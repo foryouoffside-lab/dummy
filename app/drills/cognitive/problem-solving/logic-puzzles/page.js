@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { 
-  ArrowLeft, Target, Zap, Timer, Trophy, Heart, 
+  ArrowLeft, Target, Zap, Timer, Trophy,
   Volume2, VolumeX, Maximize2, Minimize2, Sun, Moon, Eye,
   BarChart3, Info, CheckCircle, Puzzle, Lightbulb, TrendingUp, Infinity
 } from 'lucide-react';
@@ -22,7 +22,6 @@ export default function LogicPuzzlesPage() {
   const [feedbackType, setFeedbackType] = useState('');
   const [combo, setCombo] = useState(0);
   const [bestCombo, setBestCombo] = useState(0);
-  const [lives, setLives] = useState(3);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -39,7 +38,6 @@ export default function LogicPuzzlesPage() {
   const audioContextRef = useRef(null);
   const scoreRef = useRef(0);
   const comboRef = useRef(0);
-  const livesRef = useRef(3);
   const gameStateRef = useRef('start');
   const clickCooldownRef = useRef(false);
 
@@ -144,18 +142,18 @@ export default function LogicPuzzlesPage() {
         osc.start();
         g.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + 0.15);
         osc.stop(ctx.currentTime + 0.15);
-      } else if (type === 'penalty') {
-        osc.frequency.value = 220;
-        g.gain.value = 0.15;
-        osc.start();
-        g.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + 0.15);
-        osc.stop(ctx.currentTime + 0.15);
       } else if (type === 'combo') {
         osc.frequency.value = 1046.5;
         g.gain.value = 0.12;
         osc.start();
         g.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + 0.15);
         osc.stop(ctx.currentTime + 0.15);
+      } else if (type === 'hint') {
+        osc.frequency.value = 660;
+        g.gain.value = 0.08;
+        osc.start();
+        g.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + 0.1);
+        osc.stop(ctx.currentTime + 0.1);
       }
     } catch (e) {}
   }, [soundEnabled, initAudio]);
@@ -340,27 +338,6 @@ export default function LogicPuzzlesPage() {
     return Math.round((totalSolved / totalAttempts) * 100);
   };
 
-  const handleMiss = () => {
-    comboRef.current = 0;
-    setCombo(0);
-    
-    // Use one life for wrong answer
-    if (livesRef.current > 0) {
-      livesRef.current -= 1;
-      setLives(livesRef.current);
-      playSound('wrong');
-      showFeedback(`✗ Wrong! -1 life`, 'error');
-    }
-    
-    // If no lives left, apply penalty of 5 points
-    if (livesRef.current === 0) {
-      scoreRef.current = Math.max(0, scoreRef.current - 5);
-      setScore(scoreRef.current);
-      playSound('penalty');
-      showFeedback(`✗ Wrong! -5 points`, 'error');
-    }
-  };
-
   const checkAnswer = () => {
     if (!currentPuzzle || !userAnswer.trim()) return;
     if (clickCooldownRef.current) return;
@@ -374,25 +351,33 @@ export default function LogicPuzzlesPage() {
     const isCorrect = userAnswerLower === correctAnswerLower;
     
     if (isCorrect) {
-      // +5 points for correct answer
-      scoreRef.current += 5;
-      setScore(scoreRef.current);
-      comboRef.current++;
-      setCombo(comboRef.current);
-      
-      if (comboRef.current > bestCombo) {
-        setBestCombo(comboRef.current);
+      // Only give points if hint wasn't used
+      if (!hintUsed) {
+        scoreRef.current += 1;
+        setScore(scoreRef.current);
+        comboRef.current++;
+        setCombo(comboRef.current);
+        
+        if (comboRef.current > bestCombo) {
+          setBestCombo(comboRef.current);
+        }
+        
+        playSound('correct');
+        showFeedback(`✓ +1 point!`, 'success');
+        
+        if (comboRef.current % 5 === 0) {
+          playSound('combo');
+          showFeedback(`🔥 ${comboRef.current}x Combo!`, 'success');
+        }
+      } else {
+        // Hint used - no points, but still counts as solved
+        comboRef.current = 0;
+        setCombo(0);
+        playSound('hint');
+        showFeedback(`✓ Solved (hint used) • 0 points`, 'success');
       }
       
       setTotalSolved(prev => prev + 1);
-      
-      if (comboRef.current % 5 === 0) {
-        playSound('combo');
-        showFeedback(`🔥 ${comboRef.current}x Combo! +5`, 'success');
-      } else {
-        playSound('correct');
-        showFeedback(`✓ +5`, 'success');
-      }
       
       if (totalSolved + 1 >= level * 3) {
         setLevel(prev => prev + 1);
@@ -400,8 +385,14 @@ export default function LogicPuzzlesPage() {
       
       generateNewPuzzle();
     } else {
-      handleMiss();
-      // Keep same puzzle on wrong answer
+      // Wrong answer - minus 1 point
+      scoreRef.current = Math.max(0, scoreRef.current - 1);
+      setScore(scoreRef.current);
+      comboRef.current = 0;
+      setCombo(0);
+      
+      playSound('wrong');
+      showFeedback(`✗ Wrong! -1 point`, 'error');
     }
     
     setTimeout(() => {
@@ -424,7 +415,6 @@ export default function LogicPuzzlesPage() {
     setTimeRemaining(60);
     setCombo(0);
     setBestCombo(0);
-    setLives(3);
     setTotalSolved(0);
     setTotalAttempts(0);
     setUsedPuzzleIds(new Set());
@@ -433,7 +423,6 @@ export default function LogicPuzzlesPage() {
     
     scoreRef.current = 0;
     comboRef.current = 0;
-    livesRef.current = 3;
     clickCooldownRef.current = false;
     
     playSound('correct');
@@ -461,7 +450,7 @@ export default function LogicPuzzlesPage() {
               </div>
               <div>
                 <h1 className={`text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Logic Puzzles</h1>
-                <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Solve puzzles • +5/-5 • 3 lives</p>
+                <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Solve puzzles • +1/-1 points • Hint = 0 points</p>
               </div>
             </div>
             
@@ -483,8 +472,8 @@ export default function LogicPuzzlesPage() {
           </div>
         </div>
 
-        {/* Stats Board - 8 columns */}
-        <div className="grid grid-cols-8 gap-3 mb-4 h-[88px]">
+        {/* Stats Board - 7 columns (removed lives) */}
+        <div className="grid grid-cols-7 gap-3 mb-4 h-[88px]">
           <StatCard icon={<Target className="text-blue-600" />} value={score} label="Score" isDark={isDarkMode} />
           <StatCard icon={<Trophy className="text-yellow-600" />} value={bestScore} label="Best" isDark={isDarkMode} />
           <StatCard icon={<Timer className={timeRemaining <= 10 ? 'text-red-600' : 'text-green-600'} />} value={`${timeRemaining}s`} label="Time" isDark={isDarkMode} />
@@ -492,7 +481,6 @@ export default function LogicPuzzlesPage() {
           <StatCard icon={<BarChart3 className="text-purple-600" />} value={getAccuracy()} label="Acc" unit="%" isDark={isDarkMode} />
           <StatCard icon={<Zap className="text-orange-600" />} value={combo} label="Combo" isDark={isDarkMode} />
           <StatCard icon={<Puzzle className="text-cyan-600" />} value={currentPuzzle?.pattern || '-'} label="Type" isDark={isDarkMode} />
-          <StatCard icon={<Heart className="text-red-500" />} value={lives} label="Lives" isDark={isDarkMode} />
         </div>
 
         {/* Feedback Bar */}
@@ -533,7 +521,7 @@ export default function LogicPuzzlesPage() {
                 <div className={`rounded-2xl p-8 text-center max-w-md mx-4 shadow-xl border ${isBoxDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
                   <Puzzle className="w-16 h-16 text-purple-500 mx-auto mb-4" />
                   <h3 className={`text-2xl font-bold mb-2 ${isBoxDarkMode ? 'text-white' : 'text-gray-900'}`}>Logic Puzzles</h3>
-                  <p className={`mb-6 ${isBoxDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>60-second challenge • +5 per solve • -5 penalty • 3 lives</p>
+                  <p className={`mb-6 ${isBoxDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>60-second challenge • +1 per solve • -1 per miss • Hint = 0 points</p>
                   <button 
                     onClick={startGame}
                     className="px-8 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-xl font-semibold hover:shadow-lg w-full transition-all transform hover:scale-[1.02] active:scale-[0.98]"
@@ -582,13 +570,16 @@ export default function LogicPuzzlesPage() {
                   className={`flex items-center gap-2 text-sm transition mb-4 ${isBoxDarkMode ? 'text-purple-400 hover:text-purple-300' : 'text-purple-600 hover:text-purple-700'}`}
                 >
                   <Lightbulb className="w-4 h-4" />
-                  {showHint ? 'Hide Hint' : 'Show Hint'}
+                  {showHint ? 'Hide Hint' : 'Show Hint'} {hintUsed && '(used - 0 points)'}
                 </button>
 
                 {showHint && (
                   <div className={`rounded-lg p-4 ${isBoxDarkMode ? 'bg-yellow-900/30 border border-yellow-700' : 'bg-yellow-50 border border-yellow-200'}`}>
                     <p className={`text-sm ${isBoxDarkMode ? 'text-yellow-300' : 'text-yellow-800'}`}>
                       <strong>💡 Hint:</strong> {currentPuzzle.hint}
+                    </p>
+                    <p className={`text-xs mt-1 ${isBoxDarkMode ? 'text-yellow-400/70' : 'text-yellow-600'}`}>
+                      Using hint = correct answer gives 0 points
                     </p>
                   </div>
                 )}
@@ -632,7 +623,7 @@ export default function LogicPuzzlesPage() {
           </div>
         </div>
 
-        {/* Rules Section */}
+        {/* Rules Section - Updated */}
         {!isFullscreen && (
           <div className="mt-6">
             <div className={`rounded-xl border overflow-hidden ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
@@ -651,30 +642,30 @@ export default function LogicPuzzlesPage() {
                     </div>
                     <div className="flex items-start gap-2">
                       <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center text-white text-xs font-bold mt-0.5">2</div>
-                      <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Correct: <span className="font-semibold text-green-500">+5 points</span> • Fixed reward</p>
+                      <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Correct: <span className="font-semibold text-green-500">+1 point</span> • Simple scoring</p>
                     </div>
                     <div className="flex items-start gap-2">
                       <div className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center text-white text-xs font-bold mt-0.5">3</div>
-                      <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Wrong: <span className="font-semibold text-red-500">-1 life</span> • 3 lives system</p>
+                      <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Wrong: <span className="font-semibold text-red-500">-1 point</span> • Breaks combo</p>
                     </div>
                   </div>
                   <div className="space-y-2">
                     <div className="flex items-start gap-2">
-                      <div className="w-5 h-5 rounded-full bg-orange-500 flex items-center justify-center text-white text-xs font-bold mt-0.5">4</div>
-                      <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>No lives left: <span className="font-semibold text-orange-500">-5 point penalty</span> per mistake</p>
+                      <div className="w-5 h-5 rounded-full bg-yellow-500 flex items-center justify-center text-white text-xs font-bold mt-0.5">4</div>
+                      <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Using hint: <span className="font-semibold text-yellow-500">0 points</span> • Still counts as solved</p>
                     </div>
                     <div className="flex items-start gap-2">
                       <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold mt-0.5">5</div>
                       <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>8 puzzle types: <span className="font-semibold text-blue-500">Sequences, Algebra, PEMDAS, etc.</span></p>
                     </div>
                     <div className="flex items-start gap-2">
-                      <div className="w-5 h-5 rounded-full bg-yellow-500 flex items-center justify-center text-white text-xs font-bold mt-0.5">6</div>
-                      <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Use <span className="font-semibold text-yellow-500">hints</span> if you get stuck (no penalty)</p>
+                      <div className="w-5 h-5 rounded-full bg-orange-500 flex items-center justify-center text-white text-xs font-bold mt-0.5">6</div>
+                      <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Build <span className="font-semibold text-orange-500">combo streaks</span> • 5x combo notification</p>
                     </div>
                   </div>
                 </div>
                 <div className={`mt-3 pt-3 border-t text-xs ${isDarkMode ? 'border-gray-700 text-gray-400' : 'border-gray-200 text-gray-500'} flex items-center justify-between`}>
-                  <span>🧩 Level up every 3 solved puzzles • 5 combo bonus notification</span>
+                  <span>🧩 Level up every 3 solved puzzles • Hint = 0 points</span>
                   <span>🏆 Best Score saves locally</span>
                 </div>
               </div>

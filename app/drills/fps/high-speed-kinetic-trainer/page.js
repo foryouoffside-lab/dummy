@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { 
-  ArrowLeft, Target, Zap, Timer, Trophy, Heart, 
+  ArrowLeft, Target, Zap, Timer, Trophy,  
   Volume2, VolumeX, Maximize2, Minimize2, Sun, Moon, Eye,
   Info, Award, Activity, Wind
 } from 'lucide-react';
@@ -18,7 +18,7 @@ export default function HighSpeedKineticTrainerPage() {
   const [isBoxDarkMode, setIsBoxDarkMode] = useState(true);
   const [soundEnabled, setSoundEnabled] = useState(true);
   
-  // Drill-specific stats
+  // Drill-specific stats - removed lives
   const [kineticScore, setKineticScore] = useState(0);
   const [bestScore, setBestScore] = useState(0);
   const [hits, setHits] = useState(0);
@@ -28,7 +28,6 @@ export default function HighSpeedKineticTrainerPage() {
   const [bestCombo, setBestCombo] = useState(0);
   const [targetSpeed, setTargetSpeed] = useState(0);
   const [timeLeft, setTimeLeft] = useState(60);
-  const [lives, setLives] = useState(5);
   const [feedback, setFeedback] = useState('');
   const [feedbackType, setFeedbackType] = useState('');
   
@@ -47,7 +46,6 @@ export default function HighSpeedKineticTrainerPage() {
   const gameStateRef = useRef('start');
   const audioCtxRef = useRef(null);
   const timeLeftRef = useRef(60);
-  const livesRef = useRef(5);
   const clickCooldownRef = useRef(false);
   const TARGET_SIZE = 35;
 
@@ -132,9 +130,6 @@ export default function HighSpeedKineticTrainerPage() {
       } else if (type === 'fail') {
         osc.frequency.value = 440;
         gain.gain.value = 0.1;
-      } else if (type === 'penalty') {
-        osc.frequency.value = 220;
-        gain.gain.value = 0.15;
       } else if (type === 'teleport') {
         osc.frequency.value = 660;
         gain.gain.value = 0.08;
@@ -171,6 +166,7 @@ export default function HighSpeedKineticTrainerPage() {
     }, 1000);
   }, []);
 
+  // Simplified miss handler - no lives, no penalty
   const handleMissClick = (reason) => {
     if (!isActiveRef.current) return;
     
@@ -178,21 +174,8 @@ export default function HighSpeedKineticTrainerPage() {
     comboRef.current = 0;
     setCombo(0);
     
-    // Use one life for miss
-    if (livesRef.current > 0) {
-      livesRef.current -= 1;
-      setLives(livesRef.current);
-      playSound('fail');
-      showFeedback(`✗ ${reason}! -1 life`, 'error');
-    }
-    
-    // If no lives left, apply penalty
-    if (livesRef.current === 0) {
-      scoreRef.current = Math.max(0, scoreRef.current - 1);
-      setKineticScore(scoreRef.current);
-      playSound('penalty');
-      showFeedback(`✗ -1 point!`, 'error');
-    }
+    playSound('fail');
+    showFeedback(`✗ ${reason}!`, 'error');
     
     const total = hits + misses;
     setAccuracy(total === 0 ? 100 : Math.round((hits / total) * 100));
@@ -323,7 +306,7 @@ export default function HighSpeedKineticTrainerPage() {
         const total = hits + 1 + misses;
         setAccuracy(Math.round(((hits + 1) / total) * 100));
       } else {
-        // Clicked but missed - lose 1 life
+        // Clicked but missed - no lives, no penalty
         handleMissClick('Miss');
       }
       
@@ -332,9 +315,9 @@ export default function HighSpeedKineticTrainerPage() {
       }, 50);
     };
     
-    window.addEventListener('mouse down', handleMouseDown);
+    window.addEventListener('mousedown', handleMouseDown);
     return () => window.removeEventListener('mousedown', handleMouseDown);
-  }, [gameState]);
+  }, [gameState, hits, misses, bestCombo]);
 
   useEffect(() => {
     if (gameState !== 'playing') return;
@@ -393,8 +376,8 @@ export default function HighSpeedKineticTrainerPage() {
     function drawTarget(now) {
       const target = targetRef.current;
       
-      const pulse = Math.sin(now / 130) * 2;
-      const currentR = target.r + pulse;
+      // Removed pulse animation - constant size
+      const currentR = target.r;
       
       ctx.shadowBlur = 20;
       ctx.shadowColor = '#00ff88';
@@ -529,13 +512,11 @@ export default function HighSpeedKineticTrainerPage() {
     setBestCombo(0);
     timeLeftRef.current = 60;
     setTimeLeft(60);
-    setLives(5);
     setFeedback('');
     
     isActiveRef.current = true;
     scoreRef.current = 0;
     comboRef.current = 0;
-    livesRef.current = 5;
     clickCooldownRef.current = false;
     lastPositionsRef.current = [];
     
@@ -570,7 +551,6 @@ export default function HighSpeedKineticTrainerPage() {
     setBestCombo(0);
     timeLeftRef.current = 60;
     setTimeLeft(60);
-    setLives(5);
     setFeedback('');
   };
 
@@ -588,7 +568,7 @@ export default function HighSpeedKineticTrainerPage() {
               </div>
               <div>
                 <h1 className={`text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Kinetic Trainer</h1>
-                <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Click the bouncing target • 5 lives system</p>
+                <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Click the bouncing target • Score as many hits as possible</p>
               </div>
             </div>
             <div className="flex gap-2">
@@ -608,15 +588,14 @@ export default function HighSpeedKineticTrainerPage() {
           </div>
         </div>
 
-        {/* Drill-Specific Stats Board - 7 columns */}
-        <div className="grid grid-cols-7 gap-3 mb-4 h-[88px]">
+        {/* Drill-Specific Stats Board - 6 columns (removed lives) */}
+        <div className="grid grid-cols-6 gap-3 mb-4 h-[88px]">
           <StatCard icon={<Target className="text-blue-600" />} value={kineticScore} label="Score" isDark={isDarkMode} />
           <StatCard icon={<Trophy className="text-yellow-500" />} value={bestScore} label="Best" isDark={isDarkMode} />
           <StatCard icon={<Timer className={timeLeft <= 10 ? 'text-red-600' : 'text-green-600'} />} value={timeLeft} label="Time" unit="s" isDark={isDarkMode} />
           <StatCard icon={<Zap className="text-orange-500" />} value={combo} label="Combo" isDark={isDarkMode} />
           <StatCard icon={<Activity className="text-purple-500" />} value={accuracy} label="Accuracy" unit="%" isDark={isDarkMode} />
           <StatCard icon={<Wind className="text-cyan-500" />} value={targetSpeed} label="Speed" unit="px/s" isDark={isDarkMode} />
-          <StatCard icon={<Heart className="text-red-500" />} value={lives} label="Lives" isDark={isDarkMode} />
         </div>
 
         {/* Feedback Bar */}
@@ -650,7 +629,7 @@ export default function HighSpeedKineticTrainerPage() {
                 <button onClick={toggleFullscreen} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all"><Minimize2 className="w-5 h-5" /></button>
               </div>
               <div className="absolute top-4 left-4 z-20 bg-black/50 backdrop-blur-sm rounded-lg px-4 py-2 text-white text-sm">
-                Score: <span className="text-yellow-400">{kineticScore}</span> | Hits: <span className="text-green-400">{hits}</span> | Lives: <span className="text-red-400">{lives}</span>
+                Score: <span className="text-yellow-400">{kineticScore}</span> | Hits: <span className="text-green-400">{hits}</span>
               </div>
             </>
           )}
@@ -663,7 +642,7 @@ export default function HighSpeedKineticTrainerPage() {
               <div className={`rounded-2xl p-8 text-center max-w-md mx-4 shadow-xl border ${isBoxDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
                 <Wind className="w-16 h-16 text-blue-500 mx-auto mb-4" />
                 <h3 className={`text-2xl font-bold mb-2 ${isBoxDarkMode ? 'text-white' : 'text-gray-900'}`}>Kinetic Trainer</h3>
-                <p className={`mb-6 ${isBoxDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>60-second challenge • Click target to score • Miss costs 1 life</p>
+                <p className={`mb-6 ${isBoxDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>60-second challenge • Click target to score • Build combos</p>
                 <button 
                   onClick={startGame} 
                   className="px-8 py-3 bg-gradient-to-r from-blue-500 to-cyan-600 text-white rounded-xl font-semibold hover:shadow-lg w-full transition-all transform hover:scale-[1.02] active:scale-[0.98]"
@@ -711,7 +690,7 @@ export default function HighSpeedKineticTrainerPage() {
           )}
         </div>
 
-        {/* Rules Section */}
+        {/* Rules Section - Updated */}
         {!isFullscreen && (
           <div className="mt-6">
             <div className={`rounded-xl border overflow-hidden ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
@@ -747,13 +726,13 @@ export default function HighSpeedKineticTrainerPage() {
                     <div className="flex items-start gap-2">
                       <div className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center text-white text-xs font-bold mt-0.5">4</div>
                       <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                        <span className="font-semibold text-red-500">5 Lives system</span> • Each miss uses 1 life
+                        <span className="font-semibold text-red-500">Miss breaks combo</span> • Start building again
                       </p>
                     </div>
                     <div className="flex items-start gap-2">
                       <div className="w-5 h-5 rounded-full bg-orange-500 flex items-center justify-center text-white text-xs font-bold mt-0.5">5</div>
                       <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                        <span className="font-semibold text-orange-500">-1 point penalty</span> • Only after all 5 lives are used
+                        <span className="font-semibold text-orange-500">Target bounces off walls</span> • Predict movement patterns
                       </p>
                     </div>
                     <div className="flex items-start gap-2">
