@@ -38,13 +38,10 @@ export default function HomePage() {
               <span className="text-sm text-white">Free Training Platform</span>
             </div>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6">
-              Master Your{' '}
-              <span className="text-white">
-                FPS & Cognitive Skills
-              </span>
+              Train Your Brain & Body
             </h1>
             <p className="text-xl text-blue-100 mb-8">
-              Practice with specialized drills for gamers and cognitive exercises for memory and focus. No login required.
+              Free training platform for everyone. No login required.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/drills" className="inline-flex items-center justify-center gap-2 bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition transform hover:scale-105">
@@ -56,7 +53,7 @@ export default function HomePage() {
             {/* Stats */}
             <div className="grid grid-cols-3 gap-8 mt-12 pt-8 border-t border-white/20 max-w-2xl mx-auto">
               <div>
-                <p className="text-3xl font-bold text-white">2</p>
+                <p className="text-3xl font-bold text-white">9</p>
                 <p className="text-sm text-blue-100">Training Categories</p>
               </div>
               <div>
@@ -118,7 +115,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <p className="text-gray-400 text-sm">© 2026 Global Drill System. All rights reserved.</p>
-            <p className="text-gray-400 text-xs mt-2">Free training platform - FPS & Cognitive Training | No login required</p>
+            <p className="text-gray-400 text-xs mt-2">Free training platform - FPS, Cognitive, Visual, Academic, Productivity, Memory, Motor, Physical & Mental Fitness Training | No login required</p>
           </div>
         </div>
       </footer>

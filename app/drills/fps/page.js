@@ -1,38 +1,38 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowLeft, Clock, Play, Target, Gamepad2, Gauge, Crosshair, ScanEye, Eye, Activity, Move, GitBranch, Wind, Timer, Compass, TrendingUp } from 'lucide-react';
+import { ArrowLeft, Clock, Play, Target, Gamepad2, Gauge, Crosshair, ScanEye, Eye, Activity, Move, GitBranch, Wind, Timer, Compass, TrendingUp, Star } from 'lucide-react';
 
 export default function FPSDrillsPage() {
   const drills = [
     // 240fps Reaction Speed Drills
-    { id: 1, name: '240fps Click Test', category: '240fps Reaction Speed', difficulty: 'Pro', duration: '1 min', description: 'Test your reaction time at 240fps speed', enabled: true },
-    { id: 2, name: 'Target Acquisition', category: '240fps Reaction Speed', difficulty: 'Pro', duration: '1 min', description: 'Train target acquisition speed with fading targets. Click during the 150-550ms window!', enabled: true, path: 'target-acquisition' },
-    { id: 3, name: 'Flick Shot Training', category: '240fps Reaction Speed', difficulty: 'Elite', duration: '1 min', description: 'Flick to white targets appearing randomly on screen for 400ms. Train your flick shots and reaction time!', enabled: true, path: 'flick-shot-training' },
-    { id: 4, name: 'Pro-Reaction: Clinical Gray Grid', category: '240fps Reaction Speed', difficulty: 'Elite', duration: '1 min', description: 'Professional 4x4 grid reaction training. Click the red target when it appears! Random delays (500-1500ms) with 450ms target window.', enabled: true, path: 'clinical-gray-grid' },
+    { id: 1, name: '240fps Click Test', category: '240fps Reaction Speed', difficulty: 'Pro', duration: '1 min', description: 'Ultra-fast click react', enabled: true },
+    { id: 2, name: 'Target Acquisition', category: '240fps Reaction Speed', difficulty: 'Pro', duration: '1 min', description: 'Acquire fading targets', enabled: true, path: 'target-acquisition' },
+    { id: 3, name: 'Flick Shot Training', category: '240fps Reaction Speed', difficulty: 'Elite', duration: '1 min', description: 'Flick to random targets', enabled: true, path: 'flick-shot-training' },
+    { id: 4, name: 'Pro-Reaction: Clinical Gray Grid', category: '240fps Reaction Speed', difficulty: 'Elite', duration: '1 min', description: 'Grid-based react test', enabled: true, path: 'clinical-gray-grid' },
     
     // 360fps Reaction Speed Drills
-    { id: 5, name: '360fps Reflex', category: '360fps Reaction Speed', difficulty: 'Elite', duration: '1 min', description: 'Ultra-fast reflex training for 360fps', enabled: true },
-    { id: 6, name: 'Instant Response', category: '360fps Reaction Speed', difficulty: 'Elite', duration: '1 min', description: 'Train sub-100ms reaction times', enabled: true },
+    { id: 5, name: '360fps Reflex', category: '360fps Reaction Speed', difficulty: 'Elite', duration: '1 min', description: 'Ultra reflex training', enabled: true },
+    { id: 6, name: 'Instant Response', category: '360fps Reaction Speed', difficulty: 'Elite', duration: '1 min', description: 'Sub-100ms react speed', enabled: true },
     
     // Peripheral Vision Drills
-    { id: 7, name: 'Peripheral Awareness', category: 'Peripheral Vision', difficulty: 'Pro', duration: '1 min', description: 'Train peripheral vision by clicking edge targets while focusing on center crosshair. Builds essential FPS awareness!', enabled: true, path: 'peripheral-awareness' },
-    { id: 8, name: '180° Awareness', category: 'Peripheral Vision', difficulty: 'Pro', duration: '1 min', description: 'Train 180-degree peripheral awareness with extreme edge targets. Click targets that spawn at screen edges!', enabled: true, path: '180-degree-awareness' },
+    { id: 7, name: 'Peripheral Awareness', category: 'Peripheral Vision', difficulty: 'Pro', duration: '1 min', description: 'Edge target detection', enabled: true, path: 'peripheral-awareness' },
+    { id: 8, name: '180° Awareness', category: 'Peripheral Vision', difficulty: 'Pro', duration: '1 min', description: 'Full peripheral vision', enabled: true, path: '180-degree-awareness' },
     
     // Aim Training Drills
-    { id: 9, name: 'Tracking Predictor', category: 'Aim Training', difficulty: 'Pro', duration: '1 min', description: 'Predictive tracking training. Click the prediction zone (15 frames ahead) to hit moving targets!', enabled: true, path: 'predictive-tracking' },
-    { id: 10, name: 'Headshot Trainer 240FPS', category: 'Aim Training', difficulty: 'Elite', duration: '1 min', description: 'Precision headshot training with dynamic speed scaling. Hit the inner white core for maximum points!', enabled: true, path: 'headshot-trainer' },
+    { id: 9, name: 'Tracking Predictor', category: 'Aim Training', difficulty: 'Pro', duration: '1 min', description: 'Predict movement path', enabled: true, path: 'predictive-tracking' },
+    { id: 10, name: 'Headshot Trainer 240FPS', category: 'Aim Training', difficulty: 'Elite', duration: '1 min', description: 'Precision headshot aim', enabled: true, path: 'headshot-trainer' },
     
     // Target Tracking Drills
-    { id: 11, name: 'Single Target Track', category: 'Target Tracking', difficulty: 'Intermediate', duration: '1 min', description: 'Track a single moving target', enabled: true },
-    { id: 12, name: 'Multi-Target Tracking', category: 'Target Tracking', difficulty: 'Advanced', duration: '1 min', description: 'Track multiple targets at once', enabled: true },
-    { id: 13, name: 'Chaos Tracking', category: 'Target Tracking', difficulty: 'Pro', duration: '1 min', description: 'Track targets in chaotic environments', enabled: true },
-    { id: 14, name: 'Reactive Tracking', category: 'Target Tracking', difficulty: 'Pro', duration: '1 min', description: 'Track a bouncing ball with random direction changes and jitter', enabled: true, path: 'reactive-tracking' },
-    { id: 15, name: '360Hz Pro Tracking', category: 'Target Tracking', difficulty: 'Elite', duration: '1 min', description: 'Track the neon green target among white decoys with increasing speed', enabled: true, path: 'pro-tracking' },
-    { id: 16, name: 'Smooth Tracking', category: 'Target Tracking', difficulty: 'Legendary', duration: '1 min', description: 'Physics-based tracking with realistic ball collisions and teleport swaps', enabled: true, path: 'neural-tracker' },
-    { id: 17, name: 'Kinetic Trainer', category: 'Target Tracking', difficulty: 'Elite', duration: '1 min', description: 'Extreme speed reaction training with teleport mechanics for 360Hz displays', enabled: true, path: 'high-speed-kinetic-trainer' },
-    { id: 18, name: 'Anchor Flick Drill', category: 'Target Tracking', difficulty: 'Elite', duration: '1 min', description: 'Flick to white targets appearing randomly on screen for 400ms. Train your flick shots and reaction time!', enabled: true, path: 'flick-training' },
-    { id: 19, name: 'Orbital Tracking Drill', category: 'Target Tracking', difficulty: 'Pro', duration: '1 min', description: 'Track an orbiting target with changing angular speed and orbital radius. Train circular tracking precision!', enabled: true, path: 'orbital-tracking-drill' },
+    { id: 11, name: 'Single Target Track', category: 'Target Tracking', difficulty: 'Intermediate', duration: '1 min', description: 'Track one moving ball', enabled: true },
+    { id: 12, name: 'Multi-Target Tracking', category: 'Target Tracking', difficulty: 'Advanced', duration: '1 min', description: 'Track multiple objects', enabled: true },
+    { id: 13, name: 'Chaos Tracking', category: 'Target Tracking', difficulty: 'Pro', duration: '1 min', description: 'Track in chaos field', enabled: true },
+    { id: 14, name: 'Reactive Tracking', category: 'Target Tracking', difficulty: 'Pro', duration: '1 min', description: 'Bounce track react fast', enabled: true, path: 'reactive-tracking' },
+    { id: 15, name: '360Hz Pro Tracking', category: 'Target Tracking', difficulty: 'Elite', duration: '1 min', description: 'Neon target high speed', enabled: true, path: 'pro-tracking' },
+    { id: 16, name: 'Smooth Tracking', category: 'Target Tracking', difficulty: 'Legendary', duration: '1 min', description: 'Physics ball collision', enabled: true, path: 'neural-tracker' },
+    { id: 17, name: 'Kinetic Trainer', category: 'Target Tracking', difficulty: 'Elite', duration: '1 min', description: 'Extreme speed teleport', enabled: true, path: 'high-speed-kinetic-trainer' },
+    { id: 18, name: 'Anchor Flick Drill', category: 'Target Tracking', difficulty: 'Elite', duration: '1 min', description: 'Flick shot reaction test', enabled: true, path: 'flick-training' },
+    { id: 19, name: 'Orbital Tracking Drill', category: 'Target Tracking', difficulty: 'Pro', duration: '1 min', description: 'Circle track angle change', enabled: true, path: 'orbital-tracking-drill' },
   ];
 
   const categories = ['240fps Reaction Speed', '360fps Reaction Speed', 'Peripheral Vision', 'Aim Training', 'Target Tracking'];
@@ -101,15 +101,15 @@ export default function FPSDrillsPage() {
           </div>
         </div>
 
-        {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 max-w-2xl mx-auto">
+        {/* Stats Overview - Updated to match Visual Drills with 3 cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-center">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-sm text-gray-500">Total Drills</p>
+              <p className="text-sm text-gray-500">Available Drills</p>
               <Target className="w-4 h-4 text-green-500" />
             </div>
             <p className="text-2xl font-bold text-gray-900">{totalDrills}</p>
-            <p className="text-xs text-gray-500 mt-1">Available to train</p>
+            <p className="text-xs text-gray-500 mt-1">Ready to train</p>
           </div>
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-center">
             <div className="flex items-center justify-between mb-2">
@@ -118,6 +118,14 @@ export default function FPSDrillsPage() {
             </div>
             <p className="text-2xl font-bold text-gray-900">{categories.length}</p>
             <p className="text-xs text-gray-500 mt-1">Skill areas</p>
+          </div>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-center">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm text-gray-500">Free Access</p>
+              <Star className="w-4 h-4 text-yellow-500" />
+            </div>
+            <p className="text-2xl font-bold text-gray-900">100%</p>
+            <p className="text-xs text-gray-500 mt-1">No login required</p>
           </div>
         </div>
 

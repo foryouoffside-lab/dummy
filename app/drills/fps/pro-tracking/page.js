@@ -1,11 +1,10 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { 
-  ArrowLeft, Target, Zap, Timer, Trophy, 
-  Volume2, VolumeX, Maximize2, Minimize2, Sun, Moon, Eye,
-  Info, Award, Activity, Crosshair
+  ArrowLeft, Volume2, VolumeX, Maximize2, Minimize2, Sun, Moon, 
+  Eye, Timer, Trophy, Target, Zap, Activity, Award, Info
 } from 'lucide-react';
 
 export default function ProTrackingPage() {
@@ -26,15 +25,15 @@ export default function ProTrackingPage() {
   const [trackingCombo, setTrackingCombo] = useState(0);
   const [bestCombo, setBestCombo] = useState(0);
   const [timeLeft, setTimeLeft] = useState(60);
+  const [currentSpeed, setCurrentSpeed] = useState(500);
   const [targetSwitches, setTargetSwitches] = useState(0);
   const [feedback, setFeedback] = useState('');
   const [feedbackType, setFeedbackType] = useState('');
   
   const ballsRef = useRef([]);
-  const mousePositionRef = useRef({ x: 0, y: 0 });
   const targetIndexRef = useRef(0);
-  const canvasSizeRef = useRef({ width: 0, height: 0 });
-  const moveSpeedRef = useRef(400);
+  const mousePositionRef = useRef({ x: 0, y: 0 });
+  const lastTimeRef = useRef(0);
   const lastSwitchTimeRef = useRef(0);
   const scoreRef = useRef(0);
   const comboRef = useRef(0);
@@ -44,9 +43,11 @@ export default function ProTrackingPage() {
   const gameStateRef = useRef('start');
   const audioCtxRef = useRef(null);
   const timeLeftRef = useRef(60);
-  const BALL_RADIUS = 24;
-  const BALL_COUNT = 5;
-  const SWITCH_INTERVAL = 1800;
+  const moveSpeedRef = useRef(500);
+  const switchIntervalRef = useRef(1500);
+  const trackingTimeRef = useRef(0);
+  const BALL_RADIUS = 25;
+  const BALL_COUNT = 6;
 
   // Load best score from localStorage
   useEffect(() => {
@@ -123,21 +124,83 @@ export default function ProTrackingPage() {
       osc.connect(gain);
       gain.connect(audioCtx.destination);
       
-      if (type === 'success') {
+      if (type === 'switch') {
+        osc.frequency.value = 660;
+        gain.gain.value = 0.08;
+      } else if (type === 'tracking') {
         osc.frequency.value = 880;
-        gain.gain.value = 0.12;
+        gain.gain.value = 0.1;
       } else if (type === 'combo') {
         osc.frequency.value = 1046;
         gain.gain.value = 0.12;
-      } else if (type === 'switch') {
-        osc.frequency.value = 550;
-        gain.gain.value = 0.08;
       }
       osc.start();
       gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.1);
       osc.stop(audioCtx.currentTime + 0.1);
     } catch (e) {}
   };
+
+  class Ball {
+    constructor(isTarget = false) {
+      this.radius = BALL_RADIUS;
+      this.isTarget = isTarget;
+      this.spawn();
+      this.setRandomVelocity();
+    }
+
+    spawn() {
+      const cvs = canvasRef.current;
+      if (!cvs) return;
+      this.x = Math.random() * (cvs.width - 100) + 50;
+      this.y = Math.random() * (cvs.height - 100) + 50;
+    }
+
+    setRandomVelocity() {
+      const angle = Math.random() * Math.PI * 2;
+      this.vx = Math.cos(angle) * moveSpeedRef.current;
+      this.vy = Math.sin(angle) * moveSpeedRef.current;
+    }
+
+    update(dt, cvs) {
+      this.x += this.vx * dt;
+      this.y += this.vy * dt;
+
+      if (this.x < this.radius) { this.x = this.radius; this.vx *= -1; }
+      if (this.x > cvs.width - this.radius) { this.x = cvs.width - this.radius; this.vx *= -1; }
+      if (this.y < this.radius) { this.y = this.radius; this.vy *= -1; }
+      if (this.y > cvs.height - this.radius) { this.y = cvs.height - this.radius; this.vy *= -1; }
+
+      if (Math.random() < 0.008) this.setRandomVelocity();
+    }
+
+    draw(ctx, isBoxDarkMode) {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+      
+      if (this.isTarget) {
+        ctx.shadowBlur = 25;
+        ctx.shadowColor = "#00ff88";
+        ctx.fillStyle = "#00ff88";
+        ctx.fill();
+        
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, 3, 0, Math.PI * 2);
+        ctx.fillStyle = "#000000";
+        ctx.fill();
+      } else {
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = "#FFFFFF";
+        ctx.fill();
+      }
+      ctx.shadowBlur = 0;
+      
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+      ctx.strokeStyle = isBoxDarkMode ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.1)";
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
+  }
 
   // Timer function
   const startTimer = useCallback(() => {
@@ -162,24 +225,32 @@ export default function ProTrackingPage() {
     }, 1000);
   }, []);
 
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      const cvs = canvasRef.current;
-      if (!cvs) return;
-      
-      const rect = cvs.getBoundingClientRect();
-      const scaleX = cvs.width / rect.width;
-      const scaleY = cvs.height / rect.height;
-      
-      mousePositionRef.current = {
-        x: (e.clientX - rect.left) * scaleX,
-        y: (e.clientY - rect.top) * scaleY
-      };
-    };
+  const initGame = () => {
+    const cvs = canvasRef.current;
+    if (!cvs) return;
     
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
+    ballsRef.current = [];
+    for (let i = 0; i < BALL_COUNT; i++) {
+      ballsRef.current.push(new Ball(i === 0));
+    }
+    targetIndexRef.current = 0;
+    lastSwitchTimeRef.current = performance.now();
+    moveSpeedRef.current = 500;
+    setCurrentSpeed(500);
+  };
+
+  const switchTarget = () => {
+    if (!isActiveRef.current) return;
+    
+    ballsRef.current[targetIndexRef.current].isTarget = false;
+    targetIndexRef.current = (targetIndexRef.current + Math.floor(Math.random() * (BALL_COUNT - 1)) + 1) % BALL_COUNT;
+    ballsRef.current[targetIndexRef.current].isTarget = true;
+    moveSpeedRef.current += 10;
+    setCurrentSpeed(moveSpeedRef.current);
+    setTargetSwitches(prev => prev + 1);
+    playSound('switch');
+    showFeedback(`🎯 New Target! Speed: ${moveSpeedRef.current}`, 'success');
+  };
 
   // Tracking update interval
   useEffect(() => {
@@ -187,211 +258,90 @@ export default function ProTrackingPage() {
     
     const interval = setInterval(() => {
       if (!isActiveRef.current) return;
-      if (!ballsRef.current[targetIndexRef.current]) return;
       
       const target = ballsRef.current[targetIndexRef.current];
+      if (!target) return;
+      
       const mouse = mousePositionRef.current;
+      const dist = Math.hypot(mouse.x - target.x, mouse.y - target.y);
+      const isTracking = dist < target.radius;
       
-      const dx = target.x - mouse.x;
-      const dy = target.y - mouse.y;
-      const distance = Math.sqrt(dx * dx + dy * dy);
-      const maxDistance = 150;
-      const closeness = Math.max(0, 100 - (distance / maxDistance) * 100);
-      
-      const newAccuracy = Math.round(closeness);
-      setTrackingAccuracy(newAccuracy);
-      
-      if (newAccuracy > bestAccuracy) {
-        setBestAccuracy(newAccuracy);
-      }
-      
-      if (newAccuracy > 60) {
-        // Good tracking - +1 point
-        scoreRef.current += 1;
-        setTrackingScore(scoreRef.current);
+      if (isTracking) {
+        trackingTimeRef.current += 0.2;
+        
+        if (trackingTimeRef.current >= 1) {
+          const secondsTracked = Math.floor(trackingTimeRef.current);
+          const pointsEarned = secondsTracked * 5;
+          scoreRef.current += pointsEarned;
+          setTrackingScore(scoreRef.current);
+          trackingTimeRef.current -= secondsTracked;
+          showFeedback(`+${pointsEarned} Tracking!`, 'success');
+        }
+        
         comboRef.current++;
         setTrackingCombo(comboRef.current);
         if (comboRef.current > bestCombo) setBestCombo(comboRef.current);
-        showFeedback(`✓ +1`, 'success');
-        playSound('success');
-        if (comboRef.current % 5 === 0) {
+        
+        if (comboRef.current % 10 === 0) {
           playSound('combo');
           showFeedback(`🔥 ${comboRef.current} Combo!`, 'success');
         }
+      } else {
+        trackingTimeRef.current = 0;
+        if (comboRef.current > 0) {
+          comboRef.current = 0;
+          setTrackingCombo(0);
+        }
       }
-    }, 400);
+      
+      const accuracy = Math.max(0, Math.min(100, Math.round(100 - (dist / target.radius) * 100)));
+      setTrackingAccuracy(accuracy);
+      if (accuracy > bestAccuracy) setBestAccuracy(accuracy);
+    }, 200);
     
     return () => clearInterval(interval);
   }, [gameState]);
 
   useEffect(() => {
-    if (gameState !== 'playing') return;
+    const handleMouseMove = (e) => {
+      const cvs = canvasRef.current;
+      if (!cvs) return;
+      
+      const rect = cvs.getBoundingClientRect();
+      mousePositionRef.current = {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+      };
+    };
+    
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
+  useEffect(() => {
+    if (gameState !== 'playing' && gameState !== 'gameOver') return;
 
     const cvs = canvasRef.current;
     if (!cvs) return;
 
     const ctx = cvs.getContext('2d');
 
-    class Ball {
-      constructor(isTarget = false) {
-        this.radius = BALL_RADIUS;
-        this.isTarget = isTarget;
-        this.x = 0;
-        this.y = 0;
-        this.vx = 0;
-        this.vy = 0;
-      }
-
-      spawn(width, height) {
-        let validPosition = false;
-        let attempts = 0;
-        
-        while (!validPosition && attempts < 100) {
-          this.x = this.radius + Math.random() * (width - this.radius * 2);
-          this.y = this.radius + Math.random() * (height - this.radius * 2);
-          
-          validPosition = true;
-          for (const ball of ballsRef.current) {
-            if (ball !== this && ball.x !== 0) {
-              const dx = ball.x - this.x;
-              const dy = ball.y - this.y;
-              const dist = Math.sqrt(dx * dx + dy * dy);
-              if (dist < this.radius + ball.radius + 20) {
-                validPosition = false;
-                break;
-              }
-            }
-          }
-          attempts++;
-        }
-        
-        const angle = Math.random() * Math.PI * 2;
-        this.vx = Math.cos(angle) * moveSpeedRef.current;
-        this.vy = Math.sin(angle) * moveSpeedRef.current;
-      }
-
-      update(dt, width, height) {
-        this.x += this.vx * dt;
-        this.y += this.vy * dt;
-
-        if (this.x < this.radius) {
-          this.x = this.radius;
-          this.vx = Math.abs(this.vx);
-        } else if (this.x > width - this.radius) {
-          this.x = width - this.radius;
-          this.vx = -Math.abs(this.vx);
-        }
-        
-        if (this.y < this.radius) {
-          this.y = this.radius;
-          this.vy = Math.abs(this.vy);
-        } else if (this.y > height - this.radius) {
-          this.y = height - this.radius;
-          this.vy = -Math.abs(this.vy);
-        }
-
-        if (Math.random() < 0.005) {
-          const angle = Math.atan2(this.vy, this.vx);
-          const speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
-          const newAngle = angle + (Math.random() - 0.5) * 0.5;
-          this.vx = Math.cos(newAngle) * speed;
-          this.vy = Math.sin(newAngle) * speed;
-        }
-      }
-
-      draw() {
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        
-        if (this.isTarget) {
-          ctx.shadowBlur = 25;
-          ctx.shadowColor = '#00ff88';
-          ctx.fillStyle = '#00ff88';
-          ctx.fill();
-          ctx.shadowBlur = 0;
-          
-          ctx.beginPath();
-          ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-          ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
-          ctx.lineWidth = 2;
-          ctx.stroke();
-        } else {
-          ctx.shadowBlur = 0;
-          ctx.fillStyle = isBoxDarkMode ? '#e0e0e0' : '#9ca3af';
-          ctx.fill();
-          
-          ctx.beginPath();
-          ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-          ctx.strokeStyle = isBoxDarkMode ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)';
-          ctx.lineWidth = 1.5;
-          ctx.stroke();
-        }
-      }
-    }
-
     const updateCanvasSize = () => {
       const container = containerRef.current;
       if (!container) return;
       
       const containerRect = container.getBoundingClientRect();
-      const containerWidth = containerRect.width;
-      const containerHeight = containerRect.height;
+      cvs.width = containerRect.width;
+      cvs.height = containerRect.height;
+      cvs.style.width = containerRect.width + 'px';
+      cvs.style.height = containerRect.height + 'px';
       
-      let width = containerWidth;
-      let height = width * (9 / 16);
-      
-      if (height > containerHeight) {
-        height = containerHeight;
-        width = height * (16 / 9);
+      if (gameState === 'playing' && ballsRef.current.length === 0) {
+        initGame();
       }
-      
-      cvs.width = width;
-      cvs.height = height;
-      canvasSizeRef.current = { width, height };
-      
-      cvs.style.position = 'absolute';
-      cvs.style.left = `${(containerWidth - width) / 2}px`;
-      cvs.style.top = `${(containerHeight - height) / 2}px`;
-      
-      ballsRef.current = [];
-      for (let i = 0; i < BALL_COUNT; i++) {
-        const ball = new Ball(i === 0);
-        ballsRef.current.push(ball);
-      }
-      ballsRef.current.forEach(ball => ball.spawn(width, height));
-      targetIndexRef.current = 0;
-      moveSpeedRef.current = 400;
-      lastSwitchTimeRef.current = performance.now();
     };
 
     updateCanvasSize();
-
-    function switchTarget() {
-      const balls = ballsRef.current;
-      balls[targetIndexRef.current].isTarget = false;
-      
-      let newIndex;
-      do {
-        newIndex = Math.floor(Math.random() * BALL_COUNT);
-      } while (newIndex === targetIndexRef.current);
-      
-      targetIndexRef.current = newIndex;
-      balls[targetIndexRef.current].isTarget = true;
-      
-      setTargetSwitches(prev => prev + 1);
-      
-      moveSpeedRef.current = Math.min(700, moveSpeedRef.current + 8);
-      
-      balls.forEach(ball => {
-        const speed = Math.sqrt(ball.vx * ball.vx + ball.vy * ball.vy);
-        if (speed > 0) {
-          ball.vx = (ball.vx / speed) * moveSpeedRef.current;
-          ball.vy = (ball.vy / speed) * moveSpeedRef.current;
-        }
-      });
-      
-      playSound('switch');
-    }
 
     function drawBackground() {
       ctx.fillStyle = isBoxDarkMode ? '#020202' : '#f9fafb';
@@ -408,73 +358,50 @@ export default function ProTrackingPage() {
     function drawCrosshair() {
       const mouse = mousePositionRef.current;
       if (mouse.x > 0 && mouse.x < cvs.width && mouse.y > 0 && mouse.y < cvs.height) {
-        const target = ballsRef.current[targetIndexRef.current];
-        let trackingQuality = 0;
-        
-        if (target) {
-          const dx = target.x - mouse.x;
-          const dy = target.y - mouse.y;
-          const distance = Math.sqrt(dx * dx + dy * dy);
-          trackingQuality = Math.max(0, 1 - distance / 150);
-        }
-        
-        const crosshairColor = trackingQuality > 0.5 ? '#00ff88' : '#ff3366';
-        
-        ctx.strokeStyle = crosshairColor;
+        const size = 12;
+        ctx.strokeStyle = "#ff3344";
         ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.moveTo(mouse.x - 15, mouse.y); ctx.lineTo(mouse.x + 15, mouse.y);
-        ctx.moveTo(mouse.x, mouse.y - 15); ctx.lineTo(mouse.x, mouse.y + 15);
+        ctx.moveTo(mouse.x - size, mouse.y);
+        ctx.lineTo(mouse.x + size, mouse.y);
+        ctx.moveTo(mouse.x, mouse.y - size);
+        ctx.lineTo(mouse.x, mouse.y + size);
         ctx.stroke();
-        ctx.beginPath();
-        ctx.arc(mouse.x, mouse.y, 20, 0, Math.PI * 2);
-        ctx.strokeStyle = crosshairColor + '40';
-        ctx.stroke();
-        ctx.fillStyle = crosshairColor;
-        ctx.fillRect(mouse.x - 2, mouse.y - 2, 4, 4);
         
-        if (target && trackingQuality > 0.3) {
-          ctx.beginPath();
-          ctx.moveTo(mouse.x, mouse.y);
-          ctx.lineTo(target.x, target.y);
-          ctx.strokeStyle = `rgba(0, 255, 136, ${trackingQuality * 0.4})`;
-          ctx.lineWidth = 1.5;
-          ctx.stroke();
-        }
+        ctx.beginPath();
+        ctx.arc(mouse.x, mouse.y, 16, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(255, 51, 68, 0.5)';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
       }
     }
 
     let lastTime = performance.now();
-    let lastSwitchTime = performance.now();
 
-    function gameLoop(now) {
-      if (!isActiveRef.current) return;
+    function render(currentTime) {
+      const dt = Math.min(0.033, (currentTime - lastTime) / 1000);
+      lastTime = currentTime;
       
-      const dt = Math.min(0.033, (now - lastTime) / 1000);
-      lastTime = now;
-      
-      const { width, height } = canvasSizeRef.current;
-
-      if (now - lastSwitchTime > SWITCH_INTERVAL) {
-        switchTarget();
-        lastSwitchTime = now;
+      if (gameState === 'playing' && isActiveRef.current) {
+        if (currentTime - lastSwitchTimeRef.current > switchIntervalRef.current) {
+          switchTarget();
+          lastSwitchTimeRef.current = currentTime;
+        }
+        
+        ballsRef.current.forEach(b => b.update(dt, cvs));
       }
-
-      ballsRef.current.forEach(ball => ball.update(dt, width, height));
-
+      
       drawBackground();
-      ballsRef.current.forEach(ball => ball.draw());
+      ballsRef.current.forEach(b => b.draw(ctx, isBoxDarkMode));
       drawCrosshair();
-
-      animationRef.current = requestAnimationFrame(gameLoop);
+      
+      animationRef.current = requestAnimationFrame(render);
     }
 
-    animationRef.current = requestAnimationFrame(gameLoop);
+    animationRef.current = requestAnimationFrame(render);
 
     const handleResize = () => {
-      if (animationRef.current) cancelAnimationFrame(animationRef.current);
       updateCanvasSize();
-      animationRef.current = requestAnimationFrame(gameLoop);
     };
 
     window.addEventListener('resize', handleResize);
@@ -486,7 +413,6 @@ export default function ProTrackingPage() {
       cancelAnimationFrame(animationRef.current);
       window.removeEventListener('resize', handleResize);
       resizeObserver.disconnect();
-      ballsRef.current = [];
     };
   }, [gameState, isBoxDarkMode]);
 
@@ -505,15 +431,19 @@ export default function ProTrackingPage() {
     setBestCombo(0);
     timeLeftRef.current = 60;
     setTimeLeft(60);
+    setCurrentSpeed(500);
     setTargetSwitches(0);
     setFeedback('');
     
     isActiveRef.current = true;
     scoreRef.current = 0;
     comboRef.current = 0;
-    moveSpeedRef.current = 400;
+    trackingTimeRef.current = 0;
+    ballsRef.current = [];
+    moveSpeedRef.current = 500;
     
     startTimer();
+    initGame();
   };
 
   const resetGame = () => {
@@ -532,7 +462,6 @@ export default function ProTrackingPage() {
     setBestCombo(0);
     timeLeftRef.current = 60;
     setTimeLeft(60);
-    setTargetSwitches(0);
     setFeedback('');
   };
 
@@ -546,11 +475,11 @@ export default function ProTrackingPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="p-3 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl">
-                <Crosshair className="w-6 h-6 text-white" />
+                <Target className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className={`text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Pro Tracking</h1>
-                <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Track green target • Target switches every 1.8s</p>
+                <h1 className={`text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>360Hz Pro Tracking</h1>
+                <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Track green target • Speed increases</p>
               </div>
             </div>
             <div className="flex gap-2">
@@ -570,14 +499,14 @@ export default function ProTrackingPage() {
           </div>
         </div>
 
-        {/* Stats Board - 6 columns */}
+        {/* Stats Board */}
         <div className="grid grid-cols-6 gap-3 mb-4 h-[88px]">
-          <StatCard icon={<Target className="text-blue-600" />} value={trackingScore} label="Score" isDark={isDarkMode} />
-          <StatCard icon={<Trophy className="text-yellow-500" />} value={bestScore} label="Best" isDark={isDarkMode} />
-          <StatCard icon={<Timer className={timeLeft <= 10 ? 'text-red-600' : 'text-green-600'} />} value={timeLeft} label="Time" unit="s" isDark={isDarkMode} />
+          <StatCard icon={<Target className="text-blue-600" />} value={trackingScore} label="Track Score" isDark={isDarkMode} />
+          <StatCard icon={<Trophy className="text-yellow-500" />} value={bestScore} label="Best Score" isDark={isDarkMode} />
+          <StatCard icon={<Timer className={timeLeft <= 10 ? 'text-red-600' : 'text-green-600'} />} value={timeLeft} label="Time Left" unit="s" isDark={isDarkMode} />
           <StatCard icon={<Activity className="text-green-500" />} value={trackingAccuracy} label="Accuracy" unit="%" isDark={isDarkMode} />
           <StatCard icon={<Zap className="text-orange-500" />} value={trackingCombo} label="Combo" isDark={isDarkMode} />
-          <StatCard icon={<Crosshair className="text-purple-500" />} value={targetSwitches} label="Switches" isDark={isDarkMode} />
+          <StatCard icon={<Target className="text-purple-500" />} value={currentSpeed} label="Speed" isDark={isDarkMode} />
         </div>
 
         {/* Feedback Bar */}
@@ -611,7 +540,7 @@ export default function ProTrackingPage() {
                 <button onClick={toggleFullscreen} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all"><Minimize2 className="w-5 h-5" /></button>
               </div>
               <div className="absolute top-4 left-4 z-20 bg-black/50 backdrop-blur-sm rounded-lg px-4 py-2 text-white text-sm">
-                Score: <span className="text-yellow-400">{trackingScore}</span> | Accuracy: <span className="text-green-400">{trackingAccuracy}%</span> | Combo: <span className="text-purple-400">{trackingCombo}x</span>
+                Score: <span className="text-yellow-400">{trackingScore}</span> | Speed: <span className="text-cyan-400">{currentSpeed}</span> | Combo: <span className="text-purple-400">{trackingCombo}x</span>
               </div>
             </>
           )}
@@ -622,9 +551,9 @@ export default function ProTrackingPage() {
           {gameState === 'start' && (
             <div className={`absolute inset-0 flex items-center justify-center backdrop-blur-sm rounded-xl z-40 ${isBoxDarkMode ? 'bg-gray-900/95' : 'bg-white/95'}`}>
               <div className={`rounded-2xl p-8 text-center max-w-md mx-4 shadow-xl border ${isBoxDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
-                <Crosshair className="w-16 h-16 text-green-500 mx-auto mb-4" />
-                <h3 className={`text-2xl font-bold mb-2 ${isBoxDarkMode ? 'text-white' : 'text-gray-900'}`}>Pro Tracking</h3>
-                <p className={`mb-6 ${isBoxDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>60-second challenge • Track the green target</p>
+                <Target className="w-16 h-16 text-green-500 mx-auto mb-4" />
+                <h3 className={`text-2xl font-bold mb-2 ${isBoxDarkMode ? 'text-white' : 'text-gray-900'}`}>360Hz Pro Tracking</h3>
+                <p className={`mb-6 ${isBoxDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>60-second challenge • Track green target</p>
                 <button 
                   onClick={startGame} 
                   className="px-8 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl font-semibold hover:shadow-lg w-full transition-all transform hover:scale-[1.02] active:scale-[0.98]"
@@ -649,8 +578,8 @@ export default function ProTrackingPage() {
                   <ResultCard label="Best Score" value={bestScore} icon={<Trophy className="w-4 h-4" />} color="text-yellow-500" />
                   <ResultCard label="Best Accuracy" value={bestAccuracy} unit="%" icon={<Activity className="w-4 h-4" />} color="text-green-500" />
                   <ResultCard label="Best Combo" value={bestCombo} icon={<Zap className="w-4 h-4" />} color="text-orange-500" />
-                  <ResultCard label="Target Switches" value={targetSwitches} icon={<Crosshair className="w-4 h-4" />} color="text-purple-500" />
-                  <ResultCard label="Efficiency" value={targetSwitches > 0 ? (trackingScore / targetSwitches).toFixed(1) : 0} unit="/switch" icon={<Timer className="w-4 h-4" />} color="text-cyan-500" />
+                  <ResultCard label="Max Speed" value={currentSpeed} icon={<Timer className="w-4 h-4" />} color="text-purple-500" />
+                  <ResultCard label="Switches" value={targetSwitches} icon={<Target className="w-4 h-4" />} color="text-cyan-500" />
                 </div>
                 
                 <div className="flex gap-4">
@@ -688,19 +617,19 @@ export default function ProTrackingPage() {
                     <div className="flex items-start gap-2">
                       <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center text-white text-xs font-bold mt-0.5">1</div>
                       <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                        <span className="font-semibold text-green-500">Track the GREEN target</span> • Ignore white decoys
+                        <span className="font-semibold text-green-500">Track the GREEN target</span> • White balls are decoys
                       </p>
                     </div>
                     <div className="flex items-start gap-2">
                       <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold mt-0.5">2</div>
                       <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                        <span className="font-semibold text-blue-500">60%+ accuracy = +1 point</span> • Build your score
+                        <span className="font-semibold text-blue-500">1 second of tracking = +5 points</span> • Build your score
                       </p>
                     </div>
                     <div className="flex items-start gap-2">
                       <div className="w-5 h-5 rounded-full bg-purple-500 flex items-center justify-center text-white text-xs font-bold mt-0.5">3</div>
                       <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                        <span className="font-semibold text-purple-500">Build combos for bonus</span> • 5x combo bonus sound
+                        <span className="font-semibold text-purple-500">Target switches every 1.5 seconds</span> • Speed increases +10 each switch
                       </p>
                     </div>
                   </div>
@@ -708,19 +637,19 @@ export default function ProTrackingPage() {
                     <div className="flex items-start gap-2">
                       <div className="w-5 h-5 rounded-full bg-cyan-500 flex items-center justify-center text-white text-xs font-bold mt-0.5">4</div>
                       <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                        <span className="font-semibold text-cyan-500">Target switches every 1.8 seconds</span> • Stay alert
+                        <span className="font-semibold text-cyan-500">Build combos by maintaining tracking</span> • 10 combo bonus
                       </p>
                     </div>
                     <div className="flex items-start gap-2">
                       <div className="w-5 h-5 rounded-full bg-orange-500 flex items-center justify-center text-white text-xs font-bold mt-0.5">5</div>
                       <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                        <span className="font-semibold text-orange-500">Speed increases with each switch</span> • Adaptive difficulty
+                        <span className="font-semibold text-orange-500">Red crosshair for high contrast</span> • Visible against all targets
                       </p>
                     </div>
                     <div className="flex items-start gap-2">
                       <div className="w-5 h-5 rounded-full bg-yellow-500 flex items-center justify-center text-white text-xs font-bold mt-0.5">6</div>
                       <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                        <span className="font-semibold text-yellow-500">No penalties - pure positive training</span> • Just keep tracking
+                        <span className="font-semibold text-yellow-500">Best Score saves locally</span> • 60 second challenge
                       </p>
                     </div>
                   </div>

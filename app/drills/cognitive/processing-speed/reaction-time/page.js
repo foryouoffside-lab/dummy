@@ -701,7 +701,7 @@ export default function EliteNeuroSwitch() {
                   </div>
                 </div>
                 <div className={`mt-3 pt-3 border-t text-xs ${isDarkMode ? 'border-gray-700 text-gray-400' : 'border-gray-200 text-gray-500'} flex items-center justify-between`}>
-                  <span>💚 Green flash = Success • ❤️ Red flash = Failure</span>
+                  <span> Green flash = Success •  Red flash = Failure</span>
                   <span>🏆 Best Score saves locally</span>
                 </div>
               </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowLeft, Clock, Play, Brain, Target } from 'lucide-react';
+import { ArrowLeft, Clock, Play, Brain, Target, Star } from 'lucide-react';
 
 export default function CognitiveDrillsPage() {
   const drills = [
@@ -85,15 +85,15 @@ export default function CognitiveDrillsPage() {
           </div>
         </div>
 
-        {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 max-w-2xl mx-auto">
+        {/* Stats Overview - Updated to 3 cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-center">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-sm text-gray-500">Total Drills</p>
+              <p className="text-sm text-gray-500">Available Drills</p>
               <Target className="w-4 h-4 text-green-500" />
             </div>
             <p className="text-2xl font-bold text-gray-900">{totalDrills}</p>
-            <p className="text-xs text-gray-500 mt-1">Available to train</p>
+            <p className="text-xs text-gray-500 mt-1">Ready to train</p>
           </div>
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-center">
             <div className="flex items-center justify-between mb-2">
@@ -102,6 +102,14 @@ export default function CognitiveDrillsPage() {
             </div>
             <p className="text-2xl font-bold text-gray-900">{categories.length}</p>
             <p className="text-xs text-gray-500 mt-1">Skill areas</p>
+          </div>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-center">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm text-gray-500">Free Access</p>
+              <Star className="w-4 h-4 text-yellow-500" />
+            </div>
+            <p className="text-2xl font-bold text-gray-900">100%</p>
+            <p className="text-xs text-gray-500 mt-1">No login required</p>
           </div>
         </div>
 
