@@ -1,5 +1,0 @@
-﻿<!-- 
-Apple Touch Icon: For iOS devices, create a 180x180 PNG version of the favicon
-Place it at /apple-touch-icon.png
-Current SVG favicon works for all modern browsers including Safari
--->
