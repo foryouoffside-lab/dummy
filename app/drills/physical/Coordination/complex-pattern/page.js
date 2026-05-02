@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { 
   ArrowLeft, Target, Zap, Clock, Award, Activity, 
   Volume2, VolumeX, Maximize2, Minimize2, Sun, Moon, 
-  Eye, GitBranch, Brain, TrendingUp, Trophy, Info, Timer, AlertCircle, Heart
+  Eye, GitBranch, Brain, TrendingUp, Trophy, Info, Timer, AlertCircle, RefreshCw
 } from 'lucide-react';
 
 export default function ComplexPatternElitePage() {
@@ -22,7 +22,6 @@ export default function ComplexPatternElitePage() {
   const [streak, setStreak] = useState(0);
   const [bestStreak, setBestStreak] = useState(0);
   const [timeLeft, setTimeLeft] = useState(60);
-  const [lives, setLives] = useState(3);
   const [feedback, setFeedback] = useState('');
   const [feedbackType, setFeedbackType] = useState('');
   const [patternsCompleted, setPatternsCompleted] = useState(0);
@@ -35,7 +34,6 @@ export default function ComplexPatternElitePage() {
   const mousePos = useRef({ x: 0, y: 0 });
   const scoreValue = useRef(0);
   const streakValue = useRef(0);
-  const livesValue = useRef(3);
   const complexityValue = useRef(3);
   const memorizeStartTime = useRef(0);
   const resultStartTime = useRef(0);
@@ -121,69 +119,172 @@ export default function ComplexPatternElitePage() {
     isDrawing.current = false;
   };
 
-  const checkAccuracy = () => {
+  // Calculate shape similarity between drawn path and target pattern
+  const calculatePathSimilarity = () => {
     if (targetPattern.current.length === 0 || userDrawing.current.length < 2) {
-      return { accurate: false, error: 100, matchedWaypoints: 0, totalWaypoints: 0, accuracyPercent: 0 };
+      return { accurate: false, similarity: 0, error: 100 };
     }
     
-    const waypoints = targetPattern.current.filter(p => p.type === 'waypoint');
-    if (waypoints.length === 0) {
-      return { accurate: true, error: 0, matchedWaypoints: 0, totalWaypoints: 0, accuracyPercent: 100 };
-    }
+    // Step 1: Resample both paths to the same number of points (100 points each)
+    const resamplePath = (path, numPoints) => {
+      if (path.length < 2) return path;
+      
+      // Calculate total length of the path
+      let totalLength = 0;
+      const segmentLengths = [];
+      for (let i = 1; i < path.length; i++) {
+        const dist = Math.hypot(path[i].x - path[i-1].x, path[i].y - path[i-1].y);
+        segmentLengths.push(dist);
+        totalLength += dist;
+      }
+      
+      // Resample at equal distances
+      const resampled = [];
+      const stepSize = totalLength / (numPoints - 1);
+      let currentDistance = 0;
+      let segmentIndex = 0;
+      let accumulatedLength = 0;
+      
+      resampled.push({ x: path[0].x, y: path[0].y });
+      
+      for (let i = 1; i < numPoints - 1; i++) {
+        const targetDistance = i * stepSize;
+        
+        while (accumulatedLength + segmentLengths[segmentIndex] < targetDistance && segmentIndex < segmentLengths.length - 1) {
+          accumulatedLength += segmentLengths[segmentIndex];
+          segmentIndex++;
+        }
+        
+        const remainingDistance = targetDistance - accumulatedLength;
+        const segmentLength = segmentLengths[segmentIndex] || 1;
+        const t = Math.min(1, Math.max(0, remainingDistance / segmentLength));
+        
+        const p1 = path[segmentIndex];
+        const p2 = path[segmentIndex + 1] || p1;
+        
+        resampled.push({
+          x: p1.x + (p2.x - p1.x) * t,
+          y: p1.y + (p2.y - p1.y) * t
+        });
+      }
+      
+      resampled.push({ x: path[path.length - 1].x, y: path[path.length - 1].y });
+      
+      return resampled;
+    };
     
-    let matchedWaypoints = 0;
-    let totalDistanceToWaypoints = 0;
-    
-    waypoints.forEach(waypoint => {
-      let minDist = Infinity;
-      userDrawing.current.forEach(userPoint => {
-        const dist = Math.hypot(waypoint.x - userPoint.x, waypoint.y - userPoint.y);
-        if (dist < minDist) minDist = dist;
+    // Step 2: Normalize paths (center them at origin, scale to unit size)
+    const normalizePath = (path) => {
+      // Find centroid
+      let cx = 0, cy = 0;
+      path.forEach(p => { cx += p.x; cy += p.y; });
+      cx /= path.length;
+      cy /= path.length;
+      
+      // Center points
+      const centered = path.map(p => ({ x: p.x - cx, y: p.y - cy }));
+      
+      // Find max distance from center (for scaling)
+      let maxDist = 0;
+      centered.forEach(p => {
+        const dist = Math.hypot(p.x, p.y);
+        if (dist > maxDist) maxDist = dist;
       });
-      totalDistanceToWaypoints += minDist;
-      if (minDist < 40) matchedWaypoints++;
-    });
+      
+      // Scale to unit size
+      if (maxDist > 0) {
+        return centered.map(p => ({ x: p.x / maxDist, y: p.y / maxDist }));
+      }
+      return centered;
+    };
     
-    const avgError = totalDistanceToWaypoints / waypoints.length;
-    const waypointAccuracy = (matchedWaypoints / waypoints.length) * 100;
-    const accurate = avgError < 50 && waypointAccuracy > 60;
+    // Resample both paths to same number of points
+    const targetResampled = resamplePath(targetPattern.current, 100);
+    const drawnResampled = resamplePath(userDrawing.current, 100);
+    
+    // Normalize both paths
+    const targetNormalized = normalizePath(targetResampled);
+    const drawnNormalized = normalizePath(drawnResampled);
+    
+    // Step 3: Calculate Procrustes distance (point-by-point comparison)
+    let totalPointDistance = 0;
+    for (let i = 0; i < targetNormalized.length; i++) {
+      const dist = Math.hypot(
+        targetNormalized[i].x - drawnNormalized[i].x,
+        targetNormalized[i].y - drawnNormalized[i].y
+      );
+      totalPointDistance += dist;
+    }
+    
+    const avgPointDistance = totalPointDistance / targetNormalized.length;
+    
+    // Step 4: Also check direction consistency
+    const getAngles = (path) => {
+      const angles = [];
+      for (let i = 1; i < path.length; i++) {
+        const dx = path[i].x - path[i-1].x;
+        const dy = path[i].y - path[i-1].y;
+        angles.push(Math.atan2(dy, dx));
+      }
+      return angles;
+    };
+    
+    const targetAngles = getAngles(targetResampled);
+    const drawnAngles = getAngles(drawnResampled);
+    
+    let totalAngleDiff = 0;
+    const minAngleCount = Math.min(targetAngles.length, drawnAngles.length);
+    for (let i = 0; i < minAngleCount; i++) {
+      let diff = Math.abs(targetAngles[i] - drawnAngles[i]);
+      if (diff > Math.PI) diff = 2 * Math.PI - diff;
+      totalAngleDiff += diff;
+    }
+    
+    const avgAngleDiff = totalAngleDiff / minAngleCount;
+    
+    // Step 5: Check start and end points
+    const startDist = Math.hypot(
+      targetPattern.current[0].x - userDrawing.current[0].x,
+      targetPattern.current[0].y - userDrawing.current[0].y
+    );
+    const endDist = Math.hypot(
+      targetPattern.current[targetPattern.current.length - 1].x - userDrawing.current[userDrawing.current.length - 1].x,
+      targetPattern.current[targetPattern.current.length - 1].y - userDrawing.current[userDrawing.current.length - 1].y
+    );
+    
+    const pointScore = Math.max(0, 100 - (avgPointDistance * 100));
+    const angleScore = Math.max(0, 100 - (avgAngleDiff * (100 / Math.PI)));
+    const startEndPenalty = (startDist > 30 ? 10 : 0) + (endDist > 30 ? 10 : 0);
+    
+    const similarity = Math.max(0, Math.min(100, 
+      (pointScore * 0.6) + (angleScore * 0.3) + (100 - startEndPenalty) * 0.1
+    ));
+    
+    const accurate = similarity >= 60 && startDist < 50 && endDist < 50;
     
     return { 
       accurate, 
-      error: avgError, 
-      matchedWaypoints, 
-      totalWaypoints: waypoints.length,
-      accuracyPercent: waypointAccuracy
+      similarity, 
+      error: avgPointDistance,
+      startDist,
+      endDist
     };
   };
 
   const applyPenalty = () => {
-    if (livesValue.current > 0) {
-      livesValue.current -= 1;
-      setLives(livesValue.current);
-      showFeedback(` Life lost! ${livesValue.current} lives remaining`, 'warning');
-      playSound('fail');
-      
-      if (livesValue.current === 0) {
-        showFeedback(`⚠️ No lives left! Now penalties will deduct points!`, 'warning');
-      }
-    } else {
-      // Lives are 0 - apply point penalty
-      const penaltyAmount = 1;
-      scoreValue.current = Math.max(0, scoreValue.current - penaltyAmount);
-      setScore(scoreValue.current);
-      playSound('fail');
-      showFeedback(`✗ Failed! -${penaltyAmount} point penalty`, 'error');
-    }
+    const penaltyAmount = 1;
+    scoreValue.current = Math.max(0, scoreValue.current - penaltyAmount);
+    setScore(scoreValue.current);
+    playSound('fail');
+    showFeedback(`✗ Failed! -${penaltyAmount} point penalty`, 'error');
   };
 
   const submitDrawing = () => {
-    const result = checkAccuracy();
+    const result = calculatePathSimilarity();
     
     if (result.accurate) {
-      // Success: +3 points
       streakValue.current++;
-      const pointsEarned = 3;
+      const pointsEarned = 1;
       scoreValue.current += pointsEarned;
       complexityValue.current = Math.min(8, complexityValue.current + 0.5);
       
@@ -197,13 +298,18 @@ export default function ComplexPatternElitePage() {
       }
       
       playSound('success');
-      showFeedback(`✓ Success! +${pointsEarned}`, 'success');
+      showFeedback(`✓ ${Math.round(result.similarity)}% shape match! +${pointsEarned}`, 'success');
     } else {
-      // Failure: lose 1 life first
       streakValue.current = 0;
       setStreak(0);
       complexityValue.current = Math.max(2, complexityValue.current - 0.5);
       setCurrentComplexity(Math.floor(complexityValue.current));
+      
+      if (result.startDist >= 50 || result.endDist >= 50) {
+        showFeedback(`✗ Must start/end near correct points!`, 'error');
+      } else {
+        showFeedback(`✗ ${Math.round(result.similarity)}% match - need 60%`, 'error');
+      }
       
       applyPenalty();
     }
@@ -248,6 +354,7 @@ export default function ComplexPatternElitePage() {
     }, 800);
   };
 
+  // Mouse event handlers
   useEffect(() => {
     const handleMouseMove = (e) => {
       const canvas = canvasRef.current;
@@ -381,7 +488,7 @@ export default function ComplexPatternElitePage() {
       }
       
       if (phase === 'memorize') {
-        // Show full pattern
+        // Show full pattern with waypoints
         if (targetPattern.current.length > 0) {
           ctx.beginPath();
           ctx.moveTo(targetPattern.current[0].x, targetPattern.current[0].y);
@@ -496,12 +603,17 @@ export default function ComplexPatternElitePage() {
     }
   };
 
+  const resetGame = () => {
+    if (animationId.current) cancelAnimationFrame(animationId.current);
+    if (timerInterval.current) clearInterval(timerInterval.current);
+    setGameState('start');
+  };
+
   const startGame = () => {
     setGameState('playing');
     setScore(0);
     setStreak(0);
     setBestStreak(0);
-    setLives(3);
     setCurrentComplexity(3);
     setTimeLeft(60);
     setFeedback('');
@@ -509,7 +621,6 @@ export default function ComplexPatternElitePage() {
     
     scoreValue.current = 0;
     streakValue.current = 0;
-    livesValue.current = 3;
     complexityValue.current = 3;
     targetPattern.current = [];
     userDrawing.current = [];
@@ -548,10 +659,15 @@ export default function ComplexPatternElitePage() {
               </div>
               <div>
                 <h1 className={`text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Complex Pattern Elite</h1>
-                <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>+3 per success • -1 penalty after lives empty • 3  • 60s</p>
+                <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>+1 per success • Shape-based scoring • 60s</p>
               </div>
             </div>
             <div className="flex gap-2">
+              {gameState === 'playing' && (
+                <button onClick={resetGame} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} title="Reset session">
+                  <RefreshCw className="w-5 h-5" />
+                </button>
+              )}
               <button onClick={() => setIsDarkMode(!isDarkMode)} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`}>
                 {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
               </button>
@@ -568,14 +684,13 @@ export default function ComplexPatternElitePage() {
           </div>
         </div>
 
-        {/* Stats Board - With Lives */}
-        <div className="grid grid-cols-6 gap-3 mb-4 h-[88px]">
+        {/* Stats Board */}
+        <div className="grid grid-cols-5 gap-3 mb-4 h-[88px]">
           <StatCard icon={<Target className="text-blue-600" />} value={score} label="Score" isDark={isDarkMode} />
           <StatCard icon={<Trophy className="text-yellow-500" />} value={bestScore} label="Best" isDark={isDarkMode} />
           <StatCard icon={<Timer className={timeLeft < 15 ? 'text-red-600' : 'text-green-600'} />} value={timeLeft} label="Time" unit="s" isDark={isDarkMode} />
           <StatCard icon={<GitBranch className="text-cyan-600" />} value={currentComplexity} label="Complexity" isDark={isDarkMode} />
           <StatCard icon={<Zap className="text-orange-500" />} value={streak} label="Streak" isDark={isDarkMode} />
-          <StatCard icon={<Heart className={lives > 0 ? 'text-red-500' : 'text-gray-500'} />} value={lives} label="Lives" isDark={isDarkMode} />
         </div>
 
         {/* Feedback Bar */}
@@ -600,9 +715,25 @@ export default function ComplexPatternElitePage() {
             overflow: 'hidden'
           }}
         >
+          {isFullscreen && gameState === 'playing' && (
+            <div className="absolute top-4 right-4 z-30 flex gap-3">
+              <button 
+                onClick={resetGame} 
+                className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all" 
+                title="Reset session"
+              >
+                <RefreshCw className="w-5 h-5" />
+              </button>
+              <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button>
+              <button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all"><Eye className="w-5 h-5" /></button>
+              <button onClick={() => setSoundEnabled(!soundEnabled)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button>
+              <button onClick={toggleFullscreen} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all"><Minimize2 className="w-5 h-5" /></button>
+            </div>
+          )}
+
           <canvas ref={canvasRef} style={{ display: 'block', position: 'absolute', cursor: 'none', width: '100%', height: '100%' }} />
 
-          {/* Start Screen - Clean with no rules */}
+          {/* Start Screen */}
           {gameState === 'start' && (
             <div className={`absolute inset-0 flex items-center justify-center backdrop-blur-sm rounded-xl z-40 ${isBoxDarkMode ? 'bg-gray-900/95' : 'bg-white/95'}`}>
               <div className={`rounded-2xl p-8 text-center max-w-md mx-4 shadow-xl border ${isBoxDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
@@ -634,7 +765,7 @@ export default function ComplexPatternElitePage() {
                   <ResultCard label="Best Streak" value={bestStreak} icon={<Zap className="w-4 h-4" />} color="text-orange-500" />
                   <ResultCard label="Patterns Completed" value={patternsCompleted} icon={<GitBranch className="w-4 h-4" />} color="text-cyan-500" />
                   <ResultCard label="Peak Complexity" value={currentComplexity} icon={<Activity className="w-4 h-4" />} color="text-purple-500" />
-                  <ResultCard label="Lives Left" value={lives} icon={<Heart className="w-4 h-4" />} color="text-red-500" />
+                  <ResultCard label="Avg Score/Round" value={patternsCompleted > 0 ? (score / patternsCompleted).toFixed(1) : "0"} icon={<Target className="w-4 h-4" />} color="text-blue-500" />
                 </div>
                 
                 <div className="flex gap-4">
@@ -655,7 +786,7 @@ export default function ComplexPatternElitePage() {
           )}
         </div>
 
-        {/* Rules - Below the drill box */}
+        {/* Rules */}
         {!isFullscreen && (
           <div className="mt-6">
             <div className={`rounded-xl border overflow-hidden ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
@@ -674,31 +805,31 @@ export default function ComplexPatternElitePage() {
                     </div>
                     <div className="flex items-start gap-2">
                       <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center text-white text-xs font-bold mt-0.5">2</div>
-                      <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Pattern disappears - only Cyan and Magenta points remain</p>
+                      <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Pattern disappears - only Cyan (start) and Magenta (end) points remain</p>
                     </div>
                     <div className="flex items-start gap-2">
                       <div className="w-5 h-5 rounded-full bg-orange-500 flex items-center justify-center text-white text-xs font-bold mt-0.5">3</div>
-                      <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Click and drag to draw the path from Cyan to Magenta</p>
+                      <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Click and drag to draw the exact path from Cyan to Magenta</p>
                     </div>
                   </div>
                   <div className="space-y-2">
                     <div className="flex items-start gap-2">
                       <div className="w-5 h-5 rounded-full bg-purple-500 flex items-center justify-center text-white text-xs font-bold mt-0.5">4</div>
-                      <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Release mouse to submit - Accuracy based on hitting waypoints</p>
+                      <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Scoring compares <span className="font-semibold text-purple-500">path shape + direction</span> to original</p>
                     </div>
                     <div className="flex items-start gap-2">
                       <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center text-white text-xs font-bold mt-0.5">5</div>
-                      <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Success: <span className="font-semibold text-green-500">+3 points</span></p>
+                      <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Success: <span className="font-semibold text-green-500">+1 point</span> (≥60% shape match)</p>
                     </div>
                     <div className="flex items-start gap-2">
                       <div className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center text-white text-xs font-bold mt-0.5">6</div>
-                      <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Failure: <span className="font-semibold text-red-500">-1 life</span> (3 lives total) • After lives reach 0 → -1 point penalty</p>
+                      <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Failure: <span className="font-semibold text-red-500">-1 point</span> penalty</p>
                     </div>
                   </div>
                 </div>
                 <div className={`mt-3 pt-3 border-t text-xs ${isDarkMode ? 'border-gray-700 text-gray-400' : 'border-gray-200 text-gray-500'} flex items-center justify-between`}>
-                  <span>🟢 Cyan = Start • 🟣 Magenta = End • 🟢 Green = Waypoints (memorize)</span>
-                  <span>⚡ Draw path must pass near green waypoints to score • Complexity increases with success</span>
+                  <span>🟢 Cyan = Start • 🟣 Magenta = End • 🟢 Green dots = Waypoints (guide only, memorized)</span>
+                  <span>⚡ Must replicate the EXACT shape • Waypoints are just visual guides • Start/end proximity required</span>
                 </div>
               </div>
             </div>
@@ -723,7 +854,8 @@ function ResultCard({ label, value, unit = '', icon, color }) {
   const bgColor = color === 'text-yellow-500' ? 'bg-yellow-500/10' : 
                    color === 'text-orange-500' ? 'bg-orange-500/10' : 
                    color === 'text-cyan-500' ? 'bg-cyan-500/10' :
-                   color === 'text-purple-500' ? 'bg-purple-500/10' : 'bg-red-500/10';
+                   color === 'text-purple-500' ? 'bg-purple-500/10' : 
+                   color === 'text-blue-500' ? 'bg-blue-500/10' : 'bg-red-500/10';
   
   return (
     <div className={`flex items-center justify-between p-3 rounded-lg ${bgColor}`}>

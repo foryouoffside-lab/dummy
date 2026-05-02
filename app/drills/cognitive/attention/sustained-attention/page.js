@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { 
   ArrowLeft, Target, Zap, Timer, Trophy, Heart, 
   Volume2, VolumeX, Maximize2, Minimize2, Sun, Moon, Eye,
-  BarChart3, Info, CheckCircle
+  BarChart3, Info, CheckCircle, RefreshCw
 } from 'lucide-react';
 
 export default function SustainedAttentionPage() {
@@ -387,6 +387,7 @@ export default function SustainedAttentionPage() {
     if (flashIntervalRef.current) clearInterval(flashIntervalRef.current);
     if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
     if (missTimeoutRef.current) clearTimeout(missTimeoutRef.current);
+    if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
     setGameState('start');
     gameStateRef.current = 'start';
   };
@@ -412,6 +413,15 @@ export default function SustainedAttentionPage() {
             
             {/* Control Buttons */}
             <div className="flex gap-2">
+              {gameState === 'playing' && (
+                <button 
+                  onClick={resetGame} 
+                  className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} 
+                  title="Reset session"
+                >
+                  <RefreshCw className="w-5 h-5" />
+                </button>
+              )}
               <button onClick={() => setIsDarkMode(!isDarkMode)} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`}>
                 {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
               </button>
@@ -467,6 +477,13 @@ export default function SustainedAttentionPage() {
         >
           {isFullscreen && gameState === 'playing' && (
             <div className="absolute top-4 right-4 z-30 flex gap-3">
+              <button 
+                onClick={(e) => { e.stopPropagation(); resetGame(); }} 
+                className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all" 
+                title="Reset session"
+              >
+                <RefreshCw className="w-5 h-5" />
+              </button>
               <button onClick={(e) => { e.stopPropagation(); setIsDarkMode(!isDarkMode); }} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button>
               <button onClick={(e) => { e.stopPropagation(); setIsBoxDarkMode(!isBoxDarkMode); }} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all"><Eye className="w-5 h-5" /></button>
               <button onClick={(e) => { e.stopPropagation(); setSoundEnabled(!soundEnabled); }} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button>
@@ -551,7 +568,7 @@ export default function SustainedAttentionPage() {
                       </span>
                     </Link>
                     <button 
-                      onClick={(e) => { e.stopPropagation(); resetGame(); }}
+                      onClick={(e) => { e.stopPropagation(); startGame(); }}
                       className="flex-1 px-4 py-2.5 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all transform hover:scale-[1.02] active:scale-[0.98]"
                     >
                       Play Again →

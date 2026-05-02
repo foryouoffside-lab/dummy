@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { 
   ArrowLeft, Award, Clock, Eye,
   Volume2, VolumeX, Maximize2, Minimize2, Sun, Moon, 
-  Timer, Trophy, Heart, Wind, Brain, Info, TrendingUp
+  Timer, Trophy, Heart, Wind, Brain, Info, TrendingUp, RefreshCw
 } from 'lucide-react';
 
 export default function VagalBrakePage() {
@@ -35,6 +35,7 @@ export default function VagalBrakePage() {
   const scoreRef = useRef(0);
   const startTimeRef = useRef(0);
   const feedbackTimeoutRef = useRef(null);
+  const audioCtxRef = useRef(null);
 
   // Show feedback
   const showFeedback = (message, type) => {
@@ -101,7 +102,13 @@ export default function VagalBrakePage() {
   const playSound = (type) => {
     if (!soundEnabled) return;
     try {
-      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      if (!audioCtxRef.current) {
+        audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtxRef.current.state === 'suspended') {
+        audioCtxRef.current.resume();
+      }
+      const audioContext = audioCtxRef.current;
       const oscillator = audioContext.createOscillator();
       const gainNode = audioContext.createGain();
       
@@ -276,7 +283,17 @@ export default function VagalBrakePage() {
   };
 
   const resetGame = () => {
-    stopSession();
+    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
+    if (phaseTimeoutRef.current) clearTimeout(phaseTimeoutRef.current);
+    if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
+    isActiveRef.current = false;
+    setIsActive(false);
+    if (audioCtxRef.current) {
+      audioCtxRef.current.close();
+      audioCtxRef.current = null;
+    }
+    
     setGameState('start');
     setAction('READY');
     setTimerDisplay(4);
@@ -289,6 +306,7 @@ export default function VagalBrakePage() {
     setScore(0);
     scoreRef.current = 0;
     setTimeElapsed(0);
+    setFeedback('');
   };
 
   // Cleanup on unmount
@@ -298,6 +316,10 @@ export default function VagalBrakePage() {
       if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
       if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
       if (phaseTimeoutRef.current) clearTimeout(phaseTimeoutRef.current);
+      if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
+      if (audioCtxRef.current) {
+        audioCtxRef.current.close();
+      }
     };
   }, []);
 
@@ -335,9 +357,22 @@ export default function VagalBrakePage() {
             
             {/* Control Buttons */}
             <div className="flex gap-2">
+              {gameState === 'playing' && (
+                <button
+                  onClick={resetGame}
+                  className={`p-2 rounded-lg transition shadow-sm border transition-all hover:scale-105 active:scale-95 outline-none focus:outline-none ${
+                    isDarkMode 
+                      ? 'bg-gray-800 hover:bg-gray-700 text-gray-300 border-gray-700' 
+                      : 'bg-white hover:bg-gray-100 text-gray-700 border-gray-200'
+                  }`}
+                  title="Reset session"
+                >
+                  <RefreshCw className="w-5 h-5" />
+                </button>
+              )}
               <button
                 onClick={() => setIsDarkMode(!isDarkMode)}
-                className={`p-2 rounded-lg transition shadow-sm border transition-all hover:scale-105 active:scale-95 ${cleanButtonClass} ${
+                className={`p-2 rounded-lg transition shadow-sm border transition-all hover:scale-105 active:scale-95 outline-none focus:outline-none ${
                   isDarkMode 
                     ? 'bg-gray-800 hover:bg-gray-700 text-gray-300 border-gray-700' 
                     : 'bg-white hover:bg-gray-100 text-gray-700 border-gray-200'
@@ -348,7 +383,7 @@ export default function VagalBrakePage() {
               </button>
               <button
                 onClick={() => setIsBoxDarkMode(!isBoxDarkMode)}
-                className={`p-2 rounded-lg transition shadow-sm border transition-all hover:scale-105 active:scale-95 ${cleanButtonClass} ${
+                className={`p-2 rounded-lg transition shadow-sm border transition-all hover:scale-105 active:scale-95 outline-none focus:outline-none ${
                   isDarkMode 
                     ? 'bg-gray-800 hover:bg-gray-700 text-gray-300 border-gray-700' 
                     : 'bg-white hover:bg-gray-100 text-gray-700 border-gray-200'
@@ -359,7 +394,7 @@ export default function VagalBrakePage() {
               </button>
               <button
                 onClick={() => setSoundEnabled(!soundEnabled)}
-                className={`p-2 rounded-lg transition shadow-sm border transition-all hover:scale-105 active:scale-95 ${cleanButtonClass} ${
+                className={`p-2 rounded-lg transition shadow-sm border transition-all hover:scale-105 active:scale-95 outline-none focus:outline-none ${
                   isDarkMode 
                     ? 'bg-gray-800 hover:bg-gray-700 text-gray-300 border-gray-700' 
                     : 'bg-white hover:bg-gray-100 text-gray-700 border-gray-200'
@@ -370,7 +405,7 @@ export default function VagalBrakePage() {
               </button>
               <button
                 onClick={toggleFullscreen}
-                className={`p-2 rounded-lg transition shadow-sm border transition-all hover:scale-105 active:scale-95 ${cleanButtonClass} ${
+                className={`p-2 rounded-lg transition shadow-sm border transition-all hover:scale-105 active:scale-95 outline-none focus:outline-none ${
                   isDarkMode 
                     ? 'bg-gray-800 hover:bg-gray-700 text-gray-300 border-gray-700' 
                     : 'bg-white hover:bg-gray-100 text-gray-700 border-gray-200'
@@ -415,6 +450,13 @@ export default function VagalBrakePage() {
           {/* Fullscreen Controls Overlay */}
           {isFullscreen && gameState === 'playing' && (
             <div className="absolute top-4 right-4 z-30 flex gap-3">
+              <button
+                onClick={resetGame}
+                className="p-2 bg-black/50 rounded-lg hover:bg-black/70 transition text-white"
+                title="Reset session"
+              >
+                <RefreshCw className="w-5 h-5" />
+              </button>
               <button
                 onClick={() => setIsDarkMode(!isDarkMode)}
                 className="p-2 bg-black/50 rounded-lg hover:bg-black/70 transition text-white"
@@ -635,8 +677,6 @@ export default function VagalBrakePage() {
     </div>
   );
 }
-
-const cleanButtonClass = "outline-none focus:outline-none ring-0 focus:ring-0 focus:ring-offset-0 focus:ring-transparent select-none active:outline-none shadow-none";
 
 function StatCard({ icon, value, label, unit = '', isDark }) {
   return (

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { 
   ArrowLeft, Award, Activity, 
   Volume2, VolumeX, Maximize2, Minimize2, Sun, Moon, 
-  Eye, Timer, TrendingUp, Wind, Brain, Info, Trophy
+  Eye, Timer, TrendingUp, Wind, Brain, Info, Trophy, RefreshCw
 } from 'lucide-react';
 
 export default function CalmUnderPressurePage() {
@@ -295,6 +295,8 @@ export default function CalmUnderPressurePage() {
     if (inhaleTimeoutRef.current) clearTimeout(inhaleTimeoutRef.current);
     if (exhaleTimeoutRef.current) clearTimeout(exhaleTimeoutRef.current);
     if (loadIntervalRef.current) clearInterval(loadIntervalRef.current);
+    if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
+    
     isActiveRef.current = false;
     setGameState('start');
     setInstruction('');
@@ -303,6 +305,11 @@ export default function CalmUnderPressurePage() {
     setTimeLeft(180);
     setCognitiveLoad(false);
     setShowNumber(false);
+    setFeedback('');
+    
+    scoreRef.current = 0;
+    breathsRef.current = 0;
+    
     if (pacerRef.current) {
       pacerRef.current.style.transform = 'scale(1)';
     }
@@ -352,6 +359,20 @@ export default function CalmUnderPressurePage() {
             
             {/* Control Buttons */}
             <div className="flex gap-2">
+              {/* Reset button - only visible during gameplay */}
+              {gameState === 'playing' && (
+                <button
+                  onClick={resetGame}
+                  className={`p-2 rounded-lg transition shadow-sm border transition-all hover:scale-105 active:scale-95 ${cleanButtonClass} ${
+                    isDarkMode 
+                      ? 'bg-gray-800 hover:bg-gray-700 text-gray-300 border-gray-700' 
+                      : 'bg-white hover:bg-gray-100 text-gray-700 border-gray-200'
+                  }`}
+                  title="Reset session"
+                >
+                  <RefreshCw className="w-5 h-5" />
+                </button>
+              )}
               <button
                 onClick={() => setIsDarkMode(!isDarkMode)}
                 className={`p-2 rounded-lg transition shadow-sm border transition-all hover:scale-105 active:scale-95 ${cleanButtonClass} ${
@@ -435,6 +456,14 @@ export default function CalmUnderPressurePage() {
           {/* Fullscreen Controls Overlay */}
           {isFullscreen && gameState === 'playing' && (
             <div className="absolute top-4 right-4 z-30 flex gap-3">
+              {/* Reset button in fullscreen */}
+              <button
+                onClick={resetGame}
+                className="p-2 bg-black/50 rounded-lg hover:bg-black/70 transition text-white"
+                title="Reset session"
+              >
+                <RefreshCw className="w-5 h-5" />
+              </button>
               <button
                 onClick={() => setIsDarkMode(!isDarkMode)}
                 className="p-2 bg-black/50 rounded-lg hover:bg-black/70 transition text-white"

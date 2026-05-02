@@ -223,6 +223,7 @@ export default function CoherenceDrillPage() {
     if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
     if (inhaleTimeoutRef.current) clearTimeout(inhaleTimeoutRef.current);
     if (exhaleTimeoutRef.current) clearTimeout(exhaleTimeoutRef.current);
+    if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
     isActiveRef.current = false;
     setGameState('start');
     setInstruction('');
@@ -239,6 +240,7 @@ export default function CoherenceDrillPage() {
       if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
       if (inhaleTimeoutRef.current) clearTimeout(inhaleTimeoutRef.current);
       if (exhaleTimeoutRef.current) clearTimeout(exhaleTimeoutRef.current);
+      if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
     };
   }, []);
 
@@ -371,6 +373,13 @@ export default function CoherenceDrillPage() {
           {/* Fullscreen Controls Overlay */}
           {isFullscreen && gameState === 'playing' && (
             <div className="absolute top-4 right-4 z-30 flex gap-3">
+              <button
+                onClick={resetGame}
+                className="p-2 bg-black/50 rounded-lg hover:bg-black/70 transition text-white"
+                title="Reset session"
+              >
+                <RefreshCw className="w-5 h-5" />
+              </button>
               <button
                 onClick={() => setIsDarkMode(!isDarkMode)}
                 className="p-2 bg-black/50 rounded-lg hover:bg-black/70 transition text-white"
@@ -538,12 +547,13 @@ export default function CoherenceDrillPage() {
                 </div>
                 
                 <div className="flex gap-4">
-                  <button
-                    onClick={resetGame}
-                    className={`flex-1 px-4 py-2.5 rounded-lg font-semibold transition-all ${isDarkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
-                  >
-                    ← Back
-                  </button>
+                  <Link href="/drills/mental-fitness" className="flex-1">
+                    <button
+                      className={`w-full px-4 py-2.5 rounded-lg font-semibold transition-all ${isDarkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                    >
+                      ← Back
+                    </button>
+                  </Link>
                   <button
                     onClick={startDrill}
                     className="flex-1 px-4 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all transform hover:scale-[1.02] active:scale-[0.98]"

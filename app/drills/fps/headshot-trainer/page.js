@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { 
   ArrowLeft, Target, Zap, Timer, Trophy, Heart, 
   Volume2, VolumeX, Maximize2, Minimize2, Sun, Moon, Eye,
-  Info, Award, Activity, Check
+  Info, Award, Activity, Check, RefreshCw
 } from 'lucide-react';
 
 export default function HeadshotTrainerPage() {
@@ -508,10 +508,12 @@ export default function HeadshotTrainerPage() {
   };
 
   const resetGame = () => {
+    if (animationRef.current) cancelAnimationFrame(animationRef.current);
     if (timerIntervalRef.current) {
       clearInterval(timerIntervalRef.current);
       timerIntervalRef.current = null;
     }
+    if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
     
     isActiveRef.current = false;
     setGameState('start');
@@ -527,6 +529,13 @@ export default function HeadshotTrainerPage() {
     setAccuracy(100);
     setLives(5);
     setFeedback('');
+    
+    scoreRef.current = 0;
+    comboRef.current = 0;
+    livesRef.current = 5;
+    currentLifespanRef.current = 0.9;
+    setLifespan(900);
+    clickCooldownRef.current = false;
   };
 
   return (
@@ -547,6 +556,12 @@ export default function HeadshotTrainerPage() {
               </div>
             </div>
             <div className="flex gap-2">
+              {/* Reset button - only visible during gameplay */}
+              {gameState === 'playing' && (
+                <button onClick={resetGame} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} title="Reset session">
+                  <RefreshCw className="w-5 h-5" />
+                </button>
+              )}
               <button onClick={() => setIsDarkMode(!isDarkMode)} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`}>
                 {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
               </button>
@@ -600,6 +615,14 @@ export default function HeadshotTrainerPage() {
           {isFullscreen && gameState === 'playing' && (
             <>
               <div className="absolute top-4 right-4 z-20 flex gap-3">
+                {/* Reset button in fullscreen */}
+                <button 
+                  onClick={resetGame} 
+                  className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all" 
+                  title="Reset session"
+                >
+                  <RefreshCw className="w-5 h-5" />
+                </button>
                 <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button>
                 <button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all"><Eye className="w-5 h-5" /></button>
                 <button onClick={() => setSoundEnabled(!soundEnabled)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button>

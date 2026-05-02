@@ -4,7 +4,7 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { 
   ArrowLeft, Volume2, VolumeX, Maximize2, Minimize2, Sun, Moon, 
-  Eye, Timer, Trophy, Target, Zap, Activity, Award, Info, Brain, Calculator, Heart
+  Eye, Timer, Trophy, Target, Zap, Activity, Award, Info, Brain, Calculator, Heart, RefreshCw
 } from 'lucide-react';
 
 export default function MathReactionPage() {
@@ -500,12 +500,14 @@ export default function MathReactionPage() {
   };
 
   const resetGame = () => {
+    if (animationRef.current) cancelAnimationFrame(animationRef.current);
     if (timerIntervalRef.current) {
       clearInterval(timerIntervalRef.current);
       timerIntervalRef.current = null;
     }
     if (cycleTimeoutRef.current) clearTimeout(cycleTimeoutRef.current);
     if (flashTimeoutRef.current) clearTimeout(flashTimeoutRef.current);
+    if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
     
     isActiveRef.current = false;
     setGameState('start');
@@ -523,6 +525,8 @@ export default function MathReactionPage() {
     setTotalAttempts(0);
     setFeedback('');
     setLives(3);
+    setEquation('');
+    setFlashState('IDLE');
   };
 
   return (
@@ -543,6 +547,12 @@ export default function MathReactionPage() {
               </div>
             </div>
             <div className="flex gap-2">
+              {/* Reset button - only visible during gameplay */}
+              {gameState === 'playing' && (
+                <button onClick={resetGame} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} title="Reset session">
+                  <RefreshCw className="w-5 h-5" />
+                </button>
+              )}
               <button onClick={() => setIsDarkMode(!isDarkMode)} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`}>
                 {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
               </button>
@@ -595,6 +605,14 @@ export default function MathReactionPage() {
           {isFullscreen && gameState === 'playing' && (
             <>
               <div className="absolute top-4 right-4 z-20 flex gap-3">
+                {/* Reset button in fullscreen */}
+                <button 
+                  onClick={resetGame} 
+                  className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all" 
+                  title="Reset session"
+                >
+                  <RefreshCw className="w-5 h-5" />
+                </button>
                 <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button>
                 <button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all"><Eye className="w-5 h-5" /></button>
                 <button onClick={() => setSoundEnabled(!soundEnabled)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button>

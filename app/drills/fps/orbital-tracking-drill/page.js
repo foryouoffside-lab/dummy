@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { 
   ArrowLeft, Target, Zap, Timer, Trophy, 
   Volume2, VolumeX, Maximize2, Minimize2, Sun, Moon, Eye,
-  Info, Award, Activity, Compass
+  Info, Award, Activity, Compass, RefreshCw
 } from 'lucide-react';
 
 export default function ProTrackingPage() {
@@ -41,6 +41,7 @@ export default function ProTrackingPage() {
   const scoreRef = useRef(0);
   const comboRef = useRef(0);
   const timerIntervalRef = useRef(null);
+  const trackingIntervalRef = useRef(null);
   const feedbackTimeoutRef = useRef(null);
   const isActiveRef = useRef(false);
   const gameStateRef = useRef('start');
@@ -150,6 +151,7 @@ export default function ProTrackingPage() {
         if (timeLeftRef.current <= 0) {
           clearInterval(timerIntervalRef.current);
           timerIntervalRef.current = null;
+          if (trackingIntervalRef.current) clearInterval(trackingIntervalRef.current);
           setGameState('gameOver');
           gameStateRef.current = 'gameOver';
           isActiveRef.current = false;
@@ -182,7 +184,7 @@ export default function ProTrackingPage() {
   useEffect(() => {
     if (gameState !== 'playing') return;
     
-    const interval = setInterval(() => {
+    trackingIntervalRef.current = setInterval(() => {
       if (!isActiveRef.current) return;
       
       const target = targetPositionRef.current;
@@ -217,7 +219,9 @@ export default function ProTrackingPage() {
       }
     }, 400);
     
-    return () => clearInterval(interval);
+    return () => {
+      if (trackingIntervalRef.current) clearInterval(trackingIntervalRef.current);
+    };
   }, [gameState]);
 
   useEffect(() => {
@@ -431,6 +435,10 @@ export default function ProTrackingPage() {
       clearInterval(timerIntervalRef.current);
       timerIntervalRef.current = null;
     }
+    if (trackingIntervalRef.current) {
+      clearInterval(trackingIntervalRef.current);
+      trackingIntervalRef.current = null;
+    }
     
     setGameState('playing');
     gameStateRef.current = 'playing';
@@ -457,10 +465,16 @@ export default function ProTrackingPage() {
   };
 
   const resetGame = () => {
+    if (animationRef.current) cancelAnimationFrame(animationRef.current);
     if (timerIntervalRef.current) {
       clearInterval(timerIntervalRef.current);
       timerIntervalRef.current = null;
     }
+    if (trackingIntervalRef.current) {
+      clearInterval(trackingIntervalRef.current);
+      trackingIntervalRef.current = null;
+    }
+    if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
     
     isActiveRef.current = false;
     setGameState('start');
@@ -474,6 +488,14 @@ export default function ProTrackingPage() {
     timeLeftRef.current = 60;
     setTimeLeft(60);
     setFeedback('');
+    
+    scoreRef.current = 0;
+    comboRef.current = 0;
+    angleRef.current = 0;
+    radiusRef.current = 150;
+    angVelRef.current = 2.5;
+    radVelRef.current = 80;
+    wasHitRef.current = false;
   };
 
   return (
@@ -494,6 +516,12 @@ export default function ProTrackingPage() {
               </div>
             </div>
             <div className="flex gap-2">
+              {/* Reset button - only visible during gameplay */}
+              {gameState === 'playing' && (
+                <button onClick={resetGame} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} title="Reset session">
+                  <RefreshCw className="w-5 h-5" />
+                </button>
+              )}
               <button onClick={() => setIsDarkMode(!isDarkMode)} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`}>
                 {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
               </button>
@@ -545,6 +573,14 @@ export default function ProTrackingPage() {
           {isFullscreen && gameState === 'playing' && (
             <>
               <div className="absolute top-4 right-4 z-20 flex gap-3">
+                {/* Reset button in fullscreen */}
+                <button 
+                  onClick={resetGame} 
+                  className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all" 
+                  title="Reset session"
+                >
+                  <RefreshCw className="w-5 h-5" />
+                </button>
                 <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button>
                 <button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all"><Eye className="w-5 h-5" /></button>
                 <button onClick={() => setSoundEnabled(!soundEnabled)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button>

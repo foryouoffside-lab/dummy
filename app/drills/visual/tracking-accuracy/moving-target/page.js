@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { 
   ArrowLeft, Target, Zap, Clock, Award, Activity, 
   Volume2, VolumeX, Maximize2, Minimize2, Sun, Moon, 
-  Eye, Timer, Crosshair, Move, Brain, X, Trophy, Info, Check, Heart
+  Eye, Timer, Crosshair, Move, Brain, X, Trophy, Info, Check, Heart, RefreshCw
 } from 'lucide-react';
 
 export default function KineticInterceptPage() {
@@ -227,7 +227,7 @@ export default function KineticInterceptPage() {
         const penaltyPoints = 1;
         scoreRef.current = Math.max(0, scoreRef.current - penaltyPoints);
         setScore(scoreRef.current);
-        showFeedback(`⚠️ No lives left! -${penaltyPoints} point penalty!`, 'warning');
+        showFeedback(` No lives left! -${penaltyPoints} point penalty!`, 'warning');
       }
     } else {
       const penaltyPoints = 1;
@@ -441,17 +441,11 @@ export default function KineticInterceptPage() {
 
   const resetGame = () => {
     isActiveRef.current = false;
+    if (spawnTimeoutRef.current) clearTimeout(spawnTimeoutRef.current);
+    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
     setGameState('start');
     gameStateRef.current = 'start';
-    setScore(0);
-    setStreak(0);
-    setBestStreak(0);
-    setTotalHits(0);
-    setLives(3);
-    setTimeLeft(60);
-    setFeedback('');
-    
-    if (spawnTimeoutRef.current) clearTimeout(spawnTimeoutRef.current);
   };
 
   return (
@@ -472,6 +466,15 @@ export default function KineticInterceptPage() {
               </div>
             </div>
             <div className="flex gap-2">
+              {gameState === 'playing' && (
+                <button 
+                  onClick={resetGame} 
+                  className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} 
+                  title="Reset session"
+                >
+                  <RefreshCw className="w-5 h-5" />
+                </button>
+              )}
               <button onClick={() => setIsDarkMode(!isDarkMode)} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`}>
                 {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
               </button>
@@ -523,6 +526,13 @@ export default function KineticInterceptPage() {
           {isFullscreen && gameState === 'playing' && (
             <>
               <div className="absolute top-4 right-4 z-20 flex gap-3">
+                <button 
+                  onClick={resetGame} 
+                  className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all" 
+                  title="Reset session"
+                >
+                  <RefreshCw className="w-5 h-5" />
+                </button>
                 <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button>
                 <button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all"><Eye className="w-5 h-5" /></button>
                 <button onClick={() => setSoundEnabled(!soundEnabled)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button>

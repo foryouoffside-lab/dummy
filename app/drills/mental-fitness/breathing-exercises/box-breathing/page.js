@@ -436,6 +436,13 @@ export default function BoxBreathingPage() {
           {isFullscreen && gameState === 'playing' && (
             <div className="absolute top-4 right-4 z-30 flex gap-3">
               <button
+                onClick={resetGame}
+                className="p-2 bg-black/50 rounded-lg hover:bg-black/70 transition text-white"
+                title="Reset session"
+              >
+                <RefreshCw className="w-5 h-5" />
+              </button>
+              <button
                 onClick={() => setIsDarkMode(!isDarkMode)}
                 className="p-2 bg-black/50 rounded-lg hover:bg-black/70 transition text-white"
               >

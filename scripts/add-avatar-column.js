@@ -46,7 +46,7 @@ async function addAvatarColumn() {
     if (verified) {
       console.log('✅ Avatar column verified');
     } else {
-      console.log('⚠️ Avatar column could not be verified');
+      console.log(' Avatar column could not be verified');
     }
     
   } catch (error) {

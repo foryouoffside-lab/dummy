@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { 
   ArrowLeft, Target, Zap, Timer, Trophy, Heart, 
   Volume2, VolumeX, Maximize2, Minimize2, Sun, Moon, Eye,
-  Info, Award, Activity, Check, ScanEye
+  Info, Award, Activity, Check, ScanEye, RefreshCw
 } from 'lucide-react';
 
 export default function AwarenessDrillPage() {
@@ -334,7 +334,7 @@ export default function AwarenessDrillPage() {
       
       // Edge zones
       ctx.fillStyle = isBoxDarkMode ? 'rgba(0, 255, 136, 0.015)' : 'rgba(0, 200, 100, 0.015)';
-      ctx.fillRect(0, 0, 50, cvs.height);
+      ctx.fillRect(0, 0, 50, cvs.width);
       ctx.fillRect(cvs.width - 50, 0, 50, cvs.height);
       
       // Center crosshair (+)
@@ -494,8 +494,14 @@ export default function AwarenessDrillPage() {
       clearInterval(timerIntervalRef.current);
       timerIntervalRef.current = null;
     }
-    
+    if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
     isActiveRef.current = false;
+    if (animationRef.current) cancelAnimationFrame(animationRef.current);
+    if (audioCtxRef.current) {
+      audioCtxRef.current.close();
+      audioCtxRef.current = null;
+    }
+    
     setGameState('start');
     gameStateRef.current = 'start';
     setScore(0);
@@ -530,6 +536,15 @@ export default function AwarenessDrillPage() {
               </div>
             </div>
             <div className="flex gap-2">
+              {gameState === 'playing' && (
+                <button 
+                  onClick={resetGame} 
+                  className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} 
+                  title="Reset session"
+                >
+                  <RefreshCw className="w-5 h-5" />
+                </button>
+              )}
               <button onClick={() => setIsDarkMode(!isDarkMode)} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`}>
                 {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
               </button>
@@ -582,6 +597,13 @@ export default function AwarenessDrillPage() {
           {isFullscreen && gameState === 'playing' && (
             <>
               <div className="absolute top-4 right-4 z-20 flex gap-3">
+                <button 
+                  onClick={resetGame} 
+                  className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all" 
+                  title="Reset session"
+                >
+                  <RefreshCw className="w-5 h-5" />
+                </button>
                 <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button>
                 <button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all"><Eye className="w-5 h-5" /></button>
                 <button onClick={() => setSoundEnabled(!soundEnabled)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button>

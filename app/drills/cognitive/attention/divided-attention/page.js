@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { 
   ArrowLeft, Target, Zap, Timer, Trophy, Heart, 
   Volume2, VolumeX, Maximize2, Minimize2, Sun, Moon, Eye,
-  BarChart3, Info, Layers, Circle, Hash
+  BarChart3, Info, Layers, Circle, Hash, RefreshCw
 } from 'lucide-react';
 
 export default function DividedAttentionPage() {
@@ -39,6 +39,7 @@ export default function DividedAttentionPage() {
   const gameContainerRef = useRef(null);
   const numberIntervalRef = useRef(null);
   const ballIntervalRef = useRef(null);
+  const timerRef = useRef(null);
   const prevNumberRef = useRef(null);
   const wasMatchedRef = useRef(true);
   const scoreRef = useRef(0);
@@ -143,7 +144,7 @@ export default function DividedAttentionPage() {
   useEffect(() => {
     if (gameState !== 'playing') return;
     
-    const timer = setInterval(() => {
+    timerRef.current = setInterval(() => {
       setTimeRemaining(prev => {
         if (prev <= 1) {
           setGameState('ended');
@@ -153,7 +154,7 @@ export default function DividedAttentionPage() {
       });
     }, 1000);
     
-    return () => clearInterval(timer);
+    return () => clearInterval(timerRef.current);
   }, [gameState]);
 
   const getAccuracy = () => {
@@ -298,6 +299,11 @@ export default function DividedAttentionPage() {
   };
 
   const resetGame = () => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    if (numberIntervalRef.current) clearInterval(numberIntervalRef.current);
+    if (ballIntervalRef.current) clearInterval(ballIntervalRef.current);
+    if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
+    
     setGameState('start');
     setScore(0);
     setCombo(0);
@@ -309,9 +315,6 @@ export default function DividedAttentionPage() {
     setWrongMatches(0);
     setLives(5);
     setFeedback('');
-    
-    if (numberIntervalRef.current) clearInterval(numberIntervalRef.current);
-    if (ballIntervalRef.current) clearInterval(ballIntervalRef.current);
   };
 
   // Cleanup on unmount
@@ -319,6 +322,7 @@ export default function DividedAttentionPage() {
     return () => {
       if (numberIntervalRef.current) clearInterval(numberIntervalRef.current);
       if (ballIntervalRef.current) clearInterval(ballIntervalRef.current);
+      if (timerRef.current) clearInterval(timerRef.current);
       if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
     };
   }, []);
@@ -341,6 +345,15 @@ export default function DividedAttentionPage() {
               </div>
             </div>
             <div className="flex gap-2">
+              {gameState === 'playing' && (
+                <button 
+                  onClick={resetGame} 
+                  className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} 
+                  title="Reset session"
+                >
+                  <RefreshCw className="w-5 h-5" />
+                </button>
+              )}
               <button onClick={() => setIsDarkMode(!isDarkMode)} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`}>
                 {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
               </button>
@@ -392,6 +405,13 @@ export default function DividedAttentionPage() {
         >
           {isFullscreen && gameState === 'playing' && (
             <div className="absolute top-4 right-4 z-30 flex gap-3">
+              <button 
+                onClick={resetGame} 
+                className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all" 
+                title="Reset session"
+              >
+                <RefreshCw className="w-5 h-5" />
+              </button>
               <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button>
               <button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all"><Eye className="w-5 h-5" /></button>
               <button onClick={() => setSoundEnabled(!soundEnabled)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button>
@@ -478,7 +498,7 @@ export default function DividedAttentionPage() {
                     </span>
                   </Link>
                   <button 
-                    onClick={resetGame} 
+                    onClick={startGame} 
                     className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all transform hover:scale-[1.02] active:scale-[0.98]"
                   >
                     Play Again →

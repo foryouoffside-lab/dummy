@@ -336,6 +336,8 @@ export default function NameFaceDrill() {
   const resetGame = () => {
     if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
     if (memorizeTimerRef.current) clearInterval(memorizeTimerRef.current);
+    if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
+    
     setGameState('start');
     setPhase('ready');
     setScore(0);
@@ -343,6 +345,17 @@ export default function NameFaceDrill() {
     setTimeLeft(60);
     setAccuracy(100);
     setProfileCount(3);
+    setCurrentProfiles([]);
+    setTestProfile(null);
+    setOptions([]);
+    setTotalCorrect(0);
+    setTotalAttempts(0);
+    setRoundsCompleted(0);
+    setIsProcessing(false);
+    setFeedback('');
+    
+    scoreRef.current = 0;
+    streakRef.current = 0;
     profileCountRef.current = 3;
     usedProfilesRef.current = new Set();
   };
@@ -440,6 +453,14 @@ export default function NameFaceDrill() {
         >
           {isFullscreen && gameState === 'playing' && (
             <div className="absolute top-4 right-4 z-30 flex gap-3">
+              {/* Reset button in fullscreen */}
+              <button 
+                onClick={resetGame} 
+                className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all" 
+                title="Reset session"
+              >
+                <RefreshCw className="w-5 h-5" />
+              </button>
               <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button>
               <button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all"><Eye className="w-5 h-5" /></button>
               <button onClick={() => setSoundEnabled(!soundEnabled)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button>

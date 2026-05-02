@@ -86,12 +86,18 @@ export default function SoundPatternDrill() {
   const playbackTimeoutsRef = useRef([]);
   const audioCtxRef = useRef(null);
   const gameActiveRef = useRef(false);
+  const gameStateRef = useRef('start');
 
   // Simulate loading
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 300);
     return () => clearTimeout(timer);
   }, []);
+
+  // Sync gameState to ref
+  useEffect(() => {
+    gameStateRef.current = gameState;
+  }, [gameState]);
 
   // Load best scores
   useEffect(() => {
@@ -177,6 +183,7 @@ export default function SoundPatternDrill() {
         setTimeLeft(prev => {
           if (prev <= 1) {
             setGameState('gameOver');
+            gameStateRef.current = 'gameOver';
             gameActiveRef.current = false;
             if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
             updateBestScore(scoreRef.current);
@@ -256,6 +263,7 @@ export default function SoundPatternDrill() {
 
   const startGame = () => {
     setGameState('playing');
+    gameStateRef.current = 'playing';
     gameActiveRef.current = true;
     setScore(0);
     setStreak(0);
@@ -356,10 +364,17 @@ export default function SoundPatternDrill() {
   };
 
   const resetGame = () => {
-    gameActiveRef.current = false;
     if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
+    gameActiveRef.current = false;
     clearPlayback();
+    if (audioCtxRef.current) {
+      audioCtxRef.current.close();
+      audioCtxRef.current = null;
+    }
+    
     setGameState('start');
+    gameStateRef.current = 'start';
     setPhase('ready');
     setScore(0);
     setStreak(0);
@@ -375,6 +390,9 @@ export default function SoundPatternDrill() {
       gameActiveRef.current = false;
       if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
       clearPlayback();
+      if (audioCtxRef.current) {
+        audioCtxRef.current.close();
+      }
     };
   }, []);
 
@@ -464,6 +482,13 @@ export default function SoundPatternDrill() {
         >
           {isFullscreen && gameState === 'playing' && (
             <div className="absolute top-4 right-4 z-30 flex gap-3">
+              <button 
+                onClick={resetGame} 
+                className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all" 
+                title="Reset session"
+              >
+                <RefreshCw className="w-5 h-5" />
+              </button>
               <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button>
               <button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all"><Eye className="w-5 h-5" /></button>
               <button onClick={() => setSoundEnabled(!soundEnabled)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button>

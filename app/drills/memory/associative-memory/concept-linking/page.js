@@ -366,24 +366,15 @@ export default function ConceptLinkingDrill() {
   const resetGame = () => {
     if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
     if (memorizeTimerRef.current) clearInterval(memorizeTimerRef.current);
+    if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
     setGameState('start');
-    setPhase('ready');
-    setScore(0);
-    setStreak(0);
-    setTimeLeft(60);
-    setAccuracy(100);
-    setRound(1);
-    setTotalCorrect(0);
-    setTotalAttempts(0);
-    setRoundsCompleted(0);
-    chainLengthRef.current = 5;
-    usedChainsRef.current = new Set();
   };
 
   useEffect(() => {
     return () => {
       if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
       if (memorizeTimerRef.current) clearInterval(memorizeTimerRef.current);
+      if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
     };
   }, []);
 
@@ -473,6 +464,13 @@ export default function ConceptLinkingDrill() {
         >
           {isFullscreen && gameState === 'playing' && (
             <div className="absolute top-4 right-4 z-30 flex gap-3">
+              <button 
+                onClick={resetGame} 
+                className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all" 
+                title="Reset session"
+              >
+                <RefreshCw className="w-5 h-5" />
+              </button>
               <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button>
               <button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all"><Eye className="w-5 h-5" /></button>
               <button onClick={() => setSoundEnabled(!soundEnabled)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button>
@@ -664,12 +662,11 @@ export default function ConceptLinkingDrill() {
                 </div>
                 
                 <div className="flex gap-4">
-                  <button 
-                    onClick={resetGame} 
-                    className={`flex-1 px-4 py-2.5 rounded-lg font-semibold transition-all ${isDarkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
-                  >
-                    ← Back
-                  </button>
+                  <Link href="/drills/memory" className="flex-1">
+                    <button className={`w-full px-4 py-2.5 rounded-lg font-semibold transition-all ${isDarkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>
+                      ← Back
+                    </button>
+                  </Link>
                   <button 
                     onClick={startGame} 
                     className="flex-1 px-4 py-2.5 bg-gradient-to-r from-rose-500 to-red-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all transform hover:scale-[1.02] active:scale-[0.98]"

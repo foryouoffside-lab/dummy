@@ -51,6 +51,7 @@ export default function ConstantPrimePage() {
     currentInterval: 800
   });
 
+  const mainGameStateRef = useRef('start');
   const timerIntervalRef = useRef(null);
   const stimulusIntervalRef = useRef(null);
   const ruleIntervalRef = useRef(null);
@@ -71,6 +72,11 @@ export default function ConstantPrimePage() {
     const timer = setTimeout(() => setLoading(false), 300);
     return () => clearTimeout(timer);
   }, []);
+
+  // Sync gameState to ref
+  useEffect(() => {
+    mainGameStateRef.current = gameState;
+  }, [gameState]);
 
   // Load best scores
   useEffect(() => {
@@ -314,7 +320,7 @@ export default function ConstantPrimePage() {
           playSound('lifeLost');
           showFeedback(`Out of lives! Penalty now active!`, 'warning');
         } else {
-          showFeedback(`✗ Miss! No penalty • ${state.lives}  left`, 'error');
+          showFeedback(`✗ Miss! No penalty • ${state.lives} lives left`, 'error');
         }
       } else {
         // Out of lives - apply penalty
@@ -418,11 +424,30 @@ export default function ConstantPrimePage() {
 
   const resetGame = () => {
     gameStateRef.current.isGameActive = false;
-    setGameState('start');
-    
     if (stimulusIntervalRef.current) clearInterval(stimulusIntervalRef.current);
     if (ruleIntervalRef.current) clearInterval(ruleIntervalRef.current);
     if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
+    if (audioCtxRef.current) {
+      audioCtxRef.current.close();
+      audioCtxRef.current = null;
+    }
+    
+    setGameState('start');
+    setScore(0);
+    setStreak(0);
+    setCorrectHits(0);
+    setMisses(0);
+    setAccuracy(100);
+    setTimeLeft(60);
+    setLives(3);
+    setActiveSet('VOWELS');
+    setCurrentStim('G');
+    setProcessed(false);
+    setIsHit(false);
+    setIsMiss(false);
+    setFeedback('');
+    setCurrentInterval(800);
   };
 
   // Keyboard handler
@@ -445,6 +470,9 @@ export default function ConstantPrimePage() {
       if (ruleIntervalRef.current) clearInterval(ruleIntervalRef.current);
       if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
       if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
+      if (audioCtxRef.current) {
+        audioCtxRef.current.close();
+      }
     };
   }, []);
 
@@ -474,7 +502,7 @@ export default function ConstantPrimePage() {
               </div>
               <div>
                 <h1 className={`text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Constant Prime</h1>
-                <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>+1 correct • Adaptive speed 800-400ms • 3  • 60s</p>
+                <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>+1 correct • Adaptive speed 800-400ms • 3 lives • 60s</p>
               </div>
             </div>
             <div className="flex gap-2">
@@ -536,6 +564,13 @@ export default function ConstantPrimePage() {
           {isFullscreen && gameState === 'playing' && (
             <>
               <div className="absolute top-4 right-4 z-30 flex gap-3">
+                <button 
+                  onClick={resetGame} 
+                  className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all" 
+                  title="Reset session"
+                >
+                  <RefreshCw className="w-5 h-5" />
+                </button>
                 <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">
                   {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
                 </button>
@@ -556,8 +591,6 @@ export default function ConstantPrimePage() {
               </div>
             </>
           )}
-
-
 
           {/* HUD */}
           <div className="absolute top-12 w-full text-center z-20 pointer-events-none">
@@ -699,7 +732,7 @@ export default function ConstantPrimePage() {
                     <div className="flex items-start gap-2">
                       <div className="w-5 h-5 rounded-full bg-pink-500 flex items-center justify-center text-white text-xs font-bold mt-0.5">6</div>
                       <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                        <span className="font-semibold text-pink-500">3  protection</span> • No score penalty until lives reach 0
+                        <span className="font-semibold text-pink-500">3 lives protection</span> • No score penalty until lives reach 0
                       </p>
                     </div>
                   </div>

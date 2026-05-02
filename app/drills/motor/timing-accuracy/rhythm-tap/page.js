@@ -524,18 +524,10 @@ export default function RhythmTapElitePage() {
 
   const resetGame = () => {
     isActiveRef.current = false;
+    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
     setGameState('start');
     gameStateRef.current = 'start';
-    setScore(0);
-    setStreak(0);
-    setBpm(60);
-    setTimeLeft(60);
-    setLives(3);
-    setMisses(0);
-    setFeedback('');
-    setAccuracy(100);
-    
-    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
   };
 
   if (loading) {
@@ -625,6 +617,13 @@ export default function RhythmTapElitePage() {
           {isFullscreen && gameState === 'playing' && (
             <>
               <div className="absolute top-4 right-4 z-30 flex gap-3">
+                <button 
+                  onClick={resetGame} 
+                  className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all" 
+                  title="Reset session"
+                >
+                  <RefreshCw className="w-5 h-5" />
+                </button>
                 <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button>
                 <button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all"><Eye className="w-5 h-5" /></button>
                 <button onClick={() => setSoundEnabled(!soundEnabled)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button>
@@ -635,8 +634,6 @@ export default function RhythmTapElitePage() {
               </div>
             </>
           )}
-
-
 
           <canvas ref={canvasRef} style={{ display: 'block', position: 'absolute' }} />
 

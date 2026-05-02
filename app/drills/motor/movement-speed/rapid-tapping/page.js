@@ -267,7 +267,7 @@ export default function PerpetualSingularityPage() {
         difficultyTimerRef.current = 0;
         setDifficultyTimer(0);
         playSound('difficulty');
-        showFeedback(`⚠️ Difficulty +12%`, 'warning');
+        showFeedback(` Difficulty +12%`, 'warning');
       }
       
       setDifficultyTimer(difficultyTimerRef.current);
@@ -397,6 +397,10 @@ export default function PerpetualSingularityPage() {
   };
 
   const resetGame = () => {
+    if (animationRef.current) cancelAnimationFrame(animationRef.current);
+    if (survivalIntervalRef.current) clearInterval(survivalIntervalRef.current);
+    if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
+    
     isActiveRef.current = false;
     setGameState('start');
     gameStateRef.current = 'start';
@@ -408,7 +412,12 @@ export default function PerpetualSingularityPage() {
     setClicks(0);
     setFeedback('');
     
-    if (survivalIntervalRef.current) clearInterval(survivalIntervalRef.current);
+    radiusRef.current = 50;
+    shrinkRateRef.current = 45;
+    difficultyTimerRef.current = 0;
+    totalTimeRef.current = 0;
+    scoreRef.current = 0;
+    clicksRef.current = 0;
   };
 
   const formatTime = (s) => {
@@ -501,6 +510,14 @@ export default function PerpetualSingularityPage() {
         >
           {isFullscreen && gameState === 'playing' && (
             <div className="absolute top-4 right-4 z-30 flex gap-3">
+              {/* Reset button in fullscreen */}
+              <button 
+                onClick={resetGame} 
+                className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all" 
+                title="Reset session"
+              >
+                <RefreshCw className="w-5 h-5" />
+              </button>
               <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button>
               <button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all"><Eye className="w-5 h-5" /></button>
               <button onClick={() => setSoundEnabled(!soundEnabled)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button>

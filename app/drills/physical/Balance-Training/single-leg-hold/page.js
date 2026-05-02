@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { 
   ArrowLeft, Target, Zap, Clock, Award, Activity, 
   Volume2, VolumeX, Maximize2, Minimize2, Sun, Moon, 
-  Eye, Move, Brain, TrendingUp, Trophy, Info, Link as LinkIcon, Timer
+  Eye, Move, Brain, TrendingUp, Trophy, Info, Link as LinkIcon, Timer, RefreshCw
 } from 'lucide-react';
 
 export default function SingleLegEquilibriumPage() {
@@ -284,7 +284,7 @@ export default function SingleLegEquilibriumPage() {
         
         playSound('penalty');
         if (penaltiesToAdd > 0) {
-          showFeedback(`⚠️ Lost balance! -${penaltiesToAdd} point penalty`, 'error');
+          showFeedback(` Lost balance! -${penaltiesToAdd} point penalty`, 'error');
         }
         
         // Check if this was the first break after a streak
@@ -442,6 +442,8 @@ export default function SingleLegEquilibriumPage() {
   };
 
   const resetGame = () => {
+    if (animationRef.current) cancelAnimationFrame(animationRef.current);
+    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
     isActiveRef.current = false;
     setGameState('start');
     gameStateRef.current = 'start';
@@ -483,6 +485,15 @@ export default function SingleLegEquilibriumPage() {
               </div>
             </div>
             <div className="flex gap-2">
+              {gameState === 'playing' && (
+                <button 
+                  onClick={resetGame} 
+                  className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} 
+                  title="Reset session"
+                >
+                  <RefreshCw className="w-5 h-5" />
+                </button>
+              )}
               <button onClick={() => setIsDarkMode(!isDarkMode)} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`}>
                 {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
               </button>
@@ -499,7 +510,7 @@ export default function SingleLegEquilibriumPage() {
           </div>
         </div>
 
-        {/* Stats Board - Added Mistakes, removed Lives */}
+        {/* Stats Board */}
         <div className="grid grid-cols-6 gap-3 mb-4 h-[88px]">
           <StatCard icon={<Target className="text-blue-600" />} value={score} label="Score" isDark={isDarkMode} />
           <StatCard icon={<Trophy className="text-yellow-500" />} value={bestScore} label="Best Score" isDark={isDarkMode} />
@@ -533,6 +544,13 @@ export default function SingleLegEquilibriumPage() {
         >
           {isFullscreen && gameState === 'playing' && (
             <div className="absolute top-4 right-4 z-30 flex gap-3">
+              <button 
+                onClick={resetGame} 
+                className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all" 
+                title="Reset session"
+              >
+                <RefreshCw className="w-5 h-5" />
+              </button>
               <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button>
               <button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all"><Eye className="w-5 h-5" /></button>
               <button onClick={() => setSoundEnabled(!soundEnabled)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button>

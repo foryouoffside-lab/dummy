@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { 
   ArrowLeft, Sun, Moon, Maximize2, Minimize2, Eye, 
   Volume2, VolumeX, Activity, Target, Timer, Zap, Award, 
-  Info, Trophy
+  Info, Trophy, RefreshCw
 } from 'lucide-react';
 
 export default function FluidFilamentPage() {
@@ -272,7 +272,7 @@ export default function FluidFilamentPage() {
 
       if (distFromWave > tolerance) {
         isStopped = true;
-        showFeedback('⚠️ Lost Wave!', 'warning');
+        showFeedback(' Lost Wave!', 'warning');
       }
     }
 
@@ -366,6 +366,10 @@ export default function FluidFilamentPage() {
   };
   
   const resetGame = () => {
+    if (animationRef.current) cancelAnimationFrame(animationRef.current);
+    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
+    
     isActiveRef.current = false;
     setGameState('start');
     gameStateRef.current = 'start';
@@ -375,6 +379,12 @@ export default function FluidFilamentPage() {
     setStreak(0);
     setBestStreak(0);
     setFeedback('');
+    
+    scoreRef.current = 0;
+    streakRef.current = 0;
+    flowRef.current = 100;
+    focusTimerRef.current = 0;
+    distractionTimerRef.current = 0;
   };
   
   if (loading) {
@@ -409,6 +419,12 @@ export default function FluidFilamentPage() {
             </div>
             
             <div className="flex gap-2">
+              {/* Reset button - only visible during gameplay */}
+              {gameState === 'playing' && (
+                <button onClick={resetGame} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} title="Reset session">
+                  <RefreshCw className="w-5 h-5" />
+                </button>
+              )}
               <button onClick={() => setIsDarkMode(!isDarkMode)} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`}>
                 {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
               </button>
@@ -459,6 +475,14 @@ export default function FluidFilamentPage() {
           {isFullscreen && gameState === 'playing' && (
             <>
               <div className="absolute top-4 right-4 z-20 flex gap-3">
+                {/* Reset button in fullscreen */}
+                <button 
+                  onClick={resetGame} 
+                  className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all" 
+                  title="Reset session"
+                >
+                  <RefreshCw className="w-5 h-5" />
+                </button>
                 <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">
                   {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
                 </button>

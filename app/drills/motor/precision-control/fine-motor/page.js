@@ -226,6 +226,10 @@ export default function CalibratedDynamicFlowPage() {
     return () => {
       isActiveRef.current = false;
       if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+      if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
+      if (audioCtxRef.current) {
+        audioCtxRef.current.close();
+      }
     };
   }, []);
 
@@ -496,7 +500,15 @@ export default function CalibratedDynamicFlowPage() {
   };
 
   const resetGame = () => {
+    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
     isActiveRef.current = false;
+    if (animationRef.current) cancelAnimationFrame(animationRef.current);
+    if (audioCtxRef.current) {
+      audioCtxRef.current.close();
+      audioCtxRef.current = null;
+    }
+    
     setGameState('start');
     gameStateRef.current = 'start';
     setScore(0);
@@ -509,8 +521,6 @@ export default function CalibratedDynamicFlowPage() {
     setPhase('Dynamic');
     setStreak(0);
     setFeedback('');
-    
-    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
   };
 
   if (loading) {
@@ -598,6 +608,13 @@ export default function CalibratedDynamicFlowPage() {
         >
           {isFullscreen && gameState === 'playing' && (
             <div className="absolute top-4 right-4 z-30 flex gap-3">
+              <button 
+                onClick={resetGame} 
+                className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all" 
+                title="Reset session"
+              >
+                <RefreshCw className="w-5 h-5" />
+              </button>
               <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button>
               <button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all"><Eye className="w-5 h-5" /></button>
               <button onClick={() => setSoundEnabled(!soundEnabled)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button>

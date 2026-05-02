@@ -504,6 +504,8 @@ export default function SpeedDrillElitePage() {
   };
 
   const resetGame = () => {
+    if (animationRef.current) cancelAnimationFrame(animationRef.current);
+    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
     isActiveRef.current = false;
     setGameState('start');
     gameStateRef.current = 'start';
@@ -515,8 +517,6 @@ export default function SpeedDrillElitePage() {
     setFeedback('');
     setAccuracy(100);
     setHitsCount(0);
-    
-    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
   };
 
   if (loading) {
@@ -604,6 +604,13 @@ export default function SpeedDrillElitePage() {
         >
           {isFullscreen && gameState === 'playing' && (
             <div className="absolute top-4 right-4 z-30 flex gap-3">
+              <button 
+                onClick={resetGame} 
+                className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all" 
+                title="Reset session"
+              >
+                <RefreshCw className="w-5 h-5" />
+              </button>
               <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button>
               <button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all"><Eye className="w-5 h-5" /></button>
               <button onClick={() => setSoundEnabled(!soundEnabled)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button>
@@ -611,12 +618,7 @@ export default function SpeedDrillElitePage() {
             </div>
           )}
 
-          {/* Lives indicator overlay */}
-          {gameState === 'playing' && lives === 0 && (
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-30 bg-yellow-500/20 backdrop-blur-sm rounded-lg px-4 py-2">
-              <span className="text-yellow-400 text-sm font-medium">⚠️ PENALTY ACTIVE - Each miss costs 1 point</span>
-            </div>
-          )}
+
 
           <canvas ref={canvasRef} style={{ display: 'block', position: 'absolute' }} />
 

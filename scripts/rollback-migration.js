@@ -11,7 +11,7 @@ const rl = readline.createInterface({
 });
 
 async function rollbackMigration() {
-  console.log('⚠️ Database Rollback\n');
+  console.log(' Database Rollback\n');
   
   const migrationsDir = path.join(process.cwd(), 'prisma', 'migrations');
   if (!fs.existsSync(migrationsDir)) {
@@ -44,7 +44,7 @@ async function rollbackMigration() {
   }
   
   const targetMigration = migrations[index];
-  console.log(`\n⚠️ This will rollback to: ${targetMigration}`);
+  console.log(`\n This will rollback to: ${targetMigration}`);
   
   const confirm = await new Promise(resolve => {
     rl.question('Are you sure? (y/N): ', resolve);

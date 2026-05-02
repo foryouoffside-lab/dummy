@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { 
   ArrowLeft, Target, Zap, Timer, Trophy, 
   Volume2, VolumeX, Maximize2, Minimize2, Sun, Moon, Eye,
-  BarChart3, Info, Activity, Award, MousePointer
+  BarChart3, Info, Activity, Award, MousePointer, RefreshCw
 } from 'lucide-react';
 
 export default function SmoothTrackingPage() {
@@ -507,18 +507,11 @@ export default function SmoothTrackingPage() {
       clearInterval(timerIntervalRef.current);
       timerIntervalRef.current = null;
     }
+    if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
     
     isActiveRef.current = false;
     setGameState('start');
     gameStateRef.current = 'start';
-    setTrackingScore(0);
-    setTrackingAccuracy(0);
-    setBestAccuracy(0);
-    setTrackingStreak(0);
-    setBestStreak(0);
-    timeLeftRef.current = 60;
-    setTimeLeft(60);
-    setFeedback('');
   };
 
   return (
@@ -539,6 +532,15 @@ export default function SmoothTrackingPage() {
               </div>
             </div>
             <div className="flex gap-2">
+              {gameState === 'playing' && (
+                <button 
+                  onClick={resetGame} 
+                  className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} 
+                  title="Reset session"
+                >
+                  <RefreshCw className="w-5 h-5" />
+                </button>
+              )}
               <button onClick={() => setIsDarkMode(!isDarkMode)} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`}>
                 {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
               </button>
@@ -589,6 +591,13 @@ export default function SmoothTrackingPage() {
           {isFullscreen && gameState === 'playing' && (
             <>
               <div className="absolute top-4 right-4 z-20 flex gap-3">
+                <button 
+                  onClick={resetGame} 
+                  className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all" 
+                  title="Reset session"
+                >
+                  <RefreshCw className="w-5 h-5" />
+                </button>
                 <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button>
                 <button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all"><Eye className="w-5 h-5" /></button>
                 <button onClick={() => setSoundEnabled(!soundEnabled)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button>

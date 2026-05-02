@@ -7,7 +7,7 @@ import {
   Volume2, VolumeX, Sun, Moon, 
   Target, Activity, Hash,
   ArrowLeft, Eye, Maximize2, Minimize2, Timer, Trophy,
-  BarChart3, Info, CheckCircle2, XCircle, Heart
+  BarChart3, Info, CheckCircle2, XCircle, Heart, RefreshCw
 } from 'lucide-react';
 
 export default function ArithmeticRaceDrill() {
@@ -282,7 +282,7 @@ export default function ArithmeticRaceDrill() {
         
         // When lives become 0, start applying point penalty
         if (livesRef.current === 0) {
-          showFeedback(`⚠️ No lives left! Now penalties will deduct ${penaltyPoints} points!`, 'warning');
+          showFeedback(` No lives left! Now penalties will deduct ${penaltyPoints} points!`, 'warning');
         }
       } else {
         // Lives are 0 - apply point penalty (same as correct points for this difficulty)
@@ -325,6 +325,9 @@ export default function ArithmeticRaceDrill() {
   };
 
   const resetGame = () => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
     setGameState('start');
   };
 
@@ -396,6 +399,15 @@ export default function ArithmeticRaceDrill() {
             
             {/* Control Buttons */}
             <div className="flex gap-2">
+              {gameState === 'playing' && (
+                <button 
+                  onClick={resetGame} 
+                  className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} 
+                  title="Reset session"
+                >
+                  <RefreshCw className="w-5 h-5" />
+                </button>
+              )}
               <button onClick={() => setIsDarkMode(!isDarkMode)} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`}>
                 {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
               </button>
@@ -469,6 +481,13 @@ export default function ArithmeticRaceDrill() {
         >
           {isFullscreen && gameState === 'playing' && (
             <div className="absolute top-4 right-4 z-30 flex gap-3">
+              <button 
+                onClick={resetGame} 
+                className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all" 
+                title="Reset session"
+              >
+                <RefreshCw className="w-5 h-5" />
+              </button>
               <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button>
               <button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all"><Eye className="w-5 h-5" /></button>
               <button onClick={() => setSoundEnabled(!soundEnabled)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button>
@@ -570,7 +589,7 @@ export default function ArithmeticRaceDrill() {
                       </button>
                     </Link>
                     <button 
-                      onClick={resetGame} 
+                      onClick={startGame} 
                       className="flex-1 px-4 py-2.5 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all transform hover:scale-[1.02] active:scale-[0.98]"
                     >
                       Play Again →

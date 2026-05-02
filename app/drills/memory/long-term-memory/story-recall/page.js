@@ -1,4 +1,3 @@
-// app/drills/memory/long-term-memory/story-recall/page.js
 "use client";
 
 import { useState, useEffect, useRef } from "react";
@@ -6,7 +5,7 @@ import Link from "next/link";
 import { 
   ArrowLeft, Target, Zap, Clock, Award, Activity, 
   Volume2, VolumeX, Maximize2, Minimize2, Sun, Moon, 
-  Eye, Timer, Trophy, Info, Brain, TrendingUp, BookOpen, BookMarked, SkipForward, CheckCircle
+  Eye, Timer, Trophy, Info, Brain, TrendingUp, BookOpen, BookMarked, SkipForward, CheckCircle, RefreshCw
 } from "lucide-react";
 
 const allStories = [
@@ -350,6 +349,8 @@ export default function StoryRecallDrill() {
   const resetGame = () => {
     if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
     if (readingTimerRef.current) clearTimeout(readingTimerRef.current);
+    if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
+    
     setGameState('start');
     gameStateRef.current = 'start';
     setScore(0);
@@ -364,6 +365,9 @@ export default function StoryRecallDrill() {
     setAnswers({});
     setCompletedStories([]);
     setAllStoriesCompleted(false);
+    
+    scoreRef.current = 0;
+    streakRef.current = 0;
     isActiveRef.current = false;
     completedStoriesRef.current = [];
   };
@@ -433,6 +437,20 @@ export default function StoryRecallDrill() {
             </div>
             
             <div className="flex gap-2">
+              {/* Reset button - only visible during gameplay */}
+              {gameState === 'playing' && (
+                <button
+                  onClick={resetGame}
+                  className={`p-2 rounded-lg transition shadow-sm border transition-all hover:scale-105 active:scale-95 ${cleanButtonClass} ${
+                    isDarkMode 
+                      ? 'bg-gray-800 hover:bg-gray-700 text-gray-300 border-gray-700' 
+                      : 'bg-white hover:bg-gray-100 text-gray-700 border-gray-200'
+                  }`}
+                  title="Reset session"
+                >
+                  <RefreshCw className="w-5 h-5" />
+                </button>
+              )}
               <button
                 onClick={() => setIsDarkMode(!isDarkMode)}
                 className={`p-2 rounded-lg transition shadow-sm border transition-all hover:scale-105 active:scale-95 ${cleanButtonClass} ${
@@ -512,6 +530,14 @@ export default function StoryRecallDrill() {
         >
           {isFullscreen && gameState === 'playing' && (
             <div className="absolute top-4 right-4 z-30 flex gap-3">
+              {/* Reset button in fullscreen */}
+              <button 
+                onClick={resetGame} 
+                className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all" 
+                title="Reset session"
+              >
+                <RefreshCw className="w-5 h-5" />
+              </button>
               <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button>
               <button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all"><Eye className="w-5 h-5" /></button>
               <button onClick={() => setSoundEnabled(!soundEnabled)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button>

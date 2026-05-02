@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { 
   Eye, Zap, Clock, Award, Volume2, VolumeX, Sun, Moon, 
   Target, MoveVertical, ShieldCheck, Activity, Maximize2, Minimize2,
-  ArrowLeft, Timer, X, Trophy, Info, TrendingUp, Heart
+  ArrowLeft, Timer, X, Trophy, Info, TrendingUp, Heart, RefreshCw
 } from 'lucide-react';
 
 export default function DistanceJudgmentDrill() {
@@ -238,7 +238,7 @@ export default function DistanceJudgmentDrill() {
         if (livesRef.current === 0) {
           scoreRef.current = Math.max(0, scoreRef.current - 1);
           setScore(scoreRef.current);
-          showFeedback(`⚠️ No lives left! -1 point penalty!`, 'warning');
+          showFeedback(` No lives left! -1 point penalty!`, 'warning');
           playSound('penalty');
         }
       } else {
@@ -286,7 +286,7 @@ export default function DistanceJudgmentDrill() {
       if (livesRef.current === 0) {
         scoreRef.current = Math.max(0, scoreRef.current - 1);
         setScore(scoreRef.current);
-        showFeedback(`⚠️ No lives left! -1 point penalty!`, 'warning');
+        showFeedback(` No lives left! -1 point penalty!`, 'warning');
         playSound('penalty');
       }
     } else {
@@ -331,12 +331,14 @@ export default function DistanceJudgmentDrill() {
   };
 
   const resetGame = () => {
+    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
     isActiveRef.current = false;
+    if (requestRef.current) cancelAnimationFrame(requestRef.current);
+    if (nextTrialTimeoutRef.current) clearTimeout(nextTrialTimeoutRef.current);
     setGameState('start');
     gameStateRef.current = 'start';
     setRoundState('idle');
-    if (requestRef.current) cancelAnimationFrame(requestRef.current);
-    if (nextTrialTimeoutRef.current) clearTimeout(nextTrialTimeoutRef.current);
     setScore(0);
     setAttempts(0);
     setLevel(1);
@@ -368,6 +370,15 @@ export default function DistanceJudgmentDrill() {
             </div>
             
             <div className="flex gap-2">
+              {gameState === 'playing' && (
+                <button 
+                  onClick={resetGame} 
+                  className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} 
+                  title="Reset session"
+                >
+                  <RefreshCw className="w-5 h-5" />
+                </button>
+              )}
               <button onClick={() => setIsDarkMode(!isDarkMode)} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`}>
                 {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
               </button>
@@ -419,6 +430,13 @@ export default function DistanceJudgmentDrill() {
           {isFullscreen && gameState === 'playing' && (
             <>
               <div className="absolute top-4 right-4 z-20 flex gap-3">
+                <button 
+                  onClick={resetGame} 
+                  className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all" 
+                  title="Reset session"
+                >
+                  <RefreshCw className="w-5 h-5" />
+                </button>
                 <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button>
                 <button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all"><Eye className="w-5 h-5" /></button>
                 <button onClick={() => setSoundEnabled(!soundEnabled)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button>

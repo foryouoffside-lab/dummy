@@ -240,6 +240,8 @@ export default function SpeedReaderDrill() {
   const resetGame = () => {
     if (streamTimerRef.current) clearInterval(streamTimerRef.current);
     if (timerRef.current) clearInterval(timerRef.current);
+    if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
+    
     setIsPlaying(false);
     isPlayingRef.current = false;
     setGameState('start');
@@ -251,6 +253,11 @@ export default function SpeedReaderDrill() {
     setWordsRead(0);
     wordsReadRef.current = 0;
     setFeedback('');
+    
+    // Generate new columns on reset
+    const newColumns = getRandomColumns();
+    setColumns(newColumns);
+    columnsRef.current = newColumns;
   };
 
   const handleWpmUp = () => setWpm(w => Math.min(800, w + 25));
@@ -399,6 +406,14 @@ export default function SpeedReaderDrill() {
             
             {/* Control Buttons */}
             <div className="flex gap-2">
+              {/* Reset button - always visible */}
+              <button 
+                onClick={resetGame} 
+                className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`}
+                title="Reset session"
+              >
+                <RefreshCw className="w-5 h-5" />
+              </button>
               <button onClick={() => setIsDarkMode(!isDarkMode)} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`}>
                 {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
               </button>
@@ -487,8 +502,16 @@ export default function SpeedReaderDrill() {
             overflow: 'hidden'
           }}
         >
-          {isFullscreen && gameState === 'playing' && (
+          {isFullscreen && gameState !== 'start' && (
             <div className="absolute top-4 right-4 z-30 flex gap-3">
+              {/* Reset button in fullscreen */}
+              <button 
+                onClick={resetGame} 
+                className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all" 
+                title="Reset session"
+              >
+                <RefreshCw className="w-5 h-5" />
+              </button>
               <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button>
               <button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all"><Eye className="w-5 h-5" /></button>
               <button onClick={() => setSoundEnabled(!soundEnabled)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button>

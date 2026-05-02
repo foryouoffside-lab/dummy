@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { 
   ArrowLeft, Target, Zap, Timer, Trophy, Heart, 
   Volume2, VolumeX, Maximize2, Minimize2, Sun, Moon, Eye,
-  BarChart3, Info, Hash, Award, Crown
+  BarChart3, Info, Hash, Award, Crown, RefreshCw
 } from 'lucide-react';
 
 export default function NumberRecallDrill() {
@@ -449,6 +449,15 @@ export default function NumberRecallDrill() {
             
             {/* Control Buttons */}
             <div className="flex gap-2">
+              {(gameState === 'playing' || gameState === 'showing' || gameState === 'input' || gameState === 'success' || gameState === 'fail') && (
+                <button 
+                  onClick={resetGame} 
+                  className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} 
+                  title="Reset session"
+                >
+                  <RefreshCw className="w-5 h-5" />
+                </button>
+              )}
               <button onClick={() => setIsDarkMode(!isDarkMode)} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`}>
                 {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
               </button>
@@ -499,8 +508,15 @@ export default function NumberRecallDrill() {
             overflow: 'hidden'
           }}
         >
-          {isFullscreen && (gameState === 'playing' || gameState === 'showing' || gameState === 'input') && (
+          {isFullscreen && (gameState === 'playing' || gameState === 'showing' || gameState === 'input' || gameState === 'success' || gameState === 'fail') && (
             <div className="absolute top-4 right-4 z-30 flex gap-3">
+              <button 
+                onClick={resetGame} 
+                className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all" 
+                title="Reset session"
+              >
+                <RefreshCw className="w-5 h-5" />
+              </button>
               <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button>
               <button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all"><Eye className="w-5 h-5" /></button>
               <button onClick={() => setSoundEnabled(!soundEnabled)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button>
@@ -508,7 +524,7 @@ export default function NumberRecallDrill() {
             </div>
           )}
 
-          {/* Game Content */}
+          {/* Game Content - rest remains the same */}
           <div className="absolute inset-0 flex flex-col items-center justify-center p-8">
             {/* Start Screen */}
             {gameState === 'start' && (
@@ -636,7 +652,7 @@ export default function NumberRecallDrill() {
                       </span>
                     </Link>
                     <button 
-                      onClick={resetGame}
+                      onClick={startGame}
                       className="flex-1 px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all transform hover:scale-[1.02] active:scale-[0.98]"
                     >
                       Play Again →

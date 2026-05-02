@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { 
   ArrowLeft, Award, Clock, Eye,
   Volume2, VolumeX, Maximize2, Minimize2, Sun, Moon, 
-  Timer, Trophy, Flame, Wind, Brain, Info, TrendingUp, Zap
+  Timer, Trophy, Flame, Wind, Brain, Info, TrendingUp, Zap, RefreshCw
 } from 'lucide-react';
 
 export default function WHMPowerPage() {
@@ -185,8 +185,11 @@ export default function WHMPowerPage() {
     setSubData('BREATH 0 / 30');
     setNodeScale(1);
     setNodeOpacity(1);
+    setScore(0);
     setCombo(0);
+    scoreRef.current = 0;
     comboRef.current = 0;
+    setGameState('start');
     
     if (breathTimeoutRef.current) clearTimeout(breathTimeoutRef.current);
   };
@@ -259,6 +262,20 @@ export default function WHMPowerPage() {
             
             {/* Control Buttons */}
             <div className="flex gap-2">
+              {/* Reset button - only visible during gameplay */}
+              {gameState === 'playing' && (
+                <button
+                  onClick={resetDrill}
+                  className={`p-2 rounded-lg transition shadow-sm border transition-all hover:scale-105 active:scale-95 ${cleanButtonClass} ${
+                    isDarkMode 
+                      ? 'bg-gray-800 hover:bg-gray-700 text-gray-300 border-gray-700' 
+                      : 'bg-white hover:bg-gray-100 text-gray-700 border-gray-200'
+                  }`}
+                  title="Reset session"
+                >
+                  <RefreshCw className="w-5 h-5" />
+                </button>
+              )}
               <button
                 onClick={() => setIsDarkMode(!isDarkMode)}
                 className={`p-2 rounded-lg transition shadow-sm border transition-all hover:scale-105 active:scale-95 ${cleanButtonClass} ${
@@ -332,6 +349,14 @@ export default function WHMPowerPage() {
           {/* Fullscreen Controls Overlay */}
           {isFullscreen && gameState === 'playing' && (
             <div className="absolute top-4 right-4 z-30 flex gap-3">
+              {/* Reset button in fullscreen */}
+              <button
+                onClick={resetDrill}
+                className="p-2 bg-black/50 rounded-lg hover:bg-black/70 transition text-white"
+                title="Reset session"
+              >
+                <RefreshCw className="w-5 h-5" />
+              </button>
               <button
                 onClick={() => setIsDarkMode(!isDarkMode)}
                 className="p-2 bg-black/50 rounded-lg hover:bg-black/70 transition text-white"

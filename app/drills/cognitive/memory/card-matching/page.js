@@ -6,7 +6,7 @@ import {
   ArrowLeft, Target, Zap, Timer, Trophy, 
   Volume2, VolumeX, Maximize2, Minimize2, Sun, Moon, Eye,
   BarChart3, Info, Award, Grid, Heart, Star, Circle, Square,
-  Triangle, Diamond, Hexagon, Activity, Clock, CheckCircle
+  Triangle, Diamond, Hexagon, Activity, Clock, CheckCircle, RefreshCw
 } from 'lucide-react';
 
 export default function CardMatchingPage() {
@@ -384,6 +384,7 @@ export default function CardMatchingPage() {
   const resetGame = () => {
     if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
     setGameState('start');
     gameStateRef.current = 'start';
   };
@@ -427,6 +428,15 @@ export default function CardMatchingPage() {
             
             {/* Control Buttons */}
             <div className="flex gap-2">
+              {gameState === 'playing' && (
+                <button 
+                  onClick={resetGame} 
+                  className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} 
+                  title="Reset session"
+                >
+                  <RefreshCw className="w-5 h-5" />
+                </button>
+              )}
               <button onClick={() => setIsDarkMode(!isDarkMode)} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`}>
                 {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
               </button>
@@ -443,6 +453,7 @@ export default function CardMatchingPage() {
           </div>
         </div>
 
+        {/* Rest of the component remains the same... */}
         {/* Stats Board - 7 columns */}
         <div className="grid grid-cols-7 gap-3 mb-4 h-[88px]">
           <StatCard icon={<Target className="text-blue-600" />} value={score} label="Score" isDark={isDarkMode} />
@@ -478,6 +489,13 @@ export default function CardMatchingPage() {
         >
           {isFullscreen && gameState === 'playing' && (
             <div className="absolute top-4 right-4 z-30 flex gap-3">
+              <button 
+                onClick={resetGame} 
+                className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all" 
+                title="Reset session"
+              >
+                <RefreshCw className="w-5 h-5" />
+              </button>
               <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button>
               <button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all"><Eye className="w-5 h-5" /></button>
               <button onClick={() => setSoundEnabled(!soundEnabled)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button>
@@ -579,7 +597,7 @@ export default function CardMatchingPage() {
                       </span>
                     </Link>
                     <button 
-                      onClick={resetGame}
+                      onClick={startGame}
                       className="flex-1 px-4 py-2.5 bg-gradient-to-r from-pink-500 to-rose-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all transform hover:scale-[1.02] active:scale-[0.98]"
                     >
                       Play Again →

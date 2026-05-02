@@ -6,7 +6,7 @@ import Link from "next/link";
 import { 
   ArrowLeft, Target, Zap, Clock, Award, Activity, 
   Volume2, VolumeX, Maximize2, Minimize2, Sun, Moon, 
-  Eye, Timer, Trophy, Info, Hash, TrendingUp, Brain
+  Eye, Timer, Trophy, Info, Hash, TrendingUp, Brain, RefreshCw
 } from "lucide-react";
 
 export default function NBackDrill() {
@@ -178,7 +178,7 @@ export default function NBackDrill() {
       waitingForNextRef.current = false;
       playSound('next');
       
-      // Start timer for auto-move to next letter (changed from 1500 to 1000)
+      // Start timer for auto-move to next letter
       if (letterTimerRef.current) clearTimeout(letterTimerRef.current);
       letterTimerRef.current = setTimeout(() => {
         if (isActiveRef.current && canAnswerRef.current && currentIndexRef.current >= n) {
@@ -209,7 +209,7 @@ export default function NBackDrill() {
             moveToNextLetter();
           }, 300);
         }
-      }, 1000); // Changed from 1500 to 1000
+      }, 1000);
     } else {
       // End of sequence - start a new round
       const finalScore = scoreRef.current;
@@ -230,7 +230,7 @@ export default function NBackDrill() {
       waitingForNextRef.current = false;
       showFeedback(`Round Complete! Score: ${finalScore}`, 'success');
       
-      // Start timer for first letter of new round (changed from 1500 to 1000)
+      // Start timer for first letter of new round
       if (letterTimerRef.current) clearTimeout(letterTimerRef.current);
       letterTimerRef.current = setTimeout(() => {
         if (isActiveRef.current && canAnswerRef.current && currentIndexRef.current >= n) {
@@ -251,7 +251,7 @@ export default function NBackDrill() {
         } else if (currentIndexRef.current < n) {
           moveToNextLetter();
         }
-      }, 1000); // Changed from 1500 to 1000
+      }, 1000);
     }
   }, [bestScore, generateSequence, n]);
 
@@ -374,7 +374,7 @@ export default function NBackDrill() {
     setCurrentIndex(0);
     setCurrentLetter(newSeq[0]);
     
-    // Start timer for first letter (changed from 1500 to 1000)
+    // Start timer for first letter
     letterTimerRef.current = setTimeout(() => {
       if (isActiveRef.current && canAnswerRef.current && currentIndexRef.current >= n) {
         totalRef.current += 1;
@@ -394,33 +394,16 @@ export default function NBackDrill() {
       } else if (currentIndexRef.current < n) {
         moveToNextLetter();
       }
-    }, 1000); // Changed from 1500 to 1000
+    }, 1000);
   };
 
   const resetGame = () => {
     if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
     if (letterTimerRef.current) clearTimeout(letterTimerRef.current);
+    if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
     setGameActive(false);
     setGameState('start');
-    setScore(0);
-    setTotal(0);
-    setStreak(0);
-    setBestStreak(0);
-    setTimeLeft(60);
-    setFeedback('');
-    setCurrentLetter('');
-    setCanAnswer(true);
-    setSequence([]);
-    setCurrentIndex(0);
-    setLetterTimeoutActive(false);
-    scoreRef.current = 0;
-    streakRef.current = 0;
-    totalRef.current = 0;
     isActiveRef.current = false;
-    canAnswerRef.current = true;
-    waitingForNextRef.current = false;
-    sequenceRef.current = [];
-    currentIndexRef.current = 0;
   };
 
   const toggleFullscreen = async () => {
@@ -451,6 +434,7 @@ export default function NBackDrill() {
     return () => {
       if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
       if (letterTimerRef.current) clearTimeout(letterTimerRef.current);
+      if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
     };
   }, []);
 
@@ -486,6 +470,19 @@ export default function NBackDrill() {
             </div>
             
             <div className="flex gap-2">
+              {gameState === 'playing' && (
+                <button
+                  onClick={resetGame}
+                  className={`p-2 rounded-lg transition shadow-sm border transition-all hover:scale-105 active:scale-95 ${cleanButtonClass} ${
+                    isDarkMode 
+                      ? 'bg-gray-800 hover:bg-gray-700 text-gray-300 border-gray-700' 
+                      : 'bg-white hover:bg-gray-100 text-gray-700 border-gray-200'
+                  }`}
+                  title="Reset session"
+                >
+                  <RefreshCw className="w-5 h-5" />
+                </button>
+              )}
               <button
                 onClick={() => setIsDarkMode(!isDarkMode)}
                 className={`p-2 rounded-lg transition shadow-sm border transition-all hover:scale-105 active:scale-95 ${cleanButtonClass} ${
@@ -564,6 +561,13 @@ export default function NBackDrill() {
         >
           {isFullscreen && gameState === 'playing' && (
             <div className="absolute top-4 right-4 z-30 flex gap-3">
+              <button 
+                onClick={resetGame} 
+                className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all" 
+                title="Reset session"
+              >
+                <RefreshCw className="w-5 h-5" />
+              </button>
               <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button>
               <button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all"><Eye className="w-5 h-5" /></button>
               <button onClick={() => setSoundEnabled(!soundEnabled)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button>
@@ -643,7 +647,7 @@ export default function NBackDrill() {
                       </button>
                     </Link>
                     <button 
-                      onClick={resetGame} 
+                      onClick={startGame} 
                       className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-cyan-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all transform hover:scale-[1.02] active:scale-[0.98]"
                     >
                       Play Again →

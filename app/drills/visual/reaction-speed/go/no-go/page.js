@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { 
   Eye, Zap, Clock, Award, Volume2, VolumeX, Sun, Moon, 
   Target, ShieldCheck, Activity, Maximize2, Minimize2,
-  ArrowLeft, Timer, X, Trophy, Info, TrendingUp, Heart, Check
+  ArrowLeft, Timer, X, Trophy, Info, TrendingUp, Heart, Check, RefreshCw
 } from 'lucide-react';
 
 export default function ChromaSyncPage() {
@@ -260,7 +260,7 @@ export default function ChromaSyncPage() {
       if (livesRef.current === 0) {
         scoreRef.current = Math.max(0, scoreRef.current - 1);
         setScore(scoreRef.current);
-        showFeedback(`⚠️ No lives left! -1 point penalty!`, 'warning');
+        showFeedback(` No lives left! -1 point penalty!`, 'warning');
       }
     } else {
       scoreRef.current = Math.max(0, scoreRef.current - 1);
@@ -550,6 +550,7 @@ export default function ChromaSyncPage() {
   };
 
   const resetGame = () => {
+    if (animationRef.current) cancelAnimationFrame(animationRef.current);
     isActiveRef.current = false;
     setGameState('start');
     gameStateRef.current = 'start';
@@ -564,13 +565,19 @@ export default function ChromaSyncPage() {
     setSuccessfulHits(0);
     setFeedbackMsg('');
     
+    scoreRef.current = 0;
     stateRef.current = "WAITING";
     displayTimeRef.current = 250;
     streakRef.current = 0;
+    livesRef.current = 3;
     initializedRef.current = false;
+    currentTargetColorRef.current = "#151515";
+    canClickRef.current = true;
     
     if (cycleTimeoutRef.current) clearTimeout(cycleTimeoutRef.current);
     if (signalTimeoutRef.current) clearTimeout(signalTimeoutRef.current);
+    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
   };
 
   return (
@@ -592,6 +599,12 @@ export default function ChromaSyncPage() {
               </div>
             </div>
             <div className="flex gap-2">
+              {/* Reset button - only visible during gameplay */}
+              {gameState === 'playing' && (
+                <button onClick={resetGame} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} title="Reset session">
+                  <RefreshCw className="w-5 h-5" />
+                </button>
+              )}
               <button onClick={() => setIsDarkMode(!isDarkMode)} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`}>
                 {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
               </button>
@@ -643,6 +656,14 @@ export default function ChromaSyncPage() {
           {isFullscreen && gameState === 'playing' && (
             <>
               <div className="absolute top-4 right-4 z-20 flex gap-3">
+                {/* Reset button in fullscreen */}
+                <button 
+                  onClick={resetGame} 
+                  className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all" 
+                  title="Reset session"
+                >
+                  <RefreshCw className="w-5 h-5" />
+                </button>
                 <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button>
                 <button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all"><Eye className="w-5 h-5" /></button>
                 <button onClick={() => setSoundEnabled(!soundEnabled)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button>

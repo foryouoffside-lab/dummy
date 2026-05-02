@@ -5,10 +5,10 @@ import Link from 'next/link';
 import { 
   ArrowLeft, Target, Zap, Clock, Award, Activity, 
   Volume2, VolumeX, Maximize2, Minimize2, Sun, Moon, 
-  Eye, GitBranch, Brain, Trophy, Info, Timer, TrendingUp, Heart, RefreshCw
+  Eye, Crosshair, Brain, Trophy, Info, Timer, TrendingUp, RefreshCw
 } from 'lucide-react';
 
-export default function ReactionChainProPage() {
+export default function KineticArrestPage() {
   const [loading, setLoading] = useState(true);
   const canvasRef = useRef(null);
   const animationRef = useRef(null);
@@ -20,83 +20,65 @@ export default function ReactionChainProPage() {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [score, setScore] = useState(0);
   const [bestScore, setBestScore] = useState(0);
-  const [tempo, setTempo] = useState(1.0);
-  const [bestTempo, setBestTempo] = useState(1.0);
   const [streak, setStreak] = useState(0);
   const [bestStreak, setBestStreak] = useState(0);
-  const [bestReaction, setBestReaction] = useState(0);
   const [timeLeft, setTimeLeft] = useState(60);
-  const [lives, setLives] = useState(3);
-  const [penalties, setPenalties] = useState(0);
   const [feedback, setFeedback] = useState('');
   const [feedbackType, setFeedbackType] = useState('');
-  const [accuracy, setAccuracy] = useState(100);
-  const [hitsCount, setHitsCount] = useState(0);
+  const [cursorSpeed, setCursorSpeed] = useState(0);
+  const [currentSpeed, setCurrentSpeed] = useState(400);
+  const [arrestsCount, setArrestsCount] = useState(0);
+  const [misses, setMisses] = useState(0);
+  const [activeNodes, setActiveNodes] = useState(1);
   
   const nodesRef = useRef([]);
   const scoreRef = useRef(0);
-  const tempoRef = useRef(1.0);
   const streakRef = useRef(0);
-  const livesRef = useRef(3);
-  const mousePositionRef = useRef({ x: 0, y: 0 });
+  const mouseRef = useRef({ x: 0, y: 0 });
+  const lastMouseRef = useRef({ x: 0, y: 0 });
+  const cursorVelRef = useRef(0);
   const lastTimeRef = useRef(performance.now());
-  const spawnTimerRef = useRef(0);
   const timerIntervalRef = useRef(null);
   const feedbackTimeoutRef = useRef(null);
   const isActiveRef = useRef(false);
   const gameStateRef = useRef('start');
   const audioCtxRef = useRef(null);
-  const totalAttemptsRef = useRef(0);
-  const hitsRef = useRef(0);
-  const penaltyAccumulatorRef = useRef(0);
-  const hasActiveTargetRef = useRef(false);
-
-  // Penalty settings
-  const PENALTY = 1;
-  // Base time for circle to disappear (300ms)
-  const BASE_LIFE_TIME = 0.3; // 300 milliseconds
-
-  // Simulate loading
-  useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 300);
-    return () => clearTimeout(timer);
-  }, []);
+  const speedRef = useRef(400);
+  const arrestCountRef = useRef(0);
+  const missesRef = useRef(0);
+  const isFullscreenRef = useRef(false);
+  const spawnTimerRef = useRef(0);
 
   // Load best score from localStorage on mount
   useEffect(() => {
-    const savedBestScore = localStorage.getItem('reactionChainBestScore');
-    const savedBestStreak = localStorage.getItem('reactionChainBestStreak');
-    if (savedBestScore) setBestScore(parseInt(savedBestScore, 10));
-    if (savedBestStreak) setBestStreak(parseInt(savedBestStreak, 10));
+    const savedBestScore = localStorage.getItem('kineticArrestBestScore');
+    if (savedBestScore) {
+      setBestScore(parseInt(savedBestScore, 10));
+    }
   }, []);
 
-  // Update best score only when game ends
+  // Track fullscreen state in ref for game loop
+  useEffect(() => {
+    isFullscreenRef.current = isFullscreen;
+    setActiveNodes(isFullscreen ? 2 : 1);
+  }, [isFullscreen]);
+
   const updateBestScore = (finalScore) => {
-    const currentBest = parseInt(localStorage.getItem('reactionChainBestScore') || '0', 10);
+    const currentBest = parseInt(localStorage.getItem('kineticArrestBestScore') || '0', 10);
     if (finalScore > currentBest) {
-      localStorage.setItem('reactionChainBestScore', finalScore.toString());
+      localStorage.setItem('kineticArrestBestScore', finalScore.toString());
       setBestScore(finalScore);
     }
   };
 
-  // Update best tempo
-  useEffect(() => {
-    if (tempoRef.current > bestTempo) {
-      setBestTempo(tempoRef.current);
-    }
-  }, [tempo]);
-
-  // Calculate accuracy
-  useEffect(() => {
-    if (totalAttemptsRef.current > 0) {
-      const acc = (hitsRef.current / totalAttemptsRef.current) * 100;
-      setAccuracy(Math.round(acc));
-    }
-  }, [hitsCount, penalties]);
-
   useEffect(() => {
     gameStateRef.current = gameState;
   }, [gameState]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 300);
+    return () => clearTimeout(timer);
+  }, []);
 
   const toggleFullscreen = async () => {
     try {
@@ -130,7 +112,7 @@ export default function ReactionChainProPage() {
     feedbackTimeoutRef.current = setTimeout(() => {
       setFeedback('');
       setFeedbackType('');
-    }, 500);
+    }, 800);
   };
 
   const initAudio = () => {
@@ -152,25 +134,18 @@ export default function ReactionChainProPage() {
       osc.connect(gain);
       gain.connect(audioCtx.destination);
       
-      if (type === 'hit') {
+      if (type === 'arrest') {
         osc.frequency.value = 880;
-        gain.gain.value = 0.1;
+        gain.gain.value = 0.08;
       } else if (type === 'miss') {
-        osc.frequency.value = 440;
+        osc.frequency.value = 330;
         gain.gain.value = 0.1;
       } else if (type === 'streak') {
         osc.frequency.value = 1046.5;
-        gain.gain.value = 0.12;
-      } else if (type === 'highscore') {
-        osc.frequency.value = 1318.52;
-        gain.gain.value = 0.12;
-      } else if (type === 'lifeLost') {
-        osc.frequency.value = 330;
-        gain.gain.value = 0.15;
-        osc.start();
-        gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.2);
-        osc.stop(audioCtx.currentTime + 0.2);
-        return;
+        gain.gain.value = 0.1;
+      } else if (type === 'speedup') {
+        osc.frequency.value = 1318.5;
+        gain.gain.value = 0.08;
       }
       osc.start();
       gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.15);
@@ -187,7 +162,6 @@ export default function ReactionChainProPage() {
             gameStateRef.current = 'gameOver';
             isActiveRef.current = false;
             
-            // Update best score ONLY when game ends
             const finalScore = Math.floor(scoreRef.current);
             updateBestScore(finalScore);
             
@@ -203,36 +177,111 @@ export default function ReactionChainProPage() {
     };
   }, [gameState]);
 
-  const handleMiss = (reason) => {
+  const spawnNode = (cvs) => {
+    if (!cvs) return null;
+    const side = Math.floor(Math.random() * 4);
+    
+    const isFullscreenMode = isFullscreenRef.current;
+    const baseSpeed = isFullscreenMode ? 600 : 400;
+    const scoreBonus = Math.min(scoreRef.current * 20, 500);
+    const streakBonus = Math.min(streakRef.current * 15, 300);
+    const speed = baseSpeed + scoreBonus + streakBonus;
+    
+    speedRef.current = speed;
+    setCurrentSpeed(Math.round(speed));
+    
+    let node;
+    if (side === 0) {
+      node = { x: -20, y: Math.random() * cvs.height, vx: speed, vy: 0, active: true };
+    } else if (side === 1) {
+      node = { x: cvs.width + 20, y: Math.random() * cvs.height, vx: -speed, vy: 0, active: true };
+    } else if (side === 2) {
+      node = { x: Math.random() * cvs.width, y: -20, vx: 0, vy: speed, active: true };
+    } else {
+      node = { x: Math.random() * cvs.width, y: cvs.height + 20, vx: 0, vy: -speed, active: true };
+    }
+    
+    return node;
+  };
+
+  const handleMiss = (nodeIndex) => {
     if (!isActiveRef.current) return;
     
-    totalAttemptsRef.current++;
-    setPenalties(prev => prev + 1);
-    
+    // Reset streak only - NO score penalty
     streakRef.current = 0;
     setStreak(0);
-    tempoRef.current = Math.max(0.8, tempoRef.current - 0.1);
-    setTempo(tempoRef.current);
     
-    // Check lives
-    if (livesRef.current > 0) {
-      livesRef.current--;
-      setLives(livesRef.current);
-      playSound('miss');
-      
-      if (livesRef.current === 0) {
-        playSound('lifeLost');
-        showFeedback(`Out of lives! Penalty now active!`, 'warning');
-      } else {
-        showFeedback(`✗ ${reason}! No penalty • ${livesRef.current}  left`, 'error');
-      }
-    } else {
-      // Out of lives - apply penalty
-      scoreRef.current = Math.max(0, scoreRef.current - PENALTY);
-      setScore(Math.floor(scoreRef.current));
-      playSound('miss');
-      showFeedback(`✗ ${reason}! -${PENALTY} point penalty`, 'error');
+    // Track misses for stats
+    missesRef.current += 1;
+    setMisses(missesRef.current);
+    
+    // Remove the missed node
+    if (nodeIndex !== undefined) {
+      nodesRef.current.splice(nodeIndex, 1);
     }
+    
+    showFeedback(`✗ Miss! Streak reset`, 'warning');
+    playSound('miss');
+    
+    // Spawn replacement node
+    setTimeout(() => {
+      if (isActiveRef.current) {
+        const isFullscreenMode = isFullscreenRef.current;
+        const maxNodes = isFullscreenMode ? 2 : 1;
+        
+        while (nodesRef.current.length < maxNodes && isActiveRef.current) {
+          const newNode = spawnNode(canvasRef.current);
+          if (newNode) nodesRef.current.push(newNode);
+        }
+      }
+    }, 300);
+  };
+
+  const handleArrest = (nodeIndex) => {
+    if (!isActiveRef.current) return;
+    
+    arrestCountRef.current += 1;
+    setArrestsCount(arrestCountRef.current);
+    
+    const newStreak = streakRef.current + 1;
+    streakRef.current = newStreak;
+    setStreak(newStreak);
+    
+    if (newStreak > bestStreak) {
+      setBestStreak(newStreak);
+    }
+    
+    // Score increases with streak bonuses
+    const pointsEarned = 1 + Math.floor(newStreak / 5);
+    scoreRef.current += pointsEarned;
+    setScore(Math.floor(scoreRef.current));
+    
+    // Remove the arrested node
+    nodesRef.current.splice(nodeIndex, 1);
+    
+    if (newStreak % 5 === 0 && newStreak > 0) {
+      playSound('streak');
+      showFeedback(`🔥 ${newStreak} Streak! +${pointsEarned}`, 'success');
+    } else if (newStreak % 10 === 0 && newStreak > 0) {
+      playSound('speedup');
+      showFeedback(`⚡ Speed increasing! +${pointsEarned}`, 'success');
+    } else {
+      playSound('arrest');
+      showFeedback(`✓ Arrested! +${pointsEarned}`, 'success');
+    }
+    
+    // Spawn replacement node
+    setTimeout(() => {
+      if (isActiveRef.current) {
+        const isFullscreenMode = isFullscreenRef.current;
+        const maxNodes = isFullscreenMode ? 2 : 1;
+        
+        while (nodesRef.current.length < maxNodes && isActiveRef.current) {
+          const newNode = spawnNode(canvasRef.current);
+          if (newNode) nodesRef.current.push(newNode);
+        }
+      }
+    }, 150);
   };
 
   useEffect(() => {
@@ -242,7 +291,8 @@ export default function ReactionChainProPage() {
       const rect = cvs.getBoundingClientRect();
       const scaleX = cvs.width / rect.width;
       const scaleY = cvs.height / rect.height;
-      mousePositionRef.current = {
+      
+      mouseRef.current = {
         x: (e.clientX - rect.left) * scaleX,
         y: (e.clientY - rect.top) * scaleY
       };
@@ -250,99 +300,6 @@ export default function ReactionChainProPage() {
     window.addEventListener('mousemove', handleMouseMove);
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
-
-  const spawnNode = (cvs) => {
-    if (!cvs) return;
-    
-    const padding = 100;
-    // Life decreases as tempo increases (faster disappearance)
-    const lifeTime = BASE_LIFE_TIME / tempoRef.current;
-    
-    nodesRef.current.push({
-      x: padding + Math.random() * (cvs.width - padding * 2),
-      y: padding + Math.random() * (cvs.height - padding * 2),
-      r: 32,
-      life: lifeTime,
-      birth: performance.now()
-    });
-    
-    hasActiveTargetRef.current = true;
-  };
-
-  useEffect(() => {
-    const handleMouseDown = () => {
-      if (gameState !== 'playing' || !isActiveRef.current) return;
-      
-      const mouse = mousePositionRef.current;
-      
-      // Check if there's an active target
-      if (nodesRef.current.length === 0) {
-        // Click with no ball - penalty
-        handleMiss('Empty click');
-        return;
-      }
-      
-      const target = nodesRef.current[0];
-      const dist = Math.hypot(mouse.x - target.x, mouse.y - target.y);
-      const hitRadius = target.r + 15;
-
-      if (dist < hitRadius) {
-        const reactionMs = Math.floor(performance.now() - target.birth);
-        
-        totalAttemptsRef.current++;
-        hitsRef.current++;
-        setHitsCount(hitsRef.current);
-        
-        if (bestReaction === 0 || reactionMs < bestReaction) {
-          setBestReaction(reactionMs);
-        }
-        
-        nodesRef.current.shift();
-        hasActiveTargetRef.current = nodesRef.current.length > 0;
-        
-        // +1 point per hit
-        scoreRef.current += 1;
-        setScore(Math.floor(scoreRef.current));
-        
-        const newStreak = streakRef.current + 1;
-        streakRef.current = newStreak;
-        setStreak(newStreak);
-        
-        if (newStreak > bestStreak) {
-          setBestStreak(newStreak);
-          localStorage.setItem('reactionChainBestStreak', newStreak.toString());
-        }
-        
-        // Increase tempo with each hit (makes circles disappear faster)
-        tempoRef.current = Math.min(2.5, tempoRef.current + 0.025);
-        setTempo(tempoRef.current);
-        
-        if (scoreRef.current > bestScore && scoreRef.current > parseInt(localStorage.getItem('reactionChainBestScore') || '0', 10)) {
-          playSound('highscore');
-          showFeedback(`🏆 New Record! ${scoreRef.current}`, 'success');
-        } else if (newStreak % 5 === 0 && newStreak > 0) {
-          playSound('streak');
-          showFeedback(`🔥 ${newStreak} Streak!`, 'success');
-        } else {
-          playSound('hit');
-          showFeedback(`✓ ${reactionMs}ms | +1`, 'success');
-        }
-      } else {
-        // Clicked but missed the ball
-        handleMiss('Miss');
-        nodesRef.current = [];
-        spawnTimerRef.current = 0;
-        hasActiveTargetRef.current = false;
-      }
-    };
-    
-    window.addEventListener('mousedown', handleMouseDown);
-    window.addEventListener('contextmenu', (e) => e.preventDefault());
-    return () => {
-      window.removeEventListener('mousedown', handleMouseDown);
-      window.removeEventListener('contextmenu', (e) => e.preventDefault());
-    };
-  }, [gameState, bestReaction, bestStreak]);
 
   useEffect(() => {
     return () => {
@@ -373,6 +330,17 @@ export default function ReactionChainProPage() {
       cvs.style.position = 'absolute';
       cvs.style.left = `${(containerRect.width - width) / 2}px`;
       cvs.style.top = `${(containerRect.height - height) / 2}px`;
+      
+      if (isActiveRef.current) {
+        const isFullscreenMode = isFullscreenRef.current;
+        const maxNodes = isFullscreenMode ? 2 : 1;
+        
+        nodesRef.current = [];
+        for (let i = 0; i < maxNodes; i++) {
+          const newNode = spawnNode(cvs);
+          if (newNode) nodesRef.current.push(newNode);
+        }
+      }
     };
 
     const resizeObserver = new ResizeObserver(updateCanvasSize);
@@ -380,45 +348,65 @@ export default function ReactionChainProPage() {
     window.addEventListener('resize', updateCanvasSize);
     updateCanvasSize();
     
-    let lastFrameTime = performance.now();
-
-    function update(dt, now, cvs) {
-      if (!isActiveRef.current) return;
+    function draw() {
+      const now = performance.now();
+      const dt = (now - lastTimeRef.current) / 1000;
+      lastTimeRef.current = now;
       
-      // Spawn new nodes - faster spawn as tempo increases
-      spawnTimerRef.current += dt;
-      const interval = Math.max(0.2, 0.6 / tempoRef.current);
-      if (spawnTimerRef.current > interval && nodesRef.current.length < 8) {
-        spawnNode(cvs);
-        spawnTimerRef.current = 0;
+      const mouse = mouseRef.current;
+      
+      const velX = mouse.x - lastMouseRef.current.x;
+      const velY = mouse.y - lastMouseRef.current.y;
+      cursorVelRef.current = Math.hypot(velX, velY);
+      setCursorSpeed(Math.round(cursorVelRef.current * 10) / 10);
+      
+      lastMouseRef.current.x = mouse.x;
+      lastMouseRef.current.y = mouse.y;
+      
+      if (isActiveRef.current) {
+        const isFullscreenMode = isFullscreenRef.current;
+        const maxNodes = isFullscreenMode ? 2 : 1;
+        
+        while (nodesRef.current.length > maxNodes) {
+          nodesRef.current.pop();
+        }
+        
+        while (nodesRef.current.length < maxNodes) {
+          const newNode = spawnNode(cvs);
+          if (newNode) nodesRef.current.push(newNode);
+        }
       }
       
-      // Check for timeouts (circle disappeared without being clicked) - NO PENALTY
       for (let i = nodesRef.current.length - 1; i >= 0; i--) {
         const node = nodesRef.current[i];
-        const age = (now - node.birth) / 1000;
-        if (age >= node.life) {
-          // Timeout - just remove the node, no penalty
-          nodesRef.current = [];
-          spawnTimerRef.current = 0;
-          hasActiveTargetRef.current = false;
+        if (!node || !node.active) continue;
+        
+        node.x += node.vx * dt;
+        node.y += node.vy * dt;
+        
+        const dist = Math.hypot(mouse.x - node.x, mouse.y - node.y);
+        
+        if (dist < 20 && isActiveRef.current) {
+          if (cursorVelRef.current < 1.5) {
+            handleArrest(i);
+            break;
+          } else {
+            handleMiss(i);
+            break;
+          }
+        }
+        
+        const padding = 100;
+        if (node.x < -padding || node.x > cvs.width + padding || 
+            node.y < -padding || node.y > cvs.height + padding) {
+          handleMiss(i);
           break;
         }
       }
-    }
-
-    function draw() {
-      const now = performance.now();
-      const dt = Math.min(0.033, (now - lastFrameTime) / 1000);
-      lastFrameTime = now;
       
-      update(dt, now, cvs);
-      
-      // Clear canvas
       ctx.fillStyle = isBoxDarkMode ? "#020202" : "#f9fafb";
       ctx.fillRect(0, 0, cvs.width, cvs.height);
       
-      // Background grid
       ctx.strokeStyle = isBoxDarkMode ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)';
       ctx.lineWidth = 1;
       for (let i = 0; i < cvs.width; i += 50) {
@@ -427,82 +415,90 @@ export default function ReactionChainProPage() {
         ctx.moveTo(0, i); ctx.lineTo(cvs.width, i); ctx.stroke();
       }
       
-      const mouse = mousePositionRef.current;
+      ctx.fillStyle = isBoxDarkMode ? "#0a0a0a" : "#e5e7eb";
+      ctx.font = "bold 120px Courier New";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(scoreRef.current, cvs.width / 2, cvs.height / 2);
       
-      // Draw nodes from oldest to newest
-      for (let i = nodesRef.current.length - 1; i >= 0; i--) {
-        const node = nodesRef.current[i];
-        const age = (now - node.birth) / 1000;
-        const prog = Math.min(1, age / node.life);
+      nodesRef.current.forEach(node => {
+        if (!node || !node.active) return;
         
-        if (prog >= 1) continue;
+        const speedIntensity = Math.min(1, (speedRef.current - 400) / 800);
+        const glowColor = speedIntensity > 0.5 ? 
+          `rgba(255, ${Math.floor(255 * (1 - speedIntensity))}, 0, 0.6)` : 
+          `rgba(0, 255, 136, 0.6)`;
         
-        const isFirst = (i === 0);
-        const shrinkFactor = 1 - prog * 0.4;
+        ctx.shadowBlur = 15 + speedIntensity * 10;
+        ctx.shadowColor = glowColor;
         
-        // Node circle
         ctx.beginPath();
-        ctx.arc(node.x, node.y, node.r * shrinkFactor, 0, Math.PI * 2);
+        ctx.arc(node.x, node.y, 10, 0, Math.PI * 2);
         
-        if (isFirst) {
-          ctx.strokeStyle = "#00ff88";
-          ctx.lineWidth = 3.5;
+        if (speedIntensity > 0.5) {
+          const r = 255;
+          const g = Math.floor(255 * (1 - speedIntensity));
+          ctx.fillStyle = `rgb(${r}, ${g}, 0)`;
+          ctx.strokeStyle = `rgb(${r}, ${g}, 0)`;
         } else {
-          ctx.strokeStyle = isBoxDarkMode ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)";
-          ctx.lineWidth = 1.5;
-        }
-        ctx.stroke();
-        
-        if (isFirst) {
-          // Inner dot
-          ctx.beginPath();
-          ctx.arc(node.x, node.y, 5, 0, Math.PI * 2);
           ctx.fillStyle = "#00ff88";
-          ctx.fill();
-          
-          // Timer ring (shows remaining time)
-          ctx.beginPath();
-          ctx.arc(node.x, node.y, node.r + 6, -Math.PI / 2, (-Math.PI / 2) + (Math.PI * 2 * (1 - prog)));
           ctx.strokeStyle = "#00ff88";
-          ctx.lineWidth = 2.5;
-          ctx.stroke();
-          
-          // Guide line to target
-          ctx.beginPath();
-          ctx.moveTo(mouse.x, mouse.y);
-          ctx.lineTo(node.x, node.y);
-          ctx.strokeStyle = "rgba(0, 255, 136, 0.2)";
-          ctx.lineWidth = 1.5;
-          ctx.setLineDash([5, 8]);
-          ctx.stroke();
-          ctx.setLineDash([]);
         }
-      }
-
-      // Rounded Cursor Circle
-      if (mouse.x > 0 && mouse.x < cvs.width && mouse.y > 0 && mouse.y < cvs.height) {
-        // Outer ring
+        ctx.fill();
+        
+        ctx.shadowBlur = 0;
+        
+        const angle = Math.atan2(node.vy, node.vx);
         ctx.beginPath();
-        ctx.arc(mouse.x, mouse.y, 10, 0, Math.PI * 2);
-        ctx.strokeStyle = "#00ff88";
+        ctx.moveTo(node.x, node.y);
+        ctx.lineTo(
+          node.x - Math.cos(angle) * 15,
+          node.y - Math.sin(angle) * 15
+        );
+        ctx.strokeStyle = ctx.fillStyle;
         ctx.lineWidth = 2;
         ctx.stroke();
         
-        // Inner dot
         ctx.beginPath();
-        ctx.arc(mouse.x, mouse.y, 4, 0, Math.PI * 2);
-        ctx.fillStyle = "#00ff88";
-        ctx.fill();
+        ctx.arc(node.x, node.y, 20, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(255, 255, 255, ${0.1 + speedIntensity * 0.4})`;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      });
+      
+      if (isFullscreenRef.current && isActiveRef.current) {
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+        ctx.font = '12px monospace';
+        ctx.textAlign = 'left';
+        ctx.fillText('FULLSCREEN MODE • 2x NODES • HIGH SPEED • NO PENALTY', 10, 20);
+      }
+      
+      if (mouse.x > 0 && mouse.x < cvs.width && mouse.y > 0 && mouse.y < cvs.height) {
+        const isStill = cursorVelRef.current < 1.5;
         
-        // Crosshair lines
-        ctx.strokeStyle = "rgba(0, 255, 136, 0.3)";
+        ctx.beginPath();
+        ctx.arc(mouse.x, mouse.y, 15, 0, Math.PI * 2);
+        ctx.strokeStyle = isStill ? "#00ff88" : "#FF3E3E";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        
+        ctx.strokeStyle = isStill ? "#00ff88" : "#FF3E3E";
         ctx.lineWidth = 1;
         ctx.beginPath();
-        ctx.moveTo(mouse.x - 20, mouse.y); ctx.lineTo(mouse.x - 14, mouse.y);
-        ctx.moveTo(mouse.x + 14, mouse.y); ctx.lineTo(mouse.x + 20, mouse.y);
-        ctx.moveTo(mouse.x, mouse.y - 20); ctx.lineTo(mouse.x, mouse.y - 14);
-        ctx.moveTo(mouse.x, mouse.y + 14); ctx.lineTo(mouse.x, mouse.y + 20);
+        ctx.moveTo(mouse.x - 12, mouse.y);
+        ctx.lineTo(mouse.x + 12, mouse.y);
+        ctx.moveTo(mouse.x, mouse.y - 12);
+        ctx.lineTo(mouse.x, mouse.y + 12);
         ctx.stroke();
+        
+        ctx.fillStyle = isStill ? "#00ff88" : "#FF3E3E";
+        ctx.font = "10px monospace";
+        ctx.textAlign = "center";
+        ctx.fillText(
+          isStill ? "ARREST READY" : `VEL: ${cursorVelRef.current.toFixed(1)}`,
+          mouse.x, 
+          mouse.y - 25
+        );
       }
 
       animationRef.current = requestAnimationFrame(draw);
@@ -521,53 +517,57 @@ export default function ReactionChainProPage() {
     setGameState('playing');
     gameStateRef.current = 'playing';
     setScore(0);
-    setTempo(1.0);
-    setBestTempo(1.0);
     setStreak(0);
+    setBestStreak(0);
     setTimeLeft(60);
-    setLives(3);
-    setPenalties(0);
     setFeedback('');
-    setAccuracy(100);
-    setHitsCount(0);
+    setCursorSpeed(0);
+    setCurrentSpeed(isFullscreenRef.current ? 600 : 400);
+    setArrestsCount(0);
+    setMisses(0);
+    setActiveNodes(isFullscreenRef.current ? 2 : 1);
     
     isActiveRef.current = true;
     scoreRef.current = 0;
-    tempoRef.current = 1.0;
     streakRef.current = 0;
-    livesRef.current = 3;
+    speedRef.current = isFullscreenRef.current ? 600 : 400;
+    arrestCountRef.current = 0;
+    missesRef.current = 0;
     nodesRef.current = [];
-    spawnTimerRef.current = 0;
-    totalAttemptsRef.current = 0;
-    hitsRef.current = 0;
-    penaltyAccumulatorRef.current = 0;
-    hasActiveTargetRef.current = false;
     
-    showFeedback('60 seconds • Click targets before they disappear!', 'success');
+    if (canvasRef.current) {
+      const maxNodes = isFullscreenRef.current ? 2 : 1;
+      for (let i = 0; i < maxNodes; i++) {
+        const newNode = spawnNode(canvasRef.current);
+        if (newNode) nodesRef.current.push(newNode);
+      }
+    }
   };
 
   const resetGame = () => {
+    if (animationRef.current) cancelAnimationFrame(animationRef.current);
+    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
     isActiveRef.current = false;
     setGameState('start');
     gameStateRef.current = 'start';
     setScore(0);
-    setTempo(1.0);
     setStreak(0);
+    setBestStreak(0);
     setTimeLeft(60);
-    setLives(3);
-    setPenalties(0);
     setFeedback('');
-    setAccuracy(100);
-    setHitsCount(0);
-    
-    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    setCursorSpeed(0);
+    setCurrentSpeed(400);
+    setArrestsCount(0);
+    setMisses(0);
+    setActiveNodes(1);
+    nodesRef.current = [];
   };
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="w-16 h-16 border-4 border-green-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-600">Loading drill...</p>
         </div>
       </div>
@@ -583,17 +583,23 @@ export default function ReactionChainProPage() {
           </Link>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-3 bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl">
-                <GitBranch className="w-6 h-6 text-white" />
+              <div className="p-3 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl">
+                <Crosshair className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className={`text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Reaction Chain Pro</h1>
-                <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>+1 per hit • Timeout = NO penalty • 3  • 60s</p>
+                <h1 className={`text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Kinetic Arrest</h1>
+                <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                  Stop cursor to arrest nodes • No penalty for misses • {isFullscreen ? 'Fullscreen: 2x Nodes + Speed' : '60-sec challenge'}
+                </p>
               </div>
             </div>
             <div className="flex gap-2">
               {gameState === 'playing' && (
-                <button onClick={resetGame} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} title="Reset session">
+                <button 
+                  onClick={resetGame} 
+                  className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} 
+                  title="Reset session"
+                >
                   <RefreshCw className="w-5 h-5" />
                 </button>
               )}
@@ -613,14 +619,14 @@ export default function ReactionChainProPage() {
           </div>
         </div>
 
-        {/* Drill-specific stats board */}
+        {/* Stats Board */}
         <div className="grid grid-cols-6 gap-3 mb-4 h-[88px]">
-          <StatCard icon={<Target className="text-blue-600" />} value={score} label="Score" isDark={isDarkMode} />
-          <StatCard icon={<Trophy className="text-yellow-600" />} value={bestScore} label="Best Score" isDark={isDarkMode} />
-          <StatCard icon={<Timer className={timeLeft <= 10 ? 'text-red-600' : 'text-green-600'} />} value={timeLeft} label="Time" unit="s" isDark={isDarkMode} />
-          <StatCard icon={<Heart className={lives === 0 ? 'text-yellow-500' : 'text-red-500'} />} value={lives} label="Lives" isDark={isDarkMode} />
-          <StatCard icon={<TrendingUp className="text-purple-600" />} value={tempo.toFixed(2)} label="Tempo" unit="x" isDark={isDarkMode} />
-          <StatCard icon={<Zap className="text-orange-600" />} value={streak} label="Streak" isDark={isDarkMode} />
+          <StatCard icon={<Target className="text-green-500" />} value={score} label="Score" isDark={isDarkMode} />
+          <StatCard icon={<Trophy className="text-yellow-500" />} value={bestScore} label="Best" isDark={isDarkMode} />
+          <StatCard icon={<Timer className={timeLeft < 15 ? 'text-red-600' : 'text-green-600'} />} value={timeLeft} label="Time" unit="s" isDark={isDarkMode} />
+          <StatCard icon={<TrendingUp className="text-orange-500" />} value={currentSpeed} label="Speed" unit="px/s" isDark={isDarkMode} />
+          <StatCard icon={<Zap className="text-purple-500" />} value={streak} label="Streak" isDark={isDarkMode} />
+          <StatCard icon={<Activity className="text-blue-500" />} value={`${activeNodes}x`} label="Nodes" isDark={isDarkMode} />
         </div>
 
         {/* Feedback Bar */}
@@ -642,12 +648,18 @@ export default function ReactionChainProPage() {
             maxWidth: '100%',
             margin: '0 auto',
             borderColor: isDarkMode ? '#374151' : '#e5e7eb',
-            overflow: 'hidden',
-            cursor: 'none'
+            overflow: 'hidden'
           }}
         >
           {isFullscreen && gameState === 'playing' && (
             <div className="absolute top-4 right-4 z-30 flex gap-3">
+              <button 
+                onClick={resetGame} 
+                className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all" 
+                title="Reset session"
+              >
+                <RefreshCw className="w-5 h-5" />
+              </button>
               <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button>
               <button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all"><Eye className="w-5 h-5" /></button>
               <button onClick={() => setSoundEnabled(!soundEnabled)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button>
@@ -655,25 +667,22 @@ export default function ReactionChainProPage() {
             </div>
           )}
 
-          {/* Lives indicator overlay */}
-          {gameState === 'playing' && lives === 0 && (
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-30 bg-yellow-500/20 backdrop-blur-sm rounded-lg px-4 py-2">
-              <span className="text-yellow-400 text-sm font-medium">⚠️ PENALTY ACTIVE - Each miss costs 1 point</span>
-            </div>
-          )}
-
-          <canvas ref={canvasRef} style={{ display: 'block', position: 'absolute' }} />
+          <canvas ref={canvasRef} style={{ display: 'block', position: 'absolute', cursor: 'none' }} />
 
           {/* Start Screen */}
           {gameState === 'start' && (
             <div className={`absolute inset-0 flex items-center justify-center backdrop-blur-sm rounded-xl z-40 ${isBoxDarkMode ? 'bg-gray-900/95' : 'bg-white/95'}`}>
               <div className={`rounded-2xl p-8 text-center max-w-md mx-4 shadow-xl border ${isBoxDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
-                <GitBranch className="w-16 h-16 text-purple-500 mx-auto mb-4" />
-                <h3 className={`text-2xl font-bold mb-2 ${isBoxDarkMode ? 'text-white' : 'text-gray-900'}`}>Reaction Chain Pro</h3>
-                <p className={`mb-6 ${isBoxDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>60-second challenge • Click targets • Timeout = NO penalty</p>
+                <Crosshair className="w-16 h-16 text-green-500 mx-auto mb-4" />
+                <h3 className={`text-2xl font-bold mb-2 ${isBoxDarkMode ? 'text-white' : 'text-gray-900'}`}>Kinetic Arrest</h3>
+                <p className={`mb-6 ${isBoxDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                  60-second challenge • No penalties • Speed scales with skill
+                  <br />
+                  <span className="text-green-400 text-sm font-semibold"></span>
+                </p>
                 <button 
                   onClick={startGame} 
-                  className="px-8 py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-xl font-semibold hover:shadow-lg w-full transition-all transform hover:scale-[1.02] active:scale-[0.98]"
+                  className="px-8 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl font-semibold hover:shadow-lg w-full transition-all transform hover:scale-[1.02] active:scale-[0.98]"
                 >
                   Start Training
                 </button>
@@ -687,22 +696,16 @@ export default function ReactionChainProPage() {
               <div className={`rounded-2xl p-8 shadow-xl border w-[520px] ${isBoxDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
                 <div className="flex items-center justify-center gap-3 mb-6">
                   <Award className="w-10 h-10 text-yellow-500" />
-                  <h3 className={`text-2xl font-bold ${isBoxDarkMode ? 'text-white' : 'text-gray-900'}`}>Time's Up!</h3>
+                  <h3 className={`text-2xl font-bold ${isBoxDarkMode ? 'text-white' : 'text-gray-900'}`}>Session Complete!</h3>
                 </div>
                 
-                <p className={`text-center mb-6 ${isBoxDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                  60 seconds completed!
-                </p>
-                
                 <div className="grid grid-cols-2 gap-4 mb-8">
-                  <ResultCard label="Final Score" value={score} icon={<Target className="w-4 h-4" />} color="text-blue-500" isDark={isBoxDarkMode} />
-                  <ResultCard label="Best Score" value={bestScore} icon={<Trophy className="w-4 h-4" />} color="text-yellow-500" isDark={isBoxDarkMode} />
-                  <ResultCard label="Best Streak" value={bestStreak} icon={<Zap className="w-4 h-4" />} color="text-orange-500" isDark={isBoxDarkMode} />
-                  <ResultCard label="Best Reaction" value={bestReaction || '-'} unit="ms" icon={<Timer className="w-4 h-4" />} color="text-green-500" isDark={isBoxDarkMode} />
-                  <ResultCard label="Accuracy" value={accuracy} unit="%" icon={<Activity className="w-4 h-4" />} color="text-purple-500" isDark={isBoxDarkMode} />
-                  <ResultCard label="Hits" value={hitsCount} icon={<Target className="w-4 h-4" />} color="text-cyan-500" isDark={isBoxDarkMode} />
-                  <ResultCard label="Peak Tempo" value={bestTempo.toFixed(2)} unit="x" icon={<TrendingUp className="w-4 h-4" />} color="text-pink-500" isDark={isBoxDarkMode} />
-                  <ResultCard label="Lives Left" value={lives} icon={<Heart className="w-4 h-4" />} color="text-red-500" isDark={isBoxDarkMode} />
+                  <ResultCard label="Final Score" value={score} icon={<Target className="w-4 h-4" />} color="text-green-500" />
+                  <ResultCard label="Best Score" value={bestScore} icon={<Trophy className="w-4 h-4" />} color="text-yellow-500" />
+                  <ResultCard label="Arrests" value={arrestsCount} icon={<Crosshair className="w-4 h-4" />} color="text-green-500" />
+                  <ResultCard label="Best Streak" value={bestStreak} icon={<Zap className="w-4 h-4" />} color="text-orange-500" />
+                  <ResultCard label="Peak Speed" value={currentSpeed} unit="px/s" icon={<TrendingUp className="w-4 h-4" />} color="text-red-500" />
+                  <ResultCard label="Misses" value={misses} icon={<Activity className="w-4 h-4" />} color="text-purple-500" />
                 </div>
                 
                 <div className="flex gap-4">
@@ -713,7 +716,7 @@ export default function ReactionChainProPage() {
                   </Link>
                   <button 
                     onClick={startGame} 
-                    className="flex-1 px-4 py-2.5 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all transform hover:scale-[1.02] active:scale-[0.98]"
+                    className="flex-1 px-4 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all transform hover:scale-[1.02] active:scale-[0.98]"
                   >
                     Play Again →
                   </button>
@@ -723,14 +726,14 @@ export default function ReactionChainProPage() {
           )}
         </div>
 
-        {/* Drill Rules Section */}
+        {/* Rules Section */}
         {!isFullscreen && (
           <div className="mt-6">
             <div className={`rounded-xl border overflow-hidden ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
               <div className={`px-4 py-3 border-b ${isDarkMode ? 'border-gray-700 bg-gray-800/50' : 'border-gray-200 bg-gray-50'}`}>
                 <div className="flex items-center gap-2">
-                  <Info className={`w-4 h-4 ${isDarkMode ? 'text-purple-400' : 'text-purple-600'}`} />
-                  <h3 className={`font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Drill Rules & Scoring</h3>
+                  <Info className={`w-4 h-4 ${isDarkMode ? 'text-green-400' : 'text-green-600'}`} />
+                  <h3 className={`font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Drill Rules & Instructions</h3>
                 </div>
               </div>
               <div className="p-4">
@@ -738,35 +741,47 @@ export default function ReactionChainProPage() {
                   <div className="space-y-2">
                     <div className="flex items-start gap-2">
                       <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center text-white text-xs font-bold mt-0.5">1</div>
-                      <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Click the <span className="font-semibold text-green-500">GREEN target</span> before it disappears</p>
+                      <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                        <span className="font-semibold text-green-500">Stop cursor completely</span> when node passes under it
+                      </p>
                     </div>
                     <div className="flex items-start gap-2">
-                      <div className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center text-white text-xs font-bold mt-0.5">2</div>
-                      <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}><span className="font-semibold text-emerald-500">+1 point per successful hit</span></p>
+                      <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold mt-0.5">2</div>
+                      <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                        <span className="font-semibold text-blue-500">No penalties!</span> • Miss only resets streak, score unaffected
+                      </p>
                     </div>
                     <div className="flex items-start gap-2">
-                      <div className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center text-white text-xs font-bold mt-0.5">3</div>
-                      <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}><span className="font-semibold text-red-500">-1 point penalty</span> ONLY when out of lives (for misses/empty clicks)</p>
+                      <div className="w-5 h-5 rounded-full bg-purple-500 flex items-center justify-center text-white text-xs font-bold mt-0.5">3</div>
+                      <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                        <span className="font-semibold text-purple-500">Ring turns green</span> when cursor is still enough to arrest
+                      </p>
                     </div>
                   </div>
                   <div className="space-y-2">
                     <div className="flex items-start gap-2">
-                      <div className="w-5 h-5 rounded-full bg-purple-500 flex items-center justify-center text-white text-xs font-bold mt-0.5">4</div>
-                      <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Each hit increases <span className="font-semibold text-purple-500">Tempo</span> - targets disappear faster</p>
+                      <div className="w-5 h-5 rounded-full bg-orange-500 flex items-center justify-center text-white text-xs font-bold mt-0.5">4</div>
+                      <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                        <span className="font-semibold text-orange-500">Fullscreen = 2x simultaneous nodes</span> + higher base speed
+                      </p>
                     </div>
                     <div className="flex items-start gap-2">
-                      <div className="w-5 h-5 rounded-full bg-pink-500 flex items-center justify-center text-white text-xs font-bold mt-0.5">5</div>
-                      <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}><span className="font-semibold text-pink-500">3  protection</span> • No score penalty until lives reach 0</p>
+                      <div className="w-5 h-5 rounded-full bg-cyan-500 flex items-center justify-center text-white text-xs font-bold mt-0.5">5</div>
+                      <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                        <span className="font-semibold text-cyan-500">Every 5 streak = +1 bonus point</span> and speed increases
+                      </p>
                     </div>
                     <div className="flex items-start gap-2">
                       <div className="w-5 h-5 rounded-full bg-yellow-500 flex items-center justify-center text-white text-xs font-bold mt-0.5">6</div>
-                      <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}><span className="font-semibold text-yellow-500">Timeout = NO penalty</span> • Only misses cost lives/points</p>
+                      <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                        <span className="font-semibold text-yellow-500">Node color changes</span> • Green = slow, Orange/Red = fast
+                      </p>
                     </div>
                   </div>
                 </div>
                 <div className={`mt-3 pt-3 border-t text-xs ${isDarkMode ? 'border-gray-700 text-gray-400' : 'border-gray-200 text-gray-500'} flex items-center justify-between`}>
-                  <span>🎯 Base time: 300ms • Shrinking ring = remaining time</span>
-                  <span>⚡ Best Score saves locally</span>
+                  <span>🎯 Focus on arrests • Misses only affect streak, not score</span>
+                  <span>⚡ Speed: 400-1400 px/s • Pure skill-based scoring</span>
                 </div>
               </div>
             </div>
@@ -787,20 +802,19 @@ function StatCard({ icon, value, label, unit = '', isDark }) {
   );
 }
 
-function ResultCard({ label, value, unit = '', icon, color, isDark }) {
-  const bgColor = color === 'text-blue-500' ? 'bg-blue-500/10' : 
+function ResultCard({ label, value, unit = '', icon, color }) {
+  const bgColor = color === 'text-green-500' ? 'bg-green-500/10' : 
                    color === 'text-yellow-500' ? 'bg-yellow-500/10' : 
-                   color === 'text-orange-500' ? 'bg-orange-500/10' :
-                   color === 'text-green-500' ? 'bg-green-500/10' :
+                   color === 'text-orange-500' ? 'bg-orange-500/10' : 
                    color === 'text-purple-500' ? 'bg-purple-500/10' :
-                   color === 'text-cyan-500' ? 'bg-cyan-500/10' : 
-                   color === 'text-pink-500' ? 'bg-pink-500/10' : 'bg-red-500/10';
+                   color === 'text-red-500' ? 'bg-red-500/10' :
+                   color === 'text-cyan-500' ? 'bg-cyan-500/10' : 'bg-blue-500/10';
   
   return (
     <div className={`flex items-center justify-between p-3 rounded-lg ${bgColor}`}>
       <div className="flex items-center gap-2">
         <div className={color}>{icon}</div>
-        <span className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>{label}</span>
+        <span className="text-sm text-gray-600 dark:text-gray-300">{label}</span>
       </div>
       <span className={`font-bold text-lg ${color}`}>{value}{unit}</span>
     </div>

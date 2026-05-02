@@ -67,7 +67,7 @@ async function checkSchema() {
     if (foreignKeys.length > 0) {
       console.log('✅ Foreign keys configured correctly');
     } else {
-      console.log('⚠️ No foreign keys found (may be expected for SQLite)');
+      console.log(' No foreign keys found (may be expected for SQLite)');
     }
     
     // 5. Run Prisma validation
@@ -77,7 +77,7 @@ async function checkSchema() {
       execSync('npx prisma validate', { stdio: 'pipe' });
       console.log('✅ Prisma schema is valid');
     } catch (error) {
-      console.log('⚠️ Prisma validation warning:', error.message);
+      console.log(' Prisma validation warning:', error.message);
     }
     
     // 6. Check for migration drift
@@ -87,7 +87,7 @@ async function checkSchema() {
       execSync('npx prisma migrate status', { stdio: 'pipe' });
       console.log('✅ No migration drift detected');
     } catch (error) {
-      console.log('⚠️ Migration drift may exist');
+      console.log(' Migration drift may exist');
       console.log('   Run: npx prisma migrate dev to fix');
     }
     
@@ -100,7 +100,7 @@ async function checkSchema() {
       const stats = fs.statSync(typesPath);
       console.log(`   Type file size: ${(stats.size / 1024).toFixed(2)} KB`);
     } else {
-      console.log('⚠️ Prisma client types not found');
+      console.log(' Prisma client types not found');
       console.log('   Run: npx prisma generate');
     }
     

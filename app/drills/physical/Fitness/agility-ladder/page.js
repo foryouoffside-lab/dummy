@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { 
   ArrowLeft, Target, Zap, Clock, Award, Activity, 
   Volume2, VolumeX, Maximize2, Minimize2, Sun, Moon, 
-  Eye, Move, Brain, TrendingUp, Trophy, Info, Timer, AlertCircle, Grid
+  Eye, Move, Brain, TrendingUp, Trophy, Info, Timer, AlertCircle, Grid, RefreshCw
 } from 'lucide-react';
 
 export default function MonochromeAgilityLadderPage() {
@@ -478,6 +478,12 @@ export default function MonochromeAgilityLadderPage() {
     ladders.current = [];
   };
 
+  const resetGame = () => {
+    if (animationId.current) cancelAnimationFrame(animationId.current);
+    if (timerInterval.current) clearInterval(timerInterval.current);
+    setGameState('start');
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -507,6 +513,15 @@ export default function MonochromeAgilityLadderPage() {
               </div>
             </div>
             <div className="flex gap-2">
+              {gameState === 'playing' && (
+                <button 
+                  onClick={resetGame} 
+                  className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} 
+                  title="Reset session"
+                >
+                  <RefreshCw className="w-5 h-5" />
+                </button>
+              )}
               <button onClick={() => setIsDarkMode(!isDarkMode)} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`}>
                 {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
               </button>
@@ -554,6 +569,22 @@ export default function MonochromeAgilityLadderPage() {
             overflow: 'hidden'
           }}
         >
+          {isFullscreen && gameState === 'playing' && (
+            <div className="absolute top-4 right-4 z-30 flex gap-3">
+              <button 
+                onClick={resetGame} 
+                className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all" 
+                title="Reset session"
+              >
+                <RefreshCw className="w-5 h-5" />
+              </button>
+              <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button>
+              <button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all"><Eye className="w-5 h-5" /></button>
+              <button onClick={() => setSoundEnabled(!soundEnabled)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button>
+              <button onClick={toggleFullscreen} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all"><Minimize2 className="w-5 h-5" /></button>
+            </div>
+          )}
+
           <canvas ref={canvasRef} style={{ display: 'block', position: 'absolute', cursor: 'none', width: '100%', height: '100%' }} />
 
           {/* Start Screen - No rules inside */}
@@ -651,7 +682,7 @@ export default function MonochromeAgilityLadderPage() {
                 </div>
                 <div className={`mt-3 pt-3 border-t text-xs ${isDarkMode ? 'border-gray-700 text-gray-400' : 'border-gray-200 text-gray-500'} flex items-center justify-between`}>
                   <span>⬅️ Left rung → ➡️ Right rung → ⬅️ Left rung → ➡️ Right rung</span>
-                  <span>⚠️ Miss an entire ladder = -10 point penalty • Speed increases with each ladder</span>
+                  <span> Miss an entire ladder = -10 point penalty • Speed increases with each ladder</span>
                 </div>
               </div>
             </div>

@@ -6,7 +6,7 @@ import Link from "next/link";
 import { 
   ArrowLeft, Target, Zap, Clock, Award,
   Volume2, VolumeX, Maximize2, Minimize2, Sun, Moon, 
-  Eye, Timer, Trophy, Info, Route, TrendingUp
+  Eye, Timer, Trophy, Info, Route, TrendingUp, RefreshCw
 } from "lucide-react";
 
 export default function PathTracingDrill() {
@@ -428,6 +428,19 @@ export default function PathTracingDrill() {
             </div>
             
             <div className="flex gap-2">
+              {gameState === 'playing' && (
+                <button
+                  onClick={resetGame}
+                  className={`p-2 rounded-lg transition shadow-sm border hover:scale-105 active:scale-95 ${cleanButtonClass} ${
+                    isDarkMode 
+                      ? 'bg-gray-800 hover:bg-gray-700 text-gray-300 border-gray-700' 
+                      : 'bg-white hover:bg-gray-100 text-gray-700 border-gray-200'
+                  }`}
+                  title="Reset session"
+                >
+                  <RefreshCw className="w-5 h-5" />
+                </button>
+              )}
               <button
                 onClick={() => setIsDarkMode(!isDarkMode)}
                 className={`p-2 rounded-lg transition shadow-sm border hover:scale-105 active:scale-95 ${cleanButtonClass} ${
@@ -505,6 +518,9 @@ export default function PathTracingDrill() {
         >
           {isFullscreen && gameState === 'playing' && (
             <div className="absolute top-4 right-4 z-30 flex gap-3">
+              <button onClick={resetGame} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all" title="Reset session">
+                <RefreshCw className="w-5 h-5" />
+              </button>
               <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button>
               <button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all"><Eye className="w-5 h-5" /></button>
               <button onClick={() => setSoundEnabled(!soundEnabled)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button>

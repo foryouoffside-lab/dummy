@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { 
   ArrowLeft, Target, Zap, Clock, Award, Activity, 
   Volume2, VolumeX, Maximize2, Minimize2, Sun, Moon, 
-  Eye, TrendingUp, Brain, Trophy, Info, Timer, Crosshair, Heart, Check
+  Eye, TrendingUp, Brain, Trophy, Info, Timer, Crosshair, Check, RefreshCw
 } from 'lucide-react';
 
 export default function JumpSequenceElitePage() {
@@ -31,10 +31,9 @@ export default function JumpSequenceElitePage() {
   const [feedbackType, setFeedbackType] = useState('');
   const [accuracy, setAccuracy] = useState(100);
   const [jumpsCompleted, setJumpsCompleted] = useState(0);
-  const [lives, setLives] = useState(3);
   
   const playerRef = useRef({ x: 0, y: 0, vy: 0, radius: 12 });
-  const targetRef = useRef({ x: 0, y: 0, r: 40 });
+  const targetRef = useRef({ x: 0, y: 0, r: 28 });
   const scoreRef = useRef(0);
   const streakRef = useRef(0);
   const chargeRef = useRef(0);
@@ -49,7 +48,6 @@ export default function JumpSequenceElitePage() {
   const isActiveRef = useRef(false);
   const gameStateRef = useRef('start');
   const audioCtxRef = useRef(null);
-  const livesRef = useRef(3);
   const missesRef = useRef(0);
 
   useEffect(() => {
@@ -192,21 +190,11 @@ export default function JumpSequenceElitePage() {
     streakRef.current = 0;
     setStreak(0);
     
-    // Use one life for miss
-    if (livesRef.current > 0) {
-      livesRef.current -= 1;
-      setLives(livesRef.current);
-      showFeedback(`✗ ${reason}!`, 'error');
-      playSound('miss');
-    }
-    
-    // If no lives left, apply penalty
-    if (livesRef.current === 0) {
-      scoreRef.current = Math.max(0, scoreRef.current - 1);
-      setScore(Math.floor(scoreRef.current));
-      showFeedback(`💀 No lives left! -1 penalty!`, 'error');
-      playSound('penalty');
-    }
+    // Direct penalty for each miss
+    scoreRef.current = Math.max(0, scoreRef.current - 1);
+    setScore(Math.floor(scoreRef.current));
+    showFeedback(`✗ ${reason}! -1`, 'error');
+    playSound('penalty');
   };
 
   const isMouseOverPlayer = (mouseX, mouseY, playerX, playerY, radius) => {
@@ -288,6 +276,15 @@ export default function JumpSequenceElitePage() {
       playerRef.current.radius = 12;
       spawnTarget(cvs);
     }
+  };
+
+  // Reset game function
+  const resetGame = () => {
+    if (animationRef.current) cancelAnimationFrame(animationRef.current);
+    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    isActiveRef.current = false;
+    setGameState('start');
+    gameStateRef.current = 'start';
   };
 
   useEffect(() => {
@@ -449,14 +446,22 @@ export default function JumpSequenceElitePage() {
         ctx.fillRect(barX, barY + barHeight - chargeHeight, barWidth, chargeHeight);
       }
       
+      // Draw smaller target bucket
       ctx.beginPath();
       ctx.arc(targetRef.current.x, targetRef.current.y, targetRef.current.r, 0, Math.PI * 2);
       ctx.strokeStyle = "#00ff88";
       ctx.lineWidth = 3;
       ctx.stroke();
       
+      // Inner circle of target
       ctx.beginPath();
-      ctx.arc(targetRef.current.x, targetRef.current.y, 5, 0, Math.PI * 2);
+      ctx.arc(targetRef.current.x, targetRef.current.y, targetRef.current.r * 0.4, 0, Math.PI * 2);
+      ctx.strokeStyle = "#00ff44";
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      
+      ctx.beginPath();
+      ctx.arc(targetRef.current.x, targetRef.current.y, 4, 0, Math.PI * 2);
       ctx.fillStyle = "#00ff88";
       ctx.fill();
       
@@ -520,7 +525,6 @@ export default function JumpSequenceElitePage() {
     setFeedback('');
     setAccuracy(100);
     setJumpsCompleted(0);
-    setLives(3);
     
     isActiveRef.current = true;
     scoreRef.current = 0;
@@ -530,7 +534,6 @@ export default function JumpSequenceElitePage() {
     isJumpingRef.current = false;
     totalJumpsRef.current = 0;
     hitJumpsRef.current = 0;
-    livesRef.current = 3;
     missesRef.current = 0;
     
     if (canvasRef.current) {
@@ -576,6 +579,12 @@ export default function JumpSequenceElitePage() {
               </div>
             </div>
             <div className="flex gap-2">
+              {/* Reset button - only visible during gameplay */}
+              {gameState === 'playing' && (
+                <button onClick={resetGame} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} title="Reset session">
+                  <RefreshCw className="w-5 h-5" />
+                </button>
+              )}
               <button onClick={() => setIsDarkMode(!isDarkMode)} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`}>
                 {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
               </button>
@@ -593,14 +602,13 @@ export default function JumpSequenceElitePage() {
         </div>
 
         {/* Stats Board */}
-        <div className="grid grid-cols-7 gap-3 mb-4 h-[88px]">
+        <div className="grid grid-cols-6 gap-3 mb-4 h-[88px]">
           <StatCard icon={<Target className="text-blue-600" />} value={score} label="Score" isDark={isDarkMode} />
           <StatCard icon={<Trophy className="text-yellow-500" />} value={bestScore} label="Best" isDark={isDarkMode} />
           <StatCard icon={<Timer className={timeLeft <= 10 ? 'text-red-600' : 'text-green-600'} />} value={timeLeft} label="Time" unit="s" isDark={isDarkMode} />
           <StatCard icon={<Zap className="text-orange-500" />} value={streak} label="Streak" isDark={isDarkMode} />
           <StatCard icon={<Check className="text-green-500" />} value={jumpsCompleted} label="Hits" isDark={isDarkMode} />
           <StatCard icon={<Activity className="text-purple-500" />} value={bestStreak} label="Best Streak" isDark={isDarkMode} />
-          <StatCard icon={<Heart className="text-red-500" />} value={lives} label="Lives" isDark={isDarkMode} />
         </div>
 
         {/* Feedback Bar */}
@@ -628,13 +636,21 @@ export default function JumpSequenceElitePage() {
           {isFullscreen && gameState === 'playing' && (
             <>
               <div className="absolute top-4 right-4 z-20 flex gap-3">
+                {/* Reset button in fullscreen */}
+                <button 
+                  onClick={resetGame} 
+                  className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all" 
+                  title="Reset session"
+                >
+                  <RefreshCw className="w-5 h-5" />
+                </button>
                 <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button>
                 <button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all"><Eye className="w-5 h-5" /></button>
                 <button onClick={() => setSoundEnabled(!soundEnabled)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button>
                 <button onClick={toggleFullscreen} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all"><Minimize2 className="w-5 h-5" /></button>
               </div>
               <div className="absolute top-4 left-4 z-20 bg-black/50 backdrop-blur-sm rounded-lg px-4 py-2 text-white text-sm">
-                Score: <span className="text-yellow-400">{score}</span> | Streak: <span className="text-purple-400">{streak}x</span> | Lives: <span className="text-red-400">{lives}</span>
+                Score: <span className="text-yellow-400">{score}</span> | Streak: <span className="text-purple-400">{streak}x</span>
               </div>
             </>
           )}
@@ -647,7 +663,7 @@ export default function JumpSequenceElitePage() {
               <div className={`rounded-2xl p-8 text-center max-w-md mx-4 shadow-xl border ${isBoxDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
                 <TrendingUp className="w-16 h-16 text-cyan-500 mx-auto mb-4" />
                 <h3 className={`text-2xl font-bold mb-2 ${isBoxDarkMode ? 'text-white' : 'text-gray-900'}`}>Jump Sequence</h3>
-                <p className={`mb-6 ${isBoxDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>60 seconds • 3 lives</p>
+                <p className={`mb-6 ${isBoxDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>60 seconds • Direct penalty on miss</p>
                 <button 
                   onClick={startGame} 
                   className="px-8 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-xl font-semibold hover:shadow-lg w-full transition-all transform hover:scale-[1.02] active:scale-[0.98]"
@@ -728,21 +744,21 @@ export default function JumpSequenceElitePage() {
                   </div>
                   <div className="space-y-2">
                     <div className="flex items-start gap-2">
-                      <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold mt-0.5">4</div>
+                      <div className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center text-white text-xs font-bold mt-0.5">4</div>
                       <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                        <span className="font-semibold text-blue-500">3 Lives system</span> • Each miss uses 1 life
+                        <span className="font-semibold text-red-500">-1 point per miss</span> • Direct penalty for every miss
                       </p>
                     </div>
                     <div className="flex items-start gap-2">
-                      <div className="w-5 h-5 rounded-full bg-orange-500 flex items-center justify-center text-white text-xs font-bold mt-0.5">5</div>
+                      <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold mt-0.5">5</div>
                       <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                        <span className="font-semibold text-orange-500">-1 point penalty</span> • Only after all 3 lives are used
+                        <span className="font-semibold text-blue-500">Smaller target bucket</span> • Increased difficulty
                       </p>
                     </div>
                     <div className="flex items-start gap-2">
-                      <div className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center text-white text-xs font-bold mt-0.5">6</div>
+                      <div className="w-5 h-5 rounded-full bg-orange-500 flex items-center justify-center text-white text-xs font-bold mt-0.5">6</div>
                       <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                        <span className="font-semibold text-red-500">Move mouse to steer mid-air</span> • Control your trajectory
+                        <span className="font-semibold text-orange-500">Move mouse to steer mid-air</span> • Control your trajectory
                       </p>
                     </div>
                   </div>

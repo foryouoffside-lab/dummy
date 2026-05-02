@@ -341,6 +341,7 @@ export default function DualTargetFlowPage() {
     if (spawnIntervalRightRef.current) clearInterval(spawnIntervalRightRef.current);
     if (targetIntervalRef.current) clearInterval(targetIntervalRef.current);
     if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
     if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
   };
 
@@ -417,6 +418,20 @@ export default function DualTargetFlowPage() {
     isActiveRef.current = false;
     setGameState('start');
     gameStateRef.current = 'start';
+    setScore(0);
+    setLives(3);
+    setTimeLeft(60);
+    setStreak(0);
+    setSuccessfulHits(0);
+    setMisses(0);
+    setAccuracy(100);
+    setFeedback('');
+    
+    scoreRef.current = 0;
+    livesRef.current = 3;
+    streakRef.current = 0;
+    hitsRef.current = 0;
+    missesRef.current = 0;
     
     // Clear containers
     if (leftContainerRef.current) leftContainerRef.current.innerHTML = '';
@@ -467,8 +482,9 @@ export default function DualTargetFlowPage() {
               </div>
             </div>
             <div className="flex gap-2">
+              {/* Reset button - only visible during gameplay */}
               {gameState === 'playing' && (
-                <button onClick={refreshTargets} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} title="Refresh targets">
+                <button onClick={resetGame} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} title="Reset session">
                   <RefreshCw className="w-5 h-5" />
                 </button>
               )}
@@ -551,6 +567,14 @@ export default function DualTargetFlowPage() {
 
           {isFullscreen && gameState === 'playing' && (
             <div className="absolute top-4 right-4 z-30 flex gap-3">
+              {/* Reset button in fullscreen */}
+              <button 
+                onClick={resetGame} 
+                className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all" 
+                title="Reset session"
+              >
+                <RefreshCw className="w-5 h-5" />
+              </button>
               <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button>
               <button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all"><Eye className="w-5 h-5" /></button>
               <button onClick={() => setSoundEnabled(!soundEnabled)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button>

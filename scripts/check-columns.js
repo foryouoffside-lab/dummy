@@ -79,7 +79,7 @@ async function checkColumns() {
       if (existingIndexes.includes(idx)) {
         console.log(`✅ ${idx} exists`);
       } else {
-        console.log(`⚠️ ${idx} missing`);
+        console.log(` ${idx} missing`);
       }
     });
     

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { 
   ArrowLeft, Target, Zap, Clock, Award, Activity, 
   Volume2, VolumeX, Maximize2, Minimize2, Sun, Moon, 
-  Eye, Timer, Radio, Brain, X, Trophy, Info, Check, Heart
+  Eye, Timer, Radio, Brain, X, Trophy, Info, Check, Heart, RefreshCw
 } from 'lucide-react';
 
 export default function NeuroSwitchPage() {
@@ -274,7 +274,7 @@ export default function NeuroSwitchPage() {
     scoreRef.current = Math.max(0, scoreRef.current - penaltyAmount);
     setScore(scoreRef.current);
     setPenaltyCount(prev => prev + 1);
-    showFeedback(`⚠️ -${penaltyAmount} point penalty!`, 'warning');
+    showFeedback(` -${penaltyAmount} point penalty!`, 'warning');
     playSound('penalty');
   };
 
@@ -590,9 +590,18 @@ export default function NeuroSwitchPage() {
   };
 
   const resetGame = () => {
+    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
     isActiveRef.current = false;
     clearAllTimeouts();
-    if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
+    if (currentSoundRef.current) {
+      try { currentSoundRef.current.stop(); } catch (e) {}
+      currentSoundRef.current = null;
+    }
+    if (audioCtxRef.current) {
+      audioCtxRef.current.close();
+      audioCtxRef.current = null;
+    }
     
     setGameState('start');
     gameStateRef.current = 'start';
@@ -613,6 +622,8 @@ export default function NeuroSwitchPage() {
     stateRef.current = "IDLE";
     windowTimeRef.current = 1000;
     streakRef.current = 0;
+    scoreRef.current = 0;
+    livesRef.current = 3;
   };
 
   return (
@@ -633,6 +644,15 @@ export default function NeuroSwitchPage() {
               </div>
             </div>
             <div className="flex gap-2">
+              {gameState === 'playing' && (
+                <button 
+                  onClick={resetGame} 
+                  className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} 
+                  title="Reset session"
+                >
+                  <RefreshCw className="w-5 h-5" />
+                </button>
+              )}
               <button onClick={() => setIsDarkMode(!isDarkMode)} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`}>
                 {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
               </button>
@@ -684,6 +704,13 @@ export default function NeuroSwitchPage() {
           {isFullscreen && gameState === 'playing' && (
             <>
               <div className="absolute top-4 right-4 z-20 flex gap-3">
+                <button 
+                  onClick={resetGame} 
+                  className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all" 
+                  title="Reset session"
+                >
+                  <RefreshCw className="w-5 h-5" />
+                </button>
                 <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button>
                 <button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all"><Eye className="w-5 h-5" /></button>
                 <button onClick={() => setSoundEnabled(!soundEnabled)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button>

@@ -6,7 +6,7 @@ import {
   ArrowLeft, Target, Zap, Clock, Award, Activity, 
   Volume2, VolumeX, Maximize2, Minimize2, Sun, Moon, 
   Eye, Timer, AlertCircle, Brain, X,
-  BarChart3, Trophy, Info, CheckCircle2, Heart
+  BarChart3, Trophy, Info, CheckCircle2, Heart, RefreshCw
 } from 'lucide-react';
 
 export default function DifferenceSpotterPage() {
@@ -47,6 +47,7 @@ export default function DifferenceSpotterPage() {
   const audioCtxRef = useRef(null);
   const isActiveRef = useRef(false);
   const timeLeftRef = useRef(60);
+  const gameStateRef = useRef('start');
 
   // Load best score from localStorage on mount
   useEffect(() => {
@@ -55,6 +56,11 @@ export default function DifferenceSpotterPage() {
       setBestScore(parseInt(savedBestScore, 10));
     }
   }, []);
+
+  // Sync gameState to ref
+  useEffect(() => {
+    gameStateRef.current = gameState;
+  }, [gameState]);
 
   const toggleFullscreen = async () => {
     try {
@@ -97,6 +103,7 @@ export default function DifferenceSpotterPage() {
         setTimeLeft(prev => {
           if (prev <= 1) {
             setGameState('gameOver');
+            gameStateRef.current = 'gameOver';
             isActiveRef.current = false;
             clearAllTimeouts();
             updateBestScore(scoreRef.current);
@@ -252,7 +259,7 @@ export default function DifferenceSpotterPage() {
         const penaltyPoints = 1;
         scoreRef.current = Math.max(0, scoreRef.current - penaltyPoints);
         setScore(scoreRef.current);
-        showFeedback(`⚠️ No lives left! -${penaltyPoints} point penalty!`, 'warning');
+        showFeedback(` No lives left! -${penaltyPoints} point penalty!`, 'warning');
         playSound('penalty');
       }
     } else {
@@ -271,7 +278,7 @@ export default function DifferenceSpotterPage() {
     stateRef.current = "FEEDBACK";
     
     const nextTimeout = setTimeout(() => {
-      if (isActiveRef.current && gameState === 'playing') startCycle();
+      if (isActiveRef.current && gameStateRef.current === 'playing') startCycle();
     }, 600);
     timeoutRefs.current.push(nextTimeout);
   };
@@ -319,7 +326,7 @@ export default function DifferenceSpotterPage() {
     stateRef.current = "FEEDBACK";
     
     const nextTimeout = setTimeout(() => {
-      if (isActiveRef.current && gameState === 'playing') startCycle();
+      if (isActiveRef.current && gameStateRef.current === 'playing') startCycle();
     }, 400);
     timeoutRefs.current.push(nextTimeout);
   };
@@ -497,6 +504,7 @@ export default function DifferenceSpotterPage() {
 
   const startGame = () => {
     setGameState('playing');
+    gameStateRef.current = 'playing';
     setScore(0);
     setStreak(0);
     setBestStreak(0);
@@ -522,9 +530,18 @@ export default function DifferenceSpotterPage() {
   };
 
   const resetGame = () => {
+    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
     isActiveRef.current = false;
     clearAllTimeouts();
+    if (animationRef.current) cancelAnimationFrame(animationRef.current);
+    if (audioCtxRef.current) {
+      audioCtxRef.current.close();
+      audioCtxRef.current = null;
+    }
+    
     setGameState('start');
+    gameStateRef.current = 'start';
     setScore(0);
     setStreak(0);
     setBestStreak(0);
@@ -560,6 +577,15 @@ export default function DifferenceSpotterPage() {
               </div>
             </div>
             <div className="flex gap-2">
+              {gameState === 'playing' && (
+                <button 
+                  onClick={resetGame} 
+                  className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} 
+                  title="Reset session"
+                >
+                  <RefreshCw className="w-5 h-5" />
+                </button>
+              )}
               <button onClick={() => setIsDarkMode(!isDarkMode)} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`}>
                 {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
               </button>
@@ -611,6 +637,13 @@ export default function DifferenceSpotterPage() {
         >
           {isFullscreen && gameState === 'playing' && (
             <div className="absolute top-4 right-4 z-30 flex gap-3">
+              <button 
+                onClick={resetGame} 
+                className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all" 
+                title="Reset session"
+              >
+                <RefreshCw className="w-5 h-5" />
+              </button>
               <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button>
               <button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all"><Eye className="w-5 h-5" /></button>
               <button onClick={() => setSoundEnabled(!soundEnabled)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button>

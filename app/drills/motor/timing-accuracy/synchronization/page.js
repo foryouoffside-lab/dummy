@@ -567,7 +567,16 @@ export default function SynchronizationElitePage() {
   };
 
   const resetGame = () => {
+    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    if (resetTimeoutRef.current) clearTimeout(resetTimeoutRef.current);
+    if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
     isActiveRef.current = false;
+    if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
+    if (audioCtxRef.current) {
+      audioCtxRef.current.close();
+      audioCtxRef.current = null;
+    }
+    
     setGameState('start');
     gameStateRef.current = 'start';
     setScore(0);
@@ -582,7 +591,6 @@ export default function SynchronizationElitePage() {
     setRoundActive(false);
     
     barsRef.current.active = false;
-    if (resetTimeoutRef.current) clearTimeout(resetTimeoutRef.current);
   };
 
   if (loading) {
@@ -612,7 +620,7 @@ export default function SynchronizationElitePage() {
               </div>
               <div>
                 <h1 className={`text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Synchronization Elite</h1>
-                <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>+1 per hit • -1 penalty after lives empty • 3  • 60s</p>
+                <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>+1 per hit • -1 penalty after lives empty • 3 lives • 60s</p>
               </div>
             </div>
             
@@ -675,6 +683,13 @@ export default function SynchronizationElitePage() {
           {isFullscreen && gameState === 'playing' && (
             <>
               <div className="absolute top-4 right-4 z-20 flex gap-3">
+                <button 
+                  onClick={resetGame} 
+                  className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all" 
+                  title="Reset session"
+                >
+                  <RefreshCw className="w-5 h-5" />
+                </button>
                 <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button>
                 <button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all"><Eye className="w-5 h-5" /></button>
                 <button onClick={() => setSoundEnabled(!soundEnabled)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button>
@@ -796,7 +811,7 @@ export default function SynchronizationElitePage() {
                     <div className="flex items-start gap-2">
                       <div className="w-5 h-5 rounded-full bg-pink-500 flex items-center justify-center text-white text-xs font-bold mt-0.5">5</div>
                       <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                        <span className="font-semibold text-pink-500">3  protection</span> • No score penalty until lives reach 0
+                        <span className="font-semibold text-pink-500">3 lives protection</span> • No score penalty until lives reach 0
                       </p>
                     </div>
                     <div className="flex items-start gap-2">

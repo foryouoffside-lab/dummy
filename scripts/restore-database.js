@@ -74,7 +74,7 @@ async function restoreDatabase() {
   console.log(`\n📁 Backup file: ${path.basename(backupPath)}`);
   console.log(`   Size: ${fileSizeMB} MB`);
   
-  const confirm = await question('\n⚠️ This will overwrite your current database. Continue? (y/N): ');
+  const confirm = await question('\n This will overwrite your current database. Continue? (y/N): ');
   
   if (confirm.toLowerCase() !== 'y') {
     console.log('❌ Restore cancelled');

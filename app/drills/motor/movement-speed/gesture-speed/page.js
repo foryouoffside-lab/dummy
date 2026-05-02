@@ -193,7 +193,7 @@ export default function VectorRecoilPage() {
       
       // When lives become 0, start applying point penalty
       if (livesRef.current === 0) {
-        showFeedback(`⚠️ No lives left! Now penalties will deduct points!`, 'warning');
+        showFeedback(` No lives left! Now penalties will deduct points!`, 'warning');
       }
     } else {
       // Lives are 0 - apply point penalty
@@ -636,15 +636,10 @@ export default function VectorRecoilPage() {
 
   const resetGame = () => {
     isActiveRef.current = false;
+    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
     setGameState('start');
     gameStateRef.current = 'start';
-    setScore(0);
-    setStreak(0);
-    setBestStreak(0);
-    setTimeLeft(60);
-    setLives(3);
-    setFeedback('');
-    setSuccessfulRecoils(0);
   };
 
   if (loading) {
@@ -733,6 +728,13 @@ export default function VectorRecoilPage() {
         >
           {isFullscreen && gameState === 'playing' && (
             <div className="absolute top-4 right-4 z-30 flex gap-3">
+              <button 
+                onClick={resetGame} 
+                className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all" 
+                title="Reset session"
+              >
+                <RefreshCw className="w-5 h-5" />
+              </button>
               <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button>
               <button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all"><Eye className="w-5 h-5" /></button>
               <button onClick={() => setSoundEnabled(!soundEnabled)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button>

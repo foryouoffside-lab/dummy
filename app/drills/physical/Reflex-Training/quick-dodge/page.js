@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { 
   ArrowLeft, Target, Zap, Clock, Award, Activity, 
   Volume2, VolumeX, Maximize2, Minimize2, Sun, Moon, 
-  Eye, AlertCircle, Brain, Trophy, Info, Timer, TrendingUp
+  Eye, AlertCircle, Brain, Trophy, Info, Timer, TrendingUp, RefreshCw
 } from 'lucide-react';
 
 export default function QuickDodgeElitePage() {
@@ -42,6 +42,7 @@ export default function QuickDodgeElitePage() {
   const speedRef = useRef(400);
   const totalAttemptsRef = useRef(0);
   const successfulDodgesRef = useRef(0);
+  const isFullscreenRef = useRef(false);
 
   // Load best score from localStorage on mount
   useEffect(() => {
@@ -50,6 +51,11 @@ export default function QuickDodgeElitePage() {
       setBestScore(parseInt(savedBestScore, 10));
     }
   }, []);
+
+  // Track fullscreen state in ref for game loop
+  useEffect(() => {
+    isFullscreenRef.current = isFullscreen;
+  }, [isFullscreen]);
 
   // Update best score only when game ends
   const updateBestScore = (finalScore) => {
@@ -302,10 +308,19 @@ export default function QuickDodgeElitePage() {
         ctx.moveTo(0, i); ctx.lineTo(cvs.width, i); ctx.stroke();
       }
 
-      // Spawn obstacles
+      // Spawn obstacles - MORE in fullscreen mode
       spawnTimerRef.current += dt;
-      const spawnRate = Math.max(0.25, 0.6 - (scoreRef.current * 0.003));
-      if (spawnTimerRef.current > spawnRate && isActiveRef.current && obstaclesRef.current.length < 15) {
+      
+      // Different spawn rates for fullscreen vs normal mode
+      const isFullscreenMode = isFullscreenRef.current;
+      const baseSpawnRate = Math.max(0.25, 0.6 - (scoreRef.current * 0.003));
+      // Fullscreen: obstacles spawn 50% faster (lower spawn interval = more obstacles)
+      const spawnRate = isFullscreenMode ? baseSpawnRate * 0.55 : baseSpawnRate;
+      
+      // Higher max obstacles in fullscreen
+      const maxObstacles = isFullscreenMode ? 25 : 15;
+      
+      if (spawnTimerRef.current > spawnRate && isActiveRef.current && obstaclesRef.current.length < maxObstacles) {
         obstaclesRef.current.push(new Obstacle(cvs, mouse));
         spawnTimerRef.current = 0;
       }
@@ -383,6 +398,13 @@ export default function QuickDodgeElitePage() {
         ctx.stroke();
       }
 
+      // Fullscreen indicator - subtle notification that fullscreen mode is active
+      if (isFullscreenMode && isActiveRef.current) {
+        ctx.fillStyle = 'rgba(255, 62, 62, 0.15)';
+        ctx.font = '12px monospace';
+        ctx.fillText('FULLSCREEN MODE - MORE OBSTACLES', 10, 20);
+      }
+
       animationRef.current = requestAnimationFrame(draw);
     }
 
@@ -417,6 +439,21 @@ export default function QuickDodgeElitePage() {
     successfulDodgesRef.current = 0;
   };
 
+  const resetGame = () => {
+    if (animationRef.current) cancelAnimationFrame(animationRef.current);
+    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    isActiveRef.current = false;
+    setGameState('start');
+    gameStateRef.current = 'start';
+    setScore(0);
+    setStreak(0);
+    setBestStreak(0);
+    setTimeLeft(60);
+    setFeedback('');
+    setCurrentSpeed(400);
+    setDodgesCount(0);
+  };
+
   const formatTime = (s) => `${s}s`;
 
   if (loading) {
@@ -444,10 +481,19 @@ export default function QuickDodgeElitePage() {
               </div>
               <div>
                 <h1 className={`text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Quick Dodge Elite</h1>
-                <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Avoid red homing obstacles - 60 second challenge</p>
+                <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Avoid red homing obstacles - 60 second challenge{isFullscreen && ' • Fullscreen Mode Active'}</p>
               </div>
             </div>
             <div className="flex gap-2">
+              {gameState === 'playing' && (
+                <button 
+                  onClick={resetGame} 
+                  className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} 
+                  title="Reset session"
+                >
+                  <RefreshCw className="w-5 h-5" />
+                </button>
+              )}
               <button onClick={() => setIsDarkMode(!isDarkMode)} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`}>
                 {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
               </button>
@@ -497,6 +543,13 @@ export default function QuickDodgeElitePage() {
         >
           {isFullscreen && gameState === 'playing' && (
             <div className="absolute top-4 right-4 z-30 flex gap-3">
+              <button 
+                onClick={resetGame} 
+                className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all" 
+                title="Reset session"
+              >
+                <RefreshCw className="w-5 h-5" />
+              </button>
               <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button>
               <button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all"><Eye className="w-5 h-5" /></button>
               <button onClick={() => setSoundEnabled(!soundEnabled)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button>
@@ -512,7 +565,11 @@ export default function QuickDodgeElitePage() {
               <div className={`rounded-2xl p-8 text-center max-w-md mx-4 shadow-xl border ${isBoxDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
                 <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
                 <h3 className={`text-2xl font-bold mb-2 ${isBoxDarkMode ? 'text-white' : 'text-gray-900'}`}>Quick Dodge Elite</h3>
-                <p className={`mb-6 ${isBoxDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>60-second challenge • Avoid red homing obstacles</p>
+                <p className={`mb-6 ${isBoxDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                  60-second challenge • Avoid red homing obstacles
+                  <br />
+                  <span className="text-red-400 text-sm"></span>
+                </p>
                 <button 
                   onClick={startGame} 
                   className="px-8 py-3 bg-gradient-to-r from-red-500 to-orange-600 text-white rounded-xl font-semibold hover:shadow-lg w-full transition-all transform hover:scale-[1.02] active:scale-[0.98]"
@@ -595,13 +652,15 @@ export default function QuickDodgeElitePage() {
                     </div>
                     <div className="flex items-start gap-2">
                       <div className="w-5 h-5 rounded-full bg-yellow-500 flex items-center justify-center text-white text-xs font-bold mt-0.5">6</div>
-                      <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Challenge lasts <span className="font-semibold text-yellow-500">60 seconds</span> - score never goes below 0</p>
+                      <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                        <span className="font-semibold text-red-400">Fullscreen mode</span> = <span className="font-semibold text-yellow-500">50% more obstacles (harder!)</span>
+                      </p>
                     </div>
                   </div>
                 </div>
                 <div className={`mt-3 pt-3 border-t text-xs ${isDarkMode ? 'border-gray-700 text-gray-400' : 'border-gray-200 text-gray-500'} flex items-center justify-between`}>
                   <span>🔴 Red circles = Obstacles • 🎯 Cursor must avoid contact</span>
-                  <span>⚡ +1 per dodge • -5 per hit • Speed increases with every 3 dodges</span>
+                  <span>⚡ +1 per dodge • -5 per hit • Fullscreen = More chaos!</span>
                 </div>
               </div>
             </div>

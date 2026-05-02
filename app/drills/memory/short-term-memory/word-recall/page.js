@@ -297,18 +297,8 @@ export default function WordRecallDrill() {
     if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
     if (memorizeTimerRef.current) clearInterval(memorizeTimerRef.current);
     if (resultTimerRef.current) clearTimeout(resultTimerRef.current);
+    if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
     setGameState('start');
-    setPhase('ready');
-    setScore(0);
-    setStreak(0);
-    setTimeLeft(60);
-    setAccuracy(100);
-    setTotalCorrect(0);
-    setTotalAttempts(0);
-    setRoundsCompleted(0);
-    setPenaltyCount(0);
-    setShowResult(false);
-    levelRef.current = 3;
   };
 
   const inputRef = useRef(null);
@@ -319,6 +309,7 @@ export default function WordRecallDrill() {
       if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
       if (memorizeTimerRef.current) clearInterval(memorizeTimerRef.current);
       if (resultTimerRef.current) clearTimeout(resultTimerRef.current);
+      if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
     };
   }, []);
 
@@ -408,6 +399,13 @@ export default function WordRecallDrill() {
         >
           {isFullscreen && gameState === 'playing' && (
             <div className="absolute top-4 right-4 z-30 flex gap-3">
+              <button 
+                onClick={resetGame} 
+                className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all" 
+                title="Reset session"
+              >
+                <RefreshCw className="w-5 h-5" />
+              </button>
               <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button>
               <button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all"><Eye className="w-5 h-5" /></button>
               <button onClick={() => setSoundEnabled(!soundEnabled)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button>
@@ -635,4 +633,4 @@ function ResultCard({ label, value, unit = '', icon, color, isDark }) {
       <span className={`font-bold text-lg ${color}`}>{value}{unit}</span>
     </div>
   );
-}
+}5

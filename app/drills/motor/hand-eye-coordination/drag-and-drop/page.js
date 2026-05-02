@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { 
   ArrowLeft, Target, Zap, Clock, Award, Activity, 
   Volume2, VolumeX, Maximize2, Minimize2, Sun, Moon, 
-  Eye, Move, Brain, BarChart3, Timer, Trophy, Info, Heart
+  Eye, Move, Brain, BarChart3, Timer, Trophy, Info, Heart, RefreshCw
 } from 'lucide-react';
 
 export default function ExtremeConvergencePage() {
@@ -244,18 +244,18 @@ export default function ExtremeConvergencePage() {
       // Has lives: lose 1 life only, no point penalty
       livesRef.current -= 1;
       setLives(livesRef.current);
-      showFeedback(` ${reason}! -1 life (${livesRef.current} lives left)`, 'error');
+      showFeedback(`${reason}! -1 life (${livesRef.current} lives left)`, 'error');
       playSound('miss');
       
       if (livesRef.current === 0) {
-        showFeedback(`⚠️ No lives left! Now penalties will deduct points!`, 'warning');
+        showFeedback(` No lives left! Now penalties will deduct points!`, 'warning');
       }
     } else {
       // No lives left: -1 point penalty
       scoreRef.current = Math.max(0, scoreRef.current - 1);
       setScore(scoreRef.current);
       playSound('penalty');
-      showFeedback(`⚠️ ${reason}! -1 point penalty (No lives left)`, 'error');
+      showFeedback(` ${reason}! -1 point penalty (No lives left)`, 'error');
     }
     
     // Reset streak on any mistake
@@ -580,7 +580,13 @@ export default function ExtremeConvergencePage() {
   };
 
   const resetGame = () => {
+    if (animationRef.current) cancelAnimationFrame(animationRef.current);
+    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    if (teleportIntervalRef.current) clearInterval(teleportIntervalRef.current);
+    if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
+    
     isActiveRef.current = false;
+    activeRef.current = false;
     setGameState('start');
     gameStateRef.current = 'start';
     setScore(0);
@@ -593,6 +599,12 @@ export default function ExtremeConvergencePage() {
     setFeedback('');
     setAccuracy(100);
     setSuccessfulDrops(0);
+    
+    scoreRef.current = 0;
+    streakRef.current = 0;
+    livesRef.current = 3;
+    timerRef.current = 3.0;
+    ballRef.current.dragging = false;
   };
 
   if (loading) {
@@ -624,6 +636,12 @@ export default function ExtremeConvergencePage() {
               </div>
             </div>
             <div className="flex gap-2">
+              {/* Reset button - only visible during gameplay */}
+              {gameState === 'playing' && (
+                <button onClick={resetGame} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} title="Reset session">
+                  <RefreshCw className="w-5 h-5" />
+                </button>
+              )}
               <button onClick={() => setIsDarkMode(!isDarkMode)} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`}>
                 {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
               </button>
@@ -676,6 +694,14 @@ export default function ExtremeConvergencePage() {
         >
           {isFullscreen && gameState === 'playing' && (
             <div className="absolute top-4 right-4 z-30 flex gap-3">
+              {/* Reset button in fullscreen */}
+              <button 
+                onClick={resetGame} 
+                className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all" 
+                title="Reset session"
+              >
+                <RefreshCw className="w-5 h-5" />
+              </button>
               <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button>
               <button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all"><Eye className="w-5 h-5" /></button>
               <button onClick={() => setSoundEnabled(!soundEnabled)} className="p-2 bg-black/50 rounded-lg text-white hover:bg-black/70 transition-all">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button>
@@ -788,7 +814,7 @@ export default function ExtremeConvergencePage() {
                 </div>
                 <div className={`mt-3 pt-3 border-t text-xs ${isDarkMode ? 'border-gray-700 text-gray-400' : 'border-gray-200 text-gray-500'} flex items-center justify-between`}>
                   <span>⚡ 3 seconds to drop! • Teleports every 3 seconds</span>
-                  <span> 3 lives • Penalty only when lives = 0</span>
+                  <span>3 lives • Penalty only when lives = 0</span>
                 </div>
               </div>
             </div>
