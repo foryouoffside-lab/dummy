@@ -10,17 +10,17 @@ import {
 } from 'lucide-react';
 
 // Adjusted timing for better training experience
-const FLASH_DURATION = 300; // Increased from 150ms to 300ms - more visible
-const FLASH_GAP = 500; // Increased from 300ms to 500ms - clearer separation between flashes
-const SEQUENCE_GAP_MIN = 2000; // Increased to give more processing time
-const SEQUENCE_GAP_MAX = 4000; // Increased max gap
-const FLASHES_MIN = 1;
-const FLASHES_MAX = 4; // Reduced from 5 to 4 for better learning curve
-const PERIPHERAL_DISTANCE = 35; // Slightly reduced for better initial detection
+const FLASH_DURATION = 300;
+const FLASH_GAP = 400;
+const SEQUENCE_GAP_MIN = 1500;
+const SEQUENCE_GAP_MAX = 2500;
+const FLASHES_MIN = 5;
+const FLASHES_MAX = 6;
+const PERIPHERAL_DISTANCE = 35;
 const GAME_DURATION = 60;
-const CORRECT_BONUS = 10; // Increased from 1 for better score progression
-const WRONG_PENALTY = 0;
-const STREAK_BONUS_THRESHOLD = 3; // Reduced from 5 for more frequent rewards
+const CORRECT_BONUS = 1;
+const WRONG_PENALTY = 1; // Penalty enabled - 1 point deduction for wrong answers
+const STREAK_BONUS_THRESHOLD = 3;
 
 const SHAPES = ['circle', 'square', 'triangle', 'diamond'];
 const COLORS = ['#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
@@ -53,6 +53,8 @@ export default function PeripheralFlashClient() {
   const [flashCount, setFlashCount] = useState(0);
   const [totalFlashesInSequence, setTotalFlashesInSequence] = useState(0);
   const [showSequenceIndicator, setShowSequenceIndicator] = useState(false);
+  const [centerFeedback, setCenterFeedback] = useState('');
+  const [centerFeedbackType, setCenterFeedbackType] = useState('');
   
   const scoreRef = useRef(0);
   const streakRef = useRef(0);
@@ -60,6 +62,7 @@ export default function PeripheralFlashClient() {
   const sequenceGapTimeoutRef = useRef(null);
   const timerIntervalRef = useRef(null);
   const feedbackTimeoutRef = useRef(null);
+  const centerFeedbackTimeoutRef = useRef(null);
   const isActiveRef = useRef(false);
   const gameStateRef = useRef('start');
   const audioCtxRef = useRef(null);
@@ -126,6 +129,16 @@ export default function PeripheralFlashClient() {
     feedbackTimeoutRef.current = setTimeout(() => { setFeedback(''); setFeedbackType(''); }, 2000);
   }, []);
 
+  const showCenterFeedback = useCallback((message, type) => {
+    if (centerFeedbackTimeoutRef.current) clearTimeout(centerFeedbackTimeoutRef.current);
+    setCenterFeedback(message);
+    setCenterFeedbackType(type);
+    centerFeedbackTimeoutRef.current = setTimeout(() => { 
+      setCenterFeedback(''); 
+      setCenterFeedbackType(''); 
+    }, 1500);
+  }, []);
+
   const initAudio = useCallback(() => {
     try {
       if (!audioCtxRef.current) audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
@@ -159,12 +172,10 @@ export default function PeripheralFlashClient() {
   const generateFlashSequence = useCallback(() => {
     if (!isActiveRef.current || gameStateRef.current !== 'playing') return;
     
-    // Generate random number of flashes
     const numFlashes = Math.floor(Math.random() * (FLASHES_MAX - FLASHES_MIN + 1)) + FLASHES_MIN;
     setTotalFlashesInSequence(numFlashes);
-    setShowSequenceIndicator(numFlashes > 1);
+    setShowSequenceIndicator(numFlashes > 1 && !isFullscreen);
     
-    // Generate flash sequence with better positioning
     const sequence = [];
     const usedPositions = new Set();
     
@@ -172,45 +183,20 @@ export default function PeripheralFlashClient() {
       const shape = SHAPES[Math.floor(Math.random() * SHAPES.length)];
       const color = COLORS[Math.floor(Math.random() * COLORS.length)];
       
-      // Better peripheral positioning with overlap prevention
       let position;
       do {
-        const area = Math.floor(Math.random() * 8); // 8 directional areas
+        const area = Math.floor(Math.random() * 8);
         let x, y;
         
         switch(area) {
-          case 0: // top
-            x = 20 + Math.random() * 60;
-            y = 5 + Math.random() * 20;
-            break;
-          case 1: // top-right
-            x = 70 + Math.random() * 25;
-            y = 5 + Math.random() * 20;
-            break;
-          case 2: // right
-            x = 80 + Math.random() * 15;
-            y = 20 + Math.random() * 60;
-            break;
-          case 3: // bottom-right
-            x = 70 + Math.random() * 25;
-            y = 80 + Math.random() * 15;
-            break;
-          case 4: // bottom
-            x = 20 + Math.random() * 60;
-            y = 80 + Math.random() * 15;
-            break;
-          case 5: // bottom-left
-            x = 5 + Math.random() * 25;
-            y = 80 + Math.random() * 15;
-            break;
-          case 6: // left
-            x = 5 + Math.random() * 15;
-            y = 20 + Math.random() * 60;
-            break;
-          case 7: // top-left
-            x = 5 + Math.random() * 25;
-            y = 5 + Math.random() * 20;
-            break;
+          case 0: x = 20 + Math.random() * 60; y = 5 + Math.random() * 20; break;
+          case 1: x = 70 + Math.random() * 25; y = 5 + Math.random() * 20; break;
+          case 2: x = 80 + Math.random() * 15; y = 20 + Math.random() * 60; break;
+          case 3: x = 70 + Math.random() * 25; y = 80 + Math.random() * 15; break;
+          case 4: x = 20 + Math.random() * 60; y = 80 + Math.random() * 15; break;
+          case 5: x = 5 + Math.random() * 25; y = 80 + Math.random() * 15; break;
+          case 6: x = 5 + Math.random() * 15; y = 20 + Math.random() * 60; break;
+          case 7: x = 5 + Math.random() * 25; y = 5 + Math.random() * 20; break;
         }
         position = `${Math.round(x)},${Math.round(y)}`;
       } while (usedPositions.has(position) && usedPositions.size < 8);
@@ -224,11 +210,10 @@ export default function PeripheralFlashClient() {
     currentSequenceRef.current = sequence;
     currentFlashIndexRef.current = 0;
     
-    // Small delay before starting sequence
     flashSequenceTimeoutRef.current = setTimeout(() => {
       showNextFlash();
-    }, 500);
-  }, []);
+    }, 300);
+  }, [isFullscreen]);
 
   const showNextFlash = useCallback(() => {
     if (!isActiveRef.current || gameStateRef.current !== 'playing') return;
@@ -237,30 +222,25 @@ export default function PeripheralFlashClient() {
     const index = currentFlashIndexRef.current;
     
     if (index >= sequence.length) {
-      // Sequence complete, show response UI
       setIsFlashing(false);
       setFlashData(null);
       setShowSequenceIndicator(false);
       
-      // Small delay before showing response
       flashSequenceTimeoutRef.current = setTimeout(() => {
         if (isActiveRef.current && gameStateRef.current === 'playing') {
           setShowResponse(true);
         }
-      }, 300);
+      }, 150);
       return;
     }
     
-    // Show current flash with smooth animation
     const flash = sequence[index];
     setFlashData(flash);
     setIsFlashing(true);
     setFlashCount(index + 1);
     playSound('flash');
     
-    // Hide after flash duration with smooth transition
     flashSequenceTimeoutRef.current = setTimeout(() => {
-      // Fade out animation
       if (flashAnimationRef.current) cancelAnimationFrame(flashAnimationRef.current);
       
       setFlashData(null);
@@ -268,19 +248,17 @@ export default function PeripheralFlashClient() {
       
       currentFlashIndexRef.current++;
       
-      // Show next flash after gap
       if (currentFlashIndexRef.current < sequence.length) {
         flashSequenceTimeoutRef.current = setTimeout(() => {
           showNextFlash();
         }, FLASH_GAP);
       } else {
-        // All flashes shown
         setShowSequenceIndicator(false);
         flashSequenceTimeoutRef.current = setTimeout(() => {
           if (isActiveRef.current && gameStateRef.current === 'playing') {
             setShowResponse(true);
           }
-        }, FLASH_GAP);
+        }, 150);
       }
     }, FLASH_DURATION);
   }, [playSound]);
@@ -293,7 +271,8 @@ export default function PeripheralFlashClient() {
     const correct = response === targetFlash.shape;
     
     if (correct) {
-      scoreRef.current += CORRECT_BONUS + (streakRef.current * 2); // Bonus for streak
+      // Add 1 point for correct answer
+      scoreRef.current += CORRECT_BONUS;
       setScore(scoreRef.current);
       totalHitsRef.current++;
       setTotalHits(totalHitsRef.current);
@@ -306,12 +285,13 @@ export default function PeripheralFlashClient() {
       }
       
       playSound('correct');
+      showCenterFeedback('✓ Correct!', 'correct');
       
       if (streakRef.current % STREAK_BONUS_THRESHOLD === 0) {
         playSound('streak');
-        showFeedback(`🔥 ${streakRef.current} Streak! +${CORRECT_BONUS + (streakRef.current * 2)}`, 'success');
+        showFeedback(`🔥 ${streakRef.current} Streak! +1`, 'success');
       } else {
-        showFeedback(`✓ Correct! +${CORRECT_BONUS + (streakRef.current * 2)}`, 'success');
+        showFeedback(`✓ Correct! +1`, 'success');
       }
     } else {
       totalMissesRef.current++;
@@ -323,22 +303,42 @@ export default function PeripheralFlashClient() {
         totalPassesRef.current++;
         setTotalPasses(totalPassesRef.current);
         playSound('pass');
+        showCenterFeedback(`Passed - Was ${targetFlash.shape}`, 'pass');
         showFeedback(`Passed - Shape was ${targetFlash.shape}`, 'warning');
+        // No penalty for passing
       } else {
-        playSound('wrong');
-        showFeedback(`Wrong - Shape was ${targetFlash.shape}`, 'error');
+        // Subtract 1 point for wrong answer, but don't go below 0
+        if (scoreRef.current > 0) {
+          scoreRef.current -= WRONG_PENALTY;
+          setScore(scoreRef.current);
+          playSound('wrong');
+          showCenterFeedback(`✗ Wrong! -1 (Was ${targetFlash.shape})`, 'wrong');
+          showFeedback(`Wrong! -1 (Was ${targetFlash.shape})`, 'error');
+        } else {
+          // Score is already 0, no penalty applied
+          playSound('wrong');
+          showCenterFeedback(`✗ Wrong - Was ${targetFlash.shape}`, 'wrong');
+          showFeedback(`Wrong! Score at 0 (Was ${targetFlash.shape})`, 'error');
+        }
       }
     }
     
-    // Reset for next sequence
+    // Ensure score never goes below 0 (safety check)
+    if (scoreRef.current < 0) {
+      scoreRef.current = 0;
+      setScore(0);
+    }
+    
+    updateBestScore(scoreRef.current);
+    
     setShowResponse(false);
     currentSequenceRef.current = [];
     setFlashCount(0);
     setTotalFlashesInSequence(0);
     
-    // Schedule next sequence after random gap
+    // Immediately schedule next sequence without delay
     scheduleNextSequence();
-  }, [playSound, showFeedback]);
+  }, [playSound, showFeedback, showCenterFeedback, updateBestScore]);
 
   const scheduleNextSequence = useCallback(() => {
     if (!isActiveRef.current || gameStateRef.current !== 'playing') return;
@@ -393,6 +393,8 @@ export default function PeripheralFlashClient() {
     setTotalMisses(0);
     setTotalPasses(0);
     setFeedback('');
+    setCenterFeedback('');
+    setCenterFeedbackType('');
     setShowResponse(false);
     setFlashData(null);
     setIsFlashing(false);
@@ -412,18 +414,20 @@ export default function PeripheralFlashClient() {
     
     showFeedback('Focus on center • Detect flashes in periphery', 'success');
     
-    // Start first sequence after a delay
-    setTimeout(() => generateFlashSequence(), 2000);
+    setTimeout(() => generateFlashSequence(), 1000);
   }, [clearAllIntervals, generateFlashSequence, showFeedback]);
 
   const resetGame = useCallback(() => {
     clearAllIntervals();
     if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
+    if (centerFeedbackTimeoutRef.current) clearTimeout(centerFeedbackTimeoutRef.current);
     isActiveRef.current = false;
     setGameState('start');
     gameStateRef.current = 'start';
     setFeedback('');
     setFeedbackType('');
+    setCenterFeedback('');
+    setCenterFeedbackType('');
     setShowResponse(false);
     setFlashData(null);
     setIsFlashing(false);
@@ -441,10 +445,10 @@ export default function PeripheralFlashClient() {
     return () => {
       clearAllIntervals();
       if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
+      if (centerFeedbackTimeoutRef.current) clearTimeout(centerFeedbackTimeoutRef.current);
     };
   }, [clearAllIntervals]);
 
-  // Render shapes more professionally
   const renderShapeSVG = (shape, color = '#6366f1', size = 48) => {
     const strokeWidth = 3;
     switch(shape) {
@@ -533,7 +537,7 @@ export default function PeripheralFlashClient() {
         "@type": "WebApplication", 
         "name": "Peripheral Flash", 
         "url": "https://skilldrills.online/drills/visual/peripheral-vision/peripheral-flash", 
-        "description": "Professional peripheral vision training with controlled flash sequences. Progressive difficulty with variable sequences of 1-4 flashes at 300ms each.", 
+        "description": "Professional peripheral vision training with controlled flash sequences. Progressive difficulty with variable sequences of 5-6 flashes at 300ms each. +1 for correct, -1 for wrong (min 0).", 
         "applicationCategory": "EducationalApplication", 
         "operatingSystem": "Web", 
         "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }, 
@@ -541,14 +545,28 @@ export default function PeripheralFlashClient() {
       }) }} />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Breadcrumb */}
-        <nav aria-label="Breadcrumb" className="mb-6">
+        {/* Breadcrumb Navigation */}
+        <nav aria-label="Breadcrumb" className="mb-4">
           <ol className="flex flex-wrap items-center gap-2 text-sm">
-            <li><Link href="/" className={`hover:underline transition-colors ${isDarkMode?'text-gray-400 hover:text-gray-200':'text-gray-600 hover:text-gray-900'}`}>Home</Link></li>
-            <li className={`${isDarkMode?'text-gray-500':'text-gray-400'}`} aria-hidden="true">/</li>
-            <li><Link href="/drills/visual" className={`hover:underline transition-colors ${isDarkMode?'text-gray-400 hover:text-gray-200':'text-gray-600 hover:text-gray-900'}`}>Visual Drills</Link></li>
-            <li className={`${isDarkMode?'text-gray-500':'text-gray-400'}`} aria-hidden="true">/</li>
-            <li className={`font-medium ${isDarkMode?'text-purple-400':'text-purple-600'}`} aria-current="page">Peripheral Flash</li>
+            <li>
+              <Link href="/" className={`hover:underline transition-colors ${isDarkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-600 hover:text-gray-900'}`}>
+                Home
+              </Link>
+            </li>
+            <li className={`${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`} aria-hidden="true">/</li>
+            <li>
+              <Link href="/drills/visual" className={`hover:underline transition-colors ${isDarkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-600 hover:text-gray-900'}`}>
+                Visual Drills
+              </Link>
+            </li>
+            <li className={`${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`} aria-hidden="true">/</li>
+            <li className={`${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
+              Peripheral Vision
+            </li>
+            <li className={`${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`} aria-hidden="true">/</li>
+            <li className={`font-medium ${isDarkMode ? 'text-purple-400' : 'text-purple-600'}`} aria-current="page">
+              Peripheral Flash
+            </li>
           </ol>
         </nav>
 
@@ -560,7 +578,7 @@ export default function PeripheralFlashClient() {
             </div>
             <div>
               <h1 className={`text-2xl sm:text-3xl font-bold ${isDarkMode?'text-white':'text-gray-900'}`}>Peripheral Flash</h1>
-              <p className={`text-sm sm:text-base ${isDarkMode?'text-gray-400':'text-gray-500'}`}>Professional vision training • Controlled sequences • 60s rounds</p>
+              <p className={`text-sm sm:text-base ${isDarkMode?'text-gray-400':'text-gray-500'}`}>Professional vision training • 5-6 Flash sequences • 60s rounds</p>
             </div>
           </div>
           
@@ -681,23 +699,86 @@ export default function PeripheralFlashClient() {
             ref={gameAreaRef}
             className="absolute inset-0"
           >
-            {/* Central focus point */}
+            {/* Central focus point - Plus sign with 4 equal sides */}
             <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10">
-              <div className="relative">
-                <div className="w-4 h-4 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full shadow-lg shadow-purple-500/50" />
-                <div className="absolute inset-0 w-4 h-4 bg-purple-400 rounded-full animate-ping opacity-75" />
+              <div className="relative flex items-center justify-center">
+                {/* Plus sign using SVG for perfect symmetry */}
+                <svg 
+                  width="28" 
+                  height="28" 
+                  viewBox="0 0 28 28" 
+                  className="drop-shadow-lg"
+                  aria-hidden="true"
+                >
+                  {/* Glow effect */}
+                  <defs>
+                    <filter id="plusGlow">
+                      <feGaussianBlur stdDeviation="1.5" result="blur"/>
+                      <feMerge>
+                        <feMergeNode in="blur"/>
+                        <feMergeNode in="SourceGraphic"/>
+                      </feMerge>
+                    </filter>
+                  </defs>
+                  {/* Horizontal bar */}
+                  <rect 
+                    x="2" 
+                    y="11" 
+                    width="24" 
+                    height="6" 
+                    rx="1" 
+                    fill="url(#plusGradient)" 
+                    filter="url(#plusGlow)"
+                  />
+                  {/* Vertical bar */}
+                  <rect 
+                    x="11" 
+                    y="2" 
+                    width="6" 
+                    height="24" 
+                    rx="1" 
+                    fill="url(#plusGradient)" 
+                    filter="url(#plusGlow)"
+                  />
+                  {/* Gradient definition */}
+                  <defs>
+                    <linearGradient id="plusGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#a78bfa" />
+                      <stop offset="100%" stopColor="#ec4899" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+                
+                {/* Pulsing animation ring */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-8 h-8 border-2 border-purple-400/30 rounded-full animate-ping" />
+                </div>
+                
+                {/* "Focus here" text or center feedback */}
                 {gameState === 'playing' && !isFlashing && !showResponse && (
-                  <p className={`absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs whitespace-nowrap ${
-                    isBoxDarkMode?'text-gray-400':'text-gray-500'
-                  }`}>
-                    Fix gaze here
-                  </p>
+                  <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs whitespace-nowrap">
+                    {centerFeedback ? (
+                      <span className={`font-semibold px-3 py-1 rounded-full ${
+                        centerFeedbackType === 'correct' 
+                          ? 'bg-green-500/20 text-green-400' 
+                          : centerFeedbackType === 'wrong'
+                          ? 'bg-red-500/20 text-red-400'
+                          : 'bg-yellow-500/20 text-yellow-400'
+                      }`}>
+                        {centerFeedback}
+                      </span>
+                    ) : (
+                      <span className={isBoxDarkMode?'text-gray-400':'text-gray-500'}>
+                       
+                      </span>
+                    )}
+                  </div>
                 )}
               </div>
             </div>
 
-            {/* Sequence indicator */}
-            {gameState === 'playing' && showSequenceIndicator && totalFlashesInSequence > 1 && (
+            {/* Sequence indicator - only show when NOT in fullscreen */}
+            {gameState === 'playing' && showSequenceIndicator && totalFlashesInSequence > 1 && !isFullscreen && (
               <div className={`absolute top-4 left-4 px-3 py-1.5 rounded-full text-xs font-medium backdrop-blur-sm ${
                 isBoxDarkMode ? 'bg-white/10 text-white/80' : 'bg-black/10 text-black/80'
               }`}>
@@ -779,7 +860,7 @@ export default function PeripheralFlashClient() {
                     }`}
                     aria-label="Skip this one"
                   >
-                    Skip (I didn't see it)
+                    Skip (No penalty)
                   </button>
                 </div>
               </div>
@@ -806,12 +887,12 @@ export default function PeripheralFlashClient() {
                 <p className={`mb-6 text-sm leading-relaxed ${isBoxDarkMode?'text-gray-400':'text-gray-500'}`}>
                   Train your peripheral vision to detect and identify shapes
                   appearing in controlled flash sequences. Keep your eyes fixed
-                  on the center point while shapes appear in your peripheral field.
+                  on the center plus sign while shapes appear in your peripheral field.
                 </p>
                 
                 <div className={`mb-6 p-4 rounded-xl ${isBoxDarkMode?'bg-gray-700/30':'bg-gray-50'} border ${isBoxDarkMode?'border-gray-600':'border-gray-200'}`}>
                   <p className={`font-semibold mb-3 text-sm ${isBoxDarkMode?'text-gray-300':'text-gray-700'}`}>
-                    Shape Types:
+                    Scoring: +1 Correct | -1 Wrong (min 0) | 0 Skip
                   </p>
                   <div className="grid grid-cols-4 gap-3">
                     {SHAPES.map(shape => (
@@ -828,15 +909,19 @@ export default function PeripheralFlashClient() {
                 <div className={`mb-6 text-xs text-left space-y-2 ${isBoxDarkMode?'text-gray-400':'text-gray-500'}`}>
                   <div className="flex items-center gap-2">
                     <div className="w-1.5 h-1.5 rounded-full bg-purple-500"></div>
-                    <span>1-4 flashes per sequence</span>
+                    <span>5-6 flashes per sequence</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
-                    <span>300ms per flash</span>
+                    <span>300ms per flash with 400ms gaps</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
                     <span>Identify the LAST shape</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-red-500"></div>
+                    <span>-1 penalty for wrong answers (stops at 0)</span>
                   </div>
                 </div>
                 
@@ -924,7 +1009,7 @@ export default function PeripheralFlashClient() {
                       <li className="flex items-start gap-2">
                         <span className="text-purple-500 mt-1">•</span>
                         <span className={isDarkMode?'text-gray-300':'text-gray-600'}>
-                          Keep your eyes fixed on the center dot at all times
+                          Keep your eyes fixed on the center plus sign (+) at all times
                         </span>
                       </li>
                       <li className="flex items-start gap-2">
@@ -945,13 +1030,13 @@ export default function PeripheralFlashClient() {
                       <li className="flex items-start gap-2">
                         <span className="text-blue-500 mt-1">•</span>
                         <span className={isDarkMode?'text-gray-300':'text-gray-600'}>
-                          1-4 shapes appear randomly in your peripheral vision
+                          5-6 shapes appear randomly in your peripheral vision
                         </span>
                       </li>
                       <li className="flex items-start gap-2">
                         <span className="text-blue-500 mt-1">•</span>
                         <span className={isDarkMode?'text-gray-300':'text-gray-600'}>
-                          Each shape is shown for 300ms with 500ms gaps
+                          Each shape shown for 300ms with 400ms gaps
                         </span>
                       </li>
                       <li className="flex items-start gap-2">
@@ -978,13 +1063,19 @@ export default function PeripheralFlashClient() {
                       <li className="flex items-start gap-2">
                         <span className="text-green-500 mt-1">•</span>
                         <span className={isDarkMode?'text-gray-300':'text-gray-600'}>
-                          10 points per correct answer + streak bonus
+                          +1 point for correct answer
                         </span>
                       </li>
                       <li className="flex items-start gap-2">
-                        <span className="text-green-500 mt-1">•</span>
+                        <span className="text-red-500 mt-1">•</span>
                         <span className={isDarkMode?'text-gray-300':'text-gray-600'}>
-                          Use "Skip" if unsure - it's better than guessing
+                          -1 point for wrong answer (minimum 0)
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-yellow-500 mt-1">•</span>
+                        <span className={isDarkMode?'text-gray-300':'text-gray-600'}>
+                          0 points for skip
                         </span>
                       </li>
                     </ul>
@@ -992,8 +1083,8 @@ export default function PeripheralFlashClient() {
                 </div>
                 
                 <div className={`mt-5 pt-4 border-t text-xs text-center ${isDarkMode?'border-gray-700 text-gray-400':'border-gray-200 text-gray-500'}`}>
-                  <strong>Pro Tip:</strong> Start with single flashes to build confidence, then progress to sequences. 
-                  Regular practice improves peripheral awareness and visual processing speed.
+                  <strong>Scoring:</strong> +1 Correct | -1 Wrong (min 0) | 0 Skip • 
+                  <strong> Pro Tip:</strong> Focus on the last shape in each sequence for best results.
                 </div>
               </div>
             </div>

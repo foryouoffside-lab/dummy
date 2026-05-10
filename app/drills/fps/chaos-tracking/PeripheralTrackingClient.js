@@ -764,12 +764,7 @@ export default function PeripheralTrackingClient() {
                   Start Training
                 </button>
                 
-                <button 
-                  onClick={resetGame} 
-                  className="mt-3 w-full px-4 py-2 rounded-lg border border-gray-500 text-gray-400 hover:bg-gray-700 transition-all text-sm"
-                >
-                  Reset Session
-                </button>
+
               </div>
             </div>
           )}

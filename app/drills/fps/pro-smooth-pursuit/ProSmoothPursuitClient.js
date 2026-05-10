@@ -447,7 +447,7 @@ export default function ProSmoothPursuitClient() {
                   <p className={`text-xs ${isBoxDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Track the target. +1pt every 2s on target. Max 30 points. Press ESC to unlock.</p>
                 </div>
                 <button onClick={startGame} className="px-8 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl font-semibold hover:shadow-lg w-full">Start Training</button>
-                <button onClick={resetGame} className="mt-3 w-full px-4 py-2 rounded-lg border border-gray-500 text-gray-400 hover:bg-gray-700 transition-all text-sm">Reset Session</button>
+                
               </div>
             </div>
           )}

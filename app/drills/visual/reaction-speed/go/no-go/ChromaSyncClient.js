@@ -471,7 +471,7 @@ export default function ChromaSyncClient() {
                 <p className={`mb-4 ${isBoxDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>60s Go/No-Go • Adaptive 80-400ms window</p>
                 <p className={`mb-6 text-sm ${isBoxDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>GREEN = click (+1pt). RED = don't click (-1 life). Missing green has no penalty.</p>
                 <button onClick={startGame} className="px-8 py-3 bg-gradient-to-r from-green-500 to-teal-600 text-white rounded-xl font-semibold hover:shadow-lg w-full">Start Training</button>
-                <button onClick={resetGame} className="mt-3 w-full px-4 py-2 rounded-lg border border-gray-500 text-gray-400 hover:bg-gray-700 transition-all text-sm">Reset Session</button>
+               
               </div>
             </div>
           )}

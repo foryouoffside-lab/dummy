@@ -21,7 +21,6 @@ export default function WideFieldClient() {
   const [streak, setStreak] = useState(0);
   const [bestStreak, setBestStreak] = useState(0);
   const [timeLeft, setTimeLeft] = useState(60);
-  const [lives, setLives] = useState(3);
   const [feedback, setFeedback] = useState('');
   const [feedbackType, setFeedbackType] = useState('');
   
@@ -38,7 +37,6 @@ export default function WideFieldClient() {
   
   const streakRef = useRef(0);
   const scoreRef = useRef(0);
-  const livesRef = useRef(3);
   const flashTimeoutRef = useRef(null);
   const cycleTimeoutRef = useRef(null);
   const timerIntervalRef = useRef(null);
@@ -263,7 +261,7 @@ export default function WideFieldClient() {
     const allCorrect = correctCount === askCount;
     
     if (allCorrect) {
-      const pointsEarned = askCount;
+      const pointsEarned = askCount * 10;
       scoreRef.current += pointsEarned;
       setScore(scoreRef.current);
       
@@ -284,29 +282,21 @@ export default function WideFieldClient() {
         showFeedback(`✓ Perfect! +${pointsEarned}`, 'success');
       }
     } else if (correctCount > 0) {
-      const pointsEarned = correctCount;
+      const pointsEarned = correctCount * 5;
       scoreRef.current += pointsEarned;
       setScore(scoreRef.current);
       
       streakRef.current = 0;
       setStreak(0);
       
-      if (livesRef.current > 0) {
-        livesRef.current -= 1;
-        setLives(livesRef.current);
-        playSound('miss');
-        showFeedback(`✗ ${correctCount}/${askCount} correct! +${pointsEarned} but -1 life`, 'error');
-      }
+      playSound('miss');
+      showFeedback(`✗ ${correctCount}/${askCount} correct! +${pointsEarned}`, 'warning');
     } else {
       streakRef.current = 0;
       setStreak(0);
       
-      if (livesRef.current > 0) {
-        livesRef.current -= 1;
-        setLives(livesRef.current);
-        playSound('miss');
-        showFeedback('✗ Incorrect! -1 life', 'error');
-      }
+      playSound('miss');
+      showFeedback('✗ Incorrect! Streak reset', 'error');
     }
     
     setTimeout(() => {
@@ -366,7 +356,6 @@ export default function WideFieldClient() {
     setStreak(0);
     setBestStreak(0);
     setTimeLeft(60);
-    setLives(3);
     setFeedback('');
     setIsFlashing(false);
     setIsRecallMode(false);
@@ -376,7 +365,6 @@ export default function WideFieldClient() {
     
     streakRef.current = 0;
     scoreRef.current = 0;
-    livesRef.current = 3;
     bestStreakRef.current = 0;
     flashHistoryRef.current = [];
     isActiveRef.current = true;
@@ -402,7 +390,6 @@ export default function WideFieldClient() {
     setStreak(0);
     setBestStreak(0);
     setTimeLeft(60);
-    setLives(3);
     setFeedback('');
     setIsFlashing(false);
     setIsRecallMode(false);
@@ -412,7 +399,6 @@ export default function WideFieldClient() {
     
     streakRef.current = 0;
     scoreRef.current = 0;
-    livesRef.current = 3;
     bestStreakRef.current = 0;
     flashHistoryRef.current = [];
     flashesSinceLastRecallRef.current = 0;
@@ -457,7 +443,7 @@ export default function WideFieldClient() {
             "@type": "WebApplication",
             "name": "Wide Field Awareness - Peripheral Vision Training",
             "url": "https://skilldrills.online/drills/visual/peripheral-vision/wide-field",
-            "description": "Train peripheral vision by recalling characters flashed in 4 corner positions while fixating on center. Random 1-3 character recall quizzes with streak bonuses and 3 lives. 60-second challenge.",
+            "description": "Train peripheral vision by recalling characters flashed in 4 corner positions while fixating on center. Random 1-3 character recall quizzes with streak bonuses. 60-second challenge.",
             "applicationCategory": "EducationalApplication",
             "operatingSystem": "Web",
             "offers": {
@@ -574,19 +560,17 @@ export default function WideFieldClient() {
             Train your peripheral vision by recalling characters flashed in 4 corner positions while fixating on a center cross.
             Characters appear for 400ms at random corners (top-left, top-right, bottom-left, bottom-right).
             Random recall quizzes ask for the last 1-3 characters in order, testing visual memory and peripheral awareness.
-            Perfect recall scores points equal to the number of characters. Partial recall scores points but loses 1 life.
-            3 lives total with 5-streak bonus notifications. 60-second timed challenge with score tracking.
+            Perfect recall scores bonus points. 60-second timed challenge with score tracking and streak bonuses.
           </p>
         </section>
 
         {/* Stats Board */}
-        <div className="grid grid-cols-6 gap-3 mb-4 h-[88px]">
+        <div className="grid grid-cols-5 gap-3 mb-4 h-[88px]">
           <StatCard icon={<Target className="text-blue-600" />} value={score} label="Score" isDark={isDarkMode} />
           <StatCard icon={<Trophy className="text-yellow-500" />} value={bestScore} label="Best" isDark={isDarkMode} />
           <StatCard icon={<Timer className={timeLeft < 15 ? 'text-red-600' : 'text-green-600'} />} value={timeLeft} label="Time" unit="s" isDark={isDarkMode} />
           <StatCard icon={<Zap className="text-orange-500" />} value={streak} label="Streak" isDark={isDarkMode} />
           <StatCard icon={<Eye className="text-cyan-500" />} value={totalFlashes} label="Flashes" isDark={isDarkMode} />
-          <StatCard icon={<Heart className={lives > 0 ? 'text-red-500' : 'text-gray-500'} />} value={lives} label="Lives" isDark={isDarkMode} />
         </div>
 
         {/* Feedback Bar */}
@@ -644,7 +628,7 @@ export default function WideFieldClient() {
                 </button>
               </div>
               <div className="absolute top-4 left-4 z-30 bg-black/50 backdrop-blur-sm rounded-lg px-4 py-2 text-white text-sm" aria-live="polite">
-                Score: <span className="text-yellow-400 font-bold">{score}</span> | Flashes: <span className="text-cyan-400 font-bold">{totalFlashes}</span> | Lives: <span className="text-red-400 font-bold">{lives}</span>
+                Score: <span className="text-yellow-400 font-bold">{score}</span> | Flashes: <span className="text-cyan-400 font-bold">{totalFlashes}</span>
               </div>
             </>
           )}
@@ -812,7 +796,6 @@ export default function WideFieldClient() {
                   <ResultCard label="Best Score" value={bestScore} icon={<Trophy className="w-4 h-4" />} color="yellow" isDark={isBoxDarkMode} />
                   <ResultCard label="Best Streak" value={bestStreak} icon={<Zap className="w-4 h-4" />} color="orange" isDark={isBoxDarkMode} />
                   <ResultCard label="Total Flashes" value={totalFlashes} icon={<Eye className="w-4 h-4" />} color="cyan" isDark={isBoxDarkMode} />
-                  <ResultCard label="Lives Remaining" value={lives} icon={<Heart className="w-4 h-4" />} color="red" isDark={isBoxDarkMode} />
                 </div>
                 
                 <div className="flex gap-3">
@@ -869,13 +852,13 @@ export default function WideFieldClient() {
                     <div className="flex items-start gap-2">
                       <div className="w-5 h-5 rounded-full bg-yellow-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">4</div>
                       <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                        <span className="font-semibold text-yellow-500">Perfect recall: +points (1 per char)</span> and streak bonus
+                        <span className="font-semibold text-yellow-500">Perfect recall: 10 points per char</span> and streak bonus
                       </p>
                     </div>
                     <div className="flex items-start gap-2">
                       <div className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">5</div>
                       <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                        <span className="font-semibold text-red-500">Wrong/Partial: -1 life</span> (3 lives total)
+                        <span className="font-semibold text-red-500">Partial recall: 5 points per char</span>, streak resets
                       </p>
                     </div>
                     <div className="flex items-start gap-2">
