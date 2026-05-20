@@ -29,29 +29,19 @@ const nextConfig = {
       {
         source: '/(.*)',
         headers: [
-          // Security
           { key: 'X-Content-Type-Options', value: 'nosniff' },
           { key: 'X-Frame-Options', value: 'DENY' },
           { key: 'X-XSS-Protection', value: '1; mode=block' },
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
           { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(), interest-cohort=()' },
-          
-          // CSP (fixes "Ensure CSP is effective against XSS" audit)
           { 
             key: 'Content-Security-Policy', 
             value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://cdn.vercel-insights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https:; media-src 'self';" 
           },
-          
-          // HSTS (fixes "Use strong HSTS policy" audit)
           { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains; preload' },
-          
-          // Cross-Origin isolation (fixes COOP audit)
           { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
-          
-          // Remove HTML caching header from main pages (it was blocking fresh content)
         ],
       },
-      // Static assets: long cache
       {
         source: '/icons/(.*)',
         headers: [
@@ -114,12 +104,11 @@ const nextConfig = {
   },
   
   // ============================================
-  // EXPERIMENTAL OPTIMIZATIONS
+  // EXPERIMENTAL (Next.js 15 compatible)
   // ============================================
   
   experimental: {
     optimizeCss: true,
-    legacyBrowsers: false,          // 🔥 Skips legacy JS for modern browsers
     optimizePackageImports: [
       'lucide-react', 
       '@vercel/analytics',
@@ -137,7 +126,6 @@ const nextConfig = {
         ...config.optimization.splitChunks,
         chunks: 'all',
         cacheGroups: {
-          // Separate lucide-react (huge icon library)
           icons: {
             test: /[\\/]node_modules[\\/]lucide-react[\\/]/,
             name: 'icons',
@@ -145,7 +133,6 @@ const nextConfig = {
             priority: 20,
             reuseExistingChunk: true,
           },
-          // Other vendor libraries
           vendor: {
             test: /[\\/]node_modules[\\/]/,
             name: 'vendors',
@@ -153,7 +140,6 @@ const nextConfig = {
             priority: 10,
             reuseExistingChunk: true,
           },
-          // Common shared code
           common: {
             name: 'common',
             minChunks: 3,
@@ -163,7 +149,6 @@ const nextConfig = {
           },
         },
       };
-      // Enable tree shaking
       config.optimization.usedExports = true;
       config.optimization.sideEffects = true;
     }
@@ -175,7 +160,6 @@ const nextConfig = {
   // ============================================
   
   output: 'standalone',
-  swcMinify: true,
 };
 
 module.exports = nextConfig;
