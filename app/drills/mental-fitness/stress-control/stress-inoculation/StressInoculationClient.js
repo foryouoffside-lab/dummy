@@ -5,7 +5,10 @@ import Link from 'next/link';
 import { 
   ArrowLeft, Award, Activity, 
   Volume2, VolumeX, Maximize2, Minimize2, Sun, Moon, 
-  Eye, Timer, TrendingUp, Wind, AlertCircle, Brain, Info, Trophy, RefreshCw
+  Eye, Timer, TrendingUp, Wind, AlertCircle, Brain, Info, Trophy, RefreshCw,
+  Crosshair, Dumbbell, Database, Keyboard, Star, Users,
+  GraduationCap, Lightbulb, Clock, ArrowRight,
+  BookOpen, Hash, Code2, BarChart3, CheckCircle2, Heart
 } from 'lucide-react';
 
 export default function StressInoculationClient() {
@@ -47,120 +50,33 @@ export default function StressInoculationClient() {
     feedbackTimeoutRef.current = setTimeout(() => { setFeedback(''); setFeedbackType(''); }, 800);
   }, []);
 
-  useEffect(() => {
-    try { const s = localStorage.getItem('stressInoculationBestScore'); if (s) { const p = parseInt(s, 10); if (!isNaN(p)) setBestScore(p); } } catch (e) {}
-  }, []);
+  useEffect(() => { try { const s = localStorage.getItem('stressInoculationBestScore'); if (s) { const p = parseInt(s, 10); if (!isNaN(p)) setBestScore(p); } } catch (e) {} }, []);
+  useEffect(() => { if (gameState === 'gameOver' && score > bestScore) { setBestScore(score); try { localStorage.setItem('stressInoculationBestScore', score.toString()); } catch (e) {} showFeedback('🏆 New Record!', 'success'); } }, [gameState, score, bestScore, showFeedback]);
 
-  useEffect(() => {
-    if (gameState === 'gameOver' && score > bestScore) { setBestScore(score); try { localStorage.setItem('stressInoculationBestScore', score.toString()); } catch (e) {} showFeedback('🏆 New Record!', 'success'); }
-  }, [gameState, score, bestScore, showFeedback]);
+  const toggleFullscreen = useCallback(async () => { try { if (!isFullscreen) { const el = containerRef.current; if (el?.requestFullscreen) { await el.requestFullscreen(); setIsFullscreen(true); } } else { if (document.fullscreenElement) await document.exitFullscreen(); setIsFullscreen(false); } } catch (e) {} }, [isFullscreen]);
+  useEffect(() => { const h = () => setIsFullscreen(!!document.fullscreenElement); document.addEventListener('fullscreenchange', h); return () => document.removeEventListener('fullscreenchange', h); }, []);
 
-  const toggleFullscreen = useCallback(async () => {
-    try {
-      if (!isFullscreen) { const el = containerRef.current; if (el?.requestFullscreen) { await el.requestFullscreen(); setIsFullscreen(true); } }
-      else { if (document.fullscreenElement) await document.exitFullscreen(); setIsFullscreen(false); }
-    } catch (e) {}
-  }, [isFullscreen]);
+  const playSound = useCallback((type) => { if (!soundEnabled) return; try { const ctx = new (window.AudioContext || window.webkitAudioContext)(), o = ctx.createOscillator(), g = ctx.createGain(); o.connect(g); g.connect(ctx.destination); const now = ctx.currentTime; if (type==='inhale') { o.frequency.setValueAtTime(523.25, now); g.gain.setValueAtTime(0.08, now); g.gain.exponentialRampToValueAtTime(0.001, now+0.2); } else if (type==='exhale') { o.frequency.setValueAtTime(392.00, now); g.gain.setValueAtTime(0.08, now); g.gain.exponentialRampToValueAtTime(0.001, now+0.3); } else if (type==='stress') { o.frequency.setValueAtTime(880, now); g.gain.setValueAtTime(0.06, now); g.gain.exponentialRampToValueAtTime(0.001, now+0.1); } else if (type==='complete') { o.frequency.setValueAtTime(1046.5, now); g.gain.setValueAtTime(0.1, now); g.gain.exponentialRampToValueAtTime(0.001, now+0.3); } o.start(now); o.stop(now+0.3); } catch (e) {} }, [soundEnabled]);
 
-  useEffect(() => {
-    const h = () => setIsFullscreen(!!document.fullscreenElement);
-    document.addEventListener('fullscreenchange', h);
-    return () => document.removeEventListener('fullscreenchange', h);
-  }, []);
+  const updateTimerDisplay = useCallback((s) => { const m = Math.floor(s/60), sec = s%60; return `${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`; }, []);
+  const checkStressPhase = useCallback((t) => { const elapsed = 300 - t, inPhase = elapsed>=STRESS_START&&elapsed<STRESS_END; setIsStressPhase(prev => { if (inPhase!==prev) { if (inPhase) { playSound('stress'); showFeedback('⚠️ STRESS PHASE ACTIVE - Stay Coherent!','warning'); } else if (elapsed>=STRESS_END) showFeedback('✅ Stress Phase Complete - Great Resilience!','success'); return inPhase; } return prev; }); }, [playSound, showFeedback]);
 
-  const playSound = useCallback((type) => {
-    if (!soundEnabled) return;
-    try {
-      const ctx = new (window.AudioContext || window.webkitAudioContext)(), o = ctx.createOscillator(), g = ctx.createGain();
-      o.connect(g); g.connect(ctx.destination);
-      const now = ctx.currentTime;
-      if (type==='inhale') { o.frequency.setValueAtTime(523.25, now); g.gain.setValueAtTime(0.08, now); g.gain.exponentialRampToValueAtTime(0.001, now+0.2); }
-      else if (type==='exhale') { o.frequency.setValueAtTime(392.00, now); g.gain.setValueAtTime(0.08, now); g.gain.exponentialRampToValueAtTime(0.001, now+0.3); }
-      else if (type==='stress') { o.frequency.setValueAtTime(880, now); g.gain.setValueAtTime(0.06, now); g.gain.exponentialRampToValueAtTime(0.001, now+0.1); }
-      else if (type==='complete') { o.frequency.setValueAtTime(1046.5, now); g.gain.setValueAtTime(0.1, now); g.gain.exponentialRampToValueAtTime(0.001, now+0.3); }
-      o.start(now); o.stop(now+0.3);
-    } catch (e) {}
-  }, [soundEnabled]);
+  const runBreathingCycle = useCallback(() => { if (!isActiveRef.current) return; setInstruction('INHALE'); if (pacerRef.current) { pacerRef.current.style.transition=`transform ${inhaleTime}ms cubic-bezier(0.4, 0, 0.2, 1)`; pacerRef.current.style.transform='scale(2.2)'; } playSound('inhale'); inhaleTimeoutRef.current = setTimeout(() => { if (!isActiveRef.current) return; setInstruction('EXHALE'); if (pacerRef.current) { pacerRef.current.style.transition=`transform ${exhaleTime}ms cubic-bezier(0.4, 0, 0.2, 1)`; pacerRef.current.style.transform='scale(1)'; } playSound('exhale'); breathsRef.current+=1; setTotalBreaths(breathsRef.current); if (breathsRef.current%5===0) { const pts = isStressPhase?20:10; scoreRef.current+=pts; setScore(scoreRef.current); showFeedback(isStressPhase?`💪 +${pts} - Maintained Under Stress!`:`✨ +${pts} - Coherence Maintained!`,'success'); } exhaleTimeoutRef.current = setTimeout(() => { runBreathingCycle(); }, exhaleTime); }, inhaleTime); }, [isStressPhase, playSound, showFeedback]);
 
-  const updateTimerDisplay = useCallback((s) => {
-    const m = Math.floor(s/60), sec = s%60;
-    return `${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`;
-  }, []);
+  const startDrill = useCallback(() => { setGameState('playing'); gameStateRef.current='playing'; if (isActiveRef.current) return; isActiveRef.current=true; setTimeLeft(300); setTotalBreaths(0); setScore(0); setIsStressPhase(false); setInstruction(''); scoreRef.current=0; breathsRef.current=0; if (pacerRef.current) { pacerRef.current.style.transform='scale(1)'; pacerRef.current.style.transition='none'; } if (inhaleTimeoutRef.current) clearTimeout(inhaleTimeoutRef.current); if (exhaleTimeoutRef.current) clearTimeout(exhaleTimeoutRef.current); runBreathingCycle(); timerIntervalRef.current = setInterval(() => { setTimeLeft(prev => { if (prev<=1) { if (timerIntervalRef.current) { clearInterval(timerIntervalRef.current); timerIntervalRef.current=null; } if (inhaleTimeoutRef.current) clearTimeout(inhaleTimeoutRef.current); if (exhaleTimeoutRef.current) clearTimeout(exhaleTimeoutRef.current); isActiveRef.current=false; setInstruction('COMPLETE'); setIsStressPhase(false); playSound('complete'); setGameState('gameOver'); gameStateRef.current='gameOver'; showFeedback('🎯 Training Complete!','success'); return 0; } const nt = prev-1; checkStressPhase(nt); return nt; }); }, 1000); }, [runBreathingCycle, checkStressPhase, playSound, showFeedback]);
 
-  const checkStressPhase = useCallback((t) => {
-    const elapsed = 300 - t, inPhase = elapsed>=STRESS_START&&elapsed<STRESS_END;
-    setIsStressPhase(prev => {
-      if (inPhase!==prev) { if (inPhase) { playSound('stress'); showFeedback('⚠️ STRESS PHASE ACTIVE - Stay Coherent!','warning'); } else if (elapsed>=STRESS_END) showFeedback('✅ Stress Phase Complete - Great Resilience!','success'); return inPhase; }
-      return prev;
-    });
-  }, [playSound, showFeedback]);
-
-  const runBreathingCycle = useCallback(() => {
-    if (!isActiveRef.current) return;
-    setInstruction('INHALE');
-    if (pacerRef.current) { pacerRef.current.style.transition=`transform ${inhaleTime}ms cubic-bezier(0.4, 0, 0.2, 1)`; pacerRef.current.style.transform='scale(2.2)'; }
-    playSound('inhale');
-    inhaleTimeoutRef.current = setTimeout(() => {
-      if (!isActiveRef.current) return;
-      setInstruction('EXHALE');
-      if (pacerRef.current) { pacerRef.current.style.transition=`transform ${exhaleTime}ms cubic-bezier(0.4, 0, 0.2, 1)`; pacerRef.current.style.transform='scale(1)'; }
-      playSound('exhale');
-      breathsRef.current+=1; setTotalBreaths(breathsRef.current);
-      if (breathsRef.current%5===0) {
-        const pts = isStressPhase?20:10;
-        scoreRef.current+=pts; setScore(scoreRef.current);
-        showFeedback(isStressPhase?`💪 +${pts} - Maintained Under Stress!`:`✨ +${pts} - Coherence Maintained!`,'success');
-      }
-      exhaleTimeoutRef.current = setTimeout(() => { runBreathingCycle(); }, exhaleTime);
-    }, inhaleTime);
-  }, [isStressPhase, playSound, showFeedback]);
-
-  const startDrill = useCallback(() => {
-    setGameState('playing'); gameStateRef.current='playing';
-    if (isActiveRef.current) return;
-    isActiveRef.current=true; setTimeLeft(300); setTotalBreaths(0); setScore(0); setIsStressPhase(false); setInstruction('');
-    scoreRef.current=0; breathsRef.current=0;
-    if (pacerRef.current) { pacerRef.current.style.transform='scale(1)'; pacerRef.current.style.transition='none'; }
-    if (inhaleTimeoutRef.current) clearTimeout(inhaleTimeoutRef.current);
-    if (exhaleTimeoutRef.current) clearTimeout(exhaleTimeoutRef.current);
-    runBreathingCycle();
-    timerIntervalRef.current = setInterval(() => {
-      setTimeLeft(prev => {
-        if (prev<=1) {
-          if (timerIntervalRef.current) { clearInterval(timerIntervalRef.current); timerIntervalRef.current=null; }
-          if (inhaleTimeoutRef.current) clearTimeout(inhaleTimeoutRef.current);
-          if (exhaleTimeoutRef.current) clearTimeout(exhaleTimeoutRef.current);
-          isActiveRef.current=false; setInstruction('COMPLETE'); setIsStressPhase(false); playSound('complete');
-          setGameState('gameOver'); gameStateRef.current='gameOver'; showFeedback('🎯 Training Complete!','success');
-          return 0;
-        }
-        const nt = prev-1; checkStressPhase(nt); return nt;
-      });
-    }, 1000);
-  }, [runBreathingCycle, checkStressPhase, playSound, showFeedback]);
-
-  const resetGame = useCallback(() => {
-    if (timerIntervalRef.current) { clearInterval(timerIntervalRef.current); timerIntervalRef.current=null; }
-    if (inhaleTimeoutRef.current) clearTimeout(inhaleTimeoutRef.current);
-    if (exhaleTimeoutRef.current) clearTimeout(exhaleTimeoutRef.current);
-    if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
-    isActiveRef.current=false; setGameState('start'); gameStateRef.current='start';
-    setInstruction(''); setTotalBreaths(0); setScore(0); setTimeLeft(300); setIsStressPhase(false); setFeedback('');
-    if (pacerRef.current) pacerRef.current.style.transform='scale(1)';
-  }, []);
+  const resetGame = useCallback(() => { if (timerIntervalRef.current) { clearInterval(timerIntervalRef.current); timerIntervalRef.current=null; } if (inhaleTimeoutRef.current) clearTimeout(inhaleTimeoutRef.current); if (exhaleTimeoutRef.current) clearTimeout(exhaleTimeoutRef.current); if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current); isActiveRef.current=false; setGameState('start'); gameStateRef.current='start'; setInstruction(''); setTotalBreaths(0); setScore(0); setTimeLeft(300); setIsStressPhase(false); setFeedback(''); if (pacerRef.current) pacerRef.current.style.transform='scale(1)'; }, []);
 
   useEffect(() => () => { if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); if (inhaleTimeoutRef.current) clearTimeout(inhaleTimeoutRef.current); if (exhaleTimeoutRef.current) clearTimeout(exhaleTimeoutRef.current); if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current); }, []);
 
-  if (loading||!isClient) return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="w-16 h-16 border-4 border-red-600 border-t-transparent rounded-full animate-spin mx-auto"/>
-    </div>
-  );
+  const sharePage = async () => { if (navigator.share) { try { await navigator.share({ title: 'Free Stress Inoculation Drill | SkillDrills', text: 'Build stress resilience with controlled exposure training. Free!', url: 'https://skilldrills.online/drills/mental-fitness/stress-control/stress-inoculation' }); } catch (e) {} } else { navigator.clipboard.writeText('https://skilldrills.online/drills/mental-fitness/stress-control/stress-inoculation'); alert('Link copied!'); } };
+  const copyPageLink = () => { navigator.clipboard.writeText('https://skilldrills.online/drills/mental-fitness/stress-control/stress-inoculation'); alert('Link copied!'); };
+
+  if (loading||!isClient) return (<div className="min-h-screen flex items-center justify-center bg-gray-50"><div className="w-16 h-16 border-4 border-red-600 border-t-transparent rounded-full animate-spin mx-auto"/></div>);
 
   return (
     <div className={`min-h-screen select-none ${isDarkMode?'bg-gray-900':'bg-gray-50'}`}>
       {isStressPhase&&gameState==='playing'&&<div className="fixed inset-0 pointer-events-none z-40" style={{animation:'visualStress 0.4s infinite',backgroundColor:'rgba(255,0,0,0.15)'}}/>}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify({"@context":"https://schema.org","@type":"WebApplication","name":"Stress Inoculation Drill - Controlled Stress Exposure Training","url":"https://skilldrills.online/drills/mental-fitness/stress-control/stress-inoculation","description":"Build stress resilience through controlled exposure. Maintain 5:6 coherence breathing under red visual strobe and audio stress induction. 2x points during 90s stress phase. 5-minute progressive session.","applicationCategory":"HealthApplication","operatingSystem":"Web","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Organization","name":"Global Drill System"},"educationalUse":["Stress Inoculation","Resilience Training","Stress Exposure","Coherence Training"],"learningResourceType":"Interactive Exercise","timeRequired":"PT5M","interactivityType":"active","inLanguage":"en-US","teaches":["Stress Resilience","Controlled Exposure","Coherence Under Stress","Emotional Regulation"]})}}/>
       <style jsx>{`@keyframes visualStress{0%{background-color:rgba(255,0,0,0.15)}50%{background-color:rgba(255,0,0,0)}100%{background-color:rgba(255,0,0,0.15)}}`}</style>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
@@ -181,7 +97,7 @@ export default function StressInoculationClient() {
             <div className="p-3 bg-gradient-to-r from-red-500 to-orange-600 rounded-xl"><AlertCircle className="w-6 h-6 text-white"/></div>
             <div>
               <h1 className={`text-2xl sm:text-3xl font-bold ${isDarkMode?'text-white':'text-gray-900'}`}>Stress Inoculation</h1>
-              <p className={`text-sm sm:text-base ${isDarkMode?'text-gray-400':'text-gray-500'}`}>Controlled stress exposure • 5:6 breathing • 5-minute session</p>
+              <p className={`text-sm sm:text-base ${isDarkMode?'text-gray-400':'text-gray-500'}`}>Controlled stress exposure • 5:6 breathing • 5-minute session • Free resilience training</p>
             </div>
           </div>
           <div className="flex gap-2">
@@ -192,6 +108,11 @@ export default function StressInoculationClient() {
             <button onClick={toggleFullscreen} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode?'bg-gray-800 border-gray-700 text-gray-300':'bg-white border-gray-200 text-gray-700'}`} title={isFullscreen?'Exit fullscreen':'Fullscreen'}>{isFullscreen?<Minimize2 className="w-5 h-5"/>:<Maximize2 className="w-5 h-5"/>}</button>
           </div>
         </div>
+
+        <section className="sr-only" aria-label="Drill description for search engines">
+          <h2>Free Stress Inoculation Drill - Controlled Stress Exposure & Resilience Training</h2>
+          <p>Build stress resilience through controlled exposure with this free stress inoculation drill. Maintain 5:6 coherence breathing under red visual strobe and audio stress induction. Earn 2x points during the 90-second stress phase. 5-minute progressive session that improves stress tolerance, emotional regulation, and focus under pressure. No registration required.</p>
+        </section>
 
         <div className="grid grid-cols-5 gap-3 mb-4 h-[88px]">
           <SCard icon={<Brain className="text-blue-500"/>} value={score} label="Resilience" dark={isDarkMode}/>
@@ -206,18 +127,7 @@ export default function StressInoculationClient() {
         </div>
 
         <div ref={containerRef} className={`relative ${isFullscreen?'fixed inset-0 z-50':'rounded-xl border-2'}`} style={{background:isBoxDarkMode?'#0a0a0a':'#ffffff',aspectRatio:isFullscreen?'auto':'16/9',display:'flex',alignItems:'center',justifyContent:'center',borderColor:isDarkMode?'#374151':'#e5e7eb'}}>
-          {isFullscreen&&gameState==='playing'&&(
-            <>
-              <div className="absolute top-4 right-4 z-30 flex gap-3">
-                <button onClick={resetGame} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg hover:bg-black/70 transition text-white" title="Reset"><RefreshCw className="w-5 h-5"/></button>
-                <button onClick={()=>setIsDarkMode(!isDarkMode)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg hover:bg-black/70 transition text-white">{isDarkMode?<Sun className="w-5 h-5"/>:<Moon className="w-5 h-5"/>}</button>
-                <button onClick={()=>setIsBoxDarkMode(!isBoxDarkMode)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg hover:bg-black/70 transition text-white"><Eye className="w-5 h-5"/></button>
-                <button onClick={()=>setSoundEnabled(!soundEnabled)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg hover:bg-black/70 transition text-white">{soundEnabled?<Volume2 className="w-5 h-5"/>:<VolumeX className="w-5 h-5"/>}</button>
-                <button onClick={toggleFullscreen} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg hover:bg-black/70 transition text-white"><Minimize2 className="w-5 h-5"/></button>
-              </div>
-              <div className="absolute top-4 left-4 z-30 bg-black/50 backdrop-blur-sm rounded-lg px-4 py-2 text-white text-sm">Score: <span className="text-yellow-400 font-bold">{score}</span> | Breaths: <span className="text-cyan-400 font-bold">{totalBreaths}</span> | Time: <span className="text-blue-400 font-bold">{updateTimerDisplay(timeLeft)}</span></div>
-            </>
-          )}
+          {isFullscreen&&gameState==='playing'&&(<><div className="absolute top-4 right-4 z-30 flex gap-3"><button onClick={resetGame} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg hover:bg-black/70 transition text-white" title="Reset"><RefreshCw className="w-5 h-5"/></button><button onClick={()=>setIsDarkMode(!isDarkMode)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg hover:bg-black/70 transition text-white">{isDarkMode?<Sun className="w-5 h-5"/>:<Moon className="w-5 h-5"/>}</button><button onClick={()=>setIsBoxDarkMode(!isBoxDarkMode)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg hover:bg-black/70 transition text-white"><Eye className="w-5 h-5"/></button><button onClick={()=>setSoundEnabled(!soundEnabled)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg hover:bg-black/70 transition text-white">{soundEnabled?<Volume2 className="w-5 h-5"/>:<VolumeX className="w-5 h-5"/>}</button><button onClick={toggleFullscreen} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg hover:bg-black/70 transition text-white"><Minimize2 className="w-5 h-5"/></button></div><div className="absolute top-4 left-4 z-30 bg-black/50 backdrop-blur-sm rounded-lg px-4 py-2 text-white text-sm">Score: <span className="text-yellow-400 font-bold">{score}</span> | Breaths: <span className="text-cyan-400 font-bold">{totalBreaths}</span> | Time: <span className="text-blue-400 font-bold">{updateTimerDisplay(timeLeft)}</span></div></>)}
 
           <div className="text-center">
             <div className="instruction" style={{fontSize:isFullscreen?'2rem':'1.5rem',height:isFullscreen?'50px':'40px',marginBottom:isFullscreen?'30px':'20px',letterSpacing:'3px',userSelect:'none',color:isStressPhase?'#ff4444':(isBoxDarkMode?'#00f2fe':'#0284c7'),fontWeight:'bold',transition:'color 0.3s ease'}}>{instruction}</div>
@@ -225,94 +135,68 @@ export default function StressInoculationClient() {
               <div ref={pacerRef} className="pacer-circle" style={{width:isFullscreen?'160px':'120px',height:isFullscreen?'160px':'120px',background:'transparent',border:`4px solid ${isStressPhase?'#ff4444':(isBoxDarkMode?'#00f2fe':'#0284c7')}`,borderRadius:'50%',boxShadow:`0 0 20px ${isStressPhase?'rgba(255,68,68,0.6)':(isBoxDarkMode?'rgba(0,242,254,0.6)':'rgba(2,132,199,0.3)')}`,transition:'transform linear, border-color 0.3s ease, box-shadow 0.3s ease'}}/>
             </div>
             <div className="timer" style={{marginTop:isFullscreen?'40px':'30px',fontSize:isFullscreen?'2.5rem':'2rem',letterSpacing:'2px',userSelect:'none',color:isStressPhase?'#ff4444':(isBoxDarkMode?'#00f2fe':'#0284c7'),transition:'color 0.3s ease'}}>{updateTimerDisplay(timeLeft)}</div>
-            {gameState==='playing'&&(
-              <button onClick={()=>{if(timerIntervalRef.current)clearInterval(timerIntervalRef.current);if(inhaleTimeoutRef.current)clearTimeout(inhaleTimeoutRef.current);if(exhaleTimeoutRef.current)clearTimeout(exhaleTimeoutRef.current);isActiveRef.current=false;setIsStressPhase(false);setGameState('gameOver');gameStateRef.current='gameOver';}} className="mt-8 px-6 py-2 rounded-full text-sm transition-all hover:border-red-500 hover:text-red-500" style={{background:'transparent',border:`1px solid ${isBoxDarkMode?'#333':'#ddd'}`,color:isBoxDarkMode?'#666':'#999'}}>End Session</button>
-            )}
+            {gameState==='playing'&&(<button onClick={()=>{if(timerIntervalRef.current)clearInterval(timerIntervalRef.current);if(inhaleTimeoutRef.current)clearTimeout(inhaleTimeoutRef.current);if(exhaleTimeoutRef.current)clearTimeout(exhaleTimeoutRef.current);isActiveRef.current=false;setIsStressPhase(false);setGameState('gameOver');gameStateRef.current='gameOver';}} className="mt-8 px-6 py-2 rounded-full text-sm transition-all hover:border-red-500 hover:text-red-500" style={{background:'transparent',border:`1px solid ${isBoxDarkMode?'#333':'#ddd'}`,color:isBoxDarkMode?'#666':'#999'}}>End Session</button>)}
+
+            {gameState==='start'&&(<div className="absolute inset-0 flex items-center justify-center rounded-xl z-20 backdrop-blur-sm" style={{background:isBoxDarkMode?'rgba(10,10,10,0.95)':'rgba(255,255,255,0.95)'}}><div className={`rounded-2xl p-6 sm:p-8 text-center max-w-md mx-4 shadow-xl border ${isBoxDarkMode?'bg-gray-800 border-gray-700':'bg-white border-gray-200'}`}><AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4"/><h2 className={`text-2xl font-bold mb-2 ${isBoxDarkMode?'text-white':'text-gray-900'}`}>Stress Inoculation</h2><p className={`mb-2 ${isBoxDarkMode?'text-gray-300':'text-gray-600'}`}>Controlled stress exposure • 5-minute session</p><p className={`mb-6 text-sm ${isBoxDarkMode?'text-gray-400':'text-gray-500'}`}>Maintain 5:6 breathing while red strobe and audio stress challenge your focus. 2x points during 90s stress phase. Build real-world resilience.</p><button onClick={startDrill} className="px-8 py-3 bg-gradient-to-r from-red-500 to-orange-600 text-white rounded-xl font-semibold hover:shadow-lg w-full transition-all transform hover:scale-[1.02] active:scale-[0.98]">Start Free Drill</button></div></div>)}
+
+            {gameState==='gameOver'&&(<div className="absolute inset-0 flex items-center justify-center rounded-xl z-20 backdrop-blur-sm" style={{background:isBoxDarkMode?'rgba(10,10,10,0.95)':'rgba(255,255,255,0.95)'}}><div className={`rounded-2xl p-6 sm:p-8 shadow-xl border w-full max-w-[520px] mx-4 ${isBoxDarkMode?'bg-gray-800 border-gray-700':'bg-white border-gray-200'}`}><div className="flex items-center justify-center gap-3 mb-4"><Award className="w-10 h-10 text-yellow-500"/><h2 className={`text-2xl font-bold ${isBoxDarkMode?'text-white':'text-gray-900'}`}>Training Complete!</h2></div><p className={`text-center text-sm mb-6 ${isBoxDarkMode?'text-gray-400':'text-gray-500'}`}>Regular stress inoculation builds real-world resilience and improves emotional regulation under pressure.</p><div className="grid grid-cols-2 gap-3 mb-6"><RCard label="Resilience Score" value={score} icon={<Brain className="w-4 h-4"/>} color="blue" dark={isBoxDarkMode}/><RCard label="Best Score" value={bestScore} icon={<Trophy className="w-4 h-4"/>} color="yellow" dark={isBoxDarkMode}/><RCard label="Total Breaths" value={totalBreaths} icon={<Wind className="w-4 h-4"/>} color="cyan" dark={isBoxDarkMode}/><RCard label="Duration" value="5:00" icon={<Timer className="w-4 h-4"/>} color="green" dark={isBoxDarkMode}/><RCard label="Stress Phase" value="90s" icon={<AlertCircle className="w-4 h-4"/>} color="red" dark={isBoxDarkMode}/><RCard label="Tolerance" value={Math.min(100,Math.floor(score/2))} unit="%" icon={<TrendingUp className="w-4 h-4"/>} color="orange" dark={isBoxDarkMode}/></div><div className="flex gap-3"><Link href="/drills/mental-fitness" className="flex-1"><button className={`w-full px-4 py-2.5 rounded-lg font-semibold ${isDarkMode?'bg-gray-700 text-gray-300 hover:bg-gray-600':'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>← Back</button></Link><button onClick={resetGame} className="flex-1 px-4 py-2.5 bg-gradient-to-r from-red-500 to-orange-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all transform hover:scale-[1.02] active:scale-[0.98]">Train Again →</button></div></div></div>)}
           </div>
-
-          {gameState==='start'&&(
-            <div className="absolute inset-0 flex items-center justify-center rounded-xl z-20 backdrop-blur-sm" style={{background:isBoxDarkMode?'rgba(10,10,10,0.95)':'rgba(255,255,255,0.95)'}}>
-              <div className={`rounded-2xl p-6 sm:p-8 text-center max-w-md mx-4 shadow-xl border ${isBoxDarkMode?'bg-gray-800 border-gray-700':'bg-white border-gray-200'}`}>
-                <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4"/>
-                <h2 className={`text-2xl font-bold mb-2 ${isBoxDarkMode?'text-white':'text-gray-900'}`}>Stress Inoculation</h2>
-                <p className={`mb-2 ${isBoxDarkMode?'text-gray-300':'text-gray-600'}`}>Controlled stress exposure • 5-minute session</p>
-                <p className={`mb-6 text-sm ${isBoxDarkMode?'text-gray-400':'text-gray-500'}`}>Maintain 5:6 breathing while red strobe and audio stress challenge your focus. 2x points during 90s stress phase.</p>
-                <button onClick={startDrill} className="px-8 py-3 bg-gradient-to-r from-red-500 to-orange-600 text-white rounded-xl font-semibold hover:shadow-lg w-full transition-all transform hover:scale-[1.02] active:scale-[0.98]">Begin Training</button>
-              </div>
-            </div>
-          )}
-
-          {gameState==='gameOver'&&(
-            <div className="absolute inset-0 flex items-center justify-center rounded-xl z-20 backdrop-blur-sm" style={{background:isBoxDarkMode?'rgba(10,10,10,0.95)':'rgba(255,255,255,0.95)'}}>
-              <div className={`rounded-2xl p-6 sm:p-8 shadow-xl border w-full max-w-[520px] mx-4 ${isBoxDarkMode?'bg-gray-800 border-gray-700':'bg-white border-gray-200'}`}>
-                <div className="flex items-center justify-center gap-3 mb-4"><Award className="w-10 h-10 text-yellow-500"/><h2 className={`text-2xl font-bold ${isBoxDarkMode?'text-white':'text-gray-900'}`}>Training Complete!</h2></div>
-                <p className={`text-center text-sm mb-6 ${isBoxDarkMode?'text-gray-400':'text-gray-500'}`}>Regular stress inoculation builds real-world resilience and improves emotional regulation under pressure.</p>
-                <div className="grid grid-cols-2 gap-3 mb-6">
-                  <RCard label="Resilience Score" value={score} icon={<Brain className="w-4 h-4"/>} color="blue" dark={isBoxDarkMode}/>
-                  <RCard label="Best Score" value={bestScore} icon={<Trophy className="w-4 h-4"/>} color="yellow" dark={isBoxDarkMode}/>
-                  <RCard label="Total Breaths" value={totalBreaths} icon={<Wind className="w-4 h-4"/>} color="cyan" dark={isBoxDarkMode}/>
-                  <RCard label="Duration" value="5:00" icon={<Timer className="w-4 h-4"/>} color="green" dark={isBoxDarkMode}/>
-                  <RCard label="Stress Phase" value="90s" icon={<AlertCircle className="w-4 h-4"/>} color="red" dark={isBoxDarkMode}/>
-                  <RCard label="Tolerance" value={Math.min(100,Math.floor(score/2))} unit="%" icon={<TrendingUp className="w-4 h-4"/>} color="orange" dark={isBoxDarkMode}/>
-                </div>
-                <div className="flex gap-3">
-                  <Link href="/drills/mental-fitness" className="flex-1"><button className={`w-full px-4 py-2.5 rounded-lg font-semibold ${isDarkMode?'bg-gray-700 text-gray-300 hover:bg-gray-600':'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>← Back</button></Link>
-                  <button onClick={resetGame} className="flex-1 px-4 py-2.5 bg-gradient-to-r from-red-500 to-orange-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all transform hover:scale-[1.02] active:scale-[0.98]">Train Again →</button>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
 
-        {!isFullscreen&&(
-          <footer className="mt-6">
-            <div className={`rounded-xl border overflow-hidden ${isDarkMode?'bg-gray-800 border-gray-700':'bg-white border-gray-200'}`}>
-              <div className={`px-4 py-3 border-b ${isDarkMode?'border-gray-700 bg-gray-800/50':'border-gray-200 bg-gray-50'}`}>
-                <div className="flex items-center gap-2"><Info className={`w-4 h-4 ${isDarkMode?'text-red-400':'text-red-600'}`}/><h2 className={`font-semibold text-lg ${isDarkMode?'text-white':'text-gray-900'}`}>Stress Inoculation Protocol</h2></div>
+        {/* 1. DRILL RULES & SCORING */}
+        {!isFullscreen&&(<footer className="mt-6"><div className={`rounded-xl border overflow-hidden ${isDarkMode?'bg-gray-800 border-gray-700':'bg-white border-gray-200'}`}><div className={`px-4 py-3 border-b ${isDarkMode?'border-gray-700 bg-gray-800/50':'border-gray-200 bg-gray-50'}`}><div className="flex items-center gap-2"><Info className={`w-4 h-4 ${isDarkMode?'text-red-400':'text-red-600'}`}/><h2 className={`font-semibold text-lg ${isDarkMode?'text-white':'text-gray-900'}`}>Stress Inoculation Protocol</h2></div></div><div className="p-6"><div className="grid grid-cols-1 md:grid-cols-2 gap-6"><div className="space-y-3"><div className="flex items-start gap-2"><div className="w-5 h-5 rounded-full bg-cyan-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">1</div><p className={`text-sm ${isDarkMode?'text-gray-300':'text-gray-600'}`}><span className="font-semibold text-cyan-500">INHALE (5s)</span> - Circle expands, breathe in slowly</p></div><div className="flex items-start gap-2"><div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">2</div><p className={`text-sm ${isDarkMode?'text-gray-300':'text-gray-600'}`}><span className="font-semibold text-blue-500">EXHALE (6s)</span> - Circle contracts, breathe out gently</p></div><div className="flex items-start gap-2"><div className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">3</div><p className={`text-sm ${isDarkMode?'text-gray-300':'text-gray-600'}`}><span className="font-semibold text-red-500">Stress Phase (30s-120s)</span> - Red strobe + 880Hz audio induction</p></div></div><div className="space-y-3"><div className="flex items-start gap-2"><div className="w-5 h-5 rounded-full bg-purple-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">4</div><p className={`text-sm ${isDarkMode?'text-gray-300':'text-gray-600'}`}><span className="font-semibold text-purple-500">Maintain coherence</span> - Keep breathing pattern despite stress</p></div><div className="flex items-start gap-2"><div className="w-5 h-5 rounded-full bg-yellow-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">5</div><p className={`text-sm ${isDarkMode?'text-gray-300':'text-gray-600'}`}><span className="font-semibold text-yellow-500">Scoring</span> - 10pts/5 breaths (calm), 20pts/5 breaths (stress)</p></div><div className="flex items-start gap-2"><div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">6</div><p className={`text-sm ${isDarkMode?'text-gray-300':'text-gray-600'}`}><span className="font-semibold text-green-500">5-minute session</span> - Best score saves locally</p></div></div></div><div className={`mt-4 pt-3 border-t flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs ${isDarkMode?'border-gray-700 text-gray-400':'border-gray-200 text-gray-500'}`}><span>🧠 Improves stress tolerance, focus under pressure, emotional regulation</span><span>🎵 523Hz inhale • 392Hz exhale • 880Hz stress tone • Free forever</span></div></div></div></footer>)}
+
+        {/* 2. ABOUT THIS DRILL */}
+        {!isFullscreen && (
+          <section className="mt-8" aria-label="About this stress inoculation drill">
+            <div className={`rounded-xl border overflow-hidden ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+              <div className={`px-4 py-3 border-b ${isDarkMode ? 'border-gray-700 bg-gray-800/50' : 'border-gray-200 bg-gray-50'}`}>
+                <div className="flex items-center gap-2"><GraduationCap className={`w-5 h-5 ${isDarkMode ? 'text-red-400' : 'text-red-600'}`} aria-hidden="true" /><h2 className={`font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>About This Free Stress Inoculation Drill</h2></div>
               </div>
-              <div className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-3">
-                    <div className="flex items-start gap-2"><div className="w-5 h-5 rounded-full bg-cyan-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">1</div><p className={`text-sm ${isDarkMode?'text-gray-300':'text-gray-600'}`}><span className="font-semibold text-cyan-500">INHALE (5s)</span> - Circle expands, breathe in slowly</p></div>
-                    <div className="flex items-start gap-2"><div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">2</div><p className={`text-sm ${isDarkMode?'text-gray-300':'text-gray-600'}`}><span className="font-semibold text-blue-500">EXHALE (6s)</span> - Circle contracts, breathe out gently</p></div>
-                    <div className="flex items-start gap-2"><div className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">3</div><p className={`text-sm ${isDarkMode?'text-gray-300':'text-gray-600'}`}><span className="font-semibold text-red-500">Stress Phase (30s-120s)</span> - Red strobe + 880Hz audio induction</p></div>
-                  </div>
-                  <div className="space-y-3">
-                    <div className="flex items-start gap-2"><div className="w-5 h-5 rounded-full bg-purple-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">4</div><p className={`text-sm ${isDarkMode?'text-gray-300':'text-gray-600'}`}><span className="font-semibold text-purple-500">Maintain coherence</span> - Keep breathing pattern despite stress</p></div>
-                    <div className="flex items-start gap-2"><div className="w-5 h-5 rounded-full bg-yellow-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">5</div><p className={`text-sm ${isDarkMode?'text-gray-300':'text-gray-600'}`}><span className="font-semibold text-yellow-500">Scoring</span> - 10pts/5 breaths (calm), 20pts/5 breaths (stress)</p></div>
-                    <div className="flex items-start gap-2"><div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">6</div><p className={`text-sm ${isDarkMode?'text-gray-300':'text-gray-600'}`}><span className="font-semibold text-green-500">5-minute session</span> - Best score saves locally</p></div>
-                  </div>
+              <div className="p-5">
+                <p className={`text-sm leading-relaxed mb-5 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>This free stress inoculation drill uses controlled exposure to build your resilience. Maintain a 5:6 coherence breathing pattern while red visual strobe and 880Hz audio stress challenge your focus. Earn double points during the 90-second stress phase. Regular practice improves real-world stress tolerance.</p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
+                  <div className={`p-4 rounded-xl border ${isDarkMode ? 'bg-gray-700/50 border-gray-600' : 'bg-red-50 border-red-100'}`}><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-red-500 flex items-center justify-center"><GraduationCap className="w-4 h-4 text-white" /></div><h3 className={`text-sm font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Who It's For</h3></div><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Anyone wanting better stress management, professionals in high-pressure jobs, students facing exams, and those building emotional resilience.</p></div>
+                  <div className={`p-4 rounded-xl border ${isDarkMode ? 'bg-gray-700/50 border-gray-600' : 'bg-green-50 border-green-100'}`}><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-green-500 flex items-center justify-center"><TrendingUp className="w-4 h-4 text-white" /></div><h3 className={`text-sm font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Skills Improved</h3></div><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Stress tolerance, emotional regulation, coherence breathing, focus under pressure, and resilience.</p></div>
+                  <div className={`p-4 rounded-xl border ${isDarkMode ? 'bg-gray-700/50 border-gray-600' : 'bg-purple-50 border-purple-100'}`}><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-purple-500 flex items-center justify-center"><BarChart3 className="w-4 h-4 text-white" /></div><h3 className={`text-sm font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>What You'll Track</h3></div><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Resilience score, total breaths, stress tolerance percentage, and best performance.</p></div>
                 </div>
-                <div className={`mt-4 pt-3 border-t flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs ${isDarkMode?'border-gray-700 text-gray-400':'border-gray-200 text-gray-500'}`}>
-                  <span>🧠 Improves stress tolerance, focus under pressure, emotional regulation</span>
-                  <span>🎵 523Hz inhale • 392Hz exhale • 880Hz stress tone</span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className={`p-4 rounded-xl border ${isDarkMode ? 'bg-gray-700/50 border-gray-600' : 'bg-yellow-50 border-yellow-100'}`}><div className="flex items-center gap-2 mb-3"><div className="w-8 h-8 rounded-lg bg-yellow-500 flex items-center justify-center"><Lightbulb className="w-4 h-4 text-white" /></div><h3 className={`text-sm font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Why Practice Stress Inoculation?</h3></div><ul className={`text-xs space-y-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}><li className="flex items-start gap-2"><CheckCircle2 className="w-3 h-3 text-yellow-500 mt-0.5 flex-shrink-0" /> Builds resilience through controlled exposure</li><li className="flex items-start gap-2"><CheckCircle2 className="w-3 h-3 text-yellow-500 mt-0.5 flex-shrink-0" /> Improves performance under pressure</li><li className="flex items-start gap-2"><CheckCircle2 className="w-3 h-3 text-yellow-500 mt-0.5 flex-shrink-0" /> Teaches coherence breathing for calm focus</li></ul></div>
+                  <div className={`p-4 rounded-xl border ${isDarkMode ? 'bg-gray-700/50 border-gray-600' : 'bg-orange-50 border-orange-100'}`}><div className="flex items-center gap-2 mb-3"><div className="w-8 h-8 rounded-lg bg-orange-500 flex items-center justify-center"><Clock className="w-4 h-4 text-white" /></div><h3 className={`text-sm font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>How to Practice Effectively</h3></div><ol className={`text-xs space-y-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}><li className="flex items-start gap-2"><span className="w-5 h-5 rounded-full bg-orange-500 text-white text-xs flex items-center justify-center flex-shrink-0 mt-0.5">1</span> Follow the breathing pacer (5s inhale, 6s exhale)</li><li className="flex items-start gap-2"><span className="w-5 h-5 rounded-full bg-orange-500 text-white text-xs flex items-center justify-center flex-shrink-0 mt-0.5">2</span> Maintain rhythm during the stress phase (30s-120s)</li><li className="flex items-start gap-2"><span className="w-5 h-5 rounded-full bg-orange-500 text-white text-xs flex items-center justify-center flex-shrink-0 mt-0.5">3</span> Focus on the circle expansion and contraction</li><li className="flex items-start gap-2"><span className="w-5 h-5 rounded-full bg-orange-500 text-white text-xs flex items-center justify-center flex-shrink-0 mt-0.5">4</span> Practice 1-2 times daily for best results</li></ol></div>
                 </div>
               </div>
             </div>
-          </footer>
+          </section>
         )}
+
+        {/* 3. RELATED DRILLS */}
+        {!isFullscreen && (
+          <section className="mt-8" aria-label="Related training drills and resources">
+            <div className="flex items-center gap-2 mb-4"><div className="w-1 h-6 rounded-full bg-gradient-to-b from-red-500 to-orange-600"></div><h2 className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Explore Related Free Drills</h2><span className={`text-xs px-2 py-0.5 rounded-full ${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>6 drills</span></div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <Link href="/drills/mental-fitness/stress-control/calm-under-pressure" className={`group relative overflow-hidden rounded-xl border transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${isDarkMode ? 'bg-gray-800 border-gray-700 hover:border-blue-500' : 'bg-white border-gray-200 hover:border-blue-300'}`}><div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-cyan-500"></div><div className="p-4"><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center"><Brain className="w-4 h-4 text-blue-600" /></div><span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>Stress Control</span></div><h3 className={`font-semibold text-sm mb-1 ${isDarkMode ? 'text-white group-hover:text-blue-400' : 'text-gray-900 group-hover:text-blue-600'} transition-colors`}>Calm Under Pressure</h3><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Practice staying calm with visual and audio stress simulations.</p><div className="flex items-center gap-1 mt-3 text-blue-500 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">Start Drill <ArrowRight className="w-3 h-3" /></div></div></Link>
+              <Link href="/drills/mental-fitness/stress-control/biofeedback" className={`group relative overflow-hidden rounded-xl border transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${isDarkMode ? 'bg-gray-800 border-gray-700 hover:border-green-500' : 'bg-white border-gray-200 hover:border-green-300'}`}><div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-green-500 to-emerald-500"></div><div className="p-4"><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center"><Activity className="w-4 h-4 text-green-600" /></div><span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>Stress Control</span></div><h3 className={`font-semibold text-sm mb-1 ${isDarkMode ? 'text-white group-hover:text-green-400' : 'text-gray-900 group-hover:text-green-600'} transition-colors`}>Biofeedback</h3><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Real-time physiological stress monitoring and regulation training.</p><div className="flex items-center gap-1 mt-3 text-green-500 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">Start Drill <ArrowRight className="w-3 h-3" /></div></div></Link>
+              <Link href="/drills/mental-fitness/breathing-exercises/box-breathing" className={`group relative overflow-hidden rounded-xl border transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${isDarkMode ? 'bg-gray-800 border-gray-700 hover:border-teal-500' : 'bg-white border-gray-200 hover:border-teal-300'}`}><div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-teal-500 to-cyan-500"></div><div className="p-4"><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-teal-100 flex items-center justify-center"><Wind className="w-4 h-4 text-teal-600" /></div><span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>Breathing</span></div><h3 className={`font-semibold text-sm mb-1 ${isDarkMode ? 'text-white group-hover:text-teal-400' : 'text-gray-900 group-hover:text-teal-600'} transition-colors`}>Box Breathing</h3><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>4-4-4-4 tactical breathing for instant calm and focus.</p><div className="flex items-center gap-1 mt-3 text-teal-500 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">Start Drill <ArrowRight className="w-3 h-3" /></div></div></Link>
+              <Link href="/drills/mental-fitness/breathing-exercises/4-7-8" className={`group relative overflow-hidden rounded-xl border transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${isDarkMode ? 'bg-gray-800 border-gray-700 hover:border-purple-500' : 'bg-white border-gray-200 hover:border-purple-300'}`}><div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 to-violet-500"></div><div className="p-4"><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center"><Timer className="w-4 h-4 text-purple-600" /></div><span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>Breathing</span></div><h3 className={`font-semibold text-sm mb-1 ${isDarkMode ? 'text-white group-hover:text-purple-400' : 'text-gray-900 group-hover:text-purple-600'} transition-colors`}>4-7-8 Breathing</h3><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Relaxation breathing technique for deep calm and sleep preparation.</p><div className="flex items-center gap-1 mt-3 text-purple-500 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">Start Drill <ArrowRight className="w-3 h-3" /></div></div></Link>
+              <Link href="/drills/mental-fitness/breathing-exercises/wim-hof" className={`group relative overflow-hidden rounded-xl border transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${isDarkMode ? 'bg-gray-800 border-gray-700 hover:border-orange-500' : 'bg-white border-gray-200 hover:border-orange-300'}`}><div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-500 to-amber-500"></div><div className="p-4"><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center"><Zap className="w-4 h-4 text-orange-600" /></div><span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>Breathing</span></div><h3 className={`font-semibold text-sm mb-1 ${isDarkMode ? 'text-white group-hover:text-orange-400' : 'text-gray-900 group-hover:text-orange-600'} transition-colors`}>Wim Hof Method</h3><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Energizing breathing technique for vitality and focus.</p><div className="flex items-center gap-1 mt-3 text-orange-500 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">Start Drill <ArrowRight className="w-3 h-3" /></div></div></Link>
+              <Link href="/drills/productivity/focus-endurance/deep-work" className={`group relative overflow-hidden rounded-xl border transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${isDarkMode ? 'bg-gray-800 border-gray-700 hover:border-red-500' : 'bg-white border-gray-200 hover:border-red-300'}`}><div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-500 to-rose-500"></div><div className="p-4"><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center"><Timer className="w-4 h-4 text-red-600" /></div><span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>Productivity</span></div><h3 className={`font-semibold text-sm mb-1 ${isDarkMode ? 'text-white group-hover:text-red-400' : 'text-gray-900 group-hover:text-red-600'} transition-colors`}>Deep Work Timer</h3><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Build focus endurance with structured deep work sessions.</p><div className="flex items-center gap-1 mt-3 text-red-500 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">Start Drill <ArrowRight className="w-3 h-3" /></div></div></Link>
+            </div>
+          </section>
+        )}
+
+        {/* 4. GLOBAL FOOTER */}
+        {!isFullscreen && (<footer className="mt-12 bg-gray-900 text-gray-400 rounded-xl py-10 px-6" role="contentinfo"><div className="max-w-7xl mx-auto"><div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8 mb-8"><div><h3 className="text-white font-semibold mb-3 text-sm">FPS Training</h3><ul className="space-y-2 text-sm"><li><Link href="/drills/fps/flick-shot-training" className="hover:text-white transition-colors">Flick Shot Trainer</Link></li><li><Link href="/drills/fps/target-acquisition" className="hover:text-white transition-colors">Target Acquisition</Link></li><li><Link href="/drills/fps/reactive-tracking" className="hover:text-white transition-colors">Reactive Tracking</Link></li><li><Link href="/drills/fps" className="text-blue-400 hover:text-blue-300 transition-colors font-medium">All 21 FPS Drills →</Link></li></ul></div><div><h3 className="text-white font-semibold mb-3 text-sm">Cognitive</h3><ul className="space-y-2 text-sm"><li><Link href="/drills/cognitive/memory/card-matching" className="hover:text-white transition-colors">Memory Games</Link></li><li><Link href="/drills/cognitive/attention/divided-attention" className="hover:text-white transition-colors">Attention Drills</Link></li><li><Link href="/drills/cognitive/problem-solving/logic-puzzles" className="hover:text-white transition-colors">Logic Puzzles</Link></li><li><Link href="/drills/cognitive" className="text-blue-400 hover:text-blue-300 transition-colors font-medium">All 16 Cognitive Drills →</Link></li></ul></div><div><h3 className="text-white font-semibold mb-3 text-sm">Mental Fitness</h3><ul className="space-y-2 text-sm"><li><Link href="/drills/mental-fitness/breathing-exercises/box-breathing" className="hover:text-white transition-colors">Box Breathing</Link></li><li><Link href="/drills/mental-fitness/stress-control/biofeedback" className="hover:text-white transition-colors">Biofeedback</Link></li><li><Link href="/drills/mental-fitness/stress-control/calm-under-pressure" className="hover:text-white transition-colors">Calm Under Pressure</Link></li><li><Link href="/drills/mental-fitness" className="text-blue-400 hover:text-blue-300 transition-colors font-medium">All 6 Mental Fitness Drills →</Link></li></ul></div><div><h3 className="text-white font-semibold mb-3 text-sm">Visual & Motor</h3><ul className="space-y-2 text-sm"><li><Link href="/drills/visual/reaction-speed/light-reaction" className="hover:text-white transition-colors">Reaction Time Test</Link></li><li><Link href="/drills/motor/hand-eye-coordination/aim-trainer" className="hover:text-white transition-colors">Hand-Eye Coordination</Link></li><li><Link href="/drills/visual/tracking-accuracy/moving-target" className="hover:text-white transition-colors">Moving Target Tracking</Link></li><li><Link href="/drills/visual" className="text-blue-400 hover:text-blue-300 transition-colors font-medium">All 14 Visual Drills →</Link></li></ul></div><div><h3 className="text-white font-semibold mb-3 text-sm">More Categories</h3><ul className="space-y-2 text-sm"><li><Link href="/drills/memory" className="hover:text-white transition-colors">Memory (15 drills)</Link></li><li><Link href="/drills/productivity" className="hover:text-white transition-colors">Productivity (10 drills)</Link></li><li><Link href="/drills/academic" className="hover:text-white transition-colors">Academic (12 drills)</Link></li><li><Link href="/drills/physical" className="hover:text-white transition-colors">Physical (11 drills)</Link></li></ul></div></div><div className="border-t border-gray-800 pt-8 text-center"><div className="flex items-center justify-center gap-3 mb-4"><div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center"><Target className="w-5 h-5 text-white" aria-hidden="true" /></div><span className="text-white font-bold text-lg">SkillDrills</span></div><p className="text-sm mb-2">&copy; 2026 SkillDrills. All rights reserved.</p><p className="text-xs max-w-2xl mx-auto leading-relaxed mb-6">Free online stress inoculation drill for resilience training. Practice 5:6 coherence breathing under controlled stress exposure with visual and audio stress induction. Build real-world stress tolerance and emotional regulation. No registration required. More free drills at skilldrills.online.</p><div className="flex items-center justify-center gap-5 flex-wrap"><button onClick={sharePage} className="text-gray-500 hover:text-white transition-colors" title="Share this drill" aria-label="Share this free stress inoculation drill"><svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg></button><button onClick={copyPageLink} className="text-gray-500 hover:text-white transition-colors" title="Copy link" aria-label="Copy drill link to clipboard"><svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg></button><a href="https://twitter.com/skilldrillss" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-white transition-colors" title="Follow on Twitter X" aria-label="Follow SkillDrills on Twitter X"><svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a><a href="https://instagram.com/skilldrills.online" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-white transition-colors" title="Follow on Instagram" aria-label="Follow SkillDrills on Instagram"><svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg></a><a href="https://youtube.com/@skilldrills.online" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-white transition-colors" title="Subscribe on YouTube" aria-label="Subscribe to SkillDrills on YouTube"><svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a><a href="https://pinterest.com/skilldrills" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-white transition-colors" title="Follow on Pinterest" aria-label="Follow SkillDrills on Pinterest"><svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0C5.373 0 0 5.372 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738.098.119.112.224.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.631-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12 0-6.628-5.373-12-12-12z"/></svg></a></div></div></div></footer>)}
       </div>
     </div>
   );
 }
 
 function SCard({ icon, value, label, unit='', dark }) {
-  return (
-    <div className={`rounded-xl shadow-sm border p-2 sm:p-3 text-center flex flex-col justify-center h-full ${dark?'bg-gray-800 border-gray-700':'bg-white border-gray-100'}`}>
-      <div className="mb-1 flex justify-center">{icon}</div>
-      <p className={`text-lg sm:text-xl font-bold truncate ${dark?'text-white':'text-gray-900'}`}>{value}{unit}</p>
-      <p className={`text-[10px] sm:text-xs truncate ${dark?'text-gray-400':'text-gray-500'}`}>{label}</p>
-    </div>
-  );
+  return (<div className={`rounded-xl shadow-sm border p-2 sm:p-3 text-center flex flex-col justify-center h-full ${dark?'bg-gray-800 border-gray-700':'bg-white border-gray-100'}`}><div className="mb-1 flex justify-center">{icon}</div><p className={`text-lg sm:text-xl font-bold truncate ${dark?'text-white':'text-gray-900'}`}>{value}{unit}</p><p className={`text-[10px] sm:text-xs truncate ${dark?'text-gray-400':'text-gray-500'}`}>{label}</p></div>);
 }
 
 function RCard({ label, value, unit='', icon, color, dark }) {
   const m={blue:'bg-blue-500/10 border-blue-500/30 text-blue-500',yellow:'bg-yellow-500/10 border-yellow-500/30 text-yellow-500',cyan:'bg-cyan-500/10 border-cyan-500/30 text-cyan-500',green:'bg-green-500/10 border-green-500/30 text-green-500',red:'bg-red-500/10 border-red-500/30 text-red-500',orange:'bg-orange-500/10 border-orange-500/30 text-orange-500'};
   const c=m[color]||m.blue,[bg,border,text]=c.split(' ');
-  return (
-    <div className={`flex items-center justify-between p-3 rounded-lg border ${bg} ${border}`}>
-      <div className="flex items-center gap-2 min-w-0"><div className={text}>{icon}</div><span className={`text-xs sm:text-sm truncate ${dark?'text-gray-300':'text-gray-600'}`}>{label}</span></div>
-      <span className={`font-bold text-base sm:text-lg flex-shrink-0 ml-2 ${text}`}>{value}{unit}</span>
-    </div>
-  );
+  return (<div className={`flex items-center justify-between p-3 rounded-lg border ${bg} ${border}`}><div className="flex items-center gap-2 min-w-0"><div className={text}>{icon}</div><span className={`text-xs sm:text-sm truncate ${dark?'text-gray-300':'text-gray-600'}`}>{label}</span></div><span className={`font-bold text-base sm:text-lg flex-shrink-0 ml-2 ${text}`}>{value}{unit}</span></div>);
 }

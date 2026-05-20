@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { 
   ArrowLeft, Target, Zap, Clock, Award, Activity, 
   Volume2, VolumeX, Maximize2, Minimize2, Sun, Moon, 
-  Eye, Brain, BarChart3, Timer, Trophy, Info, Move, Heart, RefreshCw
+  Eye, Brain, BarChart3, Timer, Trophy, Info, Move, Heart, RefreshCw,
+  GraduationCap, Lightbulb, TrendingUp, CheckCircle2, Star, ArrowRight, Share2, Copy
 } from 'lucide-react';
 
 export default function GestureSpeedClient() {
@@ -48,19 +49,17 @@ export default function GestureSpeedClient() {
   const gateHitProcessedRef = useRef(false);
   const cycleCompletedRef = useRef(false);
 
-  // Mark as client-side rendered
   useEffect(() => {
     setIsClient(true);
     const t = setTimeout(() => setLoading(false), 300);
     return () => clearTimeout(t);
   }, []);
 
-  // Load best score
   useEffect(() => {
     try {
       const savedBestScore = localStorage.getItem('vectorRecoilBestScore');
       if (savedBestScore) { const p = parseInt(savedBestScore, 10); if (!isNaN(p)) setBestScore(p); }
-    } catch (e) { /* localStorage not available */ }
+    } catch (e) {}
   }, []);
 
   useEffect(() => { gameStateRef.current = gameState; }, [gameState]);
@@ -90,7 +89,7 @@ export default function GestureSpeedClient() {
         localStorage.setItem('vectorRecoilBestScore', finalScore.toString());
         setBestScore(finalScore);
       }
-    } catch (e) { /* localStorage not available */ }
+    } catch (e) {}
   }, []);
 
   const showFeedback = useCallback((message, type) => {
@@ -119,10 +118,9 @@ export default function GestureSpeedClient() {
       gain.gain.setValueAtTime(type === 'penalty' ? 0.15 : type === 'streak' ? 0.1 : 0.08, now);
       gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
       osc.start(now); osc.stop(now + 0.15);
-    } catch (e) { /* Audio not supported */ }
+    } catch (e) {}
   }, [soundEnabled, initAudio]);
 
-  // Timer
   useEffect(() => {
     if (gameState !== 'playing') return;
     if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
@@ -167,7 +165,6 @@ export default function GestureSpeedClient() {
     cycleCompletedRef.current = false;
   }, []);
 
-  // Mouse tracking
   useEffect(() => {
     const handleMouseMove = (e) => {
       const cvs = canvasRef.current; if (!cvs) return;
@@ -179,7 +176,6 @@ export default function GestureSpeedClient() {
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
-  // Click handler
   useEffect(() => {
     const handleMouseDown = (e) => {
       e.preventDefault(); e.stopPropagation();
@@ -213,10 +209,8 @@ export default function GestureSpeedClient() {
     return () => { window.removeEventListener('mousedown', handleMouseDown); window.removeEventListener('contextmenu', (e) => e.preventDefault()); };
   }, [addPenalty, playSound, showFeedback]);
 
-  // Cleanup
   useEffect(() => { return () => { isActiveRef.current = false; if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); }; }, []);
 
-  // Canvas
   useEffect(() => {
     if (gameState !== 'playing') return;
     const cvs = canvasRef.current; if (!cvs) return;
@@ -273,18 +267,15 @@ export default function GestureSpeedClient() {
       const mouse = mousePositionRef.current;
       const onCenter = Math.hypot(mouse.x - cx, mouse.y - cy) < 20;
 
-      // Particles
       ctx.strokeStyle = isBoxDarkMode ? "#1a1a1a" : "#e0e0e0"; ctx.lineWidth = 1;
       particlesRef.current.forEach(p => { p.a += 0.005; const px = cx + Math.cos(p.a) * p.r; const py = cy + Math.sin(p.a) * p.r; ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px + 4, py + 4); ctx.stroke(); });
 
-      // Center
       ctx.beginPath(); ctx.arc(cx, cy, 20, 0, Math.PI * 2);
       if (onCenter || stateRef.current === 'CENTER') { ctx.fillStyle = "#00ff88"; ctx.shadowColor = "#00ff88"; ctx.shadowBlur = 15; }
       else { ctx.fillStyle = "rgba(0, 255, 136, 0.3)"; ctx.shadowBlur = 0; }
       ctx.fill(); ctx.shadowBlur = 0;
       ctx.beginPath(); ctx.arc(cx, cy, 20, 0, Math.PI * 2); ctx.strokeStyle = onCenter ? "#00ff88" : "rgba(0, 255, 136, 0.5)"; ctx.lineWidth = 2; ctx.stroke();
 
-      // Gate
       const gate = gateRef.current;
       if (gate.active && stateRef.current === 'FLICKING') {
         const timerPercent = gate.timer / limitRef.current;
@@ -306,14 +297,12 @@ export default function GestureSpeedClient() {
         if (isHoveringGate) { ctx.fillStyle = "#00ff88"; ctx.font = "bold 10px monospace"; ctx.textAlign = "center"; ctx.fillText('CLICK', gate.x, gate.y - 35); }
       }
 
-      // Return indicator
       if (stateRef.current === 'RETURNING') {
         ctx.beginPath(); ctx.moveTo(mouse.x, mouse.y); ctx.lineTo(cx, cy);
         ctx.strokeStyle = "rgba(0, 255, 136, 0.4)"; ctx.lineWidth = 2; ctx.setLineDash([8, 6]); ctx.stroke(); ctx.setLineDash([]);
         ctx.fillStyle = "#00ff88"; ctx.font = "bold 10px monospace"; ctx.textAlign = "center"; ctx.fillText('Return to center for +1', cx, cy - 40);
       }
 
-      // Crosshair
       if (mouse.x > 0 && mouse.x < cvs.width && mouse.y > 0 && mouse.y < cvs.height) {
         ctx.beginPath(); ctx.arc(mouse.x, mouse.y, 10, 0, Math.PI * 2); ctx.strokeStyle = "#00ff88"; ctx.lineWidth = 2; ctx.stroke();
         ctx.beginPath(); ctx.arc(mouse.x, mouse.y, 4, 0, Math.PI * 2); ctx.fillStyle = "#00ff88"; ctx.fill();
@@ -322,7 +311,6 @@ export default function GestureSpeedClient() {
         ctx.moveTo(mouse.x, mouse.y - 20); ctx.lineTo(mouse.x, mouse.y - 14); ctx.moveTo(mouse.x, mouse.y + 14); ctx.lineTo(mouse.x, mouse.y + 20); ctx.stroke();
       }
 
-      // State text
       ctx.fillStyle = "#00ff88"; ctx.font = "bold 11px monospace"; ctx.textAlign = "center";
       if (stateRef.current === 'FLICKING') ctx.fillText('→ CLICK THE GATE (0.35s) →', cvs.width / 2, 35);
       else if (stateRef.current === 'RETURNING') ctx.fillText('← RETURN TO CENTER FOR +1 ←', cvs.width / 2, 35);
@@ -353,6 +341,26 @@ export default function GestureSpeedClient() {
     setGameState('start'); gameStateRef.current = 'start'; setFeedback(''); setFeedbackType('');
   }, []);
 
+  const sharePage = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Free Vector Recoil Gesture Speed Drill | SkillDrills',
+          text: 'Train flick-and-return mouse gestures with 350ms gate clicking. Free!',
+          url: 'https://skilldrills.online/drills/motor/movement-speed/gesture-speed'
+        });
+      } catch (e) {}
+    } else {
+      navigator.clipboard.writeText('https://skilldrills.online/drills/motor/movement-speed/gesture-speed');
+      alert('Link copied!');
+    }
+  };
+
+  const copyPageLink = () => {
+    navigator.clipboard.writeText('https://skilldrills.online/drills/motor/movement-speed/gesture-speed');
+    alert('Link copied!');
+  };
+
   if (loading || !isClient) {
     return <div className="min-h-screen flex items-center justify-center bg-gray-50"><div className="text-center"><div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div><p className="text-gray-600">Loading gesture speed drill...</p></div></div>;
   }
@@ -361,43 +369,54 @@ export default function GestureSpeedClient() {
     <div className={`min-h-screen select-none ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         "@context": "https://schema.org", "@type": "WebApplication",
-        "name": "Vector Recoil - Gesture Speed Drill",
+        "name": "Vector Recoil - Gesture Speed & Flick Movement Training",
         "url": "https://skilldrills.online/drills/motor/movement-speed/gesture-speed",
-        "description": "Flick-and-return gesture speed training. Click gates within 350ms then return to center for +1 point per cycle. 60-second challenge with 3 lives and streak bonuses.",
-        "applicationCategory": "GameApplication", "operatingSystem": "Web",
-        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-        "author": { "@type": "Organization", "name": "Global Drill System" },
-        "educationalUse": ["Gesture Speed", "Flick Training", "Rapid Movement", "Motor Speed"],
-        "learningResourceType": "Interactive Exercise", "timeRequired": "PT60S",
-        "interactivityType": "active", "inLanguage": "en-US",
-        "teaches": ["Flick Speed", "Return Accuracy", "Gesture Precision", "Movement Speed"]
+        "description": "Free flick-and-return gesture speed training with 350ms gate clicking windows. Hover center to spawn gate click it within time limit then return to center for +1 point per cycle. Direction arrow and timer ring with color change. 3-life protection system. 60-second timed challenge.",
+        "applicationCategory": "GameApplication", "operatingSystem": "All",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD", "availability": "https://schema.org/OnlineOnly" },
+        "author": { "@type": "Organization", "name": "SkillDrills", "url": "https://skilldrills.online" },
+        "publisher": { "@type": "Organization", "name": "SkillDrills" },
+        "educationalUse": ["Gesture Speed Training", "Flick Movement Practice", "Rapid Targeting Development", "Motor Speed Enhancement"],
+        "learningResourceType": ["Interactive Exercise", "Motor Drill", "Speed Training"],
+        "timeRequired": "PT60S", "interactivityType": "active", "inLanguage": "en-US",
+        "teaches": ["Flick Speed", "Return Accuracy", "Gesture Precision", "Movement Speed", "Rapid Motor Control"],
+        "educationalLevel": "All Levels", "typicalAgeRange": "10-80",
+        "datePublished": "2026-05-14", "dateModified": new Date().toISOString().split('T')[0],
+        "version": "1.0", "isAccessibleForFree": true,
+        "accessMode": ["visual"], "accessModeSufficient": ["visual"]
       })}} />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <nav aria-label="Breadcrumb" className="mb-4"><ol className="flex flex-wrap items-center gap-2 text-sm"><li><Link href="/" className={`hover:underline transition-colors ${isDarkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-600 hover:text-gray-900'}`}>Home</Link></li><li className={`${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`} aria-hidden="true">/</li><li><Link href="/drills/motor" className={`hover:underline transition-colors ${isDarkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-600 hover:text-gray-900'}`}>Motor Drills</Link></li><li className={`${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`} aria-hidden="true">/</li><li className={`${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Movement Speed</li><li className={`${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`} aria-hidden="true">/</li><li className={`font-medium ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`} aria-current="page">Vector Recoil</li></ol></nav>
+        {!isFullscreen && (
+          <nav aria-label="Breadcrumb" className="mb-4"><ol className="flex flex-wrap items-center gap-2 text-sm"><li><Link href="/" className={`hover:underline transition-colors ${isDarkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-600 hover:text-gray-900'}`}>Home</Link></li><li className={`${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`} aria-hidden="true">/</li><li><Link href="/drills/motor" className={`hover:underline transition-colors ${isDarkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-600 hover:text-gray-900'}`}>Motor Drills</Link></li><li className={`${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`} aria-hidden="true">/</li><li className={`${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Movement Speed</li><li className={`${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`} aria-hidden="true">/</li><li className={`font-medium ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`} aria-current="page">Vector Recoil</li></ol></nav>
+        )}
         
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-          <div className="flex items-center gap-3"><div className="p-3 bg-gradient-to-r from-blue-500 to-cyan-600 rounded-xl flex-shrink-0"><Move className="w-6 h-6 text-white" /></div><div><h1 className={`text-2xl sm:text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Vector Recoil</h1><p className={`text-sm sm:text-base ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Click gate (0.35s) & return • +1 per cycle • 3 lives • 60s challenge</p></div></div>
-          <div className="flex gap-2 flex-shrink-0">
-            {gameState === 'playing' && <button onClick={resetGame} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700' : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-100'}`} title="Reset" aria-label="Reset gesture speed drill"><RefreshCw className="w-5 h-5" /></button>}
-            <button onClick={() => setIsDarkMode(!isDarkMode)} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}>{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button>
-            <button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} aria-label="Toggle canvas theme"><Eye className="w-5 h-5" /></button>
-            <button onClick={() => setSoundEnabled(!soundEnabled)} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} aria-label={soundEnabled ? 'Mute sounds' : 'Enable sounds'}>{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button>
-            <button onClick={toggleFullscreen} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}>{isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}</button>
+        {!isFullscreen && (
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+            <div className="flex items-center gap-3"><div className="p-3 bg-gradient-to-r from-blue-500 to-cyan-600 rounded-xl flex-shrink-0"><Move className="w-6 h-6 text-white" /></div><div><h1 className={`text-2xl sm:text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Vector Recoil</h1><p className={`text-sm sm:text-base ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Free gesture speed drill • 0.35s gate • Return to center • 60s</p></div></div>
+            <div className="flex gap-2 flex-shrink-0">
+              {gameState === 'playing' && <button onClick={resetGame} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700' : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-100'}`} title="Reset" aria-label="Reset gesture speed drill"><RefreshCw className="w-5 h-5" /></button>}
+              <button onClick={() => setIsDarkMode(!isDarkMode)} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}>{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button>
+              <button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} aria-label="Toggle canvas theme"><Eye className="w-5 h-5" /></button>
+              <button onClick={() => setSoundEnabled(!soundEnabled)} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} aria-label={soundEnabled ? 'Mute sounds' : 'Enable sounds'}>{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button>
+              <button onClick={toggleFullscreen} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}>{isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}</button>
+            </div>
           </div>
-        </div>
+        )}
 
         <section className="sr-only"><h2>Vector Recoil - Gesture Speed Training</h2><p>Flick-and-return mouse gesture training. Hover center to spawn a gate, click it within 350ms, then return to center for +1 point. 3-life protection. 60-second challenge with streak bonuses.</p></section>
 
-        <div className="grid grid-cols-7 gap-3 mb-4 h-[88px]">
-          <StatCard icon={<Target className="text-blue-600" />} value={score} label="Score" isDark={isDarkMode} />
-          <StatCard icon={<Trophy className="text-yellow-600" />} value={bestScore} label="Best" isDark={isDarkMode} />
-          <StatCard icon={<Timer className={timeLeft < 15 ? 'text-red-600' : 'text-green-600'} />} value={timeLeft} label="Time" unit="s" isDark={isDarkMode} />
-          <StatCard icon={<Zap className="text-orange-600" />} value={streak} label="Streak" isDark={isDarkMode} />
-          <StatCard icon={<Award className="text-amber-600" />} value={bestStreak} label="Best Streak" isDark={isDarkMode} />
-          <StatCard icon={<Move className="text-cyan-600" />} value={successfulRecoils} label="Cycles" isDark={isDarkMode} />
-          <StatCard icon={<Heart className={lives > 0 ? 'text-red-500' : 'text-gray-500'} />} value={lives} label="Lives" isDark={isDarkMode} />
-        </div>
+        {!isFullscreen && (
+          <div className="grid grid-cols-7 gap-3 mb-4 h-[88px]">
+            <StatCard icon={<Target className="text-blue-600" />} value={score} label="Score" isDark={isDarkMode} />
+            <StatCard icon={<Trophy className="text-yellow-600" />} value={bestScore} label="Best" isDark={isDarkMode} />
+            <StatCard icon={<Timer className={timeLeft < 15 ? 'text-red-600' : 'text-green-600'} />} value={timeLeft} label="Time" unit="s" isDark={isDarkMode} />
+            <StatCard icon={<Zap className="text-orange-600" />} value={streak} label="Streak" isDark={isDarkMode} />
+            <StatCard icon={<Award className="text-amber-600" />} value={bestStreak} label="Best Streak" isDark={isDarkMode} />
+            <StatCard icon={<Move className="text-cyan-600" />} value={successfulRecoils} label="Cycles" isDark={isDarkMode} />
+            <StatCard icon={<Heart className={lives > 0 ? 'text-red-500' : 'text-gray-500'} />} value={lives} label="Lives" isDark={isDarkMode} />
+          </div>
+        )}
 
         <div className="h-10 mb-2 flex justify-center items-center"><div className={`px-4 py-1.5 rounded-lg text-white font-semibold text-sm transition-all duration-200 ${feedback ? 'opacity-100 scale-100' : 'opacity-0 scale-95'} ${feedbackType === 'success' ? 'bg-green-500' : feedbackType === 'warning' ? 'bg-yellow-500' : 'bg-red-500'}`} role="status" aria-live="polite">{feedback || '\u00A0'}</div></div>
 
@@ -405,7 +424,7 @@ export default function GestureSpeedClient() {
           {isFullscreen && gameState === 'playing' && (<div className="absolute top-4 right-4 z-30 flex gap-3"><button onClick={resetGame} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Reset"><RefreshCw className="w-5 h-5" /></button><button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle dark mode">{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button><button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle canvas theme"><Eye className="w-5 h-5" /></button><button onClick={() => setSoundEnabled(!soundEnabled)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle sound">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button><button onClick={toggleFullscreen} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Exit fullscreen"><Minimize2 className="w-5 h-5" /></button></div>)}
           <canvas ref={canvasRef} style={{ display: 'block', position: 'absolute' }} aria-label="Gesture speed canvas. Click gates and return to center." />
           
-          {gameState === 'start' && (<div className={`absolute inset-0 flex items-center justify-center backdrop-blur-sm rounded-xl z-40 ${isBoxDarkMode ? 'bg-gray-900/95' : 'bg-white/95'}`}><div className={`rounded-2xl p-6 sm:p-8 text-center max-w-md mx-4 shadow-xl border ${isBoxDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}><div className="mb-4"><Move className="w-16 h-16 text-blue-500 mx-auto" aria-hidden="true" /></div><h2 className={`text-2xl font-bold mb-2 ${isBoxDarkMode ? 'text-white' : 'text-gray-900'}`}>Vector Recoil</h2><p className={`mb-2 ${isBoxDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>0.35s to click gate • Return to center for +1 point • 3 lives</p><p className={`mb-6 text-sm ${isBoxDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Hover center to spawn gate. Click gate within 350ms. Return to center to complete cycle and earn +1 point.</p><button onClick={startGame} className="px-8 py-3 bg-gradient-to-r from-blue-500 to-cyan-600 text-white rounded-xl font-semibold hover:shadow-lg w-full transition-all transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" aria-label="Start gesture speed training">Start Training</button></div></div>)}
+          {gameState === 'start' && (<div className={`absolute inset-0 flex items-center justify-center backdrop-blur-sm rounded-xl z-40 ${isBoxDarkMode ? 'bg-gray-900/95' : 'bg-white/95'}`}><div className={`rounded-2xl p-6 sm:p-8 text-center max-w-md mx-4 shadow-xl border ${isBoxDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}><div className="mb-4"><Move className="w-16 h-16 text-blue-500 mx-auto" aria-hidden="true" /></div><h2 className={`text-2xl font-bold mb-2 ${isBoxDarkMode ? 'text-white' : 'text-gray-900'}`}>Vector Recoil</h2><p className={`mb-2 ${isBoxDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>0.35s to click gate • Return to center for +1 point • 3 lives</p><p className={`mb-6 text-sm ${isBoxDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Hover center to spawn gate. Click gate within 350ms. Return to center to complete cycle and earn +1 point.</p><button onClick={startGame} className="px-8 py-3 bg-gradient-to-r from-blue-500 to-cyan-600 text-white rounded-xl font-semibold hover:shadow-lg w-full transition-all transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" aria-label="Start gesture speed training">Start Free Drill</button></div></div>)}
           
           {gameState === 'gameOver' && (<div className={`absolute inset-0 flex items-center justify-center backdrop-blur-sm rounded-xl z-40 ${isBoxDarkMode ? 'bg-gray-900/95' : 'bg-white/95'}`}><div className={`rounded-2xl p-6 sm:p-8 shadow-xl border w-full max-w-[480px] mx-4 ${isBoxDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}><div className="flex items-center justify-center gap-3 mb-4"><Timer className="w-10 h-10 text-orange-500" aria-hidden="true" /><h2 className={`text-2xl font-bold ${isBoxDarkMode ? 'text-white' : 'text-gray-900'}`}>Time&apos;s Up!</h2></div><p className={`text-center text-sm mb-6 ${isBoxDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Keep practicing to improve your gesture speed and accuracy.</p><div className="grid grid-cols-2 gap-3 mb-6"><ResultCard label="Final Score" value={score} icon={<Target className="w-4 h-4" />} color="blue" isDark={isBoxDarkMode} /><ResultCard label="Best Score" value={bestScore} icon={<Trophy className="w-4 h-4" />} color="yellow" isDark={isBoxDarkMode} /><ResultCard label="Best Streak" value={bestStreak} icon={<Zap className="w-4 h-4" />} color="orange" isDark={isBoxDarkMode} /><ResultCard label="Cycles" value={successfulRecoils} icon={<Move className="w-4 h-4" />} color="green" isDark={isBoxDarkMode} /><ResultCard label="Lives Left" value={lives} icon={<Heart className="w-4 h-4" />} color="red" isDark={isBoxDarkMode} /></div><div className="flex gap-3"><Link href="/drills/motor" className="flex-1"><button className={`w-full px-4 py-2.5 rounded-lg font-semibold transition-all ${isDarkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>← Back to Motor</button></Link><button onClick={startGame} className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-cyan-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">Play Again →</button></div></div></div>)}
         </div>

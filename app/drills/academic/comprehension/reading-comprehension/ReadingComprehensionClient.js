@@ -9,55 +9,28 @@ import {
   ArrowLeft, Target, Activity,
   Play, Pause, CheckCircle2, Brain, Trophy,
   ChevronUp, ChevronDown, BarChart3, Info, Gauge,
-  RefreshCw, Check, XCircle
+  RefreshCw, Check, XCircle,
+  Crosshair, Dumbbell, Database, Keyboard, Star, Users,
+  GraduationCap, Lightbulb, TrendingUp, Clock, ArrowRight,
+  Headphones, Code2, Hash
 } from 'lucide-react';
 
-// Dynamic Passage Generator - Creates unique passages each time
 const generatePassage = (level) => {
-  // ... (keep the same generatePassage function)
-
   const topics = {
     1: [
-      {
-        title: "The Water Cycle",
-        text: "Water on Earth is constantly moving through a process called the water cycle. The sun heats water in oceans and lakes, causing it to evaporate into water vapor. This vapor rises into the atmosphere where it cools and condenses into clouds. When the clouds become heavy enough, the water falls back to Earth as precipitation in the form of rain or snow. This water then flows into rivers and streams, eventually returning to the oceans where the cycle begins again. This continuous process has been happening for billions of years and is essential for all life on our planet."
-      },
-      {
-        title: "Photosynthesis Basics",
-        text: "Plants are remarkable living organisms that can create their own food through photosynthesis. Using energy from sunlight, plants convert carbon dioxide from the air and water from the soil into glucose, a type of sugar that provides them with energy. During this process, plants release oxygen as a byproduct, which is essential for animals and humans to breathe. The green color in leaves comes from chlorophyll, a special pigment that captures sunlight energy. Without photosynthesis, life on Earth as we know it would not be possible."
-      },
-      {
-        title: "The Five Senses",
-        text: "Humans experience the world through five main senses: sight, hearing, smell, taste, and touch. Our eyes detect light and send signals to the brain that create images. Ears capture sound waves vibrating through the air. The nose contains millions of receptors that identify different odors. Taste buds on the tongue distinguish between sweet, sour, salty, bitter, and umami flavors. Finally, our skin contains nerve endings that sense pressure, temperature, and pain. Together, these senses help us navigate and understand our environment."
-      }
+      { title: "The Water Cycle", text: "Water on Earth is constantly moving through a process called the water cycle. The sun heats water in oceans and lakes, causing it to evaporate into water vapor. This vapor rises into the atmosphere where it cools and condenses into clouds. When the clouds become heavy enough, the water falls back to Earth as precipitation in the form of rain or snow. This water then flows into rivers and streams, eventually returning to the oceans where the cycle begins again. This continuous process has been happening for billions of years and is essential for all life on our planet." },
+      { title: "Photosynthesis Basics", text: "Plants are remarkable living organisms that can create their own food through photosynthesis. Using energy from sunlight, plants convert carbon dioxide from the air and water from the soil into glucose, a type of sugar that provides them with energy. During this process, plants release oxygen as a byproduct, which is essential for animals and humans to breathe. The green color in leaves comes from chlorophyll, a special pigment that captures sunlight energy. Without photosynthesis, life on Earth as we know it would not be possible." },
+      { title: "The Five Senses", text: "Humans experience the world through five main senses: sight, hearing, smell, taste, and touch. Our eyes detect light and send signals to the brain that create images. Ears capture sound waves vibrating through the air. The nose contains millions of receptors that identify different odors. Taste buds on the tongue distinguish between sweet, sour, salty, bitter, and umami flavors. Finally, our skin contains nerve endings that sense pressure, temperature, and pain. Together, these senses help us navigate and understand our environment." }
     ],
     2: [
-      {
-        title: "Artificial Intelligence Ethics",
-        text: "As artificial intelligence systems become more advanced and integrated into daily life, ethical considerations have emerged as a critical area of discussion. AI algorithms now make decisions that affect employment, healthcare, criminal justice, and financial services. Questions arise about bias in training data, transparency in decision-making processes, and accountability when AI systems cause harm. Privacy concerns have also intensified as AI requires vast amounts of personal data to function effectively. Researchers and policymakers are working to establish guidelines that ensure AI development benefits humanity while minimizing potential risks and unintended consequences."
-      },
-      {
-        title: "Sleep and Memory Consolidation",
-        text: "Sleep plays a crucial role in memory consolidation, the process by which short-term memories are transformed into stable long-term memories. During deep sleep stages, the brain replays and reorganizes information learned during waking hours. The hippocampus, a region critical for memory formation, communicates with the neocortex to strengthen neural connections representing important experiences. Studies show that students who sleep after learning new material demonstrate significantly better recall compared to those who remain awake. Sleep deprivation not only impairs new learning but also disrupts the consolidation of previously acquired knowledge."
-      },
-      {
-        title: "Renewable Energy Transition",
-        text: "The global transition from fossil fuels to renewable energy sources represents one of the most significant economic and technological shifts in modern history. Solar and wind power have experienced dramatic cost reductions, making them increasingly competitive with traditional energy sources. Battery storage technology continues to improve, addressing the intermittency challenge of renewables. Countries around the world are setting ambitious targets for carbon neutrality, driving innovation in grid management and energy efficiency. However, challenges remain including the need for upgraded transmission infrastructure and ensuring a just transition for communities dependent on fossil fuel industries."
-      }
+      { title: "Artificial Intelligence Ethics", text: "As artificial intelligence systems become more advanced and integrated into daily life, ethical considerations have emerged as a critical area of discussion. AI algorithms now make decisions that affect employment, healthcare, criminal justice, and financial services. Questions arise about bias in training data, transparency in decision-making processes, and accountability when AI systems cause harm. Privacy concerns have also intensified as AI requires vast amounts of personal data to function effectively. Researchers and policymakers are working to establish guidelines that ensure AI development benefits humanity while minimizing potential risks and unintended consequences." },
+      { title: "Sleep and Memory Consolidation", text: "Sleep plays a crucial role in memory consolidation, the process by which short-term memories are transformed into stable long-term memories. During deep sleep stages, the brain replays and reorganizes information learned during waking hours. The hippocampus, a region critical for memory formation, communicates with the neocortex to strengthen neural connections representing important experiences. Studies show that students who sleep after learning new material demonstrate significantly better recall compared to those who remain awake. Sleep deprivation not only impairs new learning but also disrupts the consolidation of previously acquired knowledge." },
+      { title: "Renewable Energy Transition", text: "The global transition from fossil fuels to renewable energy sources represents one of the most significant economic and technological shifts in modern history. Solar and wind power have experienced dramatic cost reductions, making them increasingly competitive with traditional energy sources. Battery storage technology continues to improve, addressing the intermittency challenge of renewables. Countries around the world are setting ambitious targets for carbon neutrality, driving innovation in grid management and energy efficiency. However, challenges remain including the need for upgraded transmission infrastructure and ensuring a just transition for communities dependent on fossil fuel industries." }
     ],
     3: [
-      {
-        title: "Epigenetics and Gene Expression",
-        text: "Epigenetics refers to heritable changes in gene expression that do not involve alterations to the underlying DNA sequence. Environmental factors such as diet, stress, and exposure to toxins can trigger epigenetic modifications through mechanisms including DNA methylation and histone modification. These changes can influence whether genes are activated or silenced, potentially affecting an organism's health and development across generations. Research has revealed that traumatic experiences can leave epigenetic marks that influence stress responses in offspring. This field has revolutionized our understanding of inheritance and suggests that lifestyle choices may have consequences extending beyond an individual's lifetime."
-      },
-      {
-        title: "Quantum Computing Principles",
-        text: "Quantum computing harnesses the principles of quantum mechanics to process information in fundamentally different ways than classical computers. Unlike classical bits that exist as either 0 or 1, quantum bits or qubits can exist in superposition, representing multiple states simultaneously. Quantum entanglement allows qubits to be correlated in ways that have no classical analog, enabling certain calculations to be performed exponentially faster. Potential applications include simulating complex molecular interactions for drug discovery, optimizing financial portfolios and supply chains, and breaking certain encryption schemes. However, maintaining quantum coherence and scaling to practical numbers of qubits remains significant technical challenges."
-      },
-      {
-        title: "Behavioral Economics Insights",
-        text: "Behavioral economics integrates psychological insights into economic theory, challenging the traditional assumption that humans consistently make rational decisions. Pioneering research by Kahneman and Tversky revealed systematic cognitive biases including loss aversion, where losses feel approximately twice as painful as equivalent gains feel pleasurable. The framing effect demonstrates that identical choices presented differently lead to dramatically different decisions. Nudge theory applies these insights to design choice architectures that guide people toward beneficial behaviors without restricting freedom. Governments and organizations increasingly employ behavioral insights to improve retirement savings rates, increase organ donation, and promote sustainable consumption patterns."
-      }
+      { title: "Epigenetics and Gene Expression", text: "Epigenetics refers to heritable changes in gene expression that do not involve alterations to the underlying DNA sequence. Environmental factors such as diet, stress, and exposure to toxins can trigger epigenetic modifications through mechanisms including DNA methylation and histone modification. These changes can influence whether genes are activated or silenced, potentially affecting an organism's health and development across generations. Research has revealed that traumatic experiences can leave epigenetic marks that influence stress responses in offspring. This field has revolutionized our understanding of inheritance and suggests that lifestyle choices may have consequences extending beyond an individual's lifetime." },
+      { title: "Quantum Computing Principles", text: "Quantum computing harnesses the principles of quantum mechanics to process information in fundamentally different ways than classical computers. Unlike classical bits that exist as either 0 or 1, quantum bits or qubits can exist in superposition, representing multiple states simultaneously. Quantum entanglement allows qubits to be correlated in ways that have no classical analog, enabling certain calculations to be performed exponentially faster. Potential applications include simulating complex molecular interactions for drug discovery, optimizing financial portfolios and supply chains, and breaking certain encryption schemes. However, maintaining quantum coherence and scaling to practical numbers of qubits remains significant technical challenges." },
+      { title: "Behavioral Economics Insights", text: "Behavioral economics integrates psychological insights into economic theory, challenging the traditional assumption that humans consistently make rational decisions. Pioneering research by Kahneman and Tversky revealed systematic cognitive biases including loss aversion, where losses feel approximately twice as painful as equivalent gains feel pleasurable. The framing effect demonstrates that identical choices presented differently lead to dramatically different decisions. Nudge theory applies these insights to design choice architectures that guide people toward beneficial behaviors without restricting freedom. Governments and organizations increasingly employ behavioral insights to improve retirement savings rates, increase organ donation, and promote sustainable consumption patterns." }
     ]
   };
 
@@ -66,121 +39,40 @@ const generatePassage = (level) => {
   
   const generateQuestions = (text, title) => {
     const sentences = text.split('. ').filter(s => s.length > 30);
-    
-    // Pick 3 random unique indices for sentences
     const indices = [];
     while (indices.length < 3 && indices.length < sentences.length) {
       const rand = Math.floor(Math.random() * sentences.length);
       if (!indices.includes(rand)) indices.push(rand);
     }
-    
     const questions = [];
-    
-    // Question 1: Main idea (always first)
-    questions.push({
-      q: "What is the main topic discussed in this passage?",
-      a: `The passage discusses ${title.toLowerCase()} and its key aspects`,
-      options: [
-        `The passage discusses ${title.toLowerCase()} and its key aspects`,
-        `The history of scientific discoveries in the 20th century`,
-        `Basic mathematics and arithmetic operations`,
-        `Ancient civilizations and their cultural practices`
-      ]
-    });
-
-    // Question 2 & 3: Based on random sentences
-    if (sentences[indices[0]]) {
-      const correctSentence = sentences[indices[0]];
-      const otherIdx = indices[1] || 0;
-      questions.push({
-        q: `According to the passage, ${correctSentence.substring(0, 40)}...?`,
-        a: correctSentence,
-        options: [
-          correctSentence,
-          sentences[otherIdx] || "An alternative explanation not found in the text",
-          "The opposite of what is stated in the passage",
-          "A concept not mentioned anywhere in the text"
-        ]
-      });
-    }
-
-    if (sentences[indices[1]] && indices[1] !== indices[0]) {
-      const correctSentence = sentences[indices[1]];
-      questions.push({
-        q: `What does the passage indicate about ${title.toLowerCase()}?`,
-        a: correctSentence,
-        options: [
-          correctSentence,
-          sentences[indices[0]] || "A different interpretation from the passage",
-          "A commonly held misconception not in the text",
-          "An outdated theory not referenced in the passage"
-        ]
-      });
-    }
-
+    questions.push({ q: "What is the main topic discussed in this passage?", a: `The passage discusses ${title.toLowerCase()} and its key aspects`, options: [`The passage discusses ${title.toLowerCase()} and its key aspects`, "The history of scientific discoveries in the 20th century", "Basic mathematics and arithmetic operations", "Ancient civilizations and their cultural practices"] });
+    if (sentences[indices[0]]) { const cs = sentences[indices[0]]; const oi = indices[1] || 0; questions.push({ q: `According to the passage, ${cs.substring(0, 40)}...?`, a: cs, options: [cs, sentences[oi] || "An alternative explanation not found in the text", "The opposite of what is stated in the passage", "A concept not mentioned anywhere in the text"] }); }
+    if (sentences[indices[1]] && indices[1] !== indices[0]) { const cs = sentences[indices[1]]; questions.push({ q: `What does the passage indicate about ${title.toLowerCase()}?`, a: cs, options: [cs, sentences[indices[0]] || "A different interpretation from the passage", "A commonly held misconception not in the text", "An outdated theory not referenced in the passage"] }); }
     return questions;
   };
 
-  return {
-    id: Date.now() + Math.random(),
-    title: selectedTopic.title,
-    level: level,
-    text: selectedTopic.text,
-    questions: generateQuestions(selectedTopic.text, selectedTopic.title)
-  };
+  return { id: Date.now() + Math.random(), title: selectedTopic.title, level: level, text: selectedTopic.text, questions: generateQuestions(selectedTopic.text, selectedTopic.title) };
 };
 
-// StatCard Component
 function StatCard({ icon, value, label, unit = '', isDark }) {
-  return (
-    <div className={`rounded-xl shadow-sm border p-2 sm:p-3 text-center flex flex-col justify-center h-full transition-colors ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'}`}>
-      <div className="mb-1 flex justify-center" aria-hidden="true">{icon}</div>
-      <p className={`text-lg sm:text-xl font-bold truncate ${isDark ? 'text-white' : 'text-gray-900'}`}>{value}{unit}</p>
-      <p className={`text-[10px] sm:text-xs truncate ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{label}</p>
-    </div>
-  );
+  return (<div className={`rounded-xl shadow-sm border p-2 sm:p-3 text-center flex flex-col justify-center h-full transition-colors ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'}`}><div className="mb-1 flex justify-center" aria-hidden="true">{icon}</div><p className={`text-lg sm:text-xl font-bold truncate ${isDark ? 'text-white' : 'text-gray-900'}`}>{value}{unit}</p><p className={`text-[10px] sm:text-xs truncate ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{label}</p></div>);
 }
 
-// ResultCard Component
 function ResultCard({ label, value, unit = '', icon, color, isDark }) {
-  const colorMap = {
-    yellow: { bg: 'bg-yellow-500/10', border: 'border-yellow-500/30', text: 'text-yellow-500', icon: 'text-yellow-500' },
-    purple: { bg: 'bg-purple-500/10', border: 'border-purple-500/30', text: 'text-purple-500', icon: 'text-purple-500' },
-    green: { bg: 'bg-green-500/10', border: 'border-green-500/30', text: 'text-green-500', icon: 'text-green-500' },
-    emerald: { bg: 'bg-emerald-500/10', border: 'border-emerald-500/30', text: 'text-emerald-500', icon: 'text-emerald-500' },
-    red: { bg: 'bg-red-500/10', border: 'border-red-500/30', text: 'text-red-500', icon: 'text-red-500' },
-    blue: { bg: 'bg-blue-500/10', border: 'border-blue-500/30', text: 'text-blue-500', icon: 'text-blue-500' },
-    orange: { bg: 'bg-orange-500/10', border: 'border-orange-500/30', text: 'text-orange-500', icon: 'text-orange-500' },
-    cyan: { bg: 'bg-cyan-500/10', border: 'border-cyan-500/30', text: 'text-cyan-500', icon: 'text-cyan-500' },
-  };
-  
+  const colorMap = { yellow: { bg: 'bg-yellow-500/10', border: 'border-yellow-500/30', text: 'text-yellow-500', icon: 'text-yellow-500' }, purple: { bg: 'bg-purple-500/10', border: 'border-purple-500/30', text: 'text-purple-500', icon: 'text-purple-500' }, green: { bg: 'bg-green-500/10', border: 'border-green-500/30', text: 'text-green-500', icon: 'text-green-500' }, emerald: { bg: 'bg-emerald-500/10', border: 'border-emerald-500/30', text: 'text-emerald-500', icon: 'text-emerald-500' }, red: { bg: 'bg-red-500/10', border: 'border-red-500/30', text: 'text-red-500', icon: 'text-red-500' }, blue: { bg: 'bg-blue-500/10', border: 'border-blue-500/30', text: 'text-blue-500', icon: 'text-blue-500' }, orange: { bg: 'bg-orange-500/10', border: 'border-orange-500/30', text: 'text-orange-500', icon: 'text-orange-500' }, cyan: { bg: 'bg-cyan-500/10', border: 'border-cyan-500/30', text: 'text-cyan-500', icon: 'text-cyan-500' } };
   const colors = colorMap[color] || colorMap.blue;
-  
-  return (
-    <div className={`flex items-center justify-between p-3 rounded-lg border ${colors.bg} ${colors.border}`}>
-      <div className="flex items-center gap-2 min-w-0">
-        <div className={colors.icon} aria-hidden="true">{icon}</div>
-        <span className={`text-xs sm:text-sm truncate ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>{label}</span>
-      </div>
-      <span className={`font-bold text-base sm:text-lg flex-shrink-0 ml-2 ${colors.text}`}>{value}{unit}</span>
-    </div>
-  );
+  return (<div className={`flex items-center justify-between p-3 rounded-lg border ${colors.bg} ${colors.border}`}><div className="flex items-center gap-2 min-w-0"><div className={colors.icon} aria-hidden="true">{icon}</div><span className={`text-xs sm:text-sm truncate ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>{label}</span></div><span className={`font-bold text-base sm:text-lg flex-shrink-0 ml-2 ${colors.text}`}>{value}{unit}</span></div>);
 }
 
-// Main Component
 function ReadingComprehensionClient() {
   const [passages, setPassages] = useState([]);
   const [isClient, setIsClient] = useState(false);
   const [loading, setLoading] = useState(true);
-  
-  // Drill State
   const [currentPassageIdx, setCurrentPassageIdx] = useState(0);
   const [gameState, setGameState] = useState('start');
   const [wpm, setWpm] = useState(300);
   const [wordIndex, setWordIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  
-  // Quiz State
   const [quizIndex, setQuizIndex] = useState(0);
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [wrongAnswers, setWrongAnswers] = useState(0);
@@ -193,8 +85,6 @@ function ReadingComprehensionClient() {
   const [feedback, setFeedback] = useState('');
   const [feedbackType, setFeedbackType] = useState('');
   const [totalQuestions, setTotalQuestions] = useState(0);
-
-  // UI State
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isBoxDarkMode, setIsBoxDarkMode] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -207,457 +97,76 @@ function ReadingComprehensionClient() {
   const scoreRef = useRef(0);
   const comboRef = useRef(0);
 
-  // Generate fresh passages on client mount
-  useEffect(() => {
-    setIsClient(true);
-    setPassages([
-      generatePassage(1),
-      generatePassage(2),
-      generatePassage(3)
-    ]);
-    const timer = setTimeout(() => setLoading(false), 300);
-    return () => clearTimeout(timer);
-  }, []);
+  useEffect(() => { setIsClient(true); setPassages([generatePassage(1), generatePassage(2), generatePassage(3)]); const t = setTimeout(() => setLoading(false), 300); return () => clearTimeout(t); }, []);
 
   const currentPassage = useMemo(() => passages[currentPassageIdx], [passages, currentPassageIdx]);
   const words = useMemo(() => currentPassage?.text.split(' ') || [], [currentPassage]);
-  const availablePassages = useMemo(() => 
-    passages.filter((_, idx) => !completedPassages.has(idx)), 
-    [passages, completedPassages]
-  );
+  const availablePassages = useMemo(() => passages.filter((_, idx) => !completedPassages.has(idx)), [passages, completedPassages]);
 
-  // Load best score
-  useEffect(() => {
-    try {
-      const savedBestScore = localStorage.getItem('readingRSVPDrillBestScore');
-      if (savedBestScore) {
-        const parsed = parseInt(savedBestScore, 10);
-        if (!isNaN(parsed)) setBestScore(parsed);
-      }
-    } catch (e) { /* localStorage not available */ }
-  }, []);
+  useEffect(() => { try { const s = localStorage.getItem('readingRSVPDrillBestScore'); if (s) { const p = parseInt(s, 10); if (!isNaN(p)) setBestScore(p); } } catch (e) {} }, []);
+  useEffect(() => { if (gameState === 'complete' && score > bestScore) { setBestScore(score); try { localStorage.setItem('readingRSVPDrillBestScore', score.toString()); } catch (e) {} } }, [gameState, score, bestScore]);
+  useEffect(() => { const h = () => setIsFullscreen(!!document.fullscreenElement); document.addEventListener('fullscreenchange', h); return () => document.removeEventListener('fullscreenchange', h); }, []);
 
-  // Update best score
-  useEffect(() => {
-    if (gameState === 'complete' && score > bestScore) {
-      setBestScore(score);
-      try {
-        localStorage.setItem('readingRSVPDrillBestScore', score.toString());
-      } catch (e) { /* localStorage not available */ }
-    }
-  }, [gameState, score, bestScore]);
+  const toggleFullscreen = useCallback(async () => { try { if (!isFullscreen) { const e = containerRef.current; if (e?.requestFullscreen) { await e.requestFullscreen(); setIsFullscreen(true); } } else { if (document.fullscreenElement) await document.exitFullscreen(); setIsFullscreen(false); } } catch (e) { console.error('Fullscreen error:', e); } }, [isFullscreen]);
 
-  // Handle fullscreen change
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
-  }, []);
+  const showFeedbackMessage = useCallback((message, type) => { if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current); setFeedback(message); setFeedbackType(type); feedbackTimeoutRef.current = setTimeout(() => { setFeedback(''); setFeedbackType(''); }, 800); }, []);
+  const initAudio = useCallback(() => { try { if (!audioCtxRef.current) audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)(); if (audioCtxRef.current.state === 'suspended') audioCtxRef.current.resume(); return audioCtxRef.current; } catch (e) { return null; } }, []);
+  const playSound = useCallback((type) => { if (!soundEnabled) return; try { const a = initAudio(); if (!a) return; const o = a.createOscillator(); const g = a.createGain(); o.connect(g); g.connect(a.destination); const n = a.currentTime; const f = { start: 660, correct: 880, wrong: 440, combo: 1046.5, complete: 1320 }; const d = { start: 0.1, correct: 0.15, wrong: 0.15, combo: 0.2, complete: 0.2 }; o.frequency.setValueAtTime(f[type] || 660, n); g.gain.setValueAtTime(0.1, n); g.gain.exponentialRampToValueAtTime(0.001, n + (d[type] || 0.15)); o.start(n); o.stop(n + (d[type] || 0.15)); } catch (e) {} }, [soundEnabled, initAudio]);
 
-  // Toggle fullscreen
-  const toggleFullscreen = useCallback(async () => {
-    try {
-      if (!isFullscreen) {
-        const element = containerRef.current;
-        if (element?.requestFullscreen) {
-          await element.requestFullscreen();
-          setIsFullscreen(true);
-        }
-      } else {
-        if (document.fullscreenElement) {
-          await document.exitFullscreen();
-        }
-        setIsFullscreen(false);
-      }
-    } catch (error) {
-      console.error('Fullscreen error:', error);
-    }
-  }, [isFullscreen]);
+  const startReading = useCallback(() => { if (availablePassages.length === 0) setCompletedPassages(new Set()); setGameState('reading'); setIsPlaying(true); setWordIndex(0); playSound('start'); showFeedbackMessage('Reading started • Focus on the center', 'success'); }, [availablePassages.length, playSound, showFeedbackMessage]);
+  const resetGame = useCallback(() => { if (timerRef.current) clearInterval(timerRef.current); if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current); setPassages([generatePassage(1), generatePassage(2), generatePassage(3)]); setGameState('start'); setCurrentPassageIdx(0); scoreRef.current = 0; comboRef.current = 0; setScore(0); setCombo(0); setCorrectAnswers(0); setWrongAnswers(0); setTotalQuestions(0); setCompletedPassages(new Set()); setWordIndex(0); setQuizIndex(0); setSelectedOption(null); setShowFeedback(false); setFeedback(''); setIsPlaying(false); }, []);
+  const nextPassage = useCallback(() => { if (availablePassages.length > 0) { const ni = passages.findIndex((_, idx) => !completedPassages.has(idx)); setCurrentPassageIdx(ni >= 0 ? ni : 0); setGameState('start'); setWordIndex(0); setQuizIndex(0); setSelectedOption(null); setShowFeedback(false); } else { setGameState('complete'); } }, [availablePassages, completedPassages, passages]);
 
-  const showFeedbackMessage = useCallback((message, type) => {
-    if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
-    setFeedback(message);
-    setFeedbackType(type);
-    feedbackTimeoutRef.current = setTimeout(() => {
-      setFeedback('');
-      setFeedbackType('');
-    }, 800);
-  }, []);
+  useEffect(() => { if (isPlaying && gameState === 'reading' && words.length > 0) { const iv = Math.max(50, (60 / wpm) * 1000); timerRef.current = setInterval(() => { setWordIndex((prev) => { if (prev >= words.length - 1) { clearInterval(timerRef.current); setIsPlaying(false); setTimeout(() => setGameState('testing'), 500); return prev; } return prev + 1; }); }, iv); } return () => { if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; } }; }, [isPlaying, wpm, words.length, gameState]);
 
-  const initAudio = useCallback(() => {
-    try {
-      if (!audioCtxRef.current) {
-        audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
-      }
-      if (audioCtxRef.current.state === 'suspended') {
-        audioCtxRef.current.resume();
-      }
-      return audioCtxRef.current;
-    } catch (e) {
-      return null;
-    }
-  }, []);
+  const handleAnswer = useCallback((selected) => { if (!currentPassage || showFeedback) return; setSelectedOption(selected); setShowFeedback(true); const isCorrect = selected === currentPassage.questions[quizIndex].a; setTotalQuestions(prev => prev + 1); if (isCorrect) { setCorrectAnswers(prev => prev + 1); comboRef.current = comboRef.current + 1; setCombo(comboRef.current); if (comboRef.current > 0 && comboRef.current % 3 === 0) { playSound('combo'); showFeedbackMessage(`🔥 ${comboRef.current}x Combo! +5 bonus`, 'success'); } scoreRef.current = scoreRef.current + 5; setScore(scoreRef.current); playSound('correct'); showFeedbackMessage('✓ Correct! +5 points', 'success'); } else { setWrongAnswers(prev => prev + 1); comboRef.current = 0; setCombo(0); scoreRef.current = Math.max(0, scoreRef.current - 5); setScore(scoreRef.current); playSound('wrong'); showFeedbackMessage('✗ Wrong! -5 point penalty', 'error'); } setTimeout(() => { setSelectedOption(null); setShowFeedback(false); if (quizIndex < currentPassage.questions.length - 1) { setQuizIndex(prev => prev + 1); } else { setCompletedPassages(prev => { const ns = new Set(prev); ns.add(currentPassageIdx); return ns; }); setGameState('results'); playSound('complete'); } }, 800); }, [currentPassage, quizIndex, showFeedback, currentPassageIdx, playSound, showFeedbackMessage]);
 
-  const playSound = useCallback((type) => {
-    if (!soundEnabled) return;
-    try {
-      const audioCtx = initAudio();
-      if (!audioCtx) return;
-      
-      const oscillator = audioCtx.createOscillator();
-      const gainNode = audioCtx.createGain();
-      oscillator.connect(gainNode);
-      gainNode.connect(audioCtx.destination);
-      
-      const now = audioCtx.currentTime;
-      const freqMap = {
-        start: 660,
-        correct: 880,
-        wrong: 440,
-        combo: 1046.5,
-        complete: 1320
-      };
-      const durMap = {
-        start: 0.1,
-        correct: 0.15,
-        wrong: 0.15,
-        combo: 0.2,
-        complete: 0.2
-      };
-      
-      oscillator.frequency.setValueAtTime(freqMap[type] || 660, now);
-      gainNode.gain.setValueAtTime(0.1, now);
-      gainNode.gain.exponentialRampToValueAtTime(0.001, now + (durMap[type] || 0.15));
-      oscillator.start(now);
-      oscillator.stop(now + (durMap[type] || 0.15));
-    } catch (e) { /* Audio not supported */ }
-  }, [soundEnabled, initAudio]);
-
-  const startReading = useCallback(() => {
-    if (availablePassages.length === 0) {
-      setCompletedPassages(new Set());
-    }
-    setGameState('reading');
-    setIsPlaying(true);
-    setWordIndex(0);
-    playSound('start');
-    showFeedbackMessage('Reading started • Focus on the center', 'success');
-  }, [availablePassages.length, playSound, showFeedbackMessage]);
-
-  const resetGame = useCallback(() => {
-    if (timerRef.current) clearInterval(timerRef.current);
-    if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
-    
-    // Generate completely new passages
-    setPassages([
-      generatePassage(1),
-      generatePassage(2),
-      generatePassage(3)
-    ]);
-    setGameState('start');
-    setCurrentPassageIdx(0);
-    scoreRef.current = 0;
-    comboRef.current = 0;
-    setScore(0);
-    setCombo(0);
-    setCorrectAnswers(0);
-    setWrongAnswers(0);
-    setTotalQuestions(0);
-    setCompletedPassages(new Set());
-    setWordIndex(0);
-    setQuizIndex(0);
-    setSelectedOption(null);
-    setShowFeedback(false);
-    setFeedback('');
-    setIsPlaying(false);
-  }, []);
-
-  const nextPassage = useCallback(() => {
-    if (availablePassages.length > 0) {
-      const nextIdx = passages.findIndex((_, idx) => !completedPassages.has(idx));
-      setCurrentPassageIdx(nextIdx >= 0 ? nextIdx : 0);
-      setGameState('start');
-      setWordIndex(0);
-      setQuizIndex(0);
-      setSelectedOption(null);
-      setShowFeedback(false);
-    } else {
-      setGameState('complete');
-    }
-  }, [availablePassages, completedPassages, passages]);
-
-  // RSVP Timer
-  useEffect(() => {
-    if (isPlaying && gameState === 'reading' && words.length > 0) {
-      const interval = Math.max(50, (60 / wpm) * 1000);
-      timerRef.current = setInterval(() => {
-        setWordIndex((prev) => {
-          if (prev >= words.length - 1) {
-            clearInterval(timerRef.current);
-            setIsPlaying(false);
-            setTimeout(() => setGameState('testing'), 500);
-            return prev;
-          }
-          return prev + 1;
-        });
-      }, interval);
-    }
-    return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-        timerRef.current = null;
-      }
-    };
-  }, [isPlaying, wpm, words.length, gameState]);
-
-  const handleAnswer = useCallback((selected) => {
-    if (!currentPassage || showFeedback) return;
-    
-    setSelectedOption(selected);
-    setShowFeedback(true);
-    
-    const isCorrect = selected === currentPassage.questions[quizIndex].a;
-    setTotalQuestions(prev => prev + 1);
-    
-    if (isCorrect) {
-      setCorrectAnswers(prev => prev + 1);
-      const pointsEarned = 5;
-      
-      comboRef.current = comboRef.current + 1;
-      setCombo(comboRef.current);
-      
-      if (comboRef.current > 0 && comboRef.current % 3 === 0) {
-        playSound('combo');
-        showFeedbackMessage(`🔥 ${comboRef.current}x Combo! +5 bonus`, 'success');
-      }
-      
-      scoreRef.current = scoreRef.current + pointsEarned;
-      setScore(scoreRef.current);
-      playSound('correct');
-      showFeedbackMessage(`✓ Correct! +${pointsEarned} points`, 'success');
-    } else {
-      setWrongAnswers(prev => prev + 1);
-      const penalty = 5;
-      
-      comboRef.current = 0;
-      setCombo(0);
-      scoreRef.current = Math.max(0, scoreRef.current - penalty);
-      setScore(scoreRef.current);
-      playSound('wrong');
-      showFeedbackMessage(`✗ Wrong! -${penalty} point penalty`, 'error');
-    }
-    
-    setTimeout(() => {
-      setSelectedOption(null);
-      setShowFeedback(false);
-      
-      if (quizIndex < currentPassage.questions.length - 1) {
-        setQuizIndex(prev => prev + 1);
-      } else {
-        setCompletedPassages(prev => {
-          const newSet = new Set(prev);
-          newSet.add(currentPassageIdx);
-          return newSet;
-        });
-        setGameState('results');
-        playSound('complete');
-      }
-    }, 800);
-  }, [currentPassage, quizIndex, showFeedback, currentPassageIdx, playSound, showFeedbackMessage]);
-
-  const getRetentionRate = useCallback(() => {
-    const totalAnswered = correctAnswers + wrongAnswers;
-    return totalAnswered > 0 ? Math.round((correctAnswers / totalAnswered) * 100) : 0;
-  }, [correctAnswers, wrongAnswers]);
-
+  const getRetentionRate = useCallback(() => { const t = correctAnswers + wrongAnswers; return t > 0 ? Math.round((correctAnswers / t) * 100) : 0; }, [correctAnswers, wrongAnswers]);
   const handleSpeedUp = useCallback(() => setWpm(w => Math.min(600, w + 50)), []);
   const handleSpeedDown = useCallback(() => setWpm(w => Math.max(100, w - 50)), []);
+  const getButtonClass = useCallback((option) => { if (!showFeedback || selectedOption !== option) { return isBoxDarkMode ? 'bg-gray-800 border-gray-700 text-white hover:bg-gray-700 cursor-pointer' : 'bg-white border-gray-200 text-gray-900 hover:bg-gray-50 cursor-pointer'; } if (option === currentPassage?.questions[quizIndex]?.a) return 'bg-green-500 border-green-600 text-white cursor-default'; if (option === selectedOption) return 'bg-red-500 border-red-600 text-white cursor-default'; return isBoxDarkMode ? 'bg-gray-800 border-gray-700 text-gray-500 cursor-default opacity-50' : 'bg-white border-gray-200 text-gray-400 cursor-default opacity-50'; }, [showFeedback, selectedOption, isBoxDarkMode, currentPassage, quizIndex]);
+  useEffect(() => { return () => { if (timerRef.current) clearInterval(timerRef.current); if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current); }; }, []);
 
-  const getButtonClass = useCallback((option) => {
-    if (!showFeedback || selectedOption !== option) {
-      return isBoxDarkMode 
-        ? 'bg-gray-800 border-gray-700 text-white hover:bg-gray-700 cursor-pointer' 
-        : 'bg-white border-gray-200 text-gray-900 hover:bg-gray-50 cursor-pointer';
-    }
-    
-    if (option === currentPassage?.questions[quizIndex]?.a) {
-      return 'bg-green-500 border-green-600 text-white cursor-default';
-    }
-    if (option === selectedOption) {
-      return 'bg-red-500 border-red-600 text-white cursor-default';
-    }
-    return isBoxDarkMode 
-      ? 'bg-gray-800 border-gray-700 text-gray-500 cursor-default opacity-50' 
-      : 'bg-white border-gray-200 text-gray-400 cursor-default opacity-50';
-  }, [showFeedback, selectedOption, isBoxDarkMode, currentPassage, quizIndex]);
+  const sharePage = async () => { if (navigator.share) { try { await navigator.share({ title: 'Free RSVP Speed Reading Drill | SkillDrills', text: 'Master speed reading with fresh passages and comprehension quizzes. Free!', url: 'https://skilldrills.online/drills/academic/comprehension/reading-comprehension' }); } catch (e) {} } else { navigator.clipboard.writeText('https://skilldrills.online/drills/academic/comprehension/reading-comprehension'); alert('Link copied!'); } };
+  const copyPageLink = () => { navigator.clipboard.writeText('https://skilldrills.online/drills/academic/comprehension/reading-comprehension'); alert('Link copied!'); };
 
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-      if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
-    };
-  }, []);
-
-  if (loading || !isClient) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading reading comprehension drill...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!currentPassage) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <p className="text-gray-600">Generating fresh passages...</p>
-          <button 
-            onClick={resetGame} 
-            className="mt-4 px-6 py-2 bg-emerald-500 text-white rounded-lg font-semibold hover:bg-emerald-600 transition"
-          >
-            Generate New Passages
-          </button>
-        </div>
-      </div>
-    );
-  }
+  if (loading || !isClient) { return (<div className="min-h-screen flex items-center justify-center bg-gray-50"><div className="text-center"><div className="w-16 h-16 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div><p className="text-gray-600">Loading speed reading drill...</p></div></div>); }
+  if (!currentPassage) { return (<div className="min-h-screen flex items-center justify-center bg-gray-50"><div className="text-center"><p className="text-gray-600">Generating fresh passages...</p><button onClick={resetGame} className="mt-4 px-6 py-2 bg-emerald-500 text-white rounded-lg font-semibold hover:bg-emerald-600 transition">Generate New Passages</button></div></div>); }
 
   return (
     <div className={`min-h-screen select-none ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
-      {/* SEO Structured Data */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "WebApplication",
-            "name": "RSVP Speed Reading Drill",
-            "url": "https://skilldrills.online/drills/academic/comprehension/reading-comprehension",
-            "description": "Dynamic RSVP (Rapid Serial Visual Presentation) speed reading drill with fresh passages every session. 3 difficulty levels with comprehension quizzes. Adjustable 100-600 WPM reading speed.",
-            "applicationCategory": "EducationalApplication",
-            "operatingSystem": "Web",
-            "offers": {
-              "@type": "Offer",
-              "price": "0",
-              "priceCurrency": "USD"
-            },
-            "author": {
-              "@type": "Organization",
-              "name": "Global Drill System"
-            },
-            "educationalUse": ["Speed Reading", "Reading Comprehension", "Vocabulary Building", "Cognitive Training"],
-            "learningResourceType": "Interactive Exercise",
-            "interactivityType": "active",
-            "inLanguage": "en-US",
-            "teaches": ["Speed Reading", "Reading Comprehension", "Information Retention", "Focus Training"]
-          })
-        }}
-      />
-      
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Breadcrumb Navigation */}
         <nav aria-label="Breadcrumb" className="mb-4">
           <ol className="flex flex-wrap items-center gap-2 text-sm">
-            <li>
-              <Link href="/" className={`hover:underline transition-colors ${isDarkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-600 hover:text-gray-900'}`}>
-                Home
-              </Link>
-            </li>
+            <li><Link href="/" className={`hover:underline transition-colors ${isDarkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-600 hover:text-gray-900'}`}>Home</Link></li>
             <li className={`${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`} aria-hidden="true">/</li>
-            <li>
-              <Link href="/drills/academic" className={`hover:underline transition-colors ${isDarkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-600 hover:text-gray-900'}`}>
-                Academic Drills
-              </Link>
-            </li>
+            <li><Link href="/drills/academic" className={`hover:underline transition-colors ${isDarkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-600 hover:text-gray-900'}`}>Academic Drills</Link></li>
             <li className={`${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`} aria-hidden="true">/</li>
-            <li className={`${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
-              Comprehension
-            </li>
+            <li className={`${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Comprehension</li>
             <li className={`${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`} aria-hidden="true">/</li>
-            <li className={`font-medium ${isDarkMode ? 'text-emerald-400' : 'text-emerald-600'}`} aria-current="page">
-              Reading RSVP Lab
-            </li>
+            <li className={`font-medium ${isDarkMode ? 'text-emerald-400' : 'text-emerald-600'}`} aria-current="page">RSVP Speed Reading</li>
           </ol>
         </nav>
         
-        {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl flex-shrink-0">
-              <BookOpen className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h1 className={`text-2xl sm:text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                Reading RSVP Lab
-              </h1>
-              <p className={`text-sm sm:text-base ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                Speed reading • Fresh passages every session • 3 difficulty levels
-              </p>
-            </div>
+            <div className="p-3 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl flex-shrink-0"><BookOpen className="w-6 h-6 text-white" /></div>
+            <div><h1 className={`text-2xl sm:text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>RSVP Speed Reading</h1><p className={`text-sm sm:text-base ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Fresh passages every session • 3 levels • 100-600 WPM • Free IELTS & TOEFL reading practice</p></div>
           </div>
-          
           <div className="flex gap-2 flex-shrink-0">
-            <button 
-              onClick={resetGame} 
-              className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700' : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-100'}`}
-              title="Generate new passages"
-              aria-label="Generate new reading passages"
-            >
-              <RefreshCw className="w-5 h-5" />
-            </button>
-            <button 
-              onClick={() => setIsDarkMode(!isDarkMode)} 
-              className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`}
-              aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-              title={isDarkMode ? 'Light mode' : 'Dark mode'}
-            >
-              {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-            </button>
-            <button 
-              onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} 
-              className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`}
-              aria-label="Toggle drill area theme"
-              title="Toggle drill area theme"
-            >
-              <Eye className="w-5 h-5" />
-            </button>
-            <button 
-              onClick={() => setSoundEnabled(!soundEnabled)} 
-              className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`}
-              aria-label={soundEnabled ? 'Mute sounds' : 'Enable sounds'}
-              title={soundEnabled ? 'Mute' : 'Unmute'}
-            >
-              {soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
-            </button>
-            <button 
-              onClick={toggleFullscreen} 
-              className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`}
-              aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
-              title={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
-            >
-              {isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
-            </button>
+            <button onClick={resetGame} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700' : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-100'}`} title="Generate new passages" aria-label="Generate new reading passages"><RefreshCw className="w-5 h-5" /></button>
+            <button onClick={() => setIsDarkMode(!isDarkMode)} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'} title={isDarkMode ? 'Light mode' : 'Dark mode'}>{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button>
+            <button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} aria-label="Toggle drill area theme" title="Toggle drill area theme"><Eye className="w-5 h-5" /></button>
+            <button onClick={() => setSoundEnabled(!soundEnabled)} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} aria-label={soundEnabled ? 'Mute sounds' : 'Enable sounds'} title={soundEnabled ? 'Mute' : 'Unmute'}>{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button>
+            <button onClick={toggleFullscreen} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'} title={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}>{isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}</button>
           </div>
         </div>
 
-        {/* SEO Content */}
         <section className="sr-only" aria-label="Drill description for search engines">
-          <h2>RSVP Speed Reading Drill - Dynamic Comprehension Training</h2>
-          <p>
-            Improve your reading speed and comprehension with this RSVP (Rapid Serial Visual Presentation) drill.
-            Words flash at a single focal point, eliminating eye movement for faster reading.
-            Fresh passages generated every session across 3 difficulty levels: Beginner, Intermediate, and Advanced.
-            Adjustable speed from 100 to 600 WPM. Each passage includes comprehension questions with +5 points for correct and -5 for wrong answers.
-          </p>
+          <h2>Free RSVP Speed Reading Drill - Rapid Serial Visual Presentation Training for IELTS TOEFL GRE GMAT SAT</h2>
+          <p>Improve your reading speed and comprehension with this free RSVP Rapid Serial Visual Presentation drill. Words flash at a single focal point eliminating eye movement for faster reading. Fresh passages generated every session across 3 difficulty levels Beginner Intermediate and Advanced. Adjustable speed from 100 to 600 WPM. Each passage includes comprehension questions covering main ideas, specific details, vocabulary, and inference. Perfect for IELTS reading practice, TOEFL preparation, GRE verbal, GMAT, SAT, CAT, UPSC, and competitive exams. No registration required.</p>
         </section>
 
-        {/* Stats Board */}
         <div className="grid grid-cols-7 gap-3 mb-4 h-[88px]">
           <StatCard icon={<Target className="text-blue-600" />} value={score} label="Score" isDark={isDarkMode} />
           <StatCard icon={<Trophy className="text-yellow-600" />} value={bestScore} label="Best" isDark={isDarkMode} />
@@ -668,374 +177,73 @@ function ReadingComprehensionClient() {
           <StatCard icon={<Zap className="text-orange-600" />} value={combo} label="Combo" isDark={isDarkMode} />
         </div>
 
-        {/* Feedback Bar */}
-        <div className="h-10 mb-2 flex justify-center items-center">
-          <div 
-            className={`px-4 py-1.5 rounded-lg text-white font-semibold text-sm transition-all duration-200 ${
-              feedback ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
-            } ${feedbackType === 'success' ? 'bg-green-500' : 'bg-red-500'}`}
-            role="status"
-            aria-live="polite"
-            aria-atomic="true"
-          >
-            {feedback || '\u00A0'}
-          </div>
-        </div>
+        <div className="h-10 mb-2 flex justify-center items-center"><div className={`px-4 py-1.5 rounded-lg text-white font-semibold text-sm transition-all duration-200 ${feedback ? 'opacity-100 scale-100' : 'opacity-0 scale-95'} ${feedbackType === 'success' ? 'bg-green-500' : 'bg-red-500'}`} role="status" aria-live="polite" aria-atomic="true">{feedback || '\u00A0'}</div></div>
 
-        {/* WPM Control */}
-        {gameState === 'start' && (
-          <div className="flex justify-center mb-4">
-            <div className={`flex items-center gap-3 p-2 rounded-xl ${isDarkMode ? 'bg-gray-800' : 'bg-white border border-gray-200'}`}>
-              <span className={`text-sm font-bold ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                Reading Speed:
-              </span>
-              <button 
-                onClick={handleSpeedDown} 
-                className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition"
-                aria-label="Decrease reading speed"
-                title="Slower"
-              >
-                <ChevronDown className="w-4 h-4" />
-              </button>
-              <span className={`text-lg font-bold min-w-[60px] text-center ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                {wpm} WPM
-              </span>
-              <button 
-                onClick={handleSpeedUp} 
-                className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition"
-                aria-label="Increase reading speed"
-                title="Faster"
-              >
-                <ChevronUp className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        )}
+        {gameState === 'start' && (<div className="flex justify-center mb-4"><div className={`flex items-center gap-3 p-2 rounded-xl ${isDarkMode ? 'bg-gray-800' : 'bg-white border border-gray-200'}`}><span className={`text-sm font-bold ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Reading Speed:</span><button onClick={handleSpeedDown} className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition" aria-label="Decrease reading speed" title="Slower"><ChevronDown className="w-4 h-4" /></button><span className={`text-lg font-bold min-w-[60px] text-center ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{wpm} WPM</span><button onClick={handleSpeedUp} className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition" aria-label="Increase reading speed" title="Faster"><ChevronUp className="w-4 h-4" /></button></div></div>)}
 
-        {/* Game Container */}
-        <div 
-          ref={containerRef}
-          className={`relative ${isFullscreen ? 'fixed inset-0 z-50' : 'rounded-xl border-2'}`}
-          style={{ 
-            background: isBoxDarkMode ? "#0a0a0a" : "#ffffff",
-            aspectRatio: isFullscreen ? 'auto' : '16/9',
-            maxWidth: '100%',
-            margin: '0 auto',
-            borderColor: isDarkMode ? '#374151' : '#e5e7eb',
-            overflow: 'hidden'
-          }}
-        >
-          {/* Fullscreen Controls */}
-          {isFullscreen && gameState !== 'start' && (
-            <div className="absolute top-4 right-4 z-30 flex gap-3">
-              <button 
-                onClick={resetGame} 
-                className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" 
-                title="Generate new passages"
-                aria-label="Generate new reading passages"
-              >
-                <RefreshCw className="w-5 h-5" />
-              </button>
-              <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle dark mode">
-                {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-              </button>
-              <button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle drill area theme">
-                <Eye className="w-5 h-5" />
-              </button>
-              <button onClick={() => setSoundEnabled(!soundEnabled)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle sound">
-                {soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
-              </button>
-              <button onClick={toggleFullscreen} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Exit fullscreen">
-                <Minimize2 className="w-5 h-5" />
-              </button>
-            </div>
-          )}
+        <div ref={containerRef} className={`relative ${isFullscreen ? 'fixed inset-0 z-50' : 'rounded-xl border-2'}`} style={{ background: isBoxDarkMode ? "#0a0a0a" : "#ffffff", aspectRatio: isFullscreen ? 'auto' : '16/9', maxWidth: '100%', margin: '0 auto', borderColor: isDarkMode ? '#374151' : '#e5e7eb', overflow: 'hidden' }}>
+          {isFullscreen && gameState !== 'start' && (<div className="absolute top-4 right-4 z-30 flex gap-3"><button onClick={resetGame} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" title="Generate new passages" aria-label="Generate new reading passages"><RefreshCw className="w-5 h-5" /></button><button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle dark mode">{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button><button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle drill area theme"><Eye className="w-5 h-5" /></button><button onClick={() => setSoundEnabled(!soundEnabled)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle sound">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button><button onClick={toggleFullscreen} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Exit fullscreen"><Minimize2 className="w-5 h-5" /></button></div>)}
 
           <div className="absolute inset-0 flex items-center justify-center p-4 sm:p-8 overflow-y-auto">
-            
-            {/* ============ START SCREEN ============ */}
-            {gameState === 'start' && (
-              <div className={`absolute inset-0 flex items-center justify-center backdrop-blur-sm rounded-xl z-40 ${isBoxDarkMode ? 'bg-gray-900/95' : 'bg-white/95'}`}>
-                <div className={`rounded-2xl p-6 sm:p-8 text-center max-w-md mx-4 shadow-xl border ${isBoxDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
-                  <div className="mb-4">
-                    <BookOpen className="w-16 h-16 text-emerald-500 mx-auto" aria-hidden="true" />
-                  </div>
-                  <h2 className={`text-2xl font-bold mb-2 ${isBoxDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                    {currentPassage?.title || 'Reading RSVP Lab'}
-                  </h2>
-                  <p className={`mb-2 ${isBoxDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                    Level {currentPassage?.level} • {passages.length} passages • +5/-5 points
-                  </p>
-                  <p className={`mb-6 text-sm ${isBoxDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                    Words flash at a single point. No eye movement needed. Answer comprehension questions after each passage.
-                  </p>
-                  <button 
-                    onClick={startReading} 
-                    className="px-8 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-semibold hover:shadow-lg w-full transition-all transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
-                    aria-label="Start speed reading"
-                  >
-                    Start Reading
-                  </button>
-                </div>
-              </div>
-            )}
+            {gameState === 'start' && (<div className={`absolute inset-0 flex items-center justify-center backdrop-blur-sm rounded-xl z-40 ${isBoxDarkMode ? 'bg-gray-900/95' : 'bg-white/95'}`}><div className={`rounded-2xl p-6 sm:p-8 text-center max-w-md mx-4 shadow-xl border ${isBoxDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}><div className="mb-4"><BookOpen className="w-16 h-16 text-emerald-500 mx-auto" aria-hidden="true" /></div><h2 className={`text-2xl font-bold mb-2 ${isBoxDarkMode ? 'text-white' : 'text-gray-900'}`}>{currentPassage?.title || 'RSVP Speed Reading'}</h2><p className={`mb-2 ${isBoxDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Level {currentPassage?.level} • {passages.length} passages • +5/-5 points</p><p className={`mb-6 text-sm ${isBoxDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Words flash at a single point eliminating eye movement. Answer comprehension questions after each passage. Adjust speed using buttons above.</p><button onClick={startReading} className="px-8 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-semibold hover:shadow-lg w-full transition-all transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2" aria-label="Start free speed reading drill">Start Free Drill</button></div></div>)}
 
-            {/* ============ READING SCREEN ============ */}
-            {gameState === 'reading' && (
-              <div className="text-center w-full">
-                <div className="flex justify-center mb-4 opacity-20" aria-hidden="true">
-                  <div className="w-1 h-8 bg-emerald-500 mx-1" />
-                </div>
-                
-                <div className="text-4xl sm:text-5xl md:text-7xl font-bold tracking-tight h-24 flex items-center justify-center">
-                  <span className={isBoxDarkMode ? 'text-white' : 'text-gray-900'}>
-                    {words[wordIndex]}
-                  </span>
-                </div>
+            {gameState === 'reading' && (<div className="text-center w-full"><div className="flex justify-center mb-4 opacity-20" aria-hidden="true"><div className="w-1 h-8 bg-emerald-500 mx-1" /></div><div className="text-4xl sm:text-5xl md:text-7xl font-bold tracking-tight h-24 flex items-center justify-center"><span className={isBoxDarkMode ? 'text-white' : 'text-gray-900'}>{words[wordIndex]}</span></div><div className="flex justify-center mt-4 opacity-20" aria-hidden="true"><div className="w-1 h-8 bg-emerald-500 mx-1" /></div><div className="mt-8 w-64 mx-auto"><div className={`h-1.5 rounded-full ${isBoxDarkMode ? 'bg-gray-700' : 'bg-gray-200'}`}><div className="h-full bg-emerald-500 rounded-full transition-all duration-200" style={{ width: `${words.length > 0 ? (wordIndex / words.length) * 100 : 0}%` }} role="progressbar" aria-valuenow={words.length > 0 ? Math.round((wordIndex / words.length) * 100) : 0} aria-valuemin={0} aria-valuemax={100} aria-label="Reading progress" /></div></div><div className="mt-8 flex gap-4 justify-center"><button onClick={() => setIsPlaying(!isPlaying)} className={`p-4 rounded-full transition ${isBoxDarkMode ? 'bg-gray-800 hover:bg-gray-700' : 'bg-gray-100 hover:bg-gray-200'}`} aria-label={isPlaying ? 'Pause reading' : 'Resume reading'}>{isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}</button></div><p className={`mt-4 text-xs ${isBoxDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>{wordIndex + 1} of {words.length} words</p></div>)}
 
-                <div className="flex justify-center mt-4 opacity-20" aria-hidden="true">
-                  <div className="w-1 h-8 bg-emerald-500 mx-1" />
-                </div>
+            {gameState === 'testing' && currentPassage && (<div className="w-full max-w-xl"><div className="mb-4"><span className={`text-sm font-bold ${isBoxDarkMode ? 'text-emerald-400' : 'text-emerald-600'}`}>Question {quizIndex + 1} of {currentPassage.questions.length} • +5 correct / -5 wrong</span></div><h2 className={`text-lg sm:text-xl md:text-2xl font-bold mb-6 sm:mb-8 leading-tight ${isBoxDarkMode ? 'text-white' : 'text-gray-900'}`}>{currentPassage.questions[quizIndex].q}</h2><div className="grid gap-3" role="radiogroup" aria-label="Answer options">{currentPassage.questions[quizIndex].options.map((opt, i) => { const letter = String.fromCharCode(65 + i); return (<button key={i} onClick={() => !showFeedback && handleAnswer(opt)} disabled={showFeedback} className={`p-3 sm:p-4 rounded-xl border-2 text-left font-medium transition-all ${getButtonClass(opt)} ${!showFeedback ? 'active:scale-[0.98]' : ''}`} aria-label={`Option ${letter}: ${opt}`}><span className="flex items-center gap-3"><span className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold border ${isBoxDarkMode && !showFeedback ? 'border-gray-600 text-gray-400' : 'border-gray-300 text-gray-500'}`}>{letter}</span><span className="text-sm sm:text-base">{opt}</span></span></button>); })}</div>{showFeedback && (<div className={`mt-4 p-4 rounded-lg text-center font-medium ${selectedOption === currentPassage.questions[quizIndex].a ? isBoxDarkMode ? 'bg-green-900/30 border border-green-800 text-green-400' : 'bg-green-50 border border-green-200 text-green-600' : isBoxDarkMode ? 'bg-red-900/30 border border-red-800 text-red-400' : 'bg-red-50 border border-red-200 text-red-500'}`} role="alert">{selectedOption === currentPassage.questions[quizIndex].a ? '✓ Correct! +5 points' : '✗ Incorrect. -5 points.'}</div>)}</div>)}
 
-                {/* Progress Bar */}
-                <div className="mt-8 w-64 mx-auto">
-                  <div className={`h-1.5 rounded-full ${isBoxDarkMode ? 'bg-gray-700' : 'bg-gray-200'}`}>
-                    <div 
-                      className="h-full bg-emerald-500 rounded-full transition-all duration-200"
-                      style={{ width: `${words.length > 0 ? (wordIndex / words.length) * 100 : 0}%` }}
-                      role="progressbar"
-                      aria-valuenow={words.length > 0 ? Math.round((wordIndex / words.length) * 100) : 0}
-                      aria-valuemin={0}
-                      aria-valuemax={100}
-                      aria-label="Reading progress"
-                    />
-                  </div>
-                </div>
+            {gameState === 'results' && (<div className={`absolute inset-0 flex items-center justify-center backdrop-blur-sm rounded-xl z-40 ${isBoxDarkMode ? 'bg-gray-900/95' : 'bg-white/95'}`}><div className={`rounded-2xl p-6 sm:p-8 shadow-xl border w-full max-w-[500px] mx-4 ${isBoxDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}><div className="flex items-center justify-center gap-3 mb-4"><Award className="w-10 h-10 text-yellow-500" aria-hidden="true" /><h2 className={`text-2xl font-bold ${isBoxDarkMode ? 'text-white' : 'text-gray-900'}`}>Passage Complete!</h2></div><p className={`text-center mb-6 ${isBoxDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{currentPassage.title} • Level {currentPassage.level}</p><div className="grid grid-cols-2 gap-3 mb-6"><ResultCard label="Correct" value={correctAnswers} icon={<Check className="w-4 h-4" />} color="emerald" isDark={isBoxDarkMode} /><ResultCard label="Wrong" value={wrongAnswers} icon={<XCircle className="w-4 h-4" />} color="red" isDark={isBoxDarkMode} /><ResultCard label="Accuracy" value={getRetentionRate()} unit="%" icon={<BarChart3 className="w-4 h-4" />} color="purple" isDark={isBoxDarkMode} /><ResultCard label="Combo" value={`${combo}x`} icon={<Zap className="w-4 h-4" />} color="orange" isDark={isBoxDarkMode} /><ResultCard label="WPM" value={wpm} icon={<Gauge className="w-4 h-4" />} color="blue" isDark={isBoxDarkMode} /><ResultCard label="Total Score" value={score} icon={<Target className="w-4 h-4" />} color="yellow" isDark={isBoxDarkMode} /></div><div className="flex gap-3"><Link href="/drills/academic" className="flex-1"><button className={`w-full px-4 py-2.5 rounded-lg font-semibold transition-all ${isDarkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>← Back</button></Link><button onClick={nextPassage} className="flex-1 px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg font-bold hover:shadow-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">Next Passage →</button></div></div></div>)}
 
-                <div className="mt-8 flex gap-4 justify-center">
-                  <button 
-                    onClick={() => setIsPlaying(!isPlaying)} 
-                    className={`p-4 rounded-full transition ${isBoxDarkMode ? 'bg-gray-800 hover:bg-gray-700' : 'bg-gray-100 hover:bg-gray-200'}`}
-                    aria-label={isPlaying ? 'Pause reading' : 'Resume reading'}
-                  >
-                    {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
-                  </button>
-                </div>
-                
-                <p className={`mt-4 text-xs ${isBoxDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
-                  {wordIndex + 1} of {words.length} words
-                </p>
-              </div>
-            )}
-
-            {/* ============ TESTING SCREEN ============ */}
-            {gameState === 'testing' && currentPassage && (
-              <div className="w-full max-w-xl">
-                <div className="mb-4">
-                  <span className={`text-sm font-bold ${isBoxDarkMode ? 'text-emerald-400' : 'text-emerald-600'}`}>
-                    Question {quizIndex + 1} of {currentPassage.questions.length} • +5 correct / -5 wrong
-                  </span>
-                </div>
-                
-                <h2 className={`text-lg sm:text-xl md:text-2xl font-bold mb-6 sm:mb-8 leading-tight ${isBoxDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                  {currentPassage.questions[quizIndex].q}
-                </h2>
-                
-                <div className="grid gap-3" role="radiogroup" aria-label="Answer options">
-                  {currentPassage.questions[quizIndex].options.map((opt, i) => {
-                    const letter = String.fromCharCode(65 + i);
-                    return (
-                      <button
-                        key={i}
-                        onClick={() => !showFeedback && handleAnswer(opt)}
-                        disabled={showFeedback}
-                        className={`p-3 sm:p-4 rounded-xl border-2 text-left font-medium transition-all ${getButtonClass(opt)} ${
-                          !showFeedback ? 'active:scale-[0.98]' : ''
-                        }`}
-                        aria-label={`Option ${letter}: ${opt}`}
-                      >
-                        <span className="flex items-center gap-3">
-                          <span className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold border ${
-                            isBoxDarkMode && !showFeedback ? 'border-gray-600 text-gray-400' : 'border-gray-300 text-gray-500'
-                          }`}>
-                            {letter}
-                          </span>
-                          <span className="text-sm sm:text-base">{opt}</span>
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-                
-                {showFeedback && (
-                  <div className={`mt-4 p-4 rounded-lg text-center font-medium ${
-                    selectedOption === currentPassage.questions[quizIndex].a 
-                      ? isBoxDarkMode ? 'bg-green-900/30 border border-green-800 text-green-400' : 'bg-green-50 border border-green-200 text-green-600'
-                      : isBoxDarkMode ? 'bg-red-900/30 border border-red-800 text-red-400' : 'bg-red-50 border border-red-200 text-red-500'
-                  }`} role="alert">
-                    {selectedOption === currentPassage.questions[quizIndex].a 
-                      ? '✓ Correct! +5 points' 
-                      : `✗ Incorrect. -5 points.`}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* ============ RESULTS SCREEN ============ */}
-            {gameState === 'results' && (
-              <div className={`absolute inset-0 flex items-center justify-center backdrop-blur-sm rounded-xl z-40 ${isBoxDarkMode ? 'bg-gray-900/95' : 'bg-white/95'}`}>
-                <div className={`rounded-2xl p-6 sm:p-8 shadow-xl border w-full max-w-[500px] mx-4 ${isBoxDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
-                  <div className="flex items-center justify-center gap-3 mb-4">
-                    <Award className="w-10 h-10 text-yellow-500" aria-hidden="true" />
-                    <h2 className={`text-2xl font-bold ${isBoxDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                      Passage Complete!
-                    </h2>
-                  </div>
-                  
-                  <p className={`text-center mb-6 ${isBoxDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                    {currentPassage.title} • Level {currentPassage.level}
-                  </p>
-                  
-                  <div className="grid grid-cols-2 gap-3 mb-6">
-                    <ResultCard label="Correct" value={correctAnswers} icon={<Check className="w-4 h-4" />} color="emerald" isDark={isBoxDarkMode} />
-                    <ResultCard label="Wrong" value={wrongAnswers} icon={<XCircle className="w-4 h-4" />} color="red" isDark={isBoxDarkMode} />
-                    <ResultCard label="Accuracy" value={getRetentionRate()} unit="%" icon={<BarChart3 className="w-4 h-4" />} color="purple" isDark={isBoxDarkMode} />
-                    <ResultCard label="Combo" value={`${combo}x`} icon={<Zap className="w-4 h-4" />} color="orange" isDark={isBoxDarkMode} />
-                    <ResultCard label="WPM" value={wpm} icon={<Gauge className="w-4 h-4" />} color="blue" isDark={isBoxDarkMode} />
-                    <ResultCard label="Total Score" value={score} icon={<Target className="w-4 h-4" />} color="yellow" isDark={isBoxDarkMode} />
-                  </div>
-                  
-                  <div className="flex gap-3">
-                    <Link href="/drills/academic" className="flex-1">
-                      <button className={`w-full px-4 py-2.5 rounded-lg font-semibold transition-all ${isDarkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>
-                        ← Back
-                      </button>
-                    </Link>
-                    <button
-                      onClick={nextPassage}
-                      className="flex-1 px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg font-bold hover:shadow-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
-                    >
-                      Next Passage →
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* ============ COMPLETE SCREEN ============ */}
-            {gameState === 'complete' && (
-              <div className={`absolute inset-0 flex items-center justify-center backdrop-blur-sm rounded-xl z-40 ${isBoxDarkMode ? 'bg-gray-900/95' : 'bg-white/95'}`}>
-                <div className={`rounded-2xl p-6 sm:p-8 shadow-xl border w-full max-w-[500px] mx-4 ${isBoxDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
-                  <div className="flex items-center justify-center gap-3 mb-4">
-                    <Trophy className="w-10 h-10 text-yellow-500" aria-hidden="true" />
-                    <h2 className={`text-2xl font-bold ${isBoxDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                      Mastery Achieved!
-                    </h2>
-                  </div>
-                  
-                  <p className={`text-center mb-2 ${isBoxDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                    You&apos;ve completed all {passages.length} passages!
-                  </p>
-                  <p className={`text-center text-sm mb-6 ${isBoxDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                    Great speed reading and comprehension. Generate new passages to practice again.
-                  </p>
-                  
-                  <div className="grid grid-cols-2 gap-3 mb-6">
-                    <ResultCard label="Final Score" value={score} icon={<Target className="w-4 h-4" />} color="yellow" isDark={isBoxDarkMode} />
-                    <ResultCard label="Best Score" value={bestScore} icon={<Trophy className="w-4 h-4" />} color="yellow" isDark={isBoxDarkMode} />
-                    <ResultCard label="Accuracy" value={getRetentionRate()} unit="%" icon={<BarChart3 className="w-4 h-4" />} color="purple" isDark={isBoxDarkMode} />
-                    <ResultCard label="Correct" value={correctAnswers} icon={<Check className="w-4 h-4" />} color="emerald" isDark={isBoxDarkMode} />
-                    <ResultCard label="Wrong" value={wrongAnswers} icon={<XCircle className="w-4 h-4" />} color="red" isDark={isBoxDarkMode} />
-                    <ResultCard label="Max Combo" value={`${combo}x`} icon={<Zap className="w-4 h-4" />} color="orange" isDark={isBoxDarkMode} />
-                    <ResultCard label="Passages" value={`${completedPassages.size}/${passages.length}`} icon={<BookOpen className="w-4 h-4" />} color="blue" isDark={isBoxDarkMode} />
-                    <ResultCard label="Total Questions" value={totalQuestions} icon={<Target className="w-4 h-4" />} color="cyan" isDark={isBoxDarkMode} />
-                  </div>
-                  
-                  <div className="flex gap-3">
-                    <Link href="/drills/academic" className="flex-1">
-                      <button className={`w-full px-4 py-2.5 rounded-lg font-semibold transition-all ${isDarkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>
-                        ← Back
-                      </button>
-                    </Link>
-                    <button 
-                      onClick={resetGame} 
-                      className="flex-1 px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
-                    >
-                      New Passages →
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
+            {gameState === 'complete' && (<div className={`absolute inset-0 flex items-center justify-center backdrop-blur-sm rounded-xl z-40 ${isBoxDarkMode ? 'bg-gray-900/95' : 'bg-white/95'}`}><div className={`rounded-2xl p-6 sm:p-8 shadow-xl border w-full max-w-[500px] mx-4 ${isBoxDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}><div className="flex items-center justify-center gap-3 mb-4"><Trophy className="w-10 h-10 text-yellow-500" aria-hidden="true" /><h2 className={`text-2xl font-bold ${isBoxDarkMode ? 'text-white' : 'text-gray-900'}`}>Mastery Achieved!</h2></div><p className={`text-center mb-2 ${isBoxDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>You&apos;ve completed all {passages.length} passages!</p><p className={`text-center text-sm mb-6 ${isBoxDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Great speed reading and comprehension. Generate new passages to practice again.</p><div className="grid grid-cols-2 gap-3 mb-6"><ResultCard label="Final Score" value={score} icon={<Target className="w-4 h-4" />} color="yellow" isDark={isBoxDarkMode} /><ResultCard label="Best Score" value={bestScore} icon={<Trophy className="w-4 h-4" />} color="yellow" isDark={isBoxDarkMode} /><ResultCard label="Accuracy" value={getRetentionRate()} unit="%" icon={<BarChart3 className="w-4 h-4" />} color="purple" isDark={isBoxDarkMode} /><ResultCard label="Correct" value={correctAnswers} icon={<Check className="w-4 h-4" />} color="emerald" isDark={isBoxDarkMode} /><ResultCard label="Wrong" value={wrongAnswers} icon={<XCircle className="w-4 h-4" />} color="red" isDark={isBoxDarkMode} /><ResultCard label="Max Combo" value={`${combo}x`} icon={<Zap className="w-4 h-4" />} color="orange" isDark={isBoxDarkMode} /><ResultCard label="Passages" value={`${completedPassages.size}/${passages.length}`} icon={<BookOpen className="w-4 h-4" />} color="blue" isDark={isBoxDarkMode} /><ResultCard label="Total Questions" value={totalQuestions} icon={<Target className="w-4 h-4" />} color="cyan" isDark={isBoxDarkMode} /></div><div className="flex gap-3"><Link href="/drills/academic" className="flex-1"><button className={`w-full px-4 py-2.5 rounded-lg font-semibold transition-all ${isDarkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>← Back</button></Link><button onClick={resetGame} className="flex-1 px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">New Passages →</button></div></div></div>)}
           </div>
         </div>
 
-        {/* Rules Section */}
+        {!isFullscreen && (<footer className="mt-6" aria-label="Drill rules and scoring information"><div className={`rounded-xl border overflow-hidden ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}><div className={`px-4 py-3 border-b ${isDarkMode ? 'border-gray-700 bg-gray-800/50' : 'border-gray-200 bg-gray-50'}`}><div className="flex items-center gap-2"><Info className={`w-4 h-4 ${isDarkMode ? 'text-emerald-400' : 'text-emerald-600'}`} aria-hidden="true" /><h2 className={`font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Drill Rules & Scoring</h2></div></div><div className="p-4"><div className="grid grid-cols-1 md:grid-cols-2 gap-4"><div className="space-y-3"><div className="flex items-start gap-2"><div className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">1</div><p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Words flash at a <span className="font-semibold text-emerald-500">single focal point</span> - don&apos;t move your eyes</p></div><div className="flex items-start gap-2"><div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">2</div><p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Correct answer: <span className="font-semibold text-green-500">+5 points</span></p></div><div className="flex items-start gap-2"><div className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">3</div><p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Wrong answer: <span className="font-semibold text-red-500">-5 point penalty</span></p></div></div><div className="space-y-3"><div className="flex items-start gap-2"><div className="w-5 h-5 rounded-full bg-orange-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">4</div><p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Every 3 correct = <span className="font-semibold text-orange-500">+5 combo bonus</span></p></div><div className="flex items-start gap-2"><div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">5</div><p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}><span className="font-semibold text-blue-500">Fresh passages</span> every session</p></div><div className="flex items-start gap-2"><div className="w-5 h-5 rounded-full bg-purple-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">6</div><p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Score <span className="font-semibold text-purple-500">never goes below 0</span></p></div></div></div><div className={`mt-4 pt-3 border-t flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs ${isDarkMode ? 'border-gray-700 text-gray-400' : 'border-gray-200 text-gray-500'}`}><span>🔄 Content regenerates on refresh • New questions every time</span><span>🏆 Best Score saves locally • Free forever</span></div></div></div></footer>)}
+
+        {/* ============ ABOUT THIS RSVP DRILL - ABOVE RELATED DRILLS, BELOW RULES ============ */}
         {!isFullscreen && (
-          <footer className="mt-6" aria-label="Drill rules and scoring information">
+          <section className="mt-8" aria-label="About this RSVP speed reading drill">
             <div className={`rounded-xl border overflow-hidden ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
               <div className={`px-4 py-3 border-b ${isDarkMode ? 'border-gray-700 bg-gray-800/50' : 'border-gray-200 bg-gray-50'}`}>
-                <div className="flex items-center gap-2">
-                  <Info className={`w-4 h-4 ${isDarkMode ? 'text-emerald-400' : 'text-emerald-600'}`} aria-hidden="true" />
-                  <h2 className={`font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Drill Rules & Scoring</h2>
-                </div>
+                <div className="flex items-center gap-2"><GraduationCap className={`w-5 h-5 ${isDarkMode ? 'text-emerald-400' : 'text-emerald-600'}`} aria-hidden="true" /><h2 className={`font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>About This Free RSVP Speed Reading Drill</h2></div>
               </div>
-              <div className="p-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-3">
-                    <div className="flex items-start gap-2">
-                      <div className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">1</div>
-                      <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                        Words flash at a <span className="font-semibold text-emerald-500">single focal point</span> - don&apos;t move your eyes
-                      </p>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">2</div>
-                      <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                        Correct answer: <span className="font-semibold text-green-500">+5 points</span>
-                      </p>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <div className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">3</div>
-                      <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                        Wrong answer: <span className="font-semibold text-red-500">-5 point penalty</span>
-                      </p>
-                    </div>
-                  </div>
-                  <div className="space-y-3">
-                    <div className="flex items-start gap-2">
-                      <div className="w-5 h-5 rounded-full bg-orange-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">4</div>
-                      <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                        Every 3 correct = <span className="font-semibold text-orange-500">+5 combo bonus</span>
-                      </p>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">5</div>
-                      <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                        <span className="font-semibold text-blue-500">Fresh passages</span> every session
-                      </p>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <div className="w-5 h-5 rounded-full bg-purple-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">6</div>
-                      <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                        Score <span className="font-semibold text-purple-500">never goes below 0</span>
-                      </p>
-                    </div>
-                  </div>
+              <div className="p-5">
+                <p className={`text-sm leading-relaxed mb-5 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>This free RSVP (Rapid Serial Visual Presentation) speed reading drill flashes words at a single focal point, eliminating eye movements for faster reading. Fresh passages are generated every session across 3 difficulty levels with comprehension quizzes after each passage. Adjust speed from 100 to 600 WPM. Perfect for IELTS, TOEFL, GRE, GMAT, SAT, CAT, UPSC and competitive exam reading preparation.</p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
+                  <div className={`p-4 rounded-xl border ${isDarkMode ? 'bg-gray-700/50 border-gray-600' : 'bg-emerald-50 border-emerald-100'}`}><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center"><GraduationCap className="w-4 h-4 text-white" /></div><h3 className={`text-sm font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Who It's For</h3></div><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Students, professionals, IELTS/TOEFL/GRE/GMAT/SAT test-takers, and anyone wanting to read faster with better comprehension.</p></div>
+                  <div className={`p-4 rounded-xl border ${isDarkMode ? 'bg-gray-700/50 border-gray-600' : 'bg-green-50 border-green-100'}`}><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-green-500 flex items-center justify-center"><TrendingUp className="w-4 h-4 text-white" /></div><h3 className={`text-sm font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Skills Improved</h3></div><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Reading speed, comprehension accuracy, visual processing, focus, and information retention under time pressure.</p></div>
+                  <div className={`p-4 rounded-xl border ${isDarkMode ? 'bg-gray-700/50 border-gray-600' : 'bg-purple-50 border-purple-100'}`}><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-purple-500 flex items-center justify-center"><BarChart3 className="w-4 h-4 text-white" /></div><h3 className={`text-sm font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>What You'll Track</h3></div><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Score, accuracy, correct/wrong answers, combo streaks, WPM speed, and progress through passages.</p></div>
                 </div>
-                <div className={`mt-4 pt-3 border-t flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs ${isDarkMode ? 'border-gray-700 text-gray-400' : 'border-gray-200 text-gray-500'}`}>
-                  <span>🔄 Content regenerates on refresh • New questions every time</span>
-                  <span>🏆 Best Score saves locally</span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className={`p-4 rounded-xl border ${isDarkMode ? 'bg-gray-700/50 border-gray-600' : 'bg-yellow-50 border-yellow-100'}`}><div className="flex items-center gap-2 mb-3"><div className="w-8 h-8 rounded-lg bg-yellow-500 flex items-center justify-center"><Lightbulb className="w-4 h-4 text-white" /></div><h3 className={`text-sm font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Why Practice Speed Reading?</h3></div><ul className={`text-xs space-y-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}><li className="flex items-start gap-2"><Check className="w-3 h-3 text-yellow-500 mt-0.5 flex-shrink-0" /> Process textbooks, reports, and articles faster</li><li className="flex items-start gap-2"><Check className="w-3 h-3 text-yellow-500 mt-0.5 flex-shrink-0" /> Save time on IELTS/TOEFL/GRE reading sections</li><li className="flex items-start gap-2"><Check className="w-3 h-3 text-yellow-500 mt-0.5 flex-shrink-0" /> Reduce subvocalization for faster processing</li><li className="flex items-start gap-2"><Check className="w-3 h-3 text-yellow-500 mt-0.5 flex-shrink-0" /> Improve focus and information retention</li></ul></div>
+                  <div className={`p-4 rounded-xl border ${isDarkMode ? 'bg-gray-700/50 border-gray-600' : 'bg-orange-50 border-orange-100'}`}><div className="flex items-center gap-2 mb-3"><div className="w-8 h-8 rounded-lg bg-orange-500 flex items-center justify-center"><Clock className="w-4 h-4 text-white" /></div><h3 className={`text-sm font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>How to Practice Effectively</h3></div><ol className={`text-xs space-y-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}><li className="flex items-start gap-2"><span className="w-5 h-5 rounded-full bg-orange-500 text-white text-xs flex items-center justify-center flex-shrink-0 mt-0.5">1</span> Start at 200-300 WPM for comfortable reading</li><li className="flex items-start gap-2"><span className="w-5 h-5 rounded-full bg-orange-500 text-white text-xs flex items-center justify-center flex-shrink-0 mt-0.5">2</span> Answer comprehension questions after each passage</li><li className="flex items-start gap-2"><span className="w-5 h-5 rounded-full bg-orange-500 text-white text-xs flex items-center justify-center flex-shrink-0 mt-0.5">3</span> Gradually increase WPM by 50 each week</li><li className="flex items-start gap-2"><span className="w-5 h-5 rounded-full bg-orange-500 text-white text-xs flex items-center justify-center flex-shrink-0 mt-0.5">4</span> Practice 2-3 times daily for best improvement in 2-3 weeks</li></ol></div>
                 </div>
               </div>
             </div>
-          </footer>
+          </section>
         )}
+
+        {/* ============ RELATED DRILLS ============ */}
+        {!isFullscreen && (
+          <section className="mt-8" aria-label="Related training drills and resources">
+            <div className="flex items-center gap-2 mb-4"><div className="w-1 h-6 rounded-full bg-gradient-to-b from-emerald-500 to-teal-600"></div><h2 className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Explore Related Free Drills</h2><span className={`text-xs px-2 py-0.5 rounded-full ${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>8 drills</span></div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <Link href="/drills/academic/comprehension/inference-drill" className={`group relative overflow-hidden rounded-xl border transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${isDarkMode ? 'bg-gray-800 border-gray-700 hover:border-blue-500' : 'bg-white border-gray-200 hover:border-blue-300'}`}><div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-indigo-500"></div><div className="p-4"><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center"><Brain className="w-4 h-4 text-blue-600" /></div><span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>Comprehension</span></div><h3 className={`font-semibold text-sm mb-1 ${isDarkMode ? 'text-white group-hover:text-blue-400' : 'text-gray-900 group-hover:text-blue-600'} transition-colors`}>Inference Analytics</h3><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>12 critical reasoning passages with detailed answer rationales and combo streaks.</p><div className="flex items-center gap-1 mt-3 text-blue-500 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">Start Drill <ArrowRight className="w-3 h-3" /></div></div></Link>
+              <Link href="/drills/academic/comprehension/listening-comprehension" className={`group relative overflow-hidden rounded-xl border transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${isDarkMode ? 'bg-gray-800 border-gray-700 hover:border-cyan-500' : 'bg-white border-gray-200 hover:border-cyan-300'}`}><div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-500 to-blue-500"></div><div className="p-4"><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-cyan-100 flex items-center justify-center"><Headphones className="w-4 h-4 text-cyan-600" /></div><span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>Comprehension</span></div><h3 className={`font-semibold text-sm mb-1 ${isDarkMode ? 'text-white group-hover:text-cyan-400' : 'text-gray-900 group-hover:text-cyan-600'} transition-colors`}>Listening Comprehension</h3><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>9 audio passages with male/female voices, transcript option, and recall questions.</p><div className="flex items-center gap-1 mt-3 text-cyan-500 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">Start Drill <ArrowRight className="w-3 h-3" /></div></div></Link>
+              <Link href="/drills/academic/writing-speed/typing-test" className={`group relative overflow-hidden rounded-xl border transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${isDarkMode ? 'bg-gray-800 border-gray-700 hover:border-rose-500' : 'bg-white border-gray-200 hover:border-rose-300'}`}><div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-rose-500 to-pink-500"></div><div className="p-4"><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-rose-100 flex items-center justify-center"><Keyboard className="w-4 h-4 text-rose-600" /></div><span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>Writing Speed</span></div><h3 className={`font-semibold text-sm mb-1 ${isDarkMode ? 'text-white group-hover:text-rose-400' : 'text-gray-900 group-hover:text-rose-600'} transition-colors`}>Typing Speed Test</h3><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>WPM test with 30 quotes across Easy/Medium/Hard levels and real-time feedback.</p><div className="flex items-center gap-1 mt-3 text-rose-500 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">Start Drill <ArrowRight className="w-3 h-3" /></div></div></Link>
+              <Link href="/drills/cognitive/processing-speed/quick-math" className={`group relative overflow-hidden rounded-xl border transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${isDarkMode ? 'bg-gray-800 border-gray-700 hover:border-orange-500' : 'bg-white border-gray-200 hover:border-orange-300'}`}><div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-500 to-amber-500"></div><div className="p-4"><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center"><Zap className="w-4 h-4 text-orange-600" /></div><span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>Processing Speed</span></div><h3 className={`font-semibold text-sm mb-1 ${isDarkMode ? 'text-white group-hover:text-orange-400' : 'text-gray-900 group-hover:text-orange-600'} transition-colors`}>Quick Math</h3><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Rapid fire mental arithmetic practice for competitive exams and brain training.</p><div className="flex items-center gap-1 mt-3 text-orange-500 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">Start Drill <ArrowRight className="w-3 h-3" /></div></div></Link>
+              <Link href="/drills/academic/writing-speed/code-typing" className={`group relative overflow-hidden rounded-xl border transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${isDarkMode ? 'bg-gray-800 border-gray-700 hover:border-purple-500' : 'bg-white border-gray-200 hover:border-purple-300'}`}><div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 to-violet-500"></div><div className="p-4"><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center"><Code2 className="w-4 h-4 text-purple-600" /></div><span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>Writing Speed</span></div><h3 className={`font-semibold text-sm mb-1 ${isDarkMode ? 'text-white group-hover:text-purple-400' : 'text-gray-900 group-hover:text-purple-600'} transition-colors`}>Code Typing</h3><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Practice JavaScript, Python & HTML syntax with character-level feedback.</p><div className="flex items-center gap-1 mt-3 text-purple-500 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">Start Drill <ArrowRight className="w-3 h-3" /></div></div></Link>
+              <Link href="/drills/cognitive/memory/number-recall" className={`group relative overflow-hidden rounded-xl border transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${isDarkMode ? 'bg-gray-800 border-gray-700 hover:border-red-500' : 'bg-white border-gray-200 hover:border-red-300'}`}><div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-500 to-rose-500"></div><div className="p-4"><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center"><Hash className="w-4 h-4 text-red-600" /></div><span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>Memory</span></div><h3 className={`font-semibold text-sm mb-1 ${isDarkMode ? 'text-white group-hover:text-red-400' : 'text-gray-900 group-hover:text-red-600'} transition-colors`}>Number Recall</h3><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Memorize and reproduce increasingly long number sequences accurately.</p><div className="flex items-center gap-1 mt-3 text-red-500 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">Start Drill <ArrowRight className="w-3 h-3" /></div></div></Link>
+              <Link href="/drills/cognitive/focus/concentration-grid" className={`group relative overflow-hidden rounded-xl border transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${isDarkMode ? 'bg-gray-800 border-gray-700 hover:border-teal-500' : 'bg-white border-gray-200 hover:border-teal-300'}`}><div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-teal-500 to-green-500"></div><div className="p-4"><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-teal-100 flex items-center justify-center"><Target className="w-4 h-4 text-teal-600" /></div><span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>Focus</span></div><h3 className={`font-semibold text-sm mb-1 ${isDarkMode ? 'text-white group-hover:text-teal-400' : 'text-gray-900 group-hover:text-teal-600'} transition-colors`}>Concentration Grid</h3><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Find numbers in sequence under time pressure to build sustained attention.</p><div className="flex items-center gap-1 mt-3 text-teal-500 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">Start Drill <ArrowRight className="w-3 h-3" /></div></div></Link>
+              <Link href="/drills/productivity/focus-endurance/deep-work" className={`group relative overflow-hidden rounded-xl border transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${isDarkMode ? 'bg-gray-800 border-gray-700 hover:border-indigo-500' : 'bg-white border-gray-200 hover:border-indigo-300'}`}><div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 to-blue-500"></div><div className="p-4"><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center"><Timer className="w-4 h-4 text-indigo-600" /></div><span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>Productivity</span></div><h3 className={`font-semibold text-sm mb-1 ${isDarkMode ? 'text-white group-hover:text-indigo-400' : 'text-gray-900 group-hover:text-indigo-600'} transition-colors`}>Deep Work Timer</h3><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Build focus endurance with structured deep work sessions for study and productivity.</p><div className="flex items-center gap-1 mt-3 text-indigo-500 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">Start Drill <ArrowRight className="w-3 h-3" /></div></div></Link>
+            </div>
+          </section>
+        )}
+
+        {!isFullscreen && (<footer className="mt-12 bg-gray-900 text-gray-400 rounded-xl py-10 px-6" role="contentinfo"><div className="max-w-7xl mx-auto"><div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8 mb-8"><div><h3 className="text-white font-semibold mb-3 text-sm">FPS Training</h3><ul className="space-y-2 text-sm"><li><Link href="/drills/fps/flick-shot-training" className="hover:text-white transition-colors">Flick Shot Trainer</Link></li><li><Link href="/drills/fps/target-acquisition" className="hover:text-white transition-colors">Target Acquisition</Link></li><li><Link href="/drills/fps/reactive-tracking" className="hover:text-white transition-colors">Reactive Tracking</Link></li><li><Link href="/drills/fps" className="text-blue-400 hover:text-blue-300 transition-colors font-medium">All 21 FPS Drills →</Link></li></ul></div><div><h3 className="text-white font-semibold mb-3 text-sm">Cognitive</h3><ul className="space-y-2 text-sm"><li><Link href="/drills/cognitive/memory/card-matching" className="hover:text-white transition-colors">Memory Games</Link></li><li><Link href="/drills/cognitive/attention/divided-attention" className="hover:text-white transition-colors">Attention Drills</Link></li><li><Link href="/drills/cognitive/problem-solving/logic-puzzles" className="hover:text-white transition-colors">Logic Puzzles</Link></li><li><Link href="/drills/cognitive" className="text-blue-400 hover:text-blue-300 transition-colors font-medium">All 16 Cognitive Drills →</Link></li></ul></div><div><h3 className="text-white font-semibold mb-3 text-sm">Academic</h3><ul className="space-y-2 text-sm"><li><Link href="/drills/academic/writing-speed/typing-test" className="hover:text-white transition-colors">Typing Speed Test</Link></li><li><Link href="/drills/academic/reading-speed/speed-reader" className="hover:text-white transition-colors">Speed Reader</Link></li><li><Link href="/drills/academic/math-speed/mental-math" className="hover:text-white transition-colors">Mental Math</Link></li><li><Link href="/drills/academic" className="text-blue-400 hover:text-blue-300 transition-colors font-medium">All 12 Academic Drills →</Link></li></ul></div><div><h3 className="text-white font-semibold mb-3 text-sm">Visual & Motor</h3><ul className="space-y-2 text-sm"><li><Link href="/drills/visual/reaction-speed/light-reaction" className="hover:text-white transition-colors">Reaction Time Test</Link></li><li><Link href="/drills/motor/hand-eye-coordination/aim-trainer" className="hover:text-white transition-colors">Hand-Eye Coordination</Link></li><li><Link href="/drills/visual/tracking-accuracy/moving-target" className="hover:text-white transition-colors">Moving Target Tracking</Link></li><li><Link href="/drills/visual" className="text-blue-400 hover:text-blue-300 transition-colors font-medium">All 14 Visual Drills →</Link></li></ul></div><div><h3 className="text-white font-semibold mb-3 text-sm">More Categories</h3><ul className="space-y-2 text-sm"><li><Link href="/drills/memory" className="hover:text-white transition-colors">Memory (15 drills)</Link></li><li><Link href="/drills/productivity" className="hover:text-white transition-colors">Productivity (10 drills)</Link></li><li><Link href="/drills/mental-fitness" className="hover:text-white transition-colors">Mental Fitness (6 drills)</Link></li><li><Link href="/drills/physical" className="hover:text-white transition-colors">Physical (11 drills)</Link></li></ul></div></div><div className="border-t border-gray-800 pt-8 text-center"><div className="flex items-center justify-center gap-3 mb-4"><div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center"><Target className="w-5 h-5 text-white" aria-hidden="true" /></div><span className="text-white font-bold text-lg">SkillDrills</span></div><p className="text-sm mb-2">&copy; 2026 SkillDrills. All rights reserved.</p><p className="text-xs max-w-2xl mx-auto leading-relaxed mb-6">Free online RSVP speed reading drill with fresh passages every session. Practice reading comprehension at 100-600 WPM across 3 difficulty levels. Perfect for IELTS, TOEFL, GRE, GMAT, SAT, CAT, UPSC, and competitive exam reading preparation. No registration required. More free drills at skilldrills.online.</p><div className="flex items-center justify-center gap-5 flex-wrap"><button onClick={sharePage} className="text-gray-500 hover:text-white transition-colors" title="Share this drill" aria-label="Share this free speed reading drill"><svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg></button><button onClick={copyPageLink} className="text-gray-500 hover:text-white transition-colors" title="Copy link" aria-label="Copy drill link to clipboard"><svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg></button><a href="https://twitter.com/skilldrillss" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-white transition-colors" title="Follow on Twitter X" aria-label="Follow SkillDrills on Twitter X"><svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a><a href="https://instagram.com/skilldrills.online" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-white transition-colors" title="Follow on Instagram" aria-label="Follow SkillDrills on Instagram"><svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg></a><a href="https://youtube.com/@skilldrills.online" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-white transition-colors" title="Subscribe on YouTube" aria-label="Subscribe to SkillDrills on YouTube"><svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a><a href="https://pinterest.com/skilldrills" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-white transition-colors" title="Follow on Pinterest" aria-label="Follow SkillDrills on Pinterest"><svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0C5.373 0 0 5.372 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738.098.119.112.224.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.631-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12 0-6.628-5.373-12-12-12z"/></svg></a></div></div></div></footer>)}
       </div>
     </div>
   );
 }
 
-// Export as named export and default export for compatibility
 export { ReadingComprehensionClient };
 export default ReadingComprehensionClient;

@@ -9,7 +9,9 @@
     "lint": "next lint",
     "analyze": "ANALYZE=true next build",
     "analyze:server": "ANALYZE=true next build && open .next/analyze/bundle.html",
-    "build:prod": "NODE_ENV=production next build"
+    "build:prod": "set NODE_ENV=production && next build",
+    "notify-search-engines": "node scripts/notify-indexnow.js",
+    "postbuild": "node scripts/notify-indexnow.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",

@@ -5,7 +5,10 @@ import Link from 'next/link';
 import { 
   ArrowLeft, Maximize2, Minimize2, Sun, Moon, 
   Eye, Volume2, VolumeX, Info, Activity, Target, Clock, Award, 
-  Trophy, Zap, RefreshCw, Heart
+  Trophy, Zap, RefreshCw, Heart,
+  Crosshair, Dumbbell, Database, Keyboard, Star, Users,
+  GraduationCap, Lightbulb, TrendingUp, ArrowRight,
+  BookOpen, Brain, Calculator, Hash, Code2, BarChart3, CheckCircle2
 } from 'lucide-react';
 
 export default function ConcentrationStaminaClient() {
@@ -19,7 +22,6 @@ export default function ConcentrationStaminaClient() {
   const [isBoxDarkMode, setIsBoxDarkMode] = useState(true);
   const [soundEnabled, setSoundEnabled] = useState(true);
   
-  // Game state
   const [timeLeft, setTimeLeft] = useState(60);
   const [lives, setLives] = useState(3);
   const [currentStim, setCurrentStim] = useState('G');
@@ -38,20 +40,7 @@ export default function ConcentrationStaminaClient() {
   const [processed, setProcessed] = useState(false);
   const [currentInterval, setCurrentInterval] = useState(800);
   
-  // Refs
-  const gameStateRef = useRef({
-    timeLeft: 60,
-    lives: 3,
-    activeSet: 'VOWELS',
-    currentStim: 'G',
-    processed: false,
-    streakCount: 0,
-    correctHits: 0,
-    misses: 0,
-    score: 0,
-    isGameActive: false,
-    currentInterval: 800
-  });
+  const gameStateRef = useRef({ timeLeft: 60, lives: 3, activeSet: 'VOWELS', currentStim: 'G', processed: false, streakCount: 0, correctHits: 0, misses: 0, score: 0, isGameActive: false, currentInterval: 800 });
   const mainGameStateRef = useRef('start');
   const timerIntervalRef = useRef(null);
   const stimulusIntervalRef = useRef(null);
@@ -59,10 +48,8 @@ export default function ConcentrationStaminaClient() {
   const feedbackTimeoutRef = useRef(null);
   const audioCtxRef = useRef(null);
   const bestStreakRef = useRef(0);
-
   const PENALTY = 1;
 
-  // Data sets - memoized
   const dataSets = useMemo(() => ({
     vowels: ['A', 'E', 'I', 'O', 'U'],
     consonants: ['B', 'C', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'X', 'Y', 'Z'],
@@ -70,548 +57,78 @@ export default function ConcentrationStaminaClient() {
     nonPrimes: ['1', '4', '6', '8', '9']
   }), []);
 
-  // Mark as client-side rendered
-  useEffect(() => {
-    setIsClient(true);
-    const timer = setTimeout(() => setLoading(false), 300);
-    return () => clearTimeout(timer);
-  }, []);
+  useEffect(() => { setIsClient(true); const t = setTimeout(() => setLoading(false), 300); return () => clearTimeout(t); }, []);
+  useEffect(() => { mainGameStateRef.current = gameState; }, [gameState]);
+  useEffect(() => { try { const s = localStorage.getItem('constantPrimeBestScore'); if (s) setBestScore(parseInt(s, 10)); const str = localStorage.getItem('constantPrimeBestStreak'); if (str) { const p = parseInt(str, 10); setBestStreak(p); bestStreakRef.current = p; } } catch (e) {} }, []);
 
-  // Sync gameState to ref
-  useEffect(() => {
-    mainGameStateRef.current = gameState;
-  }, [gameState]);
+  const updateBestScore = useCallback((finalScore) => { try { const c = parseInt(localStorage.getItem('constantPrimeBestScore') || '0', 10); if (finalScore > c) { localStorage.setItem('constantPrimeBestScore', finalScore.toString()); setBestScore(finalScore); } } catch (e) {} }, []);
+  const showFeedback = useCallback((message, type) => { if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current); setFeedback(message); setFeedbackType(type); feedbackTimeoutRef.current = setTimeout(() => { setFeedback(''); setFeedbackType(''); }, 600); }, []);
+  const initAudio = useCallback(() => { try { if (!audioCtxRef.current) audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)(); if (audioCtxRef.current.state === 'suspended') audioCtxRef.current.resume(); return audioCtxRef.current; } catch (e) { return null; } }, []);
+  const playSound = useCallback((type) => { if (!soundEnabled) return; try { const a = initAudio(); if (!a) return; const o = a.createOscillator(); const g = a.createGain(); o.connect(g); g.connect(a.destination); const n = a.currentTime; const fm = { hit: 880, miss: 440, ruleChange: 660, streak: 1046.5, lifeLost: 330, speedUp: 1200 }; const dm = { hit: 0.1, miss: 0.15, ruleChange: 0.1, streak: 0.2, lifeLost: 0.2, speedUp: 0.08 }; o.frequency.setValueAtTime(fm[type] || 660, n); g.gain.setValueAtTime(type === 'lifeLost' ? 0.15 : type === 'streak' ? 0.12 : 0.1, n); g.gain.exponentialRampToValueAtTime(0.001, n + (dm[type] || 0.15)); o.start(n); o.stop(n + (dm[type] || 0.15)); } catch (e) {} }, [soundEnabled, initAudio]);
 
-  // Load best scores
-  useEffect(() => {
-    try {
-      const savedBestScore = localStorage.getItem('constantPrimeBestScore');
-      const savedBestStreak = localStorage.getItem('constantPrimeBestStreak');
-      if (savedBestScore) setBestScore(parseInt(savedBestScore, 10));
-      if (savedBestStreak) {
-        const parsed = parseInt(savedBestStreak, 10);
-        setBestStreak(parsed);
-        bestStreakRef.current = parsed;
-      }
-    } catch (e) { /* localStorage not available */ }
-  }, []);
+  const toggleFullscreen = useCallback(async () => { try { if (!isFullscreen) { const e = containerRef.current; if (e?.requestFullscreen) { await e.requestFullscreen(); setIsFullscreen(true); } } else { if (document.fullscreenElement) await document.exitFullscreen(); setIsFullscreen(false); } } catch (e) { console.error('Fullscreen error:', e); } }, [isFullscreen]);
+  useEffect(() => { const h = () => setIsFullscreen(!!document.fullscreenElement); document.addEventListener('fullscreenchange', h); return () => document.removeEventListener('fullscreenchange', h); }, []);
 
-  // Update best score
-  const updateBestScore = useCallback((finalScore) => {
-    try {
-      const currentBestScore = parseInt(localStorage.getItem('constantPrimeBestScore') || '0', 10);
-      if (finalScore > currentBestScore) {
-        localStorage.setItem('constantPrimeBestScore', finalScore.toString());
-        setBestScore(finalScore);
-      }
-    } catch (e) { /* localStorage not available */ }
-  }, []);
+  const updateAccuracy = useCallback(() => { const s = gameStateRef.current; const t = s.correctHits + s.misses; if (t > 0) setAccuracy(Math.round((s.correctHits / t) * 100)); }, []);
 
-  const showFeedback = useCallback((message, type) => {
-    if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
-    setFeedback(message);
-    setFeedbackType(type);
-    feedbackTimeoutRef.current = setTimeout(() => {
-      setFeedback('');
-      setFeedbackType('');
-    }, 600);
-  }, []);
+  const updateSpeed = useCallback(() => { const s = gameStateRef.current; const ta = s.correctHits + s.misses; if (ta > 0) { const ca = (s.correctHits / ta) * 100; if (ca >= 80 && s.currentInterval > 400) { s.currentInterval = Math.max(400, s.currentInterval - 50); setCurrentInterval(s.currentInterval); playSound('speedUp'); showFeedback(`⚡ Speed increased! ${s.currentInterval}ms`, 'success'); if (stimulusIntervalRef.current) { clearInterval(stimulusIntervalRef.current); stimulusIntervalRef.current = setInterval(updateStimulus, s.currentInterval); } } else if (ca < 50 && s.currentInterval < 800) { s.currentInterval = Math.min(800, s.currentInterval + 50); setCurrentInterval(s.currentInterval); showFeedback(`🐢 Speed adjusted: ${s.currentInterval}ms`, 'warning'); if (stimulusIntervalRef.current) { clearInterval(stimulusIntervalRef.current); stimulusIntervalRef.current = setInterval(updateStimulus, s.currentInterval); } } } }, [playSound, showFeedback]);
 
-  const initAudio = useCallback(() => {
-    try {
-      if (!audioCtxRef.current) {
-        audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
-      }
-      if (audioCtxRef.current.state === 'suspended') {
-        audioCtxRef.current.resume();
-      }
-      return audioCtxRef.current;
-    } catch (e) {
-      return null;
-    }
-  }, []);
+  const updateStimulus = useCallback(() => { if (!gameStateRef.current.isGameActive) return; const s = gameStateRef.current; s.processed = false; setProcessed(false); setIsHit(false); setIsMiss(false); const isTarget = Math.random() < 0.3; let ns = ''; if (s.activeSet === 'VOWELS') { ns = isTarget ? dataSets.vowels[Math.floor(Math.random() * dataSets.vowels.length)] : dataSets.consonants[Math.floor(Math.random() * dataSets.consonants.length)]; } else { ns = isTarget ? dataSets.primes[Math.floor(Math.random() * dataSets.primes.length)] : dataSets.nonPrimes[Math.floor(Math.random() * dataSets.nonPrimes.length)]; } s.currentStim = ns; setCurrentStim(ns); if ((s.correctHits + s.misses) % 5 === 0 && (s.correctHits + s.misses) > 0) updateSpeed(); }, [dataSets, updateSpeed]);
 
-  const playSound = useCallback((type) => {
-    if (!soundEnabled) return;
-    try {
-      const audioCtx = initAudio();
-      if (!audioCtx) return;
-      
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      
-      const now = audioCtx.currentTime;
-      const freqMap = { hit: 880, miss: 440, ruleChange: 660, streak: 1046.5, lifeLost: 330, speedUp: 1200 };
-      const durMap = { hit: 0.1, miss: 0.15, ruleChange: 0.1, streak: 0.2, lifeLost: 0.2, speedUp: 0.08 };
-      
-      osc.frequency.setValueAtTime(freqMap[type] || 660, now);
-      gain.gain.setValueAtTime(type === 'lifeLost' ? 0.15 : type === 'streak' ? 0.12 : 0.1, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + (durMap[type] || 0.15));
-      osc.start(now);
-      osc.stop(now + (durMap[type] || 0.15));
-    } catch (e) { /* Audio not supported */ }
-  }, [soundEnabled, initAudio]);
+  const handleInput = useCallback(() => { if (!gameStateRef.current.isGameActive) return; const s = gameStateRef.current; if (s.processed) return; s.processed = true; setProcessed(true); const ts = s.activeSet === 'VOWELS' ? dataSets.vowels : dataSets.primes; const isTarget = ts.includes(s.currentStim); if (isTarget) { s.correctHits++; s.streakCount++; s.score += 1; setCorrectHits(s.correctHits); setStreak(s.streakCount); setScore(s.score); setIsHit(true); playSound('hit'); showFeedback('✓ Correct! +1 point', 'success'); if (s.streakCount > bestStreakRef.current) { bestStreakRef.current = s.streakCount; setBestStreak(s.streakCount); try { localStorage.setItem('constantPrimeBestStreak', s.streakCount.toString()); } catch (e) {} } if (s.streakCount % 5 === 0 && s.streakCount > 0) { playSound('streak'); showFeedback(`🔥 ${s.streakCount} Streak!`, 'success'); } } else { s.misses++; s.streakCount = 0; setMisses(s.misses); setStreak(0); setIsMiss(true); if (s.lives > 0) { s.lives--; setLives(s.lives); playSound('miss'); if (s.lives === 0) { playSound('lifeLost'); showFeedback('⚠️ Out of lives! Penalty now active!', 'warning'); } else { showFeedback(`✗ Miss! No penalty • ${s.lives} lives left`, 'error'); } } else { s.score = Math.max(0, s.score - PENALTY); setScore(s.score); playSound('miss'); showFeedback(`✗ Miss! -${PENALTY} point penalty`, 'error'); } } updateAccuracy(); setTimeout(() => { setIsHit(false); setIsMiss(false); }, 150); }, [dataSets, PENALTY, playSound, showFeedback, updateAccuracy]);
 
-  const toggleFullscreen = useCallback(async () => {
-    try {
-      if (!isFullscreen) {
-        const element = containerRef.current;
-        if (element?.requestFullscreen) {
-          await element.requestFullscreen();
-          setIsFullscreen(true);
-        }
-      } else {
-        if (document.fullscreenElement) {
-          await document.exitFullscreen();
-        }
-        setIsFullscreen(false);
-      }
-    } catch (error) {
-      console.error('Fullscreen error:', error);
-    }
-  }, [isFullscreen]);
+  const changeRule = useCallback(() => { if (!gameStateRef.current.isGameActive) return; const s = gameStateRef.current; const ns = s.activeSet === 'VOWELS' ? 'PRIMES' : 'VOWELS'; s.activeSet = ns; setActiveSet(ns); playSound('ruleChange'); showFeedback(`🔄 Rule changed to ${ns}!`, 'warning'); }, [playSound, showFeedback]);
 
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
-  }, []);
+  const endGame = useCallback(() => { const s = gameStateRef.current; s.isGameActive = false; setGameState('gameOver'); mainGameStateRef.current = 'gameOver'; if (stimulusIntervalRef.current) clearInterval(stimulusIntervalRef.current); if (ruleIntervalRef.current) clearInterval(ruleIntervalRef.current); if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); updateBestScore(s.score); }, [updateBestScore]);
 
-  const updateAccuracy = useCallback(() => {
-    const state = gameStateRef.current;
-    const total = state.correctHits + state.misses;
-    if (total > 0) {
-      setAccuracy(Math.round((state.correctHits / total) * 100));
-    }
-  }, []);
+  const startGame = useCallback(() => { if (stimulusIntervalRef.current) clearInterval(stimulusIntervalRef.current); if (ruleIntervalRef.current) clearInterval(ruleIntervalRef.current); if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); const s = gameStateRef.current; s.timeLeft = 60; s.lives = 3; s.activeSet = 'VOWELS'; s.processed = false; s.streakCount = 0; s.correctHits = 0; s.misses = 0; s.score = 0; s.currentInterval = 800; s.isGameActive = true; setTimeLeft(60); setLives(3); setActiveSet('VOWELS'); setCurrentStim('G'); setProcessed(false); setIsHit(false); setIsMiss(false); setScore(0); setStreak(0); setCorrectHits(0); setMisses(0); setAccuracy(100); setCurrentInterval(800); setGameState('playing'); mainGameStateRef.current = 'playing'; setTimeout(() => updateStimulus(), 50); stimulusIntervalRef.current = setInterval(updateStimulus, 800); ruleIntervalRef.current = setInterval(changeRule, 10000); timerIntervalRef.current = setInterval(() => { setTimeLeft(prev => { if (prev <= 1) { endGame(); return 0; } return prev - 1; }); }, 1000); showFeedback('60 seconds • Speed adapts to your accuracy!', 'success'); }, [updateStimulus, changeRule, endGame, showFeedback]);
 
-  // Adaptive speed based on performance
-  const updateSpeed = useCallback(() => {
-    const state = gameStateRef.current;
-    const totalAttempts = state.correctHits + state.misses;
-    
-    if (totalAttempts > 0) {
-      const currentAccuracy = (state.correctHits / totalAttempts) * 100;
-      
-      if (currentAccuracy >= 80 && state.currentInterval > 400) {
-        state.currentInterval = Math.max(400, state.currentInterval - 50);
-        setCurrentInterval(state.currentInterval);
-        playSound('speedUp');
-        showFeedback(`⚡ Speed increased! ${state.currentInterval}ms`, 'success');
-        
-        if (stimulusIntervalRef.current) {
-          clearInterval(stimulusIntervalRef.current);
-          stimulusIntervalRef.current = setInterval(updateStimulus, state.currentInterval);
-        }
-      } else if (currentAccuracy < 50 && state.currentInterval < 800) {
-        state.currentInterval = Math.min(800, state.currentInterval + 50);
-        setCurrentInterval(state.currentInterval);
-        showFeedback(`🐢 Speed adjusted: ${state.currentInterval}ms`, 'warning');
-        
-        if (stimulusIntervalRef.current) {
-          clearInterval(stimulusIntervalRef.current);
-          stimulusIntervalRef.current = setInterval(updateStimulus, state.currentInterval);
-        }
-      }
-    }
-  }, [playSound, showFeedback]);
+  const resetGame = useCallback(() => { gameStateRef.current.isGameActive = false; if (stimulusIntervalRef.current) clearInterval(stimulusIntervalRef.current); if (ruleIntervalRef.current) clearInterval(ruleIntervalRef.current); if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current); setGameState('start'); mainGameStateRef.current = 'start'; setScore(0); setStreak(0); setCorrectHits(0); setMisses(0); setAccuracy(100); setTimeLeft(60); setLives(3); setActiveSet('VOWELS'); setCurrentStim('G'); setProcessed(false); setIsHit(false); setIsMiss(false); setFeedback(''); setCurrentInterval(800); }, []);
 
-  const updateStimulus = useCallback(() => {
-    if (!gameStateRef.current.isGameActive) return;
-    
-    const state = gameStateRef.current;
-    state.processed = false;
-    setProcessed(false);
-    setIsHit(false);
-    setIsMiss(false);
-    
-    const isTarget = Math.random() < 0.3;
-    let newStim = '';
-    
-    if (state.activeSet === 'VOWELS') {
-      newStim = isTarget 
-        ? dataSets.vowels[Math.floor(Math.random() * dataSets.vowels.length)] 
-        : dataSets.consonants[Math.floor(Math.random() * dataSets.consonants.length)];
-    } else {
-      newStim = isTarget 
-        ? dataSets.primes[Math.floor(Math.random() * dataSets.primes.length)] 
-        : dataSets.nonPrimes[Math.floor(Math.random() * dataSets.nonPrimes.length)];
-    }
-    
-    state.currentStim = newStim;
-    setCurrentStim(newStim);
-    
-    if ((state.correctHits + state.misses) % 5 === 0 && (state.correctHits + state.misses) > 0) {
-      updateSpeed();
-    }
-  }, [dataSets, updateSpeed]);
+  useEffect(() => { const h = (e) => { if (e.code === 'Space' && mainGameStateRef.current === 'playing') { e.preventDefault(); handleInput(); } }; window.addEventListener('keydown', h); return () => window.removeEventListener('keydown', h); }, [handleInput]);
+  useEffect(() => { return () => { if (stimulusIntervalRef.current) clearInterval(stimulusIntervalRef.current); if (ruleIntervalRef.current) clearInterval(ruleIntervalRef.current); if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current); if (audioCtxRef.current) { audioCtxRef.current.close(); audioCtxRef.current = null; } }; }, []);
 
-  const handleInput = useCallback(() => {
-    if (!gameStateRef.current.isGameActive) return;
-    
-    const state = gameStateRef.current;
-    if (state.processed) return;
-    
-    state.processed = true;
-    setProcessed(true);
-    
-    const targetSet = state.activeSet === 'VOWELS' ? dataSets.vowels : dataSets.primes;
-    const isTarget = targetSet.includes(state.currentStim);
-    
-    if (isTarget) {
-      // Correct hit
-      state.correctHits++;
-      state.streakCount++;
-      state.score += 1;
-      
-      setCorrectHits(state.correctHits);
-      setStreak(state.streakCount);
-      setScore(state.score);
-      setIsHit(true);
-      
-      playSound('hit');
-      showFeedback(`✓ Correct! +1 point`, 'success');
-      
-      if (state.streakCount > bestStreakRef.current) {
-        bestStreakRef.current = state.streakCount;
-        setBestStreak(state.streakCount);
-        try {
-          localStorage.setItem('constantPrimeBestStreak', state.streakCount.toString());
-        } catch (e) { /* localStorage not available */ }
-      }
-      
-      if (state.streakCount % 5 === 0 && state.streakCount > 0) {
-        playSound('streak');
-        showFeedback(`🔥 ${state.streakCount} Streak!`, 'success');
-      }
-    } else {
-      // Miss
-      state.misses++;
-      state.streakCount = 0;
-      setMisses(state.misses);
-      setStreak(0);
-      setIsMiss(true);
-      
-      if (state.lives > 0) {
-        state.lives--;
-        setLives(state.lives);
-        playSound('miss');
-        
-        if (state.lives === 0) {
-          playSound('lifeLost');
-          showFeedback('⚠️ Out of lives! Penalty now active!', 'warning');
-        } else {
-          showFeedback(`✗ Miss! No penalty • ${state.lives} lives left`, 'error');
-        }
-      } else {
-        state.score = Math.max(0, state.score - PENALTY);
-        setScore(state.score);
-        playSound('miss');
-        showFeedback(`✗ Miss! -${PENALTY} point penalty`, 'error');
-      }
-    }
-    
-    updateAccuracy();
-    
-    setTimeout(() => {
-      setIsHit(false);
-      setIsMiss(false);
-    }, 150);
-  }, [dataSets, PENALTY, playSound, showFeedback, updateAccuracy]);
+  const sharePage = async () => { if (navigator.share) { try { await navigator.share({ title: 'Free Concentration Stamina Drill | SkillDrills', text: 'Train sustained attention with adaptive speed. Free!', url: 'https://skilldrills.online/drills/productivity/focus-endurance/concentration-stamina' }); } catch (e) {} } else { navigator.clipboard.writeText('https://skilldrills.online/drills/productivity/focus-endurance/concentration-stamina'); alert('Link copied!'); } };
+  const copyPageLink = () => { navigator.clipboard.writeText('https://skilldrills.online/drills/productivity/focus-endurance/concentration-stamina'); alert('Link copied!'); };
 
-  const changeRule = useCallback(() => {
-    if (!gameStateRef.current.isGameActive) return;
-    
-    const state = gameStateRef.current;
-    const newSet = state.activeSet === 'VOWELS' ? 'PRIMES' : 'VOWELS';
-    state.activeSet = newSet;
-    setActiveSet(newSet);
-    
-    playSound('ruleChange');
-    showFeedback(`🔄 Rule changed to ${newSet}!`, 'warning');
-  }, [playSound, showFeedback]);
-
-  const endGame = useCallback(() => {
-    const state = gameStateRef.current;
-    state.isGameActive = false;
-    setGameState('gameOver');
-    mainGameStateRef.current = 'gameOver';
-    
-    if (stimulusIntervalRef.current) clearInterval(stimulusIntervalRef.current);
-    if (ruleIntervalRef.current) clearInterval(ruleIntervalRef.current);
-    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
-    
-    updateBestScore(state.score);
-  }, [updateBestScore]);
-
-  const startGame = useCallback(() => {
-    // Clear existing intervals
-    if (stimulusIntervalRef.current) clearInterval(stimulusIntervalRef.current);
-    if (ruleIntervalRef.current) clearInterval(ruleIntervalRef.current);
-    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
-    
-    // Reset ref state
-    const state = gameStateRef.current;
-    state.timeLeft = 60;
-    state.lives = 3;
-    state.activeSet = 'VOWELS';
-    state.processed = false;
-    state.streakCount = 0;
-    state.correctHits = 0;
-    state.misses = 0;
-    state.score = 0;
-    state.currentInterval = 800;
-    state.isGameActive = true;
-    
-    // Reset UI state
-    setTimeLeft(60);
-    setLives(3);
-    setActiveSet('VOWELS');
-    setCurrentStim('G');
-    setProcessed(false);
-    setIsHit(false);
-    setIsMiss(false);
-    setScore(0);
-    setStreak(0);
-    setCorrectHits(0);
-    setMisses(0);
-    setAccuracy(100);
-    setCurrentInterval(800);
-    setGameState('playing');
-    mainGameStateRef.current = 'playing';
-    
-    // Initial stimulus
-    setTimeout(() => updateStimulus(), 50);
-    
-    // Stimulus interval
-    stimulusIntervalRef.current = setInterval(updateStimulus, 800);
-    
-    // Rule change interval (10 seconds)
-    ruleIntervalRef.current = setInterval(changeRule, 10000);
-    
-    // Timer countdown
-    timerIntervalRef.current = setInterval(() => {
-      setTimeLeft(prev => {
-        if (prev <= 1) {
-          endGame();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    
-    showFeedback('60 seconds • Speed adapts to your accuracy!', 'success');
-  }, [updateStimulus, changeRule, endGame, showFeedback]);
-
-  const resetGame = useCallback(() => {
-    gameStateRef.current.isGameActive = false;
-    if (stimulusIntervalRef.current) clearInterval(stimulusIntervalRef.current);
-    if (ruleIntervalRef.current) clearInterval(ruleIntervalRef.current);
-    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
-    if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
-    
-    setGameState('start');
-    mainGameStateRef.current = 'start';
-    setScore(0);
-    setStreak(0);
-    setCorrectHits(0);
-    setMisses(0);
-    setAccuracy(100);
-    setTimeLeft(60);
-    setLives(3);
-    setActiveSet('VOWELS');
-    setCurrentStim('G');
-    setProcessed(false);
-    setIsHit(false);
-    setIsMiss(false);
-    setFeedback('');
-    setCurrentInterval(800);
-  }, []);
-
-  // Keyboard handler
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.code === 'Space' && mainGameStateRef.current === 'playing') {
-        e.preventDefault();
-        handleInput();
-      }
-    };
-    
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleInput]);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (stimulusIntervalRef.current) clearInterval(stimulusIntervalRef.current);
-      if (ruleIntervalRef.current) clearInterval(ruleIntervalRef.current);
-      if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
-      if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
-      if (audioCtxRef.current) {
-        audioCtxRef.current.close();
-        audioCtxRef.current = null;
-      }
-    };
-  }, []);
-
-  if (loading || !isClient) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading concentration drill...</p>
-        </div>
-      </div>
-    );
-  }
+  if (loading || !isClient) { return (<div className="min-h-screen flex items-center justify-center bg-gray-50"><div className="text-center"><div className="w-16 h-16 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div><p className="text-gray-600">Loading concentration drill...</p></div></div>); }
 
   return (
     <div className={`min-h-screen select-none ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
-      {/* SEO Structured Data */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "WebApplication",
-            "name": "Constant Prime - Concentration Stamina Drill",
-            "url": "https://skilldrills.online/drills/productivity/focus-endurance/concentration-stamina",
-            "description": "Sustained attention training with alternating Vowels/Primes rule sets. Adaptive speed 800-400ms based on accuracy. 60-second challenge with 3 lives, automatic rule changes every 10 seconds, and combo streaks.",
-            "applicationCategory": "EducationalApplication",
-            "operatingSystem": "Web",
-            "offers": {
-              "@type": "Offer",
-              "price": "0",
-              "priceCurrency": "USD"
-            },
-            "author": {
-              "@type": "Organization",
-              "name": "Global Drill System"
-            },
-            "educationalUse": ["Sustained Attention", "Cognitive Flexibility", "Task Switching", "Focus Training"],
-            "learningResourceType": "Interactive Exercise",
-            "timeRequired": "PT60S",
-            "interactivityType": "active",
-            "inLanguage": "en-US",
-            "teaches": ["Sustained Attention", "Cognitive Flexibility", "Task Switching", "Focus Endurance"]
-          })
-        }}
-      />
-      
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Breadcrumb Navigation */}
         <nav aria-label="Breadcrumb" className="mb-4">
           <ol className="flex flex-wrap items-center gap-2 text-sm">
-            <li>
-              <Link href="/" className={`hover:underline transition-colors ${isDarkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-600 hover:text-gray-900'}`}>
-                Home
-              </Link>
-            </li>
+            <li><Link href="/" className={`hover:underline transition-colors ${isDarkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-600 hover:text-gray-900'}`}>Home</Link></li>
             <li className={`${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`} aria-hidden="true">/</li>
-            <li>
-              <Link href="/drills" className={`hover:underline transition-colors ${isDarkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-600 hover:text-gray-900'}`}>
-                Drills
-              </Link>
-            </li>
+            <li><Link href="/drills" className={`hover:underline transition-colors ${isDarkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-600 hover:text-gray-900'}`}>Drills</Link></li>
             <li className={`${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`} aria-hidden="true">/</li>
-            <li>
-              <Link href="/drills/productivity" className={`hover:underline transition-colors ${isDarkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-600 hover:text-gray-900'}`}>
-                Productivity
-              </Link>
-            </li>
+            <li><Link href="/drills/productivity" className={`hover:underline transition-colors ${isDarkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-600 hover:text-gray-900'}`}>Productivity</Link></li>
             <li className={`${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`} aria-hidden="true">/</li>
-            <li className={`${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
-              Focus Endurance
-            </li>
+            <li className={`${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Focus Endurance</li>
             <li className={`${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`} aria-hidden="true">/</li>
-            <li className={`font-medium ${isDarkMode ? 'text-emerald-400' : 'text-emerald-600'}`} aria-current="page">
-              Constant Prime
-            </li>
+            <li className={`font-medium ${isDarkMode ? 'text-emerald-400' : 'text-emerald-600'}`} aria-current="page">Concentration Stamina</li>
           </ol>
         </nav>
         
-        {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-gradient-to-r from-emerald-500 to-green-600 rounded-xl flex-shrink-0">
-              <Activity className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h1 className={`text-2xl sm:text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                Constant Prime
-              </h1>
-              <p className={`text-sm sm:text-base ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                Sustained attention • Adaptive speed 800-400ms • 3 lives • 60s
-              </p>
-            </div>
+            <div className="p-3 bg-gradient-to-r from-emerald-500 to-green-600 rounded-xl flex-shrink-0"><Activity className="w-6 h-6 text-white" /></div>
+            <div><h1 className={`text-2xl sm:text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Concentration Stamina</h1><p className={`text-sm sm:text-base ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Sustained attention • Adaptive speed 800-400ms • 3 lives • Free focus training</p></div>
           </div>
-          
           <div className="flex gap-2 flex-shrink-0">
-            {gameState === 'playing' && (
-              <button 
-                onClick={resetGame} 
-                className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700' : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-100'}`} 
-                title="Reset session"
-                aria-label="Reset concentration drill"
-              >
-                <RefreshCw className="w-5 h-5" />
-              </button>
-            )}
-            <button 
-              onClick={() => setIsDarkMode(!isDarkMode)} 
-              className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`}
-              aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-              title={isDarkMode ? 'Light mode' : 'Dark mode'}
-            >
-              {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-            </button>
-            <button 
-              onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} 
-              className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`}
-              aria-label="Toggle drill area theme"
-              title="Toggle drill area theme"
-            >
-              <Eye className="w-5 h-5" />
-            </button>
-            <button 
-              onClick={() => setSoundEnabled(!soundEnabled)} 
-              className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`}
-              aria-label={soundEnabled ? 'Mute sounds' : 'Enable sounds'}
-              title={soundEnabled ? 'Mute' : 'Unmute'}
-            >
-              {soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
-            </button>
-            <button 
-              onClick={toggleFullscreen} 
-              className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`}
-              aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
-              title={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
-            >
-              {isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
-            </button>
+            {gameState === 'playing' && (<button onClick={resetGame} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700' : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-100'}`} title="Reset session" aria-label="Reset concentration drill"><RefreshCw className="w-5 h-5" /></button>)}
+            <button onClick={() => setIsDarkMode(!isDarkMode)} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'} title={isDarkMode ? 'Light mode' : 'Dark mode'}>{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button>
+            <button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} aria-label="Toggle drill area theme" title="Toggle drill area theme"><Eye className="w-5 h-5" /></button>
+            <button onClick={() => setSoundEnabled(!soundEnabled)} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} aria-label={soundEnabled ? 'Mute sounds' : 'Enable sounds'} title={soundEnabled ? 'Mute' : 'Unmute'}>{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button>
+            <button onClick={toggleFullscreen} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'} title={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}>{isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}</button>
           </div>
         </div>
 
-        {/* SEO Content */}
         <section className="sr-only" aria-label="Drill description for search engines">
-          <h2>Constant Prime - Sustained Attention & Cognitive Flexibility Training</h2>
-          <p>
-            Train sustained attention and cognitive flexibility with alternating rule sets.
-            Rule A (VOWELS): Click or press Space when you see vowels A, E, I, O, U among consonants.
-            Rule B (PRIMES): Click or press Space when you see prime numbers 2, 3, 5, 7 among non-primes.
-            Rules automatically switch every 10 seconds, testing task-switching ability.
-            Adaptive speed tightens from 800ms to 400ms based on accuracy (80%+ accelerates, below 50% slows).
-            3 lives protect your score from early mistakes. After lives reach 0, each miss deducts 1 point.
-            60-second challenge with combo streaks every 5 correct hits.
-          </p>
+          <h2>Free Concentration Stamina Drill - Sustained Attention & Cognitive Flexibility Training</h2>
+          <p>Train sustained attention and cognitive flexibility with this free alternating rule set drill. Rule A VOWELS: Click or press Space when you see vowels A E I O U among consonants. Rule B PRIMES: Click or press Space when you see prime numbers 2 3 5 7 among non-primes. Rules automatically switch every 10 seconds testing task-switching ability. Adaptive speed tightens from 800ms to 400ms based on accuracy. 3 lives protect your score. 60-second challenge with combo streaks every 5 correct hits. Perfect for focus training and cognitive enhancement. No registration required.</p>
         </section>
 
-        {/* Stats Board */}
         <div className="grid grid-cols-7 gap-3 mb-4 h-[88px]">
           <StatCard icon={<Target className="text-blue-600" />} value={score} label="Score" isDark={isDarkMode} />
           <StatCard icon={<Trophy className="text-yellow-600" />} value={bestScore} label="Best" isDark={isDarkMode} />
@@ -622,268 +139,75 @@ export default function ConcentrationStaminaClient() {
           <StatCard icon={<Activity className="text-emerald-600" />} value={currentInterval} label="Speed" unit="ms" isDark={isDarkMode} />
         </div>
 
-        {/* Feedback Bar */}
-        <div className="h-10 mb-2 flex justify-center items-center">
-          <div 
-            className={`px-4 py-1.5 rounded-lg text-white font-semibold text-sm transition-all duration-200 ${
-              feedback ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
-            } ${
-              feedbackType === 'success' ? 'bg-green-500' : feedbackType === 'warning' ? 'bg-yellow-500' : 'bg-red-500'
-            }`}
-            role="status"
-            aria-live="polite"
-            aria-atomic="true"
-          >
-            {feedback || '\u00A0'}
-          </div>
+        <div className="h-10 mb-2 flex justify-center items-center"><div className={`px-4 py-1.5 rounded-lg text-white font-semibold text-sm transition-all duration-200 ${feedback ? 'opacity-100 scale-100' : 'opacity-0 scale-95'} ${feedbackType === 'success' ? 'bg-green-500' : feedbackType === 'warning' ? 'bg-yellow-500' : 'bg-red-500'}`} role="status" aria-live="polite" aria-atomic="true">{feedback || '\u00A0'}</div></div>
+
+        <div ref={containerRef} className={`relative ${isFullscreen ? 'fixed inset-0 z-50' : 'rounded-xl border-2'}`} style={{ background: isBoxDarkMode ? "#000000" : "#ffffff", aspectRatio: isFullscreen ? 'auto' : '16/9', maxWidth: '100%', margin: '0 auto', borderColor: isDarkMode ? '#374151' : '#e5e7eb', overflow: 'hidden' }} onClick={gameState === 'playing' ? handleInput : undefined} role={gameState === 'playing' ? 'button' : undefined} tabIndex={gameState === 'playing' ? 0 : undefined} aria-label={gameState === 'playing' ? `Click or press Space when target appears. Current rule: ${activeSet}` : undefined} onKeyDown={gameState === 'playing' ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleInput(); }} : undefined}>
+          {isFullscreen && gameState === 'playing' && (<><div className="absolute top-4 right-4 z-30 flex gap-3"><button onClick={resetGame} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" title="Reset session" aria-label="Reset concentration drill"><RefreshCw className="w-5 h-5" /></button><button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle dark mode">{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button><button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle drill area theme"><Eye className="w-5 h-5" /></button><button onClick={() => setSoundEnabled(!soundEnabled)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle sound">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button><button onClick={toggleFullscreen} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Exit fullscreen"><Minimize2 className="w-5 h-5" /></button></div><div className="absolute top-4 left-4 z-30 bg-black/50 backdrop-blur-sm rounded-lg px-4 py-2 text-white text-sm" aria-live="polite">Score: <span className="text-yellow-400 font-bold">{score}</span> | Time: <span className={`font-bold ${timeLeft <= 10 ? 'text-red-400' : 'text-green-400'}`}>{timeLeft}s</span> | Speed: <span className="text-emerald-400 font-bold">{currentInterval}ms</span></div></>)}
+          <div className="absolute top-12 w-full text-center z-20 pointer-events-none"><div className={`text-xs tracking-widest uppercase mb-2 ${isBoxDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Active Filter</div><div className={`text-2xl font-bold tracking-wide ${isBoxDarkMode ? 'text-white' : 'text-gray-900'}`}>{activeSet}</div></div>
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none"><span className={`text-[10rem] sm:text-[12rem] font-black transition-all duration-100 ${isHit ? 'text-[#00ff41] scale-110' : isMiss ? 'text-[#ff3131]' : isBoxDarkMode ? 'text-white' : 'text-gray-900'}`} aria-live="assertive">{currentStim}</span></div>
+          <div className="absolute bottom-4 left-4 z-20 pointer-events-none"><span className={`text-xs font-mono ${isBoxDarkMode ? 'text-gray-600' : 'text-gray-400'}`}>{currentInterval}ms</span></div>
+
+          {gameState === 'start' && (<div className={`absolute inset-0 flex items-center justify-center backdrop-blur-sm z-40 ${isBoxDarkMode ? 'bg-gray-900/95' : 'bg-white/95'}`}><div className={`rounded-2xl p-6 sm:p-8 text-center max-w-md mx-4 shadow-xl border ${isBoxDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}><div className="mb-4"><Activity className="w-16 h-16 text-emerald-500 mx-auto" aria-hidden="true" /></div><h2 className={`text-2xl font-bold mb-2 ${isBoxDarkMode ? 'text-white' : 'text-gray-900'}`}>Concentration Stamina</h2><p className={`mb-2 ${isBoxDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>60-second challenge • Adaptive speed 800-400ms</p><p className={`mb-6 text-sm ${isBoxDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Click or press Space when target appears. Rules switch every 10 seconds between VOWELS and PRIMES. Perfect for focus and cognitive flexibility training.</p><button onClick={startGame} className="px-8 py-3 bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-xl font-semibold hover:shadow-lg w-full transition-all transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2" aria-label="Start free concentration training">Start Free Drill</button></div></div>)}
+
+          {gameState === 'gameOver' && (<div className={`absolute inset-0 flex items-center justify-center backdrop-blur-sm z-40 ${isBoxDarkMode ? 'bg-gray-900/95' : 'bg-white/95'}`}><div className={`rounded-2xl p-6 sm:p-8 shadow-xl border w-full max-w-[480px] mx-4 ${isBoxDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}><div className="flex items-center justify-center gap-3 mb-4"><Clock className="w-10 h-10 text-orange-500" aria-hidden="true" /><h2 className={`text-2xl font-bold ${isBoxDarkMode ? 'text-white' : 'text-gray-900'}`}>Time&apos;s Up!</h2></div><p className={`text-center text-sm mb-6 ${isBoxDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Regular sustained attention training improves focus endurance and cognitive flexibility.</p><div className="grid grid-cols-2 gap-3 mb-6"><ResultCard label="Final Score" value={score} icon={<Target className="w-4 h-4" />} color="blue" isDark={isBoxDarkMode} /><ResultCard label="Best Score" value={bestScore} icon={<Trophy className="w-4 h-4" />} color="yellow" isDark={isBoxDarkMode} /><ResultCard label="Best Streak" value={`${bestStreak}x`} icon={<Zap className="w-4 h-4" />} color="orange" isDark={isBoxDarkMode} /><ResultCard label="Accuracy" value={accuracy} unit="%" icon={<Activity className="w-4 h-4" />} color="purple" isDark={isBoxDarkMode} /><ResultCard label="Correct Hits" value={correctHits} icon={<Target className="w-4 h-4" />} color="emerald" isDark={isBoxDarkMode} /><ResultCard label="Misses" value={misses} icon={<RefreshCw className="w-4 h-4" />} color="red" isDark={isBoxDarkMode} /></div><div className="flex gap-3"><Link href="/drills/productivity" className="flex-1"><button className={`w-full px-4 py-2.5 rounded-lg font-semibold transition-all ${isDarkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>← Back</button></Link><button onClick={startGame} className="flex-1 px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">Play Again →</button></div></div></div>)}
         </div>
 
-        {/* Game Container */}
-        <div 
-          ref={containerRef}
-          className={`relative ${isFullscreen ? 'fixed inset-0 z-50' : 'rounded-xl border-2'}`}
-          style={{ 
-            background: isBoxDarkMode ? "#000000" : "#ffffff",
-            aspectRatio: isFullscreen ? 'auto' : '16/9',
-            maxWidth: '100%',
-            margin: '0 auto',
-            borderColor: isDarkMode ? '#374151' : '#e5e7eb',
-            overflow: 'hidden'
-          }}
-          onClick={gameState === 'playing' ? handleInput : undefined}
-          role={gameState === 'playing' ? 'button' : undefined}
-          tabIndex={gameState === 'playing' ? 0 : undefined}
-          aria-label={gameState === 'playing' ? `Click or press Space when target appears. Current rule: ${activeSet}` : undefined}
-          onKeyDown={gameState === 'playing' ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleInput(); }} : undefined}
-        >
-          {/* Fullscreen Controls */}
-          {isFullscreen && gameState === 'playing' && (
-            <>
-              <div className="absolute top-4 right-4 z-30 flex gap-3">
-                <button onClick={resetGame} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" title="Reset session" aria-label="Reset concentration drill">
-                  <RefreshCw className="w-5 h-5" />
-                </button>
-                <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle dark mode">
-                  {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-                </button>
-                <button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle drill area theme">
-                  <Eye className="w-5 h-5" />
-                </button>
-                <button onClick={() => setSoundEnabled(!soundEnabled)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle sound">
-                  {soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
-                </button>
-                <button onClick={toggleFullscreen} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Exit fullscreen">
-                  <Minimize2 className="w-5 h-5" />
-                </button>
-              </div>
-              <div className="absolute top-4 left-4 z-30 bg-black/50 backdrop-blur-sm rounded-lg px-4 py-2 text-white text-sm" aria-live="polite">
-                Score: <span className="text-yellow-400 font-bold">{score}</span> | 
-                Time: <span className={`font-bold ${timeLeft <= 10 ? 'text-red-400' : 'text-green-400'}`}>{timeLeft}s</span> | 
-                Speed: <span className="text-emerald-400 font-bold">{currentInterval}ms</span>
-              </div>
-            </>
-          )}
+        {/* DRILL RULES & SCORING */}
+        {!isFullscreen && (<footer className="mt-6" aria-label="Drill rules and scoring information"><div className={`rounded-xl border overflow-hidden ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}><div className={`px-4 py-3 border-b ${isDarkMode ? 'border-gray-700 bg-gray-800/50' : 'border-gray-200 bg-gray-50'}`}><div className="flex items-center gap-2"><Info className={`w-4 h-4 ${isDarkMode ? 'text-emerald-400' : 'text-emerald-600'}`} aria-hidden="true" /><h2 className={`font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Drill Rules & Scoring</h2></div></div><div className="p-4"><div className="grid grid-cols-1 md:grid-cols-2 gap-4"><div className="space-y-3"><div className="flex items-start gap-2"><div className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">1</div><p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}><span className="font-semibold text-emerald-500">Rule A (VOWELS):</span> Click/space on A, E, I, O, U</p></div><div className="flex items-start gap-2"><div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">2</div><p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}><span className="font-semibold text-blue-500">Rule B (PRIMES):</span> Click/space on 2, 3, 5, 7</p></div><div className="flex items-start gap-2"><div className="w-5 h-5 rounded-full bg-purple-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">3</div><p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Rules switch <span className="font-semibold text-purple-500">every 10 seconds</span> automatically</p></div></div><div className="space-y-3"><div className="flex items-start gap-2"><div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">4</div><p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Correct hit: <span className="font-semibold text-green-500">+1 point</span></p></div><div className="flex items-start gap-2"><div className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">5</div><p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Miss: <span className="font-semibold text-red-500">-1pt only when 0 lives</span> (3 lives protection)</p></div><div className="flex items-start gap-2"><div className="w-5 h-5 rounded-full bg-yellow-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">6</div><p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Speed adapts: <span className="font-semibold text-yellow-500">800-400ms</span> based on accuracy</p></div></div></div><div className={`mt-4 pt-3 border-t flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs ${isDarkMode ? 'border-gray-700 text-gray-400' : 'border-gray-200 text-gray-500'}`}><span>⚡ 80%+ accuracy accelerates speed • Below 50% slows down</span><span>🏆 Best Score & Streak save locally • Free forever</span></div></div></div></footer>)}
 
-          {/* HUD - Active Rule */}
-          <div className="absolute top-12 w-full text-center z-20 pointer-events-none">
-            <div className={`text-xs tracking-widest uppercase mb-2 ${isBoxDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
-              Active Filter
-            </div>
-            <div className={`text-2xl font-bold tracking-wide ${isBoxDarkMode ? 'text-white' : 'text-gray-900'}`}>
-              {activeSet}
-            </div>
-          </div>
-
-          {/* Stimulus Display */}
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <span 
-              className={`text-[10rem] sm:text-[12rem] font-black transition-all duration-100 ${
-                isHit 
-                  ? 'text-[#00ff41] scale-110' 
-                  : isMiss 
-                    ? 'text-[#ff3131]' 
-                    : isBoxDarkMode ? 'text-white' : 'text-gray-900'
-              }`}
-              aria-live="assertive"
-            >
-              {currentStim}
-            </span>
-          </div>
-
-          {/* Speed Indicator */}
-          <div className="absolute bottom-4 left-4 z-20 pointer-events-none">
-            <span className={`text-xs font-mono ${isBoxDarkMode ? 'text-gray-600' : 'text-gray-400'}`}>
-              {currentInterval}ms
-            </span>
-          </div>
-
-          {/* ============ START SCREEN ============ */}
-          {gameState === 'start' && (
-            <div className={`absolute inset-0 flex items-center justify-center backdrop-blur-sm z-40 ${isBoxDarkMode ? 'bg-gray-900/95' : 'bg-white/95'}`}>
-              <div className={`rounded-2xl p-6 sm:p-8 text-center max-w-md mx-4 shadow-xl border ${isBoxDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
-                <div className="mb-4">
-                  <Activity className="w-16 h-16 text-emerald-500 mx-auto" aria-hidden="true" />
-                </div>
-                <h2 className={`text-2xl font-bold mb-2 ${isBoxDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                  Constant Prime
-                </h2>
-                <p className={`mb-2 ${isBoxDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                  60-second challenge • Adaptive speed 800-400ms
-                </p>
-                <p className={`mb-6 text-sm ${isBoxDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                  Click or press Space when target appears. Rules switch every 10 seconds between VOWELS and PRIMES.
-                </p>
-                <button 
-                  onClick={startGame} 
-                  className="px-8 py-3 bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-xl font-semibold hover:shadow-lg w-full transition-all transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
-                  aria-label="Start concentration training"
-                >
-                  Start Training
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* ============ GAME OVER SCREEN ============ */}
-          {gameState === 'gameOver' && (
-            <div className={`absolute inset-0 flex items-center justify-center backdrop-blur-sm z-40 ${isBoxDarkMode ? 'bg-gray-900/95' : 'bg-white/95'}`}>
-              <div className={`rounded-2xl p-6 sm:p-8 shadow-xl border w-full max-w-[480px] mx-4 ${isBoxDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
-                <div className="flex items-center justify-center gap-3 mb-4">
-                  <Clock className="w-10 h-10 text-orange-500" aria-hidden="true" />
-                  <h2 className={`text-2xl font-bold ${isBoxDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                    Time&apos;s Up!
-                  </h2>
-                </div>
-                
-                <p className={`text-center text-sm mb-6 ${isBoxDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                  Regular sustained attention training improves focus endurance and cognitive flexibility.
-                </p>
-                
-                <div className="grid grid-cols-2 gap-3 mb-6">
-                  <ResultCard label="Final Score" value={score} icon={<Target className="w-4 h-4" />} color="blue" isDark={isBoxDarkMode} />
-                  <ResultCard label="Best Score" value={bestScore} icon={<Trophy className="w-4 h-4" />} color="yellow" isDark={isBoxDarkMode} />
-                  <ResultCard label="Best Streak" value={`${bestStreak}x`} icon={<Zap className="w-4 h-4" />} color="orange" isDark={isBoxDarkMode} />
-                  <ResultCard label="Accuracy" value={accuracy} unit="%" icon={<Activity className="w-4 h-4" />} color="purple" isDark={isBoxDarkMode} />
-                  <ResultCard label="Correct Hits" value={correctHits} icon={<Target className="w-4 h-4" />} color="emerald" isDark={isBoxDarkMode} />
-                  <ResultCard label="Misses" value={misses} icon={<RefreshCw className="w-4 h-4" />} color="red" isDark={isBoxDarkMode} />
-                </div>
-                
-                <div className="flex gap-3">
-                  <Link href="/drills/productivity" className="flex-1">
-                    <button className={`w-full px-4 py-2.5 rounded-lg font-semibold transition-all ${isDarkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>
-                      ← Back
-                    </button>
-                  </Link>
-                  <button 
-                    onClick={startGame} 
-                    className="flex-1 px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
-                  >
-                    Play Again →
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Rules Section */}
+        {/* ABOUT THIS DRILL */}
         {!isFullscreen && (
-          <footer className="mt-6" aria-label="Drill rules and scoring information">
+          <section className="mt-8" aria-label="About this concentration stamina drill">
             <div className={`rounded-xl border overflow-hidden ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
               <div className={`px-4 py-3 border-b ${isDarkMode ? 'border-gray-700 bg-gray-800/50' : 'border-gray-200 bg-gray-50'}`}>
-                <div className="flex items-center gap-2">
-                  <Info className={`w-4 h-4 ${isDarkMode ? 'text-emerald-400' : 'text-emerald-600'}`} aria-hidden="true" />
-                  <h2 className={`font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Drill Rules & Scoring</h2>
-                </div>
+                <div className="flex items-center gap-2"><GraduationCap className={`w-5 h-5 ${isDarkMode ? 'text-emerald-400' : 'text-emerald-600'}`} aria-hidden="true" /><h2 className={`font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>About This Free Concentration Drill</h2></div>
               </div>
-              <div className="p-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-3">
-                    <div className="flex items-start gap-2">
-                      <div className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">1</div>
-                      <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                        <span className="font-semibold text-emerald-500">Rule A (VOWELS):</span> Click/space on A, E, I, O, U
-                      </p>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">2</div>
-                      <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                        <span className="font-semibold text-blue-500">Rule B (PRIMES):</span> Click/space on 2, 3, 5, 7
-                      </p>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <div className="w-5 h-5 rounded-full bg-purple-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">3</div>
-                      <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                        Rules switch <span className="font-semibold text-purple-500">every 10 seconds</span> automatically
-                      </p>
-                    </div>
-                  </div>
-                  <div className="space-y-3">
-                    <div className="flex items-start gap-2">
-                      <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">4</div>
-                      <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                        Correct hit: <span className="font-semibold text-green-500">+1 point</span>
-                      </p>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <div className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">5</div>
-                      <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                        Miss: <span className="font-semibold text-red-500">-1pt only when 0 lives</span> (3 lives protection)
-                      </p>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <div className="w-5 h-5 rounded-full bg-yellow-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">6</div>
-                      <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                        Speed adapts: <span className="font-semibold text-yellow-500">800-400ms</span> based on accuracy
-                      </p>
-                    </div>
-                  </div>
+              <div className="p-5">
+                <p className={`text-sm leading-relaxed mb-5 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>This free concentration stamina drill trains sustained attention and cognitive flexibility through alternating rule sets. Identify target characters (vowels or prime numbers) while rules automatically switch every 10 seconds. Adaptive speed adjusts from 800ms to 400ms based on your accuracy.</p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
+                  <div className={`p-4 rounded-xl border ${isDarkMode ? 'bg-gray-700/50 border-gray-600' : 'bg-emerald-50 border-emerald-100'}`}><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center"><GraduationCap className="w-4 h-4 text-white" /></div><h3 className={`text-sm font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Who It's For</h3></div><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Students, professionals, and anyone wanting to improve sustained attention, cognitive flexibility, and task-switching ability.</p></div>
+                  <div className={`p-4 rounded-xl border ${isDarkMode ? 'bg-gray-700/50 border-gray-600' : 'bg-green-50 border-green-100'}`}><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-green-500 flex items-center justify-center"><TrendingUp className="w-4 h-4 text-white" /></div><h3 className={`text-sm font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Skills Improved</h3></div><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Sustained attention, cognitive flexibility, task switching, focus endurance, and processing speed.</p></div>
+                  <div className={`p-4 rounded-xl border ${isDarkMode ? 'bg-gray-700/50 border-gray-600' : 'bg-purple-50 border-purple-100'}`}><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-purple-500 flex items-center justify-center"><BarChart3 className="w-4 h-4 text-white" /></div><h3 className={`text-sm font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>What You'll Track</h3></div><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Score, accuracy, streak, lives, adaptive speed, and correct hits vs misses.</p></div>
                 </div>
-                <div className={`mt-4 pt-3 border-t flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs ${isDarkMode ? 'border-gray-700 text-gray-400' : 'border-gray-200 text-gray-500'}`}>
-                  <span>⚡ 80%+ accuracy accelerates speed • Below 50% slows down</span>
-                  <span>🏆 Best Score & Streak save locally</span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className={`p-4 rounded-xl border ${isDarkMode ? 'bg-gray-700/50 border-gray-600' : 'bg-yellow-50 border-yellow-100'}`}><div className="flex items-center gap-2 mb-3"><div className="w-8 h-8 rounded-lg bg-yellow-500 flex items-center justify-center"><Lightbulb className="w-4 h-4 text-white" /></div><h3 className={`text-sm font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Why Practice Sustained Attention?</h3></div><ul className={`text-xs space-y-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}><li className="flex items-start gap-2"><CheckCircle2 className="w-3 h-3 text-yellow-500 mt-0.5 flex-shrink-0" /> Improves ability to focus for extended periods</li><li className="flex items-start gap-2"><CheckCircle2 className="w-3 h-3 text-yellow-500 mt-0.5 flex-shrink-0" /> Builds cognitive flexibility with rule switching</li><li className="flex items-start gap-2"><CheckCircle2 className="w-3 h-3 text-yellow-500 mt-0.5 flex-shrink-0" /> Enhances productivity and deep work capacity</li></ul></div>
+                  <div className={`p-4 rounded-xl border ${isDarkMode ? 'bg-gray-700/50 border-gray-600' : 'bg-amber-50 border-amber-100'}`}><div className="flex items-center gap-2 mb-3"><div className="w-8 h-8 rounded-lg bg-amber-500 flex items-center justify-center"><Clock className="w-4 h-4 text-white" /></div><h3 className={`text-sm font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>How to Practice Effectively</h3></div><ol className={`text-xs space-y-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}><li className="flex items-start gap-2"><span className="w-5 h-5 rounded-full bg-amber-500 text-white text-xs flex items-center justify-center flex-shrink-0 mt-0.5">1</span> Keep eyes on the center of the screen</li><li className="flex items-start gap-2"><span className="w-5 h-5 rounded-full bg-amber-500 text-white text-xs flex items-center justify-center flex-shrink-0 mt-0.5">2</span> Press Space or click on target characters only</li><li className="flex items-start gap-2"><span className="w-5 h-5 rounded-full bg-amber-500 text-white text-xs flex items-center justify-center flex-shrink-0 mt-0.5">3</span> Adapt to rule changes every 10 seconds</li><li className="flex items-start gap-2"><span className="w-5 h-5 rounded-full bg-amber-500 text-white text-xs flex items-center justify-center flex-shrink-0 mt-0.5">4</span> Practice 2-3 times daily for best improvement in 2-3 weeks</li></ol></div>
                 </div>
               </div>
             </div>
-          </footer>
+          </section>
         )}
+
+        {/* RELATED DRILLS */}
+        {!isFullscreen && (
+          <section className="mt-8" aria-label="Related training drills and resources">
+            <div className="flex items-center gap-2 mb-4"><div className="w-1 h-6 rounded-full bg-gradient-to-b from-emerald-500 to-green-600"></div><h2 className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Explore Related Free Drills</h2><span className={`text-xs px-2 py-0.5 rounded-full ${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>8 drills</span></div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <Link href="/drills/productivity/focus-endurance/deep-work" className={`group relative overflow-hidden rounded-xl border transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${isDarkMode ? 'bg-gray-800 border-gray-700 hover:border-blue-500' : 'bg-white border-gray-200 hover:border-blue-300'}`}><div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-indigo-500"></div><div className="p-4"><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center"><Timer className="w-4 h-4 text-blue-600" /></div><span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>Focus Endurance</span></div><h3 className={`font-semibold text-sm mb-1 ${isDarkMode ? 'text-white group-hover:text-blue-400' : 'text-gray-900 group-hover:text-blue-600'} transition-colors`}>Deep Work Timer</h3><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Build focus endurance with structured deep work sessions.</p><div className="flex items-center gap-1 mt-3 text-blue-500 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">Start Drill <ArrowRight className="w-3 h-3" /></div></div></Link>
+              <Link href="/drills/productivity/focus-endurance/flow-state" className={`group relative overflow-hidden rounded-xl border transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${isDarkMode ? 'bg-gray-800 border-gray-700 hover:border-purple-500' : 'bg-white border-gray-200 hover:border-purple-300'}`}><div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 to-violet-500"></div><div className="p-4"><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center"><Zap className="w-4 h-4 text-purple-600" /></div><span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>Focus Endurance</span></div><h3 className={`font-semibold text-sm mb-1 ${isDarkMode ? 'text-white group-hover:text-purple-400' : 'text-gray-900 group-hover:text-purple-600'} transition-colors`}>Flow State</h3><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Enter and maintain optimal performance flow state.</p><div className="flex items-center gap-1 mt-3 text-purple-500 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">Start Drill <ArrowRight className="w-3 h-3" /></div></div></Link>
+              <Link href="/drills/productivity/time-management/pomodoro-timer" className={`group relative overflow-hidden rounded-xl border transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${isDarkMode ? 'bg-gray-800 border-gray-700 hover:border-red-500' : 'bg-white border-gray-200 hover:border-red-300'}`}><div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-500 to-rose-500"></div><div className="p-4"><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center"><Clock className="w-4 h-4 text-red-600" /></div><span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>Time Management</span></div><h3 className={`font-semibold text-sm mb-1 ${isDarkMode ? 'text-white group-hover:text-red-400' : 'text-gray-900 group-hover:text-red-600'} transition-colors`}>Pomodoro Timer</h3><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Classic 25-minute focus sessions with 5-minute breaks.</p><div className="flex items-center gap-1 mt-3 text-red-500 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">Start Drill <ArrowRight className="w-3 h-3" /></div></div></Link>
+              <Link href="/drills/cognitive/focus/concentration-grid" className={`group relative overflow-hidden rounded-xl border transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${isDarkMode ? 'bg-gray-800 border-gray-700 hover:border-teal-500' : 'bg-white border-gray-200 hover:border-teal-300'}`}><div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-teal-500 to-green-500"></div><div className="p-4"><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-teal-100 flex items-center justify-center"><Target className="w-4 h-4 text-teal-600" /></div><span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>Focus</span></div><h3 className={`font-semibold text-sm mb-1 ${isDarkMode ? 'text-white group-hover:text-teal-400' : 'text-gray-900 group-hover:text-teal-600'} transition-colors`}>Concentration Grid</h3><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Find numbers in sequence under time pressure.</p><div className="flex items-center gap-1 mt-3 text-teal-500 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">Start Drill <ArrowRight className="w-3 h-3" /></div></div></Link>
+              <Link href="/drills/cognitive/attention/sustained-attention" className={`group relative overflow-hidden rounded-xl border transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${isDarkMode ? 'bg-gray-800 border-gray-700 hover:border-orange-500' : 'bg-white border-gray-200 hover:border-orange-300'}`}><div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-500 to-amber-500"></div><div className="p-4"><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center"><Eye className="w-4 h-4 text-orange-600" /></div><span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>Attention</span></div><h3 className={`font-semibold text-sm mb-1 ${isDarkMode ? 'text-white group-hover:text-orange-400' : 'text-gray-900 group-hover:text-orange-600'} transition-colors`}>Sustained Attention</h3><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Maintain focus during long monotonous monitoring tasks.</p><div className="flex items-center gap-1 mt-3 text-orange-500 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">Start Drill <ArrowRight className="w-3 h-3" /></div></div></Link>
+              <Link href="/drills/cognitive/attention/selective-attention" className={`group relative overflow-hidden rounded-xl border transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${isDarkMode ? 'bg-gray-800 border-gray-700 hover:border-cyan-500' : 'bg-white border-gray-200 hover:border-cyan-300'}`}><div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-500 to-blue-500"></div><div className="p-4"><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-cyan-100 flex items-center justify-center"><Crosshair className="w-4 h-4 text-cyan-600" /></div><span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>Attention</span></div><h3 className={`font-semibold text-sm mb-1 ${isDarkMode ? 'text-white group-hover:text-cyan-400' : 'text-gray-900 group-hover:text-cyan-600'} transition-colors`}>Selective Attention</h3><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Focus on relevant stimuli while ignoring distractions.</p><div className="flex items-center gap-1 mt-3 text-cyan-500 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">Start Drill <ArrowRight className="w-3 h-3" /></div></div></Link>
+              <Link href="/drills/productivity/time-management/priority-sorting" className={`group relative overflow-hidden rounded-xl border transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${isDarkMode ? 'bg-gray-800 border-gray-700 hover:border-rose-500' : 'bg-white border-gray-200 hover:border-rose-300'}`}><div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-rose-500 to-pink-500"></div><div className="p-4"><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-rose-100 flex items-center justify-center"><Keyboard className="w-4 h-4 text-rose-600" /></div><span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>Time Management</span></div><h3 className={`font-semibold text-sm mb-1 ${isDarkMode ? 'text-white group-hover:text-rose-400' : 'text-gray-900 group-hover:text-rose-600'} transition-colors`}>Priority Sorting</h3><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Practice task prioritization with time pressure.</p><div className="flex items-center gap-1 mt-3 text-rose-500 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">Start Drill <ArrowRight className="w-3 h-3" /></div></div></Link>
+              <Link href="/drills/cognitive/processing-speed/reaction-time" className={`group relative overflow-hidden rounded-xl border transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${isDarkMode ? 'bg-gray-800 border-gray-700 hover:border-emerald-500' : 'bg-white border-gray-200 hover:border-emerald-300'}`}><div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-green-500"></div><div className="p-4"><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center"><Zap className="w-4 h-4 text-emerald-600" /></div><span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>Processing Speed</span></div><h3 className={`font-semibold text-sm mb-1 ${isDarkMode ? 'text-white group-hover:text-emerald-400' : 'text-gray-900 group-hover:text-emerald-600'} transition-colors`}>Reaction Time</h3><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Test and improve visual reaction speed.</p><div className="flex items-center gap-1 mt-3 text-emerald-500 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">Start Drill <ArrowRight className="w-3 h-3" /></div></div></Link>
+            </div>
+          </section>
+        )}
+
+        {/* GLOBAL FOOTER */}
+        {!isFullscreen && (<footer className="mt-12 bg-gray-900 text-gray-400 rounded-xl py-10 px-6" role="contentinfo"><div className="max-w-7xl mx-auto"><div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8 mb-8"><div><h3 className="text-white font-semibold mb-3 text-sm">FPS Training</h3><ul className="space-y-2 text-sm"><li><Link href="/drills/fps/flick-shot-training" className="hover:text-white transition-colors">Flick Shot Trainer</Link></li><li><Link href="/drills/fps/target-acquisition" className="hover:text-white transition-colors">Target Acquisition</Link></li><li><Link href="/drills/fps/reactive-tracking" className="hover:text-white transition-colors">Reactive Tracking</Link></li><li><Link href="/drills/fps" className="text-blue-400 hover:text-blue-300 transition-colors font-medium">All 21 FPS Drills →</Link></li></ul></div><div><h3 className="text-white font-semibold mb-3 text-sm">Cognitive</h3><ul className="space-y-2 text-sm"><li><Link href="/drills/cognitive/memory/card-matching" className="hover:text-white transition-colors">Memory Games</Link></li><li><Link href="/drills/cognitive/attention/divided-attention" className="hover:text-white transition-colors">Attention Drills</Link></li><li><Link href="/drills/cognitive/problem-solving/logic-puzzles" className="hover:text-white transition-colors">Logic Puzzles</Link></li><li><Link href="/drills/cognitive" className="text-blue-400 hover:text-blue-300 transition-colors font-medium">All 16 Cognitive Drills →</Link></li></ul></div><div><h3 className="text-white font-semibold mb-3 text-sm">Academic</h3><ul className="space-y-2 text-sm"><li><Link href="/drills/academic/writing-speed/typing-test" className="hover:text-white transition-colors">Typing Speed Test</Link></li><li><Link href="/drills/academic/reading-speed/speed-reader" className="hover:text-white transition-colors">Speed Reader</Link></li><li><Link href="/drills/academic/math-speed/mental-math" className="hover:text-white transition-colors">Mental Math</Link></li><li><Link href="/drills/academic" className="text-blue-400 hover:text-blue-300 transition-colors font-medium">All 12 Academic Drills →</Link></li></ul></div><div><h3 className="text-white font-semibold mb-3 text-sm">Visual & Motor</h3><ul className="space-y-2 text-sm"><li><Link href="/drills/visual/reaction-speed/light-reaction" className="hover:text-white transition-colors">Reaction Time Test</Link></li><li><Link href="/drills/motor/hand-eye-coordination/aim-trainer" className="hover:text-white transition-colors">Hand-Eye Coordination</Link></li><li><Link href="/drills/visual/tracking-accuracy/moving-target" className="hover:text-white transition-colors">Moving Target Tracking</Link></li><li><Link href="/drills/visual" className="text-blue-400 hover:text-blue-300 transition-colors font-medium">All 14 Visual Drills →</Link></li></ul></div><div><h3 className="text-white font-semibold mb-3 text-sm">More Categories</h3><ul className="space-y-2 text-sm"><li><Link href="/drills/memory" className="hover:text-white transition-colors">Memory (15 drills)</Link></li><li><Link href="/drills/productivity" className="hover:text-white transition-colors">Productivity (10 drills)</Link></li><li><Link href="/drills/mental-fitness" className="hover:text-white transition-colors">Mental Fitness (6 drills)</Link></li><li><Link href="/drills/physical" className="hover:text-white transition-colors">Physical (11 drills)</Link></li></ul></div></div><div className="border-t border-gray-800 pt-8 text-center"><div className="flex items-center justify-center gap-3 mb-4"><div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center"><Target className="w-5 h-5 text-white" aria-hidden="true" /></div><span className="text-white font-bold text-lg">SkillDrills</span></div><p className="text-sm mb-2">&copy; 2026 SkillDrills. All rights reserved.</p><p className="text-xs max-w-2xl mx-auto leading-relaxed mb-6">Free online concentration stamina drill for sustained attention and cognitive flexibility training. Adaptive speed 800-400ms with alternating VOWELS and PRIMES rule sets. Perfect for focus endurance productivity and brain training. No registration required. More free drills at skilldrills.online.</p><div className="flex items-center justify-center gap-5 flex-wrap"><button onClick={sharePage} className="text-gray-500 hover:text-white transition-colors" title="Share this drill" aria-label="Share this free concentration drill"><svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg></button><button onClick={copyPageLink} className="text-gray-500 hover:text-white transition-colors" title="Copy link" aria-label="Copy drill link to clipboard"><svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg></button><a href="https://twitter.com/skilldrillss" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-white transition-colors" title="Follow on Twitter X" aria-label="Follow SkillDrills on Twitter X"><svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a><a href="https://instagram.com/skilldrills.online" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-white transition-colors" title="Follow on Instagram" aria-label="Follow SkillDrills on Instagram"><svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg></a><a href="https://youtube.com/@skilldrills.online" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-white transition-colors" title="Subscribe on YouTube" aria-label="Subscribe to SkillDrills on YouTube"><svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a><a href="https://pinterest.com/skilldrills" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-white transition-colors" title="Follow on Pinterest" aria-label="Follow SkillDrills on Pinterest"><svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0C5.373 0 0 5.372 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738.098.119.112.224.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.631-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12 0-6.628-5.373-12-12-12z"/></svg></a></div></div></div></footer>)}
       </div>
     </div>
   );
 }
 
-// ============ HELPER COMPONENTS ============
-
 function StatCard({ icon, value, label, unit = '', isDark }) {
-  return (
-    <div className={`rounded-xl shadow-sm border p-2 sm:p-3 text-center flex flex-col justify-center h-full transition-colors ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'}`}>
-      <div className="mb-1 flex justify-center" aria-hidden="true">{icon}</div>
-      <p className={`text-lg sm:text-xl font-bold truncate ${isDark ? 'text-white' : 'text-gray-900'}`}>{value}{unit}</p>
-      <p className={`text-[10px] sm:text-xs truncate ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{label}</p>
-    </div>
-  );
+  return (<div className={`rounded-xl shadow-sm border p-2 sm:p-3 text-center flex flex-col justify-center h-full transition-colors ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'}`}><div className="mb-1 flex justify-center" aria-hidden="true">{icon}</div><p className={`text-lg sm:text-xl font-bold truncate ${isDark ? 'text-white' : 'text-gray-900'}`}>{value}{unit}</p><p className={`text-[10px] sm:text-xs truncate ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{label}</p></div>);
 }
 
 function ResultCard({ label, value, unit = '', icon, color, isDark }) {
-  const colorMap = {
-    blue: { bg: 'bg-blue-500/10', border: 'border-blue-500/30', text: 'text-blue-500', icon: 'text-blue-500' },
-    yellow: { bg: 'bg-yellow-500/10', border: 'border-yellow-500/30', text: 'text-yellow-500', icon: 'text-yellow-500' },
-    orange: { bg: 'bg-orange-500/10', border: 'border-orange-500/30', text: 'text-orange-500', icon: 'text-orange-500' },
-    green: { bg: 'bg-green-500/10', border: 'border-green-500/30', text: 'text-green-500', icon: 'text-green-500' },
-    emerald: { bg: 'bg-emerald-500/10', border: 'border-emerald-500/30', text: 'text-emerald-500', icon: 'text-emerald-500' },
-    purple: { bg: 'bg-purple-500/10', border: 'border-purple-500/30', text: 'text-purple-500', icon: 'text-purple-500' },
-    red: { bg: 'bg-red-500/10', border: 'border-red-500/30', text: 'text-red-500', icon: 'text-red-500' },
-  };
-  
+  const colorMap = { blue: { bg: 'bg-blue-500/10', border: 'border-blue-500/30', text: 'text-blue-500', icon: 'text-blue-500' }, yellow: { bg: 'bg-yellow-500/10', border: 'border-yellow-500/30', text: 'text-yellow-500', icon: 'text-yellow-500' }, orange: { bg: 'bg-orange-500/10', border: 'border-orange-500/30', text: 'text-orange-500', icon: 'text-orange-500' }, green: { bg: 'bg-green-500/10', border: 'border-green-500/30', text: 'text-green-500', icon: 'text-green-500' }, emerald: { bg: 'bg-emerald-500/10', border: 'border-emerald-500/30', text: 'text-emerald-500', icon: 'text-emerald-500' }, purple: { bg: 'bg-purple-500/10', border: 'border-purple-500/30', text: 'text-purple-500', icon: 'text-purple-500' }, red: { bg: 'bg-red-500/10', border: 'border-red-500/30', text: 'text-red-500', icon: 'text-red-500' } };
   const colors = colorMap[color] || colorMap.blue;
-  
-  return (
-    <div className={`flex items-center justify-between p-3 rounded-lg border ${colors.bg} ${colors.border}`}>
-      <div className="flex items-center gap-2 min-w-0">
-        <div className={colors.icon} aria-hidden="true">{icon}</div>
-        <span className={`text-xs sm:text-sm truncate ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>{label}</span>
-      </div>
-      <span className={`font-bold text-base sm:text-lg flex-shrink-0 ml-2 ${colors.text}`}>{value}{unit}</span>
-    </div>
-  );
+  return (<div className={`flex items-center justify-between p-3 rounded-lg border ${colors.bg} ${colors.border}`}><div className="flex items-center gap-2 min-w-0"><div className={colors.icon} aria-hidden="true">{icon}</div><span className={`text-xs sm:text-sm truncate ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>{label}</span></div><span className={`font-bold text-base sm:text-lg flex-shrink-0 ml-2 ${colors.text}`}>{value}{unit}</span></div>);
 }
