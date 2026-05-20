@@ -2,14 +2,7 @@
 
 import { useEffect, useState, useRef, useCallback } from 'react';
 import Link from 'next/link';
-import { 
-  ArrowLeft, Award, Clock, Eye,
-  Volume2, VolumeX, Maximize2, Minimize2, Sun, Moon, 
-  Timer, Trophy, Flame, Wind, Brain, Info, TrendingUp, Zap, RefreshCw,
-  Crosshair, Dumbbell, Database, Keyboard, Star, Users,
-  GraduationCap, Lightbulb, TrendingUp, Clock, ArrowRight,
-  BookOpen, Hash, Code2, BarChart3, CheckCircle2, Target, Heart
-} from 'lucide-react';
+import { ArrowLeft, ArrowRight, Award, BarChart3, BookOpen, Brain, CheckCircle2, Clock, Code2, Crosshair, Database, Dumbbell, Eye, Flame, GraduationCap, Hash, Heart, Info, Keyboard, Lightbulb, Maximize2, Minimize2, Moon, RefreshCw, Star, Sun, Target, Timer, TrendingUp, Trophy, Users, Volume2, VolumeX, Wind, Zap } from 'lucide-react';
 
 export default function WimHofClient() {
   const [loading, setLoading] = useState(true);
