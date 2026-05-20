@@ -8,7 +8,7 @@ import {
   Timer, Trophy, Square, Brain, Info, TrendingUp, RefreshCw,
   Crosshair, Dumbbell, Database, Keyboard, Star, Users,
   GraduationCap, Lightbulb, ArrowRight, CheckCircle2,
-  BookOpen, Hash, Code2
+  BookOpen, Hash, Code2, Zap, Target, Activity
 } from 'lucide-react';
 
 export default function BoxBreathingClient() {

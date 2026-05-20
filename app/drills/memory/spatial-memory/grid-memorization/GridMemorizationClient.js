@@ -6,7 +6,8 @@ import {
   ArrowLeft, Target, Zap, Award, Activity, 
   Volume2, VolumeX, Maximize2, Minimize2, Sun, Moon, 
   Eye, Brain, Trophy, Info, Timer, Grid3X3, RefreshCw, SkipForward,
-  GraduationCap, Lightbulb, TrendingUp, BarChart3, CheckCircle2, Star, ArrowRight, Share2, Copy, Heart
+  GraduationCap, Lightbulb, TrendingUp, BarChart3, CheckCircle2, Star, ArrowRight, Share2, Copy, Heart,
+  Clock
 } from 'lucide-react';
 
 export default function GridMemorizationClient() {

@@ -9,7 +9,8 @@ import {
   Lock, AlertCircle, RefreshCw,
   Crosshair, Dumbbell, Database, Keyboard, Star, Users,
   GraduationCap, Lightbulb, TrendingUp, Clock, ArrowRight,
-  BookOpen, Brain, Code2, Hash, Headphones
+  BookOpen, Brain, Code2, Hash, Headphones,
+  BarChart3, CheckCircle2
 } from 'lucide-react';
 
 const SCORE_INTERVAL = 800;

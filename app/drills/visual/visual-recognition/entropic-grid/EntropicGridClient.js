@@ -6,7 +6,8 @@ import {
   ArrowLeft, Target, Zap, Timer, Trophy, 
   Volume2, VolumeX, Maximize2, Minimize2, Sun, Moon, Eye,
   Info, Award, Activity, BarChart3, Search, RefreshCw,
-  GraduationCap, Lightbulb, TrendingUp, CheckCircle2, Star, ArrowRight, Share2, Copy
+  GraduationCap, Lightbulb, TrendingUp, CheckCircle2, Star, ArrowRight, Share2, Copy,
+  Clock, Brain
 } from 'lucide-react';
 
 const CHARS = "ABCDEF0123456789";

@@ -6,7 +6,8 @@ import {
   ArrowLeft, Target, Zap, Timer, Trophy, Heart, 
   Volume2, VolumeX, Maximize2, Minimize2, Sun, Moon, Eye,
   Info, Award, Activity, Brain, RefreshCw,
-  GraduationCap, Lightbulb, TrendingUp, BarChart3, CheckCircle2, Star, ArrowRight, Share2, Copy
+  GraduationCap, Lightbulb, TrendingUp, BarChart3, CheckCircle2, Star, ArrowRight, Share2, Copy,
+  Clock
 } from 'lucide-react';
 
 export default function GhostLinkClient() {

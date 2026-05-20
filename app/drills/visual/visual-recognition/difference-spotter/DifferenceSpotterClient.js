@@ -7,7 +7,8 @@ import {
   Volume2, VolumeX, Maximize2, Minimize2, Sun, Moon, 
   Eye, Timer, AlertCircle, Brain, X,
   BarChart3, Trophy, Info, CheckCircle2, Heart, RefreshCw,
-  GraduationCap, Lightbulb, TrendingUp, Star, ArrowRight, Share2, Copy
+  GraduationCap, Lightbulb, TrendingUp, Star, ArrowRight, Share2, Copy,
+  Crosshair
 } from 'lucide-react';
 
 export default function DifferenceSpotterClient() {

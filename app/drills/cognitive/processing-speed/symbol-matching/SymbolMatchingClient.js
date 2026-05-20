@@ -8,7 +8,8 @@ import {
   BarChart3, Info, CheckCircle, Activity, RotateCcw, Clock, Compass, RefreshCw,
   Crosshair, Dumbbell, Database, Keyboard, Star, Users,
   GraduationCap, Lightbulb, TrendingUp, ArrowRight,
-  BookOpen, Brain, Code2, Hash, CheckCircle2
+  BookOpen, Brain, Code2, Hash, CheckCircle2,
+  Calculator
 } from 'lucide-react';
 
 export default function SymbolMatchingClient() {

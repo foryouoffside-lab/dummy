@@ -7,7 +7,8 @@ import {
   Volume2, VolumeX, Maximize2, Minimize2, Sun, Moon, 
   Eye, Move, Brain, TrendingUp, Trophy, Info, LinkIcon, Timer, RefreshCw,
   Crosshair, Dumbbell, Database, Keyboard, Star, Users,
-  GraduationCap, Lightbulb, ArrowRight, BookOpen, Hash, Code2
+  GraduationCap, Lightbulb, ArrowRight, BookOpen, Hash, Code2,
+  BarChart3, CheckCircle2, PenTool
 } from 'lucide-react';
 
 export default function SingleLegEquilibriumClient() {

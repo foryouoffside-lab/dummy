@@ -9,7 +9,8 @@ import {
   Lock, AlertCircle,
   Crosshair, Dumbbell, Database, Keyboard, Star, Users,
   GraduationCap, Lightbulb, TrendingUp, Clock, ArrowRight,
-  BookOpen, Brain, Hash, Code2, CheckCircle2
+  BookOpen, Brain, Hash, Code2, CheckCircle2,
+  BarChart3
 } from 'lucide-react';
 
 export default function PeripheralAwarenessClient() {

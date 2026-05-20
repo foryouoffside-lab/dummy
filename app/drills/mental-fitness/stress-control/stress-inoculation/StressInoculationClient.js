@@ -8,7 +8,8 @@ import {
   Eye, Timer, TrendingUp, Wind, AlertCircle, Brain, Info, Trophy, RefreshCw,
   Crosshair, Dumbbell, Database, Keyboard, Star, Users,
   GraduationCap, Lightbulb, Clock, ArrowRight,
-  BookOpen, Hash, Code2, BarChart3, CheckCircle2, Heart
+  BookOpen, Hash, Code2, BarChart3, CheckCircle2, Heart,
+  Zap, Target
 } from 'lucide-react';
 
 export default function StressInoculationClient() {

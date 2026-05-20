@@ -7,7 +7,7 @@ import {
   Volume2, VolumeX, Maximize2, Minimize2, Sun, Moon, Eye,
   Info, Award, Activity, BarChart3, RefreshCw, ScanEye,
   Circle, Square, Triangle, GraduationCap, Lightbulb, TrendingUp,
-  CheckCircle2, Star, ArrowRight, Share2, Copy, Heart
+  CheckCircle2, Star, ArrowRight, Share2, Copy, Heart, Clock
 } from 'lucide-react';
 
 const FLASH_DURATION = 300;

@@ -7,7 +7,8 @@ import {
   Volume2, VolumeX, Maximize2, Minimize2, Sun, Moon, Eye,
   BarChart3, Info, CheckCircle, Puzzle, Lightbulb, TrendingUp, Infinity, RefreshCw,
   Crosshair, Dumbbell, Database, Keyboard, Star, Users,
-  GraduationCap, Clock, ArrowRight, BookOpen, Brain, Code2, Hash, CheckCircle2
+  GraduationCap, Clock, ArrowRight, BookOpen, Brain, Code2, Hash, CheckCircle2,
+  Calculator
 } from 'lucide-react';
 
 export default function LogicPuzzlesClient() {

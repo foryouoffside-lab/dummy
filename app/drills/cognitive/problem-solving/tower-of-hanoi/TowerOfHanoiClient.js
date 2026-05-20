@@ -8,7 +8,8 @@ import {
   BarChart3, Info, Layers, RotateCcw, Move, Award, RefreshCw,
   Crosshair, Dumbbell, Database, Keyboard, Star, Users,
   GraduationCap, Lightbulb, TrendingUp, Clock, ArrowRight,
-  BookOpen, Brain, Code2, Hash, Headphones, CheckCircle2
+  BookOpen, Brain, Code2, Hash, Headphones, CheckCircle2,
+  Calculator
 } from 'lucide-react';
 
 export default function TowerOfHanoiClient() {

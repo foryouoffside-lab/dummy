@@ -8,7 +8,8 @@ import {
   Trophy, Zap, RefreshCw, Heart,
   Crosshair, Dumbbell, Database, Keyboard, Star, Users,
   GraduationCap, Lightbulb, TrendingUp, ArrowRight,
-  BookOpen, Brain, Calculator, Hash, Code2, BarChart3, CheckCircle2
+  BookOpen, Brain, Calculator, Hash, Code2, BarChart3, CheckCircle2,
+  Timer
 } from 'lucide-react';
 
 export default function ConcentrationStaminaClient() {

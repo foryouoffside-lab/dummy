@@ -8,7 +8,8 @@ import {
   Eye, Brain, BarChart3, Timer, Trophy, Info, Route, Repeat, RefreshCw,
   Crosshair, Dumbbell, Database, Keyboard, Star, Users,
   GraduationCap, Lightbulb, TrendingUp, ArrowRight,
-  BookOpen, Hash, Code2, Calculator
+  BookOpen, Hash, Code2, Calculator,
+  CheckCircle2
 } from 'lucide-react';
 
 export default function SteadyHandClient() {

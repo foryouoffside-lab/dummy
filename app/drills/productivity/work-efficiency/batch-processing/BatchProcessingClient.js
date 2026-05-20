@@ -6,7 +6,8 @@ import {
   ArrowLeft, Target, Zap, Clock, Award, Activity, 
   Volume2, VolumeX, Maximize2, Minimize2, Sun, Moon, 
   Eye, Layers, Brain, X, Trophy, Info, Timer, TrendingUp, Heart, RefreshCw,
-  GraduationCap, Lightbulb, BarChart3, CheckCircle2, Star, ArrowRight, Share2, Copy
+  GraduationCap, Lightbulb, BarChart3, CheckCircle2, Star, ArrowRight, Share2, Copy,
+  Search
 } from 'lucide-react';
 
 export default function BatchProcessingClient() {

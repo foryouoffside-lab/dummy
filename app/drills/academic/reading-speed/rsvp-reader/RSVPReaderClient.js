@@ -10,7 +10,8 @@ import {
   BarChart3, Info, BookOpen, ChevronUp, ChevronDown, RefreshCw,
   Crosshair, Dumbbell, Database, Keyboard, Star, Users,
   GraduationCap, Lightbulb, TrendingUp, Clock, ArrowRight,
-  Brain, Code2, Hash, Headphones
+  Brain, Code2, Hash, Headphones,
+  CheckCircle2
 } from 'lucide-react';
 
 export default function RSVPReaderClient() {

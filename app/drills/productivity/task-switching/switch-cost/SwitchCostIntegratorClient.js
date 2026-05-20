@@ -6,7 +6,8 @@ import {
   ArrowLeft, Maximize2, Minimize2, Sun, Moon, 
   Eye, Volume2, VolumeX, Info, Activity, Target, Clock, Award, 
   Trophy, Zap, RefreshCw, Heart,
-  GraduationCap, Lightbulb, TrendingUp, BarChart3, CheckCircle2, Star, ArrowRight, Share2, Copy
+  GraduationCap, Lightbulb, TrendingUp, BarChart3, CheckCircle2, Star, ArrowRight, Share2, Copy,
+  Brain
 } from 'lucide-react';
 
 export default function SwitchCostIntegratorClient() {

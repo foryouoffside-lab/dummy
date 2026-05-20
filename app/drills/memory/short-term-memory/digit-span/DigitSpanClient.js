@@ -6,7 +6,8 @@ import {
   ArrowLeft, Target, Zap, Clock, Award, Activity, 
   Volume2, VolumeX, Maximize2, Minimize2, Sun, Moon, 
   Eye, Timer, Trophy, Info, Hash, TrendingUp, RefreshCw,
-  GraduationCap, Lightbulb, BarChart3, CheckCircle2, Star, ArrowRight, Share2, Copy, Heart
+  GraduationCap, Lightbulb, BarChart3, CheckCircle2, Star, ArrowRight, Share2, Copy, Heart,
+  Brain
 } from "lucide-react";
 
 export default function DigitSpanClient() {

@@ -9,7 +9,8 @@ import {
   Lock, AlertCircle, RefreshCw,
   Crosshair, Dumbbell, Database, Keyboard, Star, Users,
   GraduationCap, Lightbulb, TrendingUp, Clock, ArrowRight,
-  BookOpen, Brain, Code2, Hash
+  BookOpen, Brain, Code2, Hash,
+  BarChart3, CheckCircle2
 } from 'lucide-react';
 
 export default function MapPredictionClient() {

@@ -6,7 +6,8 @@ import {
   ArrowLeft, Target, Zap, Timer, Trophy, 
   Volume2, VolumeX, Maximize2, Minimize2, Sun, Moon, Eye,
   Info, Award, Activity, BarChart3, RefreshCw, Grid3X3,
-  GraduationCap, Lightbulb, TrendingUp, CheckCircle2, Star, ArrowRight, Share2, Copy
+  GraduationCap, Lightbulb, TrendingUp, CheckCircle2, Star, ArrowRight, Share2, Copy,
+  Clock, Search, Brain
 } from 'lucide-react';
 
 const GRID_SIZE = 36;

@@ -6,7 +6,8 @@ import {
   ArrowLeft, Target, Zap, Award, 
   Volume2, VolumeX, Maximize2, Minimize2, Sun, Moon, 
   Eye, Timer, Activity, Trophy, Info, RefreshCw,
-  GraduationCap, Lightbulb, TrendingUp, BarChart3, CheckCircle2, Star, ArrowRight, Share2, Copy
+  GraduationCap, Lightbulb, TrendingUp, BarChart3, CheckCircle2, Star, ArrowRight, Share2, Copy,
+  Clock, Brain
 } from 'lucide-react';
 
 export default function DualTargetFlowClient() {

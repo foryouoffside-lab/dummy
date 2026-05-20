@@ -2,8 +2,7 @@
 
 import { useEffect, useState, useRef, useCallback } from 'react';
 import Link from 'next/link';
-import { Activity, ArrowLeft, ArrowRight, Award, BarChart3, BookOpen, Brain, CheckCircle2, Clock, Code2, Crosshair, Database, Eye, GraduationCap, Hash, Heart, Info, Keyboard, Lightbulb, Maximize2, Minimize2, Moon, RefreshCw, Star, Sun, Target, Timer, TrendingUp, Trophy, Users, Volume2, VolumeX, Zap } from 'lucide-react';
-
+import { Activity, ArrowLeft, ArrowRight, Award, BarChart3, BookOpen, Brain, CheckCircle2, Clock, Code2, Crosshair, Database, Eye, GraduationCap, Hash, Heart, Info, Keyboard, Lightbulb, Maximize2, Minimize2, Moon, RefreshCw, Star, Sun, Target, Timer, TrendingUp, Trophy, Users, Volume2, VolumeX, Zap, Dumbbell } from 'lucide-react';
 export default function SpeedDrillClient() {
   const [loading, setLoading] = useState(true);
   const canvasRef = useRef(null);

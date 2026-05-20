@@ -9,7 +9,8 @@ import {
   Lock, AlertCircle, RefreshCw,
   Crosshair as CrosshairIcon, Dumbbell, Database, Keyboard, Star, Users,
   GraduationCap, Lightbulb, TrendingUp, Clock, ArrowRight,
-  BookOpen, Brain, Code2, Hash, Calculator
+  BookOpen, Brain, Code2, Hash, Calculator,
+  BarChart3, CheckCircle2
 } from 'lucide-react';
 
 const TARGET_FPS = 360;

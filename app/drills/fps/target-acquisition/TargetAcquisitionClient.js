@@ -8,7 +8,7 @@ import {
   Eye, Crosshair, Trophy, Info, Timer, RefreshCw,
   Dumbbell, Database, Keyboard, Star, Users,
   GraduationCap, Lightbulb, TrendingUp, ArrowRight,
-  BookOpen, Brain, Hash, Code2, CheckCircle2
+  BookOpen, Brain, Hash, Code2, CheckCircle2, BarChart3
 } from 'lucide-react';
 
 export default function TargetAcquisitionClient() {

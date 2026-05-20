@@ -8,7 +8,8 @@ import {
   Eye, Timer, TrendingUp, Wind, Brain, Info, Trophy, RefreshCw,
   Crosshair, Dumbbell, Database, Keyboard, Star, Users,
   GraduationCap, Lightbulb, Clock, ArrowRight,
-  BookOpen, Code2, Hash, CheckCircle2, BarChart3, Heart, Zap, Calculator
+  BookOpen, Code2, Hash, CheckCircle2, BarChart3, Heart, Zap, Calculator,
+  Target
 } from 'lucide-react';
 
 export default function CoherenceBreathingClient() {

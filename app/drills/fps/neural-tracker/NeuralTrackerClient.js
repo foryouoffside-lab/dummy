@@ -9,7 +9,8 @@ import {
   Lock, AlertCircle, RefreshCw,
   Crosshair, Dumbbell, Database, Keyboard, Star, Users,
   GraduationCap, Lightbulb, TrendingUp, Clock, ArrowRight,
-  BookOpen, Brain, Code2, Hash, Calculator, CheckCircle2
+  BookOpen, Brain, Code2, Hash, Calculator, CheckCircle2,
+  BarChart3
 } from 'lucide-react';
 
 export default function NeuralTrackerClient() {

@@ -8,7 +8,8 @@ import {
   BarChart3, Info, Brain, Grid, Activity, RefreshCw,
   Crosshair, Dumbbell, Database, Keyboard, Star, Users,
   GraduationCap, Lightbulb, TrendingUp, Clock, ArrowRight,
-  BookOpen, Calculator, Code2, Hash
+  BookOpen, Calculator, Code2, Hash,
+  CheckCircle2
 } from 'lucide-react';
 
 export default function MemorySequenceClient() {
