@@ -2,7 +2,8 @@
 
 export const metadata = {
   title: 'SkillDrills - Free FPS Aim Trainer & Cognitive Brain Training Platform',
-  description: 'Master your mind and mechanics with 115+ free interactive training drills. Improve FPS aim, reaction time, memory, focus, typing speed, reading comprehension, and mental fitness. No sign-up required. Start training instantly in your browser.',
+  description: 'Master your mind and mechanics with 115+ free interactive drills. Improve FPS aim, reaction time, memory, focus, typing speed, and mental fitness. No sign-up.',
+
   keywords: [
     'free aim trainer', 'FPS aim trainer', 'flick shot training', 'tracking aim practice',
     'Valorant aim trainer', 'CS2 aim practice', 'free brain training', 'cognitive training',
