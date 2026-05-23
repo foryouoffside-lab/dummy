@@ -14,7 +14,7 @@ const inter = Inter({
 export const metadata = {
   title: {
     default: 'SkillDrills - Free FPS Aim Trainer & Cognitive Brain Training Platform',
-    template: '%s | SkillDrills'
+    template: '%s',
   },
   description: 'Master your mind and mechanics with 90+ free online training drills. Improve FPS aim, reaction time, memory, focus, typing speed, and cognitive skills. No sign-up required. Practice directly in your browser.',
   keywords: [
