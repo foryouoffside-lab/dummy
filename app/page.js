@@ -3,7 +3,6 @@
 export const metadata = {
   title: 'SkillDrills - Free FPS Aim Trainer & Cognitive Brain Training Platform',
   description: 'Master your mind and mechanics with 115+ free interactive drills. Improve FPS aim, reaction time, memory, focus, typing speed, and mental fitness. No sign-up.',
-
   keywords: [
     'free aim trainer', 'FPS aim trainer', 'flick shot training', 'tracking aim practice',
     'Valorant aim trainer', 'CS2 aim practice', 'free brain training', 'cognitive training',
@@ -19,7 +18,7 @@ export const metadata = {
     description: '115+ free drills for FPS gaming, cognitive skills, memory, and mental fitness. No registration. Start now.',
     url: 'https://skilldrills.online',
     siteName: 'SkillDrills',
-    images: [{ url: '/icons/icon-512x512.png', width: 512, height: 512, alt: 'SkillDrills - Free Brain Training Platform' }],
+    images: [{ url: 'https://skilldrills.online/icons/icon-512x512.png', width: 512, height: 512, alt: 'SkillDrills - Free Brain Training Platform' }],
     locale: 'en_US',
     type: 'website',
   },
@@ -27,12 +26,20 @@ export const metadata = {
     card: 'summary_large_image',
     title: 'SkillDrills - Free FPS & Cognitive Training Platform',
     description: '115+ free training drills. No sign-up required. Start training instantly.',
-    images: ['/icons/icon-512x512.png'],
+    images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
   alternates: { canonical: 'https://skilldrills.online' },
 };
 
 export default function HomePage() {
-  return <HomePageClient />;
+  return (
+    <>
+      <noscript>
+        <h1>SkillDrills - Free FPS Aim Trainer & Cognitive Brain Training Platform</h1>
+        <p>Master your mind and mechanics with 115+ free interactive drills. No sign-up required.</p>
+      </noscript>
+      <HomePageClient />
+    </>
+  );
 }

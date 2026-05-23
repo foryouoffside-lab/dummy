@@ -3,20 +3,43 @@ import { Target, ArrowRight, Sparkles, Gamepad2, Brain, Eye, BookOpen, Timer, Ha
 
 export const metadata = {
   title: 'All Training Drills - 90+ Free Exercises | SkillDrills',
-  description: 'Browse 90+ free training drills across 9 categories. FPS aim trainer, cognitive brain training, visual reaction speed, memory games, typing tests, and mental fitness.',
-  keywords: ['training drills', 'brain training', 'FPS aim trainer', 'cognitive exercises', 'free drills online', 'skilldrills'],
+  description: 'Browse 90+ free training drills across 9 categories. FPS aim trainer, cognitive brain training, visual reaction speed, memory games, typing tests, and mental fitness. No sign-up.',
+  keywords: [
+    'training drills', 'brain training', 'FPS aim trainer', 'cognitive exercises',
+    'free drills online', 'skilldrills', 'all drills', 'free training',
+    'FPS gaming', 'memory training', 'visual training', 'academic drills',
+    'productivity tools', 'motor skills', 'physical training', 'mental fitness',
+  ],
   openGraph: {
-    title: 'All Training Drills | SkillDrills',
-    description: '90+ free interactive drills for gaming, cognitive, and motor skills training.',
+    title: 'All Training Drills - 90+ Free Exercises | SkillDrills',
+    description: '90+ free interactive drills for gaming, cognitive, and motor skills training. No sign-up.',
     type: 'website',
+    url: 'https://skilldrills.online/drills',
+    siteName: 'SkillDrills',
+    locale: 'en_US',
+    images: [{
+      url: 'https://skilldrills.online/icons/icon-512x512.png',
+      width: 512,
+      height: 512,
+      alt: 'All Training Drills',
+    }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'All Training Drills | SkillDrills',
+    description: '90+ free drills across 9 categories. No sign-up.',
+    images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
+  alternates: {
+    canonical: 'https://skilldrills.online/drills',
+  },
 };
 
 const drillCategories = [
   { name: 'FPS Gaming', color: 'from-red-500 to-orange-600', icon: Gamepad2, description: 'Reaction speed, aim training, flick shots, tracking and peripheral vision for competitive FPS gamers', slug: 'fps', drills: '22 drills', keywords: 'aim trainer, flick shots, Valorant, CS2, Overwatch' },
   { name: 'Cognitive', color: 'from-purple-500 to-indigo-600', icon: Brain, description: 'Memory, attention, focus, problem-solving and processing speed brain training exercises', slug: 'cognitive', drills: '16 drills', keywords: 'brain training, memory games, attention exercises' },
-  { name: 'Visual', color: 'from-blue-500 to-cyan-600', icon: Eye, description: 'Reaction speed, tracking accuracy, peripheral vision, depth perception and visual recognition drills', slug: 'visual', drills: '11 drills', keywords: 'visual training, reaction time, eye tracking' },
+  { name: 'Visual', color: 'from-blue-500 to-cyan-600', icon: Eye, description: 'Reaction speed, tracking accuracy, peripheral vision, depth perception and visual recognition drills', slug: 'visual', drills: '13 drills', keywords: 'visual training, reaction time, eye tracking' },
   { name: 'Academic', color: 'from-yellow-500 to-amber-600', icon: BookOpen, description: 'Math speed, reading comprehension, writing speed, typing tests and inference practice', slug: 'academic', drills: '12 drills', keywords: 'typing test, speed reading, math practice' },
   { name: 'Productivity', color: 'from-emerald-500 to-teal-600', icon: Timer, description: 'Pomodoro timer, task management, focus sessions, deep work and habit tracking tools', slug: 'productivity', drills: '10 drills', keywords: 'pomodoro timer, focus tools, productivity apps' },
   { name: 'Memory', color: 'from-violet-500 to-purple-600', icon: Database, description: 'Short-term, working, long-term, spatial and associative memory training with scientific methods', slug: 'memory', drills: '15 drills', keywords: 'memory training, working memory, n-back' },
@@ -32,8 +55,8 @@ export default function DrillsPage() {
       <section className="sr-only" aria-label="Drills directory for search engines">
         <h2>All Training Drills - 90+ Free Exercises Across 9 Categories</h2>
         <p>
-          Browse all free training drills on SkillDrills. 9 categories including FPS gaming aim trainer, cognitive brain training, 
-          visual reaction speed tests, academic typing and reading drills, productivity tools, memory exercises, motor skills training, 
+          Browse all free training drills on SkillDrills. 9 categories including FPS gaming aim trainer, cognitive brain training,
+          visual reaction speed tests, academic typing and reading drills, productivity tools, memory exercises, motor skills training,
           physical fitness drills, and mental wellness exercises. All drills are completely free with no registration required.
         </p>
       </section>
@@ -120,7 +143,7 @@ export default function DrillsPage() {
         </div>
       </section>
 
-      {/* ============ FPS BANNER ============ */}
+      {/* FPS BANNER */}
       <section className="bg-gradient-to-r from-red-600 to-orange-600 mx-4 sm:mx-6 lg:mx-8 rounded-2xl mb-8 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 sm:px-8 py-10 sm:py-12">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
@@ -149,7 +172,7 @@ export default function DrillsPage() {
         </div>
       </section>
 
-      {/* ============ COGNITIVE BANNER ============ */}
+      {/* COGNITIVE BANNER */}
       <section className="bg-gradient-to-r from-purple-600 to-indigo-600 mx-4 sm:mx-6 lg:mx-8 rounded-2xl mb-8 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 sm:px-8 py-10 sm:py-12">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
@@ -178,7 +201,7 @@ export default function DrillsPage() {
         </div>
       </section>
 
-      {/* ============ VISUAL BANNER ============ */}
+      {/* VISUAL BANNER */}
       <section className="bg-gradient-to-r from-blue-500 to-cyan-600 mx-4 sm:mx-6 lg:mx-8 rounded-2xl mb-8 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 sm:px-8 py-10 sm:py-12">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
@@ -196,7 +219,7 @@ export default function DrillsPage() {
             <div className="flex-1 w-full max-w-md">
               <div className="bg-black/30 rounded-2xl p-6 backdrop-blur-sm">
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center"><p className="text-3xl font-bold text-white">11</p><p className="text-sm text-blue-200">Drills</p></div>
+                  <div className="text-center"><p className="text-3xl font-bold text-white">13</p><p className="text-sm text-blue-200">Drills</p></div>
                   <div className="text-center"><p className="text-3xl font-bold text-white">Reaction</p><p className="text-sm text-blue-200">Speed</p></div>
                   <div className="text-center"><p className="text-3xl font-bold text-white">Target</p><p className="text-sm text-blue-200">Tracking</p></div>
                   <div className="text-center"><p className="text-3xl font-bold text-white">Free</p><p className="text-sm text-blue-200">Forever</p></div>
@@ -207,7 +230,7 @@ export default function DrillsPage() {
         </div>
       </section>
 
-      {/* ============ ACADEMIC BANNER ============ */}
+      {/* ACADEMIC BANNER */}
       <section className="bg-gradient-to-r from-yellow-500 to-amber-600 mx-4 sm:mx-6 lg:mx-8 rounded-2xl mb-8 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 sm:px-8 py-10 sm:py-12">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
@@ -236,7 +259,7 @@ export default function DrillsPage() {
         </div>
       </section>
 
-      {/* ============ PRODUCTIVITY BANNER ============ */}
+      {/* PRODUCTIVITY BANNER */}
       <section className="bg-gradient-to-r from-emerald-500 to-teal-600 mx-4 sm:mx-6 lg:mx-8 rounded-2xl mb-8 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 sm:px-8 py-10 sm:py-12">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
@@ -265,7 +288,7 @@ export default function DrillsPage() {
         </div>
       </section>
 
-      {/* ============ MEMORY BANNER ============ */}
+      {/* MEMORY BANNER */}
       <section className="bg-gradient-to-r from-violet-500 to-purple-600 mx-4 sm:mx-6 lg:mx-8 rounded-2xl mb-8 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 sm:px-8 py-10 sm:py-12">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
@@ -294,7 +317,7 @@ export default function DrillsPage() {
         </div>
       </section>
 
-      {/* ============ MOTOR SKILLS BANNER ============ */}
+      {/* MOTOR SKILLS BANNER */}
       <section className="bg-gradient-to-r from-green-500 to-emerald-600 mx-4 sm:mx-6 lg:mx-8 rounded-2xl mb-8 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 sm:px-8 py-10 sm:py-12">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
@@ -323,7 +346,7 @@ export default function DrillsPage() {
         </div>
       </section>
 
-      {/* ============ PHYSICAL BANNER ============ */}
+      {/* PHYSICAL BANNER */}
       <section className="bg-gradient-to-r from-orange-500 to-red-600 mx-4 sm:mx-6 lg:mx-8 rounded-2xl mb-8 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 sm:px-8 py-10 sm:py-12">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
@@ -352,7 +375,7 @@ export default function DrillsPage() {
         </div>
       </section>
 
-      {/* ============ MENTAL FITNESS BANNER ============ */}
+      {/* MENTAL FITNESS BANNER */}
       <section className="bg-gradient-to-r from-pink-500 to-rose-600 mx-4 sm:mx-6 lg:mx-8 rounded-2xl mb-8 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 sm:px-8 py-10 sm:py-12">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
