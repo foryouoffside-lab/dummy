@@ -3,7 +3,7 @@ import { Target, ArrowRight, Sparkles, Gamepad2, Brain, Eye, BookOpen, Timer, Ha
 
 export const metadata = {
   title: 'All Training Drills - 90+ Free Exercises | SkillDrills',
-  description: 'Browse 90+ free training drills across 9 categories. FPS aim trainer, cognitive brain training, visual reaction speed, memory games, typing tests, and mental fitness. No sign-up.',
+  description: 'Browse 90+ free training drills across 9 categories. FPS aim trainer, cognitive brain training, visual reaction speed, memory games, and mental fitness. No sign-up.',
   keywords: [
     'training drills', 'brain training', 'FPS aim trainer', 'cognitive exercises',
     'free drills online', 'skilldrills', 'all drills', 'free training',
