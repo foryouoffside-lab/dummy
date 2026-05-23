@@ -1,7 +1,7 @@
 ﻿import InferenceDrillClient from './InferenceDrillClient';
 
 export const metadata = {
-  title: 'Inference Drill - Critical Reasoning & Logical Thinking | SkillDrills',
+  title: 'Inference Drill - Critical Reasoning Practice | SkillDrills',
   description: 'Master critical reasoning with 12 unique passages. Practice logical flaws, causal analysis, inference drawing, and argument evaluation. LSAT & GMAT style. No sign-up.',
   keywords: [
     'inference drill', 'inference practice', 'inference test', 'critical reasoning drill',
@@ -57,11 +57,6 @@ export const metadata = {
 export default function InferenceDrillPage() {
   return (
     <>
-      <noscript>
-        <h1>Inference Drill - Critical Reasoning & Logical Thinking Practice</h1>
-        <p>Free interactive inference drill with 12 unique critical reasoning passages. LSAT & GMAT style. No sign-up required.</p>
-      </noscript>
-
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
