@@ -1,8 +1,8 @@
 import QuickMathClient from './QuickMathClient';
 
 export const metadata = {
-  title: 'Quick Math Drill - Processing Speed & Mental Calculation | SkillDrills',
-  description: 'Boost processing speed with adaptive math. Unique non-repeating questions across addition, subtraction, multiplication, and division. 60-second challenge. No sign-up.',
+  title: 'Quick Math - Processing & Calculation | SkillDrills',
+  description: 'Boost processing speed with adaptive math. Unique non-repeating questions across addition, subtraction, multiplication, and division. No sign-up.',
   keywords: [
     'quick math drill', 'mental math speed test', 'processing speed training',
     'rapid calculation practice', 'math reflexes test', 'arithmetic speed drill',
@@ -21,8 +21,8 @@ export const metadata = {
     'daily math drill', 'math warm up exercise', 'math skills improvement',
   ],
   openGraph: {
-    title: 'Quick Math Drill - Processing Speed Training | SkillDrills',
-    description: 'Adaptive difficulty with unique non-repeating questions. 60s challenge. Free.',
+    title: 'Quick Math - Processing & Calculation | SkillDrills',
+    description: 'Boost processing speed with adaptive math. Unique non-repeating questions across addition, subtraction, multiplication, and division. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/cognitive/processing-speed/quick-math',
     siteName: 'SkillDrills',
@@ -36,8 +36,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Quick Math Drill | SkillDrills',
-    description: 'Boost processing speed with adaptive math. Free.',
+    title: 'Quick Math - Processing & Calculation | SkillDrills',
+    description: 'Boost processing speed with adaptive math. Unique non-repeating questions across addition, subtraction, multiplication, and division. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -49,10 +49,6 @@ export const metadata = {
 export default function QuickMathPage() {
   return (
     <>
-      <noscript>
-        <h1>Quick Math Drill - Processing Speed & Mental Calculation Training</h1>
-        <p>Free quick math drill with adaptive difficulty and unique non-repeating questions. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

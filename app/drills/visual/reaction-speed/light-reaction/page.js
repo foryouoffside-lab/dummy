@@ -1,8 +1,8 @@
-﻿import StrobeLatencyClient from './StrobeLatencyClient';
+import StrobeLatencyClient from './StrobeLatencyClient';
 
 export const metadata = {
-  title: 'Light Reaction Speed Lab - Light Reaction Speed Drill | SkillDrills',
-  description: 'Test visual reaction speed with light flash detection. Click when ball flashes white. Adaptive 100-200ms window, raw mouse input. No sign-up.',
+  title: 'Light Reaction - Speed Drill | SkillDrills',
+  description: 'Click when ball flashes white. Adaptive 100-200ms window, raw mouse input, random 1-3s intervals. Millisecond reaction tracking. No sign-up.',
   keywords: [
     'light reaction test', 'visual reaction speed', 'reaction time drill',
     'light reaction speed', 'reflex training', 'visual stimulus reaction',
@@ -17,8 +17,8 @@ export const metadata = {
     'esports reaction training', 'gaming reflex drill', 'competitive reaction test',
   ],
   openGraph: {
-    title: 'Light Reaction Speed Lab - Reaction Speed Drill | SkillDrills',
-    description: 'Click when ball flashes white. Adaptive 100-200ms window. Free.',
+    title: 'Light Reaction - Speed Drill | SkillDrills',
+    description: 'Click when ball flashes white. Adaptive 100-200ms window, raw mouse input, random 1-3s intervals. Millisecond reaction tracking. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/visual/reaction-speed/light-reaction',
     siteName: 'SkillDrills',
@@ -32,8 +32,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Light Reaction Speed Lab | SkillDrills',
-    description: 'Click when ball flashes white. Adaptive window. Free.',
+    title: 'Light Reaction - Speed Drill | SkillDrills',
+    description: 'Click when ball flashes white. Adaptive 100-200ms window, raw mouse input, random 1-3s intervals. Millisecond reaction tracking. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -45,10 +45,6 @@ export const metadata = {
 export default function StrobeLatencyPage() {
   return (
     <>
-      <noscript>
-        <h1>Light Reaction Speed Lab - Light Reaction Speed & Reflex Training</h1>
-        <p>Free light-based reaction speed drill with adaptive 100-200ms window. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

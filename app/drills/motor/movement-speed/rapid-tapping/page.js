@@ -1,7 +1,7 @@
-﻿import RapidTappingClient from './RapidTappingClient';
+import RapidTappingClient from './RapidTappingClient';
 
 export const metadata = {
-  title: 'Rapid Tapping Drill - Click Speed & Endurance Test | SkillDrills',
+  title: 'Rapid Tapping - Click Speed Test | SkillDrills',
   description: 'Endless survival tapping. Click the shrinking ball to keep it alive. 10 clicks = 1 point. Difficulty +12% every 3s. Max ball 140px. No sign-up.',
   keywords: [
     'rapid tapping drill', 'click speed test', 'tapping endurance training', 'mouse clicking speed test',
@@ -17,7 +17,7 @@ export const metadata = {
     'hand eye coordination click', 'reflex clicking practice', 'competitive clicking',
   ],
   openGraph: {
-    title: 'Rapid Tapping Drill - Click Speed Test | SkillDrills',
+    title: 'Rapid Tapping - Click Speed Test | SkillDrills',
     description: 'Endless survival tapping. 10 clicks = 1 point. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/motor/movement-speed/rapid-tapping',
@@ -32,7 +32,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Rapid Tapping Drill | SkillDrills',
+    title: 'Rapid Tapping - Click Speed Test | SkillDrills',
     description: 'Endless survival clicking. 10 clicks = 1 point. Free.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
@@ -45,10 +45,6 @@ export const metadata = {
 export default function RapidTappingPage() {
   return (
     <>
-      <noscript>
-        <h1>Rapid Tapping Drill - Click Speed Test & Mouse Endurance Training</h1>
-        <p>Free endless rapid tapping survival drill. Click the shrinking ball to keep it alive. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

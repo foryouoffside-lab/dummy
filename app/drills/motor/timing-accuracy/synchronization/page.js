@@ -1,8 +1,8 @@
-﻿import SynchronizationClient from './SynchronizationClient';
+import SynchronizationClient from './SynchronizationClient';
 
 export const metadata = {
-  title: 'Synchronization Drill - Bar Alignment Timing Training | SkillDrills',
-  description: 'Click when converging bars align at center line. Variable speed 400-1200px/s. 3 lives, perfect sync tracking <16.6ms. No sign-up.',
+  title: 'Synchronization - Bar Alignment Drill | SkillDrills',
+  description: 'Click when converging bars align at center line. Variable speed 400-1200px/s. 3 lives, perfect sync tracking. No sign-up.',
   keywords: [
     'synchronization training', 'bar alignment drill', 'convergence timing', 'timing precision test',
     'visual synchronization', 'motor timing drill', 'bar convergence', 'reaction alignment',
@@ -18,8 +18,8 @@ export const metadata = {
     'online timing game', 'browser timing drill', 'no download synchronization',
   ],
   openGraph: {
-    title: 'Synchronization Drill - Bar Alignment Timing | SkillDrills',
-    description: 'Click when converging bars align at center. Free.',
+    title: 'Synchronization - Bar Alignment Drill | SkillDrills',
+    description: 'Click when converging bars align at center line. Variable speed 400-1200px/s. 3 lives, perfect sync tracking. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/motor/timing-accuracy/synchronization',
     siteName: 'SkillDrills',
@@ -33,8 +33,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Synchronization Drill | SkillDrills',
-    description: 'Master timing precision. Variable speed bar convergence. Free.',
+    title: 'Synchronization - Bar Alignment Drill | SkillDrills',
+    description: 'Click when converging bars align at center line. Variable speed 400-1200px/s. 3 lives, perfect sync tracking. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -46,10 +46,6 @@ export const metadata = {
 export default function SynchronizationPage() {
   return (
     <>
-      <noscript>
-        <h1>Synchronization Drill - Bar Alignment Timing & Visual Convergence Training</h1>
-        <p>Free synchronization drill with converging bars and variable speed. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

@@ -1,8 +1,8 @@
-﻿import RhythmTapClient from './RhythmTapClient';
+import RhythmTapClient from './RhythmTapClient';
 
 export const metadata = {
-  title: 'Rhythm Tap Training - Timing Accuracy & Beat Sync Drill | SkillDrills',
-  description: 'Tap in sync with dynamic BPM pulse (50-140). Perfect hits <40ms, Good <80ms. BPM changes every 8 beats. 60-second challenge. No sign-up.',
+  title: 'Rhythm Tap - Timing & Beat Sync | SkillDrills',
+  description: 'Tap in sync with dynamic BPM pulse (50-140). Perfect hits under 40ms, Good under 80ms. BPM changes every 8 beats. No sign-up.',
   keywords: [
     'rhythm tap training', 'timing accuracy drill', 'beat synchronization practice',
     'rhythm training online', 'BPM training free', 'musical timing practice',
@@ -15,8 +15,8 @@ export const metadata = {
     'adaptive BPM training', 'dynamic tempo practice', 'beat detection drill',
   ],
   openGraph: {
-    title: 'Rhythm Tap Training - Timing Accuracy | SkillDrills',
-    description: 'Tap in sync with dynamic BPM pulse (50-140). Free.',
+    title: 'Rhythm Tap - Timing & Beat Sync | SkillDrills',
+    description: 'Tap in sync with dynamic BPM pulse (50-140). Perfect hits under 40ms, Good under 80ms. BPM changes every 8 beats. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/motor/timing-accuracy/rhythm-tap',
     siteName: 'SkillDrills',
@@ -30,8 +30,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Rhythm Tap Training | SkillDrills',
-    description: 'Master rhythmic timing. Dynamic BPM. Free.',
+    title: 'Rhythm Tap - Timing & Beat Sync | SkillDrills',
+    description: 'Tap in sync with dynamic BPM pulse (50-140). Perfect hits under 40ms, Good under 80ms. BPM changes every 8 beats. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -43,10 +43,6 @@ export const metadata = {
 export default function RhythmTapPage() {
   return (
     <>
-      <noscript>
-        <h1>Rhythm Tap Training - Timing Accuracy & Beat Synchronization Drill</h1>
-        <p>Free rhythm tap drill with dynamic BPM (50-140). No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

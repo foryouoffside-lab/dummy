@@ -1,7 +1,7 @@
 import InstantResponseClient from './InstantResponseClient';
 
 export const metadata = {
-  title: 'Instant Response Trainer - Raw Reflex FPS Aim Drill | SkillDrills',
+  title: 'Instant Response - Raw Reflex Drill | SkillDrills',
   description: 'Train pure reaction speed with raw mouse input. Adaptive 80-1200ms response window, 3 lives, millisecond tracking. For Valorant, CS2, Apex. No sign-up.',
   keywords: [
     'instant response drill', 'reaction speed test', 'adaptive window training',
@@ -19,7 +19,7 @@ export const metadata = {
     'reflex improvement', 'reaction speed training', 'gaming reflex practice',
   ],
   openGraph: {
-    title: 'Instant Response Trainer - FPS Reflex Drill | SkillDrills',
+    title: 'Instant Response - Raw Reflex Drill | SkillDrills',
     description: 'Raw mouse input. Adaptive 80-1200ms window. 3 lives. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/fps/instant-response',
@@ -34,7 +34,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Instant Response Trainer | SkillDrills',
+    title: 'Instant Response - Raw Reflex Drill | SkillDrills',
     description: 'Raw mouse input reflex drill. Adaptive window. Free.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
@@ -47,10 +47,6 @@ export const metadata = {
 export default function InstantResponsePage() {
   return (
     <>
-      <noscript>
-        <h1>Instant Response Trainer - Raw Reflex & Adaptive Window FPS Aim Drill</h1>
-        <p>Free FPS reflex drill with raw mouse input and adaptive response window. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

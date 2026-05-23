@@ -1,8 +1,8 @@
 import ObjectLocationClient from './ObjectLocationClient';
 
 export const metadata = {
-  title: 'Object Location Drill - Spatial Position Memory Training | SkillDrills',
-  description: 'Train spatial memory with 10 emoji objects on expanding 3x3 to 7x7 grids. Memorize positions, then find the target. Auto-advancing rounds. No sign-up.',
+  title: 'Object Location - Position Memory | SkillDrills',
+  description: 'Train spatial memory with 10 emoji objects on expanding 3x3 to 7x7 grids. Memorize positions, then find the target. No sign-up.',
   keywords: [
     'object location memory', 'spatial position recall', 'object placement memory',
     'spatial memory grid', 'location memory drill', 'object position test',
@@ -17,8 +17,8 @@ export const metadata = {
     'position memory exercise', 'grid object memory', 'spatial awareness drill',
   ],
   openGraph: {
-    title: 'Object Location Drill - Spatial Memory | SkillDrills',
-    description: '10 emoji objects on expanding 3x3 to 7x7 grids. Memorize then find. Free.',
+    title: 'Object Location - Position Memory | SkillDrills',
+    description: 'Train spatial memory with 10 emoji objects on expanding 3x3 to 7x7 grids. Memorize positions, then find the target. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/memory/spatial-memory/object-location',
     siteName: 'SkillDrills',
@@ -32,8 +32,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Object Location Drill | SkillDrills',
-    description: '10 emoji objects on expanding grids. Memorize then find. Free.',
+    title: 'Object Location - Position Memory | SkillDrills',
+    description: 'Train spatial memory with 10 emoji objects on expanding 3x3 to 7x7 grids. Memorize positions, then find the target. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -45,10 +45,6 @@ export const metadata = {
 export default function ObjectLocationPage() {
   return (
     <>
-      <noscript>
-        <h1>Object Location Drill - Spatial Memory & Position Recall Training</h1>
-        <p>Free object location drill with 10 emoji objects on expanding 3x3 to 7x7 grids. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

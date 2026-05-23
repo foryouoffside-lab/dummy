@@ -1,8 +1,8 @@
-﻿import BatchProcessingClient from './BatchProcessingClient';
+import BatchProcessingClient from './BatchProcessingClient';
 
 export const metadata = {
-  title: 'Batch Processing Drill - Work Efficiency & Task Grouping | SkillDrills',
-  description: 'Process color-coded RED, BLUE, GREEN batches in 2-second windows. Progressive difficulty +2 items per level. 3 lives system. No sign-up.',
+  title: 'Batch Processing - Work Efficiency | SkillDrills',
+  description: 'Process RED, BLUE, GREEN batches in 2-second windows. Progressive difficulty +2 items per level. 3 lives system. No sign-up.',
   keywords: [
     'batch processing', 'task grouping', 'work efficiency training',
     'batch task management', 'productivity drill', 'task batching',
@@ -17,8 +17,8 @@ export const metadata = {
     'work batching game', 'efficiency exercise', 'productivity skill drill',
   ],
   openGraph: {
-    title: 'Batch Processing Drill - Work Efficiency | SkillDrills',
-    description: 'RED BLUE GREEN batches in 2-second windows. Free.',
+    title: 'Batch Processing - Work Efficiency | SkillDrills',
+    description: 'Process RED, BLUE, GREEN batches in 2-second windows. Progressive difficulty +2 items per level. 3 lives system. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/productivity/work-efficiency/batch-processing',
     siteName: 'SkillDrills',
@@ -32,8 +32,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Batch Processing Drill | SkillDrills',
-    description: 'Color-coded batches in 2-second windows. Free.',
+    title: 'Batch Processing - Work Efficiency | SkillDrills',
+    description: 'Process RED, BLUE, GREEN batches in 2-second windows. Progressive difficulty +2 items per level. 3 lives system. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -45,10 +45,6 @@ export const metadata = {
 export default function BatchProcessingPage() {
   return (
     <>
-      <noscript>
-        <h1>Batch Processing Drill - Work Efficiency & Task Grouping Training</h1>
-        <p>Free batch processing drill with color-coded task batches. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

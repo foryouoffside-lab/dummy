@@ -1,8 +1,8 @@
 import ComplexPatternClient from './ComplexPatternClient';
 
 export const metadata = {
-  title: 'Complex Pattern Elite - Pattern Memory & Coordination | SkillDrills',
-  description: 'Memorize path patterns in 2 seconds, then draw from memory. Shape-based scoring. Adaptive complexity 2-8 waypoints. 60-second challenge. No sign-up.',
+  title: 'Complex Pattern - Memory & Coordination | SkillDrills',
+  description: 'Memorize path patterns in 2 seconds, then draw from memory. Shape-based scoring. Adaptive complexity 2-8 waypoints. No sign-up.',
   keywords: [
     'complex pattern training', 'pattern memory drill', 'motor coordination exercise',
     'shape drawing practice', 'pattern replication game', 'hand-eye coordination',
@@ -16,8 +16,8 @@ export const metadata = {
     'online coordination test', 'browser pattern game', 'no download coordination drill',
   ],
   openGraph: {
-    title: 'Complex Pattern Elite - Pattern Memory | SkillDrills',
-    description: 'Memorize path patterns in 2 seconds, then draw from memory. Free.',
+    title: 'Complex Pattern - Memory & Coordination | SkillDrills',
+    description: 'Memorize path patterns in 2 seconds, then draw from memory. Shape-based scoring. Adaptive complexity 2-8 waypoints. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/physical/Coordination/complex-pattern',
     siteName: 'SkillDrills',
@@ -31,8 +31,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Complex Pattern Drill | SkillDrills',
-    description: 'Train pattern memory and motor coordination. Free.',
+    title: 'Complex Pattern - Memory & Coordination | SkillDrills',
+    description: 'Memorize path patterns in 2 seconds, then draw from memory. Shape-based scoring. Adaptive complexity 2-8 waypoints. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -44,10 +44,6 @@ export const metadata = {
 export default function ComplexPatternPage() {
   return (
     <>
-      <noscript>
-        <h1>Complex Pattern Elite - Pattern Memory & Motor Coordination Training</h1>
-        <p>Free pattern memory drill. Memorize paths, draw from memory. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

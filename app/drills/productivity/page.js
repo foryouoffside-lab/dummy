@@ -1,8 +1,8 @@
-﻿import ProductivityDrillsClient from './ProductivityDrillsClient';
+import ProductivityDrillsClient from './ProductivityDrillsClient';
 
 export const metadata = {
-  title: 'Productivity - 10 Free Drills for Focus & Efficiency | SkillDrills',
-  description: '10 free productivity drills for task switching, time management, focus endurance, and work efficiency. Improve deep work, Pomodoro, batch processing. No sign-up.',
+  title: 'Productivity - 10 Drills for Efficiency | SkillDrills',
+  description: '10 free productivity drills for task switching, time management, focus endurance, and work efficiency. Improve deep work and Pomodoro. No sign-up.',
   keywords: [
     'productivity drills', 'task switching training', 'time management practice',
     'focus endurance', 'work efficiency training', 'pomodoro timer',
@@ -12,8 +12,8 @@ export const metadata = {
     'skilldrills productivity', 'skilldrills focus', 'free work efficiency',
   ],
   openGraph: {
-    title: 'Productivity - 10 Free Focus & Efficiency Drills | SkillDrills',
-    description: '10 free productivity drills. Task switching, time management, focus. No sign-up.',
+    title: 'Productivity - 10 Drills for Efficiency | SkillDrills',
+    description: '10 free productivity drills for task switching, time management, focus endurance, and work efficiency. Improve deep work and Pomodoro. No sign-up.',
     type: 'website',
     url: 'https://skilldrills.online/drills/productivity',
     siteName: 'SkillDrills',
@@ -27,8 +27,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Productivity - 10 Free Drills | SkillDrills',
-    description: '10 free productivity drills. No sign-up required.',
+    title: 'Productivity - 10 Drills for Efficiency | SkillDrills',
+    description: '10 free productivity drills for task switching, time management, focus endurance, and work efficiency. Improve deep work and Pomodoro. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -40,10 +40,7 @@ export const metadata = {
 export default function ProductivityDrillsPage() {
   return (
     <>
-      <noscript>
-        <h1>Productivity Drills - Task Switching, Time Management & Focus Training</h1>
-        <p>10 free productivity drills across 4 categories. No sign-up required.</p>
-      </noscript>
+      
       <ProductivityDrillsClient />
     </>
   );

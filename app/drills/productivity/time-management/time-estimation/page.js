@@ -1,7 +1,7 @@
-﻿import TemporalPrecisionClient from './TemporalPrecisionClient';
+import TemporalPrecisionClient from './TemporalPrecisionClient';
 
 export const metadata = {
-  title: 'Temporal Precision Drill - Time Estimation Training | SkillDrills',
+  title: 'Time Estimation - Temporal Precision | SkillDrills',
   description: 'Train your internal clock. Hold and release to match 0.5-2.5s targets. No visual timer. 120ms accuracy window. No penalties. No sign-up.',
   keywords: [
     'time estimation', 'temporal precision', 'internal clock training',
@@ -17,7 +17,7 @@ export const metadata = {
     'motor response timing', 'temporal discrimination', 'duration estimation game',
   ],
   openGraph: {
-    title: 'Temporal Precision Drill - Time Estimation | SkillDrills',
+    title: 'Time Estimation - Temporal Precision | SkillDrills',
     description: 'Hold and release to match 0.5-2.5s targets. No visual timer. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/productivity/time-management/time-estimation',
@@ -32,7 +32,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Temporal Precision Drill | SkillDrills',
+    title: 'Time Estimation - Temporal Precision | SkillDrills',
     description: 'Hold and release to match target times. Free.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
@@ -45,10 +45,6 @@ export const metadata = {
 export default function TemporalPrecisionPage() {
   return (
     <>
-      <noscript>
-        <h1>Temporal Precision Drill - Time Estimation & Internal Clock Training</h1>
-        <p>Free time estimation drill with no visual timer. Hold and release to match targets. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

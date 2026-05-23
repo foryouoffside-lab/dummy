@@ -1,8 +1,8 @@
 import ColorSequenceClient from './ColorSequenceClient';
 
 export const metadata = {
-  title: 'Color Sequence Drill - Visual Short-Term Memory Training | SkillDrills',
-  description: 'Train visual memory with 6 vibrant colors and progressive sequences. Watch patterns play, then tap colors in order. Level-based scoring. No sign-up.',
+  title: 'Color Sequence - Short-Term Memory | SkillDrills',
+  description: 'Train visual memory with 6 vibrant colors and progressive sequences. Watch patterns play, then tap colors in order. No sign-up.',
   keywords: [
     'color sequence memory', 'visual memory drill', 'short term memory colors',
     'color pattern recall', 'sequence memory game', 'visual pattern memory',
@@ -17,8 +17,8 @@ export const metadata = {
     'sequential color recall', 'color order practice', 'visual memory improvement',
   ],
   openGraph: {
-    title: 'Color Sequence Drill - Visual Memory Training | SkillDrills',
-    description: '6 vibrant colors with progressive sequences. Memorize then tap in order. Free.',
+    title: 'Color Sequence - Short-Term Memory | SkillDrills',
+    description: 'Train visual memory with 6 vibrant colors and progressive sequences. Watch patterns play, then tap colors in order. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/memory/short-term-memory/color-sequence',
     siteName: 'SkillDrills',
@@ -32,8 +32,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Color Sequence Drill | SkillDrills',
-    description: '6 vibrant colors with progressive difficulty. Free.',
+    title: 'Color Sequence - Short-Term Memory | SkillDrills',
+    description: 'Train visual memory with 6 vibrant colors and progressive sequences. Watch patterns play, then tap colors in order. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -45,10 +45,6 @@ export const metadata = {
 export default function ColorSequencePage() {
   return (
     <>
-      <noscript>
-        <h1>Color Sequence Drill - Short-Term Memory & Visual Pattern Recall</h1>
-        <p>Free color sequence drill with 6 vibrant colors and progressive difficulty. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

@@ -1,8 +1,8 @@
-﻿import ArithmeticRaceClient from './ArithmeticRaceClient';
+import ArithmeticRaceClient from './ArithmeticRaceClient';
 
 export const metadata = {
-  title: 'Arithmetic Race Drill - Speed Math & Mental Calculation | SkillDrills',
-  description: 'Boost mental math with this free timed arithmetic race. Addition, subtraction, and multiplication across 3 levels. 60-second challenge. No sign-up.',
+  title: 'Arithmetic Race - Speed Math Drill | SkillDrills',
+  description: 'Boost mental math with timed arithmetic race. Addition, subtraction, and multiplication across 3 levels. 60-second challenge. No sign-up.',
   keywords: [
     'arithmetic race drill', 'speed math practice', 'mental math training', 'math drill online',
     'calculation speed test', 'arithmetic practice free', 'math game online', 'quick math test',
@@ -20,8 +20,8 @@ export const metadata = {
     'interactive math quiz', 'browser math game', 'no download math practice',
   ],
   openGraph: {
-    title: 'Arithmetic Race Drill - Speed Math Training | SkillDrills',
-    description: '60-second mental math challenge with 3 difficulty levels. Free, no sign-up.',
+    title: 'Arithmetic Race - Speed Math Drill | SkillDrills',
+    description: 'Boost mental math with timed arithmetic race. Addition, subtraction, and multiplication across 3 levels. 60-second challenge. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/academic/math-speed/arithmetic-race',
     siteName: 'SkillDrills',
@@ -35,8 +35,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Arithmetic Race Drill | SkillDrills',
-    description: 'Boost mental math speed. 3 levels, 60-second challenge. Free.',
+    title: 'Arithmetic Race - Speed Math Drill | SkillDrills',
+    description: 'Boost mental math with timed arithmetic race. Addition, subtraction, and multiplication across 3 levels. 60-second challenge. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -48,10 +48,6 @@ export const metadata = {
 export default function ArithmeticRacePage() {
   return (
     <>
-      <noscript>
-        <h1>Arithmetic Race Drill - Speed Math & Mental Calculation Training</h1>
-        <p>Free interactive arithmetic race for mental math practice. Addition, subtraction, and multiplication across 3 difficulty levels. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

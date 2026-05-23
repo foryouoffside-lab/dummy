@@ -1,7 +1,7 @@
 import DigitSpanClient from './DigitSpanClient';
 
 export const metadata = {
-  title: 'Digit Span Drill - Number Sequence Memory Training | SkillDrills',
+  title: 'Digit Span - Number Sequence Memory | SkillDrills',
   description: 'Train numerical memory with infinite progressive digit sequences. 3-second memorization, then type the exact sequence. Auto-adjusting font size. No sign-up.',
   keywords: [
     'digit span', 'number memory', 'digit sequence recall', 'short term memory numbers',
@@ -17,7 +17,7 @@ export const metadata = {
     'digit retention drill', 'number sequence practice', 'working memory capacity',
   ],
   openGraph: {
-    title: 'Digit Span Drill - Number Memory Training | SkillDrills',
+    title: 'Digit Span - Number Sequence Memory | SkillDrills',
     description: 'Infinite progressive digit sequences. 3-second memorization, type recall. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/memory/short-term-memory/digit-span',
@@ -32,7 +32,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Digit Span Drill | SkillDrills',
+    title: 'Digit Span - Number Sequence Memory | SkillDrills',
     description: 'Infinite progressive digit sequences. Type recall. Free.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
@@ -45,10 +45,6 @@ export const metadata = {
 export default function DigitSpanPage() {
   return (
     <>
-      <noscript>
-        <h1>Digit Span Drill - Short-Term Memory & Number Sequence Training</h1>
-        <p>Free digit span drill with infinite progressive levels. 3-second memorization, type recall. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

@@ -1,7 +1,7 @@
 import SingleTargetTrackClient from './SingleTargetTrackClient';
 
 export const metadata = {
-  title: 'Single Target Tracking - Smooth Aim & Mouse Control | SkillDrills',
+  title: 'Single Target Track - Smooth Aim | SkillDrills',
   description: 'Track a bouncing target with raw mouse input. Lock-on glow, +1pt/200ms, streak bonuses every 10 ticks. Direction arrows when off-target. No penalties. No sign-up.',
   keywords: [
     'single target tracking', 'smooth tracking aim trainer', 'precision aim drill',
@@ -18,7 +18,7 @@ export const metadata = {
     'esports aim training', 'gaming mouse practice', 'pro aim warm up',
   ],
   openGraph: {
-    title: 'Single Target Tracking - Smooth Aim Trainer | SkillDrills',
+    title: 'Single Target Track - Smooth Aim | SkillDrills',
     description: 'Raw mouse input tracking with lock-on glow. +1pt/200ms. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/fps/single-target-track',
@@ -33,7 +33,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Single Target Tracking Drill | SkillDrills',
+    title: 'Single Target Track - Smooth Aim | SkillDrills',
     description: 'Smooth tracking with raw mouse input. Lock-on glow, streaks. Free.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
@@ -46,10 +46,6 @@ export const metadata = {
 export default function SingleTargetTrackPage() {
   return (
     <>
-      <noscript>
-        <h1>Single Target Tracking Drill - Smooth Aim Trainer & Mouse Control Practice</h1>
-        <p>Free single target tracking drill with raw mouse input and lock-on glow feedback. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

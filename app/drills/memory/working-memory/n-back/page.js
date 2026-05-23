@@ -1,8 +1,8 @@
 import NBackClient from './NBackClient';
 
 export const metadata = {
-  title: '3-Back Training Drill - Working Memory & N-Back Exercise | SkillDrills',
-  description: 'Train working memory with the classic N-Back task at 3-back level. Letters every second, compare to 3 steps back. ~23 matches per round. No sign-up.',
+  title: '3-Back Training - Working Memory Drill | SkillDrills',
+  description: 'Train working memory with classic N-Back task at 3-back level. Letters every second, compare to 3 steps back. No sign-up.',
   keywords: [
     'n-back training', '3-back task', 'working memory exercise',
     'dual n-back', 'cognitive training n-back', 'working memory test',
@@ -17,8 +17,8 @@ export const metadata = {
     'mental agility training', 'attention memory drill', 'n-back practice free',
   ],
   openGraph: {
-    title: '3-Back Training - Working Memory N-Back | SkillDrills',
-    description: 'Classic N-Back at 3-back level. 60 letters per round. Free.',
+    title: '3-Back Training - Working Memory Drill | SkillDrills',
+    description: 'Train working memory with classic N-Back task at 3-back level. Letters every second, compare to 3 steps back. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/memory/working-memory/n-back',
     siteName: 'SkillDrills',
@@ -32,8 +32,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: '3-Back Training Drill | SkillDrills',
-    description: 'Classic N-Back at 3-back with 60 letters. Free.',
+    title: '3-Back Training - Working Memory Drill | SkillDrills',
+    description: 'Train working memory with classic N-Back task at 3-back level. Letters every second, compare to 3 steps back. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -45,10 +45,6 @@ export const metadata = {
 export default function NBackPage() {
   return (
     <>
-      <noscript>
-        <h1>3-Back Training Drill - Working Memory & N-Back Cognitive Exercise</h1>
-        <p>Free N-Back working memory task at 3-back difficulty level. Scientifically-validated cognitive training. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

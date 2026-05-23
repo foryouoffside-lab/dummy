@@ -1,7 +1,7 @@
-﻿import FineMotorClient from './FineMotorClient';
+import FineMotorClient from './FineMotorClient';
 
 export const metadata = {
-  title: 'Fine Motor Control - Precision Path Tracking Drill | SkillDrills',
+  title: 'Fine Motor - Precision Path Tracking | SkillDrills',
   description: 'Track a scrolling wave path with your cursor. +1pt/sec on path, no penalties. Dynamic and Extreme phases with adaptive speed. No sign-up.',
   keywords: [
     'fine motor control drill', 'path tracking training', 'mouse precision practice',
@@ -18,7 +18,7 @@ export const metadata = {
     'precision hand training', 'fine motor skills for artists', 'motor accuracy online',
   ],
   openGraph: {
-    title: 'Fine Motor Control - Precision Path Tracking | SkillDrills',
+    title: 'Fine Motor - Precision Path Tracking | SkillDrills',
     description: 'Track scrolling wave path with cursor. +1/sec on path. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/motor/precision-control/fine-motor',
@@ -33,7 +33,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Fine Motor Control Drill | SkillDrills',
+    title: 'Fine Motor - Precision Path Tracking | SkillDrills',
     description: 'Track scrolling wave path. +1/sec on path. Free.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
@@ -46,10 +46,6 @@ export const metadata = {
 export default function FineMotorPage() {
   return (
     <>
-      <noscript>
-        <h1>Fine Motor Control Drill - Precision Path Tracking & Steady Hand Training</h1>
-        <p>Free fine motor control drill with scrolling wave path. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

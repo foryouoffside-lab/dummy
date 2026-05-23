@@ -1,8 +1,8 @@
-﻿import AutoPursuitClient from './AutoPursuitClient';
+import AutoPursuitClient from './AutoPursuitClient';
 
 export const metadata = {
-  title: 'Auto-Pursuit Drill - Smooth Pursuit Tracking Training | SkillDrills',
-  description: 'Train smooth pursuit tracking with a randomly moving target. Keep cursor on ball for +1pt/0.5s. Green glow feedback. No penalties. No sign-up.',
+  title: 'Auto-Pursuit - Smooth Tracking Drill | SkillDrills',
+  description: 'Keep cursor on randomly moving target with directional jitter. +1pt/0.5s continuous tracking. Green glow feedback. No penalties. No sign-up.',
   keywords: [
     'pursuit tracking', 'smooth pursuit training', 'eye tracking drill',
     'cursor tracking practice', 'hand-eye coordination', 'continuous tracking',
@@ -17,8 +17,8 @@ export const metadata = {
     'smooth motor control', 'tracking accuracy practice', 'pursuit aim drill',
   ],
   openGraph: {
-    title: 'Auto-Pursuit Drill - Smooth Pursuit Tracking | SkillDrills',
-    description: 'Keep cursor on moving target with jitter. +1pt/0.5s. Free.',
+    title: 'Auto-Pursuit - Smooth Tracking Drill | SkillDrills',
+    description: 'Keep cursor on randomly moving target with directional jitter. +1pt/0.5s continuous tracking. Green glow feedback. No penalties. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/visual/tracking-accuracy/pursuit-tracker',
     siteName: 'SkillDrills',
@@ -32,8 +32,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Auto-Pursuit Drill | SkillDrills',
-    description: 'Track moving target with jitter. +1pt/0.5s. Free.',
+    title: 'Auto-Pursuit - Smooth Tracking Drill | SkillDrills',
+    description: 'Keep cursor on randomly moving target with directional jitter. +1pt/0.5s continuous tracking. Green glow feedback. No penalties. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -45,10 +45,6 @@ export const metadata = {
 export default function AutoPursuitPage() {
   return (
     <>
-      <noscript>
-        <h1>Auto-Pursuit Drill - Smooth Pursuit Tracking & Hand-Eye Coordination Training</h1>
-        <p>Free smooth pursuit tracking drill with randomly moving target and directional jitter. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

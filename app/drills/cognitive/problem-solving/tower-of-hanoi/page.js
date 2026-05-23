@@ -1,7 +1,7 @@
 import TowerOfHanoiClient from './TowerOfHanoiClient';
 
 export const metadata = {
-  title: 'Tower of Hanoi - Recursive Problem Solving Puzzle | SkillDrills',
+  title: 'Tower of Hanoi - Recursive Puzzle | SkillDrills',
   description: 'Master the classic Tower of Hanoi with progressive 3-8 disk levels. Perfect move celebrations, efficiency tracking, no penalties. No sign-up.',
   keywords: [
     'tower of hanoi', 'recursive puzzle', 'problem solving game online',
@@ -35,7 +35,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Tower of Hanoi | SkillDrills',
+    title: 'Tower of Hanoi - Recursive Puzzle | SkillDrills',
     description: 'Master recursive problem solving. 3-8 disk levels. Free.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
@@ -48,10 +48,6 @@ export const metadata = {
 export default function TowerOfHanoiPage() {
   return (
     <>
-      <noscript>
-        <h1>Tower of Hanoi - Recursive Problem Solving & Strategic Planning Puzzle</h1>
-        <p>Free Tower of Hanoi puzzle with progressive 3-8 disk levels. Perfect for programming interview prep. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

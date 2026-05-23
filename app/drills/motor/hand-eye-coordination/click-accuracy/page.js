@@ -1,7 +1,7 @@
-﻿import ClickAccuracyClient from './ClickAccuracyClient';
+import ClickAccuracyClient from './ClickAccuracyClient';
 
 export const metadata = {
-  title: 'Click Accuracy Elite - Precision Mouse Training | SkillDrills',
+  title: 'Click Accuracy - Precision Mouse Drill | SkillDrills',
   description: 'Single teleporting target shrinks from 12px to 7px with streak. 1.5s teleport interval. 3-life system, reaction tracking. No sign-up.',
   keywords: [
     'click accuracy', 'mouse precision', 'precision clicking', 'teleport target',
@@ -16,7 +16,7 @@ export const metadata = {
     'target tracking drill', 'precision aim practice', 'mouse control training free',
   ],
   openGraph: {
-    title: 'Click Accuracy Elite - Precision Mouse | SkillDrills',
+    title: 'Click Accuracy - Precision Mouse Drill | SkillDrills',
     description: 'Single teleporting target shrinks with streak. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/motor/hand-eye-coordination/click-accuracy',
@@ -31,7 +31,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Click Accuracy Elite | SkillDrills',
+    title: 'Click Accuracy - Precision Mouse Drill | SkillDrills',
     description: 'Single teleporting target. Reaction tracking. Free.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
@@ -44,10 +44,6 @@ export const metadata = {
 export default function ClickAccuracyPage() {
   return (
     <>
-      <noscript>
-        <h1>Click Accuracy Elite - Precision Mouse Training & Teleport Tracking</h1>
-        <p>Free click accuracy drill with single teleporting target. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

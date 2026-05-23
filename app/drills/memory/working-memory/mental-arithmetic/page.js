@@ -1,7 +1,7 @@
 import MentalArithmeticClient from './MentalArithmeticClient';
 
 export const metadata = {
-  title: 'Mental Arithmetic Drill - Working Memory & Math Training | SkillDrills',
+  title: 'Mental Arithmetic - Working Memory | SkillDrills',
   description: 'Train working memory with 4 operations across 8 adaptive levels. 10-second timer per problem. Difficulty scales with score. No sign-up.',
   keywords: [
     'mental arithmetic', 'working memory math', 'mental calculation drill',
@@ -17,8 +17,8 @@ export const metadata = {
     'quick math practice', 'math memory exercise', 'mental number processing',
   ],
   openGraph: {
-    title: 'Mental Arithmetic Drill - Working Memory Training | SkillDrills',
-    description: '4 operations across 8 adaptive levels. 10-second timer. Free.',
+    title: 'Mental Arithmetic - Working Memory | SkillDrills',
+    description: 'Train working memory with 4 operations across 8 adaptive levels. 10-second timer per problem. Difficulty scales with score. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/memory/working-memory/mental-arithmetic',
     siteName: 'SkillDrills',
@@ -32,8 +32,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Mental Arithmetic Drill | SkillDrills',
-    description: '4 operations with 8 adaptive levels. Free mental math.',
+    title: 'Mental Arithmetic - Working Memory | SkillDrills',
+    description: 'Train working memory with 4 operations across 8 adaptive levels. 10-second timer per problem. Difficulty scales with score. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -45,10 +45,6 @@ export const metadata = {
 export default function MentalArithmeticPage() {
   return (
     <>
-      <noscript>
-        <h1>Mental Arithmetic Drill - Working Memory & Mental Calculation Training</h1>
-        <p>Free mental arithmetic drill with 4 operations and 8 adaptive difficulty levels. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

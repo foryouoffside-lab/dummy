@@ -1,7 +1,7 @@
 import GridMemorizationClient from './GridMemorizationClient';
 
 export const metadata = {
-  title: 'Grid Memorization Drill - Spatial Memory & Pattern Recall | SkillDrills',
+  title: 'Grid Memorization - Spatial Memory | SkillDrills',
   description: 'Train spatial memory with progressive 4x4 to 5x5 grids. 5-second memorization, then tap all lit cells. Instant fail on wrong click. No sign-up.',
   keywords: [
     'grid memorization', 'spatial memory', 'visual pattern memory',
@@ -17,8 +17,8 @@ export const metadata = {
     'grid memory exercise', 'spatial recall practice', 'grid recognition drill',
   ],
   openGraph: {
-    title: 'Grid Memorization Drill - Spatial Memory | SkillDrills',
-    description: 'Progressive 4x4 to 5x5 grid. 5-second memorization, instant fail on wrong click. Free.',
+    title: 'Grid Memorization - Spatial Memory | SkillDrills',
+    description: 'Train spatial memory with progressive 4x4 to 5x5 grids. 5-second memorization, then tap all lit cells. Instant fail on wrong click. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/memory/spatial-memory/grid-memorization',
     siteName: 'SkillDrills',
@@ -32,8 +32,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Grid Memorization Drill | SkillDrills',
-    description: 'Progressive grid memorization. Instant fail on wrong click. Free.',
+    title: 'Grid Memorization - Spatial Memory | SkillDrills',
+    description: 'Train spatial memory with progressive 4x4 to 5x5 grids. 5-second memorization, then tap all lit cells. Instant fail on wrong click. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -45,10 +45,6 @@ export const metadata = {
 export default function GridMemorizationPage() {
   return (
     <>
-      <noscript>
-        <h1>Grid Memorization Drill - Spatial Memory & Visual Pattern Recall</h1>
-        <p>Free grid memorization drill with progressive 4x4 to 5x5 grids. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

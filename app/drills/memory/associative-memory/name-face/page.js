@@ -1,8 +1,8 @@
 import NameFaceClient from './NameFaceClient';
 
 export const metadata = {
-  title: 'Name-Face Memory Drill - Associative Face-Name Recall | SkillDrills',
-  description: 'Train face-name association with 30 unique emoji profiles. Memorize for 5 seconds, then pick the correct name from 3 options. Adaptive 3-8 profiles. No sign-up.',
+  title: 'Name-Face Memory - Face-Name Recall | SkillDrills',
+  description: 'Train face-name association with 30 unique emoji profiles. Memorize for 5 seconds, then pick the correct name from 3 options. No sign-up.',
   keywords: [
     'name face memory', 'face name association', 'name recall training',
     'face memory drill', 'associative memory faces', 'remembering names',
@@ -17,8 +17,8 @@ export const metadata = {
     'multiple choice memory', 'visual verbal association', 'working memory names',
   ],
   openGraph: {
-    title: 'Name-Face Memory Drill - Face-Name Recall | SkillDrills',
-    description: '30 unique emoji profiles. Memorize names with faces. Free.',
+    title: 'Name-Face Memory - Face-Name Recall | SkillDrills',
+    description: 'Train face-name association with 30 unique emoji profiles. Memorize for 5 seconds, then pick the correct name from 3 options. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/memory/associative-memory/name-face',
     siteName: 'SkillDrills',
@@ -32,8 +32,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Name-Face Memory Drill | SkillDrills',
-    description: '30 unique emoji profiles. Memorize names then recall. Free.',
+    title: 'Name-Face Memory - Face-Name Recall | SkillDrills',
+    description: 'Train face-name association with 30 unique emoji profiles. Memorize for 5 seconds, then pick the correct name from 3 options. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -45,10 +45,6 @@ export const metadata = {
 export default function NameFacePage() {
   return (
     <>
-      <noscript>
-        <h1>Name-Face Memory Drill - Associative Face-Name Recall Training</h1>
-        <p>Free name-face memory drill with 30 unique emoji profiles. Adaptive difficulty 3-8 profiles. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

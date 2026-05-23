@@ -1,7 +1,7 @@
-﻿import NeuroSwitchClient from './NeuroSwitchClient';
+import NeuroSwitchClient from './NeuroSwitchClient';
 
 export const metadata = {
-  title: 'Neuro-Switch Drill - Sound Reaction Speed Training | SkillDrills',
+  title: 'Sound Reaction - Audio Cue Drill | SkillDrills',
   description: 'Train auditory reaction speed with dual pitch cues. High pitch (1200Hz) = Green, Low pitch (250Hz) = Red. Adaptive 300-1000ms window. No sign-up.',
   keywords: [
     'sound reaction test', 'audio reaction speed', 'auditory cue training',
@@ -17,7 +17,7 @@ export const metadata = {
     'reaction time audio', 'auditory processing drill', 'sound switch game',
   ],
   openGraph: {
-    title: 'Neuro-Switch Drill - Sound Reaction Speed | SkillDrills',
+    title: 'Sound Reaction - Audio Cue Drill | SkillDrills',
     description: 'High pitch = Green. Low pitch = Red. Adaptive window. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/visual/reaction-speed/sound-reaction',
@@ -32,7 +32,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Neuro-Switch Drill | SkillDrills',
+    title: 'Sound Reaction - Audio Cue Drill | SkillDrills',
     description: 'High pitch = Green. Low pitch = Red. Free.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
@@ -45,10 +45,6 @@ export const metadata = {
 export default function NeuroSwitchPage() {
   return (
     <>
-      <noscript>
-        <h1>Neuro-Switch Drill - Sound Reaction Speed & Audio Cue Training</h1>
-        <p>Free auditory reaction drill with dual pitch cues. High pitch = Green, Low pitch = Red. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

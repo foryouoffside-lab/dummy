@@ -1,8 +1,8 @@
 import PredictiveTrackingClient from './PredictiveTrackingClient';
 
 export const metadata = {
-  title: 'Predictive Tracking Trainer - FPS Lead Aim & Anticipation | SkillDrills',
-  description: 'Master predictive aim by clicking where targets WILL be. 12-frame lead prediction, velocity arrows, raw mouse input. For Valorant, CS2, Apex. No sign-up.',
+  title: 'Predictive Tracking - Lead Aim Drill | SkillDrills',
+  description: 'Master predictive aim by clicking where targets WILL be. 12-frame lead prediction, velocity arrows, raw mouse input. No sign-up.',
   keywords: [
     'predictive tracking', 'lead aim training', 'movement anticipation drill',
     'predictive aim FPS', 'enemy prediction practice', 'leading shots training',
@@ -18,8 +18,8 @@ export const metadata = {
     'tracking weapons practice', 'SMG tracking drill', 'AR aim training',
   ],
   openGraph: {
-    title: 'Predictive Tracking Trainer - FPS Lead Aim | SkillDrills',
-    description: 'Raw mouse input, 12-frame prediction, shatter effects. Free.',
+    title: 'Predictive Tracking - Lead Aim Drill | SkillDrills',
+    description: 'Master predictive aim by clicking where targets WILL be. 12-frame lead prediction, velocity arrows, raw mouse input. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/fps/predictive-tracking',
     siteName: 'SkillDrills',
@@ -33,8 +33,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Predictive Tracking Trainer | SkillDrills',
-    description: 'Master lead aim with 12-frame prediction. Free.',
+    title: 'Predictive Tracking - Lead Aim Drill | SkillDrills',
+    description: 'Master predictive aim by clicking where targets WILL be. 12-frame lead prediction, velocity arrows, raw mouse input. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -46,10 +46,6 @@ export const metadata = {
 export default function PredictiveTrackingPage() {
   return (
     <>
-      <noscript>
-        <h1>Predictive Tracking Trainer - FPS Enemy Movement Anticipation & Lead Aim Drill</h1>
-        <p>Free predictive tracking drill with 12-frame lead prediction and raw mouse input. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

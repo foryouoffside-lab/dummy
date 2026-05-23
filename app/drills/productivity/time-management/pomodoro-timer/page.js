@@ -1,7 +1,7 @@
-﻿import PomodoroSyncClient from './PomodoroSyncClient';
+import PomodoroSyncClient from './PomodoroSyncClient';
 
 export const metadata = {
-  title: 'Pomodoro Sync - Focus Timer & Productivity Tracker | SkillDrills',
+  title: 'Pomodoro Timer - Focus & Productivity | SkillDrills',
   description: '25-minute focus sessions with 5-minute breaks. Earn 1 point per minute. Canvas progress ring. Track pomodoros, streaks, and focus time. No sign-up.',
   keywords: [
     'pomodoro timer', 'focus timer', 'productivity timer', 'pomodoro technique',
@@ -16,7 +16,7 @@ export const metadata = {
     'work session timer', 'productivity habit tracker', 'focus minute tracker',
   ],
   openGraph: {
-    title: 'Pomodoro Sync - Focus Timer | SkillDrills',
+    title: 'Pomodoro Timer - Focus & Productivity | SkillDrills',
     description: '25-min focus + 5-min break cycles. Earn points per minute. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/productivity/time-management/pomodoro-timer',
@@ -31,7 +31,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Pomodoro Sync Timer | SkillDrills',
+    title: 'Pomodoro Timer - Focus & Productivity | SkillDrills',
     description: '25-min focus + 5-min break. Canvas progress ring. Free.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
@@ -44,10 +44,6 @@ export const metadata = {
 export default function PomodoroSyncPage() {
   return (
     <>
-      <noscript>
-        <h1>Pomodoro Sync - Focus Timer & Productivity Tracker</h1>
-        <p>Free Pomodoro Technique timer with 25-min focus and 5-min break cycles. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

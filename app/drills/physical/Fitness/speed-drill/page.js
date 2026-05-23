@@ -1,8 +1,8 @@
 import SpeedDrillClient from './SpeedDrillClient';
 
 export const metadata = {
-  title: 'Speed Drill Elite - Reaction Time & Precision Clicking | SkillDrills',
-  description: 'Click shrinking rings before they disappear. Adaptive velocity 1.5x-5.0x with streaks. 3 lives, no timeout penalty. Reaction tracking. No sign-up.',
+  title: 'Speed Drill - Reaction & Clicking | SkillDrills',
+  description: 'Click shrinking rings before they disappear. Adaptive velocity 1.5x-5.0x with streaks. 3 lives, no timeout penalty. No sign-up.',
   keywords: [
     'speed drill', 'reaction time training', 'precision clicking game',
     'shrinking ring drill', 'click speed test', 'reflex training game',
@@ -21,8 +21,8 @@ export const metadata = {
     'no signup reaction test', 'browser reflex game', 'instant play speed drill',
   ],
   openGraph: {
-    title: 'Speed Drill Elite - Reaction Time Training | SkillDrills',
-    description: 'Click shrinking rings with adaptive velocity. 3 lives. Free.',
+    title: 'Speed Drill - Reaction & Clicking | SkillDrills',
+    description: 'Click shrinking rings before they disappear. Adaptive velocity 1.5x-5.0x with streaks. 3 lives, no timeout penalty. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/physical/Fitness/speed-drill',
     siteName: 'SkillDrills',
@@ -36,8 +36,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Speed Drill Elite | SkillDrills',
-    description: 'Train reaction time with shrinking rings. Free.',
+    title: 'Speed Drill - Reaction & Clicking | SkillDrills',
+    description: 'Click shrinking rings before they disappear. Adaptive velocity 1.5x-5.0x with streaks. 3 lives, no timeout penalty. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -49,10 +49,6 @@ export const metadata = {
 export default function SpeedDrillPage() {
   return (
     <>
-      <noscript>
-        <h1>Speed Drill Elite - Reaction Time & Precision Clicking Training</h1>
-        <p>Free speed drill with shrinking rings and adaptive velocity. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

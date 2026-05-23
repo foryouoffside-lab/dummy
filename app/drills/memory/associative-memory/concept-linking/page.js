@@ -1,7 +1,7 @@
 import ConceptLinkingClient from './ConceptLinkingClient';
 
 export const metadata = {
-  title: 'Concept Linking Drill - Associative Memory Training | SkillDrills',
+  title: 'Concept Linking - Associative Memory | SkillDrills',
   description: 'Train associative memory by memorizing concept chains for 5 seconds then recalling step by step. 30 unique chains, 3 categories. Chains grow up to 8 concepts. No sign-up.',
   keywords: [
     'concept linking', 'associative memory', 'sequential recall', 'memory chain drill',
@@ -16,7 +16,7 @@ export const metadata = {
     'concept recall test', 'memory sequence practice', 'associative thinking drill',
   ],
   openGraph: {
-    title: 'Concept Linking Drill - Associative Memory | SkillDrills',
+    title: 'Concept Linking - Associative Memory | SkillDrills',
     description: '30 unique concept chains. Memorize for 5 seconds then recall. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/memory/associative-memory/concept-linking',
@@ -31,7 +31,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Concept Linking Drill | SkillDrills',
+    title: 'Concept Linking - Associative Memory | SkillDrills',
     description: '30 unique concept chains. Memorize then recall. Free.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
@@ -44,10 +44,6 @@ export const metadata = {
 export default function ConceptLinkingPage() {
   return (
     <>
-      <noscript>
-        <h1>Concept Linking Drill - Associative Memory & Sequential Recall Training</h1>
-        <p>Free associative memory drill with 30 unique concept chains across 3 categories. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

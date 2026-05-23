@@ -1,7 +1,7 @@
-﻿import RapidObjectIdClient from './RapidObjectIdClient';
+import RapidObjectIdClient from './RapidObjectIdClient';
 
 export const metadata = {
-  title: 'Neural Shape ID Drill - Rapid Object Recognition | SkillDrills',
+  title: 'Rapid Object ID - Shape Recognition | SkillDrills',
   description: 'Train rapid shape recognition with adaptive 50-300ms flash. Circle=Left/A, Square=Right/D. Keyboard support. 3 lives, reaction tracking. No sign-up.',
   keywords: [
     'rapid object recognition', 'shape identification', 'visual processing speed',
@@ -17,7 +17,7 @@ export const metadata = {
     'shape discrimination practice', 'reaction time shapes', 'object classification drill',
   ],
   openGraph: {
-    title: 'Neural Shape ID Drill - Rapid Recognition | SkillDrills',
+    title: 'Rapid Object ID - Shape Recognition | SkillDrills',
     description: 'Circle=Left Square=Right. Adaptive 50-300ms flash. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/visual/visual-recognition/rapid-object-id',
@@ -32,7 +32,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Neural Shape ID Drill | SkillDrills',
+    title: 'Rapid Object ID - Shape Recognition | SkillDrills',
     description: 'Circle=Left Square=Right. Adaptive flash. Free.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
@@ -45,10 +45,6 @@ export const metadata = {
 export default function RapidObjectIdPage() {
   return (
     <>
-      <noscript>
-        <h1>Neural Shape ID Drill - Rapid Object Recognition & Visual Processing Training</h1>
-        <p>Free rapid shape recognition drill with adaptive 50-300ms flash. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

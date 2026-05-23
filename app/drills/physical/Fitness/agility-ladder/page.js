@@ -1,8 +1,8 @@
 import AgilityLadderClient from './AgilityLadderClient';
 
 export const metadata = {
-  title: 'Agility Ladder Drill - Motor Sequencing & Coordination | SkillDrills',
-  description: 'Free interactive agility ladder drill. Train motor sequencing with scrolling rungs in Left-Right pattern. Adaptive speed, 60s challenge. No sign-up.',
+  title: 'Agility Ladder - Sequencing Drill | SkillDrills',
+  description: 'Train motor sequencing with scrolling rungs in Left-Right pattern. Adaptive speed, 60s challenge, scoring and best performance tracking. No sign-up.',
   keywords: [
     'agility ladder drill', 'sequence coordination training', 'ladder drill practice',
     'motor sequencing practice', 'speed coordination game', 'agility training online',
@@ -16,8 +16,8 @@ export const metadata = {
     'online agility test', 'browser coordination game', 'no download agility drill',
   ],
   openGraph: {
-    title: 'Agility Ladder Drill - Coordination Training | SkillDrills',
-    description: 'Free interactive agility ladder. Train motor sequencing with adaptive speed. 60s challenge.',
+    title: 'Agility Ladder - Sequencing Drill | SkillDrills',
+    description: 'Train motor sequencing with scrolling rungs in Left-Right pattern. Adaptive speed, 60s challenge, scoring and best performance tracking. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/physical/Fitness/agility-ladder',
     siteName: 'SkillDrills',
@@ -31,8 +31,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Agility Ladder Drill | SkillDrills',
-    description: 'Free coordination drill with adaptive speed. Train motor sequencing.',
+    title: 'Agility Ladder - Sequencing Drill | SkillDrills',
+    description: 'Train motor sequencing with scrolling rungs in Left-Right pattern. Adaptive speed, 60s challenge, scoring and best performance tracking. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -44,10 +44,6 @@ export const metadata = {
 export default function AgilityLadderPage() {
   return (
     <>
-      <noscript>
-        <h1>Agility Ladder Drill - Motor Sequencing & Coordination Training</h1>
-        <p>Free agility ladder drill with scrolling rungs and adaptive speed. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

@@ -1,8 +1,8 @@
-﻿import ListeningComprehensionClient from './ListeningComprehensionClient';
+import ListeningComprehensionClient from './ListeningComprehensionClient';
 
 export const metadata = {
-  title: 'Listening Comprehension Drill - Audio Memory & Processing | SkillDrills',
-  description: 'Train listening skills with 9 audio passages and 18 questions across Easy, Medium, and Hard levels. Male and female voices. 60-second challenge. No sign-up.',
+  title: 'Listening Comprehension - Audio Memory | SkillDrills',
+  description: 'Train listening skills with 9 audio passages and 18 questions across Easy, Medium, and Hard levels. Male and female voices. No sign-up.',
   keywords: [
     'listening comprehension drill', 'listening comprehension practice', 'listening comprehension test',
     'audio memory training', 'auditory processing test', 'auditory learning exercise',
@@ -23,8 +23,8 @@ export const metadata = {
     'listening for competitive exams', 'IELTS listening test practice',
   ],
   openGraph: {
-    title: 'Listening Comprehension Drill - Audio Training | SkillDrills',
-    description: '9 audio passages with 18 questions. Male and female voices. Free listening practice.',
+    title: 'Listening Comprehension - Audio Memory | SkillDrills',
+    description: 'Train listening skills with 9 audio passages and 18 questions across Easy, Medium, and Hard levels. Male and female voices. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/academic/comprehension/listening-comprehension',
     siteName: 'SkillDrills',
@@ -38,8 +38,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Listening Comprehension Drill | SkillDrills',
-    description: '9 audio passages, 18 questions, 3 difficulty levels. Free.',
+    title: 'Listening Comprehension - Audio Memory | SkillDrills',
+    description: 'Train listening skills with 9 audio passages and 18 questions across Easy, Medium, and Hard levels. Male and female voices. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -51,10 +51,6 @@ export const metadata = {
 export default function ListeningComprehensionPage() {
   return (
     <>
-      <noscript>
-        <h1>Listening Comprehension Drill - Audio Memory & Processing Training</h1>
-        <p>Free interactive listening drill with 9 audio passages and 18 questions. Male and female voices. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

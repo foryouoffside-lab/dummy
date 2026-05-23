@@ -1,7 +1,7 @@
 import CardMatchingClient from './CardMatchingClient';
 
 export const metadata = {
-  title: 'Card Matching Game - Visual Memory & Brain Training | SkillDrills',
+  title: 'Card Matching - Visual Memory Game | SkillDrills',
   description: 'Train visual memory with 15+ icons on expanding grids from 12 to 32+ cards. Combo streaks, no penalties, 60-second challenge. No sign-up.',
   keywords: [
     'card matching game', 'memory game online', 'pair matching game', 'visual memory training',
@@ -21,7 +21,7 @@ export const metadata = {
     'no download memory game', 'browser memory game', 'instant play memory game',
   ],
   openGraph: {
-    title: 'Card Matching Game - Visual Memory Training | SkillDrills',
+    title: 'Card Matching - Visual Memory Game | SkillDrills',
     description: 'Train memory with 15+ icons on expanding grids. Free brain training game.',
     type: 'article',
     url: 'https://skilldrills.online/drills/cognitive/memory/card-matching',
@@ -36,7 +36,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Card Matching Game | SkillDrills',
+    title: 'Card Matching - Visual Memory Game | SkillDrills',
     description: 'Train visual memory with expanding grids. Free brain game.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
@@ -49,10 +49,6 @@ export const metadata = {
 export default function CardMatchingPage() {
   return (
     <>
-      <noscript>
-        <h1>Card Matching Game - Visual Memory & Pair Recall Brain Training</h1>
-        <p>Free card matching memory game with 15+ icons on expanding grids. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

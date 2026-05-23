@@ -1,7 +1,7 @@
 import ReactiveTrackingClient from './ReactiveTrackingClient';
 
 export const metadata = {
-  title: 'Reactive Tracking Trainer - Smooth Aim FPS Drill | SkillDrills',
+  title: 'Reactive Tracking - Smooth Aim Drill | SkillDrills',
   description: 'Track a bouncing ball with raw mouse input. Directional arrows, accuracy tracking, combo streaks, lock-on ring. +1pt/150ms. No penalties. No sign-up.',
   keywords: [
     'reactive tracking trainer', 'single ball tracking', 'smooth aim training',
@@ -17,7 +17,7 @@ export const metadata = {
     'online tracking trainer', 'browser aim trainer', 'no download tracking practice',
   ],
   openGraph: {
-    title: 'Reactive Tracking Trainer - FPS Aim Drill | SkillDrills',
+    title: 'Reactive Tracking - Smooth Aim Drill | SkillDrills',
     description: 'Track a bouncing ball with raw mouse input. Directional arrows, combos. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/fps/reactive-tracking',
@@ -32,7 +32,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Reactive Tracking Trainer | SkillDrills',
+    title: 'Reactive Tracking - Smooth Aim Drill | SkillDrills',
     description: 'Master tracking aim with raw mouse input. Free FPS drill.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
@@ -45,10 +45,6 @@ export const metadata = {
 export default function ReactiveTrackingPage() {
   return (
     <>
-      <noscript>
-        <h1>Reactive Tracking Trainer - Smooth Aim & Mouse Control FPS Drill</h1>
-        <p>Free reactive tracking drill with bouncing ball and raw mouse input. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

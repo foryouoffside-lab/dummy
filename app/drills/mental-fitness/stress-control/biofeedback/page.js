@@ -1,7 +1,7 @@
-﻿import CoherenceBreathingClient from './CoherenceBreathingClient';
+import CoherenceBreathingClient from './CoherenceBreathingClient';
 
 export const metadata = {
-  title: 'Coherence Breathing Drill - 5:6 HRV Biofeedback Training | SkillDrills',
+  title: 'Coherence Breathing - HRV Biofeedback | SkillDrills',
   description: 'Optimize HRV with 5:6 ratio breathing. 5s inhale, 6s exhale with visual pacer and audio tones. 5-minute guided session. No sign-up.',
   keywords: [
     'coherence breathing', 'heart rate variability training', 'HRV biofeedback',
@@ -20,8 +20,8 @@ export const metadata = {
     'HRV biofeedback training free', 'cardiac coherence training', 'breath pacing tool',
   ],
   openGraph: {
-    title: 'Coherence Breathing - 5:6 HRV Biofeedback | SkillDrills',
-    description: '5:6 ratio breathing with visual pacer. Optimize HRV. Free.',
+    title: 'Coherence Breathing - HRV Biofeedback | SkillDrills',
+    description: 'Optimize HRV with 5:6 ratio breathing. 5s inhale, 6s exhale with visual pacer and audio tones. 5-minute guided session. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/mental-fitness/stress-control/biofeedback',
     siteName: 'SkillDrills',
@@ -35,8 +35,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Coherence Breathing Drill | SkillDrills',
-    description: '5:6 ratio breathing for HRV optimization. Free.',
+    title: 'Coherence Breathing - HRV Biofeedback | SkillDrills',
+    description: 'Optimize HRV with 5:6 ratio breathing. 5s inhale, 6s exhale with visual pacer and audio tones. 5-minute guided session. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -48,10 +48,6 @@ export const metadata = {
 export default function CoherenceBreathingPage() {
   return (
     <>
-      <noscript>
-        <h1>Coherence Breathing Drill - 5:6 Ratio HRV Biofeedback Training</h1>
-        <p>Free coherence breathing drill with 5:6 breath ratio. Optimize heart rate variability. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

@@ -1,8 +1,8 @@
 import KineticTrainerClient from './KineticTrainerClient';
 
 export const metadata = {
-  title: 'High-Speed Kinetic Trainer - Bouncing Target FPS Aim Drill | SkillDrills',
-  description: 'Train FPS aim with bouncing teleporting targets. Raw mouse input, combo speed scaling up to 60px/s. No penalties. For Valorant, CS2, Apex. No sign-up.',
+  title: 'High-Speed Kinetic - Bouncing Target | SkillDrills',
+  description: 'Train FPS aim with bouncing teleporting targets. Raw mouse input, combo speed scaling up to 60px/s. No penalties. No sign-up.',
   keywords: [
     'kinetic trainer', 'bouncing target aim', 'moving target practice',
     'prediction aim drill', 'tracking speed trainer', 'FPS moving target',
@@ -17,8 +17,8 @@ export const metadata = {
     'browser aim trainer', 'no download aim practice', 'instant aim training',
   ],
   openGraph: {
-    title: 'High-Speed Kinetic Trainer - FPS Aim Drill | SkillDrills',
-    description: 'Raw mouse input, bouncing teleporting targets, combo scaling. Free.',
+    title: 'High-Speed Kinetic - Bouncing Target | SkillDrills',
+    description: 'Train FPS aim with bouncing teleporting targets. Raw mouse input, combo speed scaling up to 60px/s. No penalties. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/fps/high-speed-kinetic-trainer',
     siteName: 'SkillDrills',
@@ -32,8 +32,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'High-Speed Kinetic Trainer | SkillDrills',
-    description: 'Bouncing targets, raw input, combo scaling. Free.',
+    title: 'High-Speed Kinetic - Bouncing Target | SkillDrills',
+    description: 'Train FPS aim with bouncing teleporting targets. Raw mouse input, combo speed scaling up to 60px/s. No penalties. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -45,10 +45,6 @@ export const metadata = {
 export default function KineticTrainerPage() {
   return (
     <>
-      <noscript>
-        <h1>High-Speed Kinetic Trainer - Bouncing Target FPS Aim & Tracking Drill</h1>
-        <p>Free FPS kinetic trainer with bouncing targets and raw mouse input. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

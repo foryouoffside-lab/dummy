@@ -1,7 +1,7 @@
-﻿import StopwatchClickClient from './StopwatchClickClient';
+import StopwatchClickClient from './StopwatchClickClient';
 
 export const metadata = {
-  title: 'Stopwatch Timing Drill - Mental Chronometry Test | SkillDrills',
+  title: 'Stopwatch Timing - Mental Chronometry | SkillDrills',
   description: 'Memorize target times (1-8s) and click at the exact moment. Perfect <25ms, Good <75ms, OK <150ms. 60-second challenge. No sign-up.',
   keywords: [
     'stopwatch click drill', 'timing accuracy test', 'mental chronometry training', 'time estimation practice',
@@ -18,7 +18,7 @@ export const metadata = {
     'browser timing game', 'no download timing drill', 'instant timing practice',
   ],
   openGraph: {
-    title: 'Stopwatch Timing Drill - Mental Chronometry | SkillDrills',
+    title: 'Stopwatch Timing - Mental Chronometry | SkillDrills',
     description: 'Memorize target times (1-8s), click at exact moment. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/motor/timing-accuracy/stopwatch-click',
@@ -33,7 +33,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Stopwatch Timing Drill | SkillDrills',
+    title: 'Stopwatch Timing - Mental Chronometry | SkillDrills',
     description: 'Train your internal clock. Click at exact target times. Free.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
@@ -46,10 +46,6 @@ export const metadata = {
 export default function StopwatchClickPage() {
   return (
     <>
-      <noscript>
-        <h1>Stopwatch Timing Drill - Mental Chronometry & Precision Click Test</h1>
-        <p>Free stopwatch timing drill. Memorize target times and click at exact moment. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

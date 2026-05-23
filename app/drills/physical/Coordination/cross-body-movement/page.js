@@ -1,7 +1,7 @@
 import CrossBodyMovementClient from './CrossBodyMovementClient';
 
 export const metadata = {
-  title: 'Cross-Body Movement Drill - Bilateral Coordination | SkillDrills',
+  title: 'Cross-Body Movement - Coordination | SkillDrills',
   description: 'Connect nodes across screen along vector paths. +5pts per connection, streak bonuses every 5. No penalties. 60-second challenge. No sign-up.',
   keywords: [
     'cross body movement drill', 'bilateral coordination training', 'linear movement practice',
@@ -21,7 +21,7 @@ export const metadata = {
     'sports coordination drill', 'athletic motor training', 'movement accuracy practice',
   ],
   openGraph: {
-    title: 'Cross-Body Movement Drill - Bilateral Coordination | SkillDrills',
+    title: 'Cross-Body Movement - Coordination | SkillDrills',
     description: 'Connect nodes across the screen along vector paths. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/physical/Coordination/cross-body-movement',
@@ -36,7 +36,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Cross-Body Movement Drill | SkillDrills',
+    title: 'Cross-Body Movement - Coordination | SkillDrills',
     description: 'Train bilateral coordination connecting nodes. Free.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
@@ -49,10 +49,6 @@ export const metadata = {
 export default function CrossBodyMovementPage() {
   return (
     <>
-      <noscript>
-        <h1>Cross-Body Movement Drill - Bilateral Coordination & Motor Control Training</h1>
-        <p>Free cross-body movement drill. Connect nodes along vector paths. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

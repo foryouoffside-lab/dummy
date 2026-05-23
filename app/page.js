@@ -1,4 +1,4 @@
-﻿import HomePageClient from './HomePageClient';
+import HomePageClient from './HomePageClient';
 
 export const metadata = {
   title: 'SkillDrills - Free FPS Aim Trainer & Cognitive Brain Training Platform',

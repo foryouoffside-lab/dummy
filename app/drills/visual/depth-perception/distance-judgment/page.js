@@ -1,7 +1,7 @@
-﻿import DistanceJudgmentClient from './DistanceJudgmentClient';
+import DistanceJudgmentClient from './DistanceJudgmentClient';
 
 export const metadata = {
-  title: 'Distance Judgment Lab - Depth Perception Training | SkillDrills',
+  title: 'Distance Judgment - Depth Perception | SkillDrills',
   description: 'Train depth perception by intercepting a moving sphere at target depth. Color feedback green/yellow/red, auto-leveling speed. 60-second challenge. No sign-up.',
   keywords: [
     'distance judgment', 'depth perception training', 'spatial awareness',
@@ -16,7 +16,7 @@ export const metadata = {
     'sphere interception drill', 'depth alignment practice', 'visual spatial judgment',
   ],
   openGraph: {
-    title: 'Distance Judgment Lab - Depth Perception | SkillDrills',
+    title: 'Distance Judgment - Depth Perception | SkillDrills',
     description: 'Intercept moving sphere at target depth. Color feedback. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/visual/depth-perception/distance-judgment',
@@ -31,7 +31,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Distance Judgment Lab | SkillDrills',
+    title: 'Distance Judgment - Depth Perception | SkillDrills',
     description: 'Intercept moving sphere at target depth. Free.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
@@ -44,10 +44,6 @@ export const metadata = {
 export default function DistanceJudgmentPage() {
   return (
     <>
-      <noscript>
-        <h1>Distance Judgment Lab - Depth Perception & Spatial Awareness Training</h1>
-        <p>Free depth perception drill with moving sphere interception and auto-leveling difficulty. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

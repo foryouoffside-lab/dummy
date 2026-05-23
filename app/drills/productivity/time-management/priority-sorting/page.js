@@ -1,7 +1,7 @@
-﻿import PrioritySortingClient from './PrioritySortingClient';
+import PrioritySortingClient from './PrioritySortingClient';
 
 export const metadata = {
-  title: 'Priority Sorting Drill - Task Prioritization Training | SkillDrills',
+  title: 'Priority Sorting - Task Prioritization | SkillDrills',
   description: 'Click RED, GREEN, BLUE targets matching the priority rule. Rules change every 3-4s. Shrinking items add urgency. 3 lives. No sign-up.',
   keywords: [
     'priority sorting', 'task prioritization', 'time management training',
@@ -17,8 +17,8 @@ export const metadata = {
     'color priority game', 'rapid prioritization drill', 'task sorting practice',
   ],
   openGraph: {
-    title: 'Priority Sorting Drill - Task Prioritization | SkillDrills',
-    description: 'RED GREEN BLUE targets with rules changing every 3-4s. Free.',
+    title: 'Priority Sorting - Task Prioritization | SkillDrills',
+    description: 'Click RED, GREEN, BLUE targets matching the priority rule. Rules change every 3-4s. Shrinking items add urgency. 3 lives. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/productivity/time-management/priority-sorting',
     siteName: 'SkillDrills',
@@ -32,8 +32,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Priority Sorting Drill | SkillDrills',
-    description: 'Color-coded targets with dynamic rule changes. Free.',
+    title: 'Priority Sorting - Task Prioritization | SkillDrills',
+    description: 'Click RED, GREEN, BLUE targets matching the priority rule. Rules change every 3-4s. Shrinking items add urgency. 3 lives. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -45,10 +45,6 @@ export const metadata = {
 export default function PrioritySortingPage() {
   return (
     <>
-      <noscript>
-        <h1>Priority Sorting Drill - Time Management & Task Prioritization Training</h1>
-        <p>Free priority sorting drill with dynamic rule changes and shrinking targets. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

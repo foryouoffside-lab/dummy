@@ -1,7 +1,7 @@
-﻿import TracingClient from './TracingClient';
+import TracingClient from './TracingClient';
 
 export const metadata = {
-  title: 'Wave Tracing Drill - Flow State Cursor Tracking | SkillDrills',
+  title: 'Wave Tracing - Flow State Tracking | SkillDrills',
   description: 'Follow a dynamic red wave filament with 45px tolerance. Auto-pauses off-wave, resumes on return. Two waveform modes. +1pt/sec. No sign-up.',
   keywords: [
     'wave tracing drill', 'cursor tracking practice', 'flow state training', 'smooth movement drill',
@@ -17,7 +17,7 @@ export const metadata = {
     'flow meter training', 'streak tracking drill', 'auto resume tracing',
   ],
   openGraph: {
-    title: 'Wave Tracing Drill - Flow State Cursor Tracking | SkillDrills',
+    title: 'Wave Tracing - Flow State Tracking | SkillDrills',
     description: 'Follow dynamic red wave filament. +1/sec on wave. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/motor/precision-control/tracing',
@@ -32,7 +32,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Wave Tracing Drill | SkillDrills',
+    title: 'Wave Tracing - Flow State Tracking | SkillDrills',
     description: 'Master smooth cursor tracking with flow state. Free.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
@@ -45,10 +45,6 @@ export const metadata = {
 export default function TracingPage() {
   return (
     <>
-      <noscript>
-        <h1>Wave Tracing Drill - Flow State Cursor Tracking & Motor Precision Training</h1>
-        <p>Free wave tracing drill with dynamic red filament and auto-pause. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

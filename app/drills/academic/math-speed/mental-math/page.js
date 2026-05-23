@@ -1,8 +1,8 @@
-﻿import MentalMathClient from './MentalMathClient';
+import MentalMathClient from './MentalMathClient';
 
 export const metadata = {
-  title: 'Mental Math Drill - Arithmetic Practice & Brain Training | SkillDrills',
-  description: 'Sharpen mental arithmetic with this free timed math drill. Addition, subtraction, and multiplication across 3 levels. 60-second challenge. No sign-up.',
+  title: 'Mental Math - Arithmetic & Brain | SkillDrills',
+  description: 'Sharpen mental arithmetic with timed math drill. Addition, subtraction, and multiplication across 3 levels. 60-second challenge. No sign-up.',
   keywords: [
     'mental math drill', 'speed math practice', 'arithmetic practice online', 'mental calculation training',
     'math training free', 'brain math game', 'quick math quiz online', 'number skills practice',
@@ -19,8 +19,8 @@ export const metadata = {
     'interactive math quiz', 'browser math game', 'no download math practice',
   ],
   openGraph: {
-    title: 'Mental Math Drill - Arithmetic Training | SkillDrills',
-    description: '60-second mental math challenge with 3 difficulty levels. Free, no sign-up.',
+    title: 'Mental Math - Arithmetic & Brain | SkillDrills',
+    description: 'Sharpen mental arithmetic with timed math drill. Addition, subtraction, and multiplication across 3 levels. 60-second challenge. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/academic/math-speed/mental-math',
     siteName: 'SkillDrills',
@@ -34,8 +34,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Mental Math Drill | SkillDrills',
-    description: 'Boost mental arithmetic. 3 levels, 60-second challenge. Free.',
+    title: 'Mental Math - Arithmetic & Brain | SkillDrills',
+    description: 'Sharpen mental arithmetic with timed math drill. Addition, subtraction, and multiplication across 3 levels. 60-second challenge. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -47,10 +47,6 @@ export const metadata = {
 export default function MentalMathPage() {
   return (
     <>
-      <noscript>
-        <h1>Mental Math Drill - Arithmetic Practice & Brain Training</h1>
-        <p>Free interactive mental math speed drill for arithmetic practice. 3 difficulty levels. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

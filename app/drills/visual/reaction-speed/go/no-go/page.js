@@ -1,7 +1,7 @@
-﻿import ChromaSyncClient from './ChromaSyncClient';
+import ChromaSyncClient from './ChromaSyncClient';
 
 export const metadata = {
-  title: 'Chroma-Sync Lab - Go/No-Go Impulse Control Drill | SkillDrills',
+  title: 'Go/No-Go - Impulse Control Drill | SkillDrills',
   description: 'Train impulse control with Go/No-Go paradigm. Click GREEN, avoid RED. Adaptive 80-400ms window, 3 lives, reaction tracking. No sign-up.',
   keywords: [
     'go no-go test', 'impulse control training', 'reaction time drill',
@@ -18,7 +18,7 @@ export const metadata = {
     'free impulse control test', 'visual response inhibition', 'gamer cognitive training',
   ],
   openGraph: {
-    title: 'Chroma-Sync Lab - Go/No-Go Impulse Control | SkillDrills',
+    title: 'Go/No-Go - Impulse Control Drill | SkillDrills',
     description: 'Click GREEN only. Adaptive 80-400ms window. 3 lives. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/visual/reaction-speed/go/no-go',
@@ -33,7 +33,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Chroma-Sync Lab | SkillDrills',
+    title: 'Go/No-Go - Impulse Control Drill | SkillDrills',
     description: 'Go/No-Go impulse control. Click GREEN, avoid RED. Free.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
@@ -46,10 +46,6 @@ export const metadata = {
 export default function ChromaSyncPage() {
   return (
     <>
-      <noscript>
-        <h1>Chroma-Sync Lab - Go/No-Go Reaction Time & Impulse Control Training</h1>
-        <p>Free Go/No-Go impulse control drill with adaptive 80-400ms window. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

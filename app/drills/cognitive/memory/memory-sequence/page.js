@@ -1,8 +1,8 @@
 import MemorySequenceClient from './MemorySequenceClient';
 
 export const metadata = {
-  title: 'Memory Sequence Drill - Working Memory & Pattern Recall | SkillDrills',
-  description: 'Train spatial working memory by repeating patterns on expanding 4x4 to 7x7 grids. Sequences grow from 8 to 49 steps. 60-second challenge. No sign-up.',
+  title: 'Memory Sequence - Working Memory | SkillDrills',
+  description: 'Train spatial working memory by repeating patterns on expanding 4x4 to 7x7 grids. Sequences grow from 8 to 49 steps. No sign-up.',
   keywords: [
     'memory sequence drill', 'working memory training', 'spatial memory exercise',
     'pattern recall test', 'sequence memory game', 'memory improvement game',
@@ -20,8 +20,8 @@ export const metadata = {
     'progressive memory challenge', 'adaptive memory training', 'spatial cognition test',
   ],
   openGraph: {
-    title: 'Memory Sequence Drill - Working Memory Training | SkillDrills',
-    description: 'Repeat patterns on 4x4 to 7x7 grids. Sequences grow 8 to 49 steps. Free.',
+    title: 'Memory Sequence - Working Memory | SkillDrills',
+    description: 'Train spatial working memory by repeating patterns on expanding 4x4 to 7x7 grids. Sequences grow from 8 to 49 steps. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/cognitive/memory/memory-sequence',
     siteName: 'SkillDrills',
@@ -35,8 +35,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Memory Sequence Drill | SkillDrills',
-    description: 'Train spatial working memory with expanding grids. Free.',
+    title: 'Memory Sequence - Working Memory | SkillDrills',
+    description: 'Train spatial working memory by repeating patterns on expanding 4x4 to 7x7 grids. Sequences grow from 8 to 49 steps. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -48,10 +48,6 @@ export const metadata = {
 export default function MemorySequencePage() {
   return (
     <>
-      <noscript>
-        <h1>Memory Sequence Drill - Spatial Working Memory & Pattern Recall Training</h1>
-        <p>Free memory sequence drill. Repeat patterns on expanding 4x4 to 7x7 grids. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

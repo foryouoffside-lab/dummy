@@ -1,7 +1,7 @@
-﻿import WideFieldClient from './WideFieldClient';
+import WideFieldClient from './WideFieldClient';
 
 export const metadata = {
-  title: 'Wide Field Awareness - Peripheral Vision Training | SkillDrills',
+  title: 'Wide Field - Peripheral Vision Drill | SkillDrills',
   description: 'Train peripheral vision with characters flashing 400ms in 4 corners. Fixate center, recall 1-3 characters in order. Perfect recall 10pts/char. No sign-up.',
   keywords: [
     'wide field awareness', 'peripheral vision training', 'character recall',
@@ -17,7 +17,7 @@ export const metadata = {
     'peripheral vision exercise', 'wide awareness training', 'visual field awareness',
   ],
   openGraph: {
-    title: 'Wide Field Awareness - Peripheral Vision | SkillDrills',
+    title: 'Wide Field - Peripheral Vision Drill | SkillDrills',
     description: 'Characters flash 400ms in 4 corners. Center fixation, recall quiz. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/visual/peripheral-vision/wide-field',
@@ -32,7 +32,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Wide Field Awareness Drill | SkillDrills',
+    title: 'Wide Field - Peripheral Vision Drill | SkillDrills',
     description: 'Characters flash in 4 corners. Recall quiz. Free.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
@@ -45,10 +45,6 @@ export const metadata = {
 export default function WideFieldPage() {
   return (
     <>
-      <noscript>
-        <h1>Wide Field Awareness - Peripheral Vision & Character Recall Training</h1>
-        <p>Free wide field awareness drill with characters flashing in 4 corners. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

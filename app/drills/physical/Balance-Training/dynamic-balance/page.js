@@ -1,8 +1,8 @@
 import DynamicBalanceClient from './DynamicBalanceClient';
 
 export const metadata = {
-  title: 'Dynamic Balance Training - Motor Control & Coordination | SkillDrills',
-  description: 'Track a Lissajous trajectory target with cursor. +1pt/2s tracking, -1pt for missing. 60-second challenge with accuracy and streak tracking. No sign-up.',
+  title: 'Dynamic Balance - Motor Coordination | SkillDrills',
+  description: 'Track a Lissajous trajectory target with cursor. +1pt/2s tracking, -1pt for missing. 60-second challenge with accuracy tracking. No sign-up.',
   keywords: [
     'dynamic balance training', 'motor control drill', 'hand-eye coordination test',
     'tracking precision game', 'cursor tracking exercise', 'motor skills training',
@@ -20,8 +20,8 @@ export const metadata = {
     'fine motor assessment', 'gross motor practice', 'dexterity training online',
   ],
   openGraph: {
-    title: 'Dynamic Balance Training - Motor Control | SkillDrills',
-    description: 'Track a Lissajous trajectory target with your cursor. Free.',
+    title: 'Dynamic Balance - Motor Coordination | SkillDrills',
+    description: 'Track a Lissajous trajectory target with cursor. +1pt/2s tracking, -1pt for missing. 60-second challenge with accuracy tracking. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/physical/Balance-Training/dynamic-balance',
     siteName: 'SkillDrills',
@@ -35,8 +35,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Dynamic Balance Training | SkillDrills',
-    description: 'Track a moving target with your cursor. Free.',
+    title: 'Dynamic Balance - Motor Coordination | SkillDrills',
+    description: 'Track a Lissajous trajectory target with cursor. +1pt/2s tracking, -1pt for missing. 60-second challenge with accuracy tracking. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -48,10 +48,6 @@ export const metadata = {
 export default function DynamicBalancePage() {
   return (
     <>
-      <noscript>
-        <h1>Dynamic Balance Training - Motor Control & Hand-Eye Coordination Drill</h1>
-        <p>Free dynamic balance drill. Track a Lissajous trajectory target with cursor. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

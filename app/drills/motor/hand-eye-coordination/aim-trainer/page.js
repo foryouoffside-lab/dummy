@@ -1,7 +1,7 @@
-﻿import AimTrainerClient from './AimTrainerClient';
+import AimTrainerClient from './AimTrainerClient';
 
 export const metadata = {
-  title: 'Aim Trainer Elite - Mouse Accuracy & Coordination | SkillDrills',
+  title: 'Aim Trainer - Mouse Accuracy Drill | SkillDrills',
   description: 'Dynamic shrinking targets from 20px to 8px with streak progression. 3-life system, reaction tracking. For FPS gaming and mouse control. No sign-up.',
   keywords: [
     'aim trainer', 'mouse accuracy', 'click trainer', 'hand-eye coordination',
@@ -16,7 +16,7 @@ export const metadata = {
     'mouse precision test', 'cursor accuracy training', 'aim practice free',
   ],
   openGraph: {
-    title: 'Aim Trainer Elite - Mouse Accuracy | SkillDrills',
+    title: 'Aim Trainer - Mouse Accuracy Drill | SkillDrills',
     description: 'Dynamic shrinking targets with 3-life system. Free FPS aim training.',
     type: 'article',
     url: 'https://skilldrills.online/drills/motor/hand-eye-coordination/aim-trainer',
@@ -31,7 +31,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Aim Trainer Elite | SkillDrills',
+    title: 'Aim Trainer - Mouse Accuracy Drill | SkillDrills',
     description: 'Dynamic shrinking targets. Streak-based colors. Free.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
@@ -44,10 +44,6 @@ export const metadata = {
 export default function AimTrainerPage() {
   return (
     <>
-      <noscript>
-        <h1>Aim Trainer Elite - Mouse Accuracy & Hand-Eye Coordination Training</h1>
-        <p>Free aim trainer with dynamic shrinking targets and 3-life system. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

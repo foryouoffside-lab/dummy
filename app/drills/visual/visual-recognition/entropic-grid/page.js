@@ -1,8 +1,8 @@
 import EntropicGridClient from './EntropicGridClient';
 
 export const metadata = {
-  title: 'Entropic Grid Drill - Visual Search & Stamina Training | SkillDrills',
-  description: 'Find 2-char targets in a 100-cell grid while entropy corrupts 3 cells every 800ms. Stamina system with decay. Target refreshes every 15s. No sign-up.',
+  title: 'Entropic Grid - Search & Stamina | SkillDrills',
+  description: 'Find 2-char targets in 100-cell grid while entropy corrupts 3 cells every 800ms. Stamina system with decay. Target refreshes. No sign-up.',
   keywords: [
     'entropic grid', 'visual search training', 'stamina system drill',
     'entropy search', 'target finding game', 'visual scanning drill',
@@ -17,8 +17,8 @@ export const metadata = {
     'memory flush drill', 'visual clutter training', 'search accuracy practice',
   ],
   openGraph: {
-    title: 'Entropic Grid Drill - Visual Search & Stamina | SkillDrills',
-    description: '100-cell grid with entropy corrupting 3 cells every 800ms. Free.',
+    title: 'Entropic Grid - Search & Stamina | SkillDrills',
+    description: 'Find 2-char targets in 100-cell grid while entropy corrupts 3 cells every 800ms. Stamina system with decay. Target refreshes. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/visual/visual-recognition/entropic-grid',
     siteName: 'SkillDrills',
@@ -32,8 +32,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Entropic Grid Drill | SkillDrills',
-    description: '100-cell grid with entropy and stamina. Free.',
+    title: 'Entropic Grid - Search & Stamina | SkillDrills',
+    description: 'Find 2-char targets in 100-cell grid while entropy corrupts 3 cells every 800ms. Stamina system with decay. Target refreshes. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -45,10 +45,6 @@ export const metadata = {
 export default function EntropicGridPage() {
   return (
     <>
-      <noscript>
-        <h1>Entropic Grid Drill - Visual Search with Stamina & Entropy System Training</h1>
-        <p>Free visual search drill with 100-cell grid, entropy corruption, and stamina management. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

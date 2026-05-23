@@ -1,8 +1,8 @@
 import OrbitalTrackingClient from './OrbitalTrackingClient';
 
 export const metadata = {
-  title: 'Orbital Tracking Drill - Dynamic Orbit FPS Aim Training | SkillDrills',
-  description: 'Master smooth tracking with dynamic circular orbits. Adaptive 100-300px radius, variable speed. Raw mouse input, +1pt/50ms on target. No sign-up.',
+  title: 'Orbital Tracking - Dynamic Orbit | SkillDrills',
+  description: 'Master smooth tracking with dynamic circular orbits. Adaptive 100-300px radius, variable speed. Raw mouse input. No sign-up.',
   keywords: [
     'orbital tracking drill', 'orbit target tracking', 'circular aim training free',
     'dynamic orbit aim', 'FPS tracking practice', 'orbital aim trainer online',
@@ -18,8 +18,8 @@ export const metadata = {
     'browser aim practice', 'no download tracking drill', 'instant aim training',
   ],
   openGraph: {
-    title: 'Orbital Tracking Drill - FPS Aim Training | SkillDrills',
-    description: 'Track orbiting targets with dynamic speed and radius. Free.',
+    title: 'Orbital Tracking - Dynamic Orbit | SkillDrills',
+    description: 'Master smooth tracking with dynamic circular orbits. Adaptive 100-300px radius, variable speed. Raw mouse input. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/fps/orbital-tracking-drill',
     siteName: 'SkillDrills',
@@ -33,8 +33,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Orbital Tracking Drill | SkillDrills',
-    description: 'Master smooth tracking with orbiting targets. Free.',
+    title: 'Orbital Tracking - Dynamic Orbit | SkillDrills',
+    description: 'Master smooth tracking with dynamic circular orbits. Adaptive 100-300px radius, variable speed. Raw mouse input. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -46,10 +46,6 @@ export const metadata = {
 export default function OrbitalTrackingPage() {
   return (
     <>
-      <noscript>
-        <h1>Orbital Tracking Drill - Dynamic Orbit Aim Training for FPS Games</h1>
-        <p>Free orbital tracking drill with dynamic circular orbits and raw mouse input. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

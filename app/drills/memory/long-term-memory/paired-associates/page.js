@@ -1,7 +1,7 @@
 import PairedAssociatesClient from './PairedAssociatesClient';
 
 export const metadata = {
-  title: 'Paired Associates Drill - Word Pair Memory Training | SkillDrills',
+  title: 'Paired Associates - Word Pair Memory | SkillDrills',
   description: 'Train paired associate memory with 80 unique word pairs across 5 difficulty tiers. Memorize pairs, then pick the correct match from 3 options. Adaptive rounds. No sign-up.',
   keywords: [
     'paired associates', 'word pair memory', 'associative memory training',
@@ -17,7 +17,7 @@ export const metadata = {
     'vocabulary memory pairs', 'word connection drill', 'paired learning game',
   ],
   openGraph: {
-    title: 'Paired Associates Drill - Word Pair Memory | SkillDrills',
+    title: 'Paired Associates - Word Pair Memory | SkillDrills',
     description: '80 word pairs across 5 difficulty tiers. Memorize then match. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/memory/long-term-memory/paired-associates',
@@ -32,7 +32,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Paired Associates Drill | SkillDrills',
+    title: 'Paired Associates - Word Pair Memory | SkillDrills',
     description: '80 word pairs across 5 tiers. Memorize then match. Free.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
@@ -45,10 +45,6 @@ export const metadata = {
 export default function PairedAssociatesPage() {
   return (
     <>
-      <noscript>
-        <h1>Paired Associates Drill - Long-Term Memory & Word Pair Training</h1>
-        <p>Free paired associates drill with 80 unique word pairs across 5 difficulty tiers. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

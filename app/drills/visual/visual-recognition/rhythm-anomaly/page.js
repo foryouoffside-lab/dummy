@@ -1,7 +1,7 @@
 import RhythmAnomalyClient from './RhythmAnomalyClient';
 
 export const metadata = {
-  title: 'Rhythm Anomaly Drill - Pulse Detection & Visual Rhythm | SkillDrills',
+  title: 'Rhythm Anomaly - Pulse & Visual Rhythm | SkillDrills',
   description: 'Find the faster-pulsing cell in a 6x6 grid. Steady cells pulse at 2s, anomaly at 1.4s. Stamina system with decay. No sign-up.',
   keywords: [
     'rhythm anomaly', 'entropic grid', 'pulse detection training',
@@ -17,8 +17,8 @@ export const metadata = {
     'visual scanning rhythm', 'pulse interval detection', 'rhythm comparison drill',
   ],
   openGraph: {
-    title: 'Rhythm Anomaly Drill - Pulse Detection | SkillDrills',
-    description: '6x6 grid with steady 2s and entropic 1.4s pulsing cells. Free.',
+    title: 'Rhythm Anomaly - Pulse & Visual Rhythm | SkillDrills',
+    description: 'Find the faster-pulsing cell in a 6x6 grid. Steady cells pulse at 2s, anomaly at 1.4s. Stamina system with decay. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/visual/visual-recognition/rhythm-anomaly',
     siteName: 'SkillDrills',
@@ -32,8 +32,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Rhythm Anomaly Drill | SkillDrills',
-    description: 'Find the faster-pulsing cell in a 6x6 grid. Free.',
+    title: 'Rhythm Anomaly - Pulse & Visual Rhythm | SkillDrills',
+    description: 'Find the faster-pulsing cell in a 6x6 grid. Steady cells pulse at 2s, anomaly at 1.4s. Stamina system with decay. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -45,10 +45,6 @@ export const metadata = {
 export default function RhythmAnomalyPage() {
   return (
     <>
-      <noscript>
-        <h1>Rhythm Anomaly Drill - Entropic Grid Pulse Detection & Visual Rhythm Training</h1>
-        <p>Free visual rhythm drill. Find the faster-pulsing cell in a 6x6 grid. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

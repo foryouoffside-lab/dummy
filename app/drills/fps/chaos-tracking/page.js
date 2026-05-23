@@ -1,8 +1,8 @@
 import PeripheralTrackingClient from './PeripheralTrackingClient';
 
 export const metadata = {
-  title: 'Peripheral Tracking Drill - Dual Target FPS Awareness | SkillDrills',
-  description: 'Train peripheral vision by tracking two targets simultaneously. Raw mouse input, combo streaks up to 10x. 60-second challenge for Valorant, CS2, Apex. No sign-up.',
+  title: 'Peripheral Tracking - Dual Awareness | SkillDrills',
+  description: 'Train peripheral vision by tracking two targets simultaneously. Raw mouse input, combo streaks. 60-second challenge for FPS games. No sign-up.',
   keywords: [
     'peripheral tracking drill', 'dual target tracking', 'FPS peripheral vision training',
     'multi-target awareness drill', 'peripheral vision training free', 'tracking drill FPS',
@@ -20,8 +20,8 @@ export const metadata = {
     'visual processing speed', 'target tracking accuracy', 'peripheral detection training',
   ],
   openGraph: {
-    title: 'Peripheral Tracking Drill - FPS Awareness | SkillDrills',
-    description: 'Track two moving targets simultaneously. Raw mouse input. Free.',
+    title: 'Peripheral Tracking - Dual Awareness | SkillDrills',
+    description: 'Train peripheral vision by tracking two targets simultaneously. Raw mouse input, combo streaks. 60-second challenge for FPS games. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/fps/peripheral-awareness',
     siteName: 'SkillDrills',
@@ -35,8 +35,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Peripheral Tracking Drill | SkillDrills',
-    description: 'Train peripheral vision with dual target tracking. Free.',
+    title: 'Peripheral Tracking - Dual Awareness | SkillDrills',
+    description: 'Train peripheral vision by tracking two targets simultaneously. Raw mouse input, combo streaks. 60-second challenge for FPS games. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -48,10 +48,6 @@ export const metadata = {
 export default function PeripheralTrackingPage() {
   return (
     <>
-      <noscript>
-        <h1>Peripheral Tracking Drill - Dual Target FPS Awareness & Vision Training</h1>
-        <p>Free dual target tracking drill for FPS peripheral vision training. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

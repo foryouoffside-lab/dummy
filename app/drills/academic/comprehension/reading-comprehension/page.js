@@ -1,7 +1,7 @@
-﻿import ReadingComprehensionClient from './ReadingComprehensionClient';
+import ReadingComprehensionClient from './ReadingComprehensionClient';
 
 export const metadata = {
-  title: 'RSVP Speed Reading Drill - Comprehension & WPM Training | SkillDrills',
+  title: 'RSVP Speed Reading - WPM Training | SkillDrills',
   description: 'Master speed reading with RSVP method. Fresh passages, 3 difficulty levels, adjustable 100-600 WPM. Test comprehension with quizzes. No sign-up.',
   keywords: [
     'speed reading drill', 'RSVP reader', 'rapid serial visual presentation',
@@ -24,8 +24,8 @@ export const metadata = {
     'browser speed reading', 'no download speed reader',
   ],
   openGraph: {
-    title: 'RSVP Speed Reading Drill - WPM Training | SkillDrills',
-    description: 'Fresh passages every session. 3 difficulty levels. Adjustable 100-600 WPM. Free.',
+    title: 'RSVP Speed Reading - WPM Training | SkillDrills',
+    description: 'Master speed reading with RSVP method. Fresh passages, 3 difficulty levels, adjustable 100-600 WPM. Test comprehension with quizzes. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/academic/comprehension/reading-comprehension',
     siteName: 'SkillDrills',
@@ -39,8 +39,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'RSVP Speed Reading Drill | SkillDrills',
-    description: 'Master speed reading. Fresh passages, 3 levels, 100-600 WPM. Free.',
+    title: 'RSVP Speed Reading - WPM Training | SkillDrills',
+    description: 'Master speed reading with RSVP method. Fresh passages, 3 difficulty levels, adjustable 100-600 WPM. Test comprehension with quizzes. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -52,10 +52,6 @@ export const metadata = {
 export default function ReadingComprehensionPage() {
   return (
     <>
-      <noscript>
-        <h1>RSVP Speed Reading Drill - Comprehension & WPM Training</h1>
-        <p>Free interactive RSVP speed reading drill with fresh passages, 3 difficulty levels, and adjustable 100-600 WPM. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

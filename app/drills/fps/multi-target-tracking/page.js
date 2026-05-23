@@ -1,8 +1,8 @@
 import MultiTargetTrackingClient from './MultiTargetTrackingClient';
 
 export const metadata = {
-  title: 'Multi-Target Tracking Drill - Visual Memory FPS Training | SkillDrills',
-  description: 'Train visual memory by tracking 3 of 9 bouncing balls. 2-second preview, 60-second tracking phase. +5 per correct target. For FPS gaming. No sign-up.',
+  title: 'Multi-Target Tracking - Visual Memory | SkillDrills',
+  description: 'Train visual memory by tracking 3 of 9 bouncing balls. 2-second preview, 60-second tracking phase. +5 per correct target. No sign-up.',
   keywords: [
     'multi target tracking', 'ghost link tracking', 'visual memory drill',
     'object tracking FPS', 'multi object tracking', 'visual working memory',
@@ -17,8 +17,8 @@ export const metadata = {
     'online tracking game', 'browser tracking drill', 'no download MOT task',
   ],
   openGraph: {
-    title: 'Multi-Target Tracking - Visual Memory FPS Drill | SkillDrills',
-    description: 'Memorize 3 targets, track 9 balls for 60s. Free FPS training.',
+    title: 'Multi-Target Tracking - Visual Memory | SkillDrills',
+    description: 'Train visual memory by tracking 3 of 9 bouncing balls. 2-second preview, 60-second tracking phase. +5 per correct target. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/fps/multi-target-tracking',
     siteName: 'SkillDrills',
@@ -32,8 +32,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Multi-Target Tracking Drill | SkillDrills',
-    description: 'Train visual memory. Track 3 of 9 balls. Free.',
+    title: 'Multi-Target Tracking - Visual Memory | SkillDrills',
+    description: 'Train visual memory by tracking 3 of 9 bouncing balls. 2-second preview, 60-second tracking phase. +5 per correct target. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -45,10 +45,6 @@ export const metadata = {
 export default function MultiTargetTrackingPage() {
   return (
     <>
-      <noscript>
-        <h1>Multi-Target Tracking Drill - Visual Memory & Object Tracking for FPS Gaming</h1>
-        <p>Free multi-target tracking drill. Memorize 3 targets, track 9 balls, identify correctly. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

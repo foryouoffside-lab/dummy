@@ -1,8 +1,8 @@
-﻿import RSVPReaderClient from './RSVPReaderClient';
+import RSVPReaderClient from './RSVPReaderClient';
 
 export const metadata = {
-  title: 'RSVP Speed Reader - Rapid Serial Visual Presentation | SkillDrills',
-  description: 'Master speed reading with RSVP technology. Words flash at Optimal Recognition Point for maximum comprehension. Adjustable 100-1000 WPM. Fresh passages. No sign-up.',
+  title: 'RSVP Speed Reader - Visual Training | SkillDrills',
+  description: 'Master speed reading with RSVP technology. Words flash at Optimal Recognition Point. Adjustable 100-1000 WPM. Fresh passages. No sign-up.',
   keywords: [
     'RSVP reader', 'speed reading tool', 'rapid serial visual presentation',
     'optimal recognition point training', 'reading speed training', 'WPM improvement',
@@ -23,8 +23,8 @@ export const metadata = {
     'free online reading tool', 'browser speed reader', 'no download RSVP',
   ],
   openGraph: {
-    title: 'RSVP Speed Reader - WPM Training | SkillDrills',
-    description: 'Words flash at optimal recognition point. Adjustable 100-1000 WPM. Free.',
+    title: 'RSVP Speed Reader - Visual Training | SkillDrills',
+    description: 'Master speed reading with RSVP technology. Words flash at Optimal Recognition Point. Adjustable 100-1000 WPM. Fresh passages. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/academic/reading-speed/rsvp-reader',
     siteName: 'SkillDrills',
@@ -38,8 +38,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'RSVP Speed Reader | SkillDrills',
-    description: 'Read 3-4x faster with RSVP. Adjustable 100-1000 WPM. Free.',
+    title: 'RSVP Speed Reader - Visual Training | SkillDrills',
+    description: 'Master speed reading with RSVP technology. Words flash at Optimal Recognition Point. Adjustable 100-1000 WPM. Fresh passages. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -51,10 +51,6 @@ export const metadata = {
 export default function RSVPReaderPage() {
   return (
     <>
-      <noscript>
-        <h1>RSVP Speed Reader - Rapid Serial Visual Presentation Training</h1>
-        <p>Free RSVP speed reader with Optimal Recognition Point alignment. Adjustable 100-1000 WPM. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

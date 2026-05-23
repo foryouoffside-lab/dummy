@@ -1,7 +1,7 @@
-﻿import BoxBreathingClient from './BoxBreathingClient';
+import BoxBreathingClient from './BoxBreathingClient';
 
 export const metadata = {
-  title: 'Box Breathing Drill - 4-4-4-4 Tactical Breathing | SkillDrills',
+  title: 'Box Breathing - 4-4-4-4 Tactical Drill | SkillDrills',
   description: 'Master box breathing with square visual pacer. 4s inhale, hold, exhale, hold. Used by Navy SEALs. Track focus score. No sign-up.',
   keywords: [
     'box breathing', 'tactical breathing', '4-4-4-4 breathing', 'square breathing',
@@ -20,7 +20,7 @@ export const metadata = {
     'breathing for performance', 'pre-game breathing', 'athlete breathing drill',
   ],
   openGraph: {
-    title: 'Box Breathing Drill - Tactical Breathing | SkillDrills',
+    title: 'Box Breathing - 4-4-4-4 Tactical Drill | SkillDrills',
     description: 'Square breathing with visual pacer. 4s inhale, hold, exhale, hold. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/mental-fitness/breathing-exercises/box-breathing',
@@ -35,7 +35,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Box Breathing Drill | SkillDrills',
+    title: 'Box Breathing - 4-4-4-4 Tactical Drill | SkillDrills',
     description: 'Navy SEAL 4-4-4-4 breathing with visual pacer. Free.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
@@ -48,10 +48,6 @@ export const metadata = {
 export default function BoxBreathingPage() {
   return (
     <>
-      <noscript>
-        <h1>Box Breathing Drill - 4-4-4-4 Tactical Breathing Exercise for Stress Relief & Focus</h1>
-        <p>Free box breathing drill with square visual pacer. Used by Navy SEALs. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

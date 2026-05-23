@@ -1,7 +1,7 @@
-﻿import KineticInterceptClient from './KineticInterceptClient';
+import KineticInterceptClient from './KineticInterceptClient';
 
 export const metadata = {
-  title: 'Kinetic Intercept Drill - Moving Target Tracking | SkillDrills',
+  title: 'Moving Target - Tracking Drill | SkillDrills',
   description: 'Train hand-eye coordination with fast-moving targets from all 4 edges. Green cursor feedback on target. 3 lives, streak bonuses. No sign-up.',
   keywords: [
     'moving target training', 'target tracking drill', 'aim training',
@@ -17,7 +17,7 @@ export const metadata = {
     'visual motor training', 'predictive aiming drill', 'moving object click',
   ],
   openGraph: {
-    title: 'Kinetic Intercept Drill - Moving Target Tracking | SkillDrills',
+    title: 'Moving Target - Tracking Drill | SkillDrills',
     description: 'Fast-moving targets from 4 edges. Green cursor feedback. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/visual/tracking-accuracy/moving-target',
@@ -32,7 +32,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Kinetic Intercept Drill | SkillDrills',
+    title: 'Moving Target - Tracking Drill | SkillDrills',
     description: 'Fast-moving targets from 4 edges. Green cursor. Free.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
@@ -45,10 +45,6 @@ export const metadata = {
 export default function KineticInterceptPage() {
   return (
     <>
-      <noscript>
-        <h1>Kinetic Intercept Drill - Moving Target Tracking & Aim Training</h1>
-        <p>Free moving target drill with fast targets from all 4 edges and green cursor feedback. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

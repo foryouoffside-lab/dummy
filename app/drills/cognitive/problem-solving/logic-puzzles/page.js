@@ -1,7 +1,7 @@
 import LogicPuzzlesClient from './LogicPuzzlesClient';
 
 export const metadata = {
-  title: 'Logic Puzzles Drill - Problem Solving & Reasoning | SkillDrills',
+  title: 'Logic Puzzles - Problem Solving Drill | SkillDrills',
   description: 'Solve 8 types of unique logic puzzles including arithmetic, algebra, PEMDAS, Fibonacci, and percentages. 60-second challenge with hint system. No sign-up.',
   keywords: [
     'logic puzzles', 'math puzzles online', 'problem solving drill', 'logical reasoning practice',
@@ -19,7 +19,7 @@ export const metadata = {
     'pattern recognition practice', 'deductive reasoning exercises', 'inductive reasoning drill',
   ],
   openGraph: {
-    title: 'Logic Puzzles Drill - Problem Solving | SkillDrills',
+    title: 'Logic Puzzles - Problem Solving Drill | SkillDrills',
     description: '8 unique puzzle types, 60-second challenge, hint system. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/cognitive/problem-solving/logic-puzzles',
@@ -34,7 +34,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Logic Puzzles Drill | SkillDrills',
+    title: 'Logic Puzzles - Problem Solving Drill | SkillDrills',
     description: '8 puzzle types, 60s challenge, hints & combos. Free.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
@@ -47,10 +47,6 @@ export const metadata = {
 export default function LogicPuzzlesPage() {
   return (
     <>
-      <noscript>
-        <h1>Logic Puzzles Drill - Problem Solving & Mathematical Reasoning Training</h1>
-        <p>Free logic puzzles drill with 8 unique puzzle types. 60-second challenge with hint system. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

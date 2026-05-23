@@ -1,7 +1,7 @@
 import SudokuClient from './SudokuClient';
 
 export const metadata = {
-  title: 'Sudoku Drill - Progressive Grid Puzzle & Logic Training | SkillDrills',
+  title: 'Sudoku Drill - Grid & Logic Puzzle | SkillDrills',
   description: 'Master Sudoku from 4x4 to 7x7 grids with progressive difficulty. 60-second challenge, combo streaks, and Sudoku Master achievement. No sign-up.',
   keywords: [
     'free sudoku', 'sudoku puzzle online', 'logic puzzle game', 'number placement drill',
@@ -20,8 +20,8 @@ export const metadata = {
     'working memory training', 'attention to detail puzzle', 'focus training sudoku',
   ],
   openGraph: {
-    title: 'Sudoku Drill - Progressive Puzzle Training | SkillDrills',
-    description: 'Progressive Sudoku 4x4 to 7x7. Complete all grids to become a Master. Free.',
+    title: 'Sudoku Drill - Grid & Logic Puzzle | SkillDrills',
+    description: 'Master Sudoku from 4x4 to 7x7 grids with progressive difficulty. 60-second challenge, combo streaks, and Sudoku Master achievement. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/cognitive/problem-solving/sudoku',
     siteName: 'SkillDrills',
@@ -35,8 +35,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Sudoku Drill | SkillDrills',
-    description: 'Progressive Sudoku 4x4 to 7x7. Train logic and deduction. Free.',
+    title: 'Sudoku Drill - Grid & Logic Puzzle | SkillDrills',
+    description: 'Master Sudoku from 4x4 to 7x7 grids with progressive difficulty. 60-second challenge, combo streaks, and Sudoku Master achievement. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -48,10 +48,6 @@ export const metadata = {
 export default function SudokuPage() {
   return (
     <>
-      <noscript>
-        <h1>Sudoku Drill - Progressive Grid Puzzle & Logical Deduction Training</h1>
-        <p>Free progressive Sudoku from 4x4 to 7x7 grids. Train logical deduction and pattern recognition. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

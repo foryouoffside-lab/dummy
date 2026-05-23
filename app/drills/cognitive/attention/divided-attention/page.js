@@ -1,8 +1,8 @@
 import DividedAttentionClient from './DividedAttentionClient';
 
 export const metadata = {
-  title: 'Divided Attention Drill - Dual Task Cognitive Training | SkillDrills',
-  description: 'Train multitasking with this free dual task drill. Track moving balls while matching even numbers in a 60-second challenge. No sign-up required.',
+  title: 'Divided Attention - Dual Task Drill | SkillDrills',
+  description: 'Train multitasking with dual task drill. Track moving balls while matching even numbers in 60-second challenge. No sign-up.',
   keywords: [
     'divided attention drill', 'dual task training', 'multitasking drill online',
     'cognitive training free', 'attention splitting test', 'visual tracking practice',
@@ -18,8 +18,8 @@ export const metadata = {
     'free attention test', 'browser brain training', 'no download cognitive drill',
   ],
   openGraph: {
-    title: 'Divided Attention Drill - Dual Task Training | SkillDrills',
-    description: 'Master multitasking with visual tracking and number matching. Free 60s challenge.',
+    title: 'Divided Attention - Dual Task Drill | SkillDrills',
+    description: 'Train multitasking with dual task drill. Track moving balls while matching even numbers in 60-second challenge. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/cognitive/attention/divided-attention',
     siteName: 'SkillDrills',
@@ -33,8 +33,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Divided Attention Drill | SkillDrills',
-    description: 'Train multitasking with dual task cognitive drill. Free.',
+    title: 'Divided Attention - Dual Task Drill | SkillDrills',
+    description: 'Train multitasking with dual task drill. Track moving balls while matching even numbers in 60-second challenge. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -46,10 +46,6 @@ export const metadata = {
 export default function DividedAttentionPage() {
   return (
     <>
-      <noscript>
-        <h1>Divided Attention Drill - Dual Task Cognitive Training</h1>
-        <p>Free dual task drill combining visual tracking with number matching. 60-second challenge. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

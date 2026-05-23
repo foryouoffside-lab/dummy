@@ -1,8 +1,8 @@
 import QuickDodgeClient from './QuickDodgeClient';
 
 export const metadata = {
-  title: 'Quick Dodge Drill - Evasion Reflex & Spatial Awareness | SkillDrills',
-  description: 'Dodge red homing obstacles tracking your cursor. +1pt per dodge, -5 on hit. Adaptive speed with streaks. Fullscreen mode adds 50% more chaos. No sign-up.',
+  title: 'Quick Dodge - Evasion Reflex Drill | SkillDrills',
+  description: 'Dodge red homing obstacles tracking your cursor. +1pt per dodge, -5 on hit. Adaptive speed with streaks. Fullscreen mode available. No sign-up.',
   keywords: [
     'quick dodge game', 'evasion reflex training', 'spatial awareness drill',
     'dodge obstacles game', 'cursor evasion practice', 'reflex dodge training',
@@ -14,8 +14,8 @@ export const metadata = {
     'skilldrills dodge', 'skilldrills reflex', 'free physical training drill',
   ],
   openGraph: {
-    title: 'Quick Dodge Drill - Evasion Reflex Training | SkillDrills',
-    description: 'Dodge red homing obstacles tracking your cursor. Adaptive speed. Free.',
+    title: 'Quick Dodge - Evasion Reflex Drill | SkillDrills',
+    description: 'Dodge red homing obstacles tracking your cursor. +1pt per dodge, -5 on hit. Adaptive speed with streaks. Fullscreen mode available. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/physical/Reflex-Training/quick-dodge',
     siteName: 'SkillDrills',
@@ -29,8 +29,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Quick Dodge Reflex Drill | SkillDrills',
-    description: 'Dodge homing obstacles. Adaptive speed. Free.',
+    title: 'Quick Dodge - Evasion Reflex Drill | SkillDrills',
+    description: 'Dodge red homing obstacles tracking your cursor. +1pt per dodge, -5 on hit. Adaptive speed with streaks. Fullscreen mode available. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -42,10 +42,6 @@ export const metadata = {
 export default function QuickDodgePage() {
   return (
     <>
-      <noscript>
-        <h1>Quick Dodge Drill - Evasion Reflex & Spatial Awareness Training</h1>
-        <p>Free quick dodge game. Evade red homing obstacles tracking your cursor. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

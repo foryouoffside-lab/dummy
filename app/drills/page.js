@@ -90,9 +90,6 @@ export default function DrillsPage() {
               <Sparkles className="w-4 h-4 text-yellow-400" aria-hidden="true" />
               <span className="text-sm text-white font-medium">90+ Free Drills</span>
             </div>
-            <h1 id="drills-hero-heading" className="text-3xl sm:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
-              All Training Drills
-            </h1>
             <p className="text-lg sm:text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
               Browse 90+ free interactive drills across 9 training categories. Improve FPS aim, cognitive skills, memory, typing speed, and more. No login required.
             </p>

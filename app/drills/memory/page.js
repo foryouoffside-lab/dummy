@@ -1,7 +1,7 @@
 import MemoryClient from './MemoryClient';
 
 export const metadata = {
-  title: 'Memory Training - 15 Free Drills for Brain Fitness | SkillDrills',
+  title: 'Memory Training - 15 Free Drills | SkillDrills',
   description: 'Free memory training with 15 drills across 5 categories. Improve short-term, working, long-term, spatial, and associative memory. No sign-up.',
   keywords: [
     'memory training', 'memory drills', 'short term memory', 'working memory training',
@@ -15,7 +15,7 @@ export const metadata = {
     'skilldrills memory', 'skilldrills brain training',
   ],
   openGraph: {
-    title: 'Memory Training - 15 Free Drills for Brain Fitness | SkillDrills',
+    title: 'Memory Training - 15 Free Drills | SkillDrills',
     description: '15 free memory training drills across 5 categories. No sign-up required.',
     type: 'website',
     url: 'https://skilldrills.online/drills/memory',
@@ -43,10 +43,7 @@ export const metadata = {
 export default function MemoryPage() {
   return (
     <>
-      <noscript>
-        <h1>Memory Training Drills - 15 Free Exercises for Brain Fitness</h1>
-        <p>Free memory training with 15 drills across 5 categories. No sign-up required.</p>
-      </noscript>
+      
       <MemoryClient />
     </>
   );

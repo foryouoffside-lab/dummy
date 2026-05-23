@@ -1,7 +1,7 @@
-﻿import CodeTypingClient from './CodeTypingClient';
+import CodeTypingClient from './CodeTypingClient';
 
 export const metadata = {
-  title: 'Code Typing Speed Test - JS, Python & HTML Practice | SkillDrills',
+  title: 'Code Typing - JS, Python & HTML | SkillDrills',
   description: 'Improve coding speed with real JavaScript, Python, and HTML snippets. 70+ snippets, dynamic timer, WPM tracking, and accuracy stats. No sign-up.',
   keywords: [
     'code typing test', 'coding speed test', 'programming typing practice',
@@ -20,7 +20,7 @@ export const metadata = {
     'online coding exercise', 'browser code typing', 'no download code practice',
   ],
   openGraph: {
-    title: 'Code Typing Speed Test - JS, Python & HTML | SkillDrills',
+    title: 'Code Typing - JS, Python & HTML | SkillDrills',
     description: 'Type real code in JS, Python, HTML. 70+ snippets, WPM tracking. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/academic/writing-speed/code-typing',
@@ -35,7 +35,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Code Typing Speed Test | SkillDrills',
+    title: 'Code Typing - JS, Python & HTML | SkillDrills',
     description: 'Type real JS, Python, HTML code. Track WPM & accuracy. Free.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
@@ -48,10 +48,6 @@ export const metadata = {
 export default function CodeTypingPage() {
   return (
     <>
-      <noscript>
-        <h1>Code Typing Speed Test - JavaScript, Python & HTML Practice</h1>
-        <p>Free code typing drill with 70+ real code snippets across 3 programming languages. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

@@ -1,8 +1,8 @@
 import PatternRecognitionClient from './PatternRecognitionClient';
 
 export const metadata = {
-  title: 'Pattern Recognition Drill - Number Sequences & Reasoning | SkillDrills',
-  description: 'Train pattern recognition with 5 types: Arithmetic, Geometric, Squares, Fibonacci, and Alternating. 5,000+ unique sequences. 60-second challenge. No sign-up.',
+  title: 'Pattern Recognition - Sequences | SkillDrills',
+  description: 'Train pattern recognition with 5 types: Arithmetic, Geometric, Squares, Fibonacci, and Alternating. 5000+ unique sequences. No sign-up.',
   keywords: [
     'pattern recognition drill', 'math patterns practice', 'number sequences test',
     'logical reasoning training', 'arithmetic sequence practice', 'geometric sequence test',
@@ -20,8 +20,8 @@ export const metadata = {
     'mathematical reasoning test', 'analytical thinking math', 'problem solving patterns',
   ],
   openGraph: {
-    title: 'Pattern Recognition Drill - Number Sequences | SkillDrills',
-    description: '5 pattern types with 5,000+ unique sequences. Train logical reasoning. Free.',
+    title: 'Pattern Recognition - Sequences | SkillDrills',
+    description: 'Train pattern recognition with 5 types: Arithmetic, Geometric, Squares, Fibonacci, and Alternating. 5000+ unique sequences. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/cognitive/memory/pattern-recognition',
     siteName: 'SkillDrills',
@@ -35,8 +35,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Pattern Recognition Drill | SkillDrills',
-    description: '5 pattern types, 5000+ sequences. Train reasoning. Free.',
+    title: 'Pattern Recognition - Sequences | SkillDrills',
+    description: 'Train pattern recognition with 5 types: Arithmetic, Geometric, Squares, Fibonacci, and Alternating. 5000+ unique sequences. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -48,10 +48,6 @@ export const metadata = {
 export default function PatternRecognitionPage() {
   return (
     <>
-      <noscript>
-        <h1>Pattern Recognition Drill - Number Sequence & Logical Reasoning Training</h1>
-        <p>Free pattern recognition drill with 5 pattern types and 5,000+ unique sequences. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

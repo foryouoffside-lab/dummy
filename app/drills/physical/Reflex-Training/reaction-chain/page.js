@@ -1,7 +1,7 @@
 import ReactionChainClient from './ReactionChainClient';
 
 export const metadata = {
-  title: 'Reaction Chain Drill - Precision Stopping & Impulse | SkillDrills',
+  title: 'Reaction Chain - Precision Stopping | SkillDrills',
   description: 'Stop cursor on moving nodes to arrest them. No penalties, streak bonuses. Adaptive 400-1400px/s speed. Fullscreen doubles nodes. No sign-up.',
   keywords: [
     'reaction chain drill', 'kinetic arrest game', 'precision stopping training',
@@ -20,7 +20,7 @@ export const metadata = {
     'go no go training', 'response inhibition drill', 'executive function practice',
   ],
   openGraph: {
-    title: 'Reaction Chain Drill - Precision Stopping | SkillDrills',
+    title: 'Reaction Chain - Precision Stopping | SkillDrills',
     description: 'Stop cursor on moving nodes. No penalties. Adaptive speed. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/physical/Reflex-Training/reaction-chain',
@@ -35,7 +35,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Reaction Chain Drill | SkillDrills',
+    title: 'Reaction Chain - Precision Stopping | SkillDrills',
     description: 'Train precision stopping. No penalties. Free.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
@@ -48,10 +48,6 @@ export const metadata = {
 export default function ReactionChainPage() {
   return (
     <>
-      <noscript>
-        <h1>Reaction Chain Drill - Precision Stopping & Impulse Control Training</h1>
-        <p>Free kinetic arrest drill. Stop cursor on moving nodes. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

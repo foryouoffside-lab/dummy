@@ -1,8 +1,8 @@
 import ReactiveStrafeClient from './ReactiveStrafeClient';
 
 export const metadata = {
-  title: 'Reactive Strafe Tracking - FPS Aim & Target Follow Drill | SkillDrills',
-  description: 'Master horizontal target tracking with adaptive speed 12-35px/s. Zone-based scoring, raw mouse input, combo streaks. For Valorant, CS2, Overwatch, Apex. No sign-up.',
+  title: 'Reactive Strafe - FPS Aim Drill | SkillDrills',
+  description: 'Master horizontal target tracking with adaptive speed 12-35px/s. Zone-based scoring, raw mouse input. For Valorant, CS2, Apex. No sign-up.',
   keywords: [
     'reactive strafe tracking', 'FPS tracking drill', 'aim tracking training free',
     'target following practice', 'horizontal strafe aim', 'tracking accuracy FPS',
@@ -18,8 +18,8 @@ export const metadata = {
     'no download aim trainer', 'instant aim practice', 'web based aim trainer',
   ],
   openGraph: {
-    title: 'Reactive Strafe Tracking - FPS Aim Training | SkillDrills',
-    description: 'Adaptive speed target tracking with zone-based scoring. Free.',
+    title: 'Reactive Strafe - FPS Aim Drill | SkillDrills',
+    description: 'Master horizontal target tracking with adaptive speed 12-35px/s. Zone-based scoring, raw mouse input. For Valorant, CS2, Apex. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/fps/reactive-tracking',
     siteName: 'SkillDrills',
@@ -33,8 +33,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Reactive Strafe Tracking | SkillDrills',
-    description: 'Master FPS tracking aim with adaptive speed target. Free.',
+    title: 'Reactive Strafe - FPS Aim Drill | SkillDrills',
+    description: 'Master horizontal target tracking with adaptive speed 12-35px/s. Zone-based scoring, raw mouse input. For Valorant, CS2, Apex. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -46,10 +46,6 @@ export const metadata = {
 export default function ReactiveStrafePage() {
   return (
     <>
-      <noscript>
-        <h1>Reactive Strafe Tracking - FPS Aim & Target Following Training</h1>
-        <p>Free FPS tracking drill with adaptive speed and zone-based precision scoring. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

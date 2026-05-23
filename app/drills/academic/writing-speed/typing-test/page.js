@@ -1,8 +1,8 @@
-﻿import TypingTestClient from './TypingTestClient';
+import TypingTestClient from './TypingTestClient';
 
 export const metadata = {
-  title: 'Typing Speed Test - WPM Practice & Accuracy Training | SkillDrills',
-  description: 'Test your typing speed with 30 unique quotes across Easy, Medium, and Hard levels. Real-time WPM, accuracy, and combo streaks. 60-second challenge. No sign-up.',
+  title: 'Typing Speed Test - WPM & Accuracy | SkillDrills',
+  description: 'Test typing speed with 30 quotes across Easy, Medium, and Hard levels. Real-time WPM, accuracy, and combo streaks. 60-second challenge. No sign-up.',
   keywords: [
     'typing speed test', 'typing practice', 'WPM test', 'typing accuracy',
     'free typing test', 'speed typing challenge', 'typing quotes practice',
@@ -22,8 +22,8 @@ export const metadata = {
     'touch typing practice', 'typing without looking', 'keyboard muscle memory',
   ],
   openGraph: {
-    title: 'Typing Speed Test - WPM Practice | SkillDrills',
-    description: '30 unique quotes, 3 difficulty levels. Track WPM and accuracy. Free.',
+    title: 'Typing Speed Test - WPM & Accuracy | SkillDrills',
+    description: 'Test typing speed with 30 quotes across Easy, Medium, and Hard levels. Real-time WPM, accuracy, and combo streaks. 60-second challenge. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/academic/writing-speed/typing-test',
     siteName: 'SkillDrills',
@@ -37,8 +37,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Typing Speed Test | SkillDrills',
-    description: 'Test WPM with 30 quotes. Track accuracy and combos. Free.',
+    title: 'Typing Speed Test - WPM & Accuracy | SkillDrills',
+    description: 'Test typing speed with 30 quotes across Easy, Medium, and Hard levels. Real-time WPM, accuracy, and combo streaks. 60-second challenge. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -50,10 +50,6 @@ export const metadata = {
 export default function TypingTestPage() {
   return (
     <>
-      <noscript>
-        <h1>Typing Speed Test - WPM Practice & Accuracy Training</h1>
-        <p>Free online typing test with 30 unique quotes across 3 difficulty levels. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

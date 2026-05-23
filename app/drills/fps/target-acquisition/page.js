@@ -1,8 +1,8 @@
 import TargetAcquisitionClient from './TargetAcquisitionClient';
 
 export const metadata = {
-  title: 'Target Acquisition Drill - Luminance Priority FPS Training | SkillDrills',
-  description: 'Click 5 targets in brightness order from highest to lowest opacity. 90-second challenge with score tracking, streak bonuses, and penalties. No sign-up.',
+  title: 'Target Acquisition - Luminance Drill | SkillDrills',
+  description: 'Click 5 targets in brightness order from highest to lowest opacity. 90-second challenge with score tracking and penalties. No sign-up.',
   keywords: [
     'target acquisition drill', 'FPS aim training', 'luminance priority training',
     'brightness targeting drill', 'visual priority FPS', 'free aim trainer',
@@ -14,8 +14,8 @@ export const metadata = {
     'skilldrills target acquisition', 'skilldrills FPS drill', 'free gaming practice',
   ],
   openGraph: {
-    title: 'Target Acquisition Drill - Luminance Priority | SkillDrills',
-    description: 'Click 5 targets in brightness order. 90-second challenge. Free.',
+    title: 'Target Acquisition - Luminance Drill | SkillDrills',
+    description: 'Click 5 targets in brightness order from highest to lowest opacity. 90-second challenge with score tracking and penalties. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/fps/target-acquisition',
     siteName: 'SkillDrills',
@@ -29,8 +29,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Target Acquisition FPS Drill | SkillDrills',
-    description: 'Train luminance-based priority targeting. 90s challenge. Free.',
+    title: 'Target Acquisition - Luminance Drill | SkillDrills',
+    description: 'Click 5 targets in brightness order from highest to lowest opacity. 90-second challenge with score tracking and penalties. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -42,10 +42,6 @@ export const metadata = {
 export default function TargetAcquisitionPage() {
   return (
     <>
-      <noscript>
-        <h1>Target Acquisition FPS Drill - Luminance Priority Aim Training</h1>
-        <p>Free target acquisition drill. Click 5 targets in brightness order. 90-second challenge. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

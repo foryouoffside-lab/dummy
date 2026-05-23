@@ -1,7 +1,7 @@
 import FocusTimerClient from './FocusTimerClient';
 
 export const metadata = {
-  title: 'Focus Timer - 5-Minute Concentration Training | SkillDrills',
+  title: 'Focus Timer - Concentration Training | SkillDrills',
   description: 'Train sustained focus with a visual meditation timer. Fix gaze on center while expanding ripples test peripheral awareness. 5-minute session. No sign-up.',
   keywords: [
     'focus timer', 'concentration training', 'sustained attention drill',
@@ -32,7 +32,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Focus Timer | SkillDrills',
+    title: 'Focus Timer - Concentration Training | SkillDrills',
     description: 'Train sustained focus with visual meditation. Free.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
@@ -45,10 +45,6 @@ export const metadata = {
 export default function FocusTimerPage() {
   return (
     <>
-      <noscript>
-        <h1>Focus Timer - 5-Minute Sustained Attention & Concentration Training</h1>
-        <p>Free 5-minute visual meditation focus timer. Build concentration stamina for deep work. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

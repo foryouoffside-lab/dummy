@@ -1,7 +1,7 @@
-﻿import DragAndDropClient from './DragAndDropClient';
+import DragAndDropClient from './DragAndDropClient';
 
 export const metadata = {
-  title: 'Extreme Convergence - Drag & Drop Precision Drill | SkillDrills',
+  title: 'Drag & Drop - Precision Motor Drill | SkillDrills',
   description: 'Drag ball into shrinking ring within 3 seconds. Positions teleport every 3s. Margin shrinks 10px to 1px with streak. 3-life system. No sign-up.',
   keywords: [
     'drag and drop precision', 'mouse control training', 'hand-eye coordination',
@@ -17,7 +17,7 @@ export const metadata = {
     'mouse dexterity exercise', 'precision movement drill', 'drag training free',
   ],
   openGraph: {
-    title: 'Extreme Convergence - Drag & Drop Precision | SkillDrills',
+    title: 'Drag & Drop - Precision Motor Drill | SkillDrills',
     description: 'Drag ball into shrinking ring. Teleports every 3s. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/motor/hand-eye-coordination/drag-and-drop',
@@ -32,7 +32,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Extreme Convergence Drill | SkillDrills',
+    title: 'Drag & Drop - Precision Motor Drill | SkillDrills',
     description: 'Drag ball into shrinking ring. Teleports. Free.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
@@ -45,10 +45,6 @@ export const metadata = {
 export default function DragAndDropPage() {
   return (
     <>
-      <noscript>
-        <h1>Extreme Convergence - Drag & Drop Precision & Hand-Eye Coordination</h1>
-        <p>Free drag and drop precision drill with shrinking target ring. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

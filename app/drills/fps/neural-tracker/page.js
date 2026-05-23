@@ -1,8 +1,8 @@
 import NeuralTrackerClient from './NeuralTrackerClient';
 
 export const metadata = {
-  title: 'Neural Tracker - Smooth Target Following FPS Aim Drill | SkillDrills',
-  description: 'Master smooth tracking with 5 bouncing balls. Follow the green target with raw mouse input. 60%+ accuracy earns points. No penalties. No sign-up.',
+  title: 'Neural Tracker - Smooth Target Drill | SkillDrills',
+  description: 'Master smooth tracking with 5 bouncing balls and collision physics. Follow green target with raw mouse input. No penalties. No sign-up.',
   keywords: [
     'neural tracker', 'smooth tracking drill', 'continuous aim training',
     'target following practice', 'smooth aim FPS', 'tracking accuracy drill',
@@ -21,8 +21,8 @@ export const metadata = {
     'bouncing target aim', 'physics based aim trainer', 'realistic target movement',
   ],
   openGraph: {
-    title: 'Neural Tracker - Smooth FPS Aim Training | SkillDrills',
-    description: 'Track green target among 5 bouncing balls. Raw mouse input, no penalties. Free.',
+    title: 'Neural Tracker - Smooth Target Drill | SkillDrills',
+    description: 'Master smooth tracking with 5 bouncing balls and collision physics. Follow green target with raw mouse input. No penalties. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/fps/neural-tracker',
     siteName: 'SkillDrills',
@@ -36,8 +36,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Neural Tracker | SkillDrills',
-    description: 'Smooth tracking with collision physics. No penalties. Free.',
+    title: 'Neural Tracker - Smooth Target Drill | SkillDrills',
+    description: 'Master smooth tracking with 5 bouncing balls and collision physics. Follow green target with raw mouse input. No penalties. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -49,10 +49,6 @@ export const metadata = {
 export default function NeuralTrackerPage() {
   return (
     <>
-      <noscript>
-        <h1>Neural Tracker - Smooth Target Following & Continuous FPS Aim Training</h1>
-        <p>Free neural tracker with 5 bouncing balls and raw mouse input. No penalties. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

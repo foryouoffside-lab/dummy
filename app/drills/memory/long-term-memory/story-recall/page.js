@@ -1,8 +1,8 @@
 import StoryRecallClient from './StoryRecallClient';
 
 export const metadata = {
-  title: 'Story Recall Drill - Narrative Memory & Comprehension | SkillDrills',
-  description: 'Train narrative memory with 5 unique stories, 4 questions each. 15-second reading, then recall names, numbers, colors, and events. Mastery achievement. No sign-up.',
+  title: 'Story Recall - Narrative Memory | SkillDrills',
+  description: 'Train narrative memory with 5 unique stories, 4 questions each. 15-second reading, then recall names, numbers, colors, and events. No sign-up.',
   keywords: [
     'story recall', 'narrative memory', 'reading comprehension memory',
     'story memory drill', 'recall details practice', 'long term memory stories',
@@ -17,8 +17,8 @@ export const metadata = {
     'comprehension memory test', 'story understanding practice', 'recall reading drill',
   ],
   openGraph: {
-    title: 'Story Recall Drill - Narrative Memory | SkillDrills',
-    description: '5 unique stories with 4 questions each. Read then recall details. Free.',
+    title: 'Story Recall - Narrative Memory | SkillDrills',
+    description: 'Train narrative memory with 5 unique stories, 4 questions each. 15-second reading, then recall names, numbers, colors, and events. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/memory/long-term-memory/story-recall',
     siteName: 'SkillDrills',
@@ -32,8 +32,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Story Recall Drill | SkillDrills',
-    description: '5 stories with 4 questions each. Read then recall. Free.',
+    title: 'Story Recall - Narrative Memory | SkillDrills',
+    description: 'Train narrative memory with 5 unique stories, 4 questions each. 15-second reading, then recall names, numbers, colors, and events. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -45,10 +45,6 @@ export const metadata = {
 export default function StoryRecallPage() {
   return (
     <>
-      <noscript>
-        <h1>Story Recall Drill - Long-Term Memory & Narrative Comprehension Training</h1>
-        <p>Free story recall drill with 5 unique stories and 4 questions each. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

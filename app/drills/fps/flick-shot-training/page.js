@@ -1,7 +1,7 @@
 import ProFlickClient from './ProFlickClient';
 
 export const metadata = {
-  title: 'Pro Flick Training - Raw Mouse Input Aim Trainer | SkillDrills',
+  title: 'Flick Shot Training - FPS Aim Drill | SkillDrills',
   description: 'Master flick shots with raw mouse input via Pointer Lock API. Sensitivity matched for Valorant, CS2, Overwatch, Apex, Fortnite, and Quake. No sign-up.',
   keywords: [
     'pro flick trainer', 'flick shot training', 'raw mouse input aim trainer',
@@ -17,7 +17,7 @@ export const metadata = {
     'raw input flick practice', 'gaming mouse training', 'precision aim drill',
   ],
   openGraph: {
-    title: 'Pro Flick Training - Raw Mouse Input Trainer | SkillDrills',
+    title: 'Flick Shot Training - FPS Aim Drill | SkillDrills',
     description: 'Sensitivity-matched flick training with raw mouse input. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/fps/flick-shot-training',
@@ -32,7 +32,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Pro Flick Trainer - Raw Input Aim | SkillDrills',
+    title: 'Flick Shot Training - FPS Aim Drill | SkillDrills',
     description: 'Sensitivity-matched flick training with raw mouse input. Free.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
@@ -45,10 +45,6 @@ export const metadata = {
 export default function ProFlickPage() {
   return (
     <>
-      <noscript>
-        <h1>Pro Flick Training Tool - Raw Mouse Input Aim Trainer for FPS Gaming</h1>
-        <p>Free pro flick trainer with raw mouse input and sensitivity matching for Valorant, CS2, Overwatch, Apex, Fortnite, and Quake. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

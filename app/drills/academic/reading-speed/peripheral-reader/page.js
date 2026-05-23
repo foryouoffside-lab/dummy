@@ -1,8 +1,8 @@
-﻿import PeripheralReaderClient from './PeripheralReaderClient';
+import PeripheralReaderClient from './PeripheralReaderClient';
 
 export const metadata = {
-  title: 'Peripheral Vision Training - Extrafoveal Reading Speed | SkillDrills',
-  description: 'Train peripheral vision and expand visual span for faster reading. Words flash left/right while fixating center. 3 modes, adjustable speed 100-1000ms. No sign-up.',
+  title: 'Peripheral Vision - Reading Speed | SkillDrills',
+  description: 'Train peripheral vision for faster reading. Words flash left/right while fixating center. 3 modes, adjustable speed 100-1000ms. No sign-up.',
   keywords: [
     'peripheral vision training', 'extrafoveal processing', 'visual span expansion',
     'speed reading peripheral', 'peripheral reader drill', 'eye span training',
@@ -24,8 +24,8 @@ export const metadata = {
     'free online vision training', 'browser vision drill', 'no download vision practice',
   ],
   openGraph: {
-    title: 'Peripheral Vision Training - Reading Speed Drill | SkillDrills',
-    description: 'Train peripheral vision with flashing words. 3 modes, adjustable speed. Free.',
+    title: 'Peripheral Vision - Reading Speed | SkillDrills',
+    description: 'Train peripheral vision for faster reading. Words flash left/right while fixating center. 3 modes, adjustable speed 100-1000ms. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/academic/reading-speed/peripheral-reader',
     siteName: 'SkillDrills',
@@ -39,8 +39,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Peripheral Vision Training | SkillDrills',
-    description: 'Expand visual span for faster reading. 3 modes. Free.',
+    title: 'Peripheral Vision - Reading Speed | SkillDrills',
+    description: 'Train peripheral vision for faster reading. Words flash left/right while fixating center. 3 modes, adjustable speed 100-1000ms. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -52,10 +52,6 @@ export const metadata = {
 export default function PeripheralReaderPage() {
   return (
     <>
-      <noscript>
-        <h1>Peripheral Vision Training - Extrafoveal Reading Speed Drill</h1>
-        <p>Free peripheral vision training with flashing words. 3 modes, adjustable speed 100-1000ms. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

@@ -1,8 +1,8 @@
-﻿import StressInoculationClient from './StressInoculationClient';
+import StressInoculationClient from './StressInoculationClient';
 
 export const metadata = {
-  title: 'Stress Inoculation Drill - Controlled Exposure & Resilience | SkillDrills',
-  description: 'Build stress resilience with controlled exposure. Maintain 5:6 breathing while red strobe and 880Hz audio challenge focus. 2x points under stress. No sign-up.',
+  title: 'Stress Inoculation - Resilience Drill | SkillDrills',
+  description: 'Build stress resilience with controlled exposure. Maintain 5:6 breathing while red strobe and 880Hz audio challenge focus. No sign-up.',
   keywords: [
     'stress inoculation drill', 'stress resilience training', 'controlled stress exposure',
     'stress tolerance drill', 'mental toughness training', 'stress management practice',
@@ -20,8 +20,8 @@ export const metadata = {
     'free resilience practice', 'browser stress drill', 'no download stress training',
   ],
   openGraph: {
-    title: 'Stress Inoculation Drill - Resilience Training | SkillDrills',
-    description: 'Build stress resilience with controlled exposure. 5:6 breathing, red strobe. Free.',
+    title: 'Stress Inoculation - Resilience Drill | SkillDrills',
+    description: 'Build stress resilience with controlled exposure. Maintain 5:6 breathing while red strobe and 880Hz audio challenge focus. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/mental-fitness/stress-control/stress-inoculation',
     siteName: 'SkillDrills',
@@ -35,8 +35,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Stress Inoculation Drill | SkillDrills',
-    description: 'Build stress resilience with controlled exposure. Free.',
+    title: 'Stress Inoculation - Resilience Drill | SkillDrills',
+    description: 'Build stress resilience with controlled exposure. Maintain 5:6 breathing while red strobe and 880Hz audio challenge focus. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -48,10 +48,6 @@ export const metadata = {
 export default function StressInoculationPage() {
   return (
     <>
-      <noscript>
-        <h1>Stress Inoculation Drill - Controlled Stress Exposure & Resilience Training</h1>
-        <p>Free stress inoculation drill with 5:6 breathing under red strobe and audio stress induction. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

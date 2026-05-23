@@ -1,7 +1,7 @@
-﻿import CalmUnderPressureClient from './CalmUnderPressureClient';
+import CalmUnderPressureClient from './CalmUnderPressureClient';
 
 export const metadata = {
-  title: 'Calm Under Pressure - Stress Inoculation Training | SkillDrills',
+  title: 'Calm Under Pressure - Stress Drill | SkillDrills',
   description: 'Build cognitive resilience with dual-task breathing and cognitive load distractions. 3-minute challenge with 2x points under pressure. No sign-up.',
   keywords: [
     'stress inoculation training', 'calm under pressure drill', 'cognitive resilience training',
@@ -17,7 +17,7 @@ export const metadata = {
     'online stress drill', 'browser stress training', 'no download stress drill',
   ],
   openGraph: {
-    title: 'Calm Under Pressure - Stress Resilience | SkillDrills',
+    title: 'Calm Under Pressure - Stress Drill | SkillDrills',
     description: 'Build stress resilience with dual-task breathing. 3-min challenge. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/mental-fitness/stress-control/calm-under-pressure',
@@ -32,7 +32,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Calm Under Pressure Drill | SkillDrills',
+    title: 'Calm Under Pressure - Stress Drill | SkillDrills',
     description: 'Build stress resilience with dual-task breathing. Free.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
@@ -45,10 +45,6 @@ export const metadata = {
 export default function CalmUnderPressurePage() {
   return (
     <>
-      <noscript>
-        <h1>Calm Under Pressure Drill - Stress Inoculation & Cognitive Resilience Training</h1>
-        <p>Free dual-task stress inoculation drill with coherence breathing and cognitive load. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

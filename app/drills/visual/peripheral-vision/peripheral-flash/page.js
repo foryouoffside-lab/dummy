@@ -1,8 +1,8 @@
-﻿import PeripheralFlashClient from './PeripheralFlashClient';
+import PeripheralFlashClient from './PeripheralFlashClient';
 
 export const metadata = {
-  title: 'Peripheral Flash - Vision Training & Awareness Drill | SkillDrills',
-  description: 'Train peripheral vision with 5-6 shape sequences at 300ms. Keep eyes on center, detect shapes in peripheral field. +1 correct, -1 wrong. No sign-up.',
+  title: 'Peripheral Flash - Vision Training | SkillDrills',
+  description: 'Train peripheral vision with 5-6 shape sequences at 300ms. Keep eyes on center, detect shapes in peripheral field. No sign-up.',
   keywords: [
     'peripheral flash', 'peripheral vision training', 'reaction time test',
     'visual field training', 'peripheral detection', 'flash detection drill',
@@ -18,7 +18,7 @@ export const metadata = {
   ],
   openGraph: {
     title: 'Peripheral Flash - Vision Training | SkillDrills',
-    description: '5-6 shape sequences at 300ms in peripheral field. Free.',
+    description: 'Train peripheral vision with 5-6 shape sequences at 300ms. Keep eyes on center, detect shapes in peripheral field. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/visual/peripheral-vision/peripheral-flash',
     siteName: 'SkillDrills',
@@ -32,8 +32,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Peripheral Flash Drill | SkillDrills',
-    description: '5-6 shape sequences at 300ms. Free vision training.',
+    title: 'Peripheral Flash - Vision Training | SkillDrills',
+    description: 'Train peripheral vision with 5-6 shape sequences at 300ms. Keep eyes on center, detect shapes in peripheral field. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -45,10 +45,6 @@ export const metadata = {
 export default function PeripheralFlashPage() {
   return (
     <>
-      <noscript>
-        <h1>Peripheral Flash - Vision Training & Peripheral Awareness Drill</h1>
-        <p>Free peripheral vision drill with 5-6 shape sequences at 300ms intervals. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

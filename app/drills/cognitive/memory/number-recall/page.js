@@ -1,7 +1,7 @@
 import NumberRecallClient from './NumberRecallClient';
 
 export const metadata = {
-  title: 'Number Recall Drill - Digit Span & Working Memory | SkillDrills',
+  title: 'Number Recall - Digit Span Memory | SkillDrills',
   description: 'Train digit span memory by recalling progressively longer number sequences from 4 to 49 digits across 5 levels. Audio tones for multi-sensory encoding. No sign-up.',
   keywords: [
     'number recall drill', 'digit span test', 'working memory training',
@@ -17,7 +17,7 @@ export const metadata = {
     'instant memory practice', 'digital memory trainer', 'web based memory drill',
   ],
   openGraph: {
-    title: 'Number Recall Drill - Digit Span Training | SkillDrills',
+    title: 'Number Recall - Digit Span Memory | SkillDrills',
     description: 'Memorize and recall digit sequences from 4 to 49 digits across 5 levels. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/cognitive/memory/number-recall',
@@ -32,7 +32,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Number Recall Drill | SkillDrills',
+    title: 'Number Recall - Digit Span Memory | SkillDrills',
     description: 'Train digit span memory. 4 to 49 digits, 5 levels. Free.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
@@ -45,10 +45,6 @@ export const metadata = {
 export default function NumberRecallPage() {
   return (
     <>
-      <noscript>
-        <h1>Number Recall Drill - Digit Span & Working Memory Training</h1>
-        <p>Free digit span memory drill. Recall progressively longer number sequences from 4 to 49 digits. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

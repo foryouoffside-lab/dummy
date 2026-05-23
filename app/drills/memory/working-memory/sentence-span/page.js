@@ -1,8 +1,8 @@
 import SentenceSpanClient from './SentenceSpanClient';
 
 export const metadata = {
-  title: 'Sentence Span Drill - Verbal Working Memory Training | SkillDrills',
-  description: 'Train verbal working memory with 30 unique sentences. Read for 2 seconds each, then recall key nouns. Level-based scoring, no penalties. No sign-up.',
+  title: 'Sentence Span - Verbal Working Memory | SkillDrills',
+  description: 'Train verbal working memory with 30 unique sentences. Read for 2 seconds each, then recall key nouns. No sign-up.',
   keywords: [
     'sentence span drill', 'verbal working memory training', 'sentence recall test',
     'reading span task online', 'verbal memory training free', 'sentence memory test',
@@ -21,8 +21,8 @@ export const metadata = {
     'cognitive reserve training', 'neuroplasticity memory', 'working memory challenge',
   ],
   openGraph: {
-    title: 'Sentence Span Drill - Verbal Working Memory | SkillDrills',
-    description: '30 unique sentences. Read 2s each, recall key nouns. Free.',
+    title: 'Sentence Span - Verbal Working Memory | SkillDrills',
+    description: 'Train verbal working memory with 30 unique sentences. Read for 2 seconds each, then recall key nouns. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/memory/working-memory/sentence-span',
     siteName: 'SkillDrills',
@@ -36,8 +36,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Sentence Span Memory Drill | SkillDrills',
-    description: 'Train verbal working memory. 30 sentences. Free.',
+    title: 'Sentence Span - Verbal Working Memory | SkillDrills',
+    description: 'Train verbal working memory with 30 unique sentences. Read for 2 seconds each, then recall key nouns. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -49,10 +49,6 @@ export const metadata = {
 export default function SentenceSpanPage() {
   return (
     <>
-      <noscript>
-        <h1>Sentence Span Drill - Verbal Working Memory & Reading Span Training</h1>
-        <p>Free sentence span drill with 30 unique sentences. Train verbal working memory. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

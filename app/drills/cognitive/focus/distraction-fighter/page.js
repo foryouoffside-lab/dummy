@@ -1,8 +1,8 @@
 import DistractionFighterClient from './DistractionFighterClient';
 
 export const metadata = {
-  title: 'Distraction Fighter - Stroop Test & Cognitive Inhibition | SkillDrills',
-  description: 'Train cognitive inhibition with the Stroop effect. Identify ink colors while ignoring conflicting word meanings. 8 colors, 60-second challenge. No sign-up.',
+  title: 'Distraction Fighter - Stroop Test | SkillDrills',
+  description: 'Train cognitive inhibition with Stroop effect. Identify ink colors while ignoring conflicting word meanings. 8 colors, 60-second challenge. No sign-up.',
   keywords: [
     'distraction fighter', 'stroop test online', 'cognitive inhibition training',
     'stroop effect drill', 'focus training free', 'interference control practice',
@@ -17,7 +17,7 @@ export const metadata = {
   ],
   openGraph: {
     title: 'Distraction Fighter - Stroop Test | SkillDrills',
-    description: 'Classic Stroop effect drill. Identify ink colors, ignore words. Free.',
+    description: 'Train cognitive inhibition with Stroop effect. Identify ink colors while ignoring conflicting word meanings. 8 colors, 60-second challenge. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/cognitive/focus/distraction-fighter',
     siteName: 'SkillDrills',
@@ -31,8 +31,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Stroop Test - Distraction Fighter | SkillDrills',
-    description: 'Train cognitive inhibition. Identify ink colors, ignore words. Free.',
+    title: 'Distraction Fighter - Stroop Test | SkillDrills',
+    description: 'Train cognitive inhibition with Stroop effect. Identify ink colors while ignoring conflicting word meanings. 8 colors, 60-second challenge. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -44,10 +44,6 @@ export const metadata = {
 export default function DistractionFighterPage() {
   return (
     <>
-      <noscript>
-        <h1>Distraction Fighter - Stroop Test & Cognitive Inhibition Training</h1>
-        <p>Free Stroop effect drill. Identify ink colors while ignoring conflicting word meanings. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

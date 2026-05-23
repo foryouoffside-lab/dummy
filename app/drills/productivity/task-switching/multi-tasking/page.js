@@ -1,7 +1,7 @@
-﻿import DualTargetFlowClient from './DualTargetFlowClient';
+import DualTargetFlowClient from './DualTargetFlowClient';
 
 export const metadata = {
-  title: 'Dual-Target Flow Drill - Multi-Tasking & Divided Attention | SkillDrills',
+  title: 'Dual-Target Flow - Multi-Tasking Drill | SkillDrills',
   description: 'Two shape streams with different targets from 8 types. 35% targets, 65% distractors. Targets change every 30s. 3 lives. No sign-up.',
   keywords: [
     'dual task training', 'multi-tasking drill', 'divided attention',
@@ -17,8 +17,8 @@ export const metadata = {
     'dual shape identification', 'multitask performance test', 'divided focus practice',
   ],
   openGraph: {
-    title: 'Dual-Target Flow Drill - Multi-Tasking | SkillDrills',
-    description: 'Two shape streams with different targets. Free divided attention.',
+    title: 'Dual-Target Flow - Multi-Tasking Drill | SkillDrills',
+    description: 'Two shape streams with different targets from 8 types. 35% targets, 65% distractors. Targets change every 30s. 3 lives. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/productivity/task-switching/multi-tasking',
     siteName: 'SkillDrills',
@@ -32,8 +32,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Dual-Target Flow Drill | SkillDrills',
-    description: 'Two shape streams. Different targets each side. Free.',
+    title: 'Dual-Target Flow - Multi-Tasking Drill | SkillDrills',
+    description: 'Two shape streams with different targets from 8 types. 35% targets, 65% distractors. Targets change every 30s. 3 lives. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -45,10 +45,6 @@ export const metadata = {
 export default function DualTargetFlowPage() {
   return (
     <>
-      <noscript>
-        <h1>Dual-Target Flow Drill - Multi-Tasking & Divided Attention Training</h1>
-        <p>Free dual-target flow drill with two simultaneous shape streams. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

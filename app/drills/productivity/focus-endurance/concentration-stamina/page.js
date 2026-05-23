@@ -1,7 +1,7 @@
-﻿import ConcentrationStaminaClient from './ConcentrationStaminaClient';
+import ConcentrationStaminaClient from './ConcentrationStaminaClient';
 
 export const metadata = {
-  title: 'Concentration Stamina Drill - Sustained Attention Training | SkillDrills',
+  title: 'Concentration Stamina - Attention Drill | SkillDrills',
   description: 'Alternating VOWELS and PRIMES rule sets every 10 seconds. Adaptive 800-400ms speed. 3 lives, combo streaks. No sign-up.',
   keywords: [
     'sustained attention drill', 'concentration training', 'focus endurance practice',
@@ -20,8 +20,8 @@ export const metadata = {
     'free online focus training', 'no sign up concentration drill', 'instant focus practice',
   ],
   openGraph: {
-    title: 'Concentration Stamina Drill - Sustained Attention | SkillDrills',
-    description: 'Alternating VOWELS and PRIMES rules. Adaptive speed. Free.',
+    title: 'Concentration Stamina - Attention Drill | SkillDrills',
+    description: 'Alternating VOWELS and PRIMES rule sets every 10 seconds. Adaptive 800-400ms speed. 3 lives, combo streaks. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/productivity/focus-endurance/concentration-stamina',
     siteName: 'SkillDrills',
@@ -35,8 +35,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Concentration Stamina Drill | SkillDrills',
-    description: 'Train sustained attention with adaptive speed. Free.',
+    title: 'Concentration Stamina - Attention Drill | SkillDrills',
+    description: 'Alternating VOWELS and PRIMES rule sets every 10 seconds. Adaptive 800-400ms speed. 3 lives, combo streaks. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -48,10 +48,6 @@ export const metadata = {
 export default function ConcentrationStaminaPage() {
   return (
     <>
-      <noscript>
-        <h1>Concentration Stamina Drill - Sustained Attention & Cognitive Flexibility Training</h1>
-        <p>Free concentration drill with alternating VOWELS and PRIMES rule sets. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

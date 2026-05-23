@@ -1,8 +1,8 @@
 import ImageAssociationClient from './ImageAssociationClient';
 
 export const metadata = {
-  title: 'Image Association Drill - Visual Memory & Word Recall | SkillDrills',
-  description: 'Train visual association with 30 items, 5 words each. Memorize for 5 seconds, then free recall type all words. Green/red feedback. 60-second challenge. No sign-up.',
+  title: 'Image Association - Visual Memory | SkillDrills',
+  description: 'Train visual association with 30 items, 5 words each. Memorize for 5 seconds, then free recall type all words. Green/red feedback. No sign-up.',
   keywords: [
     'image association', 'visual memory training', 'association memory',
     'word association drill', 'visual association game', 'long term memory',
@@ -17,8 +17,8 @@ export const metadata = {
     'word association memory', 'pictorial memory exercise', 'associative recall game',
   ],
   openGraph: {
-    title: 'Image Association Drill - Visual Memory | SkillDrills',
-    description: '30 items with emoji visuals and 5 words each. Free recall typing. Free.',
+    title: 'Image Association - Visual Memory | SkillDrills',
+    description: 'Train visual association with 30 items, 5 words each. Memorize for 5 seconds, then free recall type all words. Green/red feedback. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/memory/long-term-memory/image-association',
     siteName: 'SkillDrills',
@@ -32,8 +32,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Image Association Drill | SkillDrills',
-    description: '30 items with 5 words each. Memorize then recall. Free.',
+    title: 'Image Association - Visual Memory | SkillDrills',
+    description: 'Train visual association with 30 items, 5 words each. Memorize for 5 seconds, then free recall type all words. Green/red feedback. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -45,10 +45,6 @@ export const metadata = {
 export default function ImageAssociationPage() {
   return (
     <>
-      <noscript>
-        <h1>Image Association Drill - Long-Term Memory & Visual Association Training</h1>
-        <p>Free visual memory drill with 30 items and 5 associated words each. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

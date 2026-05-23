@@ -1,8 +1,8 @@
 import SustainedAttentionClient from './SustainedAttentionClient';
 
 export const metadata = {
-  title: 'Sustained Attention Drill - Vigilance & Focus Training | SkillDrills',
-  description: 'Train sustained attention with target detection. Memorize a number and click only when it appears among flashing digits. Adaptive 300-500ms speed. 60-second challenge. No sign-up.',
+  title: 'Sustained Attention - Vigilance Drill | SkillDrills',
+  description: 'Train sustained attention with target detection. Memorize a number and click when it appears among flashing digits. Adaptive 300-500ms. No sign-up.',
   keywords: [
     'sustained attention drill', 'vigilance training', 'target detection test',
     'attention span training', 'focus endurance drill', 'concentration practice',
@@ -17,8 +17,8 @@ export const metadata = {
     'online attention test', 'browser focus game', 'no download attention training',
   ],
   openGraph: {
-    title: 'Sustained Attention Drill - Vigilance Training | SkillDrills',
-    description: 'Memorize a target number and click only when it appears. Adaptive speed. Free.',
+    title: 'Sustained Attention - Vigilance Drill | SkillDrills',
+    description: 'Train sustained attention with target detection. Memorize a number and click when it appears among flashing digits. Adaptive 300-500ms. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/cognitive/attention/sustained-attention',
     siteName: 'SkillDrills',
@@ -32,8 +32,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Sustained Attention Drill | SkillDrills',
-    description: 'Train vigilance and target detection. 60s challenge. Free.',
+    title: 'Sustained Attention - Vigilance Drill | SkillDrills',
+    description: 'Train sustained attention with target detection. Memorize a number and click when it appears among flashing digits. Adaptive 300-500ms. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -45,10 +45,6 @@ export const metadata = {
 export default function SustainedAttentionPage() {
   return (
     <>
-      <noscript>
-        <h1>Sustained Attention Drill - Vigilance & Target Detection Training</h1>
-        <p>Free sustained attention drill. Memorize a target number and click only when it appears among flashing digits. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

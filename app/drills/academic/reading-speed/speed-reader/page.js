@@ -1,7 +1,7 @@
-﻿import SpeedReaderClient from './SpeedReaderClient';
+import SpeedReaderClient from './SpeedReaderClient';
 
 export const metadata = {
-  title: 'Column Scanner - Speed Reading & Peripheral Vision | SkillDrills',
+  title: 'Column Scanner - Speed Reading Drill | SkillDrills',
   description: 'Train columnar reading with 10 rotating text columns. Adjustable 100-800 WPM speed and 200-500px column width. 60-second challenge. No sign-up.',
   keywords: [
     'column scanner', 'speed reading columns', 'columnar reading practice',
@@ -21,7 +21,7 @@ export const metadata = {
     'free online reading tool', 'browser speed reader', 'no download speed reading',
   ],
   openGraph: {
-    title: 'Column Scanner - Speed Reading Training | SkillDrills',
+    title: 'Column Scanner - Speed Reading Drill | SkillDrills',
     description: '10 rotating text columns. Adjustable 100-800 WPM. 60s challenge. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/academic/reading-speed/speed-reader',
@@ -36,7 +36,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Column Scanner Speed Reading | SkillDrills',
+    title: 'Column Scanner - Speed Reading Drill | SkillDrills',
     description: 'Train columnar reading with 10 rotating columns. Free.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
@@ -49,10 +49,6 @@ export const metadata = {
 export default function SpeedReaderPage() {
   return (
     <>
-      <noscript>
-        <h1>Column Scanner - Speed Reading & Peripheral Vision Training</h1>
-        <p>Free columnar speed reading drill with 10 rotating text columns. Adjustable 100-800 WPM. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

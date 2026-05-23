@@ -1,7 +1,7 @@
 import MathReactionClient from './MathReactionClient';
 
 export const metadata = {
-  title: 'Math Reaction Drill - Speed Math & Odd Even Test | SkillDrills',
+  title: 'Math Reaction - Odd Even Speed Drill | SkillDrills',
   description: 'Train math speed and reaction time with this free odd/even parity drill. Solve equations, identify results. Adaptive difficulty. 60-second challenge. No sign-up.',
   keywords: [
     'math reaction drill', 'odd even math game', 'mental math speed test', 'reaction time math',
@@ -20,7 +20,7 @@ export const metadata = {
     'odd even concept practice', 'parity identification drill',
   ],
   openGraph: {
-    title: 'Math Reaction Drill - Speed Math Training | SkillDrills',
+    title: 'Math Reaction - Odd Even Speed Drill | SkillDrills',
     description: 'Solve equations and identify odd/even results under time pressure. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/academic/math-speed/Math-Reaction',
@@ -35,7 +35,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Math Reaction Drill | SkillDrills',
+    title: 'Math Reaction - Odd Even Speed Drill | SkillDrills',
     description: 'Train mental math speed. Identify odd/even under pressure. Free.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
@@ -48,10 +48,6 @@ export const metadata = {
 export default function MathReactionPage() {
   return (
     <>
-      <noscript>
-        <h1>Math Reaction Drill - Speed Math & Odd Even Parity Training</h1>
-        <p>Free interactive math reaction drill combining mental arithmetic with reaction time training. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

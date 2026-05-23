@@ -1,7 +1,7 @@
-﻿import MultiplicationClient from './MultiplicationClient';
+import MultiplicationClient from './MultiplicationClient';
 
 export const metadata = {
-  title: 'Multiplication Tables Drill - Times Tables Speed Practice | SkillDrills',
+  title: 'Multiplication Tables - Times Practice | SkillDrills',
   description: 'Master multiplication tables with intelligent practice. Prioritizes hard facts 6-12 across 3 ranges up to 20x20. 60-second challenge. No sign-up.',
   keywords: [
     'multiplication tables drill', 'times tables practice', 'multiplication speed test',
@@ -23,8 +23,8 @@ export const metadata = {
     'multiplication for beginners', 'advanced multiplication drill',
   ],
   openGraph: {
-    title: 'Multiplication Tables Drill - Times Tables Practice | SkillDrills',
-    description: 'Intelligent practice prioritizing hard facts. 3 ranges, adaptive scoring. Free.',
+    title: 'Multiplication Tables - Times Practice | SkillDrills',
+    description: 'Master multiplication tables with intelligent practice. Prioritizes hard facts 6-12 across 3 ranges up to 20x20. 60-second challenge. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/academic/math-speed/multiplication-tables',
     siteName: 'SkillDrills',
@@ -38,8 +38,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Multiplication Tables Drill | SkillDrills',
-    description: 'Master times tables with intelligent practice. 3 ranges. Free.',
+    title: 'Multiplication Tables - Times Practice | SkillDrills',
+    description: 'Master multiplication tables with intelligent practice. Prioritizes hard facts 6-12 across 3 ranges up to 20x20. 60-second challenge. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -51,10 +51,6 @@ export const metadata = {
 export default function MultiplicationPage() {
   return (
     <>
-      <noscript>
-        <h1>Multiplication Tables Drill - Times Tables Speed Practice</h1>
-        <p>Free interactive multiplication tables drill with intelligent practice prioritizing hard facts. 3 ranges up to 20x20. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

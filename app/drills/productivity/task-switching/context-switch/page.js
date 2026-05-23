@@ -1,7 +1,7 @@
-﻿import ContextSwitchClient from './ContextSwitchClient';
+import ContextSwitchClient from './ContextSwitchClient';
 
 export const metadata = {
-  title: 'Context Switch Lab - Task Switching Speed Drill | SkillDrills',
+  title: 'Context Switch - Task Switching Drill | SkillDrills',
   description: 'Dual-rule switching: TOP=Even/Odd, BOTTOM=less5/greater5. Numbers 1-9 appear randomly. 1.5s per question. 3 lives, reaction tracking. No sign-up.',
   keywords: [
     'context switching', 'task switching training', 'cognitive flexibility',
@@ -17,7 +17,7 @@ export const metadata = {
     'cognitive control training', 'task switching paradigm', 'switching cost drill',
   ],
   openGraph: {
-    title: 'Context Switch Lab - Task Switching Speed | SkillDrills',
+    title: 'Context Switch - Task Switching Drill | SkillDrills',
     description: 'Dual-rule switching between parity and magnitude. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/productivity/task-switching/context-switch',
@@ -32,7 +32,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Context Switch Lab | SkillDrills',
+    title: 'Context Switch - Task Switching Drill | SkillDrills',
     description: 'Dual-rule task switching. Parity vs Magnitude. Free.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
@@ -45,10 +45,6 @@ export const metadata = {
 export default function ContextSwitchPage() {
   return (
     <>
-      <noscript>
-        <h1>Context Switch Lab - Task Switching Speed & Cognitive Flexibility Training</h1>
-        <p>Free dual-rule task switching drill. TOP=Even/Odd, BOTTOM=less5/greater5. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

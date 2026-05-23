@@ -1,4 +1,4 @@
-﻿import AcademicDrillsClient from './AcademicDrillsClient';
+import AcademicDrillsClient from './AcademicDrillsClient';
 
 export const metadata = {
   title: 'Academic Drills - Math, Reading & Typing | SkillDrills',
@@ -36,7 +36,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Academic Drills | SkillDrills',
+    title: 'Academic Drills - Math, Reading & Typing | SkillDrills',
     description: '12 free drills for math, reading, typing, and comprehension.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },

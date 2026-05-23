@@ -1,8 +1,8 @@
-﻿import DeepWorkLabClient from './DeepWorkLabClient';
+import DeepWorkLabClient from './DeepWorkLabClient';
 
 export const metadata = {
-  title: 'Deep Work Lab - Focus Endurance & Attention Training | SkillDrills',
-  description: 'Track a moving green ring with cursor. +1pt/sec inside, -1pt/sec outside. Real-time focus meter, peak tracking, visual feedback. No sign-up.',
+  title: 'Deep Work Lab - Focus & Attention | SkillDrills',
+  description: 'Track a moving green ring with cursor. +1pt/sec inside, -1pt/sec outside. Real-time focus meter, peak tracking. No sign-up.',
   keywords: [
     'deep work training', 'focus endurance drill', 'sustained attention training',
     'concentration drill free', 'focus training online', 'attention span training',
@@ -21,8 +21,8 @@ export const metadata = {
     'focus training for writers', 'focus training for professionals',
   ],
   openGraph: {
-    title: 'Deep Work Lab - Focus Endurance Training | SkillDrills',
-    description: 'Track a moving ring to train sustained attention. Free.',
+    title: 'Deep Work Lab - Focus & Attention | SkillDrills',
+    description: 'Track a moving green ring with cursor. +1pt/sec inside, -1pt/sec outside. Real-time focus meter, peak tracking. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/productivity/focus-endurance/deep-work',
     siteName: 'SkillDrills',
@@ -36,8 +36,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Deep Work Lab - Focus Training | SkillDrills',
-    description: 'Train sustained attention by tracking a moving ring. Free.',
+    title: 'Deep Work Lab - Focus & Attention | SkillDrills',
+    description: 'Track a moving green ring with cursor. +1pt/sec inside, -1pt/sec outside. Real-time focus meter, peak tracking. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -49,10 +49,6 @@ export const metadata = {
 export default function DeepWorkLabPage() {
   return (
     <>
-      <noscript>
-        <h1>Deep Work Lab - Focus Endurance & Sustained Attention Training</h1>
-        <p>Free deep work drill. Track a moving ring to train sustained attention. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

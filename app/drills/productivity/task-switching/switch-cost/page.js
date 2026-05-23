@@ -1,8 +1,8 @@
-﻿import SwitchCostIntegratorClient from './SwitchCostIntegratorClient';
+import SwitchCostIntegratorClient from './SwitchCostIntegratorClient';
 
 export const metadata = {
-  title: 'Switch Cost Training - Task Switching & Flexibility Drill | SkillDrills',
-  description: 'Alternate between direct and opposite mode orb tracking. Adaptive 1000-400ms speed. 3 lives, combo streaks, reaction tracking. No sign-up.',
+  title: 'Switch Cost - Task Switching Drill | SkillDrills',
+  description: 'Alternate between direct and opposite mode orb tracking. Adaptive 1000-400ms speed. 3 lives, combo streaks. No sign-up.',
   keywords: [
     'switch cost training', 'task switching cost drill', 'cognitive switching practice',
     'switch cost integrator', 'task set reconfiguration', 'cognitive flexibility training',
@@ -20,8 +20,8 @@ export const metadata = {
     'attention training task switching', 'dual task performance', 'multitasking brain training',
   ],
   openGraph: {
-    title: 'Switch Cost Training - Task Switching Drill | SkillDrills',
-    description: 'Alternate direct and opposite mode orb tracking. Free.',
+    title: 'Switch Cost - Task Switching Drill | SkillDrills',
+    description: 'Alternate between direct and opposite mode orb tracking. Adaptive 1000-400ms speed. 3 lives, combo streaks. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/productivity/task-switching/switch-cost',
     siteName: 'SkillDrills',
@@ -35,8 +35,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Switch Cost Training | SkillDrills',
-    description: 'Train task switching efficiency. Adaptive difficulty. Free.',
+    title: 'Switch Cost - Task Switching Drill | SkillDrills',
+    description: 'Alternate between direct and opposite mode orb tracking. Adaptive 1000-400ms speed. 3 lives, combo streaks. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -48,10 +48,6 @@ export const metadata = {
 export default function SwitchCostIntegratorPage() {
   return (
     <>
-      <noscript>
-        <h1>Switch Cost Training - Task Switching & Cognitive Flexibility Drill</h1>
-        <p>Free switch cost training drill with adaptive speed and dual-mode orb tracking. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

@@ -1,7 +1,7 @@
 import DropCatchClient from './DropCatchClient';
 
 export const metadata = {
-  title: 'Reflex Drop Catch Drill - Reaction Speed Training | SkillDrills',
+  title: 'Drop Catch - Reaction Speed Drill | SkillDrills',
   description: 'Catch falling green balls (+1pt), avoid red decoys marked X. Adaptive 400-800px/s speed. 3 lives, streak bonuses. 60-second challenge. No sign-up.',
   keywords: [
     'reflex drop catch', 'reaction speed game', 'visual discrimination training',
@@ -20,7 +20,7 @@ export const metadata = {
     'no download reflex game', 'browser reflex test', 'instant reflex practice',
   ],
   openGraph: {
-    title: 'Reflex Drop Catch Drill - Reaction Speed | SkillDrills',
+    title: 'Drop Catch - Reaction Speed Drill | SkillDrills',
     description: 'Catch green balls, avoid red decoys. Adaptive speed. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/physical/Reflex-Training/drop-catch',
@@ -35,7 +35,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Reflex Drop Catch Drill | SkillDrills',
+    title: 'Drop Catch - Reaction Speed Drill | SkillDrills',
     description: 'Catch green, avoid red. Adaptive speed. Free.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
@@ -48,10 +48,6 @@ export const metadata = {
 export default function DropCatchPage() {
   return (
     <>
-      <noscript>
-        <h1>Reflex Drop Catch Drill - Reaction Speed & Visual Discrimination Training</h1>
-        <p>Free drop catch reflex drill. Catch green balls, avoid red decoys. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

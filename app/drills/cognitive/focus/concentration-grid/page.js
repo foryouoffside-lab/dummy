@@ -1,8 +1,8 @@
 import ConcentrationGridClient from './ConcentrationGridClient';
 
 export const metadata = {
-  title: 'Concentration Grid Drill - Number Search & Focus Training | SkillDrills',
-  description: 'Train visual scanning and focus by finding numbers in order on expanding 3x3 to 8x8 grids. 6 levels, 60-second challenge, combo bonuses. No sign-up.',
+  title: 'Concentration Grid - Number Search | SkillDrills',
+  description: 'Train visual scanning and focus by finding numbers in order on expanding 3x3 to 8x8 grids. 6 levels, 60-second challenge. No sign-up.',
   keywords: [
     'concentration grid drill', 'number search game', 'sequential search training',
     'focus training online', 'visual scanning exercise', 'concentration exercise free',
@@ -19,8 +19,8 @@ export const metadata = {
     'brain games for concentration', 'free attention training', 'online focus test',
   ],
   openGraph: {
-    title: 'Concentration Grid Drill - Focus Training | SkillDrills',
-    description: 'Find numbers in order on expanding 3x3 to 8x8 grids. 60s challenge. Free.',
+    title: 'Concentration Grid - Number Search | SkillDrills',
+    description: 'Train visual scanning and focus by finding numbers in order on expanding 3x3 to 8x8 grids. 6 levels, 60-second challenge. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/cognitive/focus/concentration-grid',
     siteName: 'SkillDrills',
@@ -34,8 +34,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Concentration Grid Drill | SkillDrills',
-    description: 'Train focus with sequential number search on expanding grids. Free.',
+    title: 'Concentration Grid - Number Search | SkillDrills',
+    description: 'Train visual scanning and focus by finding numbers in order on expanding 3x3 to 8x8 grids. 6 levels, 60-second challenge. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -47,10 +47,6 @@ export const metadata = {
 export default function ConcentrationGridPage() {
   return (
     <>
-      <noscript>
-        <h1>Concentration Grid Drill - Sequential Number Search & Focus Training</h1>
-        <p>Free concentration grid drill. Find numbers in order on expanding 3x3 to 8x8 grids. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

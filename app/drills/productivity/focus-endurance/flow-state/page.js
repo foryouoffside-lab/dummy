@@ -1,8 +1,8 @@
-﻿import FlowInductionClient from './FlowInductionClient';
+import FlowInductionClient from './FlowInductionClient';
 
 export const metadata = {
-  title: 'Flow State Training - Deep Concentration Focus Drill | SkillDrills',
-  description: 'Track a moving ring to achieve flow state. +1pt/0.5s inside, adaptive speed, flow meter 0-100%, double ring at 60%+. 60-second challenge. No sign-up.',
+  title: 'Flow State - Concentration Focus Drill | SkillDrills',
+  description: 'Track a moving ring to achieve flow state. +1pt/0.5s inside, adaptive speed, flow meter 0-100%, double ring at 60%+. No sign-up.',
   keywords: [
     'flow state training', 'flow induction drill', 'deep concentration practice',
     'flow experience online', 'focus flow training', 'concentration flow exercise',
@@ -20,8 +20,8 @@ export const metadata = {
     'mihaly csikszentmihalyi flow', 'optimal state of consciousness', 'flow channel',
   ],
   openGraph: {
-    title: 'Flow State Training - Deep Concentration | SkillDrills',
-    description: 'Track a moving ring to enter flow state. Adaptive difficulty. Free.',
+    title: 'Flow State - Concentration Focus Drill | SkillDrills',
+    description: 'Track a moving ring to achieve flow state. +1pt/0.5s inside, adaptive speed, flow meter 0-100%, double ring at 60%+. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/productivity/focus-endurance/flow-state',
     siteName: 'SkillDrills',
@@ -35,8 +35,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Flow State Training | SkillDrills',
-    description: 'Achieve deep concentration by tracking a moving ring. Free.',
+    title: 'Flow State - Concentration Focus Drill | SkillDrills',
+    description: 'Track a moving ring to achieve flow state. +1pt/0.5s inside, adaptive speed, flow meter 0-100%, double ring at 60%+. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -48,10 +48,6 @@ export const metadata = {
 export default function FlowInductionPage() {
   return (
     <>
-      <noscript>
-        <h1>Flow State Training - Deep Concentration & Peak Performance Focus Drill</h1>
-        <p>Free flow state training drill. Track a moving ring to enter optimal concentration. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

@@ -1,7 +1,7 @@
 import SelectiveAttentionClient from './SelectiveAttentionClient';
 
 export const metadata = {
-  title: 'Selective Attention Drill - Visual Search Training | SkillDrills',
+  title: 'Selective Attention - Visual Search | SkillDrills',
   description: 'Train selective attention with visual search. Find items matching color and shape among distractors. Adaptive speed 900-2000ms. 60-second challenge. No sign-up.',
   keywords: [
     'selective attention drill', 'visual search training', 'target identification test',
@@ -18,7 +18,7 @@ export const metadata = {
     'concentration training free', 'mental focus exercise', 'distraction filtering drill',
   ],
   openGraph: {
-    title: 'Selective Attention Drill - Visual Search | SkillDrills',
+    title: 'Selective Attention - Visual Search | SkillDrills',
     description: 'Find matching color and shape among distractors. Adaptive speed. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/cognitive/attention/selective-attention',
@@ -33,7 +33,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Selective Attention Drill | SkillDrills',
+    title: 'Selective Attention - Visual Search | SkillDrills',
     description: 'Train visual search skills. Find matching color and shape. Free.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
@@ -46,10 +46,6 @@ export const metadata = {
 export default function SelectiveAttentionPage() {
   return (
     <>
-      <noscript>
-        <h1>Selective Attention Drill - Visual Search & Target Identification Training</h1>
-        <p>Free visual search drill training selective attention. Find matching color and shape among distractors. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

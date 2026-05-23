@@ -1,7 +1,7 @@
 import ProSmoothPursuitClient from './ProSmoothPursuitClient';
 
 export const metadata = {
-  title: 'Pro Smooth Pursuit - 360Hz Lissajous Tracking Drill | SkillDrills',
+  title: 'Pro Smooth Pursuit - Lissajous Track | SkillDrills',
   description: 'Track Lissajous curve targets at 360Hz with raw mouse input. +1pt every 2 seconds on target. 60-second FPS aim challenge. No sign-up.',
   keywords: [
     'pro smooth pursuit', 'Lissajous tracking', 'precision aim trainer',
@@ -18,7 +18,7 @@ export const metadata = {
     'online aim practice', 'browser aim trainer', 'no download aim practice',
   ],
   openGraph: {
-    title: 'Pro Smooth Pursuit - 360Hz Tracking | SkillDrills',
+    title: 'Pro Smooth Pursuit - Lissajous Track | SkillDrills',
     description: 'Lissajous curve tracking with raw mouse input. Free FPS aim training.',
     type: 'article',
     url: 'https://skilldrills.online/drills/fps/pro-smooth-pursuit',
@@ -33,7 +33,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Pro Smooth Pursuit | SkillDrills',
+    title: 'Pro Smooth Pursuit - Lissajous Track | SkillDrills',
     description: '360Hz Lissajous curve tracking. Raw mouse input. Free.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
@@ -46,10 +46,6 @@ export const metadata = {
 export default function ProSmoothPursuitPage() {
   return (
     <>
-      <noscript>
-        <h1>Pro Smooth Pursuit - 360Hz Lissajous Tracking & Precision Aim Training</h1>
-        <p>Free pro-level smooth pursuit drill with Lissajous curve tracking at 360Hz. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

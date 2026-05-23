@@ -1,7 +1,7 @@
 import AnchorFlickClient from './AnchorFlickClient';
 
 export const metadata = {
-  title: 'Anchor Flick Trainer - Raw Input FPS Aim Drill | SkillDrills',
+  title: 'Flick Training - Raw Input Aim Drill | SkillDrills',
   description: 'Master flick shots with raw mouse input. Click anchor, flick to shrinking target. Speed-based scoring, shot analytics, path efficiency tracking. No sign-up.',
   keywords: [
     'anchor flick trainer', 'flick shot training', 'flick aim practice free',
@@ -19,7 +19,7 @@ export const metadata = {
     'flick shot analyzer', 'overshoot undershoot tracking', 'aim analytics free',
   ],
   openGraph: {
-    title: 'Anchor Flick Trainer - Raw Input Aim | SkillDrills',
+    title: 'Flick Training - Raw Input Aim Drill | SkillDrills',
     description: 'Raw mouse input flick trainer with shrinking targets. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/fps/flick-training',
@@ -34,7 +34,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Anchor Flick Trainer | SkillDrills',
+    title: 'Flick Training - Raw Input Aim Drill | SkillDrills',
     description: 'Raw mouse input flick training with shrinking targets. Free.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
@@ -47,10 +47,6 @@ export const metadata = {
 export default function AnchorFlickPage() {
   return (
     <>
-      <noscript>
-        <h1>Anchor Flick Trainer - Raw Mouse Input FPS Aim & Precision Training</h1>
-        <p>Free anchor flick trainer with raw mouse input and speed-based scoring. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

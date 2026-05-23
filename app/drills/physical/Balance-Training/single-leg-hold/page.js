@@ -1,7 +1,7 @@
 import SingleLegEquilibriumClient from './SingleLegEquilibriumClient';
 
 export const metadata = {
-  title: 'Single Leg Equilibrium - Balance Stability Drill | SkillDrills',
+  title: 'Single Leg Hold - Balance Stability | SkillDrills',
   description: 'Maintain link between cursor and bouncing anchor. +1pt/2s connected, -1pt/s broken. Stability %, streak tracking. No sign-up.',
   keywords: [
     'single leg balance drill', 'equilibrium training', 'balance stability drill',
@@ -18,7 +18,7 @@ export const metadata = {
     'browser balance drill', 'no download coordination test', 'web based motor test',
   ],
   openGraph: {
-    title: 'Single Leg Equilibrium - Balance Stability | SkillDrills',
+    title: 'Single Leg Hold - Balance Stability | SkillDrills',
     description: 'Maintain link between cursor and bouncing anchor. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/physical/Balance-Training/single-leg-hold',
@@ -33,7 +33,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Equilibrium Balance Drill | SkillDrills',
+    title: 'Single Leg Hold - Balance Stability | SkillDrills',
     description: 'Train motor control and stability. Free.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
@@ -46,10 +46,6 @@ export const metadata = {
 export default function SingleLegEquilibriumPage() {
   return (
     <>
-      <noscript>
-        <h1>Single Leg Equilibrium Drill - Balance Stability & Motor Control Training</h1>
-        <p>Free equilibrium drill. Maintain cursor-anchor link. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

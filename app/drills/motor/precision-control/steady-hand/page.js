@@ -1,7 +1,7 @@
-﻿import SteadyHandClient from './SteadyHandClient';
+import SteadyHandClient from './SteadyHandClient';
 
 export const metadata = {
-  title: 'Sustained Circuit - Steady Hand Path Tracking Drill | SkillDrills',
+  title: 'Steady Hand - Path Tracking Drill | SkillDrills',
   description: 'Trace a winding corridor with steady cursor control. Complete laps for 15 points. Corridor shrinks 50px to 12px with streak. No sign-up.',
   keywords: [
     'steady hand drill', 'path tracing game', 'precision tracking test', 'motor endurance training',
@@ -17,7 +17,7 @@ export const metadata = {
     'skilldrills steady hand', 'skilldrills motor drill', 'free precision training',
   ],
   openGraph: {
-    title: 'Sustained Circuit - Steady Hand Path Tracking | SkillDrills',
+    title: 'Steady Hand - Path Tracking Drill | SkillDrills',
     description: 'Trace winding corridor with steady cursor. 15pts per lap. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/motor/precision-control/steady-hand',
@@ -32,7 +32,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Sustained Circuit Drill | SkillDrills',
+    title: 'Steady Hand - Path Tracking Drill | SkillDrills',
     description: 'Trace the path, keep steady. Free precision training.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
@@ -45,10 +45,6 @@ export const metadata = {
 export default function SteadyHandPage() {
   return (
     <>
-      <noscript>
-        <h1>Sustained Circuit - Steady Hand Path Tracking & Precision Motor Training</h1>
-        <p>Free steady hand drill. Trace a winding corridor with cursor. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

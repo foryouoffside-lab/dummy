@@ -1,8 +1,8 @@
 import WordRecallClient from './WordRecallClient';
 
 export const metadata = {
-  title: 'Word Recall Drill - Verbal Short-Term Memory Training | SkillDrills',
-  description: 'Train verbal memory with 50 unique words and progressive difficulty. 10-second memorization, then free recall typing. Green/red feedback. No sign-up.',
+  title: 'Word Recall - Short-Term Memory | SkillDrills',
+  description: 'Train verbal memory with 50 unique words and progressive difficulty. 10-second memorization, then free recall typing. No sign-up.',
   keywords: [
     'word recall', 'verbal memory', 'word list memory', 'short term memory words',
     'word recall test', 'verbal learning drill', 'word memory game',
@@ -17,8 +17,8 @@ export const metadata = {
     'word memorization practice', 'vocabulary memory test', 'word list drill',
   ],
   openGraph: {
-    title: 'Word Recall Drill - Verbal Memory Training | SkillDrills',
-    description: '50 unique words with progressive difficulty. Memorize then free recall. Free.',
+    title: 'Word Recall - Short-Term Memory | SkillDrills',
+    description: 'Train verbal memory with 50 unique words and progressive difficulty. 10-second memorization, then free recall typing. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/memory/short-term-memory/word-recall',
     siteName: 'SkillDrills',
@@ -32,8 +32,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Word Recall Drill | SkillDrills',
-    description: '50 unique words. Memorize then free recall type. Free.',
+    title: 'Word Recall - Short-Term Memory | SkillDrills',
+    description: 'Train verbal memory with 50 unique words and progressive difficulty. 10-second memorization, then free recall typing. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -45,10 +45,6 @@ export const metadata = {
 export default function WordRecallPage() {
   return (
     <>
-      <noscript>
-        <h1>Word Recall Drill - Short-Term Memory & Verbal Learning Training</h1>
-        <p>Free word recall drill with 50 unique words and progressive difficulty. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

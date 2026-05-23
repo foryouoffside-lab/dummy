@@ -1,7 +1,7 @@
-﻿import GestureSpeedClient from './GestureSpeedClient';
+import GestureSpeedClient from './GestureSpeedClient';
 
 export const metadata = {
-  title: 'Vector Recoil - Flick & Return Gesture Speed Drill | SkillDrills',
+  title: 'Gesture Speed - Flick & Return Drill | SkillDrills',
   description: 'Flick to click gates within 350ms, then return to center. Direction arrow, timer ring. 3-life system. No sign-up.',
   keywords: [
     'gesture speed', 'flick training', 'mouse gesture', 'rapid movement',
@@ -16,7 +16,7 @@ export const metadata = {
     'motor speed practice', 'flick reflex training', 'gesture speed test free',
   ],
   openGraph: {
-    title: 'Vector Recoil - Flick & Return Gesture Speed | SkillDrills',
+    title: 'Gesture Speed - Flick & Return Drill | SkillDrills',
     description: '350ms gate clicking with flick-and-return cycles. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/motor/movement-speed/gesture-speed',
@@ -31,7 +31,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Vector Recoil Drill | SkillDrills',
+    title: 'Gesture Speed - Flick & Return Drill | SkillDrills',
     description: '350ms gate clicking with flick-and-return. Free.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
@@ -44,10 +44,6 @@ export const metadata = {
 export default function GestureSpeedPage() {
   return (
     <>
-      <noscript>
-        <h1>Vector Recoil - Flick & Return Gesture Speed Training</h1>
-        <p>Free flick-and-return gesture speed drill with 350ms gate windows. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

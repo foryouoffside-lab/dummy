@@ -1,7 +1,7 @@
 import StabilityChallengeClient from './StabilityChallengeClient';
 
 export const metadata = {
-  title: 'Gravitational Stability Drill - Kinetic Resistance | SkillDrills',
+  title: 'Stability Challenge - Kinetic Resistance | SkillDrills',
   description: 'Resist simulated wind forces to keep cursor centered. Adaptive difficulty, pure positive scoring. +1pt/0.5s stability. No sign-up.',
   keywords: [
     'gravitational stability drill', 'kinetic resistance training', 'balance challenge online',
@@ -18,7 +18,7 @@ export const metadata = {
     'gaming mouse control', 'esports motor training', 'competitive gaming practice',
   ],
   openGraph: {
-    title: 'Gravitational Stability Drill - Kinetic Resistance | SkillDrills',
+    title: 'Stability Challenge - Kinetic Resistance | SkillDrills',
     description: 'Resist wind forces, keep cursor centered. Adaptive difficulty. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/physical/Balance-Training/stability-challenge',
@@ -33,7 +33,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Gravitational Stability Drill | SkillDrills',
+    title: 'Stability Challenge - Kinetic Resistance | SkillDrills',
     description: 'Train motor control with adaptive wind resistance. Free.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
@@ -46,10 +46,6 @@ export const metadata = {
 export default function StabilityChallengePage() {
   return (
     <>
-      <noscript>
-        <h1>Gravitational Stability Drill - Kinetic Resistance & Balance Training</h1>
-        <p>Free gravitational stability drill. Resist wind forces to keep cursor centered. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

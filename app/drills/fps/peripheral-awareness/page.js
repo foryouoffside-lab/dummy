@@ -1,8 +1,8 @@
 import PeripheralAwarenessClient from './PeripheralAwarenessClient';
 
 export const metadata = {
-  title: 'Peripheral Awareness Trainer - Edge Detection FPS Drill | SkillDrills',
-  description: 'Train peripheral vision with edge-spawning targets. Fixate on center crosshair, detect targets at screen edges. Raw mouse input, 3 lives. No sign-up.',
+  title: 'Peripheral Awareness - Edge Detection | SkillDrills',
+  description: 'Train peripheral vision with edge-spawning targets. Fixate on center crosshair, detect targets at screen edges. Raw mouse input. No sign-up.',
   keywords: [
     'peripheral awareness trainer', 'edge target detection', 'peripheral vision FPS training',
     'visual field training drill', 'peripheral target practice', 'FPS awareness training free',
@@ -18,8 +18,8 @@ export const metadata = {
     'skilldrills peripheral', 'skilldrills FPS drill', 'free gaming practice',
   ],
   openGraph: {
-    title: 'Peripheral Awareness Trainer - FPS Vision Drill | SkillDrills',
-    description: 'Edge-spawning targets with raw mouse input. Train FPS peripheral vision. Free.',
+    title: 'Peripheral Awareness - Edge Detection | SkillDrills',
+    description: 'Train peripheral vision with edge-spawning targets. Fixate on center crosshair, detect targets at screen edges. Raw mouse input. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/fps/peripheral-awareness',
     siteName: 'SkillDrills',
@@ -33,8 +33,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Peripheral Awareness Trainer | SkillDrills',
-    description: 'Edge target detection with raw mouse input. Free FPS training.',
+    title: 'Peripheral Awareness - Edge Detection | SkillDrills',
+    description: 'Train peripheral vision with edge-spawning targets. Fixate on center crosshair, detect targets at screen edges. Raw mouse input. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -46,10 +46,6 @@ export const metadata = {
 export default function PeripheralAwarenessPage() {
   return (
     <>
-      <noscript>
-        <h1>Peripheral Awareness Trainer - Edge Target Detection & FPS Vision Training</h1>
-        <p>Free peripheral awareness drill with edge-spawning targets and raw mouse input. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

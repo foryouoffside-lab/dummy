@@ -1,7 +1,7 @@
-﻿import VisualSearchClient from './VisualSearchClient';
+import VisualSearchClient from './VisualSearchClient';
 
 export const metadata = {
-  title: 'Visual Search Drill - Conjunctive Search & Scanning | SkillDrills',
+  title: 'Visual Search - Conjunctive Scanning | SkillDrills',
   description: 'Find C among 160 rotated O distractors in a 16x10 grid. Millisecond search time tracking. +1 correct, -1 wrong. 60-second challenge. No sign-up.',
   keywords: [
     'visual search', 'conjunctive search', 'visual scanning training',
@@ -17,7 +17,7 @@ export const metadata = {
     'visual search speed', 'attention to detail practice', 'concentration exercise',
   ],
   openGraph: {
-    title: 'Visual Search Drill - Conjunctive Search | SkillDrills',
+    title: 'Visual Search - Conjunctive Scanning | SkillDrills',
     description: 'Find C among 160 rotated Os in 16x10 grid. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/visual/visual-recognition/visual-search',
@@ -32,7 +32,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Visual Search Drill | SkillDrills',
+    title: 'Visual Search - Conjunctive Scanning | SkillDrills',
     description: 'Find C among 160 rotated Os. Millisecond tracking. Free.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
@@ -45,10 +45,6 @@ export const metadata = {
 export default function VisualSearchPage() {
   return (
     <>
-      <noscript>
-        <h1>Visual Search Drill - Conjunctive Search & Visual Scanning Training</h1>
-        <p>Free conjunctive visual search drill. Find C among 160 rotated O distractors. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

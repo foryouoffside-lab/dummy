@@ -1,7 +1,7 @@
 import FlickShot240Client from './FlickShot240Client';
 
 export const metadata = {
-  title: 'Flick Shot 240FPS Drill - Adaptive Speed Aim Training | SkillDrills',
+  title: 'Flick Shot 240FPS - Adaptive Aim | SkillDrills',
   description: 'Master flick shots with adaptive target windows 150-1000ms. Timer ring feedback, 5 lives, shot analytics. For Valorant, CS2, Apex. No sign-up.',
   keywords: [
     'flick shot 240fps', 'adaptive flick drill', 'FPS flick training', 'aim trainer flick',
@@ -17,8 +17,8 @@ export const metadata = {
     'FPS warm up drill', 'daily aim practice', 'flick shot improvement',
   ],
   openGraph: {
-    title: 'Flick Shot 240FPS Drill - Adaptive Aim Training | SkillDrills',
-    description: 'Adaptive flick targets at 240FPS. Timer ring feedback. Free.',
+    title: 'Flick Shot 240FPS - Adaptive Aim | SkillDrills',
+    description: 'Master flick shots with adaptive target windows 150-1000ms. Timer ring feedback, 5 lives, shot analytics. For Valorant, CS2, Apex. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/fps/flick-shot-240fps',
     siteName: 'SkillDrills',
@@ -32,8 +32,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Flick Shot 240FPS Drill | SkillDrills',
-    description: 'Adaptive flick targets at 240FPS. 5 lives, shot analytics. Free.',
+    title: 'Flick Shot 240FPS - Adaptive Aim | SkillDrills',
+    description: 'Master flick shots with adaptive target windows 150-1000ms. Timer ring feedback, 5 lives, shot analytics. For Valorant, CS2, Apex. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -45,10 +45,6 @@ export const metadata = {
 export default function FlickShot240Page() {
   return (
     <>
-      <noscript>
-        <h1>Flick Shot 240FPS Drill - Adaptive Speed FPS Aim & Reflex Training</h1>
-        <p>Free adaptive flick shot trainer at 240FPS with timer ring feedback and shot analytics. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

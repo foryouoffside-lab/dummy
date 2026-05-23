@@ -1,7 +1,7 @@
 import ProTrackingClient from './ProTrackingClient';
 
 export const metadata = {
-  title: 'Pro Tracking Trainer - Raw Input FPS Aim Drill | SkillDrills',
+  title: 'Pro Tracking - Raw Input Aim Drill | SkillDrills',
   description: 'Master FPS tracking with raw mouse input. Track green target among 6 bouncing balls with 1.5s switches and infinite speed scaling. +5pts/sec. No sign-up.',
   keywords: [
     'pro tracking drill', 'FPS tracking trainer', 'raw input aim trainer',
@@ -18,7 +18,7 @@ export const metadata = {
     'mouse control training', 'hand eye coordination FPS', 'gaming aim improvement',
   ],
   openGraph: {
-    title: 'Pro Tracking Trainer - Raw Input Aim Drill | SkillDrills',
+    title: 'Pro Tracking - Raw Input Aim Drill | SkillDrills',
     description: 'Raw mouse input tracking with 1.5s switches and infinite speed scaling. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/fps/pro-tracking',
@@ -33,7 +33,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Pro Tracking Trainer | SkillDrills',
+    title: 'Pro Tracking - Raw Input Aim Drill | SkillDrills',
     description: 'Raw input tracking with infinite speed scaling. Free.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
@@ -46,10 +46,6 @@ export const metadata = {
 export default function ProTrackingPage() {
   return (
     <>
-      <noscript>
-        <h1>Pro Tracking Trainer - Raw Input FPS Aim Tracking Drill</h1>
-        <p>Free pro-level tracking drill with raw mouse input and infinite speed scaling. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

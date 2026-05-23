@@ -1,8 +1,8 @@
 import ReactionDrillClient from './ReactionDrillClient';
 
 export const metadata = {
-  title: '240FPS Reaction Drill - Click Timing & FPS Reflex Training | SkillDrills',
-  description: 'Train click timing with a 200ms flash window. Raw mouse input, 5 lives, millisecond reaction tracking, and combo streaks. For Valorant, CS2, and all FPS games. No sign-up.',
+  title: '240FPS Reaction - Click & Reflex | SkillDrills',
+  description: 'Train click timing with 200ms flash window. Raw mouse input, 5 lives, millisecond reaction tracking. For Valorant, CS2, and all FPS games. No sign-up.',
   keywords: [
     '240fps reaction drill', 'click timing test', 'FPS reflex training', 'reaction time drill',
     'click reflex test', 'gaming reaction speed', '200ms reaction window',
@@ -15,8 +15,8 @@ export const metadata = {
     'visual reaction speed', 'hand-eye coordination test', 'mouse click speed',
   ],
   openGraph: {
-    title: '240FPS Reaction Drill - FPS Reflex Training | SkillDrills',
-    description: 'Train click timing with 200ms flash window. Raw input, 5 lives. Free.',
+    title: '240FPS Reaction - Click & Reflex | SkillDrills',
+    description: 'Train click timing with 200ms flash window. Raw mouse input, 5 lives, millisecond reaction tracking. For Valorant, CS2, and all FPS games. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/fps/240fps-click-test',
     siteName: 'SkillDrills',
@@ -30,8 +30,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: '240FPS Reaction Drill | SkillDrills',
-    description: 'Train FPS reflexes with 200ms flash window. Free.',
+    title: '240FPS Reaction - Click & Reflex | SkillDrills',
+    description: 'Train click timing with 200ms flash window. Raw mouse input, 5 lives, millisecond reaction tracking. For Valorant, CS2, and all FPS games. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -43,10 +43,6 @@ export const metadata = {
 export default function ReactionDrillPage() {
   return (
     <>
-      <noscript>
-        <h1>240FPS Reaction Drill - Click Timing & Reflex Training for FPS Gaming</h1>
-        <p>Free FPS reaction drill with 200ms flash window and raw mouse input. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

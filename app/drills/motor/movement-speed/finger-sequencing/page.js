@@ -1,7 +1,7 @@
-﻿import FingerSequencingClient from './FingerSequencingClient';
+import FingerSequencingClient from './FingerSequencingClient';
 
 export const metadata = {
-  title: 'Fractal Link - Finger Sequencing Speed Drill | SkillDrills',
+  title: 'Finger Sequencing - Speed Drill | SkillDrills',
   description: 'Click 3 nodes largest to smallest within 2 seconds. Pulsing green nodes, timer ring, dashed guide lines. 3-life system. No sign-up.',
   keywords: [
     'finger sequencing', 'motor sequencing', 'rapid clicking', 'finger speed training',
@@ -16,7 +16,7 @@ export const metadata = {
     'ordered motor execution', 'clicking sequence game', 'finger control training free',
   ],
   openGraph: {
-    title: 'Fractal Link - Finger Sequencing Speed | SkillDrills',
+    title: 'Finger Sequencing - Speed Drill | SkillDrills',
     description: 'Click 3 nodes largest to smallest within 2 seconds. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/motor/movement-speed/finger-sequencing',
@@ -31,7 +31,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Fractal Link Drill | SkillDrills',
+    title: 'Finger Sequencing - Speed Drill | SkillDrills',
     description: 'Click 3 nodes largest to smallest. Timer ring. Free.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
@@ -44,10 +44,6 @@ export const metadata = {
 export default function FingerSequencingPage() {
   return (
     <>
-      <noscript>
-        <h1>Fractal Link - Finger Sequencing Speed & Precision Motor Training</h1>
-        <p>Free finger sequencing drill with 3-node chains. Click largest to smallest. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

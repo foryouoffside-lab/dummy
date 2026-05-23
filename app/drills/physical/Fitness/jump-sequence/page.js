@@ -1,7 +1,7 @@
 import JumpSequenceClient from './JumpSequenceClient';
 
 export const metadata = {
-  title: 'Jump Sequence Drill - Precision Jumping & Trajectory | SkillDrills',
+  title: 'Jump Sequence - Precision & Trajectory | SkillDrills',
   description: 'Charge-and-launch with mid-air steering. Land on green targets for points. Combo streaks every 5 hits. 60-second challenge. No sign-up.',
   keywords: [
     'jump sequence drill', 'precision jumping game', 'trajectory control training',
@@ -20,8 +20,8 @@ export const metadata = {
     'competitive gaming skills', 'reflex jumping drill', 'movement prediction training',
   ],
   openGraph: {
-    title: 'Jump Sequence Drill - Precision Jumping | SkillDrills',
-    description: 'Charge-and-launch with mid-air steering. Free.',
+    title: 'Jump Sequence - Precision & Trajectory | SkillDrills',
+    description: 'Charge-and-launch with mid-air steering. Land on green targets for points. Combo streaks every 5 hits. 60-second challenge. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/physical/Fitness/jump-sequence',
     siteName: 'SkillDrills',
@@ -35,8 +35,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Jump Sequence Drill | SkillDrills',
-    description: 'Charge, launch, and steer to land on targets. Free.',
+    title: 'Jump Sequence - Precision & Trajectory | SkillDrills',
+    description: 'Charge-and-launch with mid-air steering. Land on green targets for points. Combo streaks every 5 hits. 60-second challenge. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -48,10 +48,6 @@ export const metadata = {
 export default function JumpSequencePage() {
   return (
     <>
-      <noscript>
-        <h1>Jump Sequence Drill - Precision Jumping & Trajectory Control Training</h1>
-        <p>Free charge-and-launch drill with mid-air steering. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

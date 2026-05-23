@@ -1,8 +1,8 @@
-﻿import GhostLinkClient from './GhostLinkClient';
+import GhostLinkClient from './GhostLinkClient';
 
 export const metadata = {
-  title: 'Ghost-Link Tracking Drill - Multi-Object Visual Memory | SkillDrills',
-  description: 'Train multi-object tracking with 2 green targets among 11 moving balls. 2-second preview, 60s tracking, then identify. 10pts per correct ball. No sign-up.',
+  title: 'Ghost-Link Tracking - Multi-Object | SkillDrills',
+  description: '2 green targets among 11 moving balls. 2-second preview, 60s tracking, then identify. 10pts per correct ball. MOT paradigm. No sign-up.',
   keywords: [
     'multi-object tracking', 'visual memory training', 'multiple target tracking',
     'ghost link tracking', 'visual working memory', 'object tracking drill',
@@ -17,8 +17,8 @@ export const metadata = {
     'cognitive psychology MOT', 'multiple object pursuit', 'visual cognition exercise',
   ],
   openGraph: {
-    title: 'Ghost-Link Tracking Drill - Multi-Object MOT | SkillDrills',
-    description: '2 green targets among 11 moving balls. Memorize, track, identify. Free.',
+    title: 'Ghost-Link Tracking - Multi-Object | SkillDrills',
+    description: '2 green targets among 11 moving balls. 2-second preview, 60s tracking, then identify. 10pts per correct ball. MOT paradigm. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/visual/tracking-accuracy/multiple-targets',
     siteName: 'SkillDrills',
@@ -32,8 +32,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Ghost-Link Tracking Drill | SkillDrills',
-    description: '2 targets among 11 balls. Memorize, track, identify. Free.',
+    title: 'Ghost-Link Tracking - Multi-Object | SkillDrills',
+    description: '2 green targets among 11 moving balls. 2-second preview, 60s tracking, then identify. 10pts per correct ball. MOT paradigm. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -45,10 +45,6 @@ export const metadata = {
 export default function GhostLinkPage() {
   return (
     <>
-      <noscript>
-        <h1>Ghost-Link Tracking Drill - Multi-Object Visual Memory & Tracking Training</h1>
-        <p>Free multi-object tracking drill with 2 targets among 11 moving balls. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

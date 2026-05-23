@@ -1,8 +1,8 @@
 import FPSHubClient from './FPSHubClient';
 
 export const metadata = {
-  title: 'FPS Aim Training - 22 Free Drills for Valorant, CS2 & FPS Games | SkillDrills',
-  description: '22 free FPS aim training drills across 4 categories: Aim Accuracy, Tracking, Reaction Speed, and Awareness. Improve flick shots, smooth tracking, and peripheral vision. No sign-up.',
+  title: 'FPS Aim Training - 22 Drills for Gamers | SkillDrills',
+  description: '22 free FPS aim training drills across 4 categories: Aim Accuracy, Tracking, Reaction Speed, and Awareness. Improve flick shots and tracking. No sign-up.',
   keywords: [
     'FPS aim training', 'aim trainer', 'flick shot practice', 'tracking drills',
     'free aim trainer', 'Valorant aim training', 'CS2 aim practice',
@@ -17,8 +17,8 @@ export const metadata = {
     'skilldrills FPS', 'skilldrills aim trainer',
   ],
   openGraph: {
-    title: 'FPS Aim Training - 22 Free Drills for FPS Games | SkillDrills',
-    description: 'Master flick shots, tracking, reaction speed, and awareness with 22 free FPS aim drills. No sign-up. Train for Valorant, CS2, Apex, Overwatch.',
+    title: 'FPS Aim Training - 22 Drills for Gamers | SkillDrills',
+    description: '22 free FPS aim training drills across 4 categories: Aim Accuracy, Tracking, Reaction Speed, and Awareness. Improve flick shots and tracking. No sign-up.',
     type: 'website',
     url: 'https://skilldrills.online/drills/fps',
     siteName: 'SkillDrills',
@@ -32,8 +32,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'FPS Aim Training - 22 Free Drills | SkillDrills',
-    description: 'Master FPS aim with 22 free drills. No sign-up required.',
+    title: 'FPS Aim Training - 22 Drills for Gamers | SkillDrills',
+    description: '22 free FPS aim training drills across 4 categories: Aim Accuracy, Tracking, Reaction Speed, and Awareness. Improve flick shots and tracking. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -45,10 +45,7 @@ export const metadata = {
 export default function FPSHubPage() {
   return (
     <>
-      <noscript>
-        <h1>FPS Aim Training - 22 Free Drills for Valorant, CS2 & All FPS Games</h1>
-        <p>Master FPS aim with 22 free training drills. No sign-up required.</p>
-      </noscript>
+      
       <FPSHubClient />
     </>
   );

@@ -1,8 +1,8 @@
 import SymbolMatchingClient from './SymbolMatchingClient';
 
 export const metadata = {
-  title: 'Symbol Matching Drill - Cognitive Flexibility Training | SkillDrills',
-  description: 'Train cognitive flexibility by matching Greek symbols to numbers with keys that change after every answer. 75-second challenge with reaction time tracking. No sign-up.',
+  title: 'Symbol Matching - Flexibility Drill | SkillDrills',
+  description: 'Train cognitive flexibility by matching Greek symbols to numbers with keys that change after every answer. 75-second challenge. No sign-up.',
   keywords: [
     'symbol matching drill', 'cognitive flexibility training', 'processing speed test',
     'symbol recognition game', 'reaction time test online', 'brain training free',
@@ -19,8 +19,8 @@ export const metadata = {
     'working memory exercise', 'task switching practice', 'mental processing speed',
   ],
   openGraph: {
-    title: 'Symbol Matching Drill - Cognitive Flexibility | SkillDrills',
-    description: 'Match Greek symbols to numbers with changing keys. 75s challenge. Free.',
+    title: 'Symbol Matching - Flexibility Drill | SkillDrills',
+    description: 'Train cognitive flexibility by matching Greek symbols to numbers with keys that change after every answer. 75-second challenge. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/cognitive/processing-speed/symbol-matching',
     siteName: 'SkillDrills',
@@ -34,8 +34,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Symbol Matching Drill | SkillDrills',
-    description: 'Train cognitive flexibility. Match symbols to numbers. Free.',
+    title: 'Symbol Matching - Flexibility Drill | SkillDrills',
+    description: 'Train cognitive flexibility by matching Greek symbols to numbers with keys that change after every answer. 75-second challenge. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -47,10 +47,6 @@ export const metadata = {
 export default function SymbolMatchingPage() {
   return (
     <>
-      <noscript>
-        <h1>Symbol Matching Drill - Cognitive Flexibility & Processing Speed Training</h1>
-        <p>Free symbol matching drill with Greek symbols and constantly changing number keys. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

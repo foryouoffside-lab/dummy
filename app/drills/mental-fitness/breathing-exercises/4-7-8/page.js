@@ -1,7 +1,7 @@
-﻿import VagalBrakeClient from './VagalBrakeClient';
+import VagalBrakeClient from './VagalBrakeClient';
 
 export const metadata = {
-  title: '4-7-8 Breathing Exercise - Vagal Brake Relaxation | SkillDrills',
+  title: '4-7-8 Breathing - Vagal Brake Relaxation | SkillDrills',
   description: 'Master the 4-7-8 breathing technique with guided visual pacer. Inhale 4s, hold 7s, exhale 8s. Activates vagus nerve for deep calm. No sign-up.',
   keywords: [
     '4-7-8 breathing', 'vagal brake', 'breathing exercise', 'relaxation technique',
@@ -18,7 +18,7 @@ export const metadata = {
     'no sign up breathing exercise', 'browser breathing app', 'instant relaxation',
   ],
   openGraph: {
-    title: '4-7-8 Breathing Exercise - Vagal Brake Relaxation | SkillDrills',
+    title: '4-7-8 Breathing - Vagal Brake Relaxation | SkillDrills',
     description: 'Guided 4-7-8 breathing with visual pacer. Activate vagus nerve. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/mental-fitness/breathing-exercises/4-7-8',
@@ -33,7 +33,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: '4-7-8 Breathing Exercise | SkillDrills',
+    title: '4-7-8 Breathing - Vagal Brake Relaxation | SkillDrills',
     description: 'Activate vagus nerve with guided 4-7-8 breathing. Free.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
@@ -46,10 +46,6 @@ export const metadata = {
 export default function VagalBrakePage() {
   return (
     <>
-      <noscript>
-        <h1>4-7-8 Breathing Exercise - Vagal Brake Relaxation for Stress Relief & Sleep</h1>
-        <p>Free guided 4-7-8 breathing drill with visual pacer. Activate vagus nerve for deep calm. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

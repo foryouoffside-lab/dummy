@@ -1,8 +1,8 @@
 import PathTracingClient from './PathTracingClient';
 
 export const metadata = {
-  title: 'Path Tracing Drill - Spatial Sequence Memory Training | SkillDrills',
-  description: 'Train spatial memory with animated dot paths on expanding 3x3 to 7x7 grids. Retrace paths in exact order. Instant fail on wrong click. No sign-up.',
+  title: 'Path Tracing - Sequence Memory | SkillDrills',
+  description: 'Train spatial memory with animated dot paths on expanding 3x3 to 7x7 grids. Retrace paths in exact order. No sign-up.',
   keywords: [
     'path tracing', 'route memory', 'spatial sequence recall', 'path memory drill',
     'sequential spatial memory', 'route tracing game', 'path recall training',
@@ -17,8 +17,8 @@ export const metadata = {
     'sequential dot memory', 'spatial ordering drill', 'path reproduction test',
   ],
   openGraph: {
-    title: 'Path Tracing Drill - Spatial Sequence Memory | SkillDrills',
-    description: 'Animated dot paths on expanding grids. Retrace in exact order. Free.',
+    title: 'Path Tracing - Sequence Memory | SkillDrills',
+    description: 'Train spatial memory with animated dot paths on expanding 3x3 to 7x7 grids. Retrace paths in exact order. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/memory/spatial-memory/path-tracing',
     siteName: 'SkillDrills',
@@ -32,8 +32,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Path Tracing Drill | SkillDrills',
-    description: 'Animated dot paths on expanding grids. Retrace in order. Free.',
+    title: 'Path Tracing - Sequence Memory | SkillDrills',
+    description: 'Train spatial memory with animated dot paths on expanding 3x3 to 7x7 grids. Retrace paths in exact order. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -45,10 +45,6 @@ export const metadata = {
 export default function PathTracingPage() {
   return (
     <>
-      <noscript>
-        <h1>Path Tracing Drill - Spatial Memory & Sequential Route Recall</h1>
-        <p>Free path tracing drill with animated dot paths on expanding 3x3 to 7x7 grids. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

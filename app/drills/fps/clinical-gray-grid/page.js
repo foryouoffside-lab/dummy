@@ -1,8 +1,8 @@
 import ClinicalGrayGridClient from './ClinicalGrayGridClient';
 
 export const metadata = {
-  title: 'Clinical Gray Grid - Precision Aim Trainer & Reaction Drill | SkillDrills',
-  description: '4x4 grid with 450ms red flash targets. Raw mouse input, 3 lives, shot analytics tracking overshoots and path efficiency. For Valorant, CS2, Apex. No sign-up.',
+  title: 'Clinical Gray Grid - Aim & Reaction | SkillDrills',
+  description: '4x4 grid with 450ms red flash targets. Raw mouse input, 3 lives, shot analytics tracking overshoots and path efficiency. No sign-up.',
   keywords: [
     'clinical gray grid', '4x4 grid aim trainer', 'precision aim training', 'grid reaction drill',
     'FPS grid aim', 'target acquisition drill', 'red target grid', 'aim precision FPS',
@@ -17,8 +17,8 @@ export const metadata = {
     'skilldrills clinical grid', 'skilldrills aim trainer', 'free grid aim test',
   ],
   openGraph: {
-    title: 'Clinical Gray Grid - Precision Aim Trainer | SkillDrills',
-    description: '4x4 grid, 450ms targets, raw mouse input, shot analytics. Free.',
+    title: 'Clinical Gray Grid - Aim & Reaction | SkillDrills',
+    description: '4x4 grid with 450ms red flash targets. Raw mouse input, 3 lives, shot analytics tracking overshoots and path efficiency. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/fps/clinical-gray-grid',
     siteName: 'SkillDrills',
@@ -32,8 +32,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Clinical Gray Grid Aim Trainer | SkillDrills',
-    description: '4x4 grid, raw mouse input, shot analytics. Free.',
+    title: 'Clinical Gray Grid - Aim & Reaction | SkillDrills',
+    description: '4x4 grid with 450ms red flash targets. Raw mouse input, 3 lives, shot analytics tracking overshoots and path efficiency. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -45,10 +45,6 @@ export const metadata = {
 export default function ClinicalGrayGridPage() {
   return (
     <>
-      <noscript>
-        <h1>Clinical Gray Grid - 4x4 Precision Aim Trainer & Reaction Drill</h1>
-        <p>Free precision FPS aim trainer with 4x4 grid and raw mouse input. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

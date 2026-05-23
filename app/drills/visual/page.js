@@ -1,8 +1,8 @@
-﻿import VisualDrillsClient from './VisualDrillsClient';
+import VisualDrillsClient from './VisualDrillsClient';
 
 export const metadata = {
-  title: 'Visual Training - 13 Free Drills for Vision & Reaction | SkillDrills',
-  description: '13 free visual training drills across 5 categories. Improve reaction speed, tracking accuracy, peripheral vision, recognition, and depth perception. No sign-up.',
+  title: 'Visual Training - 13 Drills for Vision | SkillDrills',
+  description: '13 free visual training drills across 5 categories. Improve reaction speed, tracking accuracy, peripheral vision, and recognition. No sign-up.',
   keywords: [
     'visual drills', 'reaction speed training', 'tracking accuracy', 'peripheral vision',
     'visual recognition', 'depth perception', 'go no-go test', 'light reaction',
@@ -14,8 +14,8 @@ export const metadata = {
     'skilldrills visual', 'skilldrills vision training',
   ],
   openGraph: {
-    title: 'Visual Training - 13 Free Vision Drills | SkillDrills',
-    description: '13 free visual training drills. Reaction, tracking, peripheral vision. No sign-up.',
+    title: 'Visual Training - 13 Drills for Vision | SkillDrills',
+    description: '13 free visual training drills across 5 categories. Improve reaction speed, tracking accuracy, peripheral vision, and recognition. No sign-up.',
     type: 'website',
     url: 'https://skilldrills.online/drills/visual',
     siteName: 'SkillDrills',
@@ -29,8 +29,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Visual Training - 13 Free Drills | SkillDrills',
-    description: '13 free visual training drills. No sign-up required.',
+    title: 'Visual Training - 13 Drills for Vision | SkillDrills',
+    description: '13 free visual training drills across 5 categories. Improve reaction speed, tracking accuracy, peripheral vision, and recognition. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -42,10 +42,7 @@ export const metadata = {
 export default function VisualDrillsPage() {
   return (
     <>
-      <noscript>
-        <h1>Visual Training Drills - Reaction Speed, Tracking, Peripheral Vision & Recognition</h1>
-        <p>13 free visual training drills across 5 categories. No sign-up required.</p>
-      </noscript>
+      
       <VisualDrillsClient />
     </>
   );

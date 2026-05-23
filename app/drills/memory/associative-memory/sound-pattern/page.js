@@ -1,8 +1,8 @@
 import SoundPatternClient from './SoundPatternClient';
 
 export const metadata = {
-  title: 'Sound Pattern Drill - Auditory Memory & Rhythm Recall | SkillDrills',
-  description: 'Train auditory memory with 30 unique rhythmic beat sequences. Listen to patterns, then reproduce using Tap and Rest buttons. Adaptive 8-12 beats. No sign-up.',
+  title: 'Sound Pattern - Auditory Memory Drill | SkillDrills',
+  description: 'Train auditory memory with 30 unique rhythmic beat sequences. Listen to patterns, then reproduce using Tap and Rest buttons. No sign-up.',
   keywords: [
     'sound pattern memory', 'auditory memory training', 'rhythm recall',
     'beat pattern drill', 'sound sequence memory', 'auditory processing',
@@ -17,8 +17,8 @@ export const metadata = {
     'sound memory improvement', 'auditory working memory', 'pattern recall drill',
   ],
   openGraph: {
-    title: 'Sound Pattern Drill - Auditory Memory | SkillDrills',
-    description: '30 unique rhythmic patterns. Listen then reproduce with Tap/Rest. Free.',
+    title: 'Sound Pattern - Auditory Memory Drill | SkillDrills',
+    description: 'Train auditory memory with 30 unique rhythmic beat sequences. Listen to patterns, then reproduce using Tap and Rest buttons. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/memory/associative-memory/sound-pattern',
     siteName: 'SkillDrills',
@@ -32,8 +32,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Sound Pattern Drill | SkillDrills',
-    description: '30 unique rhythmic patterns. Listen then reproduce. Free.',
+    title: 'Sound Pattern - Auditory Memory Drill | SkillDrills',
+    description: 'Train auditory memory with 30 unique rhythmic beat sequences. Listen to patterns, then reproduce using Tap and Rest buttons. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -45,10 +45,6 @@ export const metadata = {
 export default function SoundPatternPage() {
   return (
     <>
-      <noscript>
-        <h1>Sound Pattern Drill - Auditory Memory & Rhythm Recall Training</h1>
-        <p>Free sound pattern drill with 30 unique rhythmic beat sequences. Adaptive 8-12 beats. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

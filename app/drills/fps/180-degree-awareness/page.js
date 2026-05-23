@@ -1,8 +1,8 @@
 import AwarenessDrillClient from './AwarenessDrillClient';
 
 export const metadata = {
-  title: '180° Awareness Trainer - FPS Peripheral Vision Drill | SkillDrills',
-  description: 'Train 180-degree awareness with edge targets at 8% and 92% horizontal. Raw mouse input via Pointer Lock. 60-second challenge, combo streaks. No sign-up.',
+  title: '180-Degree Awareness - FPS Vision | SkillDrills',
+  description: 'Train 180-degree awareness with edge targets at 8% and 92% horizontal. Raw mouse input via Pointer Lock. 60-second challenge. No sign-up.',
   keywords: [
     '180 degree awareness trainer', 'FPS awareness training', 'peripheral vision FPS drill',
     'aim training peripheral', 'gaming awareness drill', 'reaction time FPS test',
@@ -17,8 +17,8 @@ export const metadata = {
     'mouse control training', 'raw input FPS practice', 'browser FPS trainer',
   ],
   openGraph: {
-    title: '180° Awareness Trainer - FPS Peripheral Vision | SkillDrills',
-    description: 'Edge targets at 8% and 92% horizontal. Raw mouse input. Free.',
+    title: '180-Degree Awareness - FPS Vision | SkillDrills',
+    description: 'Train 180-degree awareness with edge targets at 8% and 92% horizontal. Raw mouse input via Pointer Lock. 60-second challenge. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/fps/180-degree-awareness',
     siteName: 'SkillDrills',
@@ -32,8 +32,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: '180° Awareness Trainer | SkillDrills',
-    description: 'Train peripheral vision with raw mouse input. Free.',
+    title: '180-Degree Awareness - FPS Vision | SkillDrills',
+    description: 'Train 180-degree awareness with edge targets at 8% and 92% horizontal. Raw mouse input via Pointer Lock. 60-second challenge. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -45,10 +45,6 @@ export const metadata = {
 export default function AwarenessDrillPage() {
   return (
     <>
-      <noscript>
-        <h1>180° Awareness Trainer - FPS Peripheral Vision & Raw Mouse Input Training</h1>
-        <p>Free FPS awareness drill with edge targets and raw mouse input via Pointer Lock API. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

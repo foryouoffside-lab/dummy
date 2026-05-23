@@ -1,7 +1,7 @@
-﻿import DifferenceSpotterClient from './DifferenceSpotterClient';
+import DifferenceSpotterClient from './DifferenceSpotterClient';
 
 export const metadata = {
-  title: 'Difference Spotter Drill - Visual Change Detection | SkillDrills',
+  title: 'Difference Spotter - Change Detection | SkillDrills',
   description: 'Train change detection with 5 objects. Spot which one changed position or color after a blink. Adaptive 2-5s study time. 3 lives. No sign-up.',
   keywords: [
     'difference spotter', 'change detection', 'visual recognition training',
@@ -17,7 +17,7 @@ export const metadata = {
     'adaptive study time drill', 'change blindness exercise', 'visual attention test',
   ],
   openGraph: {
-    title: 'Difference Spotter Drill - Change Detection | SkillDrills',
+    title: 'Difference Spotter - Change Detection | SkillDrills',
     description: '5 objects change position or color after blink. Adaptive study time. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/visual/visual-recognition/difference-spotter',
@@ -32,7 +32,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Difference Spotter Drill | SkillDrills',
+    title: 'Difference Spotter - Change Detection | SkillDrills',
     description: 'Spot what changed after a blink. Adaptive study time. Free.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
@@ -45,10 +45,6 @@ export const metadata = {
 export default function DifferenceSpotterPage() {
   return (
     <>
-      <noscript>
-        <h1>Difference Spotter Drill - Visual Change Detection & Recognition Training</h1>
-        <p>Free change detection drill with 5 objects. Spot position or color changes after a blink. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

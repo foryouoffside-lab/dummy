@@ -1,7 +1,7 @@
-﻿import WimHofClient from './WimHofClient';
+import WimHofClient from './WimHofClient';
 
 export const metadata = {
-  title: 'Wim Hof Method Breathing - 30 Breaths Oxygenation Drill | SkillDrills',
+  title: 'Wim Hof Method - Oxygenation Drill | SkillDrills',
   description: 'Practice WHM power breathing with 30 rapid inhale-exhale cycles. Visual pacer guides each breath. Track combos and oxygen boost. No sign-up.',
   keywords: [
     'wim hof breathing', 'wim hof method', 'power breathing', 'whm breathing',
@@ -20,8 +20,8 @@ export const metadata = {
     'holistic breathing', 'breathing for health', 'respiratory training',
   ],
   openGraph: {
-    title: 'Wim Hof Method Breathing - Oxygenation Drill | SkillDrills',
-    description: '30 rapid inhale-exhale cycles with visual pacer. Free breathwork.',
+    title: 'Wim Hof Method - Oxygenation Drill | SkillDrills',
+    description: 'Practice WHM power breathing with 30 rapid inhale-exhale cycles. Visual pacer guides each breath. Track combos and oxygen boost. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/mental-fitness/breathing-exercises/wim-hof',
     siteName: 'SkillDrills',
@@ -35,8 +35,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Wim Hof Power Breathing Drill | SkillDrills',
-    description: '30 breaths with visual pacer. Track combos. Free.',
+    title: 'Wim Hof Method - Oxygenation Drill | SkillDrills',
+    description: 'Practice WHM power breathing with 30 rapid inhale-exhale cycles. Visual pacer guides each breath. Track combos and oxygen boost. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -48,10 +48,6 @@ export const metadata = {
 export default function WimHofPage() {
   return (
     <>
-      <noscript>
-        <h1>Wim Hof Method Power Breathing Drill - 30 Breaths Oxygenation & Breathwork Training</h1>
-        <p>Free WHM power breathing drill with 30 rapid inhale-exhale cycles. No sign-up required.</p>
-      </noscript>
 
       <script
         type="application/ld+json"

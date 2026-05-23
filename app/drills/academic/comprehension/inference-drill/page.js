@@ -1,4 +1,4 @@
-﻿import InferenceDrillClient from './InferenceDrillClient';
+import InferenceDrillClient from './InferenceDrillClient';
 
 export const metadata = {
   title: 'Inference Drill - Critical Reasoning | SkillDrills',
