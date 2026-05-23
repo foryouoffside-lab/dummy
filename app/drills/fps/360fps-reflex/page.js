@@ -1,8 +1,8 @@
 import ReactiveStrafeClient from './ReactiveStrafeClient';
 
 export const metadata = {
-  title: 'Free Reactive Strafe Tracking Drill - FPS Aim & Target Following Training | SkillDrills',
-  description: 'Master horizontal target tracking with this free adaptive speed FPS aim drill. Zone-based scoring rewards precision with Perfect Good and Edge accuracy tiers. Speed adapts 12-35px/s based on your tracking performance. Features raw mouse input via Pointer Lock API combo streaks and no penalties. Perfect for Valorant CS2 Overwatch Apex Legends and competitive FPS gaming. No sign-up required.',
+  title: 'Reactive Strafe Tracking - FPS Aim & Target Follow Drill | SkillDrills',
+  description: 'Master horizontal target tracking with adaptive speed 12-35px/s. Zone-based scoring, raw mouse input, combo streaks. For Valorant, CS2, Overwatch, Apex. No sign-up.',
   keywords: [
     'reactive strafe tracking', 'FPS tracking drill', 'aim tracking training free',
     'target following practice', 'horizontal strafe aim', 'tracking accuracy FPS',
@@ -18,66 +18,39 @@ export const metadata = {
     'no download aim trainer', 'instant aim practice', 'web based aim trainer',
   ],
   openGraph: {
-    title: 'Free Reactive Strafe Tracking - FPS Aim & Target Following Training | SkillDrills',
-    description: 'Adaptive speed target tracking with zone-based scoring. Raw mouse input, no penalties. Free.',
+    title: 'Reactive Strafe Tracking - FPS Aim Training | SkillDrills',
+    description: 'Adaptive speed target tracking with zone-based scoring. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/fps/reactive-tracking',
     siteName: 'SkillDrills',
     locale: 'en_US',
-    images: [
-      {
-        url: 'https://skilldrills.online/icons/icon-512x512.png',
-        width: 512,
-        height: 512,
-        alt: 'Reactive Strafe Tracking - FPS Aim Training Drill',
-      }
-    ],
-    publishedTime: '2026-05-20T00:00:00+00:00',
-    modifiedTime: new Date().toISOString(),
-    section: 'FPS Training',
-    tag: ['FPS aim', 'tracking drill', 'strafe tracking', 'Valorant', 'CS2', 'Overwatch', 'Apex Legends'],
+    images: [{
+      url: 'https://skilldrills.online/icons/icon-512x512.png',
+      width: 512,
+      height: 512,
+      alt: 'Reactive Strafe Tracking',
+    }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Free Reactive Strafe Tracking | SkillDrills',
+    title: 'Reactive Strafe Tracking | SkillDrills',
     description: 'Master FPS tracking aim with adaptive speed target. Free.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
-    creator: '@skilldrills',
-    site: '@skilldrills',
   },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': 320,
-    },
-  },
+  robots: { index: true, follow: true },
   alternates: {
     canonical: 'https://skilldrills.online/drills/fps/reactive-tracking',
-    languages: {
-      'en': 'https://skilldrills.online/drills/fps/reactive-tracking',
-      'en-US': 'https://skilldrills.online/drills/fps/reactive-tracking',
-      'x-default': 'https://skilldrills.online/drills/fps/reactive-tracking',
-    },
-  },
-  other: {
-    'article:published_time': '2026-05-20T00:00:00+00:00',
-    'article:modified_time': new Date().toISOString(),
-    'article:section': 'FPS Training',
-    'article:tag': 'FPS aim, tracking drill, strafe tracking, Valorant, CS2, Overwatch, Apex Legends',
-  },
-  verification: {
-    google: 'bf3e19be4c41802b',
   },
 };
 
 export default function ReactiveStrafePage() {
   return (
     <>
+      <noscript>
+        <h1>Reactive Strafe Tracking - FPS Aim & Target Following Training</h1>
+        <p>Free FPS tracking drill with adaptive speed and zone-based precision scoring. No sign-up required.</p>
+      </noscript>
+
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -92,37 +65,25 @@ export default function ReactiveStrafePage() {
           })
         }}
       />
+
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "WebApplication",
-            "name": "Reactive Strafe Tracking - FPS Aim Training",
+            "name": "Reactive Strafe Tracking",
             "url": "https://skilldrills.online/drills/fps/reactive-tracking",
-            "description": "Free interactive FPS tracking drill with adaptive speed target. Zone-based scoring rewards precision tracking. Features raw mouse input via Pointer Lock API, combo streaks, and adaptive speed 12-35px/s. Perfect for Valorant, CS2, Overwatch, and Apex Legends.",
+            "description": "Free FPS tracking drill with adaptive speed 12-35px/s. Zone-based scoring, raw mouse input, and combo streaks. For Valorant, CS2, Overwatch, Apex Legends.",
             "applicationCategory": "GamingApplication",
             "operatingSystem": "All",
-            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD", "availability": "https://schema.org/OnlineOnly" },
-            "author": { "@type": "Organization", "name": "SkillDrills", "url": "https://skilldrills.online" },
-            "publisher": { "@type": "Organization", "name": "SkillDrills" },
-            "educationalUse": ["FPS Aim Training", "Tracking Practice", "Mouse Control", "Esports Training"],
-            "learningResourceType": ["Interactive Exercise", "Aim Drill", "Tracking Test"],
-            "timeRequired": "PT60S",
-            "interactivityType": "active",
-            "inLanguage": "en-US",
-            "teaches": ["Tracking Aim", "Smooth Mouse Control", "Reactive Tracking", "Hand-Eye Coordination", "Adaptive Speed Adjustment"],
-            "educationalLevel": "All Levels",
-            "typicalAgeRange": "12-60",
-            "datePublished": "2026-05-20",
-            "dateModified": new Date().toISOString().split('T')[0],
-            "version": "1.0",
-            "isAccessibleForFree": true,
-            "accessMode": ["visual"],
-            "accessModeSufficient": ["visual"]
+            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+            "author": { "@type": "Organization", "name": "SkillDrills" },
+            "isAccessibleForFree": true
           })
         }}
       />
+
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -135,61 +96,38 @@ export default function ReactiveStrafePage() {
                 "name": "What is Reactive Strafe Tracking?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Reactive Strafe Tracking is a free FPS aim training drill that helps you practice tracking horizontally moving targets. A target moves left and right at adaptive speeds based on your accuracy. You score points by keeping your crosshair on the target with zone-based precision scoring. It uses Pointer Lock API for raw mouse input, providing the most accurate aim training experience."
+                  "text": "A free FPS aim drill practicing horizontal target tracking. Adaptive speed from 12-35px/s. Zone-based scoring rewards precision with Perfect, Good, and Edge tiers."
                 }
               },
               {
                 "@type": "Question",
-                "name": "How does adaptive speed work in this tracking drill?",
+                "name": "How does adaptive speed work?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "The target adapts its speed based on your tracking accuracy. When you maintain high accuracy above 70 percent, the target speeds up to challenge you more. When accuracy drops below 30 percent, the target slows down to help you recover. Speed ranges from 12 to 35 pixels per second. This adaptive system ensures you are always training at the edge of your ability."
+                  "text": "Speed adapts to your accuracy. Above 70% accuracy speeds up; below 30% slows down. Range: 12-35 pixels per second. Always training at your edge."
                 }
               },
               {
                 "@type": "Question",
-                "name": "What FPS games does this tracking drill help with?",
+                "name": "What games does this help with?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "This drill improves tracking aim for all competitive FPS games including Valorant, Counter-Strike 2 CS2, Overwatch 2, Apex Legends, Call of Duty, Rainbow Six Siege, Fortnite, Escape from Tarkov, and Destiny 2. Tracking is essential for automatic weapons, SMGs, and any situation requiring smooth aim on moving targets."
+                  "text": "Valorant, CS2, Overwatch 2, Apex Legends, Call of Duty, Rainbow Six Siege, Fortnite, Escape from Tarkov, and Destiny 2."
                 }
               },
               {
                 "@type": "Question",
-                "name": "How is scoring calculated in Reactive Strafe Tracking?",
+                "name": "Do I need to sign up?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Scoring is zone-based with three tiers: Perfect tracking earns 1 point every 800 milliseconds, Good tracking earns 0.5 points, and Edge tracking earns 0.25 points. There are no penalties for missing the target. Combo streaks build as you maintain tracking consistency. The maximum score is approximately 75 points with perfect tracking throughout the 60-second session."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "What is Pointer Lock API and why does this drill use it?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "Pointer Lock API locks your cursor to the game canvas, providing raw mouse movement input without acceleration or operating system interference. This gives the most accurate and responsive aim training experience, closely matching how mouse input feels in actual FPS games. Click the canvas to lock, press ESC to unlock."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "How often should I practice tracking aim?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "For best results, practice tracking 2-3 times daily in 5-10 minute sessions. Start by focusing on maintaining consistent contact with the target. As accuracy improves, the adaptive speed system will automatically increase difficulty. Most players see 20-30 percent improvement in tracking consistency within 2-3 weeks of daily practice."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "Do I need to sign up to use this tracking drill?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "No registration, no sign-up, and no login is required. This reactive strafe tracking drill is completely free and works instantly in your browser. Your best scores are saved locally on your device. Just visit SkillDrills.online and start improving your tracking aim immediately."
+                  "text": "No registration required. This tracking drill is completely free and works instantly in your browser."
                 }
               }
             ]
           })
         }}
       />
+
       <ReactiveStrafeClient />
     </>
   );

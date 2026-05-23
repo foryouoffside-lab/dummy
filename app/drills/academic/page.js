@@ -1,76 +1,61 @@
 ﻿import AcademicDrillsClient from './AcademicDrillsClient';
 
 export const metadata = {
-  title: 'Free Academic Training Drills - Math Speed Reading Typing & Comprehension Practice | SkillDrills',
-  description: 'Master academic skills with 12 free interactive training drills. Improve mental math arithmetic multiplication tables speed reading RSVP peripheral vision reading comprehension listening comprehension inference critical reasoning code typing and typing speed. Perfect for students competitive exam preparation and lifelong learners. No sign-up required start practicing instantly.',
+  title: 'Academic Training Drills - Math, Reading, Typing & More | SkillDrills',
+  description: 'Master academic skills with 12 free interactive drills. Improve mental math, speed reading, typing speed, and comprehension. No sign-up required.',
   keywords: [
     'academic drills', 'math practice online', 'speed reading training', 'typing test free',
     'comprehension training', 'mental arithmetic practice', 'multiplication tables drill',
-    'RSVP reader online', 'peripheral vision training', 'code typing practice free',
+    'RSVP reader online', 'code typing practice free',
     'listening comprehension test', 'inference drills', 'critical reasoning practice',
     'free educational games', 'brain training academic', 'academic skills improvement',
     'math speed test', 'reading speed test', 'writing speed practice',
     'arithmetic race', 'math reaction drill', 'mental math online',
-    'factor recall', 'times tables practice', 'speed reader free',
-    'column scanner reading', 'RSVP speed reader', 'code typing JavaScript Python HTML',
+    'times tables practice', 'speed reader free',
+    'RSVP speed reader', 'code typing JavaScript Python HTML',
     'typing speed test online', 'WPM test free', 'reading comprehension quiz',
     'listening skills test', 'inference analytics', 'logical reasoning practice',
     'LSAT practice free', 'GMAT verbal practice', 'GRE preparation',
-    'SAT reading practice', 'ACT prep drills', 'CAT exam practice',
-    'UPSC preparation', 'SSC exam practice', 'banking exam training',
     'free student resources', 'online learning tools', 'educational drills free',
     'skilldrills academic', 'skilldrills math drills', 'skilldrills reading',
     'free academic practice', 'online study tools', 'exam preparation free',
   ],
   openGraph: {
-    title: 'Free Academic Training Drills - Math Speed Reading Typing & Comprehension | SkillDrills',
-    description: '12 free interactive academic drills. Math, reading, writing, comprehension. No sign-up.',
+    title: 'Academic Training Drills - Math, Reading & Typing | SkillDrills',
+    description: '12 free interactive academic drills. Improve math, reading, typing, and comprehension.',
     type: 'website',
     url: 'https://skilldrills.online/drills/academic',
     siteName: 'SkillDrills',
     locale: 'en_US',
-    images: [
-      {
-        url: 'https://skilldrills.online/icons/icon-512x512.png',
-        width: 512,
-        height: 512,
-        alt: 'Academic Training Drills - Math Reading Writing Comprehension',
-      }
-    ],
+    images: [{
+      url: 'https://skilldrills.online/icons/icon-512x512.png',
+      width: 512,
+      height: 512,
+      alt: 'Academic Training Drills',
+    }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Free Academic Training Drills | SkillDrills',
+    title: 'Academic Training Drills | SkillDrills',
     description: '12 free drills for math, reading, typing, and comprehension.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
-    },
-  },
+  robots: { index: true, follow: true },
   alternates: {
     canonical: 'https://skilldrills.online/drills/academic',
-    languages: {
-      'en': 'https://skilldrills.online/drills/academic',
-      'en-US': 'https://skilldrills.online/drills/academic',
-      'x-default': 'https://skilldrills.online/drills/academic',
-    },
-  },
-  verification: {
-    google: 'bf3e19be4c41802b',
   },
 };
 
 export default function AcademicDrillsPage() {
   return (
     <>
+      {/* Fallback H1 for crawlers that don't execute JavaScript */}
+      <noscript>
+        <h1>Academic Training Drills - Math, Reading, Typing & Comprehension</h1>
+        <p>12 free interactive academic skill training drills covering math speed, reading speed, writing speed, and comprehension. No sign-up required.</p>
+      </noscript>
+
+      {/* BreadcrumbList Schema */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -84,34 +69,89 @@ export default function AcademicDrillsPage() {
           })
         }}
       />
+
+      {/* CollectionPage Schema */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "CollectionPage",
-            "name": "Academic Training Drills - Math Reading Writing & Comprehension",
+            "name": "Academic Training Drills",
             "url": "https://skilldrills.online/drills/academic",
-            "description": "12 free interactive academic skill training drills covering math speed, reading speed, writing speed, and comprehension. Improve mental arithmetic, multiplication tables, RSVP reading, peripheral vision, code typing, typing speed, listening comprehension, inference, and critical reasoning.",
+            "description": "12 free interactive academic skill training drills covering math speed, reading speed, writing speed, and comprehension.",
             "provider": { "@type": "Organization", "name": "SkillDrills", "url": "https://skilldrills.online" },
             "isAccessibleForFree": true,
             "hasPart": [
-              { "@type": "WebApplication", "name": "Arithmetic Race", "url": "https://skilldrills.online/drills/academic/math-speed/arithmetic-race", "description": "Speed math drill with addition subtraction and multiplication" },
-              { "@type": "WebApplication", "name": "Math Reaction", "url": "https://skilldrills.online/drills/academic/math-speed/Math-Reaction", "description": "Odd even parity reaction training" },
-              { "@type": "WebApplication", "name": "Mental Math", "url": "https://skilldrills.online/drills/academic/math-speed/mental-math", "description": "Advanced mental calculation challenges" },
-              { "@type": "WebApplication", "name": "Multiplication Tables", "url": "https://skilldrills.online/drills/academic/math-speed/multiplication-tables", "description": "Times tables practice with intelligent prioritization" },
-              { "@type": "WebApplication", "name": "Peripheral Vision", "url": "https://skilldrills.online/drills/academic/reading-speed/peripheral-reader", "description": "Extrafoveal vision training for reading" },
-              { "@type": "WebApplication", "name": "RSVP Speed Reader", "url": "https://skilldrills.online/drills/academic/reading-speed/rsvp-reader", "description": "Rapid Serial Visual Presentation training" },
-              { "@type": "WebApplication", "name": "Column Scanner", "url": "https://skilldrills.online/drills/academic/reading-speed/speed-reader", "description": "Columnar reading with adjustable speed and width" },
-              { "@type": "WebApplication", "name": "Code Typing", "url": "https://skilldrills.online/drills/academic/writing-speed/code-typing", "description": "JavaScript Python HTML syntax practice" },
-              { "@type": "WebApplication", "name": "Typing Speed Test", "url": "https://skilldrills.online/drills/academic/writing-speed/typing-test", "description": "WPM test with 30 quotes across 3 levels" },
-              { "@type": "WebApplication", "name": "Inference Analytics", "url": "https://skilldrills.online/drills/academic/comprehension/inference-drill", "description": "Critical reasoning and logical thinking" },
-              { "@type": "WebApplication", "name": "Listening Comprehension", "url": "https://skilldrills.online/drills/academic/comprehension/listening-comprehension", "description": "Audio memory and auditory processing" },
-              { "@type": "WebApplication", "name": "Reading Comprehension", "url": "https://skilldrills.online/drills/academic/comprehension/reading-comprehension", "description": "RSVP reading with comprehension quizzes" }
+              { "@type": "WebApplication", "name": "Arithmetic Race", "url": "https://skilldrills.online/drills/academic/math-speed/arithmetic-race" },
+              { "@type": "WebApplication", "name": "Math Reaction", "url": "https://skilldrills.online/drills/academic/math-speed/Math-Reaction" },
+              { "@type": "WebApplication", "name": "Mental Math", "url": "https://skilldrills.online/drills/academic/math-speed/mental-math" },
+              { "@type": "WebApplication", "name": "Multiplication Tables", "url": "https://skilldrills.online/drills/academic/math-speed/multiplication-tables" },
+              { "@type": "WebApplication", "name": "Peripheral Reader", "url": "https://skilldrills.online/drills/academic/reading-speed/peripheral-reader" },
+              { "@type": "WebApplication", "name": "RSVP Speed Reader", "url": "https://skilldrills.online/drills/academic/reading-speed/rsvp-reader" },
+              { "@type": "WebApplication", "name": "Speed Reader", "url": "https://skilldrills.online/drills/academic/reading-speed/speed-reader" },
+              { "@type": "WebApplication", "name": "Code Typing", "url": "https://skilldrills.online/drills/academic/writing-speed/code-typing" },
+              { "@type": "WebApplication", "name": "Typing Speed Test", "url": "https://skilldrills.online/drills/academic/writing-speed/typing-test" },
+              { "@type": "WebApplication", "name": "Inference Analytics", "url": "https://skilldrills.online/drills/academic/comprehension/inference-drill" },
+              { "@type": "WebApplication", "name": "Listening Comprehension", "url": "https://skilldrills.online/drills/academic/comprehension/listening-comprehension" },
+              { "@type": "WebApplication", "name": "Reading Comprehension", "url": "https://skilldrills.online/drills/academic/comprehension/reading-comprehension" }
             ]
           })
         }}
       />
+
+      {/* FAQ Schema */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "What academic drills are available?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "SkillDrills offers 12 free academic training drills across 4 categories: Math Speed (Arithmetic Race, Math Reaction, Mental Math, Multiplication Tables), Reading Speed (Speed Reader, RSVP Reader, Peripheral Reader), Writing Speed (Typing Test, Code Typing), and Comprehension (Reading Comprehension, Listening Comprehension, Inference Drill). All drills are free with no sign-up required."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Are these academic drills helpful for exam preparation?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Yes. The inference and comprehension drills help with LSAT, GMAT, GRE, SAT, ACT, CAT, UPSC, SSC, and banking exams. Mental math and speed reading drills improve calculation speed and reading efficiency essential for competitive exams."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Do I need to create an account to practice?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "No registration or login is required. All 12 academic drills are completely free and work instantly in your browser. Your best scores are saved locally on your device."
+                }
+              }
+            ]
+          })
+        }}
+      />
+
+      {/* WebSite Schema */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "name": "SkillDrills Academic Training",
+            "url": "https://skilldrills.online/drills/academic",
+            "description": "Free academic training drills for math, reading, typing, and comprehension.",
+            "isAccessibleForFree": true
+          })
+        }}
+      />
+
       <AcademicDrillsClient />
     </>
   );

@@ -1,8 +1,8 @@
 ﻿import RapidTappingClient from './RapidTappingClient';
 
 export const metadata = {
-  title: 'Free Rapid Tapping Drill - Click Speed Test & Mouse Endurance Training | SkillDrills',
-  description: 'Test and improve your click speed with this free endless rapid tapping survival drill. Click the shrinking ball to keep it alive. 10 clicks earn 1 point. Difficulty increases 12% every 3 seconds. Max ball size 140px. Track survival time, total clicks, score, and beat your best performance. Perfect for FPS gamers, MOBA players, and anyone wanting faster clicking speed and mouse endurance. No sign-up required, play instantly.',
+  title: 'Rapid Tapping Drill - Click Speed & Endurance Test | SkillDrills',
+  description: 'Endless survival tapping. Click the shrinking ball to keep it alive. 10 clicks = 1 point. Difficulty +12% every 3s. Max ball 140px. No sign-up.',
   keywords: [
     'rapid tapping drill', 'click speed test', 'tapping endurance training', 'mouse clicking speed test',
     'click per second test', 'tapping drill online', 'endurance clicking practice', 'rapid click training',
@@ -17,66 +17,39 @@ export const metadata = {
     'hand eye coordination click', 'reflex clicking practice', 'competitive clicking',
   ],
   openGraph: {
-    title: 'Free Rapid Tapping Drill - Click Speed & Mouse Endurance | SkillDrills',
-    description: 'Endless survival tapping. 10 clicks = 1 point. Difficulty +12% every 3s. Free.',
+    title: 'Rapid Tapping Drill - Click Speed Test | SkillDrills',
+    description: 'Endless survival tapping. 10 clicks = 1 point. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/motor/movement-speed/rapid-tapping',
     siteName: 'SkillDrills',
     locale: 'en_US',
-    images: [
-      {
-        url: 'https://skilldrills.online/icons/icon-512x512.png',
-        width: 512,
-        height: 512,
-        alt: 'Rapid Tapping Drill - Click Speed Training',
-      }
-    ],
-    publishedTime: '2026-05-20T00:00:00+00:00',
-    modifiedTime: new Date().toISOString(),
-    section: 'Motor Skills Training',
-    tag: ['rapid tapping', 'click speed', 'mouse endurance', 'gaming skills', 'reflex training'],
+    images: [{
+      url: 'https://skilldrills.online/icons/icon-512x512.png',
+      width: 512,
+      height: 512,
+      alt: 'Rapid Tapping Drill',
+    }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Free Rapid Tapping Drill | SkillDrills',
+    title: 'Rapid Tapping Drill | SkillDrills',
     description: 'Endless survival clicking. 10 clicks = 1 point. Free.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
-    creator: '@skilldrills',
-    site: '@skilldrills',
   },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': 320,
-    },
-  },
+  robots: { index: true, follow: true },
   alternates: {
     canonical: 'https://skilldrills.online/drills/motor/movement-speed/rapid-tapping',
-    languages: {
-      'en': 'https://skilldrills.online/drills/motor/movement-speed/rapid-tapping',
-      'en-US': 'https://skilldrills.online/drills/motor/movement-speed/rapid-tapping',
-      'x-default': 'https://skilldrills.online/drills/motor/movement-speed/rapid-tapping',
-    },
-  },
-  other: {
-    'article:published_time': '2026-05-20T00:00:00+00:00',
-    'article:modified_time': new Date().toISOString(),
-    'article:section': 'Motor Skills Training',
-    'article:tag': 'rapid tapping, click speed, mouse endurance, gaming, reflex',
-  },
-  verification: {
-    google: 'bf3e19be4c41802b',
   },
 };
 
 export default function RapidTappingPage() {
   return (
     <>
+      <noscript>
+        <h1>Rapid Tapping Drill - Click Speed Test & Mouse Endurance Training</h1>
+        <p>Free endless rapid tapping survival drill. Click the shrinking ball to keep it alive. No sign-up required.</p>
+      </noscript>
+
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -85,41 +58,32 @@ export default function RapidTappingPage() {
             "@type": "BreadcrumbList",
             "itemListElement": [
               { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://skilldrills.online" },
-              { "@type": "ListItem", "position": 2, "name": "Motor Skills", "item": "https://skilldrills.online/drills/motor" },
+              { "@type": "ListItem", "position": 2, "name": "Motor Training", "item": "https://skilldrills.online/drills/motor" },
               { "@type": "ListItem", "position": 3, "name": "Movement Speed", "item": "https://skilldrills.online/drills/motor/movement-speed" },
-              { "@type": "ListItem", "position": 4, "name": "Rapid Tapping Drill" }
+              { "@type": "ListItem", "position": 4, "name": "Rapid Tapping" }
             ]
           })
         }}
       />
+
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "WebApplication",
-            "name": "Rapid Tapping Drill - Click Speed & Endurance Training",
+            "name": "Rapid Tapping Drill",
             "url": "https://skilldrills.online/drills/motor/movement-speed/rapid-tapping",
-            "description": "Free endless rapid tapping survival drill. Click the shrinking ball to keep it alive. 10 clicks earn 1 point. Difficulty increases 12% every 3 seconds. Max ball size 140px. Track survival time, total clicks, and score.",
+            "description": "Free endless survival tapping drill. Click shrinking ball to keep it alive. 10 clicks = 1 point. Difficulty +12% every 3s. Max ball 140px.",
             "applicationCategory": "GameApplication",
             "operatingSystem": "All",
-            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD", "availability": "https://schema.org/OnlineOnly" },
-            "author": { "@type": "Organization", "name": "SkillDrills", "url": "https://skilldrills.online" },
-            "publisher": { "@type": "Organization", "name": "SkillDrills" },
-            "educationalUse": ["Click Speed Training", "Mouse Endurance", "Gaming Skills", "Reflex Training", "Hand-Eye Coordination"],
-            "learningResourceType": ["Interactive Exercise", "Survival Drill", "Speed Test"],
-            "interactivityType": "active",
-            "inLanguage": "en-US",
-            "teaches": ["Click Speed", "Tapping Endurance", "Mouse Stamina", "Rapid Response", "Hand-Eye Coordination"],
-            "educationalLevel": "All Levels",
-            "typicalAgeRange": "10-60",
-            "datePublished": "2026-05-20",
-            "dateModified": new Date().toISOString().split('T')[0],
-            "version": "1.0",
+            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+            "author": { "@type": "Organization", "name": "SkillDrills" },
             "isAccessibleForFree": true
           })
         }}
       />
+
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -132,53 +96,38 @@ export default function RapidTappingPage() {
                 "name": "What is the Rapid Tapping Drill?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "The Rapid Tapping Drill is a free endless survival clicking game where you click a central ball to expand it by 10 pixels per click. The ball constantly shrinks at an increasing rate. Every 3 seconds the difficulty increases by 12 percent. You earn 1 point for every 10 clicks. The game ends when the ball shrinks to zero. Track your survival time, total clicks, and best score."
+                  "text": "A free endless survival clicking game. Click the ball to expand it 10px per click. Ball shrinks at increasing rate. 10 clicks = 1 point."
                 }
               },
               {
                 "@type": "Question",
-                "name": "How does the difficulty increase?",
+                "name": "How does difficulty increase?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "The ball shrinks at a base rate that increases by 12 percent every 3 seconds. This means the longer you survive, the faster the ball shrinks, requiring more rapid clicking to keep it alive. The maximum ball size is 140 pixels, and each click expands it by 10 pixels. You must balance expansion against the accelerating shrink rate."
+                  "text": "Shrink rate increases 12% every 3 seconds. Longer survival requires faster clicking. Max ball size 140px."
                 }
               },
               {
                 "@type": "Question",
-                "name": "How is scoring calculated?",
+                "name": "Does this help with FPS/MOBA gaming?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "You earn 1 point for every 10 successful clicks on the ball. The drill tracks your total score, best score saved locally, survival time in minutes and seconds, total clicks landed, current ball size in pixels, and maximum difficulty percentage reached. Your best score persists between sessions."
+                  "text": "Yes. Improves click speed and mouse endurance for FPS (Valorant, CS2) and MOBA games. Survival format simulates competitive pressure."
                 }
               },
               {
                 "@type": "Question",
-                "name": "Is this drill helpful for FPS and MOBA gaming?",
+                "name": "Do I need to sign up?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Yes. Rapid tapping directly improves click speed and mouse endurance essential for FPS games like Valorant, CS2, and Overwatch where fast firing is crucial. MOBA players benefit from improved clicking stamina for long gaming sessions. The survival format with increasing difficulty simulates the pressure of competitive gaming where sustained rapid clicking is required."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "How often should I practice rapid tapping?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "Practice 2-3 times daily in 3-5 minute sessions. Focus on maintaining consistent clicking rhythm as difficulty increases. Take breaks between sessions to prevent hand fatigue. Most users see 20-30 percent improvement in click speed and endurance within 2 weeks of regular practice."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "Do I need to sign up to use this drill?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "No registration, no sign-up, and no login is required. This rapid tapping drill is completely free and works instantly in your browser. Your best score is saved locally on your device. Just visit SkillDrills.online and start clicking immediately."
+                  "text": "No registration required. This rapid tapping drill is completely free and works instantly in your browser."
                 }
               }
             ]
           })
         }}
       />
+
       <RapidTappingClient />
     </>
   );

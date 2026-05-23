@@ -1,8 +1,8 @@
 import PathTracingClient from './PathTracingClient';
 
 export const metadata = {
-  title: 'Free Path Tracing Drill - Spatial Memory & Sequential Route Recall | SkillDrills',
-  description: 'Train spatial sequence memory with this free path tracing drill featuring animated dot paths on expanding 3×3 to 7×7 grids. Watch paths animate at 500ms per dot then retrace in exact order. Path length equals level + 3 dots with progressive difficulty. One wrong click immediately ends the round with -2 penalty. +2 for perfect path recall. Numbered progress indicators and green correct path reveal on mistakes. 60-second timed challenge with streak tracking every 5 perfect rounds. Perfect for students gamers and anyone wanting to improve sequential spatial memory. No sign-up required.',
+  title: 'Path Tracing Drill - Spatial Sequence Memory Training | SkillDrills',
+  description: 'Train spatial memory with animated dot paths on expanding 3x3 to 7x7 grids. Retrace paths in exact order. Instant fail on wrong click. No sign-up.',
   keywords: [
     'path tracing', 'route memory', 'spatial sequence recall', 'path memory drill',
     'sequential spatial memory', 'route tracing game', 'path recall training',
@@ -17,66 +17,39 @@ export const metadata = {
     'sequential dot memory', 'spatial ordering drill', 'path reproduction test',
   ],
   openGraph: {
-    title: 'Free Path Tracing Drill - Spatial Sequence Memory Training | SkillDrills',
-    description: 'Animated dot paths on expanding 3×3 to 7×7 grids. Retrace in exact order. Instant fail on wrong click. Free.',
+    title: 'Path Tracing Drill - Spatial Sequence Memory | SkillDrills',
+    description: 'Animated dot paths on expanding grids. Retrace in exact order. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/memory/spatial-memory/path-tracing',
     siteName: 'SkillDrills',
     locale: 'en_US',
-    images: [
-      {
-        url: 'https://skilldrills.online/icons/icon-512x512.png',
-        width: 512,
-        height: 512,
-        alt: 'Path Tracing Drill - Spatial Sequence Memory Training',
-      }
-    ],
-    publishedTime: '2026-05-14T00:00:00+00:00',
-    modifiedTime: new Date().toISOString(),
-    section: 'Memory Training',
-    tag: ['path tracing', 'route memory', 'spatial sequence', 'sequential recall', 'visual path', 'cognitive training'],
+    images: [{
+      url: 'https://skilldrills.online/icons/icon-512x512.png',
+      width: 512,
+      height: 512,
+      alt: 'Path Tracing Drill',
+    }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Free Path Tracing Drill | SkillDrills',
-    description: 'Animated dot paths on expanding grids. Retrace in exact order. Instant fail on wrong click. Free.',
+    title: 'Path Tracing Drill | SkillDrills',
+    description: 'Animated dot paths on expanding grids. Retrace in order. Free.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
-    creator: '@skilldrills',
-    site: '@skilldrills',
   },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': 320,
-    },
-  },
+  robots: { index: true, follow: true },
   alternates: {
     canonical: 'https://skilldrills.online/drills/memory/spatial-memory/path-tracing',
-    languages: {
-      'en': 'https://skilldrills.online/drills/memory/spatial-memory/path-tracing',
-      'en-US': 'https://skilldrills.online/drills/memory/spatial-memory/path-tracing',
-      'x-default': 'https://skilldrills.online/drills/memory/spatial-memory/path-tracing',
-    },
-  },
-  other: {
-    'article:published_time': '2026-05-14T00:00:00+00:00',
-    'article:modified_time': new Date().toISOString(),
-    'article:section': 'Memory Training',
-    'article:tag': 'path tracing, route memory, spatial sequence, sequential recall, visual path',
-  },
-  verification: {
-    google: 'bf3e19be4c41802b',
   },
 };
 
 export default function PathTracingPage() {
   return (
     <>
+      <noscript>
+        <h1>Path Tracing Drill - Spatial Memory & Sequential Route Recall</h1>
+        <p>Free path tracing drill with animated dot paths on expanding 3x3 to 7x7 grids. No sign-up required.</p>
+      </noscript>
+
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -87,42 +60,30 @@ export default function PathTracingPage() {
               { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://skilldrills.online" },
               { "@type": "ListItem", "position": 2, "name": "Memory Training", "item": "https://skilldrills.online/drills/memory" },
               { "@type": "ListItem", "position": 3, "name": "Spatial Memory", "item": "https://skilldrills.online/drills/memory/spatial-memory" },
-              { "@type": "ListItem", "position": 4, "name": "Path Tracing Drill" }
+              { "@type": "ListItem", "position": 4, "name": "Path Tracing" }
             ]
           })
         }}
       />
+
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "WebApplication",
-            "name": "Path Tracing Drill - Spatial Sequence Memory & Route Recall Training",
+            "name": "Path Tracing Drill",
             "url": "https://skilldrills.online/drills/memory/spatial-memory/path-tracing",
-            "description": "Free spatial sequence memory drill with animated dot paths on expanding grids from 3×3 to 7×7. Watch paths animate at 500ms per dot with yellow current dot and dimmed previous dots then retrace in exact order by clicking dots. Numbered progress indicators show click order. One wrong click immediately ends the round revealing correct path in green. +2 for perfect path recall -2 for wrong click. Path length equals level + 3 with progressive difficulty. 60-second timed challenge with streak bonus every 5 perfect rounds.",
+            "description": "Free spatial memory drill with animated dot paths on 3x3 to 7x7 grids. Retrace paths in exact order. Instant fail on wrong click. +2 for perfect recall.",
             "applicationCategory": "EducationalApplication",
             "operatingSystem": "All",
-            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD", "availability": "https://schema.org/OnlineOnly" },
-            "author": { "@type": "Organization", "name": "SkillDrills", "url": "https://skilldrills.online" },
-            "publisher": { "@type": "Organization", "name": "SkillDrills" },
-            "educationalUse": ["Spatial Memory Training", "Sequential Recall Practice", "Route Memory Development", "Spatial Sequence Learning", "Cognitive Training"],
-            "learningResourceType": ["Interactive Exercise", "Memory Drill", "Spatial Training", "Sequence Game"],
-            "timeRequired": "PT60S",
-            "interactivityType": "active",
-            "inLanguage": "en-US",
-            "teaches": ["Spatial Sequence Memory", "Path Recall", "Route Tracing", "Sequential Spatial Memory", "Spatial Working Memory", "Ordered Recall"],
-            "educationalLevel": "All Levels",
-            "typicalAgeRange": "8-80",
-            "datePublished": "2026-05-14",
-            "dateModified": new Date().toISOString().split('T')[0],
-            "version": "1.0",
-            "isAccessibleForFree": true,
-            "accessMode": ["visual"],
-            "accessModeSufficient": ["visual"]
+            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+            "author": { "@type": "Organization", "name": "SkillDrills" },
+            "isAccessibleForFree": true
           })
         }}
       />
+
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -135,61 +96,38 @@ export default function PathTracingPage() {
                 "name": "What is the Path Tracing Drill?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "The Path Tracing Drill is a free spatial sequence memory exercise that challenges you to watch animated dot paths and retrace them in exact order. Starting on a 3×3 grid with 4 dots, each dot illuminates yellow at 500ms intervals while previous dots dim creating a visual sequence to memorize. You then click dots in the correct order with blue numbered progress indicators showing your click sequence. One wrong click immediately ends the round revealing the correct path in green with numbered positions."
+                  "text": "A free spatial sequence exercise. Watch animated dot paths at 500ms intervals, then retrace in exact order. Instant fail on wrong click."
                 }
               },
               {
                 "@type": "Question",
-                "name": "How does the progressive difficulty system work?",
+                "name": "How does progressive difficulty work?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "The path length equals your current level plus 3. Level 1 has 4 dots, Level 2 has 5 dots, Level 3 has 6 dots, and so on with infinite progression. The grid expands automatically based on path length: 3×3 for paths of 4 dots or fewer, 4×4 for 5-6 dots, 5×5 for 7-8 dots, 6×6 for 9-10 dots, and 7×7 for 11 or more dots. Each correct path advances you to the next level with a longer path. Wrong clicks keep you at the current level."
+                  "text": "Path length = level + 3. Level 1 has 4 dots. Grid expands from 3x3 to 7x7 as paths grow longer. Infinite progression."
                 }
               },
               {
                 "@type": "Question",
-                "name": "How does the instant fail and scoring system work?",
+                "name": "Who should use this drill?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "The drill uses an instant fail mechanic for precision training. Clicking any dot that is not the next correct dot in the sequence immediately ends the round deducting 2 points and revealing the correct path with green numbered dots. Previously clicked correct dots remain blue with their order numbers. Perfectly retracing the entire path in correct order earns +2 points and advances to the next level with a longer path. Every 5 consecutive perfect rounds triggers a streak bonus notification."
+                  "text": "Students, professionals, gamers (strategy/MOBA), and anyone wanting better sequential spatial memory and route recall."
                 }
               },
               {
                 "@type": "Question",
-                "name": "What visual feedback does the drill provide?",
+                "name": "Do I need to sign up?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "The drill provides comprehensive color-coded visual feedback throughout. During path animation the current dot glows bright yellow with a shadow effect while previously shown dots appear as dimmed yellow. During retracing blue dots with white numbers show your correctly clicked sequence. Red dots with an X mark show wrong clicks. After mistakes the correct path appears as green dots with position numbers. A result message appears with Perfect! in green or Wrong path in red with bounce animation."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "What spatial memory skills does this drill improve?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "This drill improves spatial sequence memory by training the ability to encode and reproduce ordered spatial information. Route recall strengthens the capacity to remember paths and sequences. Sequential spatial processing develops the skill of processing spatial information in correct temporal order. Spatial working memory capacity increases as paths grow longer across larger grids. Path tracing accuracy improves through the instant fail mechanic that penalizes incorrect clicks and rewards precise sequential recall."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "Who should use the Path Tracing Drill?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "This drill is ideal for students developing sequential memory for academic learning. Professionals strengthening route planning and spatial organization skills. Gamers improving positional sequence recall for strategy and MOBA games. Anyone wanting to improve their ability to remember and reproduce ordered sequences of locations. The animated dot format makes it engaging for all ages while the progressive difficulty ensures continuous challenge for all ability levels."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "Do I need to sign up to use this spatial memory drill?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "No registration no sign-up and no login is required. This path tracing drill is completely free and works instantly in your browser. Your best scores are saved locally on your device. Just visit SkillDrills.online and start improving your spatial sequence memory immediately."
+                  "text": "No registration required. This path tracing drill is completely free and works instantly in your browser."
                 }
               }
             ]
           })
         }}
       />
+
       <PathTracingClient />
     </>
   );

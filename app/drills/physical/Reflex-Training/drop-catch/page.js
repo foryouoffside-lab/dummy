@@ -1,8 +1,8 @@
 import DropCatchClient from './DropCatchClient';
 
 export const metadata = {
-  title: 'Free Reflex Drop Catch Drill - Reaction Speed & Visual Discrimination Training | SkillDrills',
-  description: 'Train your reflexes and visual discrimination with this free drop catch drill. Catch falling green balls for +1 point while avoiding red decoy balls marked with X. Features 3-life protection system adaptive speed 400-800 px/s progressive difficulty and 60-second timed challenge. Track score accuracy streak catches and peak speed. Perfect for gamers athletes sports enthusiasts FPS players and anyone wanting faster reaction time and better hand-eye coordination. No sign-up required.',
+  title: 'Reflex Drop Catch Drill - Reaction Speed Training | SkillDrills',
+  description: 'Catch falling green balls (+1pt), avoid red decoys marked X. Adaptive 400-800px/s speed. 3 lives, streak bonuses. 60-second challenge. No sign-up.',
   keywords: [
     'reflex drop catch', 'reaction speed game', 'visual discrimination training',
     'falling ball catch drill', 'reflex training online', 'click reaction game free',
@@ -20,66 +20,39 @@ export const metadata = {
     'no download reflex game', 'browser reflex test', 'instant reflex practice',
   ],
   openGraph: {
-    title: 'Free Reflex Drop Catch Drill - Reaction Speed & Visual Discrimination | SkillDrills',
-    description: 'Catch green balls (+1pt), avoid red decoys. 3 lives, adaptive speed, 60s challenge. Free.',
+    title: 'Reflex Drop Catch Drill - Reaction Speed | SkillDrills',
+    description: 'Catch green balls, avoid red decoys. Adaptive speed. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/physical/Reflex-Training/drop-catch',
     siteName: 'SkillDrills',
     locale: 'en_US',
-    images: [
-      {
-        url: 'https://skilldrills.online/icons/icon-512x512.png',
-        width: 512,
-        height: 512,
-        alt: 'Reflex Drop Catch - Reaction Speed & Visual Discrimination Training',
-      }
-    ],
-    publishedTime: '2026-05-20T00:00:00+00:00',
-    modifiedTime: new Date().toISOString(),
-    section: 'Physical Training',
-    tag: ['reflex training', 'reaction speed', 'visual discrimination', 'hand-eye coordination', 'drop catch'],
+    images: [{
+      url: 'https://skilldrills.online/icons/icon-512x512.png',
+      width: 512,
+      height: 512,
+      alt: 'Reflex Drop Catch Drill',
+    }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Free Reflex Drop Catch Drill | SkillDrills',
-    description: 'Catch green, avoid red. Adaptive speed. 3 lives. Free.',
+    title: 'Reflex Drop Catch Drill | SkillDrills',
+    description: 'Catch green, avoid red. Adaptive speed. Free.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
-    creator: '@skilldrills',
-    site: '@skilldrills',
   },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': 320,
-    },
-  },
+  robots: { index: true, follow: true },
   alternates: {
     canonical: 'https://skilldrills.online/drills/physical/Reflex-Training/drop-catch',
-    languages: {
-      'en': 'https://skilldrills.online/drills/physical/Reflex-Training/drop-catch',
-      'en-US': 'https://skilldrills.online/drills/physical/Reflex-Training/drop-catch',
-      'x-default': 'https://skilldrills.online/drills/physical/Reflex-Training/drop-catch',
-    },
-  },
-  other: {
-    'article:published_time': '2026-05-20T00:00:00+00:00',
-    'article:modified_time': new Date().toISOString(),
-    'article:section': 'Physical Training',
-    'article:tag': 'reflex training, reaction speed, visual discrimination, hand-eye coordination, drop catch',
-  },
-  verification: {
-    google: 'bf3e19be4c41802b',
   },
 };
 
 export default function DropCatchPage() {
   return (
     <>
+      <noscript>
+        <h1>Reflex Drop Catch Drill - Reaction Speed & Visual Discrimination Training</h1>
+        <p>Free drop catch reflex drill. Catch green balls, avoid red decoys. No sign-up required.</p>
+      </noscript>
+
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -88,44 +61,32 @@ export default function DropCatchPage() {
             "@type": "BreadcrumbList",
             "itemListElement": [
               { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://skilldrills.online" },
-              { "@type": "ListItem", "position": 2, "name": "Physical Drills", "item": "https://skilldrills.online/drills/physical" },
+              { "@type": "ListItem", "position": 2, "name": "Physical Training", "item": "https://skilldrills.online/drills/physical" },
               { "@type": "ListItem", "position": 3, "name": "Reflex Training", "item": "https://skilldrills.online/drills/physical/Reflex-Training" },
-              { "@type": "ListItem", "position": 4, "name": "Reflex Drop Catch Drill" }
+              { "@type": "ListItem", "position": 4, "name": "Drop Catch" }
             ]
           })
         }}
       />
+
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "WebApplication",
-            "name": "Reflex Drop Catch - Reaction Speed & Visual Discrimination Training",
+            "name": "Reflex Drop Catch Drill",
             "url": "https://skilldrills.online/drills/physical/Reflex-Training/drop-catch",
-            "description": "Free interactive reflex training drill where you catch falling green balls for points while avoiding red decoy balls marked with X. Features 3-life protection system, adaptive speed 400-800 px/s, progressive difficulty, and 60-second timed challenge. Tracks score, accuracy, streak, catches, and peak speed.",
+            "description": "Free reflex drill. Catch falling green balls (+1pt), avoid red decoys (X). Adaptive 400-800px/s speed. 3 lives, streak bonuses.",
             "applicationCategory": "HealthApplication",
             "operatingSystem": "All",
-            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD", "availability": "https://schema.org/OnlineOnly" },
-            "author": { "@type": "Organization", "name": "SkillDrills", "url": "https://skilldrills.online" },
-            "publisher": { "@type": "Organization", "name": "SkillDrills" },
-            "educationalUse": ["Reflex Training", "Reaction Speed Practice", "Visual Discrimination Training", "Hand-Eye Coordination", "Gaming Skills Development"],
-            "learningResourceType": ["Interactive Exercise", "Reflex Drill", "Speed Test"],
-            "timeRequired": "PT60S",
-            "interactivityType": "active",
-            "inLanguage": "en-US",
-            "teaches": ["Reaction Speed", "Visual Discrimination", "Reflex Control", "Target Identification", "Hand-Eye Coordination", "Quick Decision Making"],
-            "educationalLevel": "All Levels",
-            "typicalAgeRange": "8-70",
-            "datePublished": "2026-05-20",
-            "dateModified": new Date().toISOString().split('T')[0],
-            "version": "1.0",
-            "isAccessibleForFree": true,
-            "accessMode": ["visual", "interactive"],
-            "accessModeSufficient": ["visual"]
+            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+            "author": { "@type": "Organization", "name": "SkillDrills" },
+            "isAccessibleForFree": true
           })
         }}
       />
+
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -138,15 +99,7 @@ export default function DropCatchPage() {
                 "name": "What is the Reflex Drop Catch drill?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "The Reflex Drop Catch drill is a free interactive reflex training game where balls fall from the top of the screen. You must click green balls to earn +1 point each while avoiding red balls marked with an X. Red balls and missed green balls cost 1 life. You start with 3 lives. After lives reach 0, mistakes deduct 1 point. The speed adaptively increases from 400 to 800 pixels per second as you improve."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "How does the adaptive difficulty work?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "The drill features adaptive difficulty where speed increases every 2 successful catches. Starting at 400 pixels per second, the ball falling speed can reach up to 800 px/s. The spawn rate also increases as you catch more balls, making the challenge progressively harder. This ensures the drill remains challenging at any skill level."
+                  "text": "A free reflex game. Catch falling green balls (+1pt), avoid red decoys with X. Adaptive 400-800px/s speed. 3 lives."
                 }
               },
               {
@@ -154,45 +107,30 @@ export default function DropCatchPage() {
                 "name": "What are the fake decoy balls?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "25% of falling balls are fake red decoys marked with a visible X. These test your visual discrimination skills - the ability to quickly distinguish between targets (green) and non-targets (red). Clicking a red decoy costs 1 life. This dual-task training improves both reaction speed and decision-making accuracy."
+                  "text": "25% are red decoys marked X. Test visual discrimination. Clicking red costs 1 life. Dual-task training for speed and accuracy."
                 }
               },
               {
                 "@type": "Question",
-                "name": "How is the drop catch drill scored?",
+                "name": "How does adaptive difficulty work?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Each correct green ball catch earns +1 point. Every 5 consecutive catches triggers a streak bonus notification. Red ball clicks and missed green balls cost 1 life first (3 lives total). After all lives are depleted, mistakes incur -1 point penalty. The 60-second timer tracks your session. Your final score, accuracy percentage, peak speed, best streak, and total catches are recorded."
+                  "text": "Speed increases every 2 catches from 400 to 800 px/s. Spawn rate also increases. Always challenging at your level."
                 }
               },
               {
                 "@type": "Question",
-                "name": "Who benefits from reflex drop catch training?",
+                "name": "Do I need to sign up?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Gamers benefit from improved reaction time for FPS and action games. Athletes develop faster visual processing and hand-eye coordination. Sports enthusiasts improve quick decision-making under pressure. Anyone wanting faster reflexes and better visual discrimination skills benefits from regular practice. The adaptive difficulty makes it suitable for beginners through advanced users."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "How often should I practice reflex training?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "For best results, practice 2-3 times daily in 5-10 minute sessions. The adaptive difficulty ensures each session is challenging. Focus on accuracy first by avoiding red decoys, then speed. Most users see 20-30 percent improvement in reaction speed and visual discrimination within 2-3 weeks of consistent daily practice."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "Do I need to sign up to use this reflex drill?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "No registration, no sign-up, and no login is required. This reflex drop catch drill is completely free and works instantly in your browser. Your best scores are saved locally on your device. Just visit SkillDrills.online and start training your reflexes immediately."
+                  "text": "No registration required. This reflex drill is completely free and works instantly in your browser."
                 }
               }
             ]
           })
         }}
       />
+
       <DropCatchClient />
     </>
   );

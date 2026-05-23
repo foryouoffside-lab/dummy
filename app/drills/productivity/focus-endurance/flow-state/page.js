@@ -1,8 +1,8 @@
 ﻿import FlowInductionClient from './FlowInductionClient';
 
 export const metadata = {
-  title: 'Free Flow State Training - Deep Concentration & Peak Performance Focus Drill | SkillDrills',
-  description: 'Achieve optimal flow state with this free interactive concentration training drill. Track a moving ring with your cursor to build deep focus. Earn +1 point per 0.5 seconds of sustained flow inside the ring while distractions deduct -1 point. Features adaptive difficulty with ring speed increasing with streaks, real-time flow meter 0-100%, double ring indicator at 60%+ deep flow zone, and peak performance tracking. 60-second timed challenge with score, streak, and flow percentage tracking. Perfect for productivity enhancement, deep work preparation, cognitive focus training, and peak performance mental conditioning. No sign-up required.',
+  title: 'Flow State Training - Deep Concentration Focus Drill | SkillDrills',
+  description: 'Track a moving ring to achieve flow state. +1pt/0.5s inside, adaptive speed, flow meter 0-100%, double ring at 60%+. 60-second challenge. No sign-up.',
   keywords: [
     'flow state training', 'flow induction drill', 'deep concentration practice',
     'flow experience online', 'focus flow training', 'concentration flow exercise',
@@ -20,66 +20,39 @@ export const metadata = {
     'mihaly csikszentmihalyi flow', 'optimal state of consciousness', 'flow channel',
   ],
   openGraph: {
-    title: 'Free Flow State Training - Deep Concentration & Peak Performance | SkillDrills',
-    description: 'Track a moving ring to enter flow state. +1pt per 0.5s of flow, adaptive difficulty, real-time flow meter. Free.',
+    title: 'Flow State Training - Deep Concentration | SkillDrills',
+    description: 'Track a moving ring to enter flow state. Adaptive difficulty. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/productivity/focus-endurance/flow-state',
     siteName: 'SkillDrills',
     locale: 'en_US',
-    images: [
-      {
-        url: 'https://skilldrills.online/icons/icon-512x512.png',
-        width: 512,
-        height: 512,
-        alt: 'Flow State Training - Deep Concentration Focus Drill',
-      }
-    ],
-    publishedTime: '2026-05-20T00:00:00+00:00',
-    modifiedTime: new Date().toISOString(),
-    section: 'Productivity Training',
-    tag: ['flow state', 'deep concentration', 'peak performance', 'focus training', 'productivity'],
+    images: [{
+      url: 'https://skilldrills.online/icons/icon-512x512.png',
+      width: 512,
+      height: 512,
+      alt: 'Flow State Training',
+    }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Free Flow State Training | SkillDrills',
-    description: 'Achieve deep concentration by tracking a moving ring. 60s challenge. Free.',
+    title: 'Flow State Training | SkillDrills',
+    description: 'Achieve deep concentration by tracking a moving ring. Free.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
-    creator: '@skilldrills',
-    site: '@skilldrills',
   },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': 320,
-    },
-  },
+  robots: { index: true, follow: true },
   alternates: {
     canonical: 'https://skilldrills.online/drills/productivity/focus-endurance/flow-state',
-    languages: {
-      'en': 'https://skilldrills.online/drills/productivity/focus-endurance/flow-state',
-      'en-US': 'https://skilldrills.online/drills/productivity/focus-endurance/flow-state',
-      'x-default': 'https://skilldrills.online/drills/productivity/focus-endurance/flow-state',
-    },
-  },
-  other: {
-    'article:published_time': '2026-05-20T00:00:00+00:00',
-    'article:modified_time': new Date().toISOString(),
-    'article:section': 'Productivity Training',
-    'article:tag': 'flow state, deep concentration, peak performance, focus training, productivity, cognitive enhancement',
-  },
-  verification: {
-    google: 'bf3e19be4c41802b',
   },
 };
 
 export default function FlowInductionPage() {
   return (
     <>
+      <noscript>
+        <h1>Flow State Training - Deep Concentration & Peak Performance Focus Drill</h1>
+        <p>Free flow state training drill. Track a moving ring to enter optimal concentration. No sign-up required.</p>
+      </noscript>
+
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -88,44 +61,32 @@ export default function FlowInductionPage() {
             "@type": "BreadcrumbList",
             "itemListElement": [
               { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://skilldrills.online" },
-              { "@type": "ListItem", "position": 2, "name": "Productivity Drills", "item": "https://skilldrills.online/drills/productivity" },
+              { "@type": "ListItem", "position": 2, "name": "Productivity Training", "item": "https://skilldrills.online/drills/productivity" },
               { "@type": "ListItem", "position": 3, "name": "Focus Endurance", "item": "https://skilldrills.online/drills/productivity/focus-endurance" },
-              { "@type": "ListItem", "position": 4, "name": "Flow State Training" }
+              { "@type": "ListItem", "position": 4, "name": "Flow State" }
             ]
           })
         }}
       />
+
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "WebApplication",
-            "name": "Flow State Training - Deep Concentration & Peak Performance Drill",
+            "name": "Flow State Training",
             "url": "https://skilldrills.online/drills/productivity/focus-endurance/flow-state",
-            "description": "Free interactive flow state training drill that helps achieve optimal concentration by tracking a moving ring with your cursor. Features adaptive difficulty, real-time flow meter, double ring deep flow indicator, and peak performance tracking. 60-second timed challenge.",
+            "description": "Free flow state drill. Track moving ring with cursor. +1pt/0.5s inside, adaptive speed. Flow meter 0-100%, double ring at 60%+. 60-second challenge.",
             "applicationCategory": "EducationalApplication",
             "operatingSystem": "All",
-            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD", "availability": "https://schema.org/OnlineOnly" },
-            "author": { "@type": "Organization", "name": "SkillDrills", "url": "https://skilldrills.online" },
-            "publisher": { "@type": "Organization", "name": "SkillDrills" },
-            "educationalUse": ["Flow State Training", "Deep Concentration Practice", "Peak Performance Training", "Productivity Enhancement", "Cognitive Focus Training"],
-            "learningResourceType": ["Interactive Exercise", "Focus Drill", "Concentration Game"],
-            "timeRequired": "PT60S",
-            "interactivityType": "active",
-            "inLanguage": "en-US",
-            "teaches": ["Flow State Induction", "Deep Concentration", "Distraction Resistance", "Sustained Attention", "Hand-Eye Coordination", "Peak Performance"],
-            "educationalLevel": "All Levels",
-            "typicalAgeRange": "12-70",
-            "datePublished": "2026-05-20",
-            "dateModified": new Date().toISOString().split('T')[0],
-            "version": "1.0",
-            "isAccessibleForFree": true,
-            "accessMode": ["visual", "interactive"],
-            "accessModeSufficient": ["visual"]
+            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+            "author": { "@type": "Organization", "name": "SkillDrills" },
+            "isAccessibleForFree": true
           })
         }}
       />
+
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -138,15 +99,7 @@ export default function FlowInductionPage() {
                 "name": "What is flow state training?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Flow state training uses interactive exercises to help you achieve the optimal state of consciousness where you are fully immersed in an activity with energized focus and peak performance. Popularized by psychologist Mihaly Csikszentmihalyi, flow state is characterized by complete absorption, loss of self-consciousness, and distorted time perception. This free drill helps you practice entering and maintaining flow through a moving ring tracking exercise with adaptive difficulty."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "How does the Flow State Training drill work?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "Track a moving green ring with your cursor. Keeping your cursor inside the ring builds flow and earns +1 point every 0.5 seconds. The ring speeds up and becomes more unpredictable as your streak increases, testing your concentration. A flow meter shows your current flow level from 0-100%. A double ring appears at 60%+ flow indicating the deep flow zone. When your cursor leaves the ring, you lose -1 point per 0.5 seconds of distraction."
+                  "text": "A free concentration exercise based on Csikszentmihalyi's flow psychology. Track moving ring. +1pt/0.5s inside. Flow meter, double ring at 60%+ deep flow."
                 }
               },
               {
@@ -154,53 +107,30 @@ export default function FlowInductionPage() {
                 "name": "What is the double ring indicator?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "The double ring appears when you reach 60% or higher flow level. This visual indicator represents the deep flow zone where concentration is strongest and performance peaks. The primary ring glows brighter, and a secondary ring appears around it. This feedback helps you recognize when you are entering optimal flow state, training your brain to identify and sustain deep concentration."
+                  "text": "Appears at 60%+ flow level. Primary ring glows brighter with secondary ring. Represents deep flow zone where concentration peaks."
                 }
               },
               {
                 "@type": "Question",
-                "name": "How does the adaptive difficulty work?",
+                "name": "How does adaptive difficulty work?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "The ring's speed and movement jitter increase as your streak builds. Every 50 consecutive streak points triggers a speed increase. This adaptive system ensures the drill remains challenging regardless of your skill level. Beginners experience a moderately paced ring, while advanced users face faster, more erratic movement patterns that demand intense concentration to track."
+                  "text": "Ring speed and jitter increase with streak. Every 50 streak points triggers speed increase. Always challenging at your level."
                 }
               },
               {
                 "@type": "Question",
-                "name": "How is the flow state drill scored?",
+                "name": "Do I need to sign up?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "You earn +1 point for every 0.5 seconds your cursor stays inside the ring. You lose -1 point for every 0.5 seconds outside the ring, though your score never drops below 0. The drill tracks your current flow percentage, streak length, best streak, peak flow achieved, and final score. Your best score is saved locally in your browser for performance tracking across sessions."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "Who benefits from flow state training?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "Flow state training benefits professionals seeking improved productivity, students preparing for deep study sessions, creatives wanting to enter artistic flow, athletes practicing mental focus, programmers needing sustained concentration, and anyone wanting to improve their ability to focus deeply. Regular practice helps train your brain to enter concentrated states more quickly and maintain focus longer."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "How often should I practice flow state training?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "For best results, practice 2-3 times daily in 5-10 minute sessions. Use it as a warm-up before deep work or study sessions to prime your brain for concentration. Most users report improved ability to enter focused states within 2-3 weeks of consistent daily practice. The drill is designed to be a quick, effective concentration primer."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "Do I need to sign up to use this flow state drill?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "No registration, no sign-up, and no login is required. This flow state training drill is completely free and works instantly in your browser. Your best scores are saved locally on your device. Just visit SkillDrills.online and start training your concentration immediately."
+                  "text": "No registration required. This flow state drill is completely free and works instantly in your browser."
                 }
               }
             ]
           })
         }}
       />
+
       <FlowInductionClient />
     </>
   );

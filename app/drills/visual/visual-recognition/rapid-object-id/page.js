@@ -1,8 +1,8 @@
 ﻿import RapidObjectIdClient from './RapidObjectIdClient';
 
 export const metadata = {
-  title: 'Free Neural Shape ID Drill - Rapid Object Recognition & Visual Processing Training | SkillDrills',
-  description: 'Train rapid visual object recognition with this free neural shape ID drill featuring adaptive flash durations from 50-300ms. Circle maps to LEFT button or A/Left Arrow key and Square maps to RIGHT button or D/Right Arrow key for faster keyboard responses. Shapes flash briefly at center then you must identify which appeared. Adaptive system tightens flash by 6ms on correct answers down to 50ms and loosens by 20ms on mistakes up to 300ms. 3 lives system with penalty scoring after depletion. 60-second timed challenge with reaction time tracking in milliseconds and 5-streak bonus notifications. Perfect for gamers athletes and anyone wanting faster visual processing and dual-choice decision-making speed. No sign-up required.',
+  title: 'Neural Shape ID Drill - Rapid Object Recognition | SkillDrills',
+  description: 'Train rapid shape recognition with adaptive 50-300ms flash. Circle=Left/A, Square=Right/D. Keyboard support. 3 lives, reaction tracking. No sign-up.',
   keywords: [
     'rapid object recognition', 'shape identification', 'visual processing speed',
     'object recognition drill', 'circle square test', 'rapid visual processing',
@@ -17,66 +17,39 @@ export const metadata = {
     'shape discrimination practice', 'reaction time shapes', 'object classification drill',
   ],
   openGraph: {
-    title: 'Free Neural Shape ID Drill - Rapid Object Recognition Training | SkillDrills',
-    description: 'Circle=Left Square=Right with adaptive 50-300ms flash. Keyboard A/D support. Free visual processing training.',
+    title: 'Neural Shape ID Drill - Rapid Recognition | SkillDrills',
+    description: 'Circle=Left Square=Right. Adaptive 50-300ms flash. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/visual/visual-recognition/rapid-object-id',
     siteName: 'SkillDrills',
     locale: 'en_US',
-    images: [
-      {
-        url: 'https://skilldrills.online/icons/icon-512x512.png',
-        width: 512,
-        height: 512,
-        alt: 'Neural Shape ID Drill - Rapid Object Recognition & Visual Processing Training',
-      }
-    ],
-    publishedTime: '2026-05-14T00:00:00+00:00',
-    modifiedTime: new Date().toISOString(),
-    section: 'Visual Training',
-    tag: ['neural shape id', 'rapid recognition', 'visual processing', 'shape identification', 'reaction time', 'cognitive training'],
+    images: [{
+      url: 'https://skilldrills.online/icons/icon-512x512.png',
+      width: 512,
+      height: 512,
+      alt: 'Neural Shape ID Drill',
+    }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Free Neural Shape ID Drill | SkillDrills',
-    description: 'Circle=Left Square=Right. Adaptive 50-300ms flash. Keyboard support. Free.',
+    title: 'Neural Shape ID Drill | SkillDrills',
+    description: 'Circle=Left Square=Right. Adaptive flash. Free.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
-    creator: '@skilldrills',
-    site: '@skilldrills',
   },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': 320,
-    },
-  },
+  robots: { index: true, follow: true },
   alternates: {
     canonical: 'https://skilldrills.online/drills/visual/visual-recognition/rapid-object-id',
-    languages: {
-      'en': 'https://skilldrills.online/drills/visual/visual-recognition/rapid-object-id',
-      'en-US': 'https://skilldrills.online/drills/visual/visual-recognition/rapid-object-id',
-      'x-default': 'https://skilldrills.online/drills/visual/visual-recognition/rapid-object-id',
-    },
-  },
-  other: {
-    'article:published_time': '2026-05-14T00:00:00+00:00',
-    'article:modified_time': new Date().toISOString(),
-    'article:section': 'Visual Training',
-    'article:tag': 'neural shape id, rapid recognition, visual processing, shape identification, reaction time',
-  },
-  verification: {
-    google: 'bf3e19be4c41802b',
   },
 };
 
 export default function RapidObjectIdPage() {
   return (
     <>
+      <noscript>
+        <h1>Neural Shape ID Drill - Rapid Object Recognition & Visual Processing Training</h1>
+        <p>Free rapid shape recognition drill with adaptive 50-300ms flash. No sign-up required.</p>
+      </noscript>
+
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -87,42 +60,30 @@ export default function RapidObjectIdPage() {
               { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://skilldrills.online" },
               { "@type": "ListItem", "position": 2, "name": "Visual Training", "item": "https://skilldrills.online/drills/visual" },
               { "@type": "ListItem", "position": 3, "name": "Visual Recognition", "item": "https://skilldrills.online/drills/visual/visual-recognition" },
-              { "@type": "ListItem", "position": 4, "name": "Neural Shape ID Drill" }
+              { "@type": "ListItem", "position": 4, "name": "Neural Shape ID" }
             ]
           })
         }}
       />
+
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "WebApplication",
-            "name": "Neural Shape ID Drill - Rapid Object Recognition & Visual Processing Training",
+            "name": "Neural Shape ID Drill",
             "url": "https://skilldrills.online/drills/visual/visual-recognition/rapid-object-id",
-            "description": "Free rapid shape recognition drill with adaptive flash duration 50-300ms. Circle maps to LEFT button or A/Left Arrow key and Square maps to RIGHT button or D/Right Arrow key. Adaptive system tightens flash by 6ms on correct answers and loosens by 20ms on mistakes. 3 lives system with penalty scoring after depletion. 60-second timed challenge with reaction time tracking and 5-streak bonuses.",
+            "description": "Free rapid shape recognition drill. Adaptive 50-300ms flash. Circle=Left/A, Square=Right/D. 3 lives, millisecond reaction tracking.",
             "applicationCategory": "EducationalApplication",
             "operatingSystem": "All",
-            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD", "availability": "https://schema.org/OnlineOnly" },
-            "author": { "@type": "Organization", "name": "SkillDrills", "url": "https://skilldrills.online" },
-            "publisher": { "@type": "Organization", "name": "SkillDrills" },
-            "educationalUse": ["Object Recognition Training", "Visual Processing Speed", "Cognitive Speed Practice", "Decision Making", "Response Selection", "Dual-Choice Reaction"],
-            "learningResourceType": ["Interactive Exercise", "Visual Drill", "Reaction Training", "Recognition Practice"],
-            "timeRequired": "PT60S",
-            "interactivityType": "active",
-            "inLanguage": "en-US",
-            "teaches": ["Shape Recognition", "Rapid Visual Processing", "Response Selection", "Reaction Speed", "Visual Discrimination", "Cognitive Flexibility"],
-            "educationalLevel": "All Levels",
-            "typicalAgeRange": "8-80",
-            "datePublished": "2026-05-14",
-            "dateModified": new Date().toISOString().split('T')[0],
-            "version": "1.0",
-            "isAccessibleForFree": true,
-            "accessMode": ["visual"],
-            "accessModeSufficient": ["visual"]
+            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+            "author": { "@type": "Organization", "name": "SkillDrills" },
+            "isAccessibleForFree": true
           })
         }}
       />
+
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -135,23 +96,15 @@ export default function RapidObjectIdPage() {
                 "name": "What is the Neural Shape ID Drill?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "The Neural Shape ID Drill is a free rapid visual recognition exercise that challenges you to identify briefly flashing shapes. Either a circle or square appears at the center of the screen for an adaptive duration starting at 250ms. Circle maps to the LEFT button or A/Left Arrow key and Square maps to the RIGHT button or D/Right Arrow key. The flash duration tightens by 6ms with each correct answer down to 50ms and loosens by 20ms on mistakes up to 300ms, creating a personalized difficulty curve."
+                  "text": "A free rapid recognition exercise. Circle or Square flash briefly (50-300ms adaptive). Circle=Left/A, Square=Right/D. Reaction time tracked."
                 }
               },
               {
                 "@type": "Question",
-                "name": "How does the adaptive flash duration system work?",
+                "name": "How does adaptive flash work?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "The flash duration starts at 250ms. Each correct identification tightens the flash by 6ms making the next shape appear for less time. Each wrong answer or timeout loosens the flash by 20ms making the next shape appear for longer. The flash ranges from a minimum of 50ms elite level where shapes appear as brief flashes to a maximum of 300ms beginner level. This adaptive system ensures you are always challenged at your current visual processing speed while providing more time when you need it."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "How does the scoring and lives system work?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "Each correct identification earns +1 point with your reaction time displayed in milliseconds. You start with 3 lives displayed as heart icons. Wrong shape selection or failing to respond within the 800ms response window costs 1 life but no points are deducted while lives remain. After all 3 lives are depleted, each mistake deducts 1 point. Every 5 consecutive correct identifications triggers a streak bonus notification. Clicking a button when no shape is present also counts as an error."
+                  "text": "Starts at 250ms. Correct answers tighten by 6ms (min 50ms). Wrong answers loosen by 20ms (max 300ms). Always at your processing speed."
                 }
               },
               {
@@ -159,37 +112,22 @@ export default function RapidObjectIdPage() {
                 "name": "What control options are available?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "The drill offers both mouse and keyboard controls for flexibility. You can click the LEFT or RIGHT buttons displayed at the bottom of the screen. For faster responses, use keyboard shortcuts: A key or Left Arrow for Circle, D key or Right Arrow for Square. The buttons display keyboard shortcuts as hints below each button. The canvas displays the shape with a glow effect while the buttons provide clear visual and text feedback for the correct mapping."
+                  "text": "Mouse: click LEFT/RIGHT buttons. Keyboard: A/Left Arrow for Circle, D/Right Arrow for Square. Faster responses with keyboard."
                 }
               },
               {
                 "@type": "Question",
-                "name": "What visual cognitive skills does this drill improve?",
+                "name": "Do I need to sign up?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "This drill improves rapid visual processing by training the ability to identify objects at brief exposure durations. Shape recognition strengthens through repeated identification of circle and square. Response selection develops the cognitive flexibility to map visual input to motor output quickly. Reaction speed improves through the 800ms response window and adaptive flash system. Visual discrimination enhances the ability to distinguish between two similar geometric shapes under time pressure."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "Who should use the Neural Shape ID Drill?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "This drill is ideal for gamers improving response speed for competitive gaming. Athletes training quick visual decision-making for sports. Drivers enhancing hazard recognition and reaction time. Anyone wanting faster visual processing speed and the ability to quickly identify and respond to visual stimuli. The dual-choice format with keyboard shortcuts makes it excellent for building the rapid object recognition essential for many real-world tasks."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "Do I need to sign up to use this shape recognition drill?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "No registration no sign-up and no login is required. This neural shape ID drill is completely free and works instantly in your browser. Your best scores and streak records are saved locally on your device. Just visit SkillDrills.online and start improving your rapid visual object recognition immediately."
+                  "text": "No registration required. This shape recognition drill is completely free and works instantly in your browser."
                 }
               }
             ]
           })
         }}
       />
+
       <RapidObjectIdClient />
     </>
   );

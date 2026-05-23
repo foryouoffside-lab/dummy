@@ -1,8 +1,8 @@
 import ReactionChainClient from './ReactionChainClient';
 
 export const metadata = {
-  title: 'Free Reaction Chain Drill - Precision Stopping & Impulse Control Training | SkillDrills',
-  description: 'Train precision stopping and impulse control with this free kinetic arrest reaction chain drill. Arrest moving nodes by stopping your cursor precisely over them. No penalties for misses only positive scoring with streak bonuses. Fullscreen mode doubles nodes and speed from 400-1400 px per second. 60-second challenge with adaptive difficulty perfect for FPS gaming mouse control motor inhibition and reflex development. No sign-up required.',
+  title: 'Reaction Chain Drill - Precision Stopping & Impulse | SkillDrills',
+  description: 'Stop cursor on moving nodes to arrest them. No penalties, streak bonuses. Adaptive 400-1400px/s speed. Fullscreen doubles nodes. No sign-up.',
   keywords: [
     'reaction chain drill', 'kinetic arrest game', 'precision stopping training',
     'impulse control practice', 'cursor stopping drill', 'motor inhibition training',
@@ -20,66 +20,39 @@ export const metadata = {
     'go no go training', 'response inhibition drill', 'executive function practice',
   ],
   openGraph: {
-    title: 'Free Reaction Chain Drill - Precision Stopping & Impulse Control | SkillDrills',
-    description: 'Stop your cursor on moving nodes. No penalties. Fullscreen doubles speed. Free.',
+    title: 'Reaction Chain Drill - Precision Stopping | SkillDrills',
+    description: 'Stop cursor on moving nodes. No penalties. Adaptive speed. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/physical/Reflex-Training/reaction-chain',
     siteName: 'SkillDrills',
     locale: 'en_US',
-    images: [
-      {
-        url: 'https://skilldrills.online/icons/icon-512x512.png',
-        width: 512,
-        height: 512,
-        alt: 'Reaction Chain Drill - Precision Stopping Training',
-      }
-    ],
-    publishedTime: '2026-05-20T00:00:00+00:00',
-    modifiedTime: new Date().toISOString(),
-    section: 'Physical Training',
-    tag: ['reaction chain', 'precision stopping', 'impulse control', 'reflex training', 'mouse control'],
+    images: [{
+      url: 'https://skilldrills.online/icons/icon-512x512.png',
+      width: 512,
+      height: 512,
+      alt: 'Reaction Chain Drill',
+    }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Free Reaction Chain Drill | SkillDrills',
-    description: 'Train precision stopping. No penalties. Adaptive speed. Free.',
+    title: 'Reaction Chain Drill | SkillDrills',
+    description: 'Train precision stopping. No penalties. Free.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
-    creator: '@skilldrills',
-    site: '@skilldrills',
   },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': 320,
-    },
-  },
+  robots: { index: true, follow: true },
   alternates: {
     canonical: 'https://skilldrills.online/drills/physical/Reflex-Training/reaction-chain',
-    languages: {
-      'en': 'https://skilldrills.online/drills/physical/Reflex-Training/reaction-chain',
-      'en-US': 'https://skilldrills.online/drills/physical/Reflex-Training/reaction-chain',
-      'x-default': 'https://skilldrills.online/drills/physical/Reflex-Training/reaction-chain',
-    },
-  },
-  other: {
-    'article:published_time': '2026-05-20T00:00:00+00:00',
-    'article:modified_time': new Date().toISOString(),
-    'article:section': 'Physical Training',
-    'article:tag': 'reaction chain, precision stopping, impulse control, reflex training, mouse control',
-  },
-  verification: {
-    google: 'bf3e19be4c41802b',
   },
 };
 
 export default function ReactionChainPage() {
   return (
     <>
+      <noscript>
+        <h1>Reaction Chain Drill - Precision Stopping & Impulse Control Training</h1>
+        <p>Free kinetic arrest drill. Stop cursor on moving nodes. No sign-up required.</p>
+      </noscript>
+
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -88,44 +61,32 @@ export default function ReactionChainPage() {
             "@type": "BreadcrumbList",
             "itemListElement": [
               { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://skilldrills.online" },
-              { "@type": "ListItem", "position": 2, "name": "Physical Drills", "item": "https://skilldrills.online/drills/physical" },
+              { "@type": "ListItem", "position": 2, "name": "Physical Training", "item": "https://skilldrills.online/drills/physical" },
               { "@type": "ListItem", "position": 3, "name": "Reflex Training", "item": "https://skilldrills.online/drills/physical/Reflex-Training" },
-              { "@type": "ListItem", "position": 4, "name": "Reaction Chain Drill" }
+              { "@type": "ListItem", "position": 4, "name": "Reaction Chain" }
             ]
           })
         }}
       />
+
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "WebApplication",
-            "name": "Reaction Chain Drill - Precision Stopping & Impulse Control Training",
+            "name": "Reaction Chain Drill",
             "url": "https://skilldrills.online/drills/physical/Reflex-Training/reaction-chain",
-            "description": "Free interactive reaction chain drill for precision stopping and impulse control training. Arrest moving nodes by stopping your cursor precisely. No penalties for misses. Adaptive speed 400-1400 px/s. Fullscreen mode doubles nodes and speed. 60-second challenge with streak bonuses.",
+            "description": "Free precision stopping drill. Stop cursor on moving nodes to arrest them. No penalties, streak bonuses. Adaptive 400-1400px/s. Fullscreen doubles nodes.",
             "applicationCategory": "HealthApplication",
             "operatingSystem": "All",
-            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD", "availability": "https://schema.org/OnlineOnly" },
-            "author": { "@type": "Organization", "name": "SkillDrills", "url": "https://skilldrills.online" },
-            "publisher": { "@type": "Organization", "name": "SkillDrills" },
-            "educationalUse": ["Precision Stopping Training", "Impulse Control Practice", "Motor Inhibition", "Reflex Development", "Mouse Control Training"],
-            "learningResourceType": ["Interactive Exercise", "Reflex Drill", "Motor Training"],
-            "timeRequired": "PT60S",
-            "interactivityType": "active",
-            "inLanguage": "en-US",
-            "teaches": ["Precision Stopping", "Impulse Control", "Motor Inhibition", "Cursor Control", "Reaction Decision-Making"],
-            "educationalLevel": "All Levels",
-            "typicalAgeRange": "10-70",
-            "datePublished": "2026-05-20",
-            "dateModified": new Date().toISOString().split('T')[0],
-            "version": "1.0",
-            "isAccessibleForFree": true,
-            "accessMode": ["visual", "motor"],
-            "accessModeSufficient": ["visual"]
+            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+            "author": { "@type": "Organization", "name": "SkillDrills" },
+            "isAccessibleForFree": true
           })
         }}
       />
+
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -138,69 +99,38 @@ export default function ReactionChainPage() {
                 "name": "What is the Reaction Chain Drill?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "The Reaction Chain Drill is a free interactive precision stopping game that trains impulse control and motor inhibition. Moving nodes travel across the screen at speeds from 400 to 1400 pixels per second. You must stop your cursor completely when a node passes under it to arrest it. Each arrest earns points with streak bonuses. There are no penalties for misses only streak resets. The drill adapts its difficulty based on your performance."
+                  "text": "A free precision stopping game. Stop cursor on moving nodes to arrest them. Green ring = still enough. Red ring = moving. No penalties."
                 }
               },
               {
                 "@type": "Question",
-                "name": "How does the precision stopping mechanic work?",
+                "name": "Are there penalties for missing?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Nodes move across the screen from random edges. Your cursor has a detection ring around it. When the ring is green your cursor is still enough to arrest a node. When red you are moving too fast. Stop your cursor completely so a node passes through the ring to score. This trains the impulse control needed to stop precisely rather than chasing targets."
+                  "text": "No point penalties. Only streak resets. Risk-free practice. Streak bonuses every 5 consecutive arrests reward consistency."
                 }
               },
               {
                 "@type": "Question",
-                "name": "Are there penalties for missing nodes?",
+                "name": "Is this helpful for FPS gaming?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "No there are absolutely no point penalties for missing nodes. The only consequence is that your streak resets to zero. This encourages risk-free practice and experimentation. You can focus entirely on precision stopping without fear of losing points. The streak bonus system rewards consistent arrests with extra points every 5 consecutive arrests."
+                  "text": "Yes. Improves mouse control precision and impulse inhibition. Knowing when to stop is as important as flicking for Valorant, CS2, Apex."
                 }
               },
               {
                 "@type": "Question",
-                "name": "What happens in fullscreen mode?",
+                "name": "Do I need to sign up?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Fullscreen mode significantly increases the challenge by doubling the number of active nodes from 1 to 2 simultaneously. Base speed also increases from 400 to 600 pixels per second. The fullscreen indicator shows you are in enhanced mode. This mode is ideal for advanced users wanting maximum training intensity and better immersion."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "How does the adaptive speed work?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "Node speed adapts dynamically based on your performance. Base speed starts at 400 px per second and increases by up to 500 px based on your score plus up to 300 px based on your current streak. This means the better you perform the faster nodes become creating a continuously challenging experience. Maximum speed reaches approximately 1400 px per second for elite players."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "Is this drill helpful for FPS gaming?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "Yes this drill directly improves mouse control precision and impulse inhibition essential for FPS games. Knowing when to stop moving your crosshair is as important as flicking. The precision stopping skill transfers directly to games like Valorant CS2 Overwatch and Apex Legends where controlled micro-adjustments win gunfights. Regular practice improves both stopping accuracy and decision-making speed."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "How often should I practice reaction chain training?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "For best results practice 2-3 times daily in 5-10 minute sessions. Start in normal mode to build fundamental stopping precision. Progress to fullscreen mode as your control improves. Most users see significant improvement in cursor control and impulse inhibition within 1-2 weeks of consistent daily practice."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "Do I need to sign up to use this reflex drill?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "No registration no sign-up and no login is required. This reaction chain drill is completely free and works instantly in your browser. Your best scores are saved locally on your device. Just visit SkillDrills.online and start training your precision stopping skills immediately."
+                  "text": "No registration required. This reaction chain drill is completely free and works instantly in your browser."
                 }
               }
             ]
           })
         }}
       />
+
       <ReactionChainClient />
     </>
   );

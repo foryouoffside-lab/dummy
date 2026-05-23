@@ -1,8 +1,8 @@
 import NumberRecallClient from './NumberRecallClient';
 
 export const metadata = {
-  title: 'Free Number Recall Drill - Digit Span & Working Memory Training Test | SkillDrills',
-  description: 'Train your digit span working memory with this free number recall drill. Memorize and recall progressively longer number sequences from 4 to 49 digits across 5 levels. Features 60-second timed challenge with 3 lives system, combo streaks, audio tones for multi-sensory encoding, and Memory Master achievement at level 5. Perfect for cognitive assessment, brain training, and working memory improvement. No sign-up required.',
+  title: 'Number Recall Drill - Digit Span & Working Memory | SkillDrills',
+  description: 'Train digit span memory by recalling progressively longer number sequences from 4 to 49 digits across 5 levels. Audio tones for multi-sensory encoding. No sign-up.',
   keywords: [
     'number recall drill', 'digit span test', 'working memory training',
     'number memory game', 'digit recall practice', 'memory span test online',
@@ -17,66 +17,39 @@ export const metadata = {
     'instant memory practice', 'digital memory trainer', 'web based memory drill',
   ],
   openGraph: {
-    title: 'Free Number Recall Drill - Digit Span & Working Memory Training | SkillDrills',
+    title: 'Number Recall Drill - Digit Span Training | SkillDrills',
     description: 'Memorize and recall digit sequences from 4 to 49 digits across 5 levels. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/cognitive/memory/number-recall',
     siteName: 'SkillDrills',
     locale: 'en_US',
-    images: [
-      {
-        url: 'https://skilldrills.online/icons/icon-512x512.png',
-        width: 512,
-        height: 512,
-        alt: 'Number Recall Drill - Digit Span Working Memory Training',
-      }
-    ],
-    publishedTime: '2026-05-20T00:00:00+00:00',
-    modifiedTime: new Date().toISOString(),
-    section: 'Cognitive Training',
-    tag: ['number recall', 'digit span', 'working memory', 'cognitive training', 'brain training'],
+    images: [{
+      url: 'https://skilldrills.online/icons/icon-512x512.png',
+      width: 512,
+      height: 512,
+      alt: 'Number Recall Drill',
+    }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Free Number Recall Drill | SkillDrills',
+    title: 'Number Recall Drill | SkillDrills',
     description: 'Train digit span memory. 4 to 49 digits, 5 levels. Free.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
-    creator: '@skilldrills',
-    site: '@skilldrills',
   },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': 320,
-    },
-  },
+  robots: { index: true, follow: true },
   alternates: {
     canonical: 'https://skilldrills.online/drills/cognitive/memory/number-recall',
-    languages: {
-      'en': 'https://skilldrills.online/drills/cognitive/memory/number-recall',
-      'en-US': 'https://skilldrills.online/drills/cognitive/memory/number-recall',
-      'x-default': 'https://skilldrills.online/drills/cognitive/memory/number-recall',
-    },
-  },
-  other: {
-    'article:published_time': '2026-05-20T00:00:00+00:00',
-    'article:modified_time': new Date().toISOString(),
-    'article:section': 'Cognitive Training',
-    'article:tag': 'number recall, digit span, working memory, cognitive training, brain training',
-  },
-  verification: {
-    google: 'bf3e19be4c41802b',
   },
 };
 
 export default function NumberRecallPage() {
   return (
     <>
+      <noscript>
+        <h1>Number Recall Drill - Digit Span & Working Memory Training</h1>
+        <p>Free digit span memory drill. Recall progressively longer number sequences from 4 to 49 digits. No sign-up required.</p>
+      </noscript>
+
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -87,42 +60,30 @@ export default function NumberRecallPage() {
               { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://skilldrills.online" },
               { "@type": "ListItem", "position": 2, "name": "Cognitive Drills", "item": "https://skilldrills.online/drills/cognitive" },
               { "@type": "ListItem", "position": 3, "name": "Memory", "item": "https://skilldrills.online/drills/cognitive/memory" },
-              { "@type": "ListItem", "position": 4, "name": "Number Recall Drill" }
+              { "@type": "ListItem", "position": 4, "name": "Number Recall" }
             ]
           })
         }}
       />
+
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "WebApplication",
-            "name": "Number Recall Drill - Digit Span Working Memory Training",
+            "name": "Number Recall Drill",
             "url": "https://skilldrills.online/drills/cognitive/memory/number-recall",
-            "description": "Free interactive number recall drill for digit span working memory training. Memorize and recall progressively longer number sequences from 4 to 49 digits across 5 levels with audio tones, lives system, combo streaks, and Memory Master achievement.",
+            "description": "Free number recall drill for digit span training. Memorize and recall sequences from 4 to 49 digits across 5 levels with audio tones. 60-second challenge.",
             "applicationCategory": "EducationalApplication",
             "operatingSystem": "All",
-            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD", "availability": "https://schema.org/OnlineOnly" },
-            "author": { "@type": "Organization", "name": "SkillDrills", "url": "https://skilldrills.online" },
-            "publisher": { "@type": "Organization", "name": "SkillDrills" },
-            "educationalUse": ["Working Memory Training", "Digit Span Practice", "Cognitive Assessment", "Brain Training"],
-            "learningResourceType": ["Interactive Exercise", "Memory Drill", "Cognitive Test"],
-            "timeRequired": "PT60S",
-            "interactivityType": "active",
-            "inLanguage": "en-US",
-            "teaches": ["Digit Span", "Working Memory", "Numerical Recall", "Sequence Memory", "Short Term Memory"],
-            "educationalLevel": "All Levels",
-            "typicalAgeRange": "10-70",
-            "datePublished": "2026-05-20",
-            "dateModified": new Date().toISOString().split('T')[0],
-            "version": "1.0",
-            "isAccessibleForFree": true,
-            "accessMode": ["visual", "textual"],
-            "accessModeSufficient": ["visual", "textual"]
+            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+            "author": { "@type": "Organization", "name": "SkillDrills" },
+            "isAccessibleForFree": true
           })
         }}
       />
+
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -135,61 +96,38 @@ export default function NumberRecallPage() {
                 "name": "What is the Number Recall Drill?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "The Number Recall Drill is a free interactive digit span working memory training tool. Number sequences flash one digit at a time with audio tones. You must memorize and recall the sequence correctly. Progress from 4 digits at Level 1 to 49 digits at Level 5. Features a 60-second timed challenge with 3 lives and combo streaks."
+                  "text": "A free digit span working memory tool. Number sequences flash one digit at a time. Memorize and recall them correctly. Progress from 4 to 49 digits across 5 levels."
                 }
               },
               {
                 "@type": "Question",
-                "name": "What is digit span and why is it important?",
+                "name": "What is digit span?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Digit span is a measure of working memory capacity - the ability to hold and manipulate information in your mind over short periods. It is a key component of cognitive assessments and is linked to problem-solving, reading comprehension, and general intelligence. Training digit span can improve working memory capacity and cognitive performance."
+                  "text": "A measure of working memory capacity - your ability to hold and manipulate information over short periods. Linked to problem-solving and reading comprehension."
                 }
               },
               {
                 "@type": "Question",
-                "name": "How many levels and digits are in this drill?",
+                "name": "How many levels are there?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "The drill has 5 levels with progressive difficulty. Level 1 starts at 4 digits and goes up to 9. Level 2 ranges from 8 to 16 digits. Level 3 from 15 to 25 digits. Level 4 from 25 to 36 digits. Level 5 from 36 to 49 digits. Complete all 5 levels to achieve Memory Master status with special celebration sounds."
+                  "text": "5 levels: Level 1 (4-9 digits), Level 2 (8-16), Level 3 (15-25), Level 4 (25-36), Level 5 (36-49). Complete all for Memory Master achievement."
                 }
               },
               {
                 "@type": "Question",
-                "name": "How is the Number Recall Drill scored?",
+                "name": "Do I need to sign up?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Each correct sequence recall earns +3 points. Consecutive correct answers build combo streaks. You have 3 lives to protect your score. When lives reach 0, mistakes incur a -3 point penalty. The 60-second timer creates urgency. Your best score, level reached, max digits, and combo streak are tracked and saved locally."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "Does this drill help with cognitive assessment?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "Yes. Digit span tests are standard components of clinical cognitive assessments including the Wechsler Adult Intelligence Scale (WAIS) and Wechsler Memory Scale (WMS). Regular practice with this drill can improve your digit span performance which correlates with overall working memory capacity. The multi-level progression provides a good measure of your current working memory ability."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "How often should I practice number recall?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "For best results practice 2-3 times daily in 5-10 minute sessions. Start at lower levels and progress as your digit span improves. Consistency matters more than duration. Most users see measurable improvement in working memory capacity within 2-3 weeks of daily digit span practice."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "Do I need to sign up to use this memory drill?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "No registration no sign-up and no login is required. This number recall drill is completely free and works instantly in your browser. Your best scores are saved locally on your device. Just visit SkillDrills.online and start training your working memory immediately."
+                  "text": "No registration required. This number recall drill is completely free and works instantly in your browser."
                 }
               }
             ]
           })
         }}
       />
+
       <NumberRecallClient />
     </>
   );

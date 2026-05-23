@@ -1,8 +1,8 @@
 import SentenceSpanClient from './SentenceSpanClient';
 
 export const metadata = {
-  title: 'Free Sentence Span Drill - Verbal Working Memory & Reading Span Training Test | SkillDrills',
-  description: 'Train verbal working memory with this free sentence span drill featuring 30 unique sentences with auto-advancing display. Read sentences for 2 seconds each then recall key nouns. Progressive difficulty with level-based scoring and 70% accuracy threshold to advance. 60-second timed challenge with no penalties correct words shown on failure. Perfect for cognitive training brain exercises memory improvement students professionals and older adults. No sign-up required.',
+  title: 'Sentence Span Drill - Verbal Working Memory Training | SkillDrills',
+  description: 'Train verbal working memory with 30 unique sentences. Read for 2 seconds each, then recall key nouns. Level-based scoring, no penalties. No sign-up.',
   keywords: [
     'sentence span drill', 'verbal working memory training', 'sentence recall test',
     'reading span task online', 'verbal memory training free', 'sentence memory test',
@@ -21,66 +21,39 @@ export const metadata = {
     'cognitive reserve training', 'neuroplasticity memory', 'working memory challenge',
   ],
   openGraph: {
-    title: 'Free Sentence Span Drill - Verbal Working Memory & Reading Span Training | SkillDrills',
-    description: '30 unique sentences. Read 2s each, recall key nouns. Level-based scoring, no penalties. Free.',
+    title: 'Sentence Span Drill - Verbal Working Memory | SkillDrills',
+    description: '30 unique sentences. Read 2s each, recall key nouns. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/memory/working-memory/sentence-span',
     siteName: 'SkillDrills',
     locale: 'en_US',
-    images: [
-      {
-        url: 'https://skilldrills.online/icons/icon-512x512.png',
-        width: 512,
-        height: 512,
-        alt: 'Sentence Span Drill - Verbal Working Memory Training',
-      }
-    ],
-    publishedTime: '2026-05-20T00:00:00+00:00',
-    modifiedTime: new Date().toISOString(),
-    section: 'Memory Training',
-    tag: ['sentence span', 'working memory', 'verbal memory', 'reading span', 'cognitive training'],
+    images: [{
+      url: 'https://skilldrills.online/icons/icon-512x512.png',
+      width: 512,
+      height: 512,
+      alt: 'Sentence Span Drill',
+    }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Free Sentence Span Memory Drill | SkillDrills',
-    description: 'Train verbal working memory. 30 sentences, level-based scoring. Free.',
+    title: 'Sentence Span Memory Drill | SkillDrills',
+    description: 'Train verbal working memory. 30 sentences. Free.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
-    creator: '@skilldrills',
-    site: '@skilldrills',
   },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': 320,
-    },
-  },
+  robots: { index: true, follow: true },
   alternates: {
     canonical: 'https://skilldrills.online/drills/memory/working-memory/sentence-span',
-    languages: {
-      'en': 'https://skilldrills.online/drills/memory/working-memory/sentence-span',
-      'en-US': 'https://skilldrills.online/drills/memory/working-memory/sentence-span',
-      'x-default': 'https://skilldrills.online/drills/memory/working-memory/sentence-span',
-    },
-  },
-  other: {
-    'article:published_time': '2026-05-20T00:00:00+00:00',
-    'article:modified_time': new Date().toISOString(),
-    'article:section': 'Memory Training',
-    'article:tag': 'sentence span, working memory, verbal memory, reading span, cognitive training',
-  },
-  verification: {
-    google: 'bf3e19be4c41802b',
   },
 };
 
 export default function SentenceSpanPage() {
   return (
     <>
+      <noscript>
+        <h1>Sentence Span Drill - Verbal Working Memory & Reading Span Training</h1>
+        <p>Free sentence span drill with 30 unique sentences. Train verbal working memory. No sign-up required.</p>
+      </noscript>
+
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -89,44 +62,32 @@ export default function SentenceSpanPage() {
             "@type": "BreadcrumbList",
             "itemListElement": [
               { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://skilldrills.online" },
-              { "@type": "ListItem", "position": 2, "name": "Memory Drills", "item": "https://skilldrills.online/drills/memory" },
+              { "@type": "ListItem", "position": 2, "name": "Memory Training", "item": "https://skilldrills.online/drills/memory" },
               { "@type": "ListItem", "position": 3, "name": "Working Memory", "item": "https://skilldrills.online/drills/memory/working-memory" },
-              { "@type": "ListItem", "position": 4, "name": "Sentence Span Drill" }
+              { "@type": "ListItem", "position": 4, "name": "Sentence Span" }
             ]
           })
         }}
       />
+
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "WebApplication",
-            "name": "Sentence Span Drill - Verbal Working Memory Training",
+            "name": "Sentence Span Drill",
             "url": "https://skilldrills.online/drills/memory/working-memory/sentence-span",
-            "description": "Free interactive sentence span drill for verbal working memory training. Features 30 unique sentences with auto-advancing 2-second display. Read sentences then recall key nouns. Progressive difficulty with level-based scoring and 70% accuracy threshold. 60-second timed challenge with no penalties.",
+            "description": "Free verbal working memory drill with 30 unique sentences. 2-second auto-advancing display, recall key nouns. Level-based scoring, 70% accuracy threshold.",
             "applicationCategory": "EducationalApplication",
             "operatingSystem": "All",
-            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD", "availability": "https://schema.org/OnlineOnly" },
-            "author": { "@type": "Organization", "name": "SkillDrills", "url": "https://skilldrills.online" },
-            "publisher": { "@type": "Organization", "name": "SkillDrills" },
-            "educationalUse": ["Working Memory Training", "Verbal Processing Practice", "Cognitive Assessment", "Brain Training", "Memory Improvement"],
-            "learningResourceType": ["Interactive Exercise", "Memory Drill", "Cognitive Test"],
-            "timeRequired": "PT60S",
-            "interactivityType": "active",
-            "inLanguage": "en-US",
-            "teaches": ["Verbal Working Memory", "Sentence Processing", "Noun Recall", "Reading Span", "Cognitive Processing Speed"],
-            "educationalLevel": "All Levels",
-            "typicalAgeRange": "12-80",
-            "datePublished": "2026-05-20",
-            "dateModified": new Date().toISOString().split('T')[0],
-            "version": "1.0",
-            "isAccessibleForFree": true,
-            "accessMode": ["visual", "textual"],
-            "accessModeSufficient": ["visual", "textual"]
+            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+            "author": { "@type": "Organization", "name": "SkillDrills" },
+            "isAccessibleForFree": true
           })
         }}
       />
+
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -139,15 +100,15 @@ export default function SentenceSpanPage() {
                 "name": "What is the Sentence Span Drill?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "The Sentence Span Drill is a free interactive verbal working memory training exercise. You read sentences that auto-advance every 2 seconds, then recall the key nouns from each sentence. The difficulty increases progressively with your level determining how many sentences you must process and recall. A 70% accuracy threshold is required to advance to the next level."
+                  "text": "A free verbal working memory exercise. 30 sentences auto-advance every 2 seconds. Recall key nouns. Level-based scoring with 70% accuracy to advance."
                 }
               },
               {
                 "@type": "Question",
-                "name": "How does sentence span training improve working memory?",
+                "name": "How does it improve working memory?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Sentence span training strengthens your verbal working memory by requiring you to simultaneously process sentence meaning while holding key words in memory. This dual-task demand mirrors real-world cognitive challenges like following conversations, reading comprehension, and listening to lectures. Regular practice expands your ability to hold and manipulate verbal information."
+                  "text": "Dual-task demand: process sentence meaning while holding key words in memory. Mirrors real-world challenges like conversations and lectures."
                 }
               },
               {
@@ -155,29 +116,22 @@ export default function SentenceSpanPage() {
                 "name": "What is the scoring system?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Your score equals your current level when you successfully recall 70% or more of the nouns. Level 1 starts with 3 sentences earning 1 point. Level 2 has 4 sentences earning 2 points. The level and sentence count increase indefinitely as you demonstrate mastery. There are no penalties for incorrect answers and the correct nouns are shown for learning purposes."
+                  "text": "Score = current level when 70%+ nouns recalled. Level 1 = 3 sentences (1 pt). No penalties. Correct nouns shown on failure for learning."
                 }
               },
               {
                 "@type": "Question",
-                "name": "How often should I practice sentence span training?",
+                "name": "Do I need to sign up?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "For best results practice 2-3 times daily in 5-10 minute sessions. Focus on accuracy first then speed. Most users see improvement in verbal working memory span within 2-3 weeks of consistent daily practice. The 60-second timed format makes it easy to fit into any schedule."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "Do I need to sign up to use this memory drill?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "No registration, no sign-up, and no login is required. This sentence span drill is completely free and works instantly in your browser. Your best scores are saved locally on your device. Just visit SkillDrills.online and start training your verbal working memory immediately."
+                  "text": "No registration required. This sentence span drill is completely free and works instantly in your browser."
                 }
               }
             ]
           })
         }}
       />
+
       <SentenceSpanClient />
     </>
   );

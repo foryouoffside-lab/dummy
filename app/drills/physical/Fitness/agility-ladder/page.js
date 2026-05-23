@@ -44,6 +44,11 @@ export const metadata = {
 export default function AgilityLadderPage() {
   return (
     <>
+      <noscript>
+        <h1>Agility Ladder Drill - Motor Sequencing & Coordination Training</h1>
+        <p>Free agility ladder drill with scrolling rungs and adaptive speed. No sign-up required.</p>
+      </noscript>
+
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -52,9 +57,9 @@ export default function AgilityLadderPage() {
             "@type": "BreadcrumbList",
             "itemListElement": [
               { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://skilldrills.online" },
-              { "@type": "ListItem", "position": 2, "name": "Physical Drills", "item": "https://skilldrills.online/drills/physical" },
+              { "@type": "ListItem", "position": 2, "name": "Physical Training", "item": "https://skilldrills.online/drills/physical" },
               { "@type": "ListItem", "position": 3, "name": "Fitness", "item": "https://skilldrills.online/drills/physical/Fitness" },
-              { "@type": "ListItem", "position": 4, "name": "Agility Ladder Drill" }
+              { "@type": "ListItem", "position": 4, "name": "Agility Ladder" }
             ]
           })
         }}

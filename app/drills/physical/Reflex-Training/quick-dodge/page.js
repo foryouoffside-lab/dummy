@@ -1,8 +1,8 @@
 import QuickDodgeClient from './QuickDodgeClient';
 
 export const metadata = {
-  title: 'Free Quick Dodge Drill - Evasion Reflex & Spatial Awareness Training | SkillDrills',
-  description: 'Train your evasion reflexes with this free quick dodge game. Dodge red homing obstacles that track your cursor. Earn +1 point per successful dodge and -5 on hit. Adaptive speed increases with streaks. Fullscreen mode adds 50% more obstacles for extra challenge. 60-second timed reflex challenge. No sign-up required.',
+  title: 'Quick Dodge Drill - Evasion Reflex & Spatial Awareness | SkillDrills',
+  description: 'Dodge red homing obstacles tracking your cursor. +1pt per dodge, -5 on hit. Adaptive speed with streaks. Fullscreen mode adds 50% more chaos. No sign-up.',
   keywords: [
     'quick dodge game', 'evasion reflex training', 'spatial awareness drill',
     'dodge obstacles game', 'cursor evasion practice', 'reflex dodge training',
@@ -14,54 +14,39 @@ export const metadata = {
     'skilldrills dodge', 'skilldrills reflex', 'free physical training drill',
   ],
   openGraph: {
-    title: 'Free Quick Dodge Drill - Evasion Reflex & Spatial Awareness Training | SkillDrills',
-    description: 'Dodge red homing obstacles tracking your cursor. +1 per dodge, -5 on hit. Adaptive speed with streaks. Fullscreen mode for 50% more chaos. 60-second challenge.',
+    title: 'Quick Dodge Drill - Evasion Reflex Training | SkillDrills',
+    description: 'Dodge red homing obstacles tracking your cursor. Adaptive speed. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/physical/Reflex-Training/quick-dodge',
     siteName: 'SkillDrills',
     locale: 'en_US',
-    images: [
-      {
-        url: 'https://skilldrills.online/icons/icon-512x512.png',
-        width: 512,
-        height: 512,
-        alt: 'Quick Dodge Reflex Training Drill',
-      }
-    ],
+    images: [{
+      url: 'https://skilldrills.online/icons/icon-512x512.png',
+      width: 512,
+      height: 512,
+      alt: 'Quick Dodge Drill',
+    }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Free Quick Dodge Reflex Drill | SkillDrills',
-    description: 'Dodge homing obstacles. Adaptive speed, fullscreen mode. Free.',
+    title: 'Quick Dodge Reflex Drill | SkillDrills',
+    description: 'Dodge homing obstacles. Adaptive speed. Free.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': 320,
-    },
-  },
+  robots: { index: true, follow: true },
   alternates: {
     canonical: 'https://skilldrills.online/drills/physical/Reflex-Training/quick-dodge',
-    languages: {
-      'en': 'https://skilldrills.online/drills/physical/Reflex-Training/quick-dodge',
-      'en-US': 'https://skilldrills.online/drills/physical/Reflex-Training/quick-dodge',
-      'x-default': 'https://skilldrills.online/drills/physical/Reflex-Training/quick-dodge',
-    },
-  },
-  verification: {
-    google: 'bf3e19be4c41802b',
   },
 };
 
 export default function QuickDodgePage() {
   return (
     <>
+      <noscript>
+        <h1>Quick Dodge Drill - Evasion Reflex & Spatial Awareness Training</h1>
+        <p>Free quick dodge game. Evade red homing obstacles tracking your cursor. No sign-up required.</p>
+      </noscript>
+
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -70,39 +55,32 @@ export default function QuickDodgePage() {
             "@type": "BreadcrumbList",
             "itemListElement": [
               { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://skilldrills.online" },
-              { "@type": "ListItem", "position": 2, "name": "Physical Drills", "item": "https://skilldrills.online/drills/physical" },
+              { "@type": "ListItem", "position": 2, "name": "Physical Training", "item": "https://skilldrills.online/drills/physical" },
               { "@type": "ListItem", "position": 3, "name": "Reflex Training", "item": "https://skilldrills.online/drills/physical/Reflex-Training" },
-              { "@type": "ListItem", "position": 4, "name": "Quick Dodge Drill" }
+              { "@type": "ListItem", "position": 4, "name": "Quick Dodge" }
             ]
           })
         }}
       />
+
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "WebApplication",
-            "name": "Quick Dodge - Evasion Reflex Training",
+            "name": "Quick Dodge Drill",
             "url": "https://skilldrills.online/drills/physical/Reflex-Training/quick-dodge",
-            "description": "Free interactive quick dodge drill for evasion reflex and spatial awareness training. Dodge red homing obstacles with adaptive speed and fullscreen mode.",
+            "description": "Free evasion reflex drill. Dodge red homing obstacles tracking cursor. +1pt/dodge, -5 on hit. Adaptive speed. Fullscreen mode adds 50% more obstacles.",
             "applicationCategory": "HealthApplication",
             "operatingSystem": "All",
-            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD", "availability": "https://schema.org/OnlineOnly" },
-            "author": { "@type": "Organization", "name": "SkillDrills", "url": "https://skilldrills.online" },
-            "publisher": { "@type": "Organization", "name": "SkillDrills" },
-            "educationalUse": ["Evasion Reflex", "Spatial Awareness", "Reaction Training", "Hand-Eye Coordination"],
-            "learningResourceType": ["Interactive Exercise", "Reflex Drill", "Game"],
-            "timeRequired": "PT60S",
-            "interactivityType": "active",
-            "inLanguage": "en-US",
-            "teaches": ["Spatial Evasion", "Reflex Speed", "Obstacle Avoidance", "Adaptive Response"],
-            "datePublished": "2026-05-20",
-            "dateModified": new Date().toISOString().split('T')[0],
+            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+            "author": { "@type": "Organization", "name": "SkillDrills" },
             "isAccessibleForFree": true
           })
         }}
       />
+
       <QuickDodgeClient />
     </>
   );
