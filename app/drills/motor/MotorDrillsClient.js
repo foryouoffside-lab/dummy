@@ -122,7 +122,7 @@ export default function MotorDrillsClient() {
             "description": "12 free motor skills training drills covering Hand-Eye Coordination, Timing Accuracy, Precision Control, and Movement Speed. Improve mouse aim, timing, steady hand, and reaction speed.",
             "isPartOf": {
               "@type": "WebSite",
-              "name": "Global Drill System",
+              "name": "SkillDrills",
               "url": "https://skilldrills.online"
             },
             "about": { "@type": "Thing", "name": "Motor Skill Training" },

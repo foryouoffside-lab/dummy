@@ -443,7 +443,7 @@ export default function ConceptLinkingClient() {
             },
             "author": {
               "@type": "Organization",
-              "name": "Global Drill System"
+              "name": "SkillDrills"
             },
             "educationalUse": ["Associative Memory", "Sequential Recall", "Cognitive Training", "Memory Improvement"],
             "learningResourceType": "Interactive Exercise",

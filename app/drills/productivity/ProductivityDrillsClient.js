@@ -210,7 +210,7 @@ export default function ProductivityDrillsClient() {
             "description": "10 free productivity training drills covering Task Switching, Time Management, Focus Endurance, and Work Efficiency.",
             "isPartOf": {
               "@type": "WebSite",
-              "name": "Global Drill System",
+              "name": "SkillDrills",
               "url": "https://skilldrills.online"
             },
             "numberOfItems": 10,

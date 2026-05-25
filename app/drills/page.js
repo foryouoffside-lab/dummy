@@ -51,6 +51,7 @@ const drillCategories = [
 export default function DrillsPage() {
   return (
     <div className="min-h-screen bg-gray-50">
+      <h1 style={{ position: "absolute", width: "1px", height: "1px", padding: "0", margin: "-1px", overflow: "hidden", clip: "rect(0,0,0,0)", whiteSpace: "nowrap", border: "0" }}>All Training Drills - 90+ Free Exercises Across 9 Categories</h1>
       {/* SEO Content */}
       <section className="sr-only" aria-label="Drills directory for search engines">
         <h2>All Training Drills - 90+ Free Exercises Across 9 Categories</h2>

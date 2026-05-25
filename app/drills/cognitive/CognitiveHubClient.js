@@ -130,7 +130,7 @@ export default function CognitiveHubClient() {
             "name": "Cognitive Brain Training - 16 Free Drills",
             "url": "https://skilldrills.online/drills/cognitive",
             "description": "Science-based cognitive training with 16 free drills across 5 domains: Attention, Focus, Memory, Problem Solving, and Processing Speed. No login required.",
-            "isPartOf": { "@type": "WebSite", "name": "Global Drill System", "url": "https://skilldrills.online" },
+            "isPartOf": { "@type": "WebSite", "name": "SkillDrills", "url": "https://skilldrills.online" },
             "about": { "@type": "Thing", "name": "Cognitive Training" },
             "numberOfItems": 16,
             "itemListElement": cognitiveCategories.flatMap(category =>

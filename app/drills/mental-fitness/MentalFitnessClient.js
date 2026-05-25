@@ -119,7 +119,7 @@ export default function MentalFitnessClient() {
             "description": "6 free mental fitness drills covering breathing exercises and stress control. Practice 4-7-8 breathing, box breathing, Wim Hof method, coherence biofeedback, stress inoculation, and calm under pressure training.",
             "isPartOf": {
               "@type": "WebSite",
-              "name": "Global Drill System",
+              "name": "SkillDrills",
               "url": "https://skilldrills.online"
             },
             "about": {

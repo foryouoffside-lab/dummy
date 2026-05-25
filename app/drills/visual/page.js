@@ -1,8 +1,8 @@
-import VisualDrillsClient from './VisualDrillsClient';
+﻿import VisualDrillsClient from './VisualDrillsClient';
 
 export const metadata = {
-  title: 'Visual Training - 13 Drills for Vision | SkillDrills',
-  description: '13 free visual training drills across 5 categories. Improve reaction speed, tracking accuracy, peripheral vision, and recognition. No sign-up.',
+  title: 'Visual Training - 14 Drills for Vision | SkillDrills',
+  description: '14 free visual training drills across 5 categories. Improve reaction speed, tracking accuracy, peripheral vision, and recognition.',
   keywords: [
     'visual drills', 'reaction speed training', 'tracking accuracy', 'peripheral vision',
     'visual recognition', 'depth perception', 'go no-go test', 'light reaction',
@@ -14,8 +14,8 @@ export const metadata = {
     'skilldrills visual', 'skilldrills vision training',
   ],
   openGraph: {
-    title: 'Visual Training - 13 Drills for Vision | SkillDrills',
-    description: '13 free visual training drills across 5 categories. Improve reaction speed, tracking accuracy, peripheral vision, and recognition. No sign-up.',
+    title: 'Visual Training - 14 Drills for Vision | SkillDrills',
+    description: '14 free visual training drills across 5 categories. Improve reaction speed, tracking accuracy, peripheral vision, and recognition.',
     type: 'website',
     url: 'https://skilldrills.online/drills/visual',
     siteName: 'SkillDrills',
@@ -29,8 +29,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Visual Training - 13 Drills for Vision | SkillDrills',
-    description: '13 free visual training drills across 5 categories. Improve reaction speed, tracking accuracy, peripheral vision, and recognition. No sign-up.',
+    title: 'Visual Training - 14 Drills for Vision | SkillDrills',
+    description: '14 free visual training drills across 5 categories. Improve reaction speed, tracking accuracy, peripheral vision, and recognition.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -42,7 +42,10 @@ export const metadata = {
 export default function VisualDrillsPage() {
   return (
     <>
-      
+      <noscript>
+        <h1>Visual Training Drills - 14 Free Exercises for Reaction Speed, Tracking & Vision</h1>
+        <p>14 free visual training drills across Reaction Speed, Tracking Accuracy, Peripheral Vision, Visual Recognition, and Depth Perception. No sign-up required.</p>
+      </noscript>
       <VisualDrillsClient />
     </>
   );

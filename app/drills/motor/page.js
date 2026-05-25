@@ -1,8 +1,8 @@
-import MotorDrillsClient from './MotorDrillsClient';
+﻿import MotorDrillsClient from './MotorDrillsClient';
 
 export const metadata = {
-  title: 'Motor Skills - 12 Drills for Precision | SkillDrills',
-  description: '12 free motor skills drills across Hand-Eye Coordination, Timing Accuracy, Precision Control, and Movement Speed. Improve mouse aim, timing, and reaction. No sign-up.',
+  title: 'Motor Skills - 12 Drills for Precision & Speed | SkillDrills',
+  description: '12 free motor skills drills across 4 categories: Hand-Eye Coordination, Timing Accuracy, Precision Control, and Movement Speed. Improve mouse aim.',
   keywords: [
     'motor skills drills', 'hand-eye coordination training', 'timing accuracy practice',
     'precision control drills', 'movement speed training', 'aim trainer', 'click accuracy',
@@ -13,8 +13,8 @@ export const metadata = {
     'skilldrills motor', 'skilldrills coordination', 'free precision training',
   ],
   openGraph: {
-    title: 'Motor Skills - 12 Drills for Precision | SkillDrills',
-    description: '12 free motor skills drills. Hand-eye coordination, timing, precision. No sign-up.',
+    title: 'Motor Skills - 12 Drills for Precision & Speed | SkillDrills',
+    description: '12 free motor skills drills across 4 categories: Hand-Eye Coordination, Timing Accuracy, Precision Control, and Movement Speed. Improve mouse aim.',
     type: 'website',
     url: 'https://skilldrills.online/drills/motor',
     siteName: 'SkillDrills',
@@ -28,8 +28,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Motor Skills - 12 Drills for Precision | SkillDrills',
-    description: '12 free motor skills drills. No sign-up required.',
+    title: 'Motor Skills - 12 Drills for Precision & Speed | SkillDrills',
+    description: '12 free motor skills drills across 4 categories: Hand-Eye Coordination, Timing Accuracy, Precision Control, and Movement Speed. Improve mouse aim.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -41,7 +41,10 @@ export const metadata = {
 export default function MotorDrillsPage() {
   return (
     <>
-      
+      <noscript>
+        <h1>Motor Skills Drills - 12 Free Exercises for Precision, Timing & Speed</h1>
+        <p>12 free motor skills drills across Hand-Eye Coordination, Timing Accuracy, Precision Control, and Movement Speed. No sign-up required.</p>
+      </noscript>
       <MotorDrillsClient />
     </>
   );

@@ -134,7 +134,7 @@ export default function FPSHubClient() {
             "name": "FPS Aim Training Drills",
             "url": "https://skilldrills.online/drills/fps",
             "description": `${totalDrills} free FPS aim training drills for Valorant, CS2, Apex Legends, Overwatch 2 and all FPS games. 4 categories: Aim Accuracy, Tracking, Reaction Speed, and Awareness.`,
-            "isPartOf": { "@type": "WebSite", "name": "Global Drill System", "url": "https://skilldrills.online" },
+            "isPartOf": { "@type": "WebSite", "name": "SkillDrills", "url": "https://skilldrills.online" },
             "about": { "@type": "Thing", "name": "FPS Gaming Aim Training" },
             "numberOfItems": totalDrills,
             "itemListElement": fpsCategories.flatMap(cat => cat.drills).map((drill, index) => ({

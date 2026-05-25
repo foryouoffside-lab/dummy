@@ -1,4 +1,4 @@
-import ProductivityDrillsClient from './ProductivityDrillsClient';
+﻿import ProductivityDrillsClient from './ProductivityDrillsClient';
 
 export const metadata = {
   title: 'Productivity - 10 Drills for Efficiency | SkillDrills',
@@ -40,7 +40,10 @@ export const metadata = {
 export default function ProductivityDrillsPage() {
   return (
     <>
-      
+      <noscript>
+        <h1>Productivity Drills - 10 Free Exercises for Focus, Efficiency & Time Management</h1>
+        <p>10 free productivity drills across Task Switching, Time Management, Focus Endurance, and Work Efficiency. No sign-up required.</p>
+      </noscript>
       <ProductivityDrillsClient />
     </>
   );

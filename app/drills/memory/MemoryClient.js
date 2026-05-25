@@ -132,7 +132,7 @@ export default function MemoryClient() {
             "description": "15 free memory training drills across 5 categories: Short-Term, Working, Long-Term, Spatial, and Associative Memory. No login required.",
             "isPartOf": {
               "@type": "WebSite",
-              "name": "Global Drill System",
+              "name": "SkillDrills",
               "url": "https://skilldrills.online"
             },
             "about": {

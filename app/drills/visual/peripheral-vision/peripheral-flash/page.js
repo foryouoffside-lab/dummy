@@ -1,4 +1,4 @@
-import PeripheralFlashClient from './PeripheralFlashClient';
+﻿import PeripheralFlashClient from './PeripheralFlashClient';
 
 export const metadata = {
   title: 'Peripheral Flash - Vision Training | SkillDrills',
@@ -45,6 +45,10 @@ export const metadata = {
 export default function PeripheralFlashPage() {
   return (
     <>
+      <noscript>
+        <h1>Peripheral Flash - Vision Training & Peripheral Awareness Drill</h1>
+        <p>Free peripheral flash drill with 5-6 shape sequences at 300ms intervals. No sign-up required.</p>
+      </noscript>
 
       <script
         type="application/ld+json"

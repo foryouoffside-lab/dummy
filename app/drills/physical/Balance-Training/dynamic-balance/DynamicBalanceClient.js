@@ -3,12 +3,12 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { 
-  ArrowLeft, Target, Zap, Clock, Award, Activity, 
+  Target, Zap, Clock, Award, Activity, 
   Volume2, VolumeX, Maximize2, Minimize2, Sun, Moon, 
   Eye, Move, Brain, TrendingUp, Trophy, Info, Timer, RefreshCw,
   Crosshair, Dumbbell, Database, Keyboard, Star, Users,
   GraduationCap, Lightbulb, BarChart3, CheckCircle2, ArrowRight,
-  BookOpen, Code2, Hash, Heart
+  BookOpen, Code2, Hash, Heart, Lock, AlertCircle
 } from 'lucide-react';
 
 export default function DynamicBalanceClient() {
@@ -30,11 +30,15 @@ export default function DynamicBalanceClient() {
   const [feedback, setFeedback] = useState('');
   const [feedbackType, setFeedbackType] = useState('');
   const [isClient, setIsClient] = useState(false);
+  const [pointerLocked, setPointerLocked] = useState(false);
+  
+  const virtualCrosshair = useRef({ x: 0, y: 0 });
+  const canvasSizeRef = useRef({ width: 0, height: 0 });
+  const crosshairInitRef = useRef(false);
   
   const targetRef = useRef({ x: 0, y: 0, r: 40 });
   const scoreRef = useRef(0);
   const streakRef = useRef(0);
-  const mousePositionRef = useRef({ x: 0, y: 0 });
   const lastTimeRef = useRef(performance.now());
   const angleRef = useRef(0);
   const totalFramesRef = useRef(0);
@@ -48,29 +52,69 @@ export default function DynamicBalanceClient() {
   const audioCtxRef = useRef(null);
 
   useEffect(() => { setIsClient(true); const timer = setTimeout(() => setLoading(false), 300); return () => clearTimeout(timer); }, []);
-  useEffect(() => { try { const s = localStorage.getItem('dynamicBalanceBestScore'); if (s) { const p = parseInt(s, 10); if (!isNaN(p)) setBestScore(p); } } catch (e) {} }, []);
-  const updateBestScore = useCallback((finalScore) => { try { const c = parseInt(localStorage.getItem('dynamicBalanceBestScore') || '0', 10); if (finalScore > c) { localStorage.setItem('dynamicBalanceBestScore', finalScore.toString()); setBestScore(finalScore); } } catch (e) {} }, []);
+  useEffect(() => { try { const s = localStorage.getItem('dynamicBalanceBest'); if (s) { const p = parseInt(s, 10); if (!isNaN(p)) setBestScore(p); } } catch (e) {} }, []);
   useEffect(() => { gameStateRef.current = gameState; }, [gameState]);
+  
+  const updateBestScore = useCallback((finalScore) => { try { const c = parseInt(localStorage.getItem('dynamicBalanceBest') || '0', 10); if (finalScore > c) { localStorage.setItem('dynamicBalanceBest', finalScore.toString()); setBestScore(finalScore); } } catch (e) {} }, []);
+
+  const showFeedback = useCallback((message, type) => { if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current); setFeedback(message); setFeedbackType(type); feedbackTimeoutRef.current = setTimeout(() => { setFeedback(''); setFeedbackType(''); }, 800); }, []);
+  const initAudio = useCallback(() => { try { if (!audioCtxRef.current) audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)(); if (audioCtxRef.current.state === 'suspended') audioCtxRef.current.resume(); return audioCtxRef.current; } catch (e) { return null; } }, []);
+  const playSound = useCallback((type) => { if (!soundEnabled) return; try { const a = initAudio(); if (!a) return; const o = a.createOscillator(); const g = a.createGain(); o.connect(g); g.connect(a.destination); const n = a.currentTime; if (type === 'focus') { o.frequency.setValueAtTime(880, n); g.gain.setValueAtTime(0.08, n); } else if (type === 'break') { o.frequency.setValueAtTime(440, n); g.gain.setValueAtTime(0.08, n); } o.start(n); g.gain.exponentialRampToValueAtTime(0.001, n + 0.15); o.stop(n + 0.15); } catch (e) {} }, [soundEnabled, initAudio]);
+
+  // Pointer Lock
+  const requestPointerLock = useCallback(() => { canvasRef.current?.requestPointerLock(); }, []);
+  
+  useEffect(() => {
+    const h = () => {
+      const l = document.pointerLockElement === canvasRef.current;
+      setPointerLocked(l);
+      if(l) crosshairInitRef.current = true;
+      else if(gameState==='playing') showFeedback('Cursor unlocked - Click canvas','error');
+    };
+    document.addEventListener('pointerlockchange',h);
+    document.addEventListener('pointerlockerror',()=>showFeedback('Lock failed','error'));
+    return () => { document.removeEventListener('pointerlockchange',h); };
+  }, [gameState,showFeedback]);
+
+  useEffect(() => {
+    const c = canvasRef.current; if(!c)return;
+    const h = () => { if(gameState==='playing'&&!pointerLocked)requestPointerLock(); };
+    c.addEventListener('click',h);
+    return () => c.removeEventListener('click',h);
+  }, [gameState,pointerLocked,requestPointerLock]);
+
+  // Raw input
+  useEffect(() => {
+    const h = (e) => {
+      if(document.pointerLockElement!==canvasRef.current)return;
+      virtualCrosshair.current.x+=e.movementX||0;
+      virtualCrosshair.current.y+=e.movementY||0;
+      const c=canvasRef.current;
+      if(c){virtualCrosshair.current.x=Math.max(0,Math.min(c.width,virtualCrosshair.current.x)); virtualCrosshair.current.y=Math.max(0,Math.min(c.height,virtualCrosshair.current.y));}
+    };
+    document.addEventListener('mousemove',h);
+    return () => document.removeEventListener('mousemove',h);
+  }, []);
 
   const toggleFullscreen = useCallback(async () => { try { if (!isFullscreen) { const e = containerRef.current; if (e?.requestFullscreen) { await e.requestFullscreen(); setIsFullscreen(true); } } else { if (document.fullscreenElement) await document.exitFullscreen(); setIsFullscreen(false); } } catch (e) { console.error('Fullscreen error:', e); } }, [isFullscreen]);
   useEffect(() => { const h = () => setIsFullscreen(!!document.fullscreenElement); document.addEventListener('fullscreenchange', h); return () => document.removeEventListener('fullscreenchange', h); }, []);
 
-  const showFeedback = useCallback((message, type) => { if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current); setFeedback(message); setFeedbackType(type); feedbackTimeoutRef.current = setTimeout(() => { setFeedback(''); setFeedbackType(''); }, 600); }, []);
-  const initAudio = useCallback(() => { try { if (!audioCtxRef.current) audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)(); if (audioCtxRef.current.state === 'suspended') audioCtxRef.current.resume(); return audioCtxRef.current; } catch (e) { return null; } }, []);
-  const playSound = useCallback((type) => { if (!soundEnabled) return; try { const a = initAudio(); if (!a) return; const o = a.createOscillator(); const g = a.createGain(); o.connect(g); g.connect(a.destination); const n = a.currentTime; if (type === 'focus') { o.frequency.setValueAtTime(880, n); g.gain.setValueAtTime(0.08, n); } else if (type === 'break') { o.frequency.setValueAtTime(440, n); g.gain.setValueAtTime(0.08, n); } o.start(n); g.gain.exponentialRampToValueAtTime(0.001, n + 0.15); o.stop(n + 0.15); } catch (e) {} }, [soundEnabled, initAudio]);
-
-  useEffect(() => { if (gameState === 'playing' && timeLeft > 0) { timerIntervalRef.current = setInterval(() => { setTimeLeft(prev => { if (prev <= 1) { setGameState('gameOver'); gameStateRef.current = 'gameOver'; isActiveRef.current = false; const fs = Math.floor(scoreRef.current); updateBestScore(fs); if (timerIntervalRef.current) { clearInterval(timerIntervalRef.current); timerIntervalRef.current = null; } return 0; } return prev - 1; }); }, 1000); } return () => { if (timerIntervalRef.current) { clearInterval(timerIntervalRef.current); timerIntervalRef.current = null; } }; }, [gameState, updateBestScore]);
-
-  useEffect(() => { const h = (e) => { const c = canvasRef.current; if (!c) return; const r = c.getBoundingClientRect(); const sx = c.width / r.width; const sy = c.height / r.height; mousePositionRef.current = { x: (e.clientX - r.left) * sx, y: (e.clientY - r.top) * sy }; }; window.addEventListener('mousemove', h); return () => window.removeEventListener('mousemove', h); }, []);
+  // Timer
+  useEffect(() => { if (gameState === 'playing' && timeLeft > 0) { timerIntervalRef.current = setInterval(() => { setTimeLeft(prev => { if (prev <= 1) { setGameState('gameOver'); gameStateRef.current = 'gameOver'; isActiveRef.current = false; const fs = Math.floor(scoreRef.current); updateBestScore(fs); if (timerIntervalRef.current) { clearInterval(timerIntervalRef.current); timerIntervalRef.current = null; } document.exitPointerLock(); return 0; } return prev - 1; }); }, 1000); } return () => { if (timerIntervalRef.current) { clearInterval(timerIntervalRef.current); timerIntervalRef.current = null; } }; }, [gameState, updateBestScore]);
 
   const init = useCallback((c) => { if (c) { targetRef.current.x = c.width / 2; targetRef.current.y = c.height / 2; } }, []);
-  const update = useCallback((dt, c) => { if (!c || !isActiveRef.current) return; const t = targetRef.current; const m = mousePositionRef.current; angleRef.current += 0.65 * dt; const wr = c.width * 0.32; const hr = c.height * 0.22; t.x = c.width / 2 + Math.cos(angleRef.current) * wr; t.y = c.height / 2 + Math.sin(angleRef.current * 1.5) * hr; const d = Math.hypot(m.x - t.x, m.y - t.y); totalFramesRef.current++; const TR = 40; const IOT = d < TR; if (IOT) { focusFramesRef.current++; trackingTimerRef.current += dt; streakRef.current++; if (streakRef.current > bestStreakRef.current) { bestStreakRef.current = streakRef.current; setBestStreak(bestStreakRef.current); } if (trackingTimerRef.current >= 2.0) { const sc = Math.floor(trackingTimerRef.current / 2); const pe = sc; scoreRef.current += pe; setScore(Math.floor(scoreRef.current)); trackingTimerRef.current -= sc * 2; showFeedback(`✓ Tracking! +${pe}`, 'success'); playSound('focus'); } } else { trackingTimerRef.current = 0; streakRef.current = Math.max(0, streakRef.current - 5); if (streakRef.current <= 5) { const pp = 1; scoreRef.current = Math.max(0, scoreRef.current - pp); setScore(Math.floor(scoreRef.current)); showFeedback(`✗ Target lost! -${pp}`, 'error'); playSound('break'); } } setStreak(streakRef.current); const ca = totalFramesRef.current > 0 ? Math.floor((focusFramesRef.current / totalFramesRef.current) * 100) : 100; setTrackingAccuracy(ca); }, [showFeedback, playSound]);
 
-  useEffect(() => { if (gameState !== 'playing') return; const c = canvasRef.current; if (!c) return; const ctx = c.getContext('2d'); const uc = () => { const cont = containerRef.current; if (!cont) return; const cr = cont.getBoundingClientRect(); let w = cr.width; let h = w * (9 / 16); if (h > cr.height) { h = cr.height; w = h * (16 / 9); } c.width = w; c.height = h; c.style.position = 'absolute'; c.style.left = `${(cr.width - w) / 2}px`; c.style.top = `${(cr.height - h) / 2}px`; init(c); }; const ro = new ResizeObserver(uc); if (containerRef.current) ro.observe(containerRef.current); window.addEventListener('resize', uc); uc(); let lft = performance.now(); function draw() { const n = performance.now(); const dt = Math.min(0.033, (n - lft) / 1000); lft = n; update(dt, c); ctx.fillStyle = isBoxDarkMode ? "#020202" : "#f9fafb"; ctx.fillRect(0, 0, c.width, c.height); ctx.strokeStyle = isBoxDarkMode ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)'; ctx.lineWidth = 1; const fs = (n * 0.08) % 80; for (let i = -c.width; i < c.width * 2; i += 80) { ctx.beginPath(); ctx.moveTo(i + fs, 0); ctx.lineTo(i + fs - 300, c.height); ctx.stroke(); } const t = targetRef.current; const m = mousePositionRef.current; const d = Math.hypot(m.x - t.x, m.y - t.y); const iT = d < t.r; ctx.beginPath(); ctx.arc(t.x, t.y, t.r, 0, Math.PI * 2); ctx.strokeStyle = iT ? "#00ff88" : "#FF3E3E"; ctx.lineWidth = iT ? 3.5 : 2; ctx.stroke(); if (iT) { ctx.beginPath(); ctx.arc(t.x, t.y, 5, 0, Math.PI * 2); ctx.fillStyle = "#00ff88"; ctx.fill(); } if (m.x > 0 && m.x < c.width && m.y > 0 && m.y < c.height) { ctx.strokeStyle = "#00ff88"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(m.x - 14, m.y); ctx.lineTo(m.x + 14, m.y); ctx.moveTo(m.x, m.y - 14); ctx.lineTo(m.x, m.y + 14); ctx.stroke(); ctx.beginPath(); ctx.arc(m.x, m.y, 20, 0, Math.PI * 2); ctx.strokeStyle = 'rgba(0, 255, 136, 0.3)'; ctx.stroke(); } animationRef.current = requestAnimationFrame(draw); } animationRef.current = requestAnimationFrame(draw); return () => { if (animationRef.current) cancelAnimationFrame(animationRef.current); window.removeEventListener('resize', uc); ro.disconnect(); }; }, [gameState, isBoxDarkMode, init, update]);
+  // Update using virtual crosshair
+  const update = useCallback((dt, c) => { if (!c || !isActiveRef.current || !crosshairInitRef.current) return; const t = targetRef.current; const ch = virtualCrosshair.current; angleRef.current += 0.65 * dt; const wr = c.width * 0.32; const hr = c.height * 0.22; t.x = c.width / 2 + Math.cos(angleRef.current) * wr; t.y = c.height / 2 + Math.sin(angleRef.current * 1.5) * hr; const d = Math.hypot(ch.x - t.x, ch.y - t.y); totalFramesRef.current++; const TR = 40; const IOT = d < TR; if (IOT) { focusFramesRef.current++; trackingTimerRef.current += dt; streakRef.current++; if (streakRef.current > bestStreakRef.current) { bestStreakRef.current = streakRef.current; setBestStreak(bestStreakRef.current); } if (trackingTimerRef.current >= 2.0) { const sc = Math.floor(trackingTimerRef.current / 2); const pe = sc; scoreRef.current += pe; setScore(Math.floor(scoreRef.current)); trackingTimerRef.current -= sc * 2; showFeedback(`✓ Tracking! +${pe}`, 'success'); playSound('focus'); } } else { trackingTimerRef.current = 0; streakRef.current = Math.max(0, streakRef.current - 5); if (streakRef.current <= 5) { const pp = 1; scoreRef.current = Math.max(0, scoreRef.current - pp); setScore(Math.floor(scoreRef.current)); showFeedback(`✗ Target lost! -${pp}`, 'error'); playSound('break'); } } setStreak(streakRef.current); const ca = totalFramesRef.current > 0 ? Math.floor((focusFramesRef.current / totalFramesRef.current) * 100) : 100; setTrackingAccuracy(ca); }, [showFeedback, playSound]);
 
-  const startGame = useCallback(() => { if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); setGameState('playing'); gameStateRef.current = 'playing'; setScore(0); setStreak(0); setBestStreak(0); setTrackingAccuracy(100); setTimeLeft(60); setFeedback(''); isActiveRef.current = true; scoreRef.current = 0; streakRef.current = 0; bestStreakRef.current = 0; totalFramesRef.current = 0; focusFramesRef.current = 0; trackingTimerRef.current = 0; angleRef.current = 0; }, []);
-  const resetGame = useCallback(() => { if (animationRef.current) cancelAnimationFrame(animationRef.current); if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current); isActiveRef.current = false; setGameState('start'); gameStateRef.current = 'start'; setFeedback(''); setFeedbackType(''); }, []);
-  useEffect(() => { return () => { if (animationRef.current) cancelAnimationFrame(animationRef.current); if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current); }; }, []);
+  // Render loop
+  useEffect(() => { if (gameState !== 'playing') return; const c = canvasRef.current; if (!c) return; const ctx = c.getContext('2d'); const uc = () => { const cont = containerRef.current; if (!cont) return; const cr = cont.getBoundingClientRect(); let w = cr.width; let h = w * (9 / 16); if (h > cr.height) { h = cr.height; w = h * (16 / 9); } c.width = w; c.height = h; canvasSizeRef.current = { width: w, height: h }; c.style.position = 'absolute'; c.style.left = `${(cr.width - w) / 2}px`; c.style.top = `${(cr.height - h) / 2}px`; if(!crosshairInitRef.current) virtualCrosshair.current = { x: w/2, y: h/2 }; init(c); }; const ro = new ResizeObserver(uc); if (containerRef.current) ro.observe(containerRef.current); window.addEventListener('resize', uc); uc(); let lft = performance.now(); function draw() { const n = performance.now(); const dt = Math.min(0.033, (n - lft) / 1000); lft = n; update(dt, c); ctx.fillStyle = isBoxDarkMode ? "#020202" : "#f9fafb"; ctx.fillRect(0, 0, c.width, c.height); ctx.strokeStyle = isBoxDarkMode ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)'; ctx.lineWidth = 1; for (let i = 0; i < c.width; i += 40) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, c.height); ctx.stroke(); } const t = targetRef.current; const ch = virtualCrosshair.current; const d = Math.hypot(ch.x - t.x, ch.y - t.y); const iT = d < t.r; ctx.beginPath(); ctx.arc(t.x, t.y, t.r, 0, Math.PI * 2); ctx.strokeStyle = iT ? "#00ff88" : "#FF3E3E"; ctx.lineWidth = iT ? 3.5 : 2; ctx.stroke(); if (iT) { ctx.beginPath(); ctx.arc(t.x, t.y, 5, 0, Math.PI * 2); ctx.fillStyle = "#00ff88"; ctx.fill(); } if (ch.x > 0 && ch.x < c.width && ch.y > 0 && ch.y < c.height) { ctx.strokeStyle = pointerLocked ? "#00ff88" : "#ff4444"; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(ch.x, ch.y, 12, 0, Math.PI * 2); ctx.stroke(); ctx.beginPath(); ctx.moveTo(ch.x - 24, ch.y); ctx.lineTo(ch.x - 10, ch.y); ctx.moveTo(ch.x + 10, ch.y); ctx.lineTo(ch.x + 24, ch.y); ctx.moveTo(ch.x, ch.y - 24); ctx.lineTo(ch.x, ch.y - 10); ctx.moveTo(ch.x, ch.y + 10); ctx.lineTo(ch.x, ch.y + 24); ctx.stroke(); ctx.fillStyle = pointerLocked ? "#00ff88" : "#ff4444"; ctx.beginPath(); ctx.arc(ch.x, ch.y, 3, 0, Math.PI * 2); ctx.fill(); } animationRef.current = requestAnimationFrame(draw); } animationRef.current = requestAnimationFrame(draw); return () => { if (animationRef.current) cancelAnimationFrame(animationRef.current); window.removeEventListener('resize', uc); ro.disconnect(); }; }, [gameState, isBoxDarkMode, pointerLocked, init, update]);
+
+  const startGame = useCallback(() => { if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); setGameState('playing'); gameStateRef.current = 'playing'; setScore(0); setStreak(0); setBestStreak(0); setTrackingAccuracy(100); setTimeLeft(60); setFeedback(''); isActiveRef.current = true; scoreRef.current = 0; streakRef.current = 0; bestStreakRef.current = 0; totalFramesRef.current = 0; focusFramesRef.current = 0; trackingTimerRef.current = 0; angleRef.current = 0; crosshairInitRef.current = false; setTimeout(()=>requestPointerLock(),200); setTimeout(()=>{crosshairInitRef.current=true;},400); }, [requestPointerLock]);
+  
+  const resetGame = useCallback(() => { if (animationRef.current) cancelAnimationFrame(animationRef.current); if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current); isActiveRef.current = false; setGameState('start'); gameStateRef.current = 'start'; setFeedback(''); setFeedbackType(''); crosshairInitRef.current = false; document.exitPointerLock(); }, []);
+  
+  useEffect(() => { return () => { if (animationRef.current) cancelAnimationFrame(animationRef.current); if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current); document.exitPointerLock(); }; }, []);
 
   const sharePage = async () => { if (navigator.share) { try { await navigator.share({ title: 'Free Dynamic Balance Training | SkillDrills', text: 'Improve motor control and hand-eye coordination. Free!', url: 'https://skilldrills.online/drills/physical/Balance-Training/dynamic-balance' }); } catch (e) {} } else { navigator.clipboard.writeText('https://skilldrills.online/drills/physical/Balance-Training/dynamic-balance'); alert('Link copied!'); } };
   const copyPageLink = () => { navigator.clipboard.writeText('https://skilldrills.online/drills/physical/Balance-Training/dynamic-balance'); alert('Link copied!'); };
@@ -80,52 +124,59 @@ export default function DynamicBalanceClient() {
   return (
     <div className={`min-h-screen select-none ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <nav aria-label="Breadcrumb" className="mb-4">
-          <ol className="flex flex-wrap items-center gap-2 text-sm">
-            <li><Link href="/" className={`hover:underline transition-colors ${isDarkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-600 hover:text-gray-900'}`}>Home</Link></li>
-            <li className={`${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`} aria-hidden="true">/</li>
-            <li><Link href="/drills/physical" className={`hover:underline transition-colors ${isDarkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-600 hover:text-gray-900'}`}>Physical Drills</Link></li>
-            <li className={`${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`} aria-hidden="true">/</li>
-            <li className={`${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Balance Training</li>
-            <li className={`${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`} aria-hidden="true">/</li>
-            <li className={`font-medium ${isDarkMode ? 'text-purple-400' : 'text-purple-600'}`} aria-current="page">Dynamic Balance</li>
-          </ol>
-        </nav>
+        {!isFullscreen && (
+          <nav aria-label="Breadcrumb" className="mb-4">
+            <ol className="flex flex-wrap items-center gap-2 text-sm">
+              <li><Link href="/" className={`hover:underline transition-colors ${isDarkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-600 hover:text-gray-900'}`}>Home</Link></li>
+              <li className={`${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`} aria-hidden="true">/</li>
+              <li><Link href="/drills/physical" className={`hover:underline transition-colors ${isDarkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-600 hover:text-gray-900'}`}>Physical Drills</Link></li>
+              <li className={`${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`} aria-hidden="true">/</li>
+              <li className={`${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Balance Training</li>
+              <li className={`${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`} aria-hidden="true">/</li>
+              <li className={`font-medium ${isDarkMode ? 'text-purple-400' : 'text-purple-600'}`} aria-current="page">Dynamic Balance</li>
+            </ol>
+          </nav>
+        )}
         
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl flex-shrink-0"><Move className="w-6 h-6 text-white" /></div>
-            <div><h1 className={`text-2xl sm:text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Dynamic Balance Training</h1><p className={`text-sm sm:text-base ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Track the moving target • 2s tracking = +1 point • 60-second challenge • Free motor control practice</p></div>
+        {!isFullscreen && (
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl flex-shrink-0"><Move className="w-6 h-6 text-white" /></div>
+              <div><h1 className={`text-2xl sm:text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Dynamic Balance Training</h1><p className={`text-sm sm:text-base ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{pointerLocked?'🟢 Raw input active':'🔴 Click canvas'} • Track the moving target • 60s challenge</p></div>
+            </div>
+            <div className="flex gap-2 flex-shrink-0">
+              {gameState === 'playing' && (<button onClick={resetGame} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700' : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-100'}`} title="Reset session" aria-label="Reset balance drill"><RefreshCw className="w-5 h-5" /></button>)}
+              <button onClick={() => setIsDarkMode(!isDarkMode)} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'} title={isDarkMode ? 'Light mode' : 'Dark mode'}>{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button>
+              <button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} aria-label="Toggle drill area theme" title="Toggle drill area theme"><Eye className="w-5 h-5" /></button>
+              <button onClick={() => setSoundEnabled(!soundEnabled)} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} aria-label={soundEnabled ? 'Mute sounds' : 'Enable sounds'} title={soundEnabled ? 'Mute' : 'Unmute'}>{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button>
+              <button onClick={toggleFullscreen} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'} title={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}>{isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}</button>
+              <button onClick={pointerLocked?()=>document.exitPointerLock():requestPointerLock} className={`p-2 rounded-lg border ${pointerLocked?'bg-green-500 border-green-600 text-white':isDarkMode?'bg-gray-800 border-gray-700 text-gray-300':'bg-white border-gray-200 text-gray-700'}`}><Lock className="w-5 h-5"/></button>
+            </div>
           </div>
-          <div className="flex gap-2 flex-shrink-0">
-            {gameState === 'playing' && (<button onClick={resetGame} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700' : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-100'}`} title="Reset session" aria-label="Reset balance drill"><RefreshCw className="w-5 h-5" /></button>)}
-            <button onClick={() => setIsDarkMode(!isDarkMode)} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'} title={isDarkMode ? 'Light mode' : 'Dark mode'}>{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button>
-            <button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} aria-label="Toggle drill area theme" title="Toggle drill area theme"><Eye className="w-5 h-5" /></button>
-            <button onClick={() => setSoundEnabled(!soundEnabled)} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} aria-label={soundEnabled ? 'Mute sounds' : 'Enable sounds'} title={soundEnabled ? 'Mute' : 'Unmute'}>{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button>
-            <button onClick={toggleFullscreen} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'} title={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}>{isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}</button>
-          </div>
-        </div>
+        )}
 
         <section className="sr-only" aria-label="Drill description for search engines">
           <h2>Free Dynamic Balance Training - Motor Control & Hand-Eye Coordination Exercise</h2>
           <p>Train hand-eye coordination and fine motor control by tracking a moving target with your mouse cursor. The target moves in a Lissajous trajectory pattern across the screen. Keep your cursor inside the ring to build tracking time. Every 2 seconds of sustained tracking earns +1 point. Losing the target resets your tracking timer and applies a -1 point penalty. 60 second timed challenge with score tracking accuracy percentage and best streak. Perfect for gamers, athletes, rehabilitation, and cognitive motor training. No registration required.</p>
         </section>
 
-        <div className="grid grid-cols-5 gap-3 mb-4 h-[88px]">
-          <StatCard icon={<Target className="text-blue-600" />} value={score} label="Score" isDark={isDarkMode} />
-          <StatCard icon={<Trophy className="text-yellow-500" />} value={bestScore} label="Best" isDark={isDarkMode} />
-          <StatCard icon={<Timer className={timeLeft < 15 ? 'text-red-600' : 'text-green-600'} />} value={timeLeft} label="Time" unit="s" isDark={isDarkMode} />
-          <StatCard icon={<Activity className="text-green-600" />} value={trackingAccuracy} label="Accuracy" unit="%" isDark={isDarkMode} />
-          <StatCard icon={<Zap className="text-orange-500" />} value={streak} label="Streak" isDark={isDarkMode} />
-        </div>
+        {!isFullscreen && (
+          <div className="grid grid-cols-5 gap-3 mb-4 h-[88px]">
+            <StatCard icon={<Target className="text-blue-600" />} value={score} label="Score" isDark={isDarkMode} />
+            <StatCard icon={<Trophy className="text-yellow-500" />} value={bestScore} label="Best" isDark={isDarkMode} />
+            <StatCard icon={<Timer className={timeLeft < 15 ? 'text-red-600' : 'text-green-600'} />} value={timeLeft} label="Time" unit="s" isDark={isDarkMode} />
+            <StatCard icon={<Activity className="text-green-600" />} value={trackingAccuracy} label="Accuracy" unit="%" isDark={isDarkMode} />
+            <StatCard icon={<Zap className="text-orange-500" />} value={streak} label="Streak" isDark={isDarkMode} />
+          </div>
+        )}
 
         <div className="h-10 mb-2 flex justify-center items-center"><div className={`px-4 py-1.5 rounded-lg text-white font-semibold text-sm transition-all duration-200 ${feedback ? 'opacity-100 scale-100' : 'opacity-0 scale-95'} ${feedbackType === 'success' ? 'bg-green-500' : feedbackType === 'warning' ? 'bg-orange-500' : 'bg-red-500'}`} role="status" aria-live="polite" aria-atomic="true">{feedback || '\u00A0'}</div></div>
 
         <div ref={containerRef} className={`relative ${isFullscreen ? 'fixed inset-0 z-50' : 'rounded-xl border-2'}`} style={{ background: isBoxDarkMode ? "#020202" : "#ffffff", aspectRatio: isFullscreen ? 'auto' : '16/9', maxWidth: '100%', margin: '0 auto', borderColor: isDarkMode ? '#374151' : '#e5e7eb', overflow: 'hidden' }}>
-          {isFullscreen && gameState === 'playing' && (<div className="absolute top-4 right-4 z-30 flex gap-3"><button onClick={resetGame} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" title="Reset session" aria-label="Reset balance drill"><RefreshCw className="w-5 h-5" /></button><button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle dark mode">{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button><button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle drill area theme"><Eye className="w-5 h-5" /></button><button onClick={() => setSoundEnabled(!soundEnabled)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle sound">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button><button onClick={toggleFullscreen} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Exit fullscreen"><Minimize2 className="w-5 h-5" /></button></div>)}
+          {isFullscreen && gameState === 'playing' && (<div className="absolute top-4 right-4 z-20"><button onClick={toggleFullscreen} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70"><Minimize2 className="w-5 h-5"/></button></div>)}
           <canvas ref={canvasRef} style={{ display: 'block', position: 'absolute', cursor: 'none' }} aria-label="Balance tracking canvas - move your mouse to track the target" />
 
-          {gameState === 'start' && (<div className={`absolute inset-0 flex items-center justify-center backdrop-blur-sm rounded-xl z-40 ${isBoxDarkMode ? 'bg-gray-900/95' : 'bg-white/95'}`}><div className={`rounded-2xl p-6 sm:p-8 text-center max-w-md mx-4 shadow-xl border ${isBoxDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}><div className="mb-4"><Move className="w-16 h-16 text-purple-500 mx-auto" aria-hidden="true" /></div><h2 className={`text-2xl font-bold mb-2 ${isBoxDarkMode ? 'text-white' : 'text-gray-900'}`}>Dynamic Balance Training</h2><p className={`mb-2 ${isBoxDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>60-second challenge • 2s tracking = +1 point</p><p className={`mb-6 text-sm ${isBoxDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Keep your cursor inside the moving ring. Green ring means tracking. Lose target = -1 point penalty. Perfect for improving hand-eye coordination and motor control.</p><button onClick={startGame} className="px-8 py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-xl font-semibold hover:shadow-lg w-full transition-all transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2" aria-label="Start free dynamic balance training">Start Free Drill</button></div></div>)}
+          {gameState === 'start' && (<div className={`absolute inset-0 flex items-center justify-center backdrop-blur-sm rounded-xl z-40 ${isBoxDarkMode ? 'bg-gray-900/95' : 'bg-white/95'}`}><div className={`rounded-2xl p-6 sm:p-8 text-center max-w-md mx-4 shadow-xl border ${isBoxDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}><div className="mb-4"><Move className="w-16 h-16 text-purple-500 mx-auto" aria-hidden="true" /></div><h2 className={`text-2xl font-bold mb-2 ${isBoxDarkMode ? 'text-white' : 'text-gray-900'}`}>Dynamic Balance Training</h2><p className={`mb-4 ${isBoxDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Raw input • 2s tracking = +1pt • 60s challenge</p><div className={`mb-6 p-3 rounded-lg border ${isBoxDarkMode ? 'border-yellow-600 bg-yellow-900/20' : 'border-yellow-200 bg-yellow-50'}`}><div className="flex items-center gap-2 mb-2"><AlertCircle className="w-4 h-4 text-yellow-500"/><p className={`text-sm font-medium ${isBoxDarkMode?'text-yellow-400':'text-yellow-700'}`}>Raw Input via Pointer Lock</p></div><p className={`text-xs ${isBoxDarkMode?'text-gray-400':'text-gray-600'}`}>Keep cursor inside ring. ESC to unlock. Click canvas to re-lock.</p></div><button onClick={startGame} className="px-8 py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-xl font-semibold hover:shadow-lg w-full transition-all transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2" aria-label="Start free dynamic balance training">Start Free Drill</button></div></div>)}
 
           {gameState === 'gameOver' && (<div className={`absolute inset-0 flex items-center justify-center backdrop-blur-sm rounded-xl z-40 ${isBoxDarkMode ? 'bg-gray-900/95' : 'bg-white/95'}`}><div className={`rounded-2xl p-6 sm:p-8 shadow-xl border w-full max-w-[520px] mx-4 ${isBoxDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}><div className="flex items-center justify-center gap-3 mb-4"><Timer className="w-10 h-10 text-orange-500" aria-hidden="true" /><h2 className={`text-2xl font-bold ${isBoxDarkMode ? 'text-white' : 'text-gray-900'}`}>Session Complete!</h2></div><p className={`text-center text-sm mb-6 ${isBoxDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Regular tracking practice improves hand-eye coordination and fine motor control for gaming and daily tasks.</p><div className="grid grid-cols-2 gap-3 mb-6"><ResultCard label="Final Score" value={score} icon={<Target className="w-4 h-4" />} color="yellow" isDark={isBoxDarkMode} /><ResultCard label="Best Score" value={bestScore} icon={<Trophy className="w-4 h-4" />} color="yellow" isDark={isBoxDarkMode} /><ResultCard label="Best Streak" value={bestStreak} icon={<Zap className="w-4 h-4" />} color="orange" isDark={isBoxDarkMode} /><ResultCard label="Accuracy" value={trackingAccuracy} unit="%" icon={<Activity className="w-4 h-4" />} color="emerald" isDark={isBoxDarkMode} /></div><div className="flex gap-3"><Link href="/drills/physical" className="flex-1"><button className={`w-full px-4 py-2.5 rounded-lg font-semibold transition-all ${isDarkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>← Back to Drills</button></Link><button onClick={startGame} className="flex-1 px-4 py-2.5 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2">Play Again →</button></div></div></div>)}
         </div>

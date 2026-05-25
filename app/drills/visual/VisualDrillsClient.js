@@ -118,7 +118,7 @@ export default function VisualDrillsClient() {
             "name": "Visual Drills - Reaction Speed, Tracking & Vision Training",
             "url": "https://skilldrills.online/drills/visual",
             "description": "14 free visual training drills across Reaction Speed, Tracking Accuracy, Peripheral Vision, Visual Recognition, and Depth Perception categories.",
-            "isPartOf": { "@type": "WebSite", "name": "Global Drill System", "url": "https://skilldrills.online" },
+            "isPartOf": { "@type": "WebSite", "name": "SkillDrills", "url": "https://skilldrills.online" },
             "about": { "@type": "Thing", "name": "Visual Skill Training" },
             "numberOfItems": 14,
             "itemListElement": drills.filter(d => d.enabled).map((drill, index) => ({

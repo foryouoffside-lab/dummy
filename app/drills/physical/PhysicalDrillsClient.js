@@ -122,7 +122,7 @@ export default function PhysicalDrillsClient() {
             "description": "11 free physical skill training drills covering Balance Training, Reflex Training, Coordination, and Fitness. Improve stability, reaction speed, motor control, and agility.",
             "isPartOf": {
               "@type": "WebSite",
-              "name": "Global Drill System",
+              "name": "SkillDrills",
               "url": "https://skilldrills.online"
             },
             "about": {

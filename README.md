@@ -1,4 +1,4 @@
-﻿# Global Drill System
+﻿# SkillDrills
 
 A comprehensive platform for cognitive and motor skill training with 120+ interactive drills.
 
