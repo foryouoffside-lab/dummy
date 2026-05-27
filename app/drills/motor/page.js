@@ -1,7 +1,7 @@
 ﻿import MotorDrillsClient from './MotorDrillsClient';
 
 export const metadata = {
-  title: 'Motor Skills - 12 Drills for Precision & Speed | SkillDrills',
+  title: 'Motor Skills - 12 Drills for Precision | SkillDrills',
   description: '12 free motor skills drills across 4 categories: Hand-Eye Coordination, Timing Accuracy, Precision Control, and Movement Speed. Improve mouse aim.',
   keywords: [
     'motor skills drills', 'hand-eye coordination training', 'timing accuracy practice',
@@ -13,7 +13,7 @@ export const metadata = {
     'skilldrills motor', 'skilldrills coordination', 'free precision training',
   ],
   openGraph: {
-    title: 'Motor Skills - 12 Drills for Precision & Speed | SkillDrills',
+    title: 'Motor Skills - 12 Drills for Precision | SkillDrills',
     description: '12 free motor skills drills across 4 categories: Hand-Eye Coordination, Timing Accuracy, Precision Control, and Movement Speed. Improve mouse aim.',
     type: 'website',
     url: 'https://skilldrills.online/drills/motor',
@@ -28,7 +28,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Motor Skills - 12 Drills for Precision & Speed | SkillDrills',
+    title: 'Motor Skills - 12 Drills for Precision | SkillDrills',
     description: '12 free motor skills drills across 4 categories: Hand-Eye Coordination, Timing Accuracy, Precision Control, and Movement Speed. Improve mouse aim.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },

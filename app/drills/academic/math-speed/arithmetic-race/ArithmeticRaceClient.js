@@ -45,79 +45,392 @@ export default function ArithmeticRaceClient() {
   const livesRef = useRef(3);
   const scoreRef = useRef(0);
   const comboRef = useRef(0);
+  const isGameActiveRef = useRef(false);
+  const gameStateRef = useRef('start');
+  const timeLeftRef = useRef(60);
+  const difficultyRef = useRef('PRO');
 
-  useEffect(() => { setIsClient(true); const t = setTimeout(() => setLoading(false), 300); return () => clearTimeout(t); }, []);
-  useEffect(() => { try { const s = localStorage.getItem('arithmeticRaceDrillBestScore'); if (s) { const p = parseFloat(s); if (!isNaN(p)) setBestScore(p); } } catch (e) {} }, []);
-  useEffect(() => { if (gameState === 'gameOver' && score > bestScore) { setBestScore(score); try { localStorage.setItem('arithmeticRaceDrillBestScore', score.toString()); } catch (e) {} } }, [gameState, score, bestScore]);
-  useEffect(() => { const h = () => setIsFullscreen(!!document.fullscreenElement); document.addEventListener('fullscreenchange', h); return () => document.removeEventListener('fullscreenchange', h); }, []);
+  // Keep refs in sync with state
+  useEffect(() => { gameStateRef.current = gameState; }, [gameState]);
+  useEffect(() => { timeLeftRef.current = timeLeft; }, [timeLeft]);
+  useEffect(() => { difficultyRef.current = difficulty; }, [difficulty]);
 
-  const toggleFullscreen = useCallback(async () => { try { if (!isFullscreen) { const e = containerRef.current; if (e?.requestFullscreen) { await e.requestFullscreen(); setIsFullscreen(true); } } else { if (document.fullscreenElement) await document.exitFullscreen(); setIsFullscreen(false); } } catch (e) { console.error('Fullscreen error:', e); } }, [isFullscreen]);
+  useEffect(() => { 
+    setIsClient(true); 
+    const t = setTimeout(() => setLoading(false), 300); 
+    return () => clearTimeout(t); 
+  }, []);
+  
+  useEffect(() => { 
+    try { 
+      const s = localStorage.getItem('arithmeticRaceDrillBestScore'); 
+      if (s) { 
+        const p = parseInt(s, 10); 
+        if (!isNaN(p)) setBestScore(p); 
+      } 
+    } catch (e) {} 
+  }, []);
+  
+  useEffect(() => { 
+    if (gameState === 'gameOver' && score > bestScore) { 
+      setBestScore(score); 
+      try { 
+        localStorage.setItem('arithmeticRaceDrillBestScore', score.toString()); 
+      } catch (e) {} 
+    } 
+  }, [gameState, score, bestScore]);
+  
+  useEffect(() => { 
+    const h = () => setIsFullscreen(!!document.fullscreenElement); 
+    document.addEventListener('fullscreenchange', h); 
+    return () => document.removeEventListener('fullscreenchange', h); 
+  }, []);
 
-  const showFeedback = useCallback((message, type) => { if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current); setFeedback(message); setFeedbackType(type); feedbackTimeoutRef.current = setTimeout(() => { setFeedback(''); setFeedbackType(''); }, 600); }, []);
-  const initAudio = useCallback(() => { try { if (!audioCtxRef.current) audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)(); if (audioCtxRef.current.state === 'suspended') audioCtxRef.current.resume(); return audioCtxRef.current; } catch (e) { return null; } }, []);
+  const toggleFullscreen = useCallback(async () => { 
+    try { 
+      if (!isFullscreen) { 
+        const e = containerRef.current; 
+        if (e?.requestFullscreen) { 
+          await e.requestFullscreen(); 
+          setIsFullscreen(true); 
+        } 
+      } else { 
+        if (document.fullscreenElement) await document.exitFullscreen(); 
+        setIsFullscreen(false); 
+      } 
+    } catch (e) { 
+      console.error('Fullscreen error:', e); 
+    } 
+  }, [isFullscreen]);
 
-  const playSound = useCallback((type) => { if (!soundEnabled) return; try { const a = initAudio(); if (!a) return; const o = a.createOscillator(); const g = a.createGain(); o.connect(g); g.connect(a.destination); const n = a.currentTime; if (type === 'correct') { o.frequency.setValueAtTime(880, n); g.gain.setValueAtTime(0.1, n); g.gain.exponentialRampToValueAtTime(0.001, n + 0.1); o.start(n); o.stop(n + 0.1); } else if (type === 'wrong') { o.frequency.setValueAtTime(440, n); g.gain.setValueAtTime(0.1, n); g.gain.exponentialRampToValueAtTime(0.001, n + 0.15); o.start(n); o.stop(n + 0.15); } else if (type === 'combo') { o.frequency.setValueAtTime(1046.5, n); g.gain.setValueAtTime(0.12, n); g.gain.exponentialRampToValueAtTime(0.001, n + 0.2); o.start(n); o.stop(n + 0.2); } } catch (e) {} }, [soundEnabled, initAudio]);
+  const showFeedback = useCallback((message, type) => { 
+    if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current); 
+    setFeedback(message); 
+    setFeedbackType(type); 
+    feedbackTimeoutRef.current = setTimeout(() => { 
+      setFeedback(''); 
+      setFeedbackType(''); 
+    }, 600); 
+  }, []);
+  
+  const initAudio = useCallback(() => { 
+    try { 
+      if (!audioCtxRef.current) audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)(); 
+      if (audioCtxRef.current.state === 'suspended') audioCtxRef.current.resume(); 
+      return audioCtxRef.current; 
+    } catch (e) { 
+      return null; 
+    } 
+  }, []);
 
-  const getPointsForCorrect = useCallback(() => { if (difficulty === 'ELITE') return 1.5; if (difficulty === 'PRO') return 1; return 0.5; }, [difficulty]);
-  const getPenaltyPoints = useCallback(() => { if (difficulty === 'ELITE') return 1.5; if (difficulty === 'PRO') return 1; return 0.5; }, [difficulty]);
+  const playSound = useCallback((type) => { 
+    if (!soundEnabled) return; 
+    try { 
+      const a = initAudio(); 
+      if (!a) return; 
+      const o = a.createOscillator(); 
+      const g = a.createGain(); 
+      o.connect(g); 
+      g.connect(a.destination); 
+      const n = a.currentTime; 
+      if (type === 'correct') { 
+        o.frequency.setValueAtTime(880, n); 
+        g.gain.setValueAtTime(0.1, n); 
+        g.gain.exponentialRampToValueAtTime(0.001, n + 0.1); 
+        o.start(n); 
+        o.stop(n + 0.1); 
+      } else if (type === 'wrong') { 
+        o.frequency.setValueAtTime(440, n); 
+        g.gain.setValueAtTime(0.1, n); 
+        g.gain.exponentialRampToValueAtTime(0.001, n + 0.15); 
+        o.start(n); 
+        o.stop(n + 0.15); 
+      } else if (type === 'combo') { 
+        o.frequency.setValueAtTime(1046.5, n); 
+        g.gain.setValueAtTime(0.12, n); 
+        g.gain.exponentialRampToValueAtTime(0.001, n + 0.2); 
+        o.start(n); 
+        o.stop(n + 0.2); 
+      } 
+    } catch (e) {} 
+  }, [soundEnabled, initAudio]);
+
+  const getPointsForCorrect = useCallback(() => { 
+    if (difficulty === 'ELITE') return 2;
+    if (difficulty === 'PRO') return 1;
+    return 1;
+  }, [difficulty]);
+  
+  const getPenaltyPoints = useCallback(() => { 
+    if (difficulty === 'ELITE') return 2;
+    if (difficulty === 'PRO') return 1;
+    return 1;
+  }, [difficulty]);
 
   const generateProblem = useCallback(() => {
+    if (gameStateRef.current !== 'playing') return;
+    
+    const currentDifficulty = difficultyRef.current;
     const ops = ['+', '-', '*'];
     let a, b, op, query, answer;
     let attempts = 0;
     const maxAttempts = 100;
     const allowRepeats = usedQuestionsRef.current.size > 50;
     do {
-      if (difficulty === 'BASIC') { a = Math.floor(Math.random() * 20) + 1; b = Math.floor(Math.random() * 20) + 1; op = ops[Math.floor(Math.random() * 2)]; }
-      else if (difficulty === 'PRO') { a = Math.floor(Math.random() * 50) + 10; b = Math.floor(Math.random() * 30) + 5; op = ops[Math.floor(Math.random() * 3)]; }
-      else { a = Math.floor(Math.random() * 100) + 20; b = Math.floor(Math.random() * 90) + 10; op = ops[Math.floor(Math.random() * 3)]; if (op === '*') { a = Math.floor(a / 4); b = Math.floor(b / 2); } }
-      switch (op) { case '+': query = `${a} + ${b}`; answer = a + b; break; case '-': query = `${a} - ${b}`; answer = a - b; break; case '*': query = `${a} × ${b}`; answer = a * b; break; default: query = `${a} + ${b}`; answer = a + b; }
+      if (currentDifficulty === 'BASIC') { 
+        a = Math.floor(Math.random() * 20) + 1; 
+        b = Math.floor(Math.random() * 20) + 1; 
+        op = ops[Math.floor(Math.random() * 2)]; 
+      }
+      else if (currentDifficulty === 'PRO') { 
+        a = Math.floor(Math.random() * 50) + 10; 
+        b = Math.floor(Math.random() * 30) + 5; 
+        op = ops[Math.floor(Math.random() * 3)]; 
+      }
+      else { 
+        a = Math.floor(Math.random() * 100) + 20; 
+        b = Math.floor(Math.random() * 90) + 10; 
+        op = ops[Math.floor(Math.random() * 3)]; 
+        if (op === '*') { 
+          a = Math.floor(a / 4); 
+          b = Math.floor(b / 2); 
+        } 
+      }
+      switch (op) { 
+        case '+': query = `${a} + ${b}`; answer = a + b; break; 
+        case '-': query = `${a} - ${b}`; answer = a - b; break; 
+        case '*': query = `${a} × ${b}`; answer = a * b; break; 
+        default: query = `${a} + ${b}`; answer = a + b; 
+      }
       attempts++;
       if (attempts >= maxAttempts) break;
     } while (!allowRepeats && usedQuestionsRef.current.has(`${query}=${answer}`));
     usedQuestionsRef.current.add(`${query}=${answer}`);
     const options = [answer];
-    while (options.length < 4) { let fa; const v = difficulty === 'BASIC' ? 8 : difficulty === 'PRO' ? 15 : 25; fa = answer + (Math.floor(Math.random() * v * 2) - v); if (fa > 0 && !options.includes(fa)) options.push(fa); }
+    while (options.length < 4) { 
+      let fa; 
+      const v = currentDifficulty === 'BASIC' ? 8 : currentDifficulty === 'PRO' ? 15 : 25; 
+      fa = answer + (Math.floor(Math.random() * v * 2) - v); 
+      if (fa > 0 && !options.includes(fa)) options.push(fa); 
+    }
     const shuffledOptions = [...options].sort(() => Math.random() - 0.5);
     setCurrentProblem({ query, answer, options: shuffledOptions });
-    setSelectedOption(null); setCanSelect(true); setShowCorrectAnswer(false);
-  }, [difficulty]);
+    setSelectedOption(null); 
+    setCanSelect(true); 
+    setShowCorrectAnswer(false);
+  }, []);
 
-  const getAccuracy = useCallback(() => { const t = solvedCount + errorCount; return t > 0 ? Math.round((solvedCount / t) * 100) : 100; }, [solvedCount, errorCount]);
+  const moveToNextQuestion = useCallback(() => {
+    if (gameStateRef.current === 'playing' && timeLeftRef.current > 0) {
+      generateProblem();
+    }
+  }, [generateProblem]);
+
+  const getAccuracy = useCallback(() => { 
+    const t = solvedCount + errorCount; 
+    return t > 0 ? Math.round((solvedCount / t) * 100) : 100; 
+  }, [solvedCount, errorCount]);
 
   const handleOptionSelect = useCallback((selectedAnswer) => {
-    if (!canSelect || selectedOption !== null || timeLeft <= 0) return;
-    setSelectedOption(selectedAnswer); setCanSelect(false);
+    if (gameStateRef.current !== 'playing' || !canSelect || selectedOption !== null || timeLeftRef.current <= 0) return;
+    
+    setSelectedOption(selectedAnswer); 
+    setCanSelect(false);
+    
     if (selectedAnswer === currentProblem.answer) {
       const pts = getPointsForCorrect();
-      scoreRef.current = parseFloat((scoreRef.current + pts).toFixed(1)); setScore(scoreRef.current); setSolvedCount(prev => prev + 1);
-      comboRef.current = comboRef.current + 1; setCombo(comboRef.current);
-      if (comboRef.current > 0 && comboRef.current % 3 === 0) { playSound('combo'); showFeedback(`🔥 ${comboRef.current}x Combo!`, 'success'); }
-      playSound('correct'); showFeedback(`✓ Correct! +${pts}`, 'success');
+      scoreRef.current = scoreRef.current + pts;
+      setScore(scoreRef.current);
+      setSolvedCount(prev => prev + 1);
+      comboRef.current = comboRef.current + 1;
+      setCombo(comboRef.current);
+      
+      if (comboRef.current > 0 && comboRef.current % 3 === 0) { 
+        playSound('combo'); 
+        showFeedback(`🔥 ${comboRef.current}x Combo!`, 'success'); 
+      }
+      playSound('correct'); 
+      showFeedback(`✓ Correct! +${pts}`, 'success');
+      
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      timeoutRef.current = setTimeout(() => { generateProblem(); timeoutRef.current = null; }, 400);
+      timeoutRef.current = setTimeout(() => { 
+        moveToNextQuestion();
+        timeoutRef.current = null; 
+      }, 400);
     } else {
-      setErrorCount(prev => prev + 1); comboRef.current = 0; setCombo(0); setShowCorrectAnswer(true);
+      setErrorCount(prev => prev + 1);
+      comboRef.current = 0;
+      setCombo(0);
+      setShowCorrectAnswer(true);
       const pp = getPenaltyPoints();
-      if (livesRef.current > 0) { livesRef.current -= 1; setLives(livesRef.current); playSound('wrong'); showFeedback(`✗ Wrong! -1 life (${livesRef.current} lives left)`, 'error'); if (livesRef.current === 0) showFeedback(`⚠️ No lives left! Penalties deduct ${pp} points!`, 'warning'); }
-      else { scoreRef.current = parseFloat(Math.max(0, scoreRef.current - pp).toFixed(1)); setScore(scoreRef.current); playSound('wrong'); showFeedback(`✗ Wrong! -${pp} point penalty`, 'error'); }
+      
+      if (livesRef.current > 0) { 
+        livesRef.current -= 1;
+        setLives(livesRef.current);
+        playSound('wrong');
+        showFeedback(`✗ Wrong! -1 life (${livesRef.current} lives left)`, 'error');
+        if (livesRef.current === 0) showFeedback(`⚠️ No lives left! Penalties deduct ${pp} points!`, 'warning');
+      }
+      else {
+        scoreRef.current = Math.max(0, scoreRef.current - pp);
+        setScore(scoreRef.current);
+        playSound('wrong');
+        showFeedback(`✗ Wrong! -${pp} point penalty`, 'error');
+      }
+      
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      timeoutRef.current = setTimeout(() => { generateProblem(); timeoutRef.current = null; }, 800);
+      timeoutRef.current = setTimeout(() => { 
+        moveToNextQuestion();
+        timeoutRef.current = null; 
+      }, 800);
     }
-  }, [canSelect, selectedOption, timeLeft, currentProblem, getPointsForCorrect, getPenaltyPoints, playSound, showFeedback, generateProblem]);
+  }, [canSelect, selectedOption, currentProblem, getPointsForCorrect, getPenaltyPoints, playSound, showFeedback, moveToNextQuestion]);
 
-  useEffect(() => { const h = (e) => { if (gameState !== 'playing' || !canSelect || selectedOption !== null) return; const km = { '1': 0, '2': 1, '3': 2, '4': 3 }; const i = km[e.key]; if (i !== undefined && i < currentProblem.options.length) handleOptionSelect(currentProblem.options[i]); }; window.addEventListener('keydown', h); return () => window.removeEventListener('keydown', h); }, [gameState, canSelect, selectedOption, currentProblem, handleOptionSelect]);
+  useEffect(() => { 
+    const h = (e) => { 
+      if (gameStateRef.current !== 'playing' || !canSelect || selectedOption !== null) return; 
+      const km = { '1': 0, '2': 1, '3': 2, '4': 3 }; 
+      const i = km[e.key]; 
+      if (i !== undefined && i < currentProblem.options.length) handleOptionSelect(currentProblem.options[i]); 
+    }; 
+    window.addEventListener('keydown', h); 
+    return () => window.removeEventListener('keydown', h); 
+  }, [canSelect, selectedOption, currentProblem, handleOptionSelect]);
 
-  const startGame = useCallback(() => { if (timerRef.current) clearInterval(timerRef.current); if (timeoutRef.current) clearTimeout(timeoutRef.current); setGameState('playing'); setScore(0); setTimeLeft(60); setSolvedCount(0); setErrorCount(0); setCombo(0); setLives(3); setSelectedOption(null); setCanSelect(true); setFeedback(''); setShowCorrectAnswer(false); usedQuestionsRef.current = new Set(); livesRef.current = 3; scoreRef.current = 0; comboRef.current = 0; generateProblem(); playSound('correct'); }, [generateProblem, playSound]);
-  const resetGame = useCallback(() => { if (timerRef.current) clearInterval(timerRef.current); if (timeoutRef.current) clearTimeout(timeoutRef.current); if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current); setGameState('start'); setFeedback(''); setFeedbackType(''); }, []);
+  const startGame = useCallback(() => {
+    // Clean up any existing timers
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+    if (feedbackTimeoutRef.current) {
+      clearTimeout(feedbackTimeoutRef.current);
+      feedbackTimeoutRef.current = null;
+    }
+    
+    usedQuestionsRef.current = new Set();
+    livesRef.current = 3;
+    scoreRef.current = 0;
+    comboRef.current = 0;
+    isGameActiveRef.current = true;
+    gameStateRef.current = 'playing';
+    timeLeftRef.current = 60;
+    
+    setGameState('playing');
+    setScore(0);
+    setTimeLeft(60);
+    setSolvedCount(0);
+    setErrorCount(0);
+    setCombo(0);
+    setLives(3);
+    setSelectedOption(null);
+    setCanSelect(true);
+    setFeedback('');
+    setShowCorrectAnswer(false);
+    
+    // Use setTimeout to ensure state is updated before generating problem
+    setTimeout(() => {
+      generateProblem();
+    }, 0);
+  }, [generateProblem]);
+  
+  const resetGame = useCallback(() => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+    if (feedbackTimeoutRef.current) {
+      clearTimeout(feedbackTimeoutRef.current);
+      feedbackTimeoutRef.current = null;
+    }
+    
+    isGameActiveRef.current = false;
+    gameStateRef.current = 'start';
+    setGameState('start');
+    setFeedback('');
+    setFeedbackType('');
+  }, []);
 
-  useEffect(() => { if (gameState === 'playing' && timeLeft > 0) { timerRef.current = setInterval(() => { setTimeLeft(prev => { if (prev <= 1) { setGameState('gameOver'); if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; } if (timeoutRef.current) clearTimeout(timeoutRef.current); return 0; } return prev - 1; }); }, 1000); } return () => { if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; } }; }, [gameState]);
-  useEffect(() => { return () => { if (timerRef.current) clearInterval(timerRef.current); if (timeoutRef.current) clearTimeout(timeoutRef.current); if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current); }; }, []);
+  // Fixed timer effect - only depends on gameState
+  useEffect(() => {
+    if (gameState === 'playing') {
+      // Clear any existing timer
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+      
+      timerRef.current = setInterval(() => {
+        setTimeLeft(prev => {
+          const newTime = prev - 1;
+          timeLeftRef.current = newTime;
+          
+          if (newTime <= 0) {
+            // Clear the interval
+            if (timerRef.current) {
+              clearInterval(timerRef.current);
+              timerRef.current = null;
+            }
+            // Clear any pending timeouts
+            if (timeoutRef.current) {
+              clearTimeout(timeoutRef.current);
+              timeoutRef.current = null;
+            }
+            // Update game state
+            isGameActiveRef.current = false;
+            gameStateRef.current = 'gameOver';
+            setGameState('gameOver');
+            return 0;
+          }
+          return newTime;
+        });
+      }, 1000);
+    }
+    
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+  }, [gameState]);
+  
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
+      isGameActiveRef.current = false;
+    };
+  }, []);
 
-  const sharePage = async () => { if (navigator.share) { try { await navigator.share({ title: 'Free Arithmetic Race Drill | SkillDrills', text: 'Boost mental math speed with this free timed arithmetic challenge!', url: 'https://skilldrills.online/drills/academic/math-speed/arithmetic-race' }); } catch (e) {} } else { navigator.clipboard.writeText('https://skilldrills.online/drills/academic/math-speed/arithmetic-race'); alert('Link copied!'); } };
-  const copyPageLink = () => { navigator.clipboard.writeText('https://skilldrills.online/drills/academic/math-speed/arithmetic-race'); alert('Link copied!'); };
+  const sharePage = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'Free Arithmetic Race Drill | SkillDrills', text: 'Boost mental math speed with this free timed arithmetic challenge!', url: 'https://skilldrills.online/drills/academic/math-speed/arithmetic-race' });
+      } catch (e) {}
+    } else {
+      navigator.clipboard.writeText('https://skilldrills.online/drills/academic/math-speed/arithmetic-race');
+      alert('Link copied!');
+    }
+  };
+  
+  const copyPageLink = () => {
+    navigator.clipboard.writeText('https://skilldrills.online/drills/academic/math-speed/arithmetic-race');
+    alert('Link copied!');
+  };
 
-  if (loading || !isClient) { return (<div className="min-h-screen flex items-center justify-center bg-gray-50"><div className="text-center"><div className="w-16 h-16 border-4 border-orange-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div><p className="text-gray-600">Loading arithmetic race drill...</p></div></div>); }
+  if (loading || !isClient) {
+    return (<div className="min-h-screen flex items-center justify-center bg-gray-50"><div className="text-center"><div className="w-16 h-16 border-4 border-orange-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div><p className="text-gray-600">Loading arithmetic race drill...</p></div></div>);
+  }
 
   return (
     <div className={`min-h-screen select-none ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
@@ -154,8 +467,8 @@ export default function ArithmeticRaceClient() {
         </section>
 
         <div className="grid grid-cols-7 gap-3 mb-4 h-[88px]">
-          <StatCard icon={<Target className="text-blue-600" />} value={score.toFixed(1)} label="Score" isDark={isDarkMode} />
-          <StatCard icon={<Trophy className="text-yellow-600" />} value={bestScore.toFixed(1)} label="Best" isDark={isDarkMode} />
+          <StatCard icon={<Target className="text-blue-600" />} value={score} label="Score" isDark={isDarkMode} />
+          <StatCard icon={<Trophy className="text-yellow-600" />} value={bestScore} label="Best" isDark={isDarkMode} />
           <StatCard icon={<Timer className={timeLeft <= 10 ? 'text-red-600' : 'text-green-600'} />} value={timeLeft} label="Time" unit="s" isDark={isDarkMode} />
           <StatCard icon={<CheckCircle2 className="text-emerald-600" />} value={solvedCount} label="Solved" isDark={isDarkMode} />
           <StatCard icon={<BarChart3 className="text-purple-600" />} value={getAccuracy()} label="Accuracy" unit="%" isDark={isDarkMode} />
@@ -165,7 +478,7 @@ export default function ArithmeticRaceClient() {
 
         <div className="h-10 mb-2 flex justify-center items-center"><div className={`px-4 py-1.5 rounded-lg text-white font-semibold text-sm transition-all duration-200 ${feedback ? 'opacity-100 scale-100' : 'opacity-0 scale-95'} ${feedbackType === 'success' ? 'bg-green-500' : feedbackType === 'warning' ? 'bg-yellow-500' : 'bg-red-500'}`} role="status" aria-live="polite" aria-atomic="true">{feedback || '\u00A0'}</div></div>
 
-        <div className="flex justify-center gap-3 mb-4"><div className={`flex p-1 rounded-xl ${isDarkMode ? 'bg-gray-800' : 'bg-gray-200'}`} role="radiogroup" aria-label="Difficulty level">{['BASIC', 'PRO', 'ELITE'].map(d => { const pts = d === 'BASIC' ? '0.5' : d === 'PRO' ? '1' : '1.5'; return (<button key={d} onClick={() => setDifficulty(d)} role="radio" aria-checked={difficulty === d} className={`px-6 py-2 rounded-lg text-sm font-bold transition-all ${difficulty === d ? 'bg-gradient-to-r from-orange-500 to-red-600 text-white shadow-lg' : `${isDarkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-500 hover:text-gray-700'}`} focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2`} aria-label={`${d} difficulty - ${pts} points per correct answer`}>{d} ({pts}pt)</button>); })}</div></div>
+        <div className="flex justify-center gap-3 mb-4"><div className={`flex p-1 rounded-xl ${isDarkMode ? 'bg-gray-800' : 'bg-gray-200'}`} role="radiogroup" aria-label="Difficulty level">{['BASIC', 'PRO', 'ELITE'].map(d => { const pts = d === 'BASIC' ? '1' : d === 'PRO' ? '1' : '2'; return (<button key={d} onClick={() => setDifficulty(d)} role="radio" aria-checked={difficulty === d} className={`px-6 py-2 rounded-lg text-sm font-bold transition-all ${difficulty === d ? 'bg-gradient-to-r from-orange-500 to-red-600 text-white shadow-lg' : `${isDarkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-500 hover:text-gray-700'}`} focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2`} aria-label={`${d} difficulty - ${pts} points per correct answer`}>{d} ({pts}pt)</button>); })}</div></div>
 
         <div ref={containerRef} className={`relative ${isFullscreen ? 'fixed inset-0 z-50' : 'rounded-xl border-2'}`} style={{ background: isBoxDarkMode ? "#0a0a0a" : "#ffffff", aspectRatio: isFullscreen ? 'auto' : '16/9', maxWidth: '100%', margin: '0 auto', borderColor: isDarkMode ? '#374151' : '#e5e7eb', overflow: 'hidden' }}>
           {isFullscreen && gameState === 'playing' && (<div className="absolute top-4 right-4 z-30 flex gap-3"><button onClick={resetGame} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" title="Reset session" aria-label="Reset drill session"><RefreshCw className="w-5 h-5" /></button><button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle dark mode">{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button><button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle drill area theme"><Eye className="w-5 h-5" /></button><button onClick={() => setSoundEnabled(!soundEnabled)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle sound">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button><button onClick={toggleFullscreen} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Exit fullscreen"><Minimize2 className="w-5 h-5" /></button></div>)}
@@ -175,13 +488,13 @@ export default function ArithmeticRaceClient() {
 
             {gameState === 'playing' && (<div className="w-full max-w-2xl"><div className={`text-4xl sm:text-5xl md:text-7xl font-bold text-center mb-6 sm:mb-8 ${isBoxDarkMode ? 'text-white' : 'text-gray-900'}`}>{currentProblem.query} = ?</div><div className="grid grid-cols-2 gap-3 sm:gap-4" role="radiogroup" aria-label="Answer options">{currentProblem.options.map((option, index) => { const isSelected = selectedOption === option; const isCorrect = option === currentProblem.answer; const keyNum = index + 1; let bc = `p-4 sm:p-6 rounded-2xl text-xl sm:text-2xl md:text-3xl font-bold transition-all relative `; if (isSelected || (showCorrectAnswer && isCorrect)) { if (isSelected && !isCorrect) bc += 'bg-red-500 text-white scale-95 shadow-lg'; else if (isCorrect && showCorrectAnswer) bc += 'bg-green-500 text-white scale-105 shadow-lg ring-2 ring-green-300'; else if (isSelected && isCorrect) bc += 'bg-green-500 text-white scale-105 shadow-lg ring-2 ring-green-300'; } else { bc += isBoxDarkMode ? 'bg-gray-800 text-white hover:bg-gray-700 border border-gray-700' : 'bg-gray-100 text-gray-900 hover:bg-gray-200 border border-gray-200'; bc += canSelect && selectedOption === null ? ' hover:scale-105 hover:shadow-lg cursor-pointer active:scale-[0.98]' : ' opacity-60 cursor-not-allowed'; } return (<button key={index} onClick={() => canSelect && selectedOption === null && handleOptionSelect(option)} disabled={!canSelect || selectedOption !== null} className={bc} aria-label={`Option ${keyNum}: ${option}`}><span className="absolute top-2 left-3 text-xs opacity-50 font-mono">{keyNum}</span>{option}</button>); })}</div><p className={`text-center mt-4 text-xs ${isBoxDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Press 1-4 keys to answer faster</p></div>)}
 
-            {gameState === 'gameOver' && (<div className={`absolute inset-0 flex items-center justify-center backdrop-blur-sm rounded-xl z-40 ${isBoxDarkMode ? 'bg-gray-900/95' : 'bg-white/95'}`}><div className={`rounded-2xl p-6 sm:p-8 shadow-xl border w-full max-w-[480px] mx-4 ${isBoxDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}><div className="flex items-center justify-center gap-3 mb-4"><Timer className="w-10 h-10 text-orange-500" aria-hidden="true" /><h2 className={`text-2xl font-bold ${isBoxDarkMode ? 'text-white' : 'text-gray-900'}`}>Time&apos;s Up!</h2></div><p className={`text-center text-sm mb-6 ${isBoxDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Keep practicing to improve your mental math speed for competitive exams and daily calculations.</p><div className="grid grid-cols-2 gap-3 mb-6"><ResultCard label="Final Score" value={score.toFixed(1)} icon={<Target className="w-4 h-4" />} color="yellow" isDark={isBoxDarkMode} /><ResultCard label="Best Score" value={bestScore.toFixed(1)} icon={<Trophy className="w-4 h-4" />} color="yellow" isDark={isBoxDarkMode} /><ResultCard label="Accuracy" value={getAccuracy()} unit="%" icon={<BarChart3 className="w-4 h-4" />} color="purple" isDark={isBoxDarkMode} /><ResultCard label="Solved" value={solvedCount} icon={<CheckCircle2 className="w-4 h-4" />} color="emerald" isDark={isBoxDarkMode} /><ResultCard label="Errors" value={errorCount} icon={<XCircle className="w-4 h-4" />} color="red" isDark={isBoxDarkMode} /><ResultCard label="Lives Left" value={lives} icon={<Heart className="w-4 h-4" />} color="red" isDark={isBoxDarkMode} /><ResultCard label="Max Combo" value={`${combo}x`} icon={<Zap className="w-4 h-4" />} color="orange" isDark={isBoxDarkMode} /><ResultCard label="Difficulty" value={difficulty} icon={<Hash className="w-4 h-4" />} color="cyan" isDark={isBoxDarkMode} /></div><div className="flex gap-3"><Link href="/drills/academic" className="flex-1"><button className={`w-full px-4 py-2.5 rounded-lg font-semibold transition-all ${isDarkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>← Back to Drills</button></Link><button onClick={startGame} className="flex-1 px-4 py-2.5 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2">Play Again →</button></div></div></div>)}
+            {gameState === 'gameOver' && (<div className={`absolute inset-0 flex items-center justify-center backdrop-blur-sm rounded-xl z-40 ${isBoxDarkMode ? 'bg-gray-900/95' : 'bg-white/95'}`}><div className={`rounded-2xl p-6 sm:p-8 shadow-xl border w-full max-w-[480px] mx-4 ${isBoxDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}><div className="flex items-center justify-center gap-3 mb-4"><Timer className="w-10 h-10 text-orange-500" aria-hidden="true" /><h2 className={`text-2xl font-bold ${isBoxDarkMode ? 'text-white' : 'text-gray-900'}`}>Time&apos;s Up!</h2></div><p className={`text-center text-sm mb-6 ${isBoxDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Keep practicing to improve your mental math speed for competitive exams and daily calculations.</p><div className="grid grid-cols-2 gap-3 mb-6"><ResultCard label="Final Score" value={score} icon={<Target className="w-4 h-4" />} color="yellow" isDark={isBoxDarkMode} /><ResultCard label="Best Score" value={bestScore} icon={<Trophy className="w-4 h-4" />} color="yellow" isDark={isBoxDarkMode} /><ResultCard label="Accuracy" value={getAccuracy()} unit="%" icon={<BarChart3 className="w-4 h-4" />} color="purple" isDark={isBoxDarkMode} /><ResultCard label="Solved" value={solvedCount} icon={<CheckCircle2 className="w-4 h-4" />} color="emerald" isDark={isBoxDarkMode} /><ResultCard label="Errors" value={errorCount} icon={<XCircle className="w-4 h-4" />} color="red" isDark={isBoxDarkMode} /><ResultCard label="Lives Left" value={lives} icon={<Heart className="w-4 h-4" />} color="red" isDark={isBoxDarkMode} /><ResultCard label="Max Combo" value={`${combo}x`} icon={<Zap className="w-4 h-4" />} color="orange" isDark={isBoxDarkMode} /><ResultCard label="Difficulty" value={difficulty} icon={<Hash className="w-4 h-4" />} color="cyan" isDark={isBoxDarkMode} /></div><div className="flex gap-3"><Link href="/drills/academic" className="flex-1"><button className={`w-full px-4 py-2.5 rounded-lg font-semibold transition-all ${isDarkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>← Back to Drills</button></Link><button onClick={startGame} className="flex-1 px-4 py-2.5 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2">Play Again →</button></div></div></div>)}
           </div>
         </div>
 
         {!isFullscreen && (<footer className="mt-6" aria-label="Drill rules and scoring information"><div className={`rounded-xl border overflow-hidden ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}><div className={`px-4 py-3 border-b ${isDarkMode ? 'border-gray-700 bg-gray-800/50' : 'border-gray-200 bg-gray-50'}`}><div className="flex items-center gap-2"><Info className={`w-4 h-4 ${isDarkMode ? 'text-orange-400' : 'text-orange-600'}`} aria-hidden="true" /><h2 className={`font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Drill Rules & Scoring</h2></div></div><div className="p-4"><div className="grid grid-cols-1 md:grid-cols-2 gap-4"><div className="space-y-3"><div className="flex items-start gap-2"><div className="w-5 h-5 rounded-full bg-orange-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">1</div><p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Choose from <span className="font-semibold text-orange-500">4 options</span> - one chance per problem</p></div><div className="flex items-start gap-2"><div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">2</div><p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Correct: <span className="font-semibold text-green-500">+{getPointsForCorrect()}pt</span></p></div><div className="flex items-start gap-2"><div className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">3</div><p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Wrong: <span className="font-semibold text-red-500">-1 life first, then -{getPenaltyPoints()}pt</span></p></div></div><div className="space-y-3"><div className="flex items-start gap-2"><div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">4</div><p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Every 3 correct = <span className="font-semibold text-blue-500">Combo notification</span></p></div><div className="flex items-start gap-2"><div className="w-5 h-5 rounded-full bg-yellow-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">5</div><p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Keyboard shortcuts: <span className="font-semibold text-yellow-500">Press 1-4 to answer</span></p></div><div className="flex items-start gap-2"><div className="w-5 h-5 rounded-full bg-purple-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">6</div><p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Questions <span className="font-semibold text-purple-500">never repeat</span> in same session</p></div></div></div><div className={`mt-4 pt-3 border-t flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs ${isDarkMode ? 'border-gray-700 text-gray-400' : 'border-gray-200 text-gray-500'}`}><span>➕➖✖️ 3 operations • 3 difficulty modes • 60 second challenge</span><span>🏆 Score never below 0 • Best Score saves locally • Free forever</span></div></div></div></footer>)}
 
-        {/* ============ ABOUT THIS ARITHMETIC RACE DRILL ============ */}
+        {/* ABOUT THIS ARITHMETIC RACE DRILL */}
         {!isFullscreen && (
           <section className="mt-8" aria-label="About this arithmetic race drill">
             <div className={`rounded-xl border overflow-hidden ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
@@ -191,9 +504,9 @@ export default function ArithmeticRaceClient() {
               <div className="p-5">
                 <p className={`text-sm leading-relaxed mb-5 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>This free arithmetic race drill tests and improves your mental calculation speed with timed addition, subtraction, and multiplication problems. Choose from 3 difficulty levels with adaptive scoring and a 3-life protection system. Perfect for competitive exam preparation and daily brain training.</p>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
-                  <div className={`p-4 rounded-xl border ${isDarkMode ? 'bg-gray-700/50 border-gray-600' : 'bg-orange-50 border-orange-100'}`}><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-orange-500 flex items-center justify-center"><GraduationCap className="w-4 h-4 text-white" /></div><h3 className={`text-sm font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Who It's For</h3></div><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Students, competitive exam aspirants (SAT, GRE, GMAT, CAT, UPSC, SSC, banking), and anyone wanting faster mental math skills.</p></div>
+                  <div className={`p-4 rounded-xl border ${isDarkMode ? 'bg-gray-700/50 border-gray-600' : 'bg-orange-50 border-orange-100'}`}><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-orange-500 flex items-center justify-center"><GraduationCap className="w-4 h-4 text-white" /></div><h3 className={`text-sm font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Who It&apos;s For</h3></div><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Students, competitive exam aspirants (SAT, GRE, GMAT, CAT, UPSC, SSC, banking), and anyone wanting faster mental math skills.</p></div>
                   <div className={`p-4 rounded-xl border ${isDarkMode ? 'bg-gray-700/50 border-gray-600' : 'bg-green-50 border-green-100'}`}><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-green-500 flex items-center justify-center"><TrendingUp className="w-4 h-4 text-white" /></div><h3 className={`text-sm font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Skills Improved</h3></div><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Mental addition, subtraction, multiplication, calculation speed, numerical accuracy, and quick decision-making.</p></div>
-                  <div className={`p-4 rounded-xl border ${isDarkMode ? 'bg-gray-700/50 border-gray-600' : 'bg-purple-50 border-purple-100'}`}><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-purple-500 flex items-center justify-center"><BarChart3 className="w-4 h-4 text-white" /></div><h3 className={`text-sm font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>What You'll Track</h3></div><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Score, accuracy, combo streaks, lives remaining, and best performance across all difficulty levels.</p></div>
+                  <div className={`p-4 rounded-xl border ${isDarkMode ? 'bg-gray-700/50 border-gray-600' : 'bg-purple-50 border-purple-100'}`}><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-purple-500 flex items-center justify-center"><BarChart3 className="w-4 h-4 text-white" /></div><h3 className={`text-sm font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>What You&apos;ll Track</h3></div><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Score, accuracy, combo streaks, lives remaining, and best performance across all difficulty levels.</p></div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className={`p-4 rounded-xl border ${isDarkMode ? 'bg-gray-700/50 border-gray-600' : 'bg-yellow-50 border-yellow-100'}`}><div className="flex items-center gap-2 mb-3"><div className="w-8 h-8 rounded-lg bg-yellow-500 flex items-center justify-center"><Lightbulb className="w-4 h-4 text-white" /></div><h3 className={`text-sm font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Why Practice Mental Math?</h3></div><ul className={`text-xs space-y-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}><li className="flex items-start gap-2"><CheckCircle2 className="w-3 h-3 text-yellow-500 mt-0.5 flex-shrink-0" /> Essential for quantitative sections of competitive exams</li><li className="flex items-start gap-2"><CheckCircle2 className="w-3 h-3 text-yellow-500 mt-0.5 flex-shrink-0" /> Improves daily calculation speed for shopping and budgeting</li><li className="flex items-start gap-2"><CheckCircle2 className="w-3 h-3 text-yellow-500 mt-0.5 flex-shrink-0" /> Builds number sense and mathematical confidence</li></ul></div>
@@ -204,7 +517,7 @@ export default function ArithmeticRaceClient() {
           </section>
         )}
 
-        {/* ============ RELATED DRILLS - WELL DESIGNED ============ */}
+        {/* RELATED DRILLS */}
         {!isFullscreen && (
           <section className="mt-8" aria-label="Related training drills and resources">
             <div className="flex items-center gap-2 mb-4"><div className="w-1 h-6 rounded-full bg-gradient-to-b from-orange-500 to-red-600"></div><h2 className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Explore Related Free Drills</h2><span className={`text-xs px-2 py-0.5 rounded-full ${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>8 drills</span></div>
