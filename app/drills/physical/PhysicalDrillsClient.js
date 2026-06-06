@@ -1,20 +1,149 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { 
   ArrowLeft, Clock, Zap, Star, Play, Dumbbell, Target, 
   Activity, Eye, Hand, TrendingUp, Battery, Gauge, 
   GitBranch, Timer, BarChart3, Award, Heart, Brain,
-  Home, ChevronRight
+  Home, ChevronRight, Cpu, Sparkles
 } from 'lucide-react';
 
 export default function PhysicalDrillsClient() {
   const [isClient, setIsClient] = useState(false);
 
+  // Directional Key reflex widget state
+  const [activeDir, setActiveDir] = useState(null); // 'UP', 'DOWN', 'LEFT', 'RIGHT'
+  const [calibState, setCalibState] = useState("idle"); // idle, running, finished
+  const [score, setScore] = useState(0);
+  const [attempts, setAttempts] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(10);
+  const timerRef = useRef(null);
+  const canvasRef = useRef(null);
+
   useEffect(() => {
     setIsClient(true);
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
   }, []);
+
+  // Energy speed pulses background animation
+  useEffect(() => {
+    if (!isClient) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    let animationFrameId;
+
+    const resize = () => {
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+    };
+    resize();
+    window.addEventListener("resize", resize);
+
+    const streams = [];
+    const count = 20;
+    for (let i = 0; i < count; i++) {
+      streams.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        length: Math.random() * 80 + 40,
+        speed: Math.random() * 3 + 2,
+        opacity: Math.random() * 0.15 + 0.05
+      });
+    }
+
+    const draw = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      streams.forEach((s) => {
+        ctx.strokeStyle = `rgba(249, 115, 22, ${s.opacity})`;
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(s.x, s.y);
+        ctx.lineTo(s.x + s.length, s.y + s.length * 0.5); // diagonal speed line
+        ctx.stroke();
+
+        s.x += s.speed;
+        s.y += s.speed * 0.5;
+
+        if (s.x > canvas.width || s.y > canvas.height) {
+          s.x = -s.length;
+          s.y = Math.random() * canvas.height - s.length;
+        }
+      });
+
+      animationFrameId = requestAnimationFrame(draw);
+    };
+    draw();
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+      window.removeEventListener("resize", resize);
+    };
+  }, [isClient]);
+
+  const startReflexTest = () => {
+    setCalibState("running");
+    setScore(0);
+    setAttempts(0);
+    setTimeLeft(10);
+    pickDirection();
+
+    if (timerRef.current) clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(timerRef.current);
+          setCalibState("finished");
+          setActiveDir(null);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
+  const pickDirection = () => {
+    const dirs = ['UP', 'DOWN', 'LEFT', 'RIGHT'];
+    const rand = dirs[Math.floor(Math.random() * dirs.length)];
+    setActiveDir(rand);
+  };
+
+  // Keyboard handler for arrow keys
+  useEffect(() => {
+    if (calibState !== "running") return;
+
+    const handleKeyDown = (e) => {
+      let pressed = null;
+      if (e.key === "ArrowUp" || e.key === "w" || e.key === "W") pressed = 'UP';
+      else if (e.key === "ArrowDown" || e.key === "s" || e.key === "S") pressed = 'DOWN';
+      else if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") pressed = 'LEFT';
+      else if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") pressed = 'RIGHT';
+
+      if (pressed) {
+        setAttempts((prev) => prev + 1);
+        if (pressed === activeDir) {
+          setScore((prev) => prev + 1);
+          pickDirection();
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [calibState, activeDir]);
+
+  const handleArrowClick = (dir) => {
+    if (calibState !== "running") return;
+    setAttempts((prev) => prev + 1);
+    if (dir === activeDir) {
+      setScore((prev) => prev + 1);
+      pickDirection();
+    }
+  };
 
   // Categories with exact folder names
   const categories = [
@@ -23,8 +152,8 @@ export default function PhysicalDrillsClient() {
       folderName: 'Balance-Training',
       icon: Activity,
       color: 'purple',
-      bgColor: 'bg-purple-50',
-      textColor: 'text-purple-600',
+      bgColor: 'bg-purple-500/10 border-purple-500/20 text-purple-400',
+      textColor: 'text-purple-400',
       description: 'Improve stability, equilibrium, and motor control',
       drills: [
         { name: 'Dynamic Balance Elite', folderName: 'dynamic-balance', difficulty: 'Hard', duration: '60s', description: 'Track a Lissajous-trajectory target with cursor for sustained tracking points' },
@@ -37,8 +166,8 @@ export default function PhysicalDrillsClient() {
       folderName: 'Reflex-Training',
       icon: Zap,
       color: 'yellow',
-      bgColor: 'bg-yellow-50',
-      textColor: 'text-yellow-600',
+      bgColor: 'bg-yellow-500/10 border-yellow-500/20 text-yellow-400',
+      textColor: 'text-yellow-400',
       description: 'Enhance reaction speed, evasion, and impulse control',
       drills: [
         { name: 'Drop Catch', folderName: 'drop-catch', difficulty: 'Easy', duration: '60s', description: 'Catch green falling balls while avoiding red decoy balls with X markers' },
@@ -51,8 +180,8 @@ export default function PhysicalDrillsClient() {
       folderName: 'Coordination',
       icon: Hand,
       color: 'green',
-      bgColor: 'bg-green-50',
-      textColor: 'text-green-600',
+      bgColor: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400',
+      textColor: 'text-emerald-400',
       description: 'Improve bilateral coordination and motor patterning',
       drills: [
         { name: 'Cross Body Movement', folderName: 'cross-body-movement', difficulty: 'Medium', duration: '60s', description: 'Connect nodes across screen along straight vector paths for +5 points each' },
@@ -64,8 +193,8 @@ export default function PhysicalDrillsClient() {
       folderName: 'Fitness',
       icon: Heart,
       color: 'red',
-      bgColor: 'bg-red-50',
-      textColor: 'text-red-600',
+      bgColor: 'bg-rose-500/10 border-rose-500/20 text-rose-400',
+      textColor: 'text-rose-400',
       description: 'Build agility, speed, and precision movement skills',
       drills: [
         { name: 'Agility Ladder', folderName: 'agility-ladder', difficulty: 'Medium', duration: '60s', description: 'Step rungs Left→Right→Left→Right on scrolling ladders with adaptive speed' },
@@ -77,21 +206,31 @@ export default function PhysicalDrillsClient() {
 
   const getDifficultyColor = (difficulty) => {
     switch(difficulty) {
-      case 'Easy': return 'bg-green-50 text-green-600 border-green-200';
-      case 'Medium': return 'bg-yellow-50 text-yellow-600 border-yellow-200';
-      case 'Hard': return 'bg-orange-50 text-orange-600 border-orange-200';
-      case 'Expert': return 'bg-red-50 text-red-600 border-red-200';
-      default: return 'bg-gray-100 text-gray-600 border-gray-200';
+      case 'Easy': return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+      case 'Medium': return 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20';
+      case 'Hard': return 'bg-orange-500/10 text-orange-400 border-orange-500/20';
+      case 'Expert': return 'bg-rose-500/10 text-rose-400 border-rose-500/20';
+      default: return 'bg-slate-500/10 text-slate-400 border-slate-500/20';
     }
   };
 
   const getCategoryGradient = (category) => {
     switch(category) {
-      case 'Balance Training': return 'from-purple-500 to-violet-600';
-      case 'Reflex Training': return 'from-yellow-500 to-amber-600';
-      case 'Coordination': return 'from-green-500 to-emerald-600';
-      case 'Fitness': return 'from-red-500 to-rose-600';
-      default: return 'from-red-500 to-orange-600';
+      case 'Balance Training': return 'from-purple-500 to-violet-500';
+      case 'Reflex Training': return 'from-amber-500 to-yellow-500';
+      case 'Coordination': return 'from-emerald-500 to-green-500';
+      case 'Fitness': return 'from-rose-500 to-red-500';
+      default: return 'from-orange-500 to-red-500';
+    }
+  };
+
+  const getCategoryCardBorder = (category) => {
+    switch(category) {
+      case 'Balance Training': return 'hover:border-purple-500/30 hover:shadow-[0_0_20px_rgba(168,85,247,0.15)]';
+      case 'Reflex Training': return 'hover:border-amber-500/30 hover:shadow-[0_0_20px_rgba(245,158,11,0.15)]';
+      case 'Coordination': return 'hover:border-emerald-500/30 hover:shadow-[0_0_20px_rgba(16,185,129,0.15)]';
+      case 'Fitness': return 'hover:border-rose-500/30 hover:shadow-[0_0_20px_rgba(244,63,94,0.15)]';
+      default: return 'hover:border-orange-500/30 hover:shadow-[0_0_20px_rgba(249,115,22,0.15)]';
     }
   };
 
@@ -99,254 +238,315 @@ export default function PhysicalDrillsClient() {
 
   if (!isClient) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-orange-50">
+      <div className="min-h-screen flex items-center justify-center bg-[#080d1a]">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-red-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading physical drills...</p>
+          <div className="w-16 h-16 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-orange-400 font-mono tracking-widest uppercase animate-pulse">Initializing Kinetic Core...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50">
-      {/* SEO Structured Data */}
+    <div className="min-h-screen bg-[#080d1a] text-slate-100 font-sans selection:bg-orange-500/30 selection:text-orange-300 relative overflow-hidden">
+      
+      {/* Background patterns */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-orange-900/10 via-slate-950 to-slate-950 pointer-events-none z-0" />
+      <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none z-0 opacity-30" />
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(18,24,38,0.45)_1px,_transparent_1px),_linear-gradient(90deg,_rgba(18,24,38,0.45)_1px,_transparent_1px)] bg-[size:32px_32px] pointer-events-none z-0" />
+
+      {/* SEO structured schema */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "CollectionPage",
-            "name": "Physical Training Drills - Balance, Reflex, Coordination & Fitness",
+            "name": "Physical Drills - Agility, Coordination & Balance Training",
             "url": "https://skilldrills.online/drills/physical",
-            "description": "11 free physical skill training drills covering Balance Training, Reflex Training, Coordination, and Fitness. Improve stability, reaction speed, motor control, and agility.",
-            "isPartOf": {
-              "@type": "WebSite",
-              "name": "SkillDrills",
-              "url": "https://skilldrills.online"
-            },
-            "about": {
-              "@type": "Thing",
-              "name": "Physical Skill Training"
-            },
-            "numberOfItems": totalDrills,
-            "itemListElement": categories.flatMap(cat => cat.drills).map((drill, index) => {
-              const parentCategory = categories.find(c => c.drills.includes(drill));
-              return {
-                "@type": "ListItem",
-                "position": index + 1,
-                "item": {
-                  "@type": "WebApplication",
-                  "name": drill.name,
-                  "url": `https://skilldrills.online/drills/physical/${parentCategory.folderName}/${drill.folderName}`,
-                  "description": drill.description,
-                  "applicationCategory": "HealthApplication",
-                  "operatingSystem": "Web"
-                }
-              };
-            })
+            "description": "11 free interactive physical reflex, balance, and coordination training drills. No login required.",
+            "isPartOf": { "@type": "WebSite", "name": "SkillDrills", "url": "https://skilldrills.online" },
+            "about": { "@type": "Thing", "name": "Physical Motor Training" },
+            "numberOfItems": 11,
+            "itemListElement": categories.flatMap(cat => cat.drills).map((drill, index) => ({
+              "@type": "ListItem",
+              "position": index + 1,
+              "item": {
+                "@type": "WebApplication",
+                "name": drill.name,
+                "url": `https://skilldrills.online/drills/physical/${cat.folderName.toLowerCase()}/${drill.folderName}`,
+                "description": drill.description,
+                "applicationCategory": "EducationalApplication",
+                "operatingSystem": "Web"
+              }
+            }))
           })
         }}
       />
-      
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Breadcrumb Navigation */}
-        <nav aria-label="Breadcrumb" className="mb-6">
-          <ol className="flex flex-wrap items-center gap-2 text-sm text-gray-500">
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
+        
+        {/* Breadcrumb */}
+        <nav aria-label="Breadcrumb" className="mb-8">
+          <ol className="flex items-center gap-2 text-xs font-mono text-slate-400 uppercase tracking-wider">
             <li>
-              <Link href="/" className="flex items-center gap-1 hover:text-red-600 transition-colors">
-                <Home className="w-4 h-4" />
-                <span>Home</span>
+              <Link href="/" className="flex items-center gap-1.5 hover:text-orange-400 transition-colors">
+                <Home className="w-3.5 h-3.5" />
+                <span>HQ</span>
               </Link>
             </li>
-            <li>
-              <ChevronRight className="w-4 h-4 text-gray-400" />
-            </li>
-            <li>
-              <Link href="/drills" className="hover:text-red-600 transition-colors">
-                Drills
-              </Link>
-            </li>
-            <li>
-              <ChevronRight className="w-4 h-4 text-gray-400" />
-            </li>
-            <li>
-              <span className="text-red-600 font-medium" aria-current="page">Physical Training</span>
-            </li>
+            <ChevronRight className="w-3 h-3 text-slate-600" />
+            <li><Link href="/drills" className="hover:text-orange-400 transition-colors">Drills</Link></li>
+            <ChevronRight className="w-3 h-3 text-slate-600" />
+            <li><span className="text-orange-400 font-bold" aria-current="page">Physical Sector</span></li>
           </ol>
         </nav>
 
-        {/* SEO Content */}
-        <section className="sr-only" aria-label="Physical drills overview">
-          <h2>Physical Training Drills Overview</h2>
-          <p>
-            Access 11 free physical skill training drills across 4 categories.
-            Balance Training: Dynamic Balance Elite, Single Leg Hold, and Stability Challenge for equilibrium and motor control.
-            Reflex Training: Drop Catch, Quick Dodge, and Kinetic Arrest for reaction speed and impulse control.
-            Coordination: Cross Body Movement and Complex Pattern for bilateral coordination and motor patterning.
-            Fitness: Agility Ladder, Jump Sequence, and Speed Drill for agility, precision, and speed.
-            All drills are free with no login required. Track your progress and best scores saved locally.
-          </p>
-        </section>
-
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-gradient-to-r from-red-500 to-orange-600 rounded-xl">
-              <Dumbbell className="w-6 h-6 text-white" />
+        <div className="mb-10 bg-slate-900/80 border border-slate-800 rounded-2xl p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden backdrop-blur-xl">
+          <div className="absolute inset-0 bg-gradient-to-r from-orange-500/5 to-transparent pointer-events-none" />
+          <div className="flex items-start gap-4">
+            <div className="p-4 bg-orange-500/10 border border-orange-500/20 rounded-2xl text-orange-400 shadow-inner shrink-0">
+              <Dumbbell className="w-8 h-8 text-orange-400" />
             </div>
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Physical Drills</h1>
-              <p className="text-gray-500 mt-1 text-sm sm:text-base">Train your balance, reflexes, coordination, and fitness with 11 free drills</p>
+              <div className="inline-flex items-center gap-1.5 bg-orange-500/15 border border-orange-500/30 text-orange-300 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider mb-2">
+                <Activity className="w-3 h-3 animate-pulse" />
+                KINETIC REFLEX HQ
+              </div>
+              <h1 className="text-3xl font-extrabold text-white tracking-tight mt-1 bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">Physical Sector</h1>
+              <p className="text-slate-400 mt-2 text-sm sm:text-base max-w-xl leading-relaxed">
+                Tune gross and fine motor coordination, reflex evasion speeds, and static balance stability margins.
+              </p>
             </div>
+          </div>
+          <div className="flex flex-wrap gap-2 self-start md:self-center">
+            <span className="px-2.5 py-1 bg-slate-950 border border-slate-800 text-slate-300 rounded-md text-xs font-mono font-semibold">⚡ REFLEX_MS</span>
+            <span className="px-2.5 py-1 bg-slate-950 border border-slate-800 text-slate-300 rounded-md text-xs font-mono font-semibold">🏃 AGILITY</span>
           </div>
         </div>
 
-        {/* Category Tags */}
-        <div className="flex flex-wrap gap-2 mb-8">
-          <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">⚖️ Balance Training</span>
-          <span className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-medium">⚡ Reflex Training</span>
-          <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">🤝 Coordination</span>
-          <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-medium">💪 Fitness</span>
-        </div>
+        {/* Telemetry Widgets */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+          
+          <div className="bg-slate-950/80 border border-slate-800 rounded-2xl p-6 flex flex-col justify-between text-center lg:text-left backdrop-blur-md">
+            <div>
+              <div className="flex items-center justify-between mb-4 border-b border-slate-900 pb-3">
+                <span className="text-xs font-mono font-bold uppercase text-slate-400 tracking-widest">DRILS_LINKED</span>
+                <Cpu className="w-4 h-4 text-orange-400" />
+              </div>
+              <p className="text-4xl font-extrabold text-white tracking-tight">{totalDrills}</p>
+              <p className="text-[10px] text-slate-500 font-mono uppercase tracking-widest mt-1">Calibrators Loaded</p>
+            </div>
+            <div className="mt-4 pt-4 border-t border-slate-900 text-xs text-slate-400 leading-relaxed font-mono">
+              Key directional inputs measure somatic reflex times and track trajectory deviations in milliseconds.
+            </div>
+          </div>
 
-        {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-center">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-sm text-gray-500">Available Drills</p>
-              <Target className="w-4 h-4 text-green-500" />
+          {/* Arrow Key Reflex Response calibrator widget */}
+          <div className="lg:col-span-2 bg-slate-950/80 border border-slate-800 rounded-2xl p-6 relative overflow-hidden flex flex-col justify-between backdrop-blur-md">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/5 blur-3xl rounded-full pointer-events-none" />
+            <div className="flex items-center justify-between mb-3 text-orange-400 border-b border-slate-900 pb-3">
+              <div className="flex items-center gap-2">
+                <Zap className="w-5 h-5 animate-pulse" />
+                <h3 className="text-sm font-bold uppercase tracking-wider text-white">Arrow Key Reflex Response Calibrator</h3>
+              </div>
+              <span className="text-[10px] text-slate-500 font-mono">TIMER: {timeLeft}s</span>
             </div>
-            <p className="text-2xl font-bold text-gray-900">{totalDrills}</p>
-            <p className="text-xs text-gray-500 mt-1">Ready to train</p>
-          </div>
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-center">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-sm text-gray-500">Categories</p>
-              <Dumbbell className="w-4 h-4 text-red-500" />
+
+            <div className="flex flex-col sm:flex-row gap-6 items-center">
+              <div className="grid grid-cols-3 grid-rows-3 gap-2 w-28 h-28 shrink-0">
+                <div />
+                <button 
+                  onClick={() => handleArrowClick('UP')}
+                  className={`border font-mono font-bold text-xs rounded flex items-center justify-center transition
+                    ${activeDir === 'UP' ? 'bg-orange-500 border-orange-400 text-slate-950 shadow-[0_0_15px_rgba(249,115,22,0.6)]' : 'bg-slate-950 border-slate-800 text-slate-600'}
+                  `}
+                >
+                  ↑
+                </button>
+                <div />
+                
+                <button 
+                  onClick={() => handleArrowClick('LEFT')}
+                  className={`border font-mono font-bold text-xs rounded flex items-center justify-center transition
+                    ${activeDir === 'LEFT' ? 'bg-orange-500 border-orange-400 text-slate-950 shadow-[0_0_15px_rgba(249,115,22,0.6)]' : 'bg-slate-950 border-slate-800 text-slate-600'}
+                  `}
+                >
+                  ←
+                </button>
+                <button 
+                  onClick={() => handleArrowClick('DOWN')}
+                  className={`border font-mono font-bold text-xs rounded flex items-center justify-center transition
+                    ${activeDir === 'DOWN' ? 'bg-orange-500 border-orange-400 text-slate-950 shadow-[0_0_15px_rgba(249,115,22,0.6)]' : 'bg-slate-950 border-slate-800 text-slate-600'}
+                  `}
+                >
+                  ↓
+                </button>
+                <button 
+                  onClick={() => handleArrowClick('RIGHT')}
+                  className={`border font-mono font-bold text-xs rounded flex items-center justify-center transition
+                    ${activeDir === 'RIGHT' ? 'bg-orange-500 border-orange-400 text-slate-950 shadow-[0_0_15px_rgba(249,115,22,0.6)]' : 'bg-slate-950 border-slate-800 text-slate-600'}
+                  `}
+                >
+                  →
+                </button>
+              </div>
+
+              <div className="flex-1 text-center sm:text-left space-y-3">
+                <p className="text-xs text-slate-400">
+                  Tap the glowing arrow key on your keyboard (WASD / Arrows) or screen as fast as possible.
+                </p>
+
+                {calibState === "idle" && (
+                  <button 
+                    onClick={startReflexTest}
+                    className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white font-mono text-xs uppercase tracking-wider font-bold px-5 py-2.5 rounded-lg transition shadow-[0_0_15px_rgba(249,115,22,0.3)]"
+                  >
+                    Engage Reflex Check
+                  </button>
+                )}
+
+                {calibState === "running" && (
+                  <div className="font-mono text-xs text-slate-300">
+                    HITS: <span className="text-orange-400 font-extrabold">{score}</span> // ACC: <span className="text-orange-400 font-extrabold">{attempts > 0 ? Math.round((score / attempts) * 100) : 100}%</span>
+                  </div>
+                )}
+
+                {calibState === "finished" && (
+                  <div className="space-y-2">
+                    <p className="text-emerald-400 font-mono text-xs uppercase tracking-widest">CALIBRATION COMPLETE</p>
+                    <p className="text-xs text-slate-300">Total hits: {score} // Accuracy: {attempts > 0 ? Math.round((score / attempts) * 100) : 0}%</p>
+                    <button 
+                      onClick={startReflexTest}
+                      className="bg-slate-900 border border-slate-800 text-slate-200 hover:text-white font-mono text-[10px] uppercase tracking-wider px-4 py-2 rounded-lg transition"
+                    >
+                      RESTART
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
-            <p className="text-2xl font-bold text-gray-900">{categories.length}</p>
-            <p className="text-xs text-gray-500 mt-1">Fitness areas</p>
-          </div>
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-center">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-sm text-gray-500">Free Access</p>
-              <Star className="w-4 h-4 text-yellow-500" />
-            </div>
-            <p className="text-2xl font-bold text-gray-900">100%</p>
-            <p className="text-xs text-gray-500 mt-1">No login required</p>
           </div>
         </div>
 
         {/* Drills Grid by Category */}
         {categories.map((category) => {
-          const CategoryIcon = category.icon;
-          
+          const categoryDrills = category.drills;
+          const styles = getCategoryCardBorder(category.name);
+          const gradient = getCategoryGradient(category.name);
+          const Icon = category.icon;
+
           return (
-            <div key={category.name} className="mb-12">
-              <div className="flex items-center gap-2 mb-4">
-                <div className={`w-1 h-6 rounded-full bg-gradient-to-b ${getCategoryGradient(category.name)}`}></div>
-                <h2 className="text-xl font-bold text-gray-900">{category.name}</h2>
-                <span className="text-xs text-gray-400">({category.drills.length} drills)</span>
-              </div>
+            <div key={category.name} className="mb-14 relative">
               
+              <div className="flex items-center gap-2 mb-6 border-b border-slate-900 pb-3">
+                <div className={`w-1 h-6 rounded-full bg-gradient-to-b ${gradient}`} />
+                <h2 className="text-lg font-bold uppercase tracking-wider text-white font-mono">{category.name}</h2>
+                <span className="px-2 py-0.5 text-[10px] font-mono rounded bg-slate-900 border border-slate-800 text-slate-500">
+                  {categoryDrills.length} DRILL{categoryDrills.length > 1 ? 'S' : ''}
+                </span>
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {category.drills.map((drill, index) => {
-                  const drillPath = `/drills/physical/${category.folderName}/${drill.folderName}`;
-                  
-                  return (
-                    <Link
-                      key={index}
-                      href={drillPath}
-                      className="group bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-200 hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-                      aria-label={`${drill.name} - ${drill.description}. Difficulty: ${drill.difficulty}. Duration: ${drill.duration}.`}
-                    >
-                      <div className="p-6">
-                        <div className="flex items-start justify-between mb-4">
-                          <div className={`p-2 rounded-lg ${category.bgColor}`}>
-                            <CategoryIcon className={`w-5 h-5 ${category.textColor}`} />
-                          </div>
-                          <div className={`px-2 py-1 rounded-full text-xs font-medium border ${getDifficultyColor(drill.difficulty)}`}>
-                            {drill.difficulty}
-                          </div>
+                {categoryDrills.map((drill, index) => (
+                  <Link 
+                    key={index} 
+                    href={`/drills/physical/${category.folderName.toLowerCase()}/${drill.folderName}`} 
+                    className={`group relative overflow-hidden bg-slate-950/80 border border-slate-900 transition-all duration-300 hover:-translate-y-1 focus:outline-none focus:ring-1 focus:ring-orange-500/50 ${styles}`}
+                    aria-label={`${drill.name} - ${drill.description}. Difficulty: ${drill.difficulty}. Duration: ${drill.duration}.`}
+                  >
+                    <div className="p-6">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className={`p-2.5 rounded-lg border ${category.bgColor}`}>
+                          <Icon className="w-5 h-5" />
                         </div>
-                        
-                        <h3 className={`text-lg font-semibold text-gray-900 mb-2 group-hover:text-${category.color === 'purple' ? 'purple' : category.color === 'yellow' ? 'amber' : category.color === 'green' ? 'green' : 'red'}-600 transition-colors`}>
-                          {drill.name}
-                        </h3>
-                        <p className="text-sm text-gray-500 mb-4 leading-relaxed">{drill.description}</p>
-                        
-                        <div className="flex items-center gap-4 mb-4 text-sm text-gray-500">
-                          <div className="flex items-center gap-1">
-                            <Clock className="w-3 h-3" />
-                            <span>{drill.duration}</span>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center justify-between pt-2 border-t border-gray-100">
-                          <span className="text-xs text-gray-400">{category.name}</span>
-                          <div className={`flex items-center gap-1 text-${category.color === 'purple' ? 'purple' : category.color === 'yellow' ? 'amber' : category.color === 'green' ? 'green' : 'red'}-600 group-hover:gap-2 transition-all`}>
-                            <span className="text-sm font-medium">Start Drill</span>
-                            <Play className="w-4 h-4" />
-                          </div>
+                        <div className={`px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold tracking-wide border uppercase ${getDifficultyColor(drill.difficulty)}`}>
+                          {drill.difficulty}
                         </div>
                       </div>
-                    </Link>
-                  );
-                })}
+                      
+                      <h3 className="text-base font-bold text-white mb-2 group-hover:text-orange-400 transition-colors uppercase tracking-tight font-mono">
+                        {drill.name}
+                      </h3>
+                      
+                      <p className="text-xs text-slate-400 mb-4 leading-relaxed min-h-[48px]">
+                        {drill.description}
+                      </p>
+                      
+                      <div className="flex items-center gap-4 mb-4 text-[10px] font-mono text-slate-500 border-b border-slate-900 pb-3">
+                        <div className="flex items-center gap-1">
+                          <Clock className="w-3.5 h-3.5" />
+                          <span>{drill.duration}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Cpu className="w-3.5 h-3.5" />
+                          <span>Physical Loop</span>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">{category.name}</span>
+                        <div className="flex items-center gap-1 text-orange-400 group-hover:gap-2 transition-all font-bold text-xs uppercase tracking-widest font-mono">
+                          <span>EXEC_DRILL</span>
+                          <Play className="w-3.5 h-3.5 fill-current" />
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
               </div>
             </div>
           );
         })}
 
-        {/* Tips Section */}
-        <div className="bg-gradient-to-r from-red-600 to-orange-600 rounded-2xl p-8 mt-8 text-white">
-          <h3 className="text-2xl font-bold mb-4 flex items-center gap-2">
-            <Dumbbell className="w-6 h-6" />
-            Physical Training Tips
+        {/* Benefits Grid */}
+        <div className="bg-slate-950/80 border border-slate-800 rounded-2xl p-8 mt-12 relative overflow-hidden backdrop-blur-md">
+          <div className="absolute top-0 right-0 w-80 h-80 bg-orange-500/5 rounded-full blur-3xl pointer-events-none" />
+          <h3 className="text-lg font-bold uppercase tracking-wider text-white mb-6 flex items-center gap-2 font-mono">
+            <Sparkles className="w-5 h-5 text-orange-400" />
+            PHYSICAL PERFORMANCE IMPROVEMENT VECTORS
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-              <h4 className="font-semibold mb-2">Warm Up First</h4>
-              <p className="text-sm text-orange-100">Always perform light stretching and warm-up exercises before starting any physical drill.</p>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-2">Proper Form</h4>
-              <p className="text-sm text-orange-100">Focus on maintaining correct posture and form to prevent injury and maximize benefits.</p>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-2">Stay Hydrated</h4>
-              <p className="text-sm text-orange-100">Drink water before, during, and after your training sessions for optimal performance.</p>
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 font-sans">
+            {[
+              { emoji: "🧎", title: "Balance Stability", desc: "Sharpen ciliary muscular equilibrium and static stability coefficients." },
+              { emoji: "⚡", title: "Reflex Velocity", desc: "Compress reaction time delay in high-speed Dodge/Catch intervals." },
+              { emoji: "🌀", title: "Motor Patterning", desc: "Construct durable motor tracing pathways across complex coordinate grids." },
+              { emoji: "🏃", title: "Agility Cadence", desc: "Train bilateral coordination sequencing under high velocity metrics." }
+            ].map((benefit, i) => (
+              <div key={i} className="bg-slate-900/30 border border-slate-900 hover:border-slate-800 transition rounded-xl p-5">
+                <h4 className="font-bold text-orange-400 mb-2 flex items-center gap-2 uppercase text-xs tracking-wider font-mono">
+                  <span className="text-sm">{benefit.emoji}</span>{benefit.title}
+                </h4>
+                <p className="text-xs text-slate-400 leading-relaxed">{benefit.desc}</p>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Explore Related Categories */}
-        <div className="mt-12 mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 text-center mb-8">Explore Related Categories</h2>
+        {/* Explore Related Sectors */}
+        <div className="mt-16 mb-8 border-t border-slate-900 pt-12">
+          <h2 className="text-lg font-bold tracking-widest text-center text-white font-mono uppercase mb-8">Explore Adjacent Sectors</h2>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
-            <Link href="/drills/motor" className="group bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-lg transition-all duration-200 hover:-translate-y-1 text-center focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
-              <div className="text-3xl mb-3">✋</div>
-              <h3 className="font-semibold text-gray-900 group-hover:text-green-600 transition">Motor Skills</h3>
-              <p className="text-xs text-gray-500 mt-1">Hand-eye coordination & precision control</p>
-            </Link>
-            <Link href="/drills/mental-fitness" className="group bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-lg transition-all duration-200 hover:-translate-y-1 text-center focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2">
-              <div className="text-3xl mb-3">🧘</div>
-              <h3 className="font-semibold text-gray-900 group-hover:text-pink-600 transition">Mental Fitness</h3>
-              <p className="text-xs text-gray-500 mt-1">Stress control & breathing exercises</p>
-            </Link>
-            <Link href="/drills/fps" className="group bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-lg transition-all duration-200 hover:-translate-y-1 text-center focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
-              <div className="text-3xl mb-3">🎮</div>
-              <h3 className="font-semibold text-gray-900 group-hover:text-red-600 transition">FPS Training</h3>
-              <p className="text-xs text-gray-500 mt-1">Aim trainer, reflex & tracking drills</p>
-            </Link>
-            <Link href="/drills/cognitive" className="group bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-lg transition-all duration-200 hover:-translate-y-1 text-center focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2">
-              <div className="text-3xl mb-3">🧠</div>
-              <h3 className="font-semibold text-gray-900 group-hover:text-purple-600 transition">Cognitive Training</h3>
-              <p className="text-xs text-gray-500 mt-1">Memory, focus & problem solving</p>
-            </Link>
+            {[
+              { href: "/drills/cognitive", emoji: "🧠", title: "Cognitive Sector", desc: "Focus & reaction speed" },
+              { href: "/drills/productivity", emoji: "⏱️", title: "Productivity", desc: "Pomodoro focus timelines" },
+              { href: "/drills/memory", emoji: "💾", title: "Memory Sector", desc: "Sequence span tests" },
+              { href: "/drills/fps", emoji: "🎮", title: "Tactical Aim", desc: "Aim Flick & Smooth Pursuit" }
+            ].map((link, i) => (
+              <Link 
+                key={i} 
+                href={link.href} 
+                className="group bg-slate-950/80 border border-slate-900 rounded-xl p-5 hover:border-orange-500/40 hover:shadow-[0_0_20px_rgba(249,115,22,0.05)] transition-all duration-200 hover:-translate-y-1 text-center"
+              >
+                <div className="text-2xl mb-2">{link.emoji}</div>
+                <h3 className="font-bold text-slate-200 group-hover:text-orange-400 transition-colors uppercase text-xs tracking-wider font-mono">{link.title}</h3>
+                <p className="text-[10px] text-slate-500 uppercase mt-1 font-mono">{link.desc}</p>
+              </Link>
+            ))}
           </div>
         </div>
+
       </div>
     </div>
   );

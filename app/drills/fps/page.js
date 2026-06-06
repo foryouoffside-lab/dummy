@@ -1,8 +1,8 @@
 import FPSHubClient from './FPSHubClient';
 
 export const metadata = {
-  title: 'FPS Aim Training - 22 Drills for Gamers | SkillDrills',
-  description: '22 free FPS aim training drills across 4 categories: Aim Accuracy, Tracking, Reaction Speed, and Awareness. Improve flick shots and tracking. No sign-up.',
+  title: 'FPS Aim Training - 12 Esports Drills | SkillDrills',
+  description: '12 professional FPS aim training drills across 4 categories: Precision Clicking, Tracking & Switching, Movement & Recoil, and Reflex & Awareness. Improve flick shots, tracking, and reaction times.',
   keywords: [
     'FPS aim training', 'aim trainer', 'flick shot practice', 'tracking drills',
     'free aim trainer', 'Valorant aim training', 'CS2 aim practice',
@@ -17,8 +17,8 @@ export const metadata = {
     'skilldrills FPS', 'skilldrills aim trainer',
   ],
   openGraph: {
-    title: 'FPS Aim Training - 22 Drills for Gamers | SkillDrills',
-    description: '22 free FPS aim training drills across 4 categories: Aim Accuracy, Tracking, Reaction Speed, and Awareness. Improve flick shots and tracking. No sign-up.',
+    title: 'FPS Aim Training - 12 Esports Drills | SkillDrills',
+    description: '12 professional FPS aim training drills across 4 categories: Precision Clicking, Tracking & Switching, Movement & Recoil, and Reflex & Awareness. Improve flick shots, tracking, and reaction times.',
     type: 'website',
     url: 'https://skilldrills.online/drills/fps',
     siteName: 'SkillDrills',
@@ -32,8 +32,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'FPS Aim Training - 22 Drills for Gamers | SkillDrills',
-    description: '22 free FPS aim training drills across 4 categories: Aim Accuracy, Tracking, Reaction Speed, and Awareness. Improve flick shots and tracking. No sign-up.',
+    title: 'FPS Aim Training - 12 Esports Drills | SkillDrills',
+    description: '12 professional FPS aim training drills across 4 categories: Precision Clicking, Tracking & Switching, Movement & Recoil, and Reflex & Awareness. Improve flick shots, tracking, and reaction times.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },

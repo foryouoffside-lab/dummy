@@ -2,10 +2,37 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Clock, Zap, Star, Play, Eye, Target, Activity, Home, ChevronRight } from 'lucide-react';
+import { 
+  ArrowLeft, 
+  Clock, 
+  Zap, 
+  Star, 
+  Play, 
+  Eye, 
+  Target, 
+  Activity, 
+  Home, 
+  ChevronRight, 
+  ShieldAlert, 
+  Sparkles, 
+  TrendingUp, 
+  Cpu, 
+  Crosshair,
+  Award
+} from 'lucide-react';
 
 export default function VisualDrillsClient() {
   const [isClient, setIsClient] = useState(false);
+
+  // Calibration Widget States
+  const [calibrationActive, setCalibrationActive] = useState(false);
+  const [targetPos, setTargetPos] = useState({ x: 50, y: 50 });
+  const [spawnTime, setSpawnTime] = useState(null);
+  const [reactions, setReactions] = useState([]);
+  const [targetsCleared, setTargetsCleared] = useState(0);
+  const [avgReaction, setAvgReaction] = useState(null);
+  const [saccadicScore, setSaccadicScore] = useState(null);
+  const [countdown, setCountdown] = useState(null);
 
   useEffect(() => {
     setIsClient(true);
@@ -39,57 +66,124 @@ export default function VisualDrillsClient() {
 
   const categories = ['Reaction Speed', 'Tracking Accuracy', 'Peripheral Vision', 'Visual Recognition', 'Depth Perception'];
 
-  const getDifficultyColor = (difficulty) => {
+  const getDifficultyStyles = (difficulty) => {
     switch(difficulty) {
-      case 'Beginner': return 'bg-green-50 text-green-600 border-green-200';
-      case 'Intermediate': return 'bg-yellow-50 text-yellow-600 border-yellow-200';
-      case 'Advanced': return 'bg-orange-50 text-orange-600 border-orange-200';
-      case 'Expert': return 'bg-red-50 text-red-600 border-red-200';
-      default: return 'bg-gray-100 text-gray-600 border-gray-200';
+      case 'Beginner': return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+      case 'Intermediate': return 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+      case 'Advanced': return 'bg-orange-500/10 text-orange-400 border-orange-500/20';
+      case 'Expert': return 'bg-rose-500/10 text-rose-400 border-rose-500/20';
+      default: return 'bg-slate-500/10 text-slate-400 border-slate-500/20';
     }
   };
 
-  const getCategoryGradient = (category) => {
+  const getCategoryStyles = (category) => {
     switch(category) {
-      case 'Reaction Speed': return 'from-blue-500 to-blue-600';
-      case 'Tracking Accuracy': return 'from-cyan-500 to-teal-600';
-      case 'Peripheral Vision': return 'from-indigo-500 to-purple-600';
-      case 'Visual Recognition': return 'from-violet-500 to-pink-600';
-      case 'Depth Perception': return 'from-sky-500 to-cyan-600';
-      default: return 'from-blue-500 to-cyan-600';
+      case 'Reaction Speed': return {
+        glow: 'shadow-[0_0_15px_rgba(59,130,246,0.15)] border-blue-500/30',
+        gradient: 'from-blue-500 to-indigo-600',
+        text: 'text-blue-400',
+        bg: 'bg-blue-500/10',
+        badge: 'bg-blue-500/20 text-blue-300'
+      };
+      case 'Tracking Accuracy': return {
+        glow: 'shadow-[0_0_15px_rgba(6,182,212,0.15)] border-cyan-500/30',
+        gradient: 'from-cyan-500 to-blue-600',
+        text: 'text-cyan-400',
+        bg: 'bg-cyan-500/10',
+        badge: 'bg-cyan-500/20 text-cyan-300'
+      };
+      case 'Peripheral Vision': return {
+        glow: 'shadow-[0_0_15px_rgba(168,85,247,0.15)] border-purple-500/30',
+        gradient: 'from-purple-500 to-pink-600',
+        text: 'text-purple-400',
+        bg: 'bg-purple-500/10',
+        badge: 'bg-purple-500/20 text-purple-300'
+      };
+      case 'Visual Recognition': return {
+        glow: 'shadow-[0_0_15px_rgba(236,72,153,0.15)] border-pink-500/30',
+        gradient: 'from-pink-500 to-rose-600',
+        text: 'text-pink-400',
+        bg: 'bg-pink-500/10',
+        badge: 'bg-pink-500/20 text-pink-300'
+      };
+      case 'Depth Perception': return {
+        glow: 'shadow-[0_0_15px_rgba(14,165,233,0.15)] border-sky-500/30',
+        gradient: 'from-sky-500 to-cyan-600',
+        text: 'text-sky-400',
+        bg: 'bg-sky-500/10',
+        badge: 'bg-sky-500/20 text-sky-300'
+      };
+      default: return {
+        glow: 'shadow-[0_0_15px_rgba(59,130,246,0.15)] border-blue-500/30',
+        gradient: 'from-blue-500 to-indigo-600',
+        text: 'text-blue-400',
+        bg: 'bg-blue-500/10',
+        badge: 'bg-blue-500/20 text-blue-300'
+      };
     }
   };
 
-  const getCategoryBgColor = (category) => {
-    switch(category) {
-      case 'Reaction Speed': return 'bg-blue-50';
-      case 'Tracking Accuracy': return 'bg-cyan-50';
-      case 'Peripheral Vision': return 'bg-indigo-50';
-      case 'Visual Recognition': return 'bg-violet-50';
-      case 'Depth Perception': return 'bg-sky-50';
-      default: return 'bg-blue-50';
-    }
+  // Calibration Logic
+  const startCalibration = () => {
+    setCountdown(3);
+    setReactions([]);
+    setTargetsCleared(0);
+    setAvgReaction(null);
+    setSaccadicScore(null);
   };
 
-  const getCategoryTextColor = (category) => {
-    switch(category) {
-      case 'Reaction Speed': return 'text-blue-600';
-      case 'Tracking Accuracy': return 'text-cyan-600';
-      case 'Peripheral Vision': return 'text-indigo-600';
-      case 'Visual Recognition': return 'text-violet-600';
-      case 'Depth Perception': return 'text-sky-600';
-      default: return 'text-blue-600';
+  useEffect(() => {
+    if (countdown === null) return;
+    if (countdown > 0) {
+      const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+      return () => clearTimeout(timer);
+    } else {
+      setCountdown(null);
+      setCalibrationActive(true);
+      spawnNextTarget();
     }
+  }, [countdown]);
+
+  const spawnNextTarget = () => {
+    const x = Math.floor(Math.random() * 70) + 15; // keep inside boundaries
+    const y = Math.floor(Math.random() * 70) + 15;
+    setTargetPos({ x, y });
+    setSpawnTime(performance.now());
   };
 
-  const getCategoryHoverColor = (category) => {
-    switch(category) {
-      case 'Reaction Speed': return 'group-hover:text-blue-600';
-      case 'Tracking Accuracy': return 'group-hover:text-cyan-600';
-      case 'Peripheral Vision': return 'group-hover:text-indigo-600';
-      case 'Visual Recognition': return 'group-hover:text-violet-600';
-      case 'Depth Perception': return 'group-hover:text-sky-600';
-      default: return 'group-hover:text-blue-600';
+  const handleTargetClick = (e) => {
+    if (!calibrationActive || !spawnTime) return;
+    
+    const clickTime = performance.now();
+    const latency = Math.round(clickTime - spawnTime);
+    
+    // Calculate click precision relative to the target container
+    const rect = e.currentTarget.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const clickY = e.clientY - rect.top;
+    
+    const targetXPixel = (rect.width * targetPos.x) / 100;
+    const targetYPixel = (rect.height * targetPos.y) / 100;
+    
+    const dist = Math.sqrt(Math.pow(clickX - targetXPixel, 2) + Math.pow(clickY - targetYPixel, 2));
+    
+    // Center accuracy (100% on target center, dropping to 0% at 30px off-center)
+    const accuracy = Math.max(0, Math.round(100 - (dist * 3.33)));
+    
+    const updatedReactions = [...reactions, { latency, accuracy }];
+    setReactions(updatedReactions);
+    
+    const nextCount = targetsCleared + 1;
+    setTargetsCleared(nextCount);
+    
+    if (nextCount >= 5) {
+      setCalibrationActive(false);
+      const avgLat = Math.round(updatedReactions.reduce((sum, r) => sum + r.latency, 0) / updatedReactions.length);
+      const avgAcc = Math.round(updatedReactions.reduce((sum, r) => sum + r.accuracy, 0) / updatedReactions.length);
+      setAvgReaction(avgLat);
+      setSaccadicScore(avgAcc);
+    } else {
+      spawnNextTarget();
     }
   };
 
@@ -97,17 +191,17 @@ export default function VisualDrillsClient() {
 
   if (!isClient) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-cyan-50">
+      <div className="min-h-screen flex items-center justify-center bg-[#080d1a]">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading visual drills...</p>
+          <div className="w-16 h-16 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-cyan-400 font-mono tracking-widest uppercase animate-pulse">Initializing Neural Gateway...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50">
+    <div className="min-h-screen bg-[#080d1a] text-slate-100 font-sans selection:bg-cyan-500/30">
       {/* SEO Structured Data */}
       <script
         type="application/ld+json"
@@ -129,32 +223,315 @@ export default function VisualDrillsClient() {
         }}
       />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Dynamic Cyber Grid Background */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-cyan-900/10 via-slate-950 to-slate-950 pointer-events-none z-0" />
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(18,24,38,0.4)_1px,_transparent_1px),_linear-gradient(90deg,_rgba(18,24,38,0.4)_1px,_transparent_1px)] bg-[size:32px_32px] pointer-events-none z-0" />
+
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
         {/* Breadcrumb Navigation */}
-        <nav aria-label="Breadcrumb" className="mb-6">
-          <ol className="flex items-center gap-2 text-sm text-gray-500">
-            <li><Link href="/" className="flex items-center gap-1 hover:text-blue-600 transition-colors"><Home className="w-4 h-4" /><span>Home</span></Link></li>
-            <li><ChevronRight className="w-4 h-4 text-gray-400" /></li>
-            <li><Link href="/drills" className="hover:text-blue-600 transition-colors">Drills</Link></li>
-            <li><ChevronRight className="w-4 h-4 text-gray-400" /></li>
-            <li><span className="text-blue-600 font-medium" aria-current="page">Visual Training</span></li>
+        <nav aria-label="Breadcrumb" className="mb-8">
+          <ol className="flex items-center gap-2 text-xs sm:text-sm text-slate-400 font-mono">
+            <li>
+              <Link href="/" className="flex items-center gap-1.5 hover:text-cyan-400 transition-colors">
+                <Home className="w-4 h-4" />
+                <span>HQ</span>
+              </Link>
+            </li>
+            <li><ChevronRight className="w-3.5 h-3.5 text-slate-600" /></li>
+            <li>
+              <Link href="/drills" className="hover:text-cyan-400 transition-colors">
+                DRILLS
+              </Link>
+            </li>
+            <li><ChevronRight className="w-3.5 h-3.5 text-slate-600" /></li>
+            <li>
+              <span className="text-cyan-400 font-semibold uppercase tracking-wider" aria-current="page">
+                VISUAL SYSTEM
+              </span>
+            </li>
           </ol>
         </nav>
 
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-gradient-to-r from-blue-500 to-cyan-600 rounded-xl">
-              <Eye className="w-6 h-6 text-white" />
+        {/* Hero Section */}
+        <div className="relative mb-12 p-8 rounded-2xl bg-gradient-to-r from-slate-900/90 to-[#0e1629]/90 border border-slate-800 shadow-2xl backdrop-blur-xl overflow-hidden">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-10 -left-10 w-80 h-80 bg-blue-500/5 rounded-full blur-3xl pointer-events-none" />
+
+          <div className="relative flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <div className="flex items-start gap-4">
+              <div className="p-4 bg-gradient-to-br from-cyan-500/10 to-blue-500/20 border border-cyan-500/30 rounded-2xl shadow-[0_0_20px_rgba(6,182,212,0.15)] shrink-0">
+                <Eye className="w-8 h-8 text-cyan-400 animate-pulse" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="px-2 py-0.5 text-[10px] font-mono font-semibold tracking-wider text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 rounded-md uppercase">
+                    Cognitive Hub
+                  </span>
+                  <span className="px-2 py-0.5 text-[10px] font-mono font-semibold tracking-wider text-blue-400 bg-blue-500/10 border border-blue-500/20 rounded-md uppercase">
+                    Esports Grade
+                  </span>
+                </div>
+                <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mt-2 bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
+                  Visual Training System
+                </h1>
+                <p className="text-slate-400 mt-2 text-sm sm:text-base max-w-2xl leading-relaxed">
+                  Calibrate and overclock your foveal detection, tracking speed, and spatial awareness with 14 professional neural conditioning drills.
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Visual Drills</h1>
-              <p className="text-gray-500 mt-1 text-sm sm:text-base">Train your reaction speed, tracking accuracy, and visual perception with 14 free drills</p>
+            
+            {/* Visual Quick Stats */}
+            <div className="grid grid-cols-2 gap-3 w-full md:w-auto font-mono text-xs">
+              <div className="p-3 bg-slate-950/60 rounded-xl border border-slate-800 text-center">
+                <p className="text-slate-500 uppercase tracking-widest">DRIL_CAPACITY</p>
+                <p className="text-xl font-bold text-cyan-400 mt-1">{totalDrills}</p>
+              </div>
+              <div className="p-3 bg-slate-950/60 rounded-xl border border-slate-800 text-center">
+                <p className="text-slate-500 uppercase tracking-widest">PERC_SECTORS</p>
+                <p className="text-xl font-bold text-blue-400 mt-1">5</p>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* SEO Content */}
+        {/* Interactive Neural & Saccadic Calibrator Widget */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+          
+          <div className="lg:col-span-2 relative p-6 bg-slate-950/80 rounded-2xl border border-slate-800 shadow-xl backdrop-blur-md flex flex-col">
+            <div className="flex items-center justify-between mb-4 border-b border-slate-900 pb-3">
+              <div className="flex items-center gap-2">
+                <Cpu className="w-5 h-5 text-cyan-400" />
+                <h2 className="text-lg font-bold text-white tracking-wide">
+                  Saccadic Calibration Module
+                </h2>
+              </div>
+              <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">
+                System Latency & Scan Precision
+              </span>
+            </div>
+
+            {/* Target Area Canvas */}
+            <div 
+              onClick={handleTargetClick}
+              className={`relative h-64 bg-slate-950 border border-slate-900 rounded-xl overflow-hidden cursor-crosshair transition-all duration-300 ${
+                calibrationActive ? 'border-cyan-500/20' : 'hover:border-slate-800'
+              }`}
+            >
+              {/* Grid Overlay Lines */}
+              <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 opacity-10 pointer-events-none">
+                <div className="border border-slate-700" />
+                <div className="border border-slate-700" />
+                <div className="border border-slate-700" />
+                <div className="border border-slate-700" />
+                <div className="border border-slate-700" />
+                <div className="border border-slate-700" />
+                <div className="border border-slate-700" />
+                <div className="border border-slate-700" />
+                <div className="border border-slate-700" />
+              </div>
+
+              {/* Fixation Cross (Center) */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-slate-800 font-mono text-xl select-none pointer-events-none">
+                +
+              </div>
+
+              {/* Calibration Start Button Overlay */}
+              {!calibrationActive && countdown === null && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/95 z-20 p-4 text-center">
+                  <Eye className="w-10 h-10 text-cyan-400/80 mb-3 animate-pulse" />
+                  <p className="text-sm font-semibold text-slate-200 max-w-sm mb-4">
+                    Test visual saccadic speed by tapping 5 peripheral targets as fast as possible.
+                  </p>
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      startCalibration();
+                    }}
+                    className="px-6 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-mono text-xs tracking-wider uppercase font-bold rounded-lg transition shadow-[0_0_15px_rgba(6,182,212,0.3)]"
+                  >
+                    Initiate Calibration
+                  </button>
+                </div>
+              )}
+
+              {/* Countdown Overlay */}
+              {countdown !== null && (
+                <div className="absolute inset-0 flex items-center justify-center bg-slate-950/95 z-20">
+                  <div className="text-center">
+                    <p className="text-[10px] font-mono text-cyan-400 uppercase tracking-widest mb-1">Target Locking</p>
+                    <p className="text-4xl font-extrabold text-white animate-ping">{countdown}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Glowing Target Node */}
+              {calibrationActive && (
+                <button
+                  className="absolute w-8 h-8 -ml-4 -mt-4 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-full flex items-center justify-center transition-all duration-75 border-2 border-white/40 shadow-[0_0_15px_rgba(6,182,212,0.8)] z-10"
+                  style={{ left: `${targetPos.x}%`, top: `${targetPos.y}%` }}
+                >
+                  <span className="w-2.5 h-2.5 bg-white rounded-full block animate-ping" />
+                </button>
+              )}
+            </div>
+
+            {/* Target Area Status Footer */}
+            <div className="mt-3 flex items-center justify-between text-[11px] font-mono text-slate-500">
+              <span className="flex items-center gap-1.5">
+                <span className={`w-2 h-2 rounded-full ${calibrationActive ? 'bg-cyan-500 animate-pulse' : 'bg-slate-700'}`} />
+                {calibrationActive ? `TARGET ${targetsCleared + 1} / 5 ACTIVE` : 'MODULE STANDBY'}
+              </span>
+              <span>FOV SCAN CALIBRATOR V1.2</span>
+            </div>
+          </div>
+
+          {/* Metrics Panel */}
+          <div className="p-6 bg-slate-950/80 rounded-2xl border border-slate-800 shadow-xl backdrop-blur-md flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between mb-4 border-b border-slate-900 pb-3">
+                <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400">
+                  Calib_Telemetry
+                </h3>
+                <Activity className="w-4 h-4 text-cyan-400" />
+              </div>
+
+              {avgReaction !== null ? (
+                <div className="space-y-5 py-2">
+                  <div className="p-4 bg-cyan-500/5 border border-cyan-500/10 rounded-xl">
+                    <p className="text-[10px] font-mono text-cyan-400 uppercase tracking-widest">Saccadic Latency</p>
+                    <p className="text-3xl font-extrabold text-white mt-1">
+                      {avgReaction} <span className="text-sm font-normal text-slate-400">ms</span>
+                    </p>
+                  </div>
+
+                  <div className="p-4 bg-blue-500/5 border border-blue-500/10 rounded-xl">
+                    <p className="text-[10px] font-mono text-blue-400 uppercase tracking-widest">Saccadic Click Precision</p>
+                    <p className="text-3xl font-extrabold text-white mt-1">
+                      {saccadicScore}%
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-xs font-mono">
+                    <Award className="w-4 h-4 text-cyan-400" />
+                    <span className="text-slate-400">System Rating:</span>
+                    <span className="text-cyan-400 font-bold uppercase">
+                      {avgReaction < 200 ? 'Cyber-Reflex' : avgReaction < 300 ? 'High Tier' : 'Standard'}
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-10 text-center text-slate-500">
+                  <ShieldAlert className="w-8 h-8 text-slate-700 mb-2 animate-bounce" />
+                  <p className="text-xs font-mono">No calibration metrics loaded.</p>
+                  <p className="text-[10px] text-slate-600 mt-1 max-w-[200px]">Run the saccadic check module to benchmark visual speed.</p>
+                </div>
+              )}
+            </div>
+
+            <div className="border-t border-slate-900 pt-4 mt-4">
+              <p className="text-[10px] text-slate-400 leading-relaxed font-mono">
+                Saccades are rapid, conjugate eye movements between fixation points. In esports, optimizing visual saccade response leads to instant target re-acquisition and heightened peripheral responsiveness.
+              </p>
+            </div>
+          </div>
+
+        </div>
+
+        {/* Sectors Grid */}
+        <div className="space-y-12">
+          {categories.map((category) => {
+            const categoryDrills = drills.filter(d => d.category === category && d.enabled);
+            if (categoryDrills.length === 0) return null;
+            
+            const styles = getCategoryStyles(category);
+
+            return (
+              <div key={category} className="relative">
+                
+                {/* Sector Header */}
+                <div className="flex items-center justify-between mb-6 border-b border-slate-900 pb-3">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-1 h-6 rounded-full bg-gradient-to-b ${styles.gradient}`} />
+                    <h2 className="text-lg font-bold text-white tracking-wide font-mono uppercase">
+                      {category}
+                    </h2>
+                    <span className="px-2 py-0.5 text-[10px] font-mono rounded bg-slate-900 border border-slate-800 text-slate-400">
+                      {categoryDrills.length} DRILL{categoryDrills.length > 1 ? 'S' : ''}
+                    </span>
+                  </div>
+                  
+                  <span className={`text-[10px] font-mono hidden sm:inline-block tracking-widest ${styles.text}`}>
+                    SECTOR // {category.toUpperCase().replace(' ', '_')}
+                  </span>
+                </div>
+
+                {/* Drills Grid Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {categoryDrills.map((drill) => {
+                    const drillPath = `/drills/visual/${drill.subcategory}/${drill.folderName}`;
+                    
+                    return (
+                      <Link
+                        key={drill.id}
+                        href={drillPath}
+                        className={`group relative bg-slate-950/80 border border-slate-900 rounded-xl overflow-hidden transition-all duration-300 hover:border-cyan-500/40 hover:-translate-y-1 ${styles.glow} focus:outline-none focus:ring-1 focus:ring-cyan-500/50`}
+                        aria-label={`${drill.name} - ${drill.description}. Difficulty: ${drill.difficulty}. Duration: ${drill.duration}.`}
+                      >
+                        <div className="p-6">
+                          
+                          {/* Card Header */}
+                          <div className="flex items-center justify-between mb-4">
+                            <div className={`p-2 rounded-lg ${styles.bg}`}>
+                              <Eye className={`w-5 h-5 ${styles.text}`} />
+                            </div>
+                            <span className={`px-2 py-0.5 text-[10px] font-mono font-semibold rounded-full border ${getDifficultyStyles(drill.difficulty)}`}>
+                              {drill.difficulty}
+                            </span>
+                          </div>
+
+                          {/* Drill Meta details */}
+                          <h3 className="text-base font-bold text-slate-100 group-hover:text-cyan-400 transition-colors mb-2">
+                            {drill.name}
+                          </h3>
+                          
+                          <p className="text-xs text-slate-400 leading-relaxed min-h-[48px] mb-4">
+                            {drill.description}
+                          </p>
+
+                          <div className="flex items-center gap-4 text-[11px] text-slate-500 font-mono mb-4 border-b border-slate-900 pb-3">
+                            <div className="flex items-center gap-1">
+                              <Clock className="w-3.5 h-3.5" />
+                              <span>{drill.duration}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Activity className="w-3.5 h-3.5" />
+                              <span>Stamina Mode</span>
+                            </div>
+                          </div>
+
+                          {/* Action Button */}
+                          <div className="flex items-center justify-between">
+                            <span className="text-[10px] text-slate-600 font-mono tracking-wider uppercase">
+                              Start Training
+                            </span>
+                            <div className={`flex items-center gap-1 ${styles.text} text-xs font-mono font-bold group-hover:gap-2 transition-all`}>
+                              <span>EXEC_DRILL</span>
+                              <Play className="w-3 h-3 fill-current" />
+                            </div>
+                          </div>
+
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Dynamic Warning Alert banner */}
         <section className="sr-only" aria-label="Visual drills overview">
           <h2>Visual Training Drills Overview</h2>
           <p>
@@ -168,113 +545,98 @@ export default function VisualDrillsClient() {
           </p>
         </section>
 
-        {/* Category Tags */}
-        <div className="flex flex-wrap gap-2 mb-8">
-          <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">⚡ Reaction Speed</span>
-          <span className="px-3 py-1 bg-cyan-100 text-cyan-700 rounded-full text-xs font-medium">🎯 Tracking Accuracy</span>
-          <span className="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-xs font-medium">👀 Peripheral Vision</span>
-          <span className="px-3 py-1 bg-violet-100 text-violet-700 rounded-full text-xs font-medium">🔍 Visual Recognition</span>
-          <span className="px-3 py-1 bg-sky-100 text-sky-700 rounded-full text-xs font-medium">📏 Depth Perception</span>
-        </div>
-
-        {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-center">
-            <div className="flex items-center justify-between mb-2"><p className="text-sm text-gray-500">Available Drills</p><Target className="w-4 h-4 text-green-500" /></div>
-            <p className="text-2xl font-bold text-gray-900">{totalDrills}</p>
-            <p className="text-xs text-gray-500 mt-1">Ready to train</p>
-          </div>
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-center">
-            <div className="flex items-center justify-between mb-2"><p className="text-sm text-gray-500">Categories</p><Eye className="w-4 h-4 text-blue-500" /></div>
-            <p className="text-2xl font-bold text-gray-900">{categories.length}</p>
-            <p className="text-xs text-gray-500 mt-1">Visual skill areas</p>
-          </div>
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-center">
-            <div className="flex items-center justify-between mb-2"><p className="text-sm text-gray-500">Free Access</p><Star className="w-4 h-4 text-yellow-500" /></div>
-            <p className="text-2xl font-bold text-gray-900">100%</p>
-            <p className="text-xs text-gray-500 mt-1">No login required</p>
-          </div>
-        </div>
-
-        {/* Drills Grid by Category */}
-        {categories.map((category) => {
-          const categoryDrills = drills.filter(d => d.category === category && d.enabled);
-          if (categoryDrills.length === 0) return null;
+        {/* Visual Training Tips Panel */}
+        <div className="mt-16 p-8 bg-slate-950/80 rounded-2xl border border-slate-800 shadow-xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-80 h-80 bg-blue-500/5 rounded-full blur-2xl pointer-events-none" />
+          <h3 className="text-xl font-extrabold text-white mb-6 flex items-center gap-2 tracking-wide font-mono">
+            <Sparkles className="w-5 h-5 text-cyan-400" />
+            VISUAL PERFORMANCE STRATEGIES
+          </h3>
           
-          return (
-            <div key={category} className="mb-12">
-              <div className="flex items-center gap-2 mb-4">
-                <div className={`w-1 h-6 rounded-full bg-gradient-to-b ${getCategoryGradient(category)}`}></div>
-                <h2 className="text-xl font-bold text-gray-900">{category}</h2>
-                <span className="text-xs text-gray-400">({categoryDrills.length} drills)</span>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {categoryDrills.map((drill) => {
-                  const drillPath = `/drills/visual/${drill.subcategory}/${drill.folderName}`;
-                  const hoverColor = getCategoryHoverColor(category);
-                  
-                  return (
-                    <Link
-                      key={drill.id}
-                      href={drillPath}
-                      className="group bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-200 hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                      aria-label={`${drill.name} - ${drill.description}. Difficulty: ${drill.difficulty}. Duration: ${drill.duration}.`}
-                    >
-                      <div className="p-6">
-                        <div className="flex items-start justify-between mb-4">
-                          <div className={`p-2 rounded-lg ${getCategoryBgColor(category)}`}>
-                            <Eye className={`w-5 h-5 ${getCategoryTextColor(category)}`} />
-                          </div>
-                          <div className={`px-2 py-1 rounded-full text-xs font-medium border ${getDifficultyColor(drill.difficulty)}`}>
-                            {drill.difficulty}
-                          </div>
-                        </div>
-                        
-                        <h3 className={`text-lg font-semibold text-gray-900 mb-2 ${hoverColor} transition-colors`}>
-                          {drill.name}
-                        </h3>
-                        <p className="text-sm text-gray-500 mb-4 leading-relaxed">{drill.description}</p>
-                        
-                        <div className="flex items-center gap-4 mb-4 text-sm text-gray-500">
-                          <div className="flex items-center gap-1"><Clock className="w-3 h-3" /><span>{drill.duration}</span></div>
-                        </div>
-                        
-                        <div className="flex items-center justify-between pt-2 border-t border-gray-100">
-                          <span className="text-xs text-gray-400">{drill.category}</span>
-                          <div className={`flex items-center gap-1 ${getCategoryTextColor(category)} group-hover:gap-2 transition-all`}>
-                            <span className="text-sm font-medium">Start Drill</span>
-                            <Play className="w-4 h-4" />
-                          </div>
-                        </div>
-                      </div>
-                    </Link>
-                  );
-                })}
-              </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 font-sans">
+            <div className="p-4 bg-slate-900/30 rounded-xl border border-slate-900 hover:border-slate-800 transition">
+              <h4 className="font-bold text-slate-200 mb-2 text-sm">1. Saccadic Fixation</h4>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                Prioritize peripheral target acquisition drills to minimize target re-fixation times. Always calibrate under stable ambient lighting.
+              </p>
             </div>
-          );
-        })}
-
-        {/* Visual Training Tips Section */}
-        <div className="bg-gradient-to-r from-blue-600 to-cyan-600 rounded-2xl p-8 mt-8 text-white">
-          <h3 className="text-2xl font-bold mb-4 flex items-center gap-2"><Eye className="w-6 h-6" />Visual Training Tips</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div><h4 className="font-semibold mb-2">Warm Up Your Eyes</h4><p className="text-sm text-blue-100">Start with easier drills to activate your visual system before tackling more challenging exercises.</p></div>
-            <div><h4 className="font-semibold mb-2">Progressive Overload</h4><p className="text-sm text-blue-100">Gradually increase speed and complexity as your visual processing improves for optimal adaptation.</p></div>
-            <div><h4 className="font-semibold mb-2">Eye Rest Matters</h4><p className="text-sm text-blue-100">Follow the 20-20-20 rule: Every 20 minutes, look at something 20 feet away for 20 seconds.</p></div>
+            <div className="p-4 bg-slate-900/30 rounded-xl border border-slate-900 hover:border-slate-800 transition">
+              <h4 className="font-bold text-slate-200 mb-2 text-sm">2. Contrast Sensitivity</h4>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                Overloading visual search pathways with entropic grid training improves object isolation in low-contrast, chaotic game scenarios.
+              </p>
+            </div>
+            <div className="p-4 bg-slate-900/30 rounded-xl border border-slate-900 hover:border-slate-800 transition">
+              <h4 className="font-bold text-slate-200 mb-2 text-sm">3. Dynamic Rest Cycle</h4>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                Apply the 20-20-20 technique between intense drills to prevent ciliary muscle strain and maintain high kinetic reaction rates.
+              </p>
+            </div>
           </div>
         </div>
 
-        {/* Explore Related Categories */}
-        <div className="mt-12 mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 text-center mb-8">Explore Related Categories</h2>
+        {/* Explore Related Categories Portal */}
+        <div className="mt-16 mb-8 border-t border-slate-900 pt-12">
+          <h2 className="text-lg font-bold text-white tracking-widest text-center font-mono uppercase mb-8">
+            Explore Related Training Hubs
+          </h2>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
-            <Link href="/drills/fps" className="group bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-lg transition-all duration-200 hover:-translate-y-1 text-center focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"><div className="text-3xl mb-3">🎮</div><h3 className="font-semibold text-gray-900 group-hover:text-red-600 transition">FPS Training</h3><p className="text-xs text-gray-500 mt-1">Aim trainer, reflex & tracking drills</p></Link>
-            <Link href="/drills/motor" className="group bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-lg transition-all duration-200 hover:-translate-y-1 text-center focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"><div className="text-3xl mb-3">✋</div><h3 className="font-semibold text-gray-900 group-hover:text-green-600 transition">Motor Skills</h3><p className="text-xs text-gray-500 mt-1">Hand-eye coordination & precision</p></Link>
-            <Link href="/drills/cognitive" className="group bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-lg transition-all duration-200 hover:-translate-y-1 text-center focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"><div className="text-3xl mb-3">🧠</div><h3 className="font-semibold text-gray-900 group-hover:text-purple-600 transition">Cognitive Training</h3><p className="text-xs text-gray-500 mt-1">Memory, focus & problem solving</p></Link>
-            <Link href="/drills/memory" className="group bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-lg transition-all duration-200 hover:-translate-y-1 text-center focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"><div className="text-3xl mb-3">💾</div><h3 className="font-semibold text-gray-900 group-hover:text-indigo-600 transition">Memory Drills</h3><p className="text-xs text-gray-500 mt-1">Working memory & spatial recall</p></Link>
+            
+            <Link 
+              href="/drills/fps" 
+              className="group p-5 bg-slate-950/80 rounded-xl border border-slate-900 hover:border-red-500/40 text-center transition-all duration-200 hover:-translate-y-1 shadow-[0_0_15px_rgba(239,68,68,0.02)]"
+            >
+              <div className="text-2xl mb-2 text-red-500">🎮</div>
+              <h3 className="font-bold text-sm text-slate-200 group-hover:text-red-400 transition font-mono uppercase">
+                FPS Training
+              </h3>
+              <p className="text-[10px] text-slate-500 mt-1 font-mono uppercase">
+                Sens calibration & flicks
+              </p>
+            </Link>
+
+            <Link 
+              href="/drills/motor" 
+              className="group p-5 bg-slate-950/80 rounded-xl border border-slate-900 hover:border-emerald-500/40 text-center transition-all duration-200 hover:-translate-y-1 shadow-[0_0_15px_rgba(16,185,129,0.02)]"
+            >
+              <div className="text-2xl mb-2 text-emerald-500">✋</div>
+              <h3 className="font-bold text-sm text-slate-200 group-hover:text-emerald-400 transition font-mono uppercase">
+                Motor Skills
+              </h3>
+              <p className="text-[10px] text-slate-500 mt-1 font-mono uppercase">
+                Accuracy & click reflexes
+              </p>
+            </Link>
+
+            <Link 
+              href="/drills/cognitive" 
+              className="group p-5 bg-slate-950/80 rounded-xl border border-slate-900 hover:border-purple-500/40 text-center transition-all duration-200 hover:-translate-y-1 shadow-[0_0_15px_rgba(168,85,247,0.02)]"
+            >
+              <div className="text-2xl mb-2 text-purple-500">🧠</div>
+              <h3 className="font-bold text-sm text-slate-200 group-hover:text-purple-400 transition font-mono uppercase">
+                Cognitive Hub
+              </h3>
+              <p className="text-[10px] text-slate-500 mt-1 font-mono uppercase">
+                Decision & priority speed
+              </p>
+            </Link>
+
+            <Link 
+              href="/drills/memory" 
+              className="group p-5 bg-slate-950/80 rounded-xl border border-slate-900 hover:border-indigo-500/40 text-center transition-all duration-200 hover:-translate-y-1 shadow-[0_0_15px_rgba(99,102,241,0.02)]"
+            >
+              <div className="text-2xl mb-2 text-indigo-500">💾</div>
+              <h3 className="font-bold text-sm text-slate-200 group-hover:text-indigo-400 transition font-mono uppercase">
+                Memory Drills
+              </h3>
+              <p className="text-[10px] text-slate-500 mt-1 font-mono uppercase">
+                Spatial recall & sequences
+              </p>
+            </Link>
+
           </div>
         </div>
+
       </div>
     </div>
   );

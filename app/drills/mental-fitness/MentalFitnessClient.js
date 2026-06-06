@@ -1,28 +1,139 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { 
   Clock, Star, Play, Heart, Target, 
-  Brain, Wind, Shield, Home, ChevronRight
+  Brain, Wind, Shield, Home, ChevronRight, Activity, Cpu, Sparkles
 } from 'lucide-react';
 
 export default function MentalFitnessClient() {
   const [isClient, setIsClient] = useState(false);
 
+  // Breathing pacer state
+  const [pacerState, setPacerState] = useState("idle"); // idle, inhale, holdIn, exhale, holdOut
+  const [pacerText, setPacerText] = useState("BEGIN RESPIRATORY PACER");
+  const [timerCount, setTimerCount] = useState(4);
+  const pacerTimerRef = useRef(null);
+  const canvasRef = useRef(null);
+
   useEffect(() => {
     setIsClient(true);
+    return () => {
+      if (pacerTimerRef.current) clearInterval(pacerTimerRef.current);
+    };
   }, []);
 
-  // Categories with exact folder names from tree structure
+  // Respiration sinus wave animation
+  useEffect(() => {
+    if (!isClient) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    let animationFrameId;
+    let offset = 0;
+
+    const resize = () => {
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+    };
+    resize();
+    window.addEventListener("resize", resize);
+
+    const draw = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.strokeStyle = "rgba(236, 72, 153, 0.08)";
+      ctx.lineWidth = 2;
+
+      // Draw two offset waves representing respiration and cardiac rhythms
+      ctx.beginPath();
+      for (let x = 0; x < canvas.width; x++) {
+        const y = canvas.height * 0.5 + Math.sin(x * 0.005 + offset) * 35 + Math.cos(x * 0.002) * 10;
+        if (x === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      ctx.strokeStyle = "rgba(6, 182, 212, 0.05)";
+      ctx.beginPath();
+      for (let x = 0; x < canvas.width; x++) {
+        const y = canvas.height * 0.52 + Math.sin(x * 0.004 - offset * 0.8) * 45;
+        if (x === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      // Control wave speed depending on state
+      let speed = 0.01;
+      if (pacerState === "inhale") speed = 0.025;
+      else if (pacerState === "exhale") speed = 0.02;
+      else if (pacerState === "holdIn" || pacerState === "holdOut") speed = 0.003;
+      offset += speed;
+
+      animationFrameId = requestAnimationFrame(draw);
+    };
+    draw();
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+      window.removeEventListener("resize", resize);
+    };
+  }, [isClient, pacerState]);
+
+  const startPacer = () => {
+    setPacerState("inhale");
+    setPacerText("INHALE...");
+    setTimerCount(4);
+  };
+
+  useEffect(() => {
+    if (pacerState === "idle") return;
+
+    if (pacerTimerRef.current) clearInterval(pacerTimerRef.current);
+
+    pacerTimerRef.current = setInterval(() => {
+      setTimerCount((prev) => {
+        if (prev <= 1) {
+          if (pacerState === "inhale") {
+            setPacerState("holdIn");
+            setPacerText("HOLD...");
+            return 4;
+          } else if (pacerState === "holdIn") {
+            setPacerState("exhale");
+            setPacerText("EXHALE...");
+            return 4;
+          } else if (pacerState === "exhale") {
+            setPacerState("holdOut");
+            setPacerText("HOLD...");
+            return 4;
+          } else {
+            setPacerState("inhale");
+            setPacerText("INHALE...");
+            return 4;
+          }
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(pacerTimerRef.current);
+  }, [pacerState]);
+
+  const stopPacer = () => {
+    setPacerState("idle");
+    setPacerText("BEGIN RESPIRATORY PACER");
+    setTimerCount(4);
+    if (pacerTimerRef.current) clearInterval(pacerTimerRef.current);
+  };
+
   const categories = [
     { 
       name: 'Breathing Exercises', 
       folderName: 'breathing-exercises',
       icon: Wind,
-      color: 'blue',
-      bgColor: 'bg-blue-50',
-      textColor: 'text-blue-600',
+      color: 'pink',
+      bgColor: 'bg-pink-500/10 border-pink-500/20 text-pink-400',
+      textColor: 'text-pink-400',
       description: 'Master evidence-based breathing techniques for relaxation, energy, and vagal tone',
       drills: [
         { name: '4-7-8 Vagal Brake', folderName: '4-7-8', difficulty: 'Easy', duration: 'Untimed', description: 'Inhale 4s, hold 7s, exhale 8s to activate vagus nerve for deep relaxation' },
@@ -35,8 +146,8 @@ export default function MentalFitnessClient() {
       folderName: 'stress-control',
       icon: Shield,
       color: 'red',
-      bgColor: 'bg-red-50',
-      textColor: 'text-red-600',
+      bgColor: 'bg-rose-500/10 border-rose-500/20 text-rose-400',
+      textColor: 'text-rose-400',
       description: 'Build cognitive resilience and maintain coherence under pressure and distraction',
       drills: [
         { name: 'Coherence Breathing', folderName: 'biofeedback', difficulty: 'Medium', duration: '5 min', description: '5:6 resonance frequency breathing to optimize heart rate variability and vagal tone' },
@@ -46,33 +157,37 @@ export default function MentalFitnessClient() {
     }
   ];
 
-  // Helper function to get difficulty color
   const getDifficultyColor = (difficulty) => {
     switch(difficulty) {
-      case 'Easy': return 'bg-green-50 text-green-600 border-green-200';
-      case 'Medium': return 'bg-yellow-50 text-yellow-600 border-yellow-200';
-      case 'Hard': return 'bg-orange-50 text-orange-600 border-orange-200';
-      case 'Expert': return 'bg-red-50 text-red-600 border-red-200';
-      default: return 'bg-gray-100 text-gray-600 border-gray-200';
+      case 'Easy': return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+      case 'Medium': return 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20';
+      case 'Hard': return 'bg-orange-500/10 text-orange-400 border-orange-500/20';
+      case 'Expert': return 'bg-rose-500/10 text-rose-400 border-rose-500/20';
+      default: return 'bg-slate-500/10 text-slate-400 border-slate-500/20';
     }
   };
 
   const getCategoryGradient = (category) => {
     switch(category) {
-      case 'Stress Control': return 'from-red-500 to-orange-600';
-      case 'Breathing Exercises': return 'from-blue-500 to-cyan-600';
-      default: return 'from-pink-500 to-rose-600';
+      case 'Stress Control': return 'from-rose-500 to-red-500';
+      case 'Breathing Exercises': return 'from-pink-500 to-indigo-500';
+      default: return 'from-pink-500 to-indigo-500';
     }
   };
 
-  // Calculate total drills
+  const getCategoryCardBorder = (category) => {
+    switch(category) {
+      case 'Stress Control': return 'hover:border-rose-500/30 hover:shadow-[0_0_20px_rgba(244,63,94,0.15)]';
+      case 'Breathing Exercises': return 'hover:border-pink-500/30 hover:shadow-[0_0_20px_rgba(236,72,153,0.15)]';
+      default: return 'hover:border-pink-500/30 hover:shadow-[0_0_20px_rgba(236,72,153,0.15)]';
+    }
+  };
+
   const totalDrills = categories.reduce((acc, cat) => acc + cat.drills.length, 0);
 
-  // Build schema items with proper position tracking
   const buildSchemaItems = () => {
     let position = 1;
     const items = [];
-    
     categories.forEach(cat => {
       cat.drills.forEach(drill => {
         items.push({
@@ -90,24 +205,29 @@ export default function MentalFitnessClient() {
         position++;
       });
     });
-    
     return items;
   };
 
   if (!isClient) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 to-rose-50">
+      <div className="min-h-screen flex items-center justify-center bg-[#080d1a]">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-pink-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading mental fitness drills...</p>
+          <div className="w-16 h-16 border-4 border-pink-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-pink-400 font-mono tracking-widest uppercase animate-pulse">Initializing Biometric Core...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 to-rose-50">
-      {/* SEO Structured Data */}
+    <div className="min-h-screen bg-[#080d1a] text-slate-100 font-sans selection:bg-pink-500/30 selection:text-pink-300 relative overflow-hidden">
+      
+      {/* Background patterns */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-pink-900/10 via-slate-950 to-slate-950 pointer-events-none z-0" />
+      <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none z-0 opacity-40" />
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(18,24,38,0.45)_1px,_transparent_1px),_linear-gradient(90deg,_rgba(18,24,38,0.45)_1px,_transparent_1px)] bg-[size:32px_32px] pointer-events-none z-0" />
+
+      {/* Structured SEO Schema */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -117,220 +237,243 @@ export default function MentalFitnessClient() {
             "name": "Mental Fitness Drills - Breathing Exercises & Stress Control Training",
             "url": "https://skilldrills.online/drills/mental-fitness",
             "description": "6 free mental fitness drills covering breathing exercises and stress control. Practice 4-7-8 breathing, box breathing, Wim Hof method, coherence biofeedback, stress inoculation, and calm under pressure training.",
-            "isPartOf": {
-              "@type": "WebSite",
-              "name": "SkillDrills",
-              "url": "https://skilldrills.online"
-            },
-            "about": {
-              "@type": "Thing",
-              "name": "Mental Fitness Training"
-            },
+            "isPartOf": { "@type": "WebSite", "name": "SkillDrills", "url": "https://skilldrills.online" },
+            "about": { "@type": "Thing", "name": "Mental Fitness Training" },
             "numberOfItems": totalDrills,
             "itemListElement": buildSchemaItems()
           })
         }}
       />
-      
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Breadcrumb Navigation */}
-        <nav aria-label="Breadcrumb" className="mb-6">
-          <ol className="flex items-center gap-2 text-sm text-gray-500">
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
+        
+        {/* Breadcrumb */}
+        <nav aria-label="Breadcrumb" className="mb-8">
+          <ol className="flex items-center gap-2 text-xs font-mono text-slate-400 uppercase tracking-wider">
             <li>
-              <Link href="/" className="flex items-center gap-1 hover:text-pink-600 transition-colors">
-                <Home className="w-4 h-4" />
-                <span>Home</span>
+              <Link href="/" className="flex items-center gap-1.5 hover:text-pink-400 transition-colors">
+                <Home className="w-3.5 h-3.5" />
+                <span>HQ</span>
               </Link>
             </li>
-            <li>
-              <ChevronRight className="w-4 h-4 text-gray-400" aria-hidden="true" />
-            </li>
-            <li>
-              <Link href="/drills" className="hover:text-pink-600 transition-colors">
-                Drills
-              </Link>
-            </li>
-            <li>
-              <ChevronRight className="w-4 h-4 text-gray-400" aria-hidden="true" />
-            </li>
-            <li>
-              <span className="text-pink-600 font-medium" aria-current="page">Mental Fitness</span>
-            </li>
+            <ChevronRight className="w-3 h-3 text-slate-600" />
+            <li><Link href="/drills" className="hover:text-pink-400 transition-colors">Drills</Link></li>
+            <ChevronRight className="w-3 h-3 text-slate-600" />
+            <li><span className="text-pink-400 font-bold" aria-current="page">Mental Fitness Sector</span></li>
           </ol>
         </nav>
 
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-gradient-to-r from-pink-500 to-rose-600 rounded-xl">
-              <Heart className="w-6 h-6 text-white" />
+        <div className="mb-10 bg-slate-900/80 border border-slate-800 rounded-2xl p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden backdrop-blur-xl">
+          <div className="absolute inset-0 bg-gradient-to-r from-pink-500/5 to-transparent pointer-events-none" />
+          <div className="flex items-start gap-4">
+            <div className="p-4 bg-pink-500/10 border border-pink-500/20 rounded-2xl text-pink-400 shadow-inner shrink-0">
+              <Heart className="w-8 h-8 animate-pulse text-pink-400" />
             </div>
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Mental Fitness Drills</h1>
-              <p className="text-gray-500 mt-1 text-sm sm:text-base">Train your breathing techniques and stress control with {totalDrills} free drills</p>
+              <div className="inline-flex items-center gap-1.5 bg-pink-500/15 border border-pink-500/30 text-pink-300 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider mb-2">
+                <Activity className="w-3 h-3 animate-pulse" />
+                BIOMETRIC REGULATION HQ
+              </div>
+              <h1 className="text-3xl font-extrabold text-white tracking-tight mt-1 bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">Mental Fitness</h1>
+              <p className="text-slate-400 mt-2 text-sm sm:text-base max-w-xl leading-relaxed">
+                Control ciliary neural tension, optimize heart rate variability (HRV), and sustain composure in high-friction settings.
+              </p>
             </div>
+          </div>
+          <div className="flex flex-wrap gap-2 self-start md:self-center">
+            <span className="px-2.5 py-1 bg-slate-950 border border-slate-800 text-slate-300 rounded-md text-xs font-mono font-semibold">🌬️ HRV_RES</span>
+            <span className="px-2.5 py-1 bg-slate-950 border border-slate-800 text-slate-300 rounded-md text-xs font-mono font-semibold">🛡️ STRESS_INOC</span>
           </div>
         </div>
 
-        {/* SEO Content */}
-        <section className="sr-only" aria-label="Mental fitness drills overview">
-          <h2>Mental Fitness Training Drills Overview</h2>
-          <p>
-            Access {totalDrills} free mental fitness drills across {categories.length} categories.
-            Breathing Exercises: 4-7-8 Vagal Brake for deep relaxation, Box Breathing (4-4-4-4 tactical technique),
-            and Wim Hof Method power breathing with 30 rapid cycles.
-            Stress Control: Coherence Breathing with 5:6 ratio for HRV optimization,
-            Calm Under Pressure dual-task training with cognitive distractions,
-            and Stress Inoculation with controlled red strobe exposure.
-            All drills are free with no login required. Best scores saved locally.
-          </p>
-        </section>
-
-        {/* Category Tags */}
-        <div className="flex flex-wrap gap-2 mb-8">
-          <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">💨 Breathing Exercises</span>
-          <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-medium">🛡️ Stress Control</span>
-          <span className="px-3 py-1 bg-pink-100 text-pink-700 rounded-full text-xs font-medium">🧘 Relaxation</span>
-          <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">😌 Mindfulness</span>
-        </div>
-
-        {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-center">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-sm text-gray-500">Available Drills</p>
-              <Target className="w-4 h-4 text-green-500" />
+        {/* Telemetry Widgets */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+          
+          <div className="bg-slate-950/80 border border-slate-800 rounded-2xl p-6 flex flex-col justify-between text-center lg:text-left backdrop-blur-md">
+            <div>
+              <div className="flex items-center justify-between mb-4 border-b border-slate-900 pb-3">
+                <span className="text-xs font-mono font-bold uppercase text-slate-400 tracking-widest">TACTICAL_PORTALS</span>
+                <Cpu className="w-4 h-4 text-pink-400" />
+              </div>
+              <p className="text-4xl font-extrabold text-white tracking-tight">{totalDrills}</p>
+              <p className="text-[10px] text-slate-500 font-mono uppercase tracking-widest mt-1">Calibrators Connected</p>
             </div>
-            <p className="text-2xl font-bold text-gray-900">{totalDrills}</p>
-            <p className="text-xs text-gray-500 mt-1">Ready to train</p>
+            <div className="mt-4 pt-4 border-t border-slate-900 text-xs text-slate-400 leading-relaxed font-mono">
+              Respiration sync monitors respiratory sinus arrhythmia (RSA) and calms ciliary muscle contractions.
+            </div>
           </div>
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-center">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-sm text-gray-500">Categories</p>
-              <Heart className="w-4 h-4 text-pink-500" />
+
+          {/* Animated Box Breathing pacing biofeedback widget */}
+          <div className="lg:col-span-2 bg-slate-950/80 border border-slate-800 rounded-2xl p-6 relative overflow-hidden flex flex-col justify-between backdrop-blur-md">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-pink-500/5 blur-3xl rounded-full pointer-events-none" />
+            <div className="flex items-center justify-between mb-3 text-pink-400 border-b border-slate-900 pb-3">
+              <div className="flex items-center gap-2">
+                <Wind className="w-5 h-5 animate-pulse" />
+                <h3 className="text-sm font-bold uppercase tracking-wider text-white">Box Breathing Rhythm Biofeedback</h3>
+              </div>
+              <span className="text-[10px] text-slate-500 font-mono">CYCLE: 4s EQUAL SQUARE</span>
             </div>
-            <p className="text-2xl font-bold text-gray-900">{categories.length}</p>
-            <p className="text-xs text-gray-500 mt-1">Wellness areas</p>
-          </div>
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-center">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-sm text-gray-500">Free Access</p>
-              <Star className="w-4 h-4 text-yellow-500" />
+
+            <div className="flex flex-col sm:flex-row gap-6 items-center py-2">
+              <div className="relative w-32 h-32 flex items-center justify-center rounded-full bg-slate-950 border border-slate-900 shadow-inner shrink-0">
+                <div 
+                  className={`absolute rounded-full border border-pink-500/30 transition-all duration-1000 ease-in-out
+                    ${pacerState === "idle" ? "w-4 h-4 bg-slate-800" : ""}
+                    ${pacerState === "inhale" ? "w-28 h-28 bg-pink-500/20 shadow-[0_0_20px_rgba(236,72,153,0.4)]" : ""}
+                    ${pacerState === "holdIn" ? "w-28 h-28 bg-pink-500/10 border-pink-500/40" : ""}
+                    ${pacerState === "exhale" ? "w-8 h-8 bg-pink-500/5" : ""}
+                    ${pacerState === "holdOut" ? "w-4 h-4 bg-slate-900 border-slate-800" : ""}
+                  `}
+                />
+                <span className="relative font-mono font-extrabold text-lg text-white z-10">{timerCount}s</span>
+              </div>
+
+              <div className="flex-1 text-center sm:text-left space-y-3">
+                <p className="text-sm font-mono text-slate-300 font-bold uppercase tracking-widest">{pacerText}</p>
+                <p className="text-xs text-slate-400 max-w-sm">
+                  Navy SEAL square breathing method: 4s inhale, 4s hold, 4s exhale, 4s hold. Equalizes heart rhythm.
+                </p>
+                
+                <div className="flex gap-3 justify-center sm:justify-start">
+                  {pacerState === "idle" ? (
+                    <button 
+                      onClick={startPacer}
+                      className="bg-gradient-to-r from-pink-600 to-indigo-600 hover:from-pink-500 hover:to-indigo-500 text-white font-mono text-xs uppercase tracking-wider font-bold px-6 py-2 rounded-lg transition shadow-[0_0_15px_rgba(236,72,153,0.3)]"
+                    >
+                      ENGAGE
+                    </button>
+                  ) : (
+                    <button 
+                      onClick={stopPacer}
+                      className="bg-slate-900 hover:bg-slate-850 text-slate-200 border border-slate-800 font-mono text-xs uppercase tracking-wider px-5 py-2 rounded-lg transition"
+                    >
+                      STOP PACER
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
-            <p className="text-2xl font-bold text-gray-900">100%</p>
-            <p className="text-xs text-gray-500 mt-1">No login required</p>
           </div>
         </div>
 
         {/* Drills Grid by Category */}
         {categories.map((category) => {
-          const CategoryIcon = category.icon;
-          
+          const categoryDrills = category.drills;
+          const styles = getCategoryCardBorder(category.name);
+          const gradient = getCategoryGradient(category.name);
+          const Icon = category.icon;
+
           return (
-            <div key={category.name} className="mb-12">
-              <div className="flex items-center gap-2 mb-4">
-                <div className={`w-1 h-6 rounded-full bg-gradient-to-b ${getCategoryGradient(category.name)}`}></div>
-                <h2 className="text-xl font-bold text-gray-900">{category.name}</h2>
-                <span className="text-xs text-gray-400">({category.drills.length} drills)</span>
-              </div>
+            <div key={category.name} className="mb-14 relative">
               
+              <div className="flex items-center gap-2 mb-6 border-b border-slate-900 pb-3">
+                <div className={`w-1 h-6 rounded-full bg-gradient-to-b ${gradient}`} />
+                <h2 className="text-lg font-bold uppercase tracking-wider text-white font-mono">{category.name}</h2>
+                <span className="px-2 py-0.5 text-[10px] font-mono rounded bg-slate-900 border border-slate-800 text-slate-500">
+                  {categoryDrills.length} DRILL{categoryDrills.length > 1 ? 'S' : ''}
+                </span>
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {category.drills.map((drill, index) => {
-                  const drillPath = `/drills/mental-fitness/${category.folderName}/${drill.folderName}`;
-                  
-                  return (
-                    <Link
-                      key={index}
-                      href={drillPath}
-                      className="group bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-200 hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2"
-                      aria-label={`${drill.name} - ${drill.description}. Difficulty: ${drill.difficulty}. Duration: ${drill.duration}.`}
-                    >
-                      <div className="p-6">
-                        <div className="flex items-start justify-between mb-4">
-                          <div className={`p-2 rounded-lg ${category.bgColor}`}>
-                            <CategoryIcon className={`w-5 h-5 ${category.textColor}`} />
-                          </div>
-                          <div className={`px-2 py-1 rounded-full text-xs font-medium border ${getDifficultyColor(drill.difficulty)}`}>
-                            {drill.difficulty}
-                          </div>
+                {categoryDrills.map((drill, index) => (
+                  <Link 
+                    key={index} 
+                    href={`/drills/mental-fitness/${category.folderName}/${drill.folderName}`} 
+                    className={`group relative overflow-hidden bg-slate-950/80 border border-slate-900 transition-all duration-300 hover:-translate-y-1 focus:outline-none focus:ring-1 focus:ring-pink-500/50 ${styles}`}
+                    aria-label={`${drill.name} - ${drill.description}. Difficulty: ${drill.difficulty}. Duration: ${drill.duration}.`}
+                  >
+                    <div className="p-6">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className={`p-2.5 rounded-lg border ${category.bgColor}`}>
+                          <Icon className="w-5 h-5" />
                         </div>
-                        
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-pink-600 transition-colors">
-                          {drill.name}
-                        </h3>
-                        <p className="text-sm text-gray-500 mb-4 leading-relaxed">{drill.description}</p>
-                        
-                        <div className="flex items-center gap-4 mb-4 text-sm text-gray-500">
-                          <div className="flex items-center gap-1">
-                            <Clock className="w-3 h-3" />
-                            <span>{drill.duration}</span>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center justify-between pt-2 border-t border-gray-100">
-                          <span className="text-xs text-gray-400">{category.name}</span>
-                          <div className="flex items-center gap-1 text-pink-600 group-hover:gap-2 transition-all">
-                            <span className="text-sm font-medium">Start Drill</span>
-                            <Play className="w-4 h-4" />
-                          </div>
+                        <div className={`px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold tracking-wide border uppercase ${getDifficultyColor(drill.difficulty)}`}>
+                          {drill.difficulty}
                         </div>
                       </div>
-                    </Link>
-                  );
-                })}
+                      
+                      <h3 className="text-base font-bold text-white mb-2 group-hover:text-pink-400 transition-colors uppercase tracking-tight font-mono">
+                        {drill.name}
+                      </h3>
+                      
+                      <p className="text-xs text-slate-400 mb-4 leading-relaxed min-h-[48px]">
+                        {drill.description}
+                      </p>
+                      
+                      <div className="flex items-center gap-4 mb-4 text-[10px] font-mono text-slate-500 border-b border-slate-900 pb-3">
+                        <div className="flex items-center gap-1">
+                          <Clock className="w-3.5 h-3.5" />
+                          <span>{drill.duration}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Cpu className="w-3.5 h-3.5" />
+                          <span>Vagal Loop</span>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">{category.name}</span>
+                        <div className="flex items-center gap-1 text-pink-400 group-hover:gap-2 transition-all font-bold text-xs uppercase tracking-widest font-mono">
+                          <span>EXEC_DRILL</span>
+                          <Play className="w-3.5 h-3.5 fill-current" />
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
               </div>
             </div>
           );
         })}
 
-        {/* Tips Section */}
-        <div className="bg-gradient-to-r from-pink-600 to-rose-600 rounded-2xl p-8 mt-8 text-white">
-          <h3 className="text-2xl font-bold mb-4 flex items-center gap-2">
-            <Heart className="w-6 h-6" />
-            Mental Fitness Tips
+        {/* Benefits Grid */}
+        <div className="bg-slate-950/80 border border-slate-800 rounded-2xl p-8 mt-12 relative overflow-hidden backdrop-blur-md">
+          <div className="absolute top-0 right-0 w-80 h-80 bg-pink-500/5 rounded-full blur-3xl pointer-events-none" />
+          <h3 className="text-lg font-bold uppercase tracking-wider text-white mb-6 flex items-center gap-2 font-mono">
+            <Sparkles className="w-5 h-5 text-pink-400" />
+            MENTAL FITNESS PERFORMANCE TARGETS
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-              <h4 className="font-semibold mb-2">Consistency Matters</h4>
-              <p className="text-sm text-pink-100">Even 5 minutes of daily breathing practice can significantly improve your mental resilience and vagal tone.</p>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-2">Start Small</h4>
-              <p className="text-sm text-pink-100">Begin with easier drills like 4-7-8 breathing and gradually progress to stress inoculation as you build mental fitness.</p>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-2">Breathe Deeply</h4>
-              <p className="text-sm text-pink-100">Focus on slow, controlled exhales to activate your parasympathetic nervous system and reduce stress response.</p>
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 font-sans">
+            {[
+              { emoji: "🌬️", title: "RSA Resonance", desc: "Sync respiratory sinus arrhythmia to activate parasympathetic breaks." },
+              { emoji: "🛡️", title: "Arousal Control", desc: "Inhibit adrenaline spikes to preserve micro-aiming steady hands." },
+              { emoji: "⚡", title: "Strobe Immunity", desc: "Build spatial target locks during chaotic sensory/audio strobe noise." },
+              { emoji: "🧬", title: "Composure Index", desc: "Maximize target conversion rate under dual cognitive load pressure." }
+            ].map((benefit, i) => (
+              <div key={i} className="bg-slate-900/30 border border-slate-900 hover:border-slate-800 transition rounded-xl p-5">
+                <h4 className="font-bold text-pink-400 mb-2 flex items-center gap-2 uppercase text-xs tracking-wider font-mono">
+                  <span className="text-sm">{benefit.emoji}</span>{benefit.title}
+                </h4>
+                <p className="text-xs text-slate-400 leading-relaxed">{benefit.desc}</p>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Explore Related Categories */}
-        <div className="mt-12 mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 text-center mb-8">Explore Related Categories</h2>
+        {/* Explore Related Sectors */}
+        <div className="mt-16 mb-8 border-t border-slate-900 pt-12">
+          <h2 className="text-lg font-bold tracking-widest text-center text-white font-mono uppercase mb-8">Explore Adjacent Sectors</h2>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
-            <Link href="/drills/cognitive" className="group bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-lg transition-all duration-200 hover:-translate-y-1 text-center focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2">
-              <div className="text-3xl mb-3">🧠</div>
-              <h3 className="font-semibold text-gray-900 group-hover:text-purple-600 transition-colors">Cognitive Training</h3>
-              <p className="text-xs text-gray-500 mt-1">Memory, focus & attention drills</p>
-            </Link>
-            <Link href="/drills/productivity" className="group bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-lg transition-all duration-200 hover:-translate-y-1 text-center focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
-              <div className="text-3xl mb-3">⏱️</div>
-              <h3 className="font-semibold text-gray-900 group-hover:text-emerald-600 transition-colors">Productivity</h3>
-              <p className="text-xs text-gray-500 mt-1">Focus endurance & time management</p>
-            </Link>
-            <Link href="/drills/physical" className="group bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-lg transition-all duration-200 hover:-translate-y-1 text-center focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2">
-              <div className="text-3xl mb-3">💪</div>
-              <h3 className="font-semibold text-gray-900 group-hover:text-orange-600 transition-colors">Physical Training</h3>
-              <p className="text-xs text-gray-500 mt-1">Balance, coordination & reflex drills</p>
-            </Link>
-            <Link href="/drills/memory" className="group bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-lg transition-all duration-200 hover:-translate-y-1 text-center focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-              <div className="text-3xl mb-3">💾</div>
-              <h3 className="font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors">Memory Drills</h3>
-              <p className="text-xs text-gray-500 mt-1">Working memory & spatial recall</p>
-            </Link>
+            {[
+              { href: "/drills/cognitive", emoji: "🧠", title: "Cognitive Sector", desc: "Neural latency & focus" },
+              { href: "/drills/productivity", emoji: "⏱️", title: "Productivity", desc: "Eisenhower time management" },
+              { href: "/drills/memory", emoji: "💾", title: "Memory Sector", desc: "Digit span buffer checks" },
+              { href: "/drills/fps", emoji: "🎮", title: "Tactical Aim", desc: "Reflex & flick calibrators" }
+            ].map((link, i) => (
+              <Link 
+                key={i} 
+                href={link.href} 
+                className="group bg-slate-950/80 border border-slate-900 rounded-xl p-5 hover:border-pink-500/40 hover:shadow-[0_0_20px_rgba(236,72,153,0.05)] transition-all duration-200 hover:-translate-y-1 text-center"
+              >
+                <div className="text-2xl mb-2">{link.emoji}</div>
+                <h3 className="font-bold text-slate-200 group-hover:text-pink-400 transition-colors uppercase text-xs tracking-wider font-mono">{link.title}</h3>
+                <p className="text-[10px] text-slate-500 uppercase mt-1 font-mono">{link.desc}</p>
+              </Link>
+            ))}
           </div>
         </div>
+
       </div>
     </div>
   );

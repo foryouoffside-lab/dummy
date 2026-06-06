@@ -1,0 +1,921 @@
+'use client';
+
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { COACHES, getActiveCoach, getCoachResponse, speakCoachText, handleCoachFeedback } from '../../../../lib/coachVoice';
+import Link from 'next/link';
+import { recordDrillResult } from '../../../../lib/performanceTelemetry';
+import { getAdaptiveParams } from '../../../../lib/adaptiveDifficulty';
+
+import { 
+  Target, Zap, Timer, Trophy, 
+  Volume2, VolumeX, Maximize2, Minimize2, Home, ChevronRight, Play,
+  Info, Activity, Crosshair, RefreshCw, BarChart3, TrendingUp, Lightbulb, Clock, CheckCircle2, GraduationCap, Sparkles, Award
+} from 'lucide-react';
+
+const DRILL_DURATION = 60;
+const PLAYER_MAX_SPEED = 280; // pixels per second
+const STRAFE_ACCEL = 1800; // acceleration pixels per second squared
+const STRAFE_DRAG = 1200; // deceleration/friction
+
+export default function PrefireCornerClearerClient() {
+const GAME_YAWS = {
+  valorant: 0.07,
+  cs2: 0.022,
+  apex: 0.022,
+  overwatch: 0.0066,
+  siege: 0.0057,
+  fortnite: 0.01,
+  cod: 0.022,
+  pubg: 0.002222,
+  destiny2: 0.0066,
+  halo: 0.022,
+  battlefield: 0.022,
+  tf2: 0.022
+};
+
+
+  const canvasRef = useRef(null);
+  const animationRef = useRef(null);
+  const containerRef = useRef(null);
+  const pageRef = useRef(null);
+
+  const [gameState, setGameState] = useState('start');
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [score, setScore] = useState(0);
+  const [bestScore, setBestScore] = useState(0);
+  const [accuracy, setAccuracy] = useState(100);
+  const [shotsFired, setShotsFired] = useState(0);
+  const [movingErrors, setMovingErrors] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(DRILL_DURATION);
+  const [pointerLocked, setPointerLocked] = useState(false);
+  const [gameType, setGameType] = useState('valorant');
+  const [dpi, setDpi] = useState(800);
+  const [inGameSens, setInGameSens] = useState(0.35);
+  const [cmPer360, setCmPer360] = useState(0);
+
+  // High performance references
+  const virtualCrosshair = useRef({ x: 0, y: 0 });
+  const canvasSizeRef = useRef({ width: 800, height: 450 });
+  const crosshairInitRef = useRef(false);
+  const sensitivityMultiplierRef = useRef(1);
+
+  // Player & strafe variables
+  const playerPositionX = useRef(200); // 0 to 800 bounds
+  const playerVelocityX = useRef(0);
+  const keysPressed = useRef({ KeyA: false, KeyD: false });
+  const targetRef = useRef(null); // spawn target with cover clearance coordinates
+  const lastSpawnTimeRef = useRef(0);
+
+  // Stats variables
+  const hitsRef = useRef(0);
+  const totalShotsRef = useRef(0);
+  const movingErrorsRef = useRef(0);
+  const timerIntervalRef = useRef(null);
+  const isActiveRef = useRef(false);
+  const gameStateRef = useRef('start');
+  const audioCtxRef = useRef(null);
+  const timeLeftRef = useRef(DRILL_DURATION);
+
+  // Feed overlay state
+  const feedbacksRef = useRef([]);
+  const [feedbacks, setFeedbacks] = useState([]);
+
+  // S+ AI Coach Performance Tracking & Sensitivity Auto-Adjustment States
+  const [activeCoach, setActiveCoach] = useState(null);
+  const [coachSubtitle, setCoachSubtitle] = useState('');
+  const [coachSpeaking, setCoachSpeaking] = useState(false);
+  const [voiceEnabled, setVoiceEnabled] = useState(true);
+  const [sensAdjustedAlert, setSensAdjustedAlert] = useState(null);
+
+  const speakText = useCallback((text, priority = false) => {
+    if (typeof window === 'undefined') return;
+    try {
+      const coachId = localStorage.getItem('activeFpCoach') || 'athena';
+      const coachObj = COACHES.find(c => c.id === coachId) || COACHES[0];
+      setActiveCoach(coachObj);
+      
+      handleCoachFeedback(text, {
+        inGameSens,
+        setInGameSens,
+        gameType,
+        dpi,
+        coachId,
+        voiceEnabled,
+        priority,
+        setCoachSubtitle,
+        setCoachSpeaking
+      });
+    } catch (e) {
+      console.error("Coach speakText error:", e);
+    }
+  }, [voiceEnabled, inGameSens, gameType, dpi]);
+
+  const checkSensitivityAdjustment = useCallback((type, extra = {}) => {
+    const currentGameState = typeof gameState !== 'undefined' ? gameState : 'playing';
+    if (currentGameState !== 'playing') return;
+    try {
+      const coachId = localStorage.getItem('activeFpCoach') || 'athena';
+      handleCoachFeedback(type, {
+        inGameSens,
+        setInGameSens,
+        gameType,
+        dpi,
+        coachId,
+        voiceEnabled,
+        extra,
+        setSensAdjustedAlert
+      });
+    } catch (e) {
+      console.error("Coach checkSensitivityAdjustment error:", e);
+    }
+  }, [inGameSens, gameState, gameType, dpi, voiceEnabled]);
+
+
+  // Auto-save user calibration preferences
+  useEffect(() => {
+    if (gameState === 'playing') return;
+    try {
+      localStorage.setItem('proSens', inGameSens.toString());
+      localStorage.setItem('proDpi', dpi.toString());
+      localStorage.setItem('proGame', gameType);
+      if (gameType === 'pubg') {
+        localStorage.setItem('pubgSens', inGameSens.toString());
+      }
+    } catch (e) {}
+  }, [inGameSens, dpi, gameType, gameState]);
+
+
+  // S+ AI Coach Performance Tracking & Sensitivity Auto-Adjustment States
+  
+
+  
+
+  
+
+
+  // Auto-save user calibration preferences
+  useEffect(() => {
+    if (gameState === 'playing') return;
+    try {
+      localStorage.setItem('proSens', inGameSens.toString());
+      localStorage.setItem('proDpi', dpi.toString());
+      localStorage.setItem('proGame', gameType);
+      if (gameType === 'pubg') {
+        localStorage.setItem('pubgSens', inGameSens.toString());
+      }
+    } catch (e) {}
+  }, [inGameSens, dpi, gameType, gameState]);
+
+
+  useEffect(() => {
+    try {
+      const s = localStorage.getItem('prefireCornerClearerBestScore');
+      if (s) {
+        const p = parseInt(s, 10);
+        if (!isNaN(p)) setBestScore(p);
+      }
+      const savedDpi = localStorage.getItem('proDpi');
+      if (savedDpi) setDpi(parseInt(savedDpi, 10));
+      const savedGameLocal = localStorage.getItem('proGame') || 'valorant';
+      const savedSens = localStorage.getItem(savedGameLocal === 'pubg' ? 'pubgSens' : 'proSens');
+      if (savedSens) setInGameSens(parseFloat(savedSens));
+      const savedGame = localStorage.getItem('proGame');
+      if (savedGame) {
+        setGameType(savedGame);
+      }
+    } catch(e){}
+  }, []);
+
+  useEffect(() => { gameStateRef.current = gameState; }, [gameState]);
+
+  // Compute sensitivity & eDPI
+  useEffect(() => {
+    const yaw = GAME_YAWS[gameType] || 0.07;
+    const counts = 360 / (yaw * inGameSens);
+    const inches = counts / dpi;
+    const cm = inches * 2.54;
+    setCmPer360(cm.toFixed(1));
+
+    sensitivityMultiplierRef.current = 45.0 / cm;
+  }, [dpi, inGameSens, gameType]);
+
+  const showFeedbackText = useCallback((text, type) => {
+    const id = Math.random().toString(36).substr(2, 9);
+    feedbacksRef.current.push({ id, text, type });
+    setFeedbacks([...feedbacksRef.current]);
+
+    setTimeout(() => {
+      feedbacksRef.current = feedbacksRef.current.filter(f => f.id !== id);
+      setFeedbacks([...feedbacksRef.current]);
+    }, 1000);
+  }, []);
+
+  const initAudio = useCallback(() => {
+    try {
+      if (!audioCtxRef.current) audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtxRef.current.state === 'suspended') audioCtxRef.current.resume();
+      return audioCtxRef.current;
+    } catch(e){ return null; }
+  }, []);
+
+  const playSound = useCallback((type) => {
+    if (!soundEnabled) return;
+    try {
+      const ctx = initAudio(); if (!ctx) return;
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      const now = ctx.currentTime;
+      const profiles = {
+        shoot: { f1: 350, f2: 100, type: 'sawtooth', dur: 0.12, vol: 0.1 },
+        hit: { f1: 950, f2: 1100, type: 'sine', dur: 0.08, vol: 0.06 },
+        fail: { f1: 220, f2: 180, type: 'triangle', dur: 0.15, vol: 0.12 }
+      };
+      const p = profiles[type] || profiles.shoot;
+      o.type = p.type;
+      o.frequency.setValueAtTime(p.f1, now);
+      o.frequency.exponentialRampToValueAtTime(p.f2, now + p.dur);
+      g.gain.setValueAtTime(p.vol, now);
+      g.gain.exponentialRampToValueAtTime(0.001, now + p.dur);
+      o.start(now); o.stop(now + p.dur);
+    } catch(e){}
+  }, [soundEnabled, initAudio]);
+
+  const requestPointerLock = useCallback(() => {
+    if (canvasRef.current) {
+      canvasRef.current.requestPointerLock();
+    }
+  }, []);
+
+  const handleCanvasClick = useCallback(() => {
+    if (gameState === 'playing' && !document.pointerLockElement) {
+      canvasRef.current?.requestPointerLock();
+    }
+  }, [gameState]);
+
+  useEffect(() => {
+    const h = () => {
+      const locked = document.pointerLockElement === canvasRef.current;
+      setPointerLocked(locked);
+      if (locked) {
+        crosshairInitRef.current = true;
+      } else if (gameStateRef.current === 'playing') {
+        showFeedbackText('CURSOR UNLOCKED - Click Canvas', 'error');
+      }
+    };
+    document.addEventListener('pointerlockchange', h);
+    return () => document.removeEventListener('pointerlockchange', h);
+  }, [showFeedbackText]);
+
+  // Capture relative pointer lock movements
+  useEffect(() => {
+    const h = (e) => {
+      if (document.pointerLockElement !== canvasRef.current) return;
+      const sens = sensitivityMultiplierRef.current;
+      virtualCrosshair.current.x += (e.movementX || 0) * sens;
+      virtualCrosshair.current.y += (e.movementY || 0) * sens;
+
+      const c = canvasRef.current;
+      if (c) {
+        virtualCrosshair.current.x = Math.max(0, Math.min(c.width, virtualCrosshair.current.x));
+        virtualCrosshair.current.y = Math.max(0, Math.min(c.height, virtualCrosshair.current.y));
+      }
+    };
+    document.addEventListener('mousemove', h);
+    return () => document.removeEventListener('mousemove', h);
+  }, []);
+
+  // Keyboard movement keys listener
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (gameStateRef.current !== 'playing') return;
+      if (e.code === 'KeyA' || e.code === 'KeyD') {
+        keysPressed.current[e.code] = true;
+      }
+    };
+
+    const handleKeyUp = (e) => {
+      if (e.code === 'KeyA' || e.code === 'KeyD') {
+        keysPressed.current[e.code] = false;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, []);
+
+  const spawnNewTarget = useCallback(() => {
+    // Wall pillars are drawn at left: 250 to 300, right: 500 to 550.
+    // Target spawns behind either left wall (x: 220) or right wall (x: 580)
+    const side = Math.random() < 0.5 ? 'left' : 'right';
+    const tx = side === 'left' ? 210 : 590;
+    targetRef.current = {
+      x: tx,
+      y: 160 + Math.random() * 80,
+      r: 12,
+      side: side,
+      visible: false // will be checked against peeking position
+    };
+    lastSpawnTimeRef.current = performance.now();
+  }, []);
+
+  const fireShot = useCallback(() => {
+    if (gameStateRef.current !== 'playing' || !isActiveRef.current || !crosshairInitRef.current) return;
+    
+    totalShotsRef.current++;
+    setShotsFired(totalShotsRef.current);
+
+    const speed = Math.abs(playerVelocityX.current);
+    const moving = speed > 25; // if moving too fast
+
+    if (moving) {
+      movingErrorsRef.current++;
+      setMovingErrors(movingErrorsRef.current);
+      playSound('fail'); if (typeof checkSensitivityAdjustment === 'function') checkSensitivityAdjustment('miss', { dist: typeof dist !== 'undefined' ? dist : 50, targetSize: typeof targetRadius !== 'undefined' ? targetRadius : (typeof TARGET_SIZE !== 'undefined' ? TARGET_SIZE : (typeof TARGET_RADIUS !== 'undefined' ? TARGET_RADIUS : 15)) }); if (typeof checkSensitivityAdjustment === 'function') checkSensitivityAdjustment('miss', { dist: typeof dist !== 'undefined' ? dist : 50, targetSize: typeof targetRadius !== 'undefined' ? targetRadius : (typeof TARGET_SIZE !== 'undefined' ? TARGET_SIZE : (typeof TARGET_RADIUS !== 'undefined' ? TARGET_RADIUS : 15)) });
+      showFeedbackText('❌ MOVING ERROR! (Inaccurate Shot)', 'error');
+      
+      const total = totalShotsRef.current;
+      setAccuracy(Math.round((hitsRef.current / total) * 100));
+      return;
+    }
+
+    // Stop strafe shot: perfect accuracy
+    playSound('shoot');
+
+    const target = targetRef.current;
+    if (target && target.visible) {
+      const ch = virtualCrosshair.current;
+      const dx = ch.x - target.x;
+      const dy = ch.y - target.y;
+      if (Math.hypot(dx, dy) < target.r + 10) {
+        hitsRef.current++;
+        setScore(hitsRef.current);
+        playSound('hit');
+        showFeedbackText('🎯 PREFIRE KILL!', 'success');
+        spawnNewTarget();
+      } else {
+        showFeedbackText('✗ Missed Target', 'warn');
+      }
+    } else {
+      showFeedbackText('✗ Blind Fire Into Cover', 'warn');
+    }
+
+    const total = totalShotsRef.current;
+    setAccuracy(Math.round((hitsRef.current / total) * 100));
+  }, [spawnNewTarget, playSound, showFeedbackText]);
+
+  useEffect(() => {
+    const handleMousedown = (e) => {
+      if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
+      if (gameState === 'playing' && document.pointerLockElement) {
+        e.preventDefault();
+        fireShot();
+      }
+    };
+    document.addEventListener('mousedown', handleMousedown);
+    return () => document.removeEventListener('mousedown', handleMousedown);
+  }, [gameState, fireShot]);
+
+  const resetGameLobby = useCallback(() => {
+    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    if (animationRef.current) cancelAnimationFrame(animationRef.current);
+    isActiveRef.current = false;
+    setGameState('start'); gameStateRef.current = 'start';
+    setScore(0); setShotsFired(0); setMovingErrors(0); setAccuracy(100);
+    timeLeftRef.current = DRILL_DURATION; setTimeLeft(DRILL_DURATION);
+    crosshairInitRef.current = false;
+    if (document.pointerLockElement) {
+      document.exitPointerLock();
+    }
+  }, []);
+
+  useEffect(() => {
+    const h = () => {
+      const active = !!document.fullscreenElement;
+      setIsFullscreen(active);
+      if (!active && gameStateRef.current === 'playing') {
+        resetGameLobby();
+      }
+    };
+    document.addEventListener('fullscreenchange', h);
+    return () => document.removeEventListener('fullscreenchange', h);
+  }, [resetGameLobby]);
+
+  const updateBestScoreValue = useCallback((fs) => {
+    try {
+      const c = parseInt(localStorage.getItem('prefireCornerClearerBestScore') || '0', 10);
+      if (fs > c) {
+        localStorage.setItem('prefireCornerClearerBestScore', fs.toString());
+        setBestScore(fs);
+      }
+    } catch(e){}
+  }, []);
+
+  const startTimerTick = useCallback(() => {
+    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    timerIntervalRef.current = setInterval(() => {
+      if (gameStateRef.current === 'playing' && isActiveRef.current) {
+        timeLeftRef.current -= 1;
+        setTimeLeft(timeLeftRef.current);
+        if (timeLeftRef.current <= 0) {
+          clearInterval(timerIntervalRef.current);
+          timerIntervalRef.current = null;
+          setGameState('gameOver');
+          gameStateRef.current = 'gameOver';
+          isActiveRef.current = false;
+          updateBestScoreValue(hitsRef.current);
+    // Record telemetry for AI coaching system
+    try {
+      recordDrillResult('prefire-corner', {
+        score: scoreRef.current,
+        accuracy: accuracy,
+        reactionTimeMs: null,
+        trackingAccuracy: null,
+        comboMax: 0,
+        overshoots: 0,
+        undershoots: 0,
+        sensitivity: inGameSens,
+        dpi,
+        gameType,
+        duration: DRILL_DURATION
+      });
+    } catch (e) {}
+
+          if (document.pointerLockElement) {
+            document.exitPointerLock();
+          }
+        }
+      }
+    }, 1000);
+  }, [updateBestScoreValue]);
+
+  const startGameClearer = useCallback(() => {
+    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    try {
+      const el = pageRef.current;
+      if (el && !document.fullscreenElement) {
+        el.requestFullscreen().catch((e) => console.warn("Fullscreen request blocked", e));
+        setIsFullscreen(true);
+      }
+    } catch(e) {
+      console.warn("Fullscreen request blocked", e);
+    }
+
+    setGameState('playing'); gameStateRef.current = 'playing';
+    setScore(0); hitsRef.current = 0;
+    setShotsFired(0); totalShotsRef.current = 0;
+    setMovingErrors(0); movingErrorsRef.current = 0;
+    setAccuracy(100);
+    playerPositionX.current = 400; // middle
+    playerVelocityX.current = 0;
+    keysPressed.current = { KeyA: false, KeyD: false };
+    timeLeftRef.current = DRILL_DURATION; setTimeLeft(DRILL_DURATION);
+    isActiveRef.current = true;
+    crosshairInitRef.current = false;
+
+    spawnNewTarget();
+    startTimerTick();
+
+    if (canvasRef.current) {
+      try {
+        canvasRef.current.requestPointerLock();
+      } catch (e) {
+        console.warn("Pointer lock blocked", e);
+      }
+    }
+    crosshairInitRef.current = true;
+  }, [startTimerTick, requestPointerLock, spawnNewTarget]);
+
+  // Main rendering loop with player A/D physics peeking checks
+  useEffect(() => {
+    if (gameState !== 'playing') return;
+    const cvs = canvasRef.current; if (!cvs) return;
+    const ctx = cvs.getContext('2d');
+
+    const updateLayout = () => {
+      const cr = containerRef.current; if (!cr) return;
+      const rect = cr.getBoundingClientRect();
+      let w = rect.width, h = w * (9/16);
+      if (h > rect.height) { h = rect.height; w = h * (16/9); }
+      cvs.width = w; cvs.height = h;
+      cvs.style.width = `${w}px`;
+      cvs.style.height = `${h}px`;
+      canvasSizeRef.current = { width: w, height: h };
+      cvs.style.position = 'absolute';
+      cvs.style.left = `${(rect.width - w) / 2}px`;
+      cvs.style.top = `${(rect.height - h) / 2}px`;
+
+      if (w > 0 && h > 0 && (!crosshairInitRef.current || (virtualCrosshair.current.x === 0 && virtualCrosshair.current.y === 0))) {
+        virtualCrosshair.current = { x: w / 2, y: h / 2 };
+        crosshairInitRef.current = true;
+      }
+    };
+
+    updateLayout();
+    window.addEventListener('resize', updateLayout);
+
+    let lastTime = performance.now();
+
+    const loop = (now) => {
+      const dt = Math.min(0.033, (now - lastTime) / 1000);
+      lastTime = now;
+
+      const { width: cw, height: ch } = canvasSizeRef.current;
+      const chRef = virtualCrosshair.current;
+
+      if (isActiveRef.current && cw > 0 && ch > 0) {
+        // Keyboard acceleration / physics bounds
+        let dir = 0;
+        if (keysPressed.current.KeyA) dir -= 1;
+        if (keysPressed.current.KeyD) dir += 1;
+
+        if (dir !== 0) {
+          playerVelocityX.current += dir * STRAFE_ACCEL * dt;
+          // Clamp speed
+          playerVelocityX.current = Math.max(-PLAYER_MAX_SPEED, Math.min(PLAYER_MAX_SPEED, playerVelocityX.current));
+        } else {
+          // Decay / deceleration
+          const drag = Math.sign(playerVelocityX.current) * STRAFE_DRAG * dt;
+          if (Math.abs(playerVelocityX.current) <= Math.abs(drag)) {
+            playerVelocityX.current = 0;
+          } else {
+            playerVelocityX.current -= drag;
+          }
+        }
+
+        playerPositionX.current += playerVelocityX.current * dt;
+        // Clamp layout coordinates
+        playerPositionX.current = Math.max(100, Math.min(cw - 100, playerPositionX.current));
+
+        // Determine if target is visible behind cover blocks
+        // Cover Left: 240 to 300. Cover Right: cw - 300 to cw - 240.
+        // Target is at x: 210 (left cover outer) or x: cw - 210 (right cover outer)
+        // If player slides far enough left (x < 230), the left target becomes visible.
+        // If player slides far enough right (x > cw - 230), the right target becomes visible.
+        const target = targetRef.current;
+        if (target) {
+          if (target.side === 'left') {
+            target.visible = playerPositionX.current < 250;
+          } else {
+            target.visible = playerPositionX.current > cw - 250;
+          }
+        }
+      }
+
+      // Draw level background
+      ctx.fillStyle = '#0a0d16';
+      ctx.fillRect(0, 0, cw, ch);
+
+      // Floor grid lines
+      ctx.strokeStyle = '#1e293b';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, ch - 80); ctx.lineTo(cw, ch - 80);
+      ctx.stroke();
+
+      // Cover block left pillar
+      ctx.fillStyle = '#1e1b4b';
+      ctx.strokeStyle = '#312e81';
+      ctx.lineWidth = 2;
+      ctx.fillRect(250, 0, cw * 0.12, ch - 80);
+      ctx.strokeRect(250, 0, cw * 0.12, ch - 80);
+
+      // Cover block right pillar
+      ctx.fillRect(cw - 250 - cw * 0.12, 0, cw * 0.12, ch - 80);
+      ctx.strokeRect(cw - 250 - cw * 0.12, 0, cw * 0.12, ch - 80);
+
+      // Draw target behind cover if visible (representing peeking defender)
+      const target = targetRef.current;
+      if (target) {
+        if (target.visible) {
+          ctx.shadowBlur = 15; ctx.shadowColor = '#ef4444';
+          ctx.fillStyle = '#ef4444';
+          ctx.beginPath();
+          ctx.arc(target.x, target.y, target.r, 0, Math.PI * 2);
+          ctx.fill();
+          
+          // Outer head rings
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.arc(target.x, target.y, target.r + 4, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.shadowBlur = 0;
+        } else {
+          // Draw a faint outline representing scanning behind walls
+          ctx.strokeStyle = 'rgba(239, 68, 68, 0.08)';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.arc(target.x, target.y, target.r, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+      }
+
+      // Draw player visual indicator (A/D position bar at bottom edge)
+      ctx.fillStyle = '#10b981';
+      ctx.fillRect(playerPositionX.current - 15, ch - 85, 30, 8);
+      ctx.fillStyle = '#34d399';
+      ctx.font = 'bold 9px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('YOU', playerPositionX.current, ch - 92);
+
+      // Draw crosshair relative indicator
+      if (chRef.x > 0 && chRef.x < cw && chRef.y > 0 && chRef.y < ch) {
+        const speed = Math.abs(playerVelocityX.current);
+        const moving = speed > 25;
+        ctx.strokeStyle = moving ? '#ef4444' : pointerLocked ? '#10b981' : '#f59e0b';
+        ctx.lineWidth = 2;
+        
+        // Error expansion offset
+        const offset = moving ? 12 : 0;
+
+        ctx.beginPath();
+        ctx.arc(chRef.x, chRef.y, 6 + offset, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(chRef.x - 14 - offset, chRef.y); ctx.lineTo(chRef.x - 4 - offset, chRef.y);
+        ctx.moveTo(chRef.x + 4 + offset, chRef.y); ctx.lineTo(chRef.x + 14 + offset, chRef.y);
+        ctx.moveTo(chRef.x, chRef.y - 14 - offset); ctx.lineTo(chRef.x, chRef.y - 4 - offset);
+        ctx.moveTo(chRef.x, chRef.y + 4 + offset); ctx.lineTo(chRef.x, chRef.y + 14 + offset);
+        ctx.stroke();
+
+        ctx.fillStyle = moving ? '#ef4444' : pointerLocked ? '#10b981' : '#f59e0b';
+        ctx.beginPath();
+        ctx.arc(chRef.x, chRef.y, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      if (!pointerLocked) {
+        ctx.fillStyle = 'rgba(8, 13, 26, 0.9)';
+        ctx.fillRect(cw / 2 - 190, ch / 2 - 25, 380, 50);
+        ctx.strokeStyle = '#ef4444';
+        ctx.strokeRect(cw / 2 - 190, ch / 2 - 25, 380, 50);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 11px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('CLICK CANVAS TO CAPTURE RAW MOUSE INPUT', cw / 2, ch / 2 + 4);
+      }
+
+      animationRef.current = requestAnimationFrame(loop);
+    };
+
+    animationRef.current = requestAnimationFrame(loop);
+
+    return () => {
+      cancelAnimationFrame(animationRef.current);
+      window.removeEventListener('resize', updateLayout);
+    };
+  }, [gameState, pointerLocked, spawnNewTarget]);
+
+  return (
+    <div ref={pageRef} className="min-h-screen select-none font-mono bg-[#080d1a] text-slate-100 relative overflow-hidden">
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-950/15 via-[#080d1a] to-[#080d1a] pointer-events-none z-0" />
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(147,51,234,0.02)_1px,_transparent_1px),_linear-gradient(90deg,_rgba(147,51,234,0.02)_1px,_transparent_1px)] bg-[size:40px_40px] pointer-events-none z-0" />
+
+      <div className={`${isFullscreen ? 'w-full h-screen p-0 m-0' : 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6'} relative z-10`}>
+        {!isFullscreen && (
+          <nav aria-label="Breadcrumb" className="mb-4">
+            <ol className="flex items-center gap-2 text-[10px] text-slate-400 uppercase tracking-widest">
+              <li><Link href="/" className="hover:text-red-400 transition-colors"><Home className="w-3.5 h-3.5" /></Link></li>
+              <li><ChevronRight className="w-3 h-3 text-slate-700" /></li>
+              <li><Link href="/drills/fps" className="hover:text-red-400 transition-colors">FPS Sector</Link></li>
+              <li><ChevronRight className="w-3 h-3 text-slate-700" /></li>
+              <li><span className="text-purple-400 font-bold">Prefire Corner Clearer</span></li>
+            </ol>
+          </nav>
+        )}
+
+        {!isFullscreen && (
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 border-b border-slate-900 pb-5">
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-purple-950/30 border border-purple-500/20 text-purple-400 rounded-xl">
+                <Crosshair className="w-7 h-7 animate-pulse" />
+              </div>
+              <div>
+                <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white uppercase bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">
+                  Prefire Corner Clearer
+                </h1>
+                <p className="text-xs text-slate-400 tracking-wider mt-0.5 font-mono">
+                  {pointerLocked ? '🟢 MOUSE LOCKED' : '🔴 CLICK CANVAS TO CAPTURE'} • {cmPer360} cm/360 • {gameType.toUpperCase()}
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <button onClick={() => setSoundEnabled(!soundEnabled)} className="p-2 rounded-lg border border-slate-800 bg-[#0c1224] text-slate-350 hover:border-slate-700 transition" title="Sound">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button>
+              <button onClick={startGameClearer} className="px-4 py-2 rounded-lg border border-slate-800 bg-[#0c1224] hover:bg-slate-900 text-green-400 hover:border-slate-700 font-bold transition text-xs uppercase tracking-wider">Start Game</button>
+            </div>
+          </div>
+        )}
+
+        {gameState === 'start' && (
+          <div className="absolute inset-0 bg-[#080d1a]/95 flex items-center justify-center p-6 z-30 overflow-y-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-1 bg-[#0c1224]/80 border border-slate-900 rounded-xl p-6 flex flex-col justify-between backdrop-blur-md">
+              <div>
+                <h3 className="text-xs font-bold text-purple-400 mb-4 flex items-center gap-2 border-b border-slate-900 pb-2 uppercase tracking-wider">
+                  <Info className="w-4 h-4" />
+                  PRE-AIM CLEARING RULES
+                </h3>
+                <ul className="space-y-4 text-xs leading-relaxed text-slate-400">
+                  <li className="flex items-start gap-2">
+                    <span className="text-purple-500 font-bold">1.</span>
+                    <span>Use <kbd className="px-1.5 py-0.5 bg-slate-900 border border-slate-800 text-slate-350 rounded font-sans text-[10px]">A</kbd> and <kbd className="px-1.5 py-0.5 bg-slate-900 border border-slate-800 text-slate-350 rounded font-sans text-[10px]">D</kbd> keys to move your player indicator sideways behind covers.</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-purple-500 font-bold">2.</span>
+                    <span>Peek corners to reveal peeking red targets. You must counter-strafe (release movement keys or tap opposite) to achieve 0 velocity before clicking.</span>
+                  </li>
+                  <li className="flex items-start gap-2 text-red-400">
+                    <span className="text-red-400 font-bold">★</span>
+                    <span>Shooting while moving triggers a **MOVING ERROR**, dispersing shots inaccurately. Practice smooth stops!</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="lg:col-span-2 bg-[#0c1224]/80 border border-slate-900 rounded-xl p-6 backdrop-blur-md flex flex-col justify-between">
+              <div>
+                <h3 className="text-xs font-bold text-white mb-4 flex items-center gap-2 border-b border-slate-900 pb-2 uppercase tracking-wider">
+                  <TrendingUp className="w-4 h-4 text-purple-400" />
+                  PEEK CALIBRATION
+                </h3>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                  <div>
+                    <label className="block text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-2">Game Profile</label>
+                    <select 
+                      value={gameType}
+                      onChange={(e) => setGameType(e.target.value)}
+                      className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-2 text-xs text-white focus:outline-none focus:border-red-500/50 font-mono"
+                    >
+                      <option value="valorant">Valorant</option>
+                      <option value="cs2">CS2 / Global Offensive</option>
+                      <option value="apex">Apex Legends</option>
+                      <option value="overwatch">Overwatch 2</option>
+                      <option value="siege">Rainbow Six Siege</option>
+                      <option value="fortnite">Fortnite</option>
+                      <option value="cod">Call of Duty / Warzone</option>
+                      <option value="pubg">PUBG</option>
+                      <option value="destiny2">Destiny 2</option>
+                      <option value="halo">Halo Infinite</option>
+                      <option value="battlefield">Battlefield 2042</option>
+                      <option value="tf2">Team Fortress 2</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-2">In-Game Sens</label>
+                    <input 
+                      type="number"
+                      step="0.01"
+                      value={inGameSens}
+                      onChange={(e) => setInGameSens(Math.max(0.01, parseFloat(e.target.value) || 0.35))}
+                      className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-2 text-xs text-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-2">Mouse DPI</label>
+                    <input 
+                      type="number"
+                      step="50"
+                      value={dpi}
+                      onChange={(e) => setDpi(Math.max(100, parseInt(e.target.value, 10) || 800))}
+                      className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-2 text-xs text-white"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-8 flex flex-col sm:flex-row gap-4 items-center justify-between border-t border-slate-900 pt-6">
+                <div>
+                  <span className="text-[10px] text-slate-550 block uppercase">Personal Best Record</span>
+                  <span className="text-white font-bold text-lg flex items-center gap-1.5">
+                    <Trophy className="w-4 h-4 text-yellow-500" />
+                    {bestScore} Kills
+                  </span>
+                </div>
+                <button
+                  onClick={startGameClearer}
+                  className="w-full sm:w-auto px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-lg text-sm flex items-center justify-center gap-2 shadow-lg shadow-purple-500/25 uppercase tracking-wider transition animate-pulse"
+                >
+                  <Play className="w-4 h-4 fill-white" />
+                  Launch Fullscreen Training
+                </button>
+              </div>
+            </div>
+          </div>
+          </div>
+        )}
+
+        {true && (
+          <div className={isFullscreen ? "w-full h-full" : ""}>
+            
+
+            <div 
+              ref={containerRef} 
+              className={isFullscreen 
+                ? "w-full h-full bg-[#050811] relative overflow-hidden flex items-center justify-center" 
+                : "w-full aspect-video min-h-[400px] lg:min-h-[500px] bg-[#050811] border border-slate-800 rounded-xl relative overflow-hidden flex items-center justify-center"}
+            >
+              <canvas ref={canvasRef} onClick={handleCanvasClick} />
+
+            {/* S+ Pro Coach Dynamic Audio Guidance HUD & Alerts (Visual Text Hidden) */}
+
+
+            {/* S+ Pro Coach Dynamic Audio Guidance HUD & Alerts (Visual Text Hidden) */}
+
+            
+
+
+              
+            </div>
+            
+            <div className="mt-4 text-center text-[10px] text-slate-550 flex items-center justify-center gap-4">
+              <span>⌨️ Use A/D to peek corners. Click to fire when fully stopped.</span>
+              <span>• Press <kbd className="px-1.5 py-0.5 bg-slate-900 border border-slate-800 text-slate-350 rounded font-sans text-[10px]">ESC</kbd> to return to lobby.</span>
+            </div>
+          </div>
+        )}
+
+        {gameState === 'gameOver' && (
+          <div className="absolute inset-0 bg-[#080d1a]/95 flex items-center justify-center p-6 z-30 overflow-y-auto">
+            <div className="bg-[#0c1224]/80 border border-slate-900 rounded-xl p-8 backdrop-blur-md max-w-3xl mx-auto">
+            <h2 className="text-xl font-bold text-purple-400 text-center mb-6 uppercase tracking-widest flex items-center justify-center gap-2">
+              <Award className="w-5 h-5 text-yellow-500" />
+              PEEK SESSION COMPLETED
+            </h2>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+              <div className="space-y-4">
+                <div className="bg-slate-950 p-4 rounded border border-slate-900">
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="text-slate-550 block uppercase">Prefire Clear Score:</span>
+                    <span className="text-white font-bold text-xl">{score} Kills</span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-slate-950 p-3 rounded border border-slate-900 text-center">
+                    <span className="text-[10px] text-slate-550 block uppercase">Moving Errors</span>
+                    <span className="text-red-400 font-bold text-sm">{movingErrors}</span>
+                  </div>
+                  <div className="bg-slate-950 p-3 rounded border border-slate-900 text-center">
+                    <span className="text-[10px] text-slate-550 block uppercase">Accuracy %</span>
+                    <span className="text-white font-bold text-sm">{accuracy}%</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="bg-slate-950 p-4 rounded border border-slate-900">
+                  <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-900 pb-2 mb-3">
+                    DIAGNOSTICS ANALYTICS
+                  </h4>
+                  <div className="text-xs leading-relaxed text-slate-350">
+                    <p>Total Shots Fired: <span className="text-white font-bold">{shotsFired}</span></p>
+                    <p className="mt-1">Peeking Sync Error Ratio: <span className="text-red-400 font-bold">{shotsFired > 0 ? Math.round((movingErrors / shotsFired) * 100) : 0}%</span></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-[#080d1a] border border-slate-800 rounded-lg p-5 mb-8 text-left shadow-inner">
+              <h3 className="text-xs font-bold text-purple-400 font-mono uppercase tracking-widest border-b border-slate-800 pb-2 mb-3 flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-purple-500 animate-pulse" />
+                AI COACH DIAGNOSTICS & RECOMMENDATION
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs leading-relaxed text-slate-350">
+                <div className="space-y-2 border-r border-slate-900 pr-6">
+                  <p className="font-bold text-white uppercase text-[10px] tracking-wider font-mono">Performance Index:</p>
+                  <ul className="space-y-2 list-disc pl-4">
+                    {movingErrors > 2 ? (
+                      <li className="text-red-400">⚠️ Strafe Deceleration Lag: You are pressing the trigger before releasing A/D completely.</li>
+                    ) : (
+                      <li className="text-green-400">🔥 Symmetrical Strafe: Clean peeks and instant stops. Excellent counter-strafe sync!</li>
+                    )}
+                  </ul>
+                </div>
+                <div className="space-y-3">
+                  <p className="font-bold text-white uppercase text-[10px] tracking-wider font-mono">Esports Routine:</p>
+                  <p className="text-slate-350">
+                    Your corner peek timing is solid. Try practicing CS2 mode to lower targets hitboxes. Spend 5 runs focusing strictly on pre-aim placement.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center border-t border-slate-900 pt-6">
+              <button onClick={startGameClearer} className="w-full sm:w-auto px-6 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-lg text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition"><RefreshCw className="w-4.5 h-4.5" />Train Again</button>
+              <Link href="/drills/fps" className="w-full sm:w-auto"><button className="w-full px-6 py-2.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-350 font-bold rounded-lg text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition">Return to Lobby</button></Link>
+            </div>
+          </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

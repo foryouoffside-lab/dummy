@@ -181,9 +181,20 @@ export default function HomePageClient() {
   };
 
   return (
-    <div className="min-h-screen bg-white selection:bg-blue-100 selection:text-blue-900">
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-200/50" role="banner">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div 
+      className="min-h-screen bg-[#050508] text-gray-100 selection:bg-blue-500/20 selection:text-blue-400 font-sans relative overflow-hidden"
+      style={{ 
+        backgroundImage: 'radial-gradient(circle at 50% 50%, rgba(20, 24, 38, 0.4) 0%, rgba(5, 5, 8, 1) 85%), linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px)', 
+        backgroundSize: '100% 100%, 48px 48px, 48px 48px' 
+      }}
+    >
+      {/* Decorative Blur Shapes */}
+      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-blue-600/10 rounded-full filter blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-10 right-10 w-[600px] h-[600px] bg-purple-600/10 rounded-full filter blur-[150px] pointer-events-none" />
+
+      {/* HEADER */}
+      <header className="fixed top-4 left-4 right-4 z-50 bg-black/40 backdrop-blur-xl border border-white/5 rounded-2xl shadow-2xl max-w-7xl mx-auto" role="banner">
+        <div className="px-6 sm:px-8">
           <div className="flex items-center justify-between h-16">
             <Link 
               href="/" 
@@ -191,28 +202,27 @@ export default function HomePageClient() {
               aria-label="SkillDrills Home - Free Brain Training Platform"
               title="SkillDrills - Free FPS and Cognitive Training"
             >
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                <Target className="w-5 h-5 text-white" aria-hidden="true" />
+              <div className="w-9 h-9 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+                <Target className="w-5.5 h-5.5 text-white" aria-hidden="true" />
               </div>
-              <span className="text-xl font-bold text-gray-900">
-                SkillDrills
+              <span className="text-xl font-black tracking-tight text-white uppercase bg-clip-text">
+                SkillDrills<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 ml-1 font-bold">Pro</span>
               </span>
             </Link>
             
             <nav aria-label="Main navigation" className="hidden sm:flex items-center gap-6">
-              <Link href="/drills/fps" className="text-sm text-gray-600 hover:text-blue-600 transition-colors font-medium">FPS</Link>
-              <Link href="/drills/cognitive" className="text-sm text-gray-600 hover:text-blue-600 transition-colors font-medium">Cognitive</Link>
-              <Link href="/drills/memory" className="text-sm text-gray-600 hover:text-blue-600 transition-colors font-medium">Memory</Link>
-              <Link href="/drills/academic" className="text-sm text-gray-600 hover:text-blue-600 transition-colors font-medium">Academic</Link>
-              <Link href="/drills/visual" className="text-sm text-gray-600 hover:text-blue-600 transition-colors font-medium">Visual</Link>
-              <Link href="/drills" className="text-sm bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium">All Drills</Link>
+              <Link href="/drills/fps" className="text-sm text-gray-400 hover:text-white transition-colors font-medium">FPS</Link>
+              <Link href="/drills/cognitive" className="text-sm text-gray-400 hover:text-white transition-colors font-medium">Cognitive</Link>
+              <Link href="/drills/memory" className="text-sm text-gray-400 hover:text-white transition-colors font-medium">Memory</Link>
+              <Link href="/drills/academic" className="text-sm text-gray-400 hover:text-white transition-colors font-medium">Academic</Link>
+              <Link href="/drills/visual" className="text-sm text-gray-400 hover:text-white transition-colors font-medium">Visual</Link>
+              <Link href="/drills" className="text-sm bg-gradient-to-r from-blue-600 to-purple-600 text-white px-5 py-2.5 rounded-xl hover:shadow-lg hover:shadow-blue-500/20 transition-all font-semibold">All Drills</Link>
             </nav>
           </div>
         </div>
       </header>
 
-      <div className="h-16" />
-
+      {/* SEO Content */}
       <section className="sr-only" aria-label="Platform description">
         <h2>SkillDrills - Free Brain Training and FPS Aim Trainer Platform</h2>
         <p>
@@ -229,105 +239,150 @@ export default function HomePageClient() {
         </p>
       </section>
 
-      <section className="relative overflow-hidden bg-gradient-to-r from-blue-600 to-purple-600" aria-labelledby="hero-heading">
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" />
-          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" style={{ animationDelay: '2s' }} />
-        </div>
-
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-          <div className="text-center max-w-3xl mx-auto">
-            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-6">
-              <Sparkles className="w-4 h-4 text-yellow-400" aria-hidden="true" />
-              <span className="text-sm text-white">100% Free Training Platform</span>
+      {/* HERO SECTION */}
+      <section className="relative pt-36 pb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" aria-labelledby="hero-heading">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          {/* Left Text Column */}
+          <div className="lg:col-span-7 space-y-8 text-center lg:text-left">
+            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-full px-4.5 py-1.5 mx-auto lg:mx-0 shadow-inner">
+              <Sparkles className="w-4 h-4 text-cyan-400" aria-hidden="true" />
+              <span className="text-xs text-blue-300 font-bold uppercase tracking-wider">Esports & Cognitive Training Hub</span>
             </div>
             
-            <h1 id="hero-heading" className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6">
-              Master Your Mind & Mechanics
+            <h1 id="hero-heading" className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-none text-white uppercase">
+              Master Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400">Mind</span> & <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-red-400 animate-pulse">Mechanics</span>
             </h1>
             
-            <p className="text-xl text-blue-100 mb-8">
-              115+ free interactive drills for FPS gaming, cognitive skills, memory, typing, and mental fitness. No sign-up required.
+            <p className="text-lg sm:text-xl text-gray-400 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
+              Elevate your visual processing, mechanical aim, and working memory. Leverage 115+ scientific, zero-latency training drills. No installations. No credit cards.
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
               <Link 
                 href="/drills" 
-                className="inline-flex items-center justify-center gap-2 bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-600"
+                className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-4 rounded-xl font-bold hover:shadow-xl hover:shadow-blue-500/25 transition transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-black"
               >
-                Browse All 115+ Drills
+                Access All Drills
                 <ArrowRight className="w-5 h-5" aria-hidden="true" />
               </Link>
               <Link 
                 href="/drills/fps" 
-                className="inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur-sm text-white border border-white/30 px-8 py-3 rounded-lg font-semibold hover:bg-white/20 transition transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-600"
+                className="inline-flex items-center justify-center gap-2 bg-white/5 backdrop-blur-md text-white border border-white/10 px-8 py-4 rounded-xl font-bold hover:bg-white/10 transition transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-black"
               >
-                <Crosshair className="w-5 h-5" aria-hidden="true" />
-                FPS Aim Trainer
+                <Crosshair className="w-5 h-5 text-red-400" aria-hidden="true" />
+                Aim Trainer
               </Link>
             </div>
             
-            <div className="grid grid-cols-3 gap-8 mt-12 pt-8 border-t border-white/20 max-w-2xl mx-auto">
-              <div>
-                <p className="text-3xl font-bold text-white">9</p>
-                <p className="text-sm text-blue-200">Training Categories</p>
+            {/* Quick Metrics */}
+            <div className="grid grid-cols-3 gap-6 max-w-xl mx-auto lg:mx-0 pt-8 border-t border-white/5">
+              <div className="text-left">
+                <p className="text-3xl font-black text-white tracking-tight">115+</p>
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mt-1">Free Drills</p>
               </div>
-              <div>
-                <p className="text-3xl font-bold text-white">115+</p>
-                <p className="text-sm text-blue-200">Free Drills</p>
+              <div className="text-left">
+                <p className="text-3xl font-black text-white tracking-tight">9</p>
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mt-1">Sectors</p>
               </div>
-              <div>
-                <p className="text-3xl font-bold text-white">0</p>
-                <p className="text-sm text-blue-200">Sign-Up Required</p>
+              <div className="text-left">
+                <p className="text-3xl font-black text-white tracking-tight">240Hz</p>
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mt-1">Optimized</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Simulation Widget Column */}
+          <div className="lg:col-span-5 hidden lg:block">
+            <div className="relative bg-gradient-to-br from-slate-950/60 to-black/80 backdrop-blur-2xl border border-white/10 rounded-3xl p-6 shadow-2xl shadow-blue-500/10 overflow-hidden group">
+              <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 opacity-60" />
+              
+              {/* Aiming Radar Interface */}
+              <div className="relative aspect-square max-w-[320px] mx-auto bg-black/40 rounded-full border border-blue-500/20 flex items-center justify-center overflow-hidden">
+                <div className="absolute inset-2 border border-blue-500/10 rounded-full" />
+                <div className="absolute inset-16 border border-blue-500/10 rounded-full" />
+                <div className="absolute inset-32 border border-blue-500/5 rounded-full" />
+                
+                {/* Radar sweep */}
+                <div className="absolute w-[2px] h-1/2 bg-gradient-to-t from-blue-500 to-transparent top-0 left-1/2 origin-bottom animate-[spin_4s_linear_infinite]" />
+                
+                {/* Glowing target nodes */}
+                <div className="absolute w-3.5 h-3.5 bg-green-400 rounded-full top-1/4 left-1/3 animate-ping shadow-[0_0_12px_#4ade80]" />
+                <div className="absolute w-2 h-2 bg-green-500 rounded-full top-1/4 left-1/3 shadow-[0_0_8px_#22c55e]" />
+                
+                <div className="absolute w-3 h-3 bg-red-400 rounded-full bottom-1/3 right-1/4 animate-ping shadow-[0_0_10px_#f87171]" style={{ animationDelay: '1s' }} />
+                <div className="absolute w-1.5 h-1.5 bg-red-500 rounded-full bottom-1/3 right-1/4 shadow-[0_0_6px_#ef4444]" />
+
+                <div className="absolute w-4 h-4 bg-purple-400 rounded-full top-1/2 right-1/3 animate-ping shadow-[0_0_14px_#c084fc]" style={{ animationDelay: '2.5s' }} />
+                <div className="absolute w-2 h-2 bg-purple-500 rounded-full top-1/2 right-1/3 shadow-[0_0_8px_#a855f7]" />
+                
+                {/* Center crosshair */}
+                <div className="absolute text-blue-400 w-8 h-8 flex items-center justify-center font-light"><Crosshair className="w-6 h-6 animate-pulse" /></div>
+              </div>
+
+              {/* Telemetry Log */}
+              <div className="mt-6 bg-black/50 rounded-xl border border-white/5 p-4 font-mono text-[10px] space-y-2 text-gray-400">
+                <p className="flex justify-between"><span className="text-cyan-400">&gt; NEURAL_LATENCY:</span> <span className="text-green-400 font-bold">142ms (EXCELLENT)</span></p>
+                <p className="flex justify-between"><span className="text-cyan-400">&gt; AIM_MATCHING:</span> <span className="text-white">DPI_800 | SENS_0.35</span></p>
+                <p className="flex justify-between"><span className="text-cyan-400">&gt; STABILITY_INDEX:</span> <span className="text-cyan-300 font-bold">98.6%</span></p>
+                <div className="h-1 bg-white/5 rounded overflow-hidden mt-1">
+                  <div className="h-full bg-gradient-to-r from-blue-500 to-purple-500 w-[92%] animate-pulse" />
+                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="bg-white py-16" aria-labelledby="categories-heading">
+      {/* CATEGORIES SECTION */}
+      <section className="py-20 relative border-t border-white/5 bg-black/20" aria-labelledby="categories-heading">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 id="categories-heading" className="text-3xl font-bold text-gray-900 mb-4">
-              Explore Training Categories
+          <div className="text-center mb-16 space-y-3">
+            <h2 id="categories-heading" className="text-3xl sm:text-4xl font-black tracking-tight text-white uppercase">
+              Training Sectors
             </h2>
             <p className="text-gray-500 max-w-2xl mx-auto">
-              Choose from 9 categories with 115+ free drills designed to improve your gaming, cognitive, academic, and fitness skills
+              Select a cognitive or mechanical vector to begin your diagnostic training program.
             </p>
           </div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
             {categories.map((category) => {
               const Icon = category.icon;
               return (
                 <Link
                   key={category.name}
                   href={category.href}
-                  className="group relative bg-white rounded-xl border-2 border-gray-100 p-5 sm:p-6 hover:border-transparent hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-300 hover:-translate-y-1"
+                  className="group relative bg-[#0E111A]/60 rounded-2xl border border-white/5 p-6 hover:border-white/10 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 overflow-hidden"
                   title={`${category.name} - ${category.description}`}
                 >
-                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-r ${category.gradient} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-lg`}>
+                  {/* Glowing background on hover */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  
+                  <div className={`w-12 h-12 rounded-xl ${category.iconBg} flex items-center justify-center mb-5 group-hover:scale-110 transition-transform shadow-lg shadow-black/40`}>
                     <Icon className="w-6 h-6 text-white" aria-hidden="true" />
                   </div>
                   
-                  <div className="flex items-start justify-between mb-1">
-                    <h3 className="text-lg font-semibold text-gray-900">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-lg font-bold text-white uppercase tracking-tight">
                       {category.name}
                     </h3>
                     {category.featured && (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-gradient-to-r from-amber-400 to-yellow-500 text-white text-xs font-semibold rounded-full">
-                        <Star className="w-3 h-3 fill-white" />
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 text-[10px] font-bold uppercase rounded-full">
                         Popular
                       </span>
                     )}
                   </div>
                   
-                  <p className="text-sm text-gray-500 mb-3">{category.description}</p>
-                  <div className="flex items-center justify-between pt-3 border-t border-gray-100 group-hover:border-gray-200 transition-colors">
-                    <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full group-hover:bg-blue-100 transition-colors">
+                  <p className="text-sm text-gray-400 mb-6 leading-relaxed line-clamp-2">{category.description}</p>
+                  
+                  <div className="flex items-center justify-between pt-4 border-t border-white/5">
+                    <span className="text-xs font-bold text-gray-400 tracking-wider bg-white/5 px-3 py-1 rounded-lg">
                       {category.drills}
                     </span>
-                    <ArrowRight className="w-4 h-4 text-gray-300 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" aria-hidden="true" />
+                    <div className="flex items-center gap-1.5 text-blue-400 font-bold text-xs uppercase tracking-wider group-hover:text-blue-300">
+                      <span>Enter</span>
+                      <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
+                    </div>
                   </div>
                 </Link>
               );
@@ -336,14 +391,15 @@ export default function HomePageClient() {
         </div>
       </section>
 
-      <section className="bg-gray-50 py-16" aria-labelledby="features-heading">
+      {/* WHY TRAIN WITH US (FEATURES) */}
+      <section className="py-20 relative border-t border-white/5" aria-labelledby="features-heading">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 id="features-heading" className="text-3xl font-bold text-gray-900 mb-4">
-              Why Train With SkillDrills
+          <div className="text-center mb-16 space-y-3">
+            <h2 id="features-heading" className="text-3xl sm:text-4xl font-black tracking-tight text-white uppercase">
+              Engine Diagnostics
             </h2>
             <p className="text-gray-500 max-w-2xl mx-auto">
-              Science-backed drills with real-time feedback, performance tracking, and achievement systems
+              Our training architecture maps real performance indexes to maximize structural neurological development.
             </p>
           </div>
           
@@ -353,13 +409,13 @@ export default function HomePageClient() {
               return (
                 <article 
                   key={index} 
-                  className="group bg-white rounded-xl border border-gray-200 p-6 hover:shadow-xl hover:border-transparent transition-all duration-300 hover:-translate-y-1"
+                  className="group bg-[#0B0D13]/60 rounded-2xl border border-white/5 p-6 hover:border-white/10 transition-all duration-300 hover:-translate-y-1"
                 >
-                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-lg`}>
-                    <Icon className="w-6 h-6 text-white" aria-hidden="true" />
+                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-5 group-hover:scale-110 transition-transform shadow-lg`}>
+                    <Icon className="w-5.5 h-5.5 text-white" aria-hidden="true" />
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{feature.title}</h3>
-                  <p className="text-gray-500">{feature.description}</p>
+                  <h3 className="text-lg font-bold text-white mb-2 uppercase tracking-tight">{feature.title}</h3>
+                  <p className="text-sm text-gray-400 leading-relaxed">{feature.description}</p>
                 </article>
               );
             })}
@@ -367,14 +423,15 @@ export default function HomePageClient() {
         </div>
       </section>
 
-      <section className="bg-white py-16" aria-labelledby="audience-heading">
+      {/* AUDIENCE TARGETS */}
+      <section className="py-20 relative border-t border-white/5 bg-black/10" aria-labelledby="audience-heading">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 id="audience-heading" className="text-3xl font-bold text-gray-900 mb-4">
-              Who Benefits From SkillDrills
+          <div className="text-center mb-16 space-y-3">
+            <h2 id="audience-heading" className="text-3xl sm:text-4xl font-black tracking-tight text-white uppercase">
+              Profile Adaptation
             </h2>
             <p className="text-gray-500 max-w-2xl mx-auto">
-              Our free training platform is built for competitive gamers, students, professionals, and lifelong learners
+              SkillDrills adapts vectors directly matching your target environment.
             </p>
           </div>
           
@@ -382,12 +439,12 @@ export default function HomePageClient() {
             {audienceData.map((item, index) => {
               const Icon = item.icon;
               return (
-                <div key={index} className="group text-center p-6 hover:bg-gray-50 rounded-xl transition-all duration-300">
-                  <div className={`w-16 h-16 bg-gradient-to-br ${item.gradient} rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform shadow-lg`}>
-                    <Icon className="w-8 h-8 text-white" aria-hidden="true" />
+                <div key={index} className="group text-center p-8 bg-[#0E111A]/40 border border-white/5 hover:border-white/10 rounded-2xl transition-all duration-300">
+                  <div className={`w-16 h-16 bg-gradient-to-br ${item.gradient} rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform shadow-lg shadow-black/50`}>
+                    <Icon className="w-7 h-7 text-white" aria-hidden="true" />
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{item.title}</h3>
-                  <p className="text-sm text-gray-500">{item.description}</p>
+                  <h3 className="text-lg font-bold text-white mb-3 uppercase tracking-tight">{item.title}</h3>
+                  <p className="text-sm text-gray-400 leading-relaxed">{item.description}</p>
                 </div>
               );
             })}
@@ -395,71 +452,69 @@ export default function HomePageClient() {
         </div>
       </section>
 
-      <section className="relative bg-gradient-to-r from-blue-600 to-purple-600 overflow-hidden" aria-labelledby="cta-heading">
-        <div className="absolute inset-0">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
-          <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2" />
-        </div>
-        
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
-          <h2 id="cta-heading" className="text-3xl font-bold text-white mb-4">
-            Start Training Free Today
+      {/* CALL TO ACTION */}
+      <section className="relative overflow-hidden border-t border-white/5" aria-labelledby="cta-heading">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-900/20 to-purple-900/20" />
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
+          <h2 id="cta-heading" className="text-3xl sm:text-4xl font-black tracking-tight text-white uppercase mb-4">
+            Initialize Diagnostics
           </h2>
-          <p className="text-blue-100 mb-8 max-w-2xl mx-auto">
-            115+ drills across 9 categories. No registration, no credit card, no download required. Start improving your skills instantly.
+          <p className="text-gray-400 mb-8 max-w-2xl mx-auto text-base">
+            No accounts. No payments. Bypasses browser latency to record raw physical parameters instantly.
           </p>
           <Link 
             href="/drills" 
-            className="inline-flex items-center gap-2 bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-600"
+            className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-10 py-4.5 rounded-xl font-bold hover:shadow-xl hover:shadow-blue-500/20 transition transform hover:-translate-y-0.5"
           >
-            Explore All 115+ Free Drills
+            Start Core Routine
             <ArrowRight className="w-5 h-5" aria-hidden="true" />
           </Link>
         </div>
       </section>
 
-      <footer className="bg-gray-900 text-gray-400 py-12" role="contentinfo">
+      {/* FOOTER */}
+      <footer className="bg-[#030305] border-t border-white/5 text-gray-500 py-16" role="contentinfo">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8 mb-8">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8 mb-12">
             <div>
-              <h3 className="text-white font-semibold mb-3 text-sm">FPS Training</h3>
-              <ul className="space-y-2 text-sm">
+              <h3 className="text-white font-bold tracking-wider mb-4 text-xs uppercase">FPS Training</h3>
+              <ul className="space-y-2.5 text-sm text-gray-400">
                 <li><Link href="/drills/fps/flick-shot-training" className="hover:text-white transition-colors">Flick Shot Trainer</Link></li>
                 <li><Link href="/drills/fps/target-acquisition" className="hover:text-white transition-colors">Target Acquisition</Link></li>
                 <li><Link href="/drills/fps/reactive-tracking" className="hover:text-white transition-colors">Reactive Tracking</Link></li>
-                <li><Link href="/drills/fps" className="text-blue-400 hover:text-blue-300 transition-colors font-medium">All 21 FPS Drills →</Link></li>
+                <li><Link href="/drills/fps" className="text-blue-400 hover:text-blue-300 transition-colors font-semibold">All 21 FPS Drills →</Link></li>
               </ul>
             </div>
             <div>
-              <h3 className="text-white font-semibold mb-3 text-sm">Cognitive</h3>
-              <ul className="space-y-2 text-sm">
+              <h3 className="text-white font-bold tracking-wider mb-4 text-xs uppercase">Cognitive Hub</h3>
+              <ul className="space-y-2.5 text-sm text-gray-400">
                 <li><Link href="/drills/cognitive/memory/card-matching" className="hover:text-white transition-colors">Memory Games</Link></li>
                 <li><Link href="/drills/cognitive/attention/divided-attention" className="hover:text-white transition-colors">Attention Drills</Link></li>
                 <li><Link href="/drills/cognitive/problem-solving/logic-puzzles" className="hover:text-white transition-colors">Logic Puzzles</Link></li>
-                <li><Link href="/drills/cognitive" className="text-blue-400 hover:text-blue-300 transition-colors font-medium">All 16 Cognitive Drills →</Link></li>
+                <li><Link href="/drills/cognitive" className="text-blue-400 hover:text-blue-300 transition-colors font-semibold">All 16 Cognitive Drills →</Link></li>
               </ul>
             </div>
             <div>
-              <h3 className="text-white font-semibold mb-3 text-sm">Academic</h3>
-              <ul className="space-y-2 text-sm">
+              <h3 className="text-white font-bold tracking-wider mb-4 text-xs uppercase">Academic Hub</h3>
+              <ul className="space-y-2.5 text-sm text-gray-400">
                 <li><Link href="/drills/academic/writing-speed/typing-test" className="hover:text-white transition-colors">Typing Speed Test</Link></li>
                 <li><Link href="/drills/academic/reading-speed/speed-reader" className="hover:text-white transition-colors">Speed Reader</Link></li>
                 <li><Link href="/drills/academic/math-speed/mental-math" className="hover:text-white transition-colors">Mental Math</Link></li>
-                <li><Link href="/drills/academic" className="text-blue-400 hover:text-blue-300 transition-colors font-medium">All 12 Academic Drills →</Link></li>
+                <li><Link href="/drills/academic" className="text-blue-400 hover:text-blue-300 transition-colors font-semibold">All 12 Academic Drills →</Link></li>
               </ul>
             </div>
             <div>
-              <h3 className="text-white font-semibold mb-3 text-sm">Visual & Motor</h3>
-              <ul className="space-y-2 text-sm">
+              <h3 className="text-white font-bold tracking-wider mb-4 text-xs uppercase">Visual & Motor</h3>
+              <ul className="space-y-2.5 text-sm text-gray-400">
                 <li><Link href="/drills/visual/reaction-speed/light-reaction" className="hover:text-white transition-colors">Reaction Time Test</Link></li>
                 <li><Link href="/drills/motor/hand-eye-coordination/aim-trainer" className="hover:text-white transition-colors">Hand-Eye Coordination</Link></li>
                 <li><Link href="/drills/visual/tracking-accuracy/moving-target" className="hover:text-white transition-colors">Moving Target Tracking</Link></li>
-                <li><Link href="/drills/visual" className="text-blue-400 hover:text-blue-300 transition-colors font-medium">All 14 Visual Drills →</Link></li>
+                <li><Link href="/drills/visual" className="text-blue-400 hover:text-blue-300 transition-colors font-semibold">All 14 Visual Drills →</Link></li>
               </ul>
             </div>
             <div>
-              <h3 className="text-white font-semibold mb-3 text-sm">More Categories</h3>
-              <ul className="space-y-2 text-sm">
+              <h3 className="text-white font-bold tracking-wider mb-4 text-xs uppercase">Sector Catalog</h3>
+              <ul className="space-y-2.5 text-sm text-gray-400">
                 <li><Link href="/drills/memory" className="hover:text-white transition-colors">Memory (15 drills)</Link></li>
                 <li><Link href="/drills/productivity" className="hover:text-white transition-colors">Productivity (10 drills)</Link></li>
                 <li><Link href="/drills/mental-fitness" className="hover:text-white transition-colors">Mental Fitness (6 drills)</Link></li>
@@ -468,18 +523,18 @@ export default function HomePageClient() {
             </div>
           </div>
           
-          <div className="border-t border-gray-800 pt-8 text-center">
-            <div className="flex items-center justify-center gap-3 mb-4">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                <Target className="w-5 h-5 text-white" aria-hidden="true" />
+          <div className="border-t border-white/5 pt-10 text-center">
+            <div className="flex items-center justify-center gap-3 mb-6">
+              <div className="w-9 h-9 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+                <Target className="w-5.5 h-5.5 text-white" aria-hidden="true" />
               </div>
-              <span className="text-white font-bold text-lg">SkillDrills</span>
+              <span className="text-white font-black text-xl tracking-tight uppercase">SkillDrills <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">Pro</span></span>
             </div>
-            <p className="text-sm mb-2">&copy; 2026 SkillDrills. All rights reserved.</p>
-            <p className="text-xs max-w-2xl mx-auto leading-relaxed mb-6">
-              SkillDrills is a free online training platform with 115+ interactive drills across 9 categories including FPS aim training, cognitive brain games, memory exercises, typing speed tests, mental math, speed reading, visual tracking, hand-eye coordination, breathing exercises, and productivity tools. No registration required. Start training instantly at skilldrills.online.
+            <p className="text-sm text-gray-500 mb-3">&copy; 2026 SkillDrills. Elite Performance Training.</p>
+            <p className="text-xs text-gray-600 max-w-2xl mx-auto leading-relaxed mb-8">
+              SkillDrills is a free high-performance training platform with 115+ interactive drills across 9 categories including FPS aim training, cognitive brain games, memory exercises, typing speed tests, mental math, speed reading, visual tracking, hand-eye coordination, breathing exercises, and productivity tools. No registration required. Start training instantly at skilldrills.online.
             </p>
-            <div className="flex items-center justify-center gap-5 flex-wrap">
+            <div className="flex items-center justify-center gap-6 flex-wrap">
               <button onClick={sharePage} className="text-gray-500 hover:text-white transition-colors" title="Share SkillDrills" aria-label="Share SkillDrills with friends">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
               </button>

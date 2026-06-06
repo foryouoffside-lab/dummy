@@ -1,0 +1,1299 @@
+'use client';
+
+import { useState, useEffect, useRef, useCallback } from 'react';
+import Link from 'next/link';
+import { 
+  Target, Zap, Trophy, Heart, 
+  Volume2, VolumeX, Maximize2, Minimize2,
+  Info, Activity, Check, Crosshair,
+  AlertCircle, RefreshCw, Home, ChevronRight, Calculator, Sparkles,
+  Play, Award, MessageSquare
+} from 'lucide-react';
+import { COACHES, getActiveCoach, getCoachResponse, speakCoachText, handleCoachFeedback } from '../../../../lib/coachVoice';
+
+import { recordDrillResult } from '../../../../lib/performanceTelemetry';
+import { getAdaptiveParams } from '../../../../lib/adaptiveDifficulty';
+
+const DRILL_DURATION = 60;
+const BOLT_COOLDOWN = 1200; // Bolt action reload delay in ms
+const TARGET_RADIUS = 10;
+const BULLET_VELOCITY = 1000; // pixels per second in depth
+const GRAVITY = 400; // pixels per second^2 vertical drop
+
+export default function PUBGLeadDropClient() {
+const GAME_YAWS = {
+  valorant: 0.07,
+  cs2: 0.022,
+  apex: 0.022,
+  overwatch: 0.0066,
+  siege: 0.0057,
+  fortnite: 0.01,
+  cod: 0.022,
+  pubg: 0.002222,
+  destiny2: 0.0066,
+  halo: 0.022,
+  battlefield: 0.022,
+  tf2: 0.022
+};
+
+
+  const canvasRef = useRef(null);
+  const animationRef = useRef(null);
+  const containerRef = useRef(null);
+  const pageRef = useRef(null);
+  
+  const [gameState, setGameState] = useState('start');
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [score, setScore] = useState(0);
+  const [bestScore, setBestScore] = useState(0);
+  const [successfulHits, setSuccessfulHits] = useState(0);
+  const [missedHits, setMissedHits] = useState(0);
+  const [combo, setCombo] = useState(0);
+  const [bestCombo, setBestCombo] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(DRILL_DURATION);
+  const [accuracy, setAccuracy] = useState(100);
+  const [lives, setLives] = useState(5);
+  const [pointerLocked, setPointerLocked] = useState(false);
+  const [dpi, setDpi] = useState(800);
+  const [inGameSens, setInGameSens] = useState(45); // PUBG sens
+  const [cmPer360, setCmPer360] = useState(0);
+  const [gameType, setGameType] = useState('pubg');
+  const sensitivityMultiplierRef = useRef(1);
+
+  // Telemetry metrics
+  const [leadError, setLeadError] = useState(0); // Average horizontal mismatch in pixels
+  const [dropError, setDropError] = useState(0); // Average vertical mismatch in pixels
+  const [targetDistance, setTargetDistance] = useState(400); // meters (affects drop/lead math)
+
+  const [analyticsData, setAnalyticsData] = useState({
+    overshoots: 0, // Over-leading count
+    undershoots: 0, // Under-leading count
+    dropLowCount: 0, // Fired too low count
+    totalShots: 0,
+    leadErrorsList: [],
+    dropErrorsList: []
+  });
+  
+  const targetRef = useRef(null);
+  const virtualCrosshair = useRef({ x: 0, y: 0 });
+  const bulletsRef = useRef([]); // active flying bullets
+  const tracesRef = useRef([]); // static bullet traces showing landing path
+  const canvasSizeRef = useRef({ width: 800, height: 450 });
+  
+  const scoreRef = useRef(0);
+  const comboRef = useRef(0);
+  const timerIntervalRef = useRef(null);
+  const isActiveRef = useRef(false);
+  const gameStateRef = useRef('start');
+  const audioCtxRef = useRef(null);
+  const lastShotTimeRef = useRef(0);
+  const timeLeftRef = useRef(DRILL_DURATION);
+  const livesRef = useRef(5);
+  const hitsRef = useRef(0);
+  const missesRef = useRef(0);
+  const bestComboRef = useRef(0);
+  
+  const leadErrorSumRef = useRef(0);
+  const dropErrorSumRef = useRef(0);
+  const leadShotsCountRef = useRef(0);
+  
+  // Feed overlay state
+  const feedbacksRef = useRef([]);
+  const [feedbacks, setFeedbacks] = useState([]);
+  
+  const crosshairHistoryRef = useRef([]);
+  const shakeTimeRef = useRef(0);
+  const flashOpacityRef = useRef(0);
+  const lastFlashTimeRef = useRef(0);
+  const nextFlashIntervalRef = useRef(15000 + Math.random() * 5000);
+  const [activePlaylist, setActivePlaylist] = useState(null);
+  const [playlistStep, setPlaylistStep] = useState(0);
+
+  // S+ AI Coach Performance Tracking & Sensitivity Auto-Adjustment States
+  const [activeCoach, setActiveCoach] = useState(null);
+  const [coachSubtitle, setCoachSubtitle] = useState('');
+  const [coachSpeaking, setCoachSpeaking] = useState(false);
+  const [voiceEnabled, setVoiceEnabled] = useState(true);
+  const [sensAdjustedAlert, setSensAdjustedAlert] = useState(null);
+
+  const speakText = useCallback((text, priority = false) => {
+    if (typeof window === 'undefined') return;
+    try {
+      const coachId = localStorage.getItem('activeFpCoach') || 'athena';
+      const coachObj = COACHES.find(c => c.id === coachId) || COACHES[0];
+      setActiveCoach(coachObj);
+      
+      handleCoachFeedback(text, {
+        inGameSens,
+        setInGameSens,
+        gameType,
+        dpi,
+        coachId,
+        voiceEnabled,
+        priority,
+        setCoachSubtitle,
+        setCoachSpeaking
+      });
+    } catch (e) {
+      console.error("Coach speakText error:", e);
+    }
+  }, [voiceEnabled, inGameSens, gameType, dpi]);
+
+  const checkSensitivityAdjustment = useCallback((type, extra = {}) => {
+    const currentGameState = typeof gameState !== 'undefined' ? gameState : 'playing';
+    if (currentGameState !== 'playing') return;
+    try {
+      const coachId = localStorage.getItem('activeFpCoach') || 'athena';
+      handleCoachFeedback(type, {
+        inGameSens,
+        setInGameSens,
+        gameType,
+        dpi,
+        coachId,
+        voiceEnabled,
+        extra,
+        setSensAdjustedAlert
+      });
+    } catch (e) {
+      console.error("Coach checkSensitivityAdjustment error:", e);
+    }
+  }, [inGameSens, gameState, gameType, dpi, voiceEnabled]);
+
+
+  // Auto-save user calibration preferences
+  useEffect(() => {
+    if (gameState === 'playing') return;
+    try {
+      localStorage.setItem('proSens', inGameSens.toString());
+      localStorage.setItem('proDpi', dpi.toString());
+      localStorage.setItem('proGame', gameType);
+      if (gameType === 'pubg') {
+        localStorage.setItem('pubgSens', inGameSens.toString());
+      }
+    } catch (e) {}
+  }, [inGameSens, dpi, gameType, gameState]);
+
+
+  // S+ AI Coach Performance Tracking & Sensitivity Auto-Adjustment States
+  
+
+  
+
+  
+
+
+  // Auto-save user calibration preferences
+  useEffect(() => {
+    if (gameState === 'playing') return;
+    try {
+      localStorage.setItem('proSens', inGameSens.toString());
+      localStorage.setItem('proDpi', dpi.toString());
+      localStorage.setItem('proGame', gameType);
+      if (gameType === 'pubg') {
+        localStorage.setItem('pubgSens', inGameSens.toString());
+      }
+    } catch (e) {}
+  }, [inGameSens, dpi, gameType, gameState]);
+
+
+  
+  
+  
+  
+  
+  
+
+  // Redefine speakText to route through active coach templates
+  
+
+  useEffect(() => {
+    try {
+      const s = localStorage.getItem('pubgLeadBestScore');
+      if (s) {
+        const p = parseInt(s, 10);
+        if (!isNaN(p)) setBestScore(p);
+      }
+      const savedDpi = localStorage.getItem('proDpi');
+      if (savedDpi) setDpi(parseInt(savedDpi, 10));
+      const savedGameLocal = localStorage.getItem('proGame') || 'valorant';
+      const savedSens = localStorage.getItem(savedGameLocal === 'pubg' ? 'pubgSens' : 'proSens');
+      if (savedSens) setInGameSens(parseFloat(savedSens));
+      
+      const savedPlaylist = sessionStorage.getItem('esportsPlaylist');
+      if (savedPlaylist) {
+        setActivePlaylist(JSON.parse(savedPlaylist));
+        setPlaylistStep(parseInt(sessionStorage.getItem('esportsPlaylistStep') || '0', 10));
+      }
+    } catch (e) {}
+  }, []);
+  
+  useEffect(() => { gameStateRef.current = gameState; }, [gameState]);
+
+  // Compute sensitivity
+  // Compute sensitivity using GAME_YAWS
+  useEffect(() => {
+    const yaw = GAME_YAWS[gameType] || 0.002222;
+    const counts = 360 / (yaw * inGameSens);
+    const inches = counts / dpi;
+    const cm = inches * 2.54;
+    setCmPer360(cm.toFixed(1));
+    
+    sensitivityMultiplierRef.current = 50.0 / cm;
+  }, [dpi, inGameSens, gameType]);
+
+  const showFeedbackText = useCallback((text, type) => {
+    const id = Math.random().toString(36).substr(2, 9);
+    feedbacksRef.current.push({ id, text, type });
+    setFeedbacks([...feedbacksRef.current]);
+    
+    setTimeout(() => {
+      feedbacksRef.current = feedbacksRef.current.filter(f => f.id !== id);
+      setFeedbacks([...feedbacksRef.current]);
+    }, 1200);
+  }, []);
+
+  const initAudio = useCallback(() => { 
+    try { 
+      if (!audioCtxRef.current) audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)(); 
+      if (audioCtxRef.current.state === 'suspended') audioCtxRef.current.resume(); 
+      return audioCtxRef.current; 
+    } catch (e) { return null; } 
+  }, []);
+
+  const playSound = useCallback((type) => { 
+    if (!soundEnabled) return; 
+    try { 
+      const ctx = initAudio(); if (!ctx) return; 
+      const o = ctx.createOscillator(), g = ctx.createGain(); 
+      o.connect(g); g.connect(ctx.destination); 
+      const now = ctx.currentTime; 
+      const f = { success: 1200, fail: 200, combo: 1500, penalty: 100, shoot: 180 }; 
+      o.frequency.setValueAtTime(f[type] || 440, now); 
+      
+      if (type === 'shoot') {
+        o.type = 'triangle';
+        g.gain.setValueAtTime(0.12, now);
+        g.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+        o.start(now); o.stop(now + 0.25);
+      } else if (type === 'success') {
+        // crunch sound for sniper headshot
+        o.type = 'sine';
+        g.gain.setValueAtTime(0.1, now);
+        g.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+        o.start(now); o.stop(now + 0.15);
+      } else {
+        g.gain.setValueAtTime(type==='combo'?0.1:type==='penalty'?0.15:0.06, now); 
+        g.gain.exponentialRampToValueAtTime(0.001, now+0.1); 
+        o.start(now); o.stop(now+0.1); 
+      }
+    } catch (e) {} 
+  }, [soundEnabled, initAudio]);
+
+  const updateBestScore = useCallback((fs) => { 
+    try { 
+      const c = parseInt(localStorage.getItem('pubgLeadBestScore') || '0', 10); 
+      if (fs > c) { 
+        localStorage.setItem('pubgLeadBestScore', fs.toString()); 
+        setBestScore(fs); 
+      } 
+    } catch (e) {} 
+  }, []);
+
+  const resetGame = useCallback(() => {
+    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    isActiveRef.current = false;
+    setGameState('start'); gameStateRef.current = 'start';
+    targetRef.current = null;
+    bulletsRef.current = [];
+    tracesRef.current = [];
+    if (document.pointerLockElement) {
+      document.exitPointerLock();
+    }
+  }, []);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      const active = !!document.fullscreenElement;
+      setIsFullscreen(active);
+      if (!active && gameStateRef.current === 'playing') {
+        resetGame();
+      }
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, [resetGame]);
+
+  const handleCanvasClick = useCallback(() => {
+    if (gameState === 'playing' && !document.pointerLockElement) {
+      canvasRef.current?.requestPointerLock();
+    }
+  }, [gameState]);
+
+  useEffect(() => {
+    const handlePointerLockChange = () => {
+      const locked = document.pointerLockElement === canvasRef.current;
+      setPointerLocked(locked);
+      if (!locked && gameStateRef.current === 'playing') {
+        showFeedbackText('CURSOR UNLOCKED - Click Canvas to Lock', 'warn');
+        speakText('Cursor unlocked. Recapture mouse control.');
+      }
+    };
+    document.addEventListener('pointerlockchange', handlePointerLockChange);
+    return () => document.removeEventListener('pointerlockchange', handlePointerLockChange);
+  }, [showFeedbackText, speakText]);
+
+  // Handle pointer locked mouse movements
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      if (document.pointerLockElement !== canvasRef.current || !isActiveRef.current) return;
+      
+      const sens = sensitivityMultiplierRef.current;
+      const dx = (e.movementX || 0) * sens;
+      const dy = (e.movementY || 0) * sens;
+      
+      virtualCrosshair.current.x += dx;
+      virtualCrosshair.current.y += dy;
+      
+      const cvs = canvasRef.current;
+      if (cvs) {
+        virtualCrosshair.current.x = Math.max(0, Math.min(cvs.width, virtualCrosshair.current.x));
+        virtualCrosshair.current.y = Math.max(0, Math.min(cvs.height, virtualCrosshair.current.y));
+      }
+      
+      crosshairHistoryRef.current.push({ x: virtualCrosshair.current.x, y: virtualCrosshair.current.y });
+      if (crosshairHistoryRef.current.length > 25) {
+        crosshairHistoryRef.current.shift();
+      }
+    };
+    document.addEventListener('mousemove', handleMouseMove);
+    return () => document.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
+  const spawnTarget = () => {
+    const cvs = canvasRef.current;
+    if (!cvs) return null;
+    
+    // Distances from 300m to 600m
+    const dist = Math.round(300 + Math.random() * 300);
+    setTargetDistance(dist);
+    
+    // Spawns left or right running horizontally at fixed vertical lane
+    const runningLeft = Math.random() > 0.5;
+    const runHeight = 160; // target running lane
+    
+    const speed = 160 + Math.random() * 100; // pixels per second
+    
+    return {
+      x: runningLeft ? cvs.width : 0,
+      y: runHeight,
+      vx: runningLeft ? -speed : speed,
+      dist: dist,
+      spawnTime: performance.now()
+    };
+  };
+
+  // Mouse Down Bullet Fire Handler
+  useEffect(() => {
+    const handleMouseClick = (e) => {
+      if (document.pointerLockElement !== canvasRef.current || gameStateRef.current !== 'playing' || !isActiveRef.current) return;
+      
+      const now = performance.now();
+      if (now - lastShotTimeRef.current < BOLT_COOLDOWN) {
+        // Bolt action not reloaded yet
+        return;
+      }
+      
+      lastShotTimeRef.current = now;
+      playSound('shoot');
+
+      const ch = virtualCrosshair.current;
+      const cvs = canvasRef.current;
+      if (!cvs || !targetRef.current) return;
+
+      const t = targetRef.current;
+      // Calculate depth travel time based on target distance
+      // e.g. 400m / 1000m/s = 0.4s
+      const travelTime = t.dist / BULLET_VELOCITY;
+      
+      // Calculate where bullet lands in target plane after travelTime
+      // Vertical bullet drop: 0.5 * gravity * t^2
+      const dropOffset = 0.5 * GRAVITY * (travelTime * travelTime);
+      const landingX = ch.x;
+      const landingY = ch.y + dropOffset;
+
+      // Spawn flying projectile tracing from bottom muzzle to target landing spot
+      bulletsRef.current.push({
+        startX: cvs.width / 2,
+        startY: cvs.height,
+        targetX: landingX,
+        targetY: landingY,
+        currentX: cvs.width / 2,
+        currentY: cvs.height,
+        startTime: now,
+        travelTime: travelTime * 1000, // ms
+        dropOffset: dropOffset,
+        targetAtFire: { x: t.x, y: t.y, vx: t.vx, dist: t.dist }
+      });
+    };
+
+    document.addEventListener('mousedown', handleMouseClick);
+    return () => document.removeEventListener('mousedown', handleMouseClick);
+  }, []);
+
+  const endGame = useCallback(() => {
+    setGameState('gameOver');
+    gameStateRef.current = 'gameOver';
+    isActiveRef.current = false;
+    updateBestScore(scoreRef.current);
+    // Record telemetry for AI coaching system
+    try {
+      recordDrillResult('pubg-lead-drop', {
+        score: scoreRef.current,
+        accuracy: accuracy,
+        reactionTimeMs: null,
+        trackingAccuracy: null,
+        comboMax: bestCombo,
+        overshoots: 0,
+        undershoots: analyticsData.undershoots || 0,
+        sensitivity: inGameSens,
+        dpi,
+        gameType,
+        duration: DRILL_DURATION
+      });
+    } catch (e) {}
+
+    if (document.pointerLockElement) {
+      document.exitPointerLock();
+    }
+
+    const avgL = leadShotsCountRef.current > 0 ? Math.round(leadErrorSumRef.current / leadShotsCountRef.current) : 0;
+    const avgD = leadShotsCountRef.current > 0 ? Math.round(dropErrorSumRef.current / leadShotsCountRef.current) : 0;
+
+    let advice = `Bullet Lead Sniping complete. Score is ${scoreRef.current} points. `;
+    if (avgL > 15) {
+      advice += `Your horizontal lead error averages ${avgL} pixels. You are under-leading target velocity. Prescribed roadmap: Run Unpredictable Strafe Tracking for 10 minutes, then retry. `;
+    } else if (avgD > 15) {
+      advice += `Your bullet drop correction error averages ${avgD} pixels. You are failing to compensate vertical drop. Aim slightly higher. `;
+    } else {
+      advice += "Your bullet drop and lead corrections are pro tier. Exceptional predictive adjustments.";
+    }
+
+    speakText(advice, true);
+  }, [updateBestScore, speakText]);
+
+  const startTimer = useCallback(() => {
+    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    timerIntervalRef.current = setInterval(() => {
+      if (gameStateRef.current === 'playing' && isActiveRef.current) {
+        timeLeftRef.current -= 1;
+        setTimeLeft(timeLeftRef.current);
+        if (timeLeftRef.current <= 0) {
+          clearInterval(timerIntervalRef.current);
+          timerIntervalRef.current = null;
+          endGame();
+        }
+      }
+    }, 1000);
+  }, [endGame]);
+
+  // Main Canvas Loop
+  useEffect(() => {
+    if (gameState !== 'playing') return;
+    const cvs = canvasRef.current; if (!cvs) return;
+    const ctx = cvs.getContext('2d', { alpha: false });
+    
+    const updateSize = () => {
+      const cr = containerRef.current; if (!cr) return;
+      const rr = cr.getBoundingClientRect();
+      let w = rr.width, h = w * (9/16);
+      if (h > rr.height) { h = rr.height; w = h * (16/9); }
+      
+      cvs.width = w; cvs.height = h;
+      cvs.style.width = `${w}px`;
+      cvs.style.height = `${h}px`;
+      canvasSizeRef.current = { width: w, height: h };
+      cvs.style.position = 'absolute';
+      cvs.style.left = `${(rr.width - w)/2}px`;
+      cvs.style.top = `${(rr.height - h)/2}px`;
+      
+      if (w > 0 && h > 0) {
+        virtualCrosshair.current = { x: w / 2, y: h / 2 };
+      }
+    };
+    
+    updateSize();
+    window.addEventListener('resize', updateSize);
+    
+    lastShotTimeRef.current = 0;
+    let lt = performance.now();
+    
+    function draw(ct) {
+      if (!isActiveRef.current) { animationRef.current = requestAnimationFrame(draw); return; }
+      let dt = (ct - lt) / 1000;
+      lt = ct;
+      if (dt > 0.1) dt = 0.1;
+      
+      // Stress flashbang interval check
+      const stressMode = typeof window !== 'undefined' && localStorage.getItem('tournamentStress') === 'true';
+      if (stressMode) {
+        if (ct - lastFlashTimeRef.current > nextFlashIntervalRef.current) {
+          flashOpacityRef.current = 1.0;
+          lastFlashTimeRef.current = ct;
+          nextFlashIntervalRef.current = 14000 + Math.random() * 10000;
+          
+          try {
+            const audioCtx = initAudio();
+            if (audioCtx) {
+              const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+              o.connect(g); g.connect(audioCtx.destination);
+              o.frequency.setValueAtTime(10000, audioCtx.currentTime);
+              o.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 1.2);
+              g.gain.setValueAtTime(0.12, audioCtx.currentTime);
+              g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.2);
+              o.start(); o.stop(audioCtx.currentTime + 1.2);
+            }
+          } catch(e){}
+        }
+      }
+
+      if (flashOpacityRef.current > 0) {
+        flashOpacityRef.current = Math.max(0, flashOpacityRef.current - dt * 0.85);
+      }
+
+      let shakeOffsetX = 0;
+      let shakeOffsetY = 0;
+      if (stressMode && ct - shakeTimeRef.current < 250) {
+        shakeOffsetX = (Math.random() - 0.5) * 12;
+        shakeOffsetY = (Math.random() - 0.5) * 12;
+      }
+
+      ctx.save();
+      ctx.translate(shakeOffsetX, shakeOffsetY);
+
+      // Render canvas background
+      ctx.fillStyle = "#020306";
+      ctx.fillRect(0, 0, cvs.width, cvs.height);
+      
+      // Grid lines
+      ctx.strokeStyle = 'rgba(239, 68, 68, 0.012)';
+      ctx.lineWidth = 1;
+      for (let i = 0; i < cvs.width; i += 40) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, cvs.height); ctx.stroke(); }
+      for (let j = 0; j < cvs.height; j += 40) { ctx.beginPath(); ctx.moveTo(0, j); ctx.lineTo(cvs.width, j); ctx.stroke(); }
+      
+      // Spawn running targets
+      if (!targetRef.current && gameStateRef.current === 'playing') {
+        targetRef.current = spawnTarget();
+      }
+      
+      // Update & Draw Target
+      if (targetRef.current) {
+        const t = targetRef.current;
+        t.x += t.vx * dt;
+        
+        // Check if escaped screen boundaries
+        if (t.x < -30 || t.x > cvs.width + 30) {
+          missesRef.current += 1;
+          setMissedHits(missesRef.current);
+          comboRef.current = 0;
+          setCombo(0);
+          shakeTimeRef.current = ct;
+          playSound('fail'); if (typeof checkSensitivityAdjustment === 'function') checkSensitivityAdjustment('miss', { dist: typeof dist !== 'undefined' ? dist : 50, targetSize: typeof targetRadius !== 'undefined' ? targetRadius : (typeof TARGET_SIZE !== 'undefined' ? TARGET_SIZE : (typeof TARGET_RADIUS !== 'undefined' ? TARGET_RADIUS : 15)) }); if (typeof checkSensitivityAdjustment === 'function') checkSensitivityAdjustment('miss', { dist: typeof dist !== 'undefined' ? dist : 50, targetSize: typeof targetRadius !== 'undefined' ? targetRadius : (typeof TARGET_SIZE !== 'undefined' ? TARGET_SIZE : (typeof TARGET_RADIUS !== 'undefined' ? TARGET_RADIUS : 15)) });
+          showFeedbackText('⚠️ TARGET ESCAPED', 'error');
+          speakText('Target escaped. Lead more.');
+          
+          livesRef.current -= 1;
+          setLives(livesRef.current);
+          if (livesRef.current <= 0) {
+            playSound('penalty'); if (typeof checkSensitivityAdjustment === 'function') checkSensitivityAdjustment('miss', { dist: typeof dist !== 'undefined' ? dist : 50, targetSize: typeof targetRadius !== 'undefined' ? targetRadius : (typeof TARGET_SIZE !== 'undefined' ? TARGET_SIZE : (typeof TARGET_RADIUS !== 'undefined' ? TARGET_RADIUS : 15)) }); if (typeof checkSensitivityAdjustment === 'function') checkSensitivityAdjustment('miss', { dist: typeof dist !== 'undefined' ? dist : 50, targetSize: typeof targetRadius !== 'undefined' ? targetRadius : (typeof TARGET_SIZE !== 'undefined' ? TARGET_SIZE : (typeof TARGET_RADIUS !== 'undefined' ? TARGET_RADIUS : 15)) });
+            // endGame();
+          }
+          
+          const total = hitsRef.current + missesRef.current;
+          setAccuracy(total > 0 ? Math.round((hitsRef.current / total) * 100) : 100);
+          
+          targetRef.current = spawnTarget(); // respawn
+        } else {
+          // Draw target circle with direction vector arrow
+          ctx.shadowBlur = 8; ctx.shadowColor = "#3b82f6";
+          ctx.fillStyle = "rgba(59, 130, 246, 0.8)";
+          ctx.beginPath();
+          ctx.arc(t.x, t.y, TARGET_RADIUS, 0, Math.PI*2);
+          ctx.fill();
+          ctx.shadowBlur = 0;
+
+          // Inner critical head hitbox
+          ctx.fillStyle = "#ffffff";
+          ctx.beginPath();
+          ctx.arc(t.x, t.y - 2, 4, 0, Math.PI*2);
+          ctx.fill();
+
+          // Distance Tag
+          ctx.fillStyle = "rgba(148, 163, 184, 0.8)";
+          ctx.font = "bold 9px monospace";
+          ctx.textAlign = "center";
+          ctx.fillText(`${t.dist}M`, t.x, t.y - 12);
+        }
+      }
+      
+      // Update & Draw Flying Bullets
+      const activeBullets = [];
+      bulletsRef.current.forEach((b) => {
+        const elapsed = ct - b.startTime;
+        const progress = Math.min(1.0, elapsed / b.travelTime);
+        
+        // Render bullet traces
+        b.currentX = b.startX + (b.targetX - b.startX) * progress;
+        b.currentY = b.startY + (b.targetY - b.startY) * progress;
+        
+        // Bullet size gets smaller as it travels in depth (simulating perspective)
+        const depthSize = Math.max(1, 4 * (1 - progress));
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath();
+        ctx.arc(b.currentX, b.currentY, depthSize, 0, Math.PI*2);
+        ctx.fill();
+        
+        if (progress < 1.0) {
+          activeBullets.push(b);
+        } else {
+          // Impact Event
+          // Target position at moment of bullet impact
+          if (targetRef.current) {
+            const t = targetRef.current;
+            const dist = Math.hypot(b.targetX - t.x, b.targetY - t.y);
+
+            // Compute errors for telemetry
+            const errX = Math.abs(b.targetX - t.x);
+            const errY = Math.abs(b.targetY - t.y);
+            
+            leadErrorSumRef.current += errX;
+            dropErrorSumRef.current += errY;
+            leadShotsCountRef.current += 1;
+            
+            setLeadError(Math.round(leadErrorSumRef.current / leadShotsCountRef.current));
+            setDropError(Math.round(dropErrorSumRef.current / leadShotsCountRef.current));
+
+            setAnalyticsData(prev => ({
+              ...prev,
+              totalShots: prev.totalShots + 1,
+              leadErrorsList: [...prev.leadErrorsList, errX],
+              dropErrorsList: [...prev.dropErrorsList, errY]
+            }));
+
+            // Store trace for static drawing feedback
+            tracesRef.current.push({
+              x: b.targetX,
+              y: b.targetY,
+              targetX: t.x,
+              targetY: t.y,
+              hit: dist <= TARGET_RADIUS,
+              spawnTime: ct
+            });
+
+            if (dist <= TARGET_RADIUS) {
+              // HIT!
+              hitsRef.current += 1;
+              setSuccessfulHits(hitsRef.current);
+              
+              const distanceBonus = Math.round(t.dist * 0.5);
+              scoreRef.current += 500 + comboRef.current * 50 + distanceBonus;
+              setScore(scoreRef.current);
+              
+              comboRef.current += 1;
+              setCombo(comboRef.current);
+              if (comboRef.current > bestComboRef.current) {
+                bestComboRef.current = comboRef.current;
+                setBestCombo(comboRef.current);
+              }
+              
+              if (comboRef.current % 3 === 0) {
+                playSound('combo');
+                showFeedbackText(`🎯 SNIPER GOD x${comboRef.current}`, 'success');
+                speakText('Sensational lead prediction!');
+              } else {
+                playSound('success'); if (typeof checkSensitivityAdjustment === 'function') checkSensitivityAdjustment('hit'); if (typeof checkSensitivityAdjustment === 'function') checkSensitivityAdjustment('hit');
+              }
+              
+              targetRef.current = spawnTarget(); // respawn new target
+            } else {
+              // MISS
+              missesRef.current += 1;
+              setMissedHits(missesRef.current);
+              comboRef.current = 0;
+              setCombo(0);
+              shakeTimeRef.current = ct;
+              playSound('fail'); if (typeof checkSensitivityAdjustment === 'function') checkSensitivityAdjustment('miss', { dist: typeof dist !== 'undefined' ? dist : 50, targetSize: typeof targetRadius !== 'undefined' ? targetRadius : (typeof TARGET_SIZE !== 'undefined' ? TARGET_SIZE : (typeof TARGET_RADIUS !== 'undefined' ? TARGET_RADIUS : 15)) }); if (typeof checkSensitivityAdjustment === 'function') checkSensitivityAdjustment('miss', { dist: typeof dist !== 'undefined' ? dist : 50, targetSize: typeof targetRadius !== 'undefined' ? targetRadius : (typeof TARGET_SIZE !== 'undefined' ? TARGET_SIZE : (typeof TARGET_RADIUS !== 'undefined' ? TARGET_RADIUS : 15)) });
+
+              // Visual correction warning alerts
+              if (b.targetX < t.x && t.vx > 0) {
+                showFeedbackText('⚠️ UNDER-LEAD', 'error');
+                speakText('Under leading target.');
+                setAnalyticsData(prev => ({ ...prev, undershoots: prev.undershoots + 1 }));
+              } else if (b.targetX > t.x && t.vx > 0) {
+                showFeedbackText('⚠️ OVER-LEAD', 'warn');
+                speakText('Over leading target.');
+                setAnalyticsData(prev => ({ ...prev, overshoots: prev.overshoots + 1 }));
+              } else if (b.targetY > t.y + 3) {
+                showFeedbackText('⚠️ DROP OVER-CORRECTION', 'warn');
+                speakText('Aim lower. Overcompensated drop.');
+              } else if (b.targetY < t.y - 3) {
+                showFeedbackText('⚠️ AIM HIGHER (DROP)', 'error');
+                speakText('Bullet drop. Aim higher.');
+                setAnalyticsData(prev => ({ ...prev, dropLowCount: prev.dropLowCount + 1 }));
+              }
+
+              livesRef.current -= 1;
+              setLives(livesRef.current);
+              if (livesRef.current <= 0) {
+                playSound('penalty'); if (typeof checkSensitivityAdjustment === 'function') checkSensitivityAdjustment('miss', { dist: typeof dist !== 'undefined' ? dist : 50, targetSize: typeof targetRadius !== 'undefined' ? targetRadius : (typeof TARGET_SIZE !== 'undefined' ? TARGET_SIZE : (typeof TARGET_RADIUS !== 'undefined' ? TARGET_RADIUS : 15)) }); if (typeof checkSensitivityAdjustment === 'function') checkSensitivityAdjustment('miss', { dist: typeof dist !== 'undefined' ? dist : 50, targetSize: typeof targetRadius !== 'undefined' ? targetRadius : (typeof TARGET_SIZE !== 'undefined' ? TARGET_SIZE : (typeof TARGET_RADIUS !== 'undefined' ? TARGET_RADIUS : 15)) });
+                // endGame();
+              }
+            }
+            const total = hitsRef.current + missesRef.current;
+            setAccuracy(total > 0 ? Math.round((hitsRef.current / total) * 100) : 100);
+          }
+        }
+      });
+      bulletsRef.current = activeBullets;
+
+      // Draw static impact feedback traces (lasts 1.5 seconds)
+      const activeTraces = [];
+      tracesRef.current.forEach((tr) => {
+        const age = ct - tr.spawnTime;
+        if (age < 1500) {
+          const opacity = 1 - age / 1500;
+          
+          // Draw landing point
+          ctx.strokeStyle = tr.hit ? `rgba(0, 255, 136, ${opacity})` : `rgba(239, 68, 68, ${opacity})`;
+          ctx.lineWidth = 1.0;
+          
+          // Red cross indicating landing click position
+          ctx.beginPath();
+          ctx.moveTo(tr.x - 4, tr.y); ctx.lineTo(tr.x + 4, tr.y);
+          ctx.moveTo(tr.x, tr.y - 4); ctx.lineTo(tr.x, tr.y + 4);
+          ctx.stroke();
+
+          // Connection line to target position at impact
+          ctx.strokeStyle = `rgba(148, 163, 184, ${opacity * 0.4})`;
+          ctx.lineWidth = 0.8;
+          ctx.setLineDash([3, 3]);
+          ctx.beginPath();
+          ctx.moveTo(tr.x, tr.y);
+          ctx.lineTo(tr.targetX, tr.targetY);
+          ctx.stroke();
+          ctx.setLineDash([]);
+          
+          activeTraces.push(tr);
+        }
+      });
+      tracesRef.current = activeTraces;
+      
+      // Draw Trajectory Trail
+      const history = crosshairHistoryRef.current;
+      if (history.length > 1) {
+        for (let idx = 1; idx < history.length; idx++) {
+          ctx.beginPath();
+          ctx.moveTo(history[idx-1].x, history[idx-1].y);
+          ctx.lineTo(history[idx].x, history[idx].y);
+          const alpha = (idx / history.length) * 0.35;
+          ctx.strokeStyle = `rgba(239, 68, 68, ${alpha})`;
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        }
+      }
+      
+      // Draw Reticle (Bolt action reload circle around crosshair)
+      const ch = virtualCrosshair.current;
+      if (ch.x > 0 && ch.x < cvs.width && ch.y > 0 && ch.y < cvs.height) {
+        ctx.strokeStyle = pointerLocked ? "#00ff88" : "#ffaa00";
+        ctx.lineWidth = 1.2;
+        
+        // Scoped circle styling
+        ctx.beginPath();
+        ctx.arc(ch.x, ch.y, 22, 0, Math.PI*2);
+        ctx.stroke();
+        
+        // Fine crosshair ticks
+        const gap = 6;
+        const len = 4;
+        ctx.beginPath();
+        ctx.moveTo(ch.x-gap-len, ch.y); ctx.lineTo(ch.x-gap, ch.y);
+        ctx.moveTo(ch.x+gap, ch.y); ctx.lineTo(ch.x+gap+len, ch.y);
+        ctx.moveTo(ch.x, ch.y-gap-len); ctx.lineTo(ch.x, ch.y-gap);
+        ctx.moveTo(ch.x, ch.y+gap); ctx.lineTo(ch.x, ch.y+gap+len);
+        ctx.stroke();
+
+        ctx.fillStyle = pointerLocked ? "#00ff88" : "#ffaa00";
+        ctx.beginPath(); ctx.arc(ch.x, ch.y, 1.0, 0, Math.PI*2); ctx.fill();
+
+        // Reload ring indicator
+        const reloadElapsed = ct - lastShotTimeRef.current;
+        if (reloadElapsed < BOLT_COOLDOWN) {
+          const pct = reloadElapsed / BOLT_COOLDOWN;
+          ctx.strokeStyle = "rgba(239, 68, 68, 0.7)";
+          ctx.lineWidth = 2.0;
+          ctx.beginPath();
+          ctx.arc(ch.x, ch.y, 16, -Math.PI/2, -Math.PI/2 + (Math.PI * 2 * pct));
+          ctx.stroke();
+        }
+      }
+      
+      if (!pointerLocked) {
+        ctx.fillStyle = 'rgba(8, 13, 26, 0.85)';
+        ctx.fillRect(cvs.width / 2 - 180, cvs.height / 2 - 25, 360, 50);
+        ctx.strokeStyle = '#ef4444';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(cvs.width / 2 - 180, cvs.height / 2 - 25, 360, 50);
+        
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 11px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('CLICK CANVAS TO CAPTURE RAW MOUSE INPUT', cvs.width / 2, cvs.height / 2 + 4);
+      }
+
+      // Flashbang render overlay
+      if (flashOpacityRef.current > 0) {
+        ctx.fillStyle = `rgba(255, 255, 255, ${flashOpacityRef.current})`;
+        ctx.fillRect(0, 0, cvs.width, cvs.height);
+      }
+
+      ctx.restore();
+      animationRef.current = requestAnimationFrame(draw);
+    }
+  }, [gameState, pointerLocked, initAudio]);
+
+  const startGame = useCallback(() => {
+    // Get adaptive difficulty parameters
+    const adaptive = getAdaptiveParams('pubg-lead-drop');
+
+    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    
+    try {
+      const el = pageRef.current;
+      if (el && !document.fullscreenElement) {
+        el.requestFullscreen().catch((e) => console.warn("Fullscreen request blocked", e));
+        setIsFullscreen(true);
+      }
+    } catch (e) {
+      console.warn("Fullscreen request blocked", e);
+    }
+    
+    setAnalyticsData({ perfectRhythmCount: 0, fastTapsCount: 0, slowTapsCount: 0, overshoots: 0, undershoots: 0, dropLowCount: 0, totalShots: 0, leadErrorsList: [], dropErrorsList: [] });
+    setGameState('playing'); gameStateRef.current = 'playing';
+    setScore(0); setSuccessfulHits(0); setMissedHits(0); setCombo(0); setBestCombo(0);
+    setLeadError(0); setDropError(0);
+    timeLeftRef.current = DRILL_DURATION; setTimeLeft(DRILL_DURATION);
+    setAccuracy(100); setLives(5);
+    isActiveRef.current = true; scoreRef.current = 0; comboRef.current = 0; bestComboRef.current = 0; livesRef.current = 5;
+    hitsRef.current = 0; missesRef.current = 0;
+    leadErrorSumRef.current = 0; dropErrorSumRef.current = 0; leadShotsCountRef.current = 0;
+    targetRef.current = null;
+    bulletsRef.current = [];
+    tracesRef.current = [];
+    
+    startTimer();
+    
+    if (canvasRef.current) {
+      try {
+        canvasRef.current.requestPointerLock();
+      } catch (e) {}
+    }
+    speakText("Sniper calibration initialized. Aim ahead of the target path and slightly above to offset drop.", true);
+  }, [startTimer, speakText]);
+
+  return (
+    <div ref={pageRef} className="min-h-screen select-none font-mono bg-[#080d1a] text-slate-100 relative overflow-hidden">
+      
+      {/* Background patterns */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-950/20 via-[#080d1a] to-[#080d1a] pointer-events-none z-0" />
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(59,130,246,0.03)_1px,_transparent_1px),_linear-gradient(90deg,_rgba(59,130,246,0.03)_1px,_transparent_1px)] bg-[size:30px_30px] pointer-events-none z-0" />
+      
+      <div className={`${isFullscreen ? 'w-full h-screen p-0 m-0' : 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6'} relative z-10`}>
+        
+        {!isFullscreen && (
+          <nav aria-label="Breadcrumb" className="mb-4">
+            <ol className="flex items-center gap-2 text-[10px] text-slate-400 uppercase tracking-widest">
+              <li><Link href="/" className="hover:text-red-400 transition-colors"><Home className="w-3.5 h-3.5" /></Link></li>
+              <li><ChevronRight className="w-3 h-3 text-slate-700" /></li>
+              <li><Link href="/drills/fps" className="hover:text-red-400 transition-colors">FPS Sector</Link></li>
+              <li><ChevronRight className="w-3 h-3 text-slate-700" /></li>
+              <li><span className="text-red-400 font-bold">S+ PUBG Bullet Lead & Drop</span></li>
+            </ol>
+          </nav>
+        )}
+        
+        {!isFullscreen && (
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 border-b border-slate-900 pb-5">
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-blue-950/30 border border-blue-500/25 text-blue-400 rounded-xl shadow-lg shadow-blue-500/10">
+                <Crosshair className="w-7 h-7 animate-pulse text-blue-400" />
+              </div>
+              <div>
+                <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white uppercase bg-gradient-to-r from-blue-500 via-white to-slate-400 bg-clip-text text-transparent">
+                  S+ PUBG Bullet Lead & Drop
+                </h1>
+                <p className="text-xs text-slate-400 tracking-wider mt-0.5 animate-pulse">
+                  {pointerLocked ? '🟢 ELITE CALIBRATION ACTIVE' : '🔴 CLICK CANVAS TO CAPTURE'} • {cmPer360} cm/360 • AWM SNIPE
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Start Game Screen */}
+        {gameState === 'start' && (
+          <div className="absolute inset-0 bg-[#080d1a]/95 flex items-center justify-center p-6 z-30 overflow-y-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-5xl">
+            
+            <div className="lg:col-span-1 bg-[#0c1224]/80 border border-slate-900 rounded-xl p-6 flex flex-col justify-between backdrop-blur-md">
+              <div>
+                <h3 className="text-sm font-bold text-blue-500 mb-4 flex items-center gap-2 border-b border-slate-900 pb-2">
+                  <Info className="w-4 h-4" />
+                  BULLET PHYSICS DETAILS
+                </h3>
+                <ul className="space-y-4 text-xs leading-relaxed text-slate-400">
+                  <li className="flex items-start gap-2">
+                    <span className="text-blue-500 font-bold">1.</span>
+                    <span>Projectiles take **travel latency** (depth distance / velocity) to land in the target's plane.</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-blue-500 font-bold">2.</span>
+                    <span>Aim **ahead** of running targets to lead them correctly, and **above** to offset gravity drop.</span>
+                  </li>
+                  <li className="flex items-start gap-2 text-blue-300 animate-pulse">
+                    <span className="text-blue-500 font-bold">★</span>
+                    <span>Bolt action takes **1.2 seconds** to reload. Wait for the reload ring to sweep fully.</span>
+                  </li>
+                </ul>
+              </div>
+              <div className="mt-6 pt-4 border-t border-slate-900 flex justify-between items-center text-[10px]">
+                <span className="text-slate-550 uppercase">Voice Guide:</span>
+                <button 
+                  onClick={() => setVoiceEnabled(!voiceEnabled)} 
+                  className={`px-3 py-1 rounded text-[10px] font-bold uppercase transition ${voiceEnabled ? 'bg-green-950 text-green-400 border border-green-500/30' : 'bg-slate-900 text-slate-550 border border-slate-800'}`}
+                >
+                  {voiceEnabled ? 'SPEAK_ON' : 'SPEAK_OFF'}
+                </button>
+              </div>
+            </div>
+
+            <div className="lg:col-span-2 bg-[#0c1224]/80 border border-slate-900 rounded-xl p-6 backdrop-blur-md flex flex-col justify-between">
+              <div>
+                <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2 border-b border-slate-900 pb-2">
+                  <Calculator className="w-4 h-4 text-blue-500" />
+                  CALIBRATE LONG-RANGE SENSITIVITY
+                </h3>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                  <div>
+                    <label className="block text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-2">Game Profile</label>
+                    <select 
+                      value={gameType}
+                      onChange={(e) => setGameType(e.target.value)}
+                      className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-2 text-xs text-white focus:outline-none focus:border-red-500/50 font-mono"
+                    >
+                      <option value="valorant">Valorant</option>
+                      <option value="cs2">CS2 / Global Offensive</option>
+                      <option value="apex">Apex Legends</option>
+                      <option value="overwatch">Overwatch 2</option>
+                      <option value="siege">Rainbow Six Siege</option>
+                      <option value="fortnite">Fortnite</option>
+                      <option value="cod">Call of Duty / Warzone</option>
+                      <option value="pubg">PUBG</option>
+                      <option value="destiny2">Destiny 2</option>
+                      <option value="halo">Halo Infinite</option>
+                      <option value="battlefield">Battlefield 2042</option>
+                      <option value="tf2">Team Fortress 2</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-2">
+                      {gameType === 'pubg' ? 'PUBG General Sensitivity (0-100)' : 'Matched Game Sens'}
+                    </label>
+                    <input 
+                      type="number"
+                      step={gameType === 'pubg' ? '1' : '0.01'}
+                      value={inGameSens}
+                      onChange={(e) => setInGameSens(gameType === 'pubg' ? Math.max(1, Math.min(100, parseFloat(e.target.value) || 45)) : Math.max(0.001, parseFloat(e.target.value) || 0.1))}
+                      className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-2 text-xs text-white focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-2">Mouse DPI</label>
+                    <input 
+                      type="number"
+                      step="50"
+                      value={dpi}
+                      onChange={(e) => setDpi(Math.max(100, parseInt(e.target.value, 10) || 800))}
+                      className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-2 text-xs text-white focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="p-4 bg-slate-950/80 rounded border border-slate-900 flex justify-between items-center text-xs">
+                  <div>
+                    <span className="text-[10px] text-slate-550 block uppercase">360° Physical Distance</span>
+                    <span className="text-white font-bold text-sm">{cmPer360} cm / 360°</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-[10px] text-slate-550 block uppercase">Bullet Muzzle Velocity</span>
+                    <span className="text-blue-400 font-bold">1000 px/s (Depth-wise)</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-8 flex flex-col sm:flex-row gap-4 items-center justify-between border-t border-slate-900 pt-6">
+                <div>
+                  <span className="text-[10px] text-slate-550 block uppercase">Personal Best Record</span>
+                  <span className="text-white font-bold text-lg flex items-center gap-1.5">
+                    <Trophy className="w-4 h-4 text-yellow-500" />
+                    {bestScore} Points
+                  </span>
+                </div>
+                <button
+                  onClick={startGame}
+                  className="w-full sm:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-500/25 uppercase tracking-wider transition animate-pulse"
+                >
+                  <Play className="w-4 h-4 fill-white" />
+                  Launch Sniper Training
+                </button>
+              </div>
+            </div>
+          </div>
+          </div>
+        )}
+
+        {/* Playing Screen */}
+        <div className={isFullscreen ? "w-full h-full" : "block"}>
+          {gameState === 'playing' && (
+            <div className="flex justify-between items-center bg-slate-950/90 border border-slate-800 rounded-lg p-3 mb-3 text-[11px] uppercase tracking-wider font-mono">
+              <div className="flex gap-4">
+                <span>Score: <strong className="text-blue-400">{score}</strong></span>
+                <span>Time: <strong className="text-white">{timeLeft}s</strong></span>
+                <span>Lives: <strong className="text-red-500">{'♥'.repeat(lives)}</strong></span>
+              </div>
+              <div className="flex gap-4">
+                <span>Combo: <strong className="text-yellow-500">{combo}</strong></span>
+                <span>Lead Error: <strong className="text-red-400">{leadError}px</strong></span>
+                <span>Drop Error: <strong className="text-blue-400">{dropError}px</strong></span>
+              </div>
+            </div>
+          )}
+
+          <div 
+            ref={containerRef} 
+            className={isFullscreen 
+              ? "w-full h-full bg-[#020306] relative overflow-hidden flex items-center justify-center" 
+              : "w-full aspect-video min-h-[400px] lg:min-h-[500px] bg-[#020306] border border-slate-800 rounded-xl relative overflow-hidden flex items-center justify-center"}
+          >
+            <canvas ref={canvasRef} onClick={handleCanvasClick} />
+
+            {/* S+ Pro Coach Dynamic Audio Guidance HUD & Alerts (Visual Text Hidden) */}
+
+
+            {/* S+ Pro Coach Dynamic Audio Guidance HUD & Alerts (Visual Text Hidden) */}
+
+
+            {/* S+ Pro Coach Dynamic Audio Guidance HUD */}
+            {gameState === 'playing' && (
+              <div className="absolute bottom-4 left-4 z-20 pointer-events-none flex items-center gap-3 bg-slate-950/85 border border-slate-850 rounded-xl px-4 py-3 backdrop-blur-md max-w-xs sm:max-w-sm transition-all duration-300 shadow-xl">
+                <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${activeCoach?.avatarColor || 'from-cyan-600 to-blue-700'} flex items-center justify-center text-xl shrink-0 border border-white/10 shadow-md ${coachSpeaking ? 'ring-2 ring-red-500/50 scale-105 animate-pulse' : 'opacity-80'}`}>
+                  {activeCoach?.avatarText || '🤖'}
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[9px] font-mono text-red-500 font-extrabold uppercase tracking-widest flex items-center gap-1">
+                    🟢 COACH {activeCoach?.name || 'ATHENA'} GUIDANCE
+                  </span>
+                  <p className="text-[10px] font-mono text-slate-350 leading-relaxed mt-0.5 max-w-[220px]">
+                    {coachSubtitle ? `"${coachSubtitle}"` : '"Awaiting sniper calibration..."'}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Feed Notifications overlay */}
+            <div className="absolute inset-0 pointer-events-none flex flex-col justify-center items-center gap-2 overflow-hidden select-none z-10">
+              {feedbacks.map((f) => (
+                <div 
+                  key={f.id} 
+                  className={`px-5 py-2.5 rounded border text-sm font-extrabold animate-bounce shadow-lg uppercase tracking-wider backdrop-blur-sm ${
+                    f.type === 'success' 
+                      ? 'bg-green-950/90 border-green-500/30 text-green-400' 
+                      : f.type === 'warn'
+                        ? 'bg-yellow-950/90 border-yellow-500/30 text-yellow-400'
+                        : 'bg-red-950/90 border-red-500/30 text-red-400'
+                  }`}
+                >
+                  {f.text}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-4 text-center text-[10px] text-slate-550 flex items-center justify-center gap-4">
+            <span>🖱 Aim ahead & above moving targets. Trace lines show landing offset.</span>
+            <span>• Exit using <kbd className="px-1.5 py-0.5 bg-slate-900 border border-slate-800 text-slate-350 rounded font-sans text-[10px]">ESC</kbd>.</span>
+          </div>
+        </div>
+
+        {/* Game Over Screen */}
+        {gameState === 'gameOver' && (
+          <div className="absolute inset-0 bg-[#080d1a]/95 flex items-center justify-center p-6 z-30 overflow-y-auto">
+            <div className="bg-[#0c1224]/85 border border-blue-500/20 rounded-xl p-8 backdrop-blur-md max-w-3xl mx-auto w-full shadow-2xl">
+            <h2 className="text-xl font-bold text-blue-400 text-center mb-6 uppercase tracking-widest flex items-center justify-center gap-2 animate-pulse">
+              <Award className="w-5 h-5 text-yellow-500" />
+              S+ PUBG SNIPER COMPLETE
+            </h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+              <div className="space-y-4">
+                <div className="bg-slate-950 p-4 rounded border border-slate-900">
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="text-slate-550 block uppercase">Final Score:</span>
+                    <span className="text-white font-bold text-xl">{score} PTS</span>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-slate-950 p-3 rounded border border-slate-900 text-center">
+                    <span className="text-[10px] text-slate-550 block uppercase">Max Combo</span>
+                    <span className="text-white font-bold text-sm">{bestCombo} Hits</span>
+                  </div>
+                  <div className="bg-slate-950 p-3 rounded border border-slate-900 text-center">
+                    <span className="text-[10px] text-slate-550 block uppercase">Accuracy %</span>
+                    <span className="text-white font-bold text-sm">{accuracy}%</span>
+                  </div>
+                </div>
+
+                <div className="bg-slate-950 p-4 rounded border border-slate-900">
+                  <div className="flex justify-between items-center text-xs mb-1">
+                    <span className="text-slate-550 uppercase">Average Lead Error</span>
+                    <span className="text-red-500 font-bold">{leadError} px</span>
+                  </div>
+                  <div className="text-[10px] text-slate-550 leading-normal">
+                    Horizontal offset between bullet impact and target center. Target escapes if lead is under 10px.
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="bg-slate-950 p-4 rounded border border-slate-900">
+                  <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-900 pb-2 mb-3">
+                    SNIPING CALIBRATION TELEMETRY
+                  </h4>
+                  <div className="space-y-2 text-xs">
+                    <div className="flex justify-between">
+                      <span className="text-slate-550">Average Drop Error:</span>
+                      <span className="text-blue-400 font-bold">{dropError} px</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-550">Under-Leaded Misses:</span>
+                      <span className="text-red-400 font-bold">{analyticsData.undershoots}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-550">Drop Deficit Misses (Aim Low):</span>
+                      <span className="text-yellow-400 font-bold">{analyticsData.dropLowCount}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* S+ AI Assistant Coach Performance Diagnostics */}
+            <div className="bg-[#080d1a] border border-blue-500/10 rounded-lg p-5 mb-8 text-left shadow-inner">
+              <h3 className="text-xs font-bold text-blue-400 font-mono uppercase tracking-widest border-b border-slate-800 pb-2 mb-3 flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-blue-400 animate-pulse" />
+                S+ AI COACH TELEMETRY DIAGNOSTICS & ROADMAP
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs leading-relaxed text-slate-350">
+                <div className="space-y-2 border-r border-slate-900 pr-6">
+                  <p className="font-bold text-white uppercase text-[10px] tracking-wider font-mono">Predictive Accuracy Diagnostics:</p>
+                  <ul className="space-y-2 list-disc pl-4">
+                    {leadError <= 15 ? (
+                      <li className="text-green-400">🔥 Lead Convergence: Outstanding velocity compensation. You track and fire perfectly ahead of target movement vectors.</li>
+                    ) : (
+                      <li className="text-red-400">⚠️ Velocity Lag: Lead error averages {leadError}px. You are releasing target triggers too early, behind target direction.</li>
+                    )}
+                    {dropError <= 15 ? (
+                      <li className="text-green-400">🔥 Gravity Alignment: Excellent vertical offset adjustments. Drop error of {dropError}px represents high precision.</li>
+                    ) : (
+                      <li className="text-yellow-500">⚠️ Gravity Deficit: Aiming too close to target horizontal line. Bullet gravity drops below hitbox boundary.</li>
+                    )}
+                  </ul>
+                </div>
+                <div className="space-y-3 flex flex-col justify-between">
+                  <div>
+                    <p className="font-bold text-white uppercase text-[10px] tracking-wider font-mono mb-1">Prescribed Practice Roadmap:</p>
+                    <p className="text-slate-350 leading-relaxed font-sans">
+                      {leadError > 15 ? (
+                        "Roadmap Prescribed: Spend 10 minutes in Unpredictable Strafe Tracking to lock in cursor tracking speed before returning to sniping."
+                      ) : (
+                        "Roadmap Prescribed: Predictive aim fully calibrated. Continue to PUBG Passenger Drive-by drill to challenge aiming from a moving vehicle."
+                      )}
+                    </p>
+                  </div>
+                  <div className="pt-1">
+                    <span className="inline-block bg-blue-950/40 text-blue-400 px-3 py-1.5 rounded text-[10px] font-mono font-bold uppercase border border-blue-550/20 shadow-md animate-pulse">
+                      S+ PERFORMANCE OVERALL: {(score * (accuracy / 100) * 1.5).toFixed(0)} INDEX PTS
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center border-t border-slate-900 pt-6">
+              {activePlaylist && playlistStep + 1 < activePlaylist.length ? (
+                <Link 
+                  href={`/drills/fps/${activePlaylist[playlistStep + 1]}`}
+                  onClick={() => {
+                    sessionStorage.setItem('esportsPlaylistStep', (playlistStep + 1).toString());
+                  }}
+                  className="w-full sm:w-auto"
+                >
+                  <button
+                    className="w-full px-6 py-2.5 bg-yellow-600 hover:bg-yellow-650 text-slate-950 font-extrabold rounded-lg text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition animate-pulse"
+                  >
+                    <span>Proceed to Stage {playlistStep + 2} →</span>
+                  </button>
+                </Link>
+              ) : activePlaylist ? (
+                <Link 
+                  href="/drills/fps"
+                  onClick={() => {
+                    sessionStorage.removeItem('esportsPlaylist');
+                    sessionStorage.removeItem('esportsPlaylistStep');
+                  }}
+                  className="w-full sm:w-auto"
+                >
+                  <button
+                    className="w-full px-6 py-2.5 bg-yellow-600 hover:bg-yellow-650 text-slate-950 font-extrabold rounded-lg text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition"
+                  >
+                    <span>Finish Routine ✅</span>
+                  </button>
+                </Link>
+              ) : (
+                <button
+                  onClick={startGame}
+                  className="w-full sm:w-auto px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition shadow-lg shadow-blue-500/20"
+                >
+                  <RefreshCw className="w-4.5 h-4.5" />
+                  Train Again
+                </button>
+              )}
+              
+              <Link href="/drills/fps" className="w-full sm:w-auto">
+                <button
+                  className="w-full px-6 py-2.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-350 font-bold rounded-lg text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition"
+                >
+                  Return to Sector HQ
+                </button>
+              </Link>
+            </div>
+          </div>
+          </div>
+        )}
+
+      </div>
+    </div>
+  );
+}

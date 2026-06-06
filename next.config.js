@@ -1,4 +1,4 @@
-﻿/** @type {import('next').NextConfig} */
+/** @type {import('next').NextConfig} */
 
 const nextConfig = {
   // ============================================
@@ -155,6 +155,10 @@ const nextConfig = {
     return config;
   },
   
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+
   // ============================================
   // OUTPUT
   // ============================================

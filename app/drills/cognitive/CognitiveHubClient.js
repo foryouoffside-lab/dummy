@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { Brain, Target, Star, Clock, Play, Eye, Zap, Puzzle, Home, ChevronRight } from "lucide-react";
+import { Brain, Target, Star, Clock, Play, Eye, Zap, Puzzle, Home, ChevronRight, Activity, Cpu, Sparkles } from "lucide-react";
 
 const cognitiveCategories = [
   {
@@ -10,8 +10,8 @@ const cognitiveCategories = [
     folderName: "attention",
     icon: Eye,
     color: "blue",
-    bgColor: "bg-blue-50",
-    textColor: "text-blue-600",
+    bgColor: "bg-blue-500/10 border-blue-500/20 text-blue-400",
+    textColor: "text-blue-400",
     description: "Divided, selective, and sustained attention exercises based on cognitive psychology research",
     drills: [
       { name: "Divided Attention", folderName: "divided-attention", difficulty: "Intermediate", duration: "60s", description: "Dual-task training: track moving balls while matching even numbers simultaneously" },
@@ -24,8 +24,8 @@ const cognitiveCategories = [
     folderName: "focus",
     icon: Target,
     color: "purple",
-    bgColor: "bg-purple-50",
-    textColor: "text-purple-600",
+    bgColor: "bg-purple-500/10 border-purple-500/20 text-purple-400",
+    textColor: "text-purple-400",
     description: "Build deep work stamina, resist distractions, and enter flow state more easily",
     drills: [
       { name: "Concentration Grid", folderName: "concentration-grid", difficulty: "Intermediate", duration: "60s", description: "Sequential search: find numbers 1→2→3 on expanding 3×3 to 8×8 grids with level bonuses" },
@@ -38,8 +38,8 @@ const cognitiveCategories = [
     folderName: "memory",
     icon: Brain,
     color: "indigo",
-    bgColor: "bg-indigo-50",
-    textColor: "text-indigo-600",
+    bgColor: "bg-indigo-500/10 border-indigo-500/20 text-indigo-400",
+    textColor: "text-indigo-400",
     description: "Working memory, spatial recall, pattern recognition, and sequence memory exercises",
     drills: [
       { name: "Card Matching", folderName: "card-matching", difficulty: "Beginner", duration: "60s", description: "Visual memory: match icon pairs on expanding 12 to 32+ card grids with 15+ unique icons" },
@@ -53,8 +53,8 @@ const cognitiveCategories = [
     folderName: "problem-solving",
     icon: Puzzle,
     color: "orange",
-    bgColor: "bg-orange-50",
-    textColor: "text-orange-600",
+    bgColor: "bg-orange-500/10 border-orange-500/20 text-orange-400",
+    textColor: "text-orange-400",
     description: "Logic puzzles, strategic planning, recursive thinking, and critical reasoning",
     drills: [
       { name: "Logic Puzzles", folderName: "logic-puzzles", difficulty: "Advanced", duration: "60s", description: "8 puzzle types including sequences, algebra, PEMDAS, percentages & number manipulation" },
@@ -66,9 +66,9 @@ const cognitiveCategories = [
     name: "Processing Speed",
     folderName: "processing-speed",
     icon: Zap,
-    color: "green",
-    bgColor: "bg-green-50",
-    textColor: "text-green-600",
+    color: "emerald",
+    bgColor: "bg-emerald-500/10 border-emerald-500/20 text-emerald-400",
+    textColor: "text-emerald-400",
     description: "Quick math, reaction time tests, cognitive flexibility, and symbol matching",
     drills: [
       { name: "Quick Math", folderName: "quick-math", difficulty: "Intermediate", duration: "60s", description: "Rapid arithmetic with adaptive difficulty, unique non-repeating problems & keyboard input" },
@@ -81,28 +81,149 @@ const cognitiveCategories = [
 export default function CognitiveHubClient() {
   const [isClient, setIsClient] = useState(false);
 
+  // Neural Latency Tester State
+  const [testState, setTestState] = useState("idle"); // idle, waiting, flash, done, fail
+  const [latencyText, setLatencyText] = useState("MEASURE NEURAL LATENCY");
+  const [score, setScore] = useState(null);
+  const timerRef = useRef(null);
+  const flashTimeRef = useRef(0);
+  const canvasRef = useRef(null);
+
   useEffect(() => {
     setIsClient(true);
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
   }, []);
+
+  // Neural connection background animation
+  useEffect(() => {
+    if (!isClient) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    let animationFrameId;
+
+    const resize = () => {
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+    };
+    resize();
+    window.addEventListener("resize", resize);
+
+    const particles = [];
+    const count = 35;
+    for (let i = 0; i < count; i++) {
+      particles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: (Math.random() - 0.5) * 0.3,
+        radius: Math.random() * 2 + 1
+      });
+    }
+
+    const draw = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "rgba(168, 85, 247, 0.25)";
+      ctx.strokeStyle = "rgba(168, 85, 247, 0.05)";
+
+      particles.forEach((p, index) => {
+        p.x += p.vx;
+        p.y += p.vy;
+
+        if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+        if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fill();
+
+        for (let j = index + 1; j < particles.length; j++) {
+          const p2 = particles[j];
+          const dist = Math.hypot(p.x - p2.x, p.y - p2.y);
+          if (dist < 120) {
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.stroke();
+          }
+        }
+      });
+
+      animationFrameId = requestAnimationFrame(draw);
+    };
+    draw();
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+      window.removeEventListener("resize", resize);
+    };
+  }, [isClient]);
+
+  const startLatencyTest = () => {
+    setTestState("waiting");
+    setLatencyText("WAIT FOR GREEN SYNAPSE...");
+    setScore(null);
+    
+    const delay = Math.random() * 2000 + 1500; // 1.5s - 3.5s
+    timerRef.current = setTimeout(() => {
+      setTestState("flash");
+      setLatencyText("CLICK NOW!");
+      flashTimeRef.current = performance.now();
+    }, delay);
+  };
+
+  const handleAreaClick = () => {
+    if (testState === "waiting") {
+      clearTimeout(timerRef.current);
+      setTestState("fail");
+      setLatencyText("NEURAL PRE-FIRE! RELOAD TESTER.");
+    } else if (testState === "flash") {
+      const clickTime = performance.now();
+      const difference = Math.round(clickTime - flashTimeRef.current);
+      setScore(difference);
+      setTestState("done");
+      
+      let rating = "";
+      if (difference < 180) rating = "Hyper-Cognitive Class";
+      else if (difference < 220) rating = "Elite Focus Class";
+      else if (difference < 260) rating = "Optimal Class";
+      else rating = "Standard Performance Class";
+
+      setLatencyText(`${difference}ms // ${rating}`);
+    }
+  };
 
   const getDifficultyColor = (difficulty) => {
     switch(difficulty) {
-      case 'Beginner': return 'bg-green-50 text-green-600 border-green-200';
-      case 'Intermediate': return 'bg-yellow-50 text-yellow-600 border-yellow-200';
-      case 'Advanced': return 'bg-orange-50 text-orange-600 border-orange-200';
-      case 'Expert': return 'bg-red-50 text-red-600 border-red-200';
-      default: return 'bg-gray-100 text-gray-600 border-gray-200';
+      case 'Beginner': return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+      case 'Intermediate': return 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+      case 'Advanced': return 'bg-orange-500/10 text-orange-400 border-orange-500/20';
+      case 'Expert': return 'bg-rose-500/10 text-rose-400 border-rose-500/20';
+      default: return 'bg-slate-500/10 text-slate-400 border-slate-500/20';
     }
   };
 
   const getCategoryGradient = (category) => {
     switch(category) {
-      case 'Attention Training': return 'from-blue-500 to-cyan-600';
-      case 'Focus & Concentration': return 'from-purple-500 to-violet-600';
-      case 'Memory Games': return 'from-indigo-500 to-purple-600';
-      case 'Problem Solving': return 'from-orange-500 to-red-600';
-      case 'Processing Speed': return 'from-green-500 to-emerald-600';
-      default: return 'from-purple-500 to-indigo-600';
+      case 'Attention Training': return 'from-blue-500 to-cyan-500';
+      case 'Focus & Concentration': return 'from-purple-500 to-violet-500';
+      case 'Memory Games': return 'from-indigo-500 to-purple-500';
+      case 'Problem Solving': return 'from-orange-500 to-red-500';
+      case 'Processing Speed': return 'from-emerald-500 to-teal-500';
+      default: return 'from-purple-500 to-indigo-500';
+    }
+  };
+
+  const getCategoryCardBorder = (category) => {
+    switch(category) {
+      case 'Attention Training': return 'hover:border-blue-500/30 hover:shadow-[0_0_20px_rgba(59,130,246,0.15)]';
+      case 'Focus & Concentration': return 'hover:border-purple-500/30 hover:shadow-[0_0_20px_rgba(168,85,247,0.15)]';
+      case 'Memory Games': return 'hover:border-indigo-500/30 hover:shadow-[0_0_20px_rgba(99,102,241,0.15)]';
+      case 'Problem Solving': return 'hover:border-orange-500/30 hover:shadow-[0_0_20px_rgba(249,115,22,0.15)]';
+      case 'Processing Speed': return 'hover:border-emerald-500/30 hover:shadow-[0_0_20px_rgba(16,185,129,0.15)]';
+      default: return 'hover:border-purple-500/30 hover:shadow-[0_0_20px_rgba(168,85,247,0.15)]';
     }
   };
 
@@ -110,17 +231,24 @@ export default function CognitiveHubClient() {
 
   if (!isClient) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-indigo-50">
+      <div className="min-h-screen flex items-center justify-center bg-[#080d1a]">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading cognitive training drills...</p>
+          <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-purple-400 font-mono tracking-widest uppercase animate-pulse">Initializing Synaptic Core...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-50">
+    <div className="min-h-screen bg-[#080d1a] text-slate-100 font-sans selection:bg-purple-500/30 selection:text-purple-300 relative overflow-hidden">
+      
+      {/* Dynamic Backgrounds */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-purple-900/10 via-slate-950 to-slate-950 pointer-events-none z-0" />
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(18,24,38,0.45)_1px,_transparent_1px),_linear-gradient(90deg,_rgba(18,24,38,0.45)_1px,_transparent_1px)] bg-[size:32px_32px] pointer-events-none z-0" />
+      <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none z-0 opacity-40" />
+
+      {/* Structured SEO Data */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -134,8 +262,9 @@ export default function CognitiveHubClient() {
             "about": { "@type": "Thing", "name": "Cognitive Training" },
             "numberOfItems": 16,
             "itemListElement": cognitiveCategories.flatMap(category =>
-              category.drills.map((drill) => ({
+              category.drills.map((drill, index) => ({
                 "@type": "ListItem",
+                "position": index + 1,
                 "item": {
                   "@type": "WebApplication",
                   "name": drill.name,
@@ -150,77 +279,176 @@ export default function CognitiveHubClient() {
         }}
       />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <nav aria-label="Breadcrumb" className="mb-6">
-          <ol className="flex flex-wrap items-center gap-2 text-sm">
-            <li><Link href="/" className="flex items-center gap-1 text-gray-500 hover:text-purple-600 transition-colors"><Home className="w-4 h-4" /><span>Home</span></Link></li>
-            <li className="text-gray-400" aria-hidden="true"><ChevronRight className="w-4 h-4" /></li>
-            <li><Link href="/drills" className="text-gray-500 hover:text-purple-600 transition-colors">Drills</Link></li>
-            <li className="text-gray-400" aria-hidden="true"><ChevronRight className="w-4 h-4" /></li>
-            <li><span className="text-purple-600 font-medium" aria-current="page">Cognitive Training</span></li>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
+        
+        {/* Breadcrumb */}
+        <nav aria-label="Breadcrumb" className="mb-8">
+          <ol className="flex flex-wrap items-center gap-2 text-xs font-mono text-slate-400 uppercase tracking-wider">
+            <li><Link href="/" className="flex items-center gap-1.5 hover:text-purple-400 transition-colors"><Home className="w-3.5 h-3.5" /><span>HQ</span></Link></li>
+            <li className="text-slate-600" aria-hidden="true"><ChevronRight className="w-3 h-3" /></li>
+            <li><Link href="/drills" className="hover:text-purple-400 transition-colors">Drills</Link></li>
+            <li className="text-slate-600" aria-hidden="true"><ChevronRight className="w-3 h-3" /></li>
+            <li><span className="text-purple-400 font-bold" aria-current="page">Cognitive Sector</span></li>
           </ol>
         </nav>
 
-        <div className="mb-8">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-xl"><Brain className="w-6 h-6 text-white" /></div>
+        {/* Header */}
+        <div className="mb-10 bg-slate-900/80 border border-slate-800 rounded-2xl p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden backdrop-blur-xl">
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-transparent pointer-events-none" />
+          <div className="flex items-start gap-4">
+            <div className="p-4 bg-purple-500/10 border border-purple-500/20 rounded-2xl text-purple-400 shadow-inner shrink-0">
+              <Brain className="w-8 h-8 animate-pulse" />
+            </div>
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Cognitive Brain Training</h1>
-              <p className="text-gray-500 mt-1 text-sm sm:text-base">Science-based drills to sharpen memory, enhance focus, and boost problem-solving abilities</p>
+              <div className="inline-flex items-center gap-1.5 bg-purple-500/15 border border-purple-500/30 text-purple-300 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider mb-2">
+                <Activity className="w-3 h-3 animate-pulse" />
+                NEURAL COGNITION HQ
+              </div>
+              <h1 className="text-3xl font-extrabold text-white tracking-tight mt-1 bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">Cognitive Sector</h1>
+              <p className="text-slate-400 mt-2 text-sm sm:text-base max-w-xl leading-relaxed">
+                Overclock working memory metrics, reaction speeds, and selective attention thresholds using scientific cognitive modules.
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-2 self-start md:self-center">
+            <span className="px-2.5 py-1 bg-slate-950 border border-slate-800 text-slate-300 rounded-md text-xs font-mono font-semibold tracking-wide">👁️ ATTN</span>
+            <span className="px-2.5 py-1 bg-slate-950 border border-slate-800 text-slate-300 rounded-md text-xs font-mono font-semibold tracking-wide">🎯 FOCUS</span>
+            <span className="px-2.5 py-1 bg-slate-950 border border-slate-800 text-slate-300 rounded-md text-xs font-mono font-semibold tracking-wide">🧠 MEM</span>
+            <span className="px-2.5 py-1 bg-slate-950 border border-slate-800 text-slate-300 rounded-md text-xs font-mono font-semibold tracking-wide">🧩 LOGIC</span>
+          </div>
+        </div>
+
+        {/* Telemetry Widgets */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+          
+          {/* Capacity Diagnostic Panel */}
+          <div className="bg-slate-950/80 border border-slate-800 rounded-2xl p-6 flex flex-col justify-between text-center lg:text-left backdrop-blur-md">
+            <div>
+              <div className="flex items-center justify-between mb-4 border-b border-slate-900 pb-3">
+                <span className="text-xs font-mono font-bold uppercase text-slate-400 tracking-widest">COGNITIVE_NODES</span>
+                <Cpu className="w-4 h-4 text-purple-400" />
+              </div>
+              <p className="text-4xl font-extrabold text-white tracking-tight">{totalDrills}</p>
+              <p className="text-[10px] text-slate-500 font-mono uppercase tracking-widest mt-1">Sectors Active</p>
+            </div>
+            <div className="mt-4 pt-4 border-t border-slate-900 text-xs text-slate-400 leading-relaxed font-mono">
+              Diagnostic simulation parameters auto-adjust speed vectors based on historical completion coefficients.
+            </div>
+          </div>
+
+          {/* Neural Latency Tester Widget */}
+          <div className="lg:col-span-2 bg-slate-950/80 border border-slate-800 rounded-2xl p-6 relative overflow-hidden flex flex-col justify-between backdrop-blur-md">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 blur-3xl rounded-full pointer-events-none" />
+            <div className="flex items-center justify-between mb-3 text-purple-400 border-b border-slate-900 pb-3">
+              <div className="flex items-center gap-2">
+                <Activity className="w-5 h-5" />
+                <h3 className="text-sm font-bold uppercase tracking-wider text-white">Neural Synaptic Latency Calibrator</h3>
+              </div>
+              {testState !== "idle" && testState !== "done" && testState !== "fail" && (
+                <span className="w-2.5 h-2.5 bg-yellow-500 rounded-full animate-ping" />
+              )}
+            </div>
+
+            <div 
+              onClick={handleAreaClick}
+              className={`flex-1 flex flex-col items-center justify-center min-h-[140px] rounded-xl border cursor-pointer transition-all duration-150 relative overflow-hidden select-none
+                ${testState === "idle" ? "bg-slate-950 border-slate-800 hover:border-slate-700" : ""}
+                ${testState === "waiting" ? "bg-yellow-500/5 border-yellow-500/20" : ""}
+                ${testState === "flash" ? "bg-emerald-500 border-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.3)] text-black" : ""}
+                ${testState === "done" ? "bg-purple-500/5 border-purple-500/20" : ""}
+                ${testState === "fail" ? "bg-rose-500/5 border-rose-500/20" : ""}
+              `}
+            >
+              <div className="text-center p-4">
+                <p className={`font-mono font-bold uppercase tracking-widest text-xs sm:text-sm ${testState === "flash" ? "text-slate-900" : "text-slate-100"}`}>
+                  {latencyText}
+                </p>
+                {testState === "idle" && (
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      startLatencyTest();
+                    }}
+                    className="mt-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-mono text-xs uppercase tracking-wider font-bold px-5 py-2 rounded-lg transition shadow-[0_0_15px_rgba(168,85,247,0.3)]"
+                  >
+                    Calibrate Latency
+                  </button>
+                )}
+                {(testState === "done" || testState === "fail") && (
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      startLatencyTest();
+                    }}
+                    className="mt-3 bg-slate-900/50 border border-slate-800 text-slate-300 hover:text-white font-mono text-[10px] uppercase tracking-wider px-4 py-2 rounded-lg transition hover:bg-slate-800"
+                  >
+                    Recalibrate
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>
 
-        <section className="sr-only" aria-label="Cognitive training overview">
-          <h2>Cognitive Brain Training Drills Overview</h2>
-          <p>Access 16 free cognitive training drills across 5 domains: Attention Training, Focus & Concentration, Memory Games, Problem Solving, and Processing Speed. All drills are free with no login required.</p>
-        </section>
-
-        <div className="flex flex-wrap gap-2 mb-8">
-          <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">👁️ Attention</span>
-          <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">🎯 Focus</span>
-          <span className="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-xs font-medium">🧠 Memory</span>
-          <span className="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-medium">🧩 Problem Solving</span>
-          <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">⚡ Processing Speed</span>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          {[
-            { label: "Available Drills", value: totalDrills, sub: "Ready to train", icon: <Target className="w-4 h-4 text-green-500" /> },
-            { label: "Domains", value: cognitiveCategories.length, sub: "Cognitive areas", icon: <Brain className="w-4 h-4 text-purple-500" /> },
-            { label: "Free Access", value: "100%", sub: "No login required", icon: <Star className="w-4 h-4 text-yellow-500" /> }
-          ].map((stat, i) => (
-            <div key={i} className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-center">
-              <div className="flex items-center justify-between mb-2"><p className="text-sm text-gray-500">{stat.label}</p>{stat.icon}</div>
-              <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
-              <p className="text-xs text-gray-500 mt-1">{stat.sub}</p>
-            </div>
-          ))}
-        </div>
-
+        {/* Drills Grid by Category */}
         {cognitiveCategories.map((category) => {
           const CategoryIcon = category.icon;
           return (
-            <div key={category.name} className="mb-12">
-              <div className="flex items-center gap-2 mb-4">
-                <div className={`w-1 h-6 rounded-full bg-gradient-to-b ${getCategoryGradient(category.name)}`}></div>
-                <h2 className="text-xl font-bold text-gray-900">{category.name}</h2>
-                <span className="text-xs text-gray-400">({category.drills.length} drills)</span>
+            <div key={category.name} className="mb-14 relative">
+              
+              {/* Category Segment Title */}
+              <div className="flex items-center gap-2 mb-6 border-b border-slate-900 pb-3">
+                <div className={`w-1 h-6 rounded-full bg-gradient-to-b ${getCategoryGradient(category.name)}`} />
+                <h2 className="text-lg font-bold uppercase tracking-wider text-white font-mono">{category.name}</h2>
+                <span className="px-2 py-0.5 text-[10px] font-mono rounded bg-slate-900 border border-slate-800 text-slate-500">
+                  {category.drills.length} DRILL{category.drills.length > 1 ? 'S' : ''}
+                </span>
               </div>
+
+              {/* Grid Cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {category.drills.map((drill, index) => (
-                  <Link key={index} href={`/drills/cognitive/${category.folderName}/${drill.folderName}`} className="group bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-200 hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2" aria-label={`${drill.name} - ${drill.description}. Difficulty: ${drill.difficulty}. Duration: ${drill.duration}.`}>
+                  <Link 
+                    key={index} 
+                    href={`/drills/cognitive/${category.folderName}/${drill.folderName}`} 
+                    className={`group relative overflow-hidden bg-slate-950/80 rounded-xl border border-slate-900 transition-all duration-300 hover:-translate-y-1 focus:outline-none focus:ring-1 focus:ring-purple-500/50 ${getCategoryCardBorder(category.name)}`}
+                    aria-label={`${drill.name} - ${drill.description}. Difficulty: ${drill.difficulty}. Duration: ${drill.duration}.`}
+                  >
                     <div className="p-6">
                       <div className="flex items-start justify-between mb-4">
-                        <div className={`p-2 rounded-lg ${category.bgColor}`}><CategoryIcon className={`w-5 h-5 ${category.textColor}`} /></div>
-                        <div className={`px-2 py-1 rounded-full text-xs font-medium border ${getDifficultyColor(drill.difficulty)}`}>{drill.difficulty}</div>
+                        <div className={`p-2.5 rounded-lg border ${category.bgColor}`}>
+                          <CategoryIcon className="w-5 h-5" />
+                        </div>
+                        <div className={`px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold tracking-wide border uppercase ${getDifficultyColor(drill.difficulty)}`}>
+                          {drill.difficulty}
+                        </div>
                       </div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-purple-600 transition-colors">{drill.name}</h3>
-                      <p className="text-sm text-gray-500 mb-4 leading-relaxed">{drill.description}</p>
-                      <div className="flex items-center gap-4 mb-4 text-sm text-gray-500"><div className="flex items-center gap-1"><Clock className="w-3 h-3" /><span>{drill.duration}</span></div></div>
-                      <div className="flex items-center justify-between pt-2 border-t border-gray-100">
-                        <span className="text-xs text-gray-400">{category.name}</span>
-                        <div className="flex items-center gap-1 text-purple-600 group-hover:gap-2 transition-all"><span className="text-sm font-medium">Start Drill</span><Play className="w-4 h-4" /></div>
+                      
+                      <h3 className="text-base font-bold text-white mb-2 group-hover:text-purple-400 transition-colors uppercase tracking-tight font-mono">
+                        {drill.name}
+                      </h3>
+                      
+                      <p className="text-xs text-slate-400 mb-4 leading-relaxed line-clamp-2 min-h-[32px]">
+                        {drill.description}
+                      </p>
+                      
+                      <div className="flex items-center gap-4 mb-4 text-[10px] font-mono text-slate-500 border-b border-slate-900 pb-3">
+                        <div className="flex items-center gap-1">
+                          <Clock className="w-3.5 h-3.5" />
+                          <span>{drill.duration}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Cpu className="w-3.5 h-3.5" />
+                          <span>Neural Path</span>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">{category.name}</span>
+                        <div className="flex items-center gap-1 text-purple-400 group-hover:gap-2 transition-all font-bold text-xs uppercase tracking-widest font-mono">
+                          <span>EXEC_DRILL</span>
+                          <Play className="w-3.5 h-3.5 fill-current" />
+                        </div>
                       </div>
                     </div>
                   </Link>
@@ -230,33 +458,48 @@ export default function CognitiveHubClient() {
           );
         })}
 
-        <div className="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl p-8 mt-8 text-white">
-          <h3 className="text-2xl font-bold mb-6 flex items-center gap-2"><Brain className="w-6 h-6" />Benefits of Cognitive Training</h3>
+        {/* Benefits Grid */}
+        <div className="bg-slate-950/80 border border-slate-800 rounded-2xl p-8 mt-12 relative overflow-hidden backdrop-blur-md">
+          <div className="absolute top-0 right-0 w-80 h-80 bg-purple-500/5 rounded-full blur-3xl pointer-events-none" />
+          <h3 className="text-lg font-bold uppercase tracking-wider text-white mb-6 flex items-center gap-2 font-mono">
+            <Sparkles className="w-5 h-5 text-purple-400" />
+            SYNAPTIC CORE IMPROVEMENT METRICS
+          </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
             {[
-              { emoji: "🧠", title: "Better Memory", desc: "Strengthen working memory through pattern exercises and recall drills" },
-              { emoji: "🎯", title: "Sharper Focus", desc: "Filter distractions with attention training and Stroop inhibition tasks" },
-              { emoji: "⚡", title: "Faster Thinking", desc: "Quicker decisions with processing speed drills and reaction tests" },
-              { emoji: "🧩", title: "Logic Skills", desc: "Develop recursive reasoning with puzzles and Sudoku challenges" }
+              { emoji: "🧠", title: "Working Memory", desc: "Augment sensory sequence mapping and pattern retention matrices." },
+              { emoji: "🎯", title: "Focus Inhibition", desc: "Suppress cognitive ambient noise to preserve high focus waveforms." },
+              { emoji: "⚡", title: "Synapse Speed", desc: "Optimize dual-task response coefficients under split-load tests." },
+              { emoji: "🧩", title: "Logical Deduction", desc: "Maximize structural planning capability and recursive analysis vectors." }
             ].map((benefit, i) => (
-              <div key={i}><h4 className="font-semibold mb-2 flex items-center gap-2"><span className="text-lg">{benefit.emoji}</span>{benefit.title}</h4><p className="text-sm text-purple-100">{benefit.desc}</p></div>
+              <div key={i} className="bg-slate-900/30 border border-slate-900 hover:border-slate-800 transition rounded-xl p-5">
+                <h4 className="font-bold text-purple-400 mb-2 flex items-center gap-2 uppercase text-xs tracking-wider font-mono">
+                  <span className="text-sm">{benefit.emoji}</span>{benefit.title}
+                </h4>
+                <p className="text-xs text-slate-400 leading-relaxed">{benefit.desc}</p>
+              </div>
             ))}
           </div>
         </div>
 
-        <div className="mt-12 mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 text-center mb-8">Explore Related Categories</h2>
+        {/* Explore Related Categories */}
+        <div className="mt-16 mb-8 border-t border-slate-900 pt-12">
+          <h2 className="text-lg font-bold tracking-widest text-center text-white font-mono uppercase mb-8">Explore Adjacent Sectors</h2>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
             {[
-              { href: "/drills/memory", emoji: "💾", title: "Memory Drills", desc: "Short-term, working & spatial memory" },
-              { href: "/drills/productivity", emoji: "⏱️", title: "Productivity", desc: "Focus endurance & time management" },
-              { href: "/drills/academic", emoji: "📚", title: "Academic", desc: "Reading, math, typing & comprehension" },
-              { href: "/drills/fps", emoji: "🎮", title: "FPS Training", desc: "Aim trainer, reflex & tracking drills" }
+              { href: "/drills/memory", emoji: "💾", title: "Memory Sector", desc: "Working & spatial recall" },
+              { href: "/drills/productivity", emoji: "⏱️", title: "Productivity", desc: "Pomodoro focus metrics" },
+              { href: "/drills/academic", emoji: "📚", title: "Academic Hub", desc: "Reading speed & equations" },
+              { href: "/drills/fps", emoji: "🎮", title: "Tactical Aim", desc: "Crosshair tracking labs" }
             ].map((link, i) => (
-              <Link key={i} href={link.href} className="group bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-lg transition-all duration-200 hover:-translate-y-1 text-center focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-                <div className="text-3xl mb-3">{link.emoji}</div>
-                <h3 className="font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors">{link.title}</h3>
-                <p className="text-xs text-gray-500 mt-1">{link.desc}</p>
+              <Link 
+                key={i} 
+                href={link.href} 
+                className="group bg-slate-950/80 border border-slate-900 rounded-xl p-5 hover:border-purple-500/40 hover:shadow-[0_0_20px_rgba(168,85,247,0.05)] transition-all duration-200 hover:-translate-y-1 text-center"
+              >
+                <div className="text-2xl mb-2">{link.emoji}</div>
+                <h3 className="font-bold text-slate-200 group-hover:text-purple-400 transition-colors uppercase text-xs tracking-wider font-mono">{link.title}</h3>
+                <p className="text-[10px] text-slate-500 uppercase mt-1 font-mono">{link.desc}</p>
               </Link>
             ))}
           </div>
