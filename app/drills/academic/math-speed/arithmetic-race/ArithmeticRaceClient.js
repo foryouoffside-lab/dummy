@@ -24,7 +24,7 @@ export default function ArithmeticRaceClient() {
   const [bestScore, setBestScore] = useState(0);
   const [combo, setCombo] = useState(0);
   const [lives, setLives] = useState(3);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(true);
   const [isBoxDarkMode, setIsBoxDarkMode] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
@@ -298,6 +298,12 @@ export default function ArithmeticRaceClient() {
   }, [canSelect, selectedOption, currentProblem, handleOptionSelect]);
 
   const startGame = useCallback(() => {
+    try {
+      if (typeof window !== 'undefined' && !document.fullscreenElement) {
+        if (typeof toggleFullscreen === 'function') toggleFullscreen();
+      }
+    } catch (err) {}
+
     // Clean up any existing timers
     if (timerRef.current) {
       clearInterval(timerRef.current);
@@ -481,6 +487,17 @@ export default function ArithmeticRaceClient() {
         <div className="flex justify-center gap-3 mb-4"><div className={`flex p-1 rounded-xl ${isDarkMode ? 'bg-gray-800' : 'bg-gray-200'}`} role="radiogroup" aria-label="Difficulty level">{['BASIC', 'PRO', 'ELITE'].map(d => { const pts = d === 'BASIC' ? '1' : d === 'PRO' ? '1' : '2'; return (<button key={d} onClick={() => setDifficulty(d)} role="radio" aria-checked={difficulty === d} className={`px-6 py-2 rounded-lg text-sm font-bold transition-all ${difficulty === d ? 'bg-gradient-to-r from-orange-500 to-red-600 text-white shadow-lg' : `${isDarkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-500 hover:text-gray-700'}`} focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2`} aria-label={`${d} difficulty - ${pts} points per correct answer`}>{d} ({pts}pt)</button>); })}</div></div>
 
         <div ref={containerRef} className={`relative ${isFullscreen ? 'fixed inset-0 z-50' : 'rounded-xl border-2'}`} style={{ background: isBoxDarkMode ? "#0a0a0a" : "#ffffff", aspectRatio: isFullscreen ? 'auto' : '16/9', maxWidth: '100%', margin: '0 auto', borderColor: isDarkMode ? '#374151' : '#e5e7eb', overflow: 'hidden' }}>
+          {/* Mobile Rotate Device Warning Overlay */}
+          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-gray-950/95 text-center p-6 md:hidden portrait:flex landscape:hidden" aria-hidden="true">
+            <div className="animate-bounce mb-4 text-blue-500">
+              <svg className="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-bold text-white mb-2">Rotate Your Device</h3>
+            <p className="text-sm text-gray-400">Please rotate your device to landscape orientation for the best training experience.</p>
+          </div>
+
           {isFullscreen && gameState === 'playing' && (<div className="absolute top-4 right-4 z-30 flex gap-3"><button onClick={resetGame} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" title="Reset session" aria-label="Reset drill session"><RefreshCw className="w-5 h-5" /></button><button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle dark mode">{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button><button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle drill area theme"><Eye className="w-5 h-5" /></button><button onClick={() => setSoundEnabled(!soundEnabled)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle sound">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button><button onClick={toggleFullscreen} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Exit fullscreen"><Minimize2 className="w-5 h-5" /></button></div>)}
 
           <div className="absolute inset-0 flex items-center justify-center p-4 sm:p-8 overflow-y-auto">

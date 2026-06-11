@@ -26,7 +26,7 @@ export default function ConcentrationGridClient() {
   const [bestCombo, setBestCombo] = useState(0);
   const [lives, setLives] = useState(3);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(true);
   const [isBoxDarkMode, setIsBoxDarkMode] = useState(true);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [feedback, setFeedback] = useState('');
@@ -69,7 +69,13 @@ export default function ConcentrationGridClient() {
 
   const handleCellClick = useCallback((row, col, value) => { if (gameStateRef.current !== 'playing' || clickCooldownRef.current || foundNumbers.includes(value)) return; clickCooldownRef.current = true; setTotalClicks(prev => prev + 1); if (value === currentNumber) { scoreRef.current += 5; setScore(scoreRef.current); setFoundNumbers(prev => [...prev, value]); setCurrentNumber(prev => prev + 1); comboRef.current++; setCombo(comboRef.current); if (comboRef.current > bestCombo) setBestCombo(comboRef.current); if (comboRef.current % 5 === 0) { playSound('combo'); showFeedback(`🔥 ${comboRef.current}x Combo! +5`, 'success'); } else { playSound('correct'); showFeedback('✓ +5', 'success'); } const tn = gridSize * gridSize; if (currentNumber === tn) levelComplete(); } else { handleMiss(); } setTimeout(() => { clickCooldownRef.current = false; }, 100); }, [currentNumber, foundNumbers, gridSize, bestCombo, playSound, showFeedback, levelComplete, handleMiss]);
 
-  const startGame = useCallback(() => { if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); setGameState('playing'); gameStateRef.current = 'playing'; setScore(0); setLevel(1); setGridSize(3); setTimeRemaining(60); setTotalClicks(0); setCombo(0); setBestCombo(0); setLives(3); setCurrentNumber(1); setFoundNumbers([]); setFeedback(''); scoreRef.current = 0; comboRef.current = 0; livesRef.current = 3; clickCooldownRef.current = false; playSound('correct'); }, [playSound]);
+  const startGame = useCallback(() => {
+    try {
+      if (typeof window !== 'undefined' && !document.fullscreenElement) {
+        if (typeof toggleFullscreen === 'function') toggleFullscreen();
+      }
+    } catch (err) {}
+ if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); setGameState('playing'); gameStateRef.current = 'playing'; setScore(0); setLevel(1); setGridSize(3); setTimeRemaining(60); setTotalClicks(0); setCombo(0); setBestCombo(0); setLives(3); setCurrentNumber(1); setFoundNumbers([]); setFeedback(''); scoreRef.current = 0; comboRef.current = 0; livesRef.current = 3; clickCooldownRef.current = false; playSound('correct'); }, [playSound]);
   const resetGame = useCallback(() => { if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current); setGameState('start'); gameStateRef.current = 'start'; setScore(0); setLevel(1); setGridSize(3); setTimeRemaining(60); setTotalClicks(0); setCombo(0); setBestCombo(0); setLives(3); setCurrentNumber(1); setFoundNumbers([]); setGrid([]); setFeedback(''); scoreRef.current = 0; comboRef.current = 0; livesRef.current = 3; clickCooldownRef.current = false; }, []);
 
   const getCellStyle = useCallback((value) => { const isFound = foundNumbers.includes(value); if (isFound) return isBoxDarkMode ? 'bg-green-900/50 text-green-300 cursor-default opacity-50' : 'bg-green-500/50 text-white cursor-default opacity-40'; return isBoxDarkMode ? 'bg-gray-700 text-gray-200 hover:bg-gray-600 cursor-pointer' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 cursor-pointer'; }, [foundNumbers, isBoxDarkMode]);
@@ -115,7 +121,7 @@ export default function ConcentrationGridClient() {
           <p>Train visual scanning and concentration by finding numbers in sequential order 1 2 3 on randomized grids. Grids expand from 3x3 to 8x8 across 6 levels. Each correct find earns +5 points with combo streaks. 3 lives protect your score. 60 second timed challenge. Perfect for cognitive training focus improvement and brain exercises. No registration required.</p>
         </section>
 
-        <div className="grid grid-cols-8 gap-3 mb-4 h-[88px]">
+        <div className="grid grid-cols-4 sm:grid-cols-8 gap-2 sm:gap-3 mb-4 h-auto min-h-[88px] py-1">
           <StatCard icon={<Target className="text-blue-600" />} value={score} label="Score" isDark={isDarkMode} />
           <StatCard icon={<Trophy className="text-yellow-600" />} value={bestScore} label="Best" isDark={isDarkMode} />
           <StatCard icon={<Timer className={timeRemaining <= 10 ? 'text-red-600' : 'text-green-600'} />} value={`${timeRemaining}s`} label="Time" isDark={isDarkMode} />
@@ -129,6 +135,17 @@ export default function ConcentrationGridClient() {
         <div className="h-10 mb-2 flex justify-center items-center"><div className={`px-4 py-1.5 rounded-lg text-white font-semibold text-sm transition-all duration-200 ${feedback ? 'opacity-100 scale-100' : 'opacity-0 scale-95'} ${feedbackType === 'success' ? 'bg-green-500' : 'bg-red-500'}`} role="status" aria-live="polite" aria-atomic="true">{feedback || '\u00A0'}</div></div>
 
         <div ref={containerRef} className={`relative ${isFullscreen ? 'fixed inset-0 z-50' : 'rounded-xl border-2'}`} style={{ background: isBoxDarkMode ? '#020202' : '#ffffff', aspectRatio: isFullscreen ? 'auto' : '16/9', maxWidth: '100%', margin: '0 auto', borderColor: isDarkMode ? '#374151' : '#e5e7eb', overflow: 'hidden' }}>
+          {/* Mobile Rotate Device Warning Overlay */}
+          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-gray-950/95 text-center p-6 md:hidden portrait:flex landscape:hidden" aria-hidden="true">
+            <div className="animate-bounce mb-4 text-blue-500">
+              <svg className="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-bold text-white mb-2">Rotate Your Device</h3>
+            <p className="text-sm text-gray-400">Please rotate your device to landscape orientation for the best training experience.</p>
+          </div>
+
           {isFullscreen && gameState === 'playing' && (<div className="absolute top-4 right-4 z-30 flex gap-3"><button onClick={resetGame} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" title="Reset session" aria-label="Reset drill session"><RefreshCw className="w-5 h-5" /></button><button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle dark mode">{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button><button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle drill area theme"><Eye className="w-5 h-5" /></button><button onClick={() => setSoundEnabled(!soundEnabled)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle sound">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button><button onClick={toggleFullscreen} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Exit fullscreen"><Minimize2 className="w-5 h-5" /></button></div>)}
 
           {gameState === 'playing' && currentNumber <= gridSize * gridSize && (<div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10"><div className={`inline-flex items-center gap-3 rounded-full px-6 py-2 shadow-md border ${isBoxDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}><Eye className="w-5 h-5 text-blue-500" aria-hidden="true" /><span className={`text-sm ${isBoxDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Find next:</span><span className={`text-2xl font-bold ${isBoxDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>{currentNumber}</span></div></div>)}

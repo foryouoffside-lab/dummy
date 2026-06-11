@@ -18,7 +18,7 @@ export default function DynamicBalanceClient() {
   const containerRef = useRef(null);
   const [gameState, setGameState] = useState('start');
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(true);
   const [isBoxDarkMode, setIsBoxDarkMode] = useState(true);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [score, setScore] = useState(0);
@@ -110,7 +110,13 @@ export default function DynamicBalanceClient() {
   // Render loop
   useEffect(() => { if (gameState !== 'playing') return; const c = canvasRef.current; if (!c) return; const ctx = c.getContext('2d'); const uc = () => { const cont = containerRef.current; if (!cont) return; const cr = cont.getBoundingClientRect(); let w = cr.width; let h = w * (9 / 16); if (h > cr.height) { h = cr.height; w = h * (16 / 9); } c.width = w; c.height = h; canvasSizeRef.current = { width: w, height: h }; c.style.position = 'absolute'; c.style.left = `${(cr.width - w) / 2}px`; c.style.top = `${(cr.height - h) / 2}px`; if(!crosshairInitRef.current) virtualCrosshair.current = { x: w/2, y: h/2 }; init(c); }; const ro = new ResizeObserver(uc); if (containerRef.current) ro.observe(containerRef.current); window.addEventListener('resize', uc); uc(); let lft = performance.now(); function draw() { const n = performance.now(); const dt = Math.min(0.033, (n - lft) / 1000); lft = n; update(dt, c); ctx.fillStyle = isBoxDarkMode ? "#020202" : "#f9fafb"; ctx.fillRect(0, 0, c.width, c.height); ctx.strokeStyle = isBoxDarkMode ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)'; ctx.lineWidth = 1; for (let i = 0; i < c.width; i += 40) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, c.height); ctx.stroke(); } const t = targetRef.current; const ch = virtualCrosshair.current; const d = Math.hypot(ch.x - t.x, ch.y - t.y); const iT = d < t.r; ctx.beginPath(); ctx.arc(t.x, t.y, t.r, 0, Math.PI * 2); ctx.strokeStyle = iT ? "#00ff88" : "#FF3E3E"; ctx.lineWidth = iT ? 3.5 : 2; ctx.stroke(); if (iT) { ctx.beginPath(); ctx.arc(t.x, t.y, 5, 0, Math.PI * 2); ctx.fillStyle = "#00ff88"; ctx.fill(); } if (ch.x > 0 && ch.x < c.width && ch.y > 0 && ch.y < c.height) { ctx.strokeStyle = pointerLocked ? "#00ff88" : "#ff4444"; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(ch.x, ch.y, 12, 0, Math.PI * 2); ctx.stroke(); ctx.beginPath(); ctx.moveTo(ch.x - 24, ch.y); ctx.lineTo(ch.x - 10, ch.y); ctx.moveTo(ch.x + 10, ch.y); ctx.lineTo(ch.x + 24, ch.y); ctx.moveTo(ch.x, ch.y - 24); ctx.lineTo(ch.x, ch.y - 10); ctx.moveTo(ch.x, ch.y + 10); ctx.lineTo(ch.x, ch.y + 24); ctx.stroke(); ctx.fillStyle = pointerLocked ? "#00ff88" : "#ff4444"; ctx.beginPath(); ctx.arc(ch.x, ch.y, 3, 0, Math.PI * 2); ctx.fill(); } animationRef.current = requestAnimationFrame(draw); } animationRef.current = requestAnimationFrame(draw); return () => { if (animationRef.current) cancelAnimationFrame(animationRef.current); window.removeEventListener('resize', uc); ro.disconnect(); }; }, [gameState, isBoxDarkMode, pointerLocked, init, update]);
 
-  const startGame = useCallback(() => { if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); setGameState('playing'); gameStateRef.current = 'playing'; setScore(0); setStreak(0); setBestStreak(0); setTrackingAccuracy(100); setTimeLeft(60); setFeedback(''); isActiveRef.current = true; scoreRef.current = 0; streakRef.current = 0; bestStreakRef.current = 0; totalFramesRef.current = 0; focusFramesRef.current = 0; trackingTimerRef.current = 0; angleRef.current = 0; crosshairInitRef.current = false; setTimeout(()=>requestPointerLock(),200); setTimeout(()=>{crosshairInitRef.current=true;},400); }, [requestPointerLock]);
+  const startGame = useCallback(() => {
+    try {
+      if (typeof window !== 'undefined' && !document.fullscreenElement) {
+        if (typeof toggleFullscreen === 'function') toggleFullscreen();
+      }
+    } catch (err) {}
+ if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); setGameState('playing'); gameStateRef.current = 'playing'; setScore(0); setStreak(0); setBestStreak(0); setTrackingAccuracy(100); setTimeLeft(60); setFeedback(''); isActiveRef.current = true; scoreRef.current = 0; streakRef.current = 0; bestStreakRef.current = 0; totalFramesRef.current = 0; focusFramesRef.current = 0; trackingTimerRef.current = 0; angleRef.current = 0; crosshairInitRef.current = false; setTimeout(()=>requestPointerLock(),200); setTimeout(()=>{crosshairInitRef.current=true;},400); }, [requestPointerLock]);
   
   const resetGame = useCallback(() => { if (animationRef.current) cancelAnimationFrame(animationRef.current); if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current); isActiveRef.current = false; setGameState('start'); gameStateRef.current = 'start'; setFeedback(''); setFeedbackType(''); crosshairInitRef.current = false; document.exitPointerLock(); }, []);
   
@@ -173,6 +179,17 @@ export default function DynamicBalanceClient() {
         <div className="h-10 mb-2 flex justify-center items-center"><div className={`px-4 py-1.5 rounded-lg text-white font-semibold text-sm transition-all duration-200 ${feedback ? 'opacity-100 scale-100' : 'opacity-0 scale-95'} ${feedbackType === 'success' ? 'bg-green-500' : feedbackType === 'warning' ? 'bg-orange-500' : 'bg-red-500'}`} role="status" aria-live="polite" aria-atomic="true">{feedback || '\u00A0'}</div></div>
 
         <div ref={containerRef} className={`relative ${isFullscreen ? 'fixed inset-0 z-50' : 'rounded-xl border-2'}`} style={{ background: isBoxDarkMode ? "#020202" : "#ffffff", aspectRatio: isFullscreen ? 'auto' : '16/9', maxWidth: '100%', margin: '0 auto', borderColor: isDarkMode ? '#374151' : '#e5e7eb', overflow: 'hidden' }}>
+          {/* Mobile Rotate Device Warning Overlay */}
+          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-gray-950/95 text-center p-6 md:hidden portrait:flex landscape:hidden" aria-hidden="true">
+            <div className="animate-bounce mb-4 text-blue-500">
+              <svg className="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-bold text-white mb-2">Rotate Your Device</h3>
+            <p className="text-sm text-gray-400">Please rotate your device to landscape orientation for the best training experience.</p>
+          </div>
+
           {isFullscreen && gameState === 'playing' && (<div className="absolute top-4 right-4 z-20"><button onClick={toggleFullscreen} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70"><Minimize2 className="w-5 h-5"/></button></div>)}
           <canvas ref={canvasRef} style={{ display: 'block', position: 'absolute', cursor: 'none' }} aria-label="Balance tracking canvas - move your mouse to track the target" />
 

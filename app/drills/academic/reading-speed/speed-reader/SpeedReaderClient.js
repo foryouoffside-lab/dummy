@@ -39,7 +39,7 @@ export default function SpeedReaderClient() {
   const [columns, setColumns] = useState([]);
   const [wordsRead, setWordsRead] = useState(0);
   const [bestScore, setBestScore] = useState(0);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(true);
   const [isBoxDarkMode, setIsBoxDarkMode] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
@@ -85,7 +85,13 @@ export default function SpeedReaderClient() {
   const playSound = useCallback((type) => { if (!soundEnabled) return; try { const a = initAudio(); if (!a) return; const o = a.createOscillator(); const g = a.createGain(); o.connect(g); g.connect(a.destination); const n = a.currentTime; if (type === 'start') { o.frequency.setValueAtTime(660, n); g.gain.setValueAtTime(0.1, n); g.gain.exponentialRampToValueAtTime(0.001, n + 0.1); o.start(n); o.stop(n + 0.1); } else if (type === 'complete') { o.frequency.setValueAtTime(880, n); g.gain.setValueAtTime(0.1, n); g.gain.exponentialRampToValueAtTime(0.001, n + 0.15); o.start(n); o.stop(n + 0.15); } } catch (e) {} }, [soundEnabled, initAudio]);
 
   const refreshColumns = useCallback(() => { const nc = getRandomColumns(); setColumns(nc); columnsRef.current = nc; const nt = nc.reduce((sum, col) => sum + col.split(/\s+/).filter(w => w.length > 0).length, 0); showFeedback(`New columns loaded • ${nt} total words`, 'success'); }, [getRandomColumns, showFeedback]);
-  const startDrill = useCallback(() => { if (columns.length === 0) return; setGameState('playing'); gameStateRef.current = 'playing'; setIsPlaying(true); isPlayingRef.current = true; setActiveColumn(0); activeColumnRef.current = 0; setTimeLeft(60); timeLeftRef.current = 60; setWordsRead(0); wordsReadRef.current = 0; playSound('start'); showFeedback(`60s challenge started • Target: ${wpm} WPM`, 'success'); }, [columns.length, wpm, playSound, showFeedback]);
+  const startDrill = useCallback(() => {
+    try {
+      if (typeof window !== 'undefined' && !document.fullscreenElement) {
+        if (typeof toggleFullscreen === 'function') toggleFullscreen();
+      }
+    } catch (err) {}
+ if (columns.length === 0) return; setGameState('playing'); gameStateRef.current = 'playing'; setIsPlaying(true); isPlayingRef.current = true; setActiveColumn(0); activeColumnRef.current = 0; setTimeLeft(60); timeLeftRef.current = 60; setWordsRead(0); wordsReadRef.current = 0; playSound('start'); showFeedback(`60s challenge started • Target: ${wpm} WPM`, 'success'); }, [columns.length, wpm, playSound, showFeedback]);
   const resetGame = useCallback(() => { if (streamTimerRef.current) clearInterval(streamTimerRef.current); if (timerRef.current) clearInterval(timerRef.current); if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current); setIsPlaying(false); isPlayingRef.current = false; setGameState('start'); gameStateRef.current = 'start'; setActiveColumn(0); activeColumnRef.current = 0; setTimeLeft(60); timeLeftRef.current = 60; setWordsRead(0); wordsReadRef.current = 0; setFeedback(''); const nc = getRandomColumns(); setColumns(nc); columnsRef.current = nc; }, [getRandomColumns]);
   const handleWpmUp = useCallback(() => setWpm(w => Math.min(800, w + 25)), []);
   const handleWpmDown = useCallback(() => setWpm(w => Math.max(100, w - 25)), []);
@@ -150,6 +156,17 @@ export default function SpeedReaderClient() {
         {gameState === 'start' && (<div className="flex flex-wrap items-center justify-center gap-4 mb-4"><div className={`flex items-center gap-3 p-2 rounded-xl ${isDarkMode ? 'bg-gray-800' : 'bg-white border border-gray-200'}`}><span className={`text-sm font-bold ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>WPM:</span><button onClick={handleWpmDown} className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition" aria-label="Decrease WPM"><ChevronDown className="w-4 h-4" /></button><span className={`text-lg font-bold min-w-[60px] text-center ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{wpm}</span><button onClick={handleWpmUp} className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition" aria-label="Increase WPM"><ChevronUp className="w-4 h-4" /></button></div><div className={`flex items-center gap-3 p-2 rounded-xl ${isDarkMode ? 'bg-gray-800' : 'bg-white border border-gray-200'}`}><span className={`text-sm font-bold ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Width:</span><button onClick={handleWidthDown} className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition" aria-label="Decrease column width"><ChevronDown className="w-4 h-4" /></button><span className={`text-lg font-bold min-w-[60px] text-center ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{columnWidth}px</span><button onClick={handleWidthUp} className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition" aria-label="Increase column width"><ChevronUp className="w-4 h-4" /></button></div><button onClick={refreshColumns} className={`flex items-center gap-2 px-5 py-2 rounded-xl font-bold transition ${isDarkMode ? 'bg-gray-800 hover:bg-gray-700 text-gray-300' : 'bg-white border border-gray-200 hover:bg-gray-100 text-gray-700'} focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2`} aria-label={`Load new columns. Currently ${totalWords} total words`}><RefreshCw className="w-4 h-4" />New Columns ({totalWords} words)</button></div>)}
 
         <div ref={containerRef} className={`relative ${isFullscreen ? 'fixed inset-0 z-50' : 'rounded-xl border-2'}`} style={{ background: isBoxDarkMode ? "#0a0a0a" : "#ffffff", aspectRatio: isFullscreen ? 'auto' : '16/9', maxWidth: '100%', margin: '0 auto', borderColor: isDarkMode ? '#374151' : '#e5e7eb', overflow: 'hidden' }}>
+          {/* Mobile Rotate Device Warning Overlay */}
+          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-gray-950/95 text-center p-6 md:hidden portrait:flex landscape:hidden" aria-hidden="true">
+            <div className="animate-bounce mb-4 text-blue-500">
+              <svg className="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-bold text-white mb-2">Rotate Your Device</h3>
+            <p className="text-sm text-gray-400">Please rotate your device to landscape orientation for the best training experience.</p>
+          </div>
+
           {isFullscreen && gameState !== 'start' && (<div className="absolute top-4 right-4 z-30 flex gap-3"><button onClick={resetGame} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" title="Reset session" aria-label="Reset column scanner"><RefreshCw className="w-5 h-5" /></button><button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle dark mode">{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button><button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle drill area theme"><Eye className="w-5 h-5" /></button><button onClick={() => setSoundEnabled(!soundEnabled)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle sound">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button><button onClick={toggleFullscreen} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Exit fullscreen"><Minimize2 className="w-5 h-5" /></button></div>)}
 
           <div className="absolute inset-0 flex items-center justify-center p-4 sm:p-8 overflow-y-auto">

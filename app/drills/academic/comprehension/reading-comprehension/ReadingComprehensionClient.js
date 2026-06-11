@@ -85,7 +85,7 @@ function ReadingComprehensionClient() {
   const [feedback, setFeedback] = useState('');
   const [feedbackType, setFeedbackType] = useState('');
   const [totalQuestions, setTotalQuestions] = useState(0);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(true);
   const [isBoxDarkMode, setIsBoxDarkMode] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
@@ -113,7 +113,13 @@ function ReadingComprehensionClient() {
   const initAudio = useCallback(() => { try { if (!audioCtxRef.current) audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)(); if (audioCtxRef.current.state === 'suspended') audioCtxRef.current.resume(); return audioCtxRef.current; } catch (e) { return null; } }, []);
   const playSound = useCallback((type) => { if (!soundEnabled) return; try { const a = initAudio(); if (!a) return; const o = a.createOscillator(); const g = a.createGain(); o.connect(g); g.connect(a.destination); const n = a.currentTime; const f = { start: 660, correct: 880, wrong: 440, combo: 1046.5, complete: 1320 }; const d = { start: 0.1, correct: 0.15, wrong: 0.15, combo: 0.2, complete: 0.2 }; o.frequency.setValueAtTime(f[type] || 660, n); g.gain.setValueAtTime(0.1, n); g.gain.exponentialRampToValueAtTime(0.001, n + (d[type] || 0.15)); o.start(n); o.stop(n + (d[type] || 0.15)); } catch (e) {} }, [soundEnabled, initAudio]);
 
-  const startReading = useCallback(() => { if (availablePassages.length === 0) setCompletedPassages(new Set()); setGameState('reading'); setIsPlaying(true); setWordIndex(0); playSound('start'); showFeedbackMessage('Reading started • Focus on the center', 'success'); }, [availablePassages.length, playSound, showFeedbackMessage]);
+  const startReading = useCallback(() => {
+    try {
+      if (typeof window !== 'undefined' && !document.fullscreenElement) {
+        if (typeof toggleFullscreen === 'function') toggleFullscreen();
+      }
+    } catch (err) {}
+ if (availablePassages.length === 0) setCompletedPassages(new Set()); setGameState('reading'); setIsPlaying(true); setWordIndex(0); playSound('start'); showFeedbackMessage('Reading started • Focus on the center', 'success'); }, [availablePassages.length, playSound, showFeedbackMessage]);
   const resetGame = useCallback(() => { if (timerRef.current) clearInterval(timerRef.current); if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current); setPassages([generatePassage(1), generatePassage(2), generatePassage(3)]); setGameState('start'); setCurrentPassageIdx(0); scoreRef.current = 0; comboRef.current = 0; setScore(0); setCombo(0); setCorrectAnswers(0); setWrongAnswers(0); setTotalQuestions(0); setCompletedPassages(new Set()); setWordIndex(0); setQuizIndex(0); setSelectedOption(null); setShowFeedback(false); setFeedback(''); setIsPlaying(false); }, []);
   const nextPassage = useCallback(() => { if (availablePassages.length > 0) { const ni = passages.findIndex((_, idx) => !completedPassages.has(idx)); setCurrentPassageIdx(ni >= 0 ? ni : 0); setGameState('start'); setWordIndex(0); setQuizIndex(0); setSelectedOption(null); setShowFeedback(false); } else { setGameState('complete'); } }, [availablePassages, completedPassages, passages]);
 
@@ -182,6 +188,17 @@ function ReadingComprehensionClient() {
         {gameState === 'start' && (<div className="flex justify-center mb-4"><div className={`flex items-center gap-3 p-2 rounded-xl ${isDarkMode ? 'bg-gray-800' : 'bg-white border border-gray-200'}`}><span className={`text-sm font-bold ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Reading Speed:</span><button onClick={handleSpeedDown} className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition" aria-label="Decrease reading speed" title="Slower"><ChevronDown className="w-4 h-4" /></button><span className={`text-lg font-bold min-w-[60px] text-center ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{wpm} WPM</span><button onClick={handleSpeedUp} className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition" aria-label="Increase reading speed" title="Faster"><ChevronUp className="w-4 h-4" /></button></div></div>)}
 
         <div ref={containerRef} className={`relative ${isFullscreen ? 'fixed inset-0 z-50' : 'rounded-xl border-2'}`} style={{ background: isBoxDarkMode ? "#0a0a0a" : "#ffffff", aspectRatio: isFullscreen ? 'auto' : '16/9', maxWidth: '100%', margin: '0 auto', borderColor: isDarkMode ? '#374151' : '#e5e7eb', overflow: 'hidden' }}>
+          {/* Mobile Rotate Device Warning Overlay */}
+          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-gray-950/95 text-center p-6 md:hidden portrait:flex landscape:hidden" aria-hidden="true">
+            <div className="animate-bounce mb-4 text-blue-500">
+              <svg className="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-bold text-white mb-2">Rotate Your Device</h3>
+            <p className="text-sm text-gray-400">Please rotate your device to landscape orientation for the best training experience.</p>
+          </div>
+
           {isFullscreen && gameState !== 'start' && (<div className="absolute top-4 right-4 z-30 flex gap-3"><button onClick={resetGame} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" title="Generate new passages" aria-label="Generate new reading passages"><RefreshCw className="w-5 h-5" /></button><button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle dark mode">{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button><button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle drill area theme"><Eye className="w-5 h-5" /></button><button onClick={() => setSoundEnabled(!soundEnabled)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle sound">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button><button onClick={toggleFullscreen} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Exit fullscreen"><Minimize2 className="w-5 h-5" /></button></div>)}
 
           <div className="absolute inset-0 flex items-center justify-center p-4 sm:p-8 overflow-y-auto">

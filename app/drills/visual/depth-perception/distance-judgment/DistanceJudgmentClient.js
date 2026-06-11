@@ -28,7 +28,7 @@ export default function DistanceJudgmentClient() {
   const [feedbackMsg, setFeedbackMsg] = useState('');
   const [feedbackType, setFeedbackType] = useState('');
   const [soundEnabled, setSoundEnabled] = useState(true);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(true);
   const [isBoxDarkMode, setIsBoxDarkMode] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -71,7 +71,13 @@ export default function DistanceJudgmentClient() {
 
   const handleCapture = useCallback(() => { if (!isActiveRef.current || roundState !== 'approaching') return; if (requestRef.current) cancelAnimationFrame(requestRef.current); const deviation = Math.abs(currentZ - targetDepth); setAttempts(prev => prev + 1); const pts = calculatePoints(deviation); scoreRef.current = parseFloat((scoreRef.current + pts).toFixed(1)); setScore(scoreRef.current); if (deviation < 5) { setPerfectHits(prev => prev + 1); playSound('perfect'); showFeedback(`✓ PERFECT! +${pts} point`, 'success'); } else if (deviation < 15) { setCloseHits(prev => prev + 1); playSound('close'); showFeedback(`✓ CLOSE! +${pts} point`, 'success'); } else { playSound('far'); showFeedback('✗ FAR! No points', 'error'); } setRoundState('results'); const acc = attempts > 0 ? ((perfectHits + closeHits + (deviation < 15 ? 1 : 0)) / (attempts + 1)) * 100 : 100; setAccuracy(Math.round(acc)); if (attempts > 0 && (attempts + 1) % 5 === 0) { setLevel(prev => prev + 1); playSound('streak'); showFeedback(`⭐ Level ${level + 1}! Speed increased!`, 'success'); } nextTrialTimeoutRef.current = setTimeout(() => { if (isActiveRef.current && gameStateRef.current === 'playing') startTrial(); }, 1000); }, [roundState, currentZ, targetDepth, calculatePoints, playSound, showFeedback, attempts, perfectHits, closeHits, level, startTrial]);
 
-  const startGame = useCallback(() => { setGameState('playing'); gameStateRef.current = 'playing'; setScore(0); setAttempts(0); setLevel(1); setPerfectHits(0); setCloseHits(0); setTimeLeft(60); setAccuracy(100); setFeedbackMsg(''); isActiveRef.current = true; scoreRef.current = 0; setRoundState('idle'); startTrial(); }, [startTrial]);
+  const startGame = useCallback(() => {
+    try {
+      if (typeof window !== 'undefined' && !document.fullscreenElement) {
+        if (typeof toggleFullscreen === 'function') toggleFullscreen();
+      }
+    } catch (err) {}
+ setGameState('playing'); gameStateRef.current = 'playing'; setScore(0); setAttempts(0); setLevel(1); setPerfectHits(0); setCloseHits(0); setTimeLeft(60); setAccuracy(100); setFeedbackMsg(''); isActiveRef.current = true; scoreRef.current = 0; setRoundState('idle'); startTrial(); }, [startTrial]);
   const resetGame = useCallback(() => { if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current); isActiveRef.current = false; if (requestRef.current) cancelAnimationFrame(requestRef.current); if (nextTrialTimeoutRef.current) clearTimeout(nextTrialTimeoutRef.current); setGameState('start'); gameStateRef.current = 'start'; setRoundState('idle'); setScore(0); setAttempts(0); setLevel(1); setPerfectHits(0); setCloseHits(0); setTimeLeft(60); setAccuracy(100); scoreRef.current = 0; }, []);
   useEffect(() => { return () => { if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current); if (requestRef.current) cancelAnimationFrame(requestRef.current); if (nextTrialTimeoutRef.current) clearTimeout(nextTrialTimeoutRef.current); }; }, []);
 
@@ -125,6 +131,17 @@ export default function DistanceJudgmentClient() {
         <div className="h-10 mb-2 flex justify-center items-center"><div className={`px-4 py-1.5 rounded-lg text-white font-semibold text-sm transition-all duration-200 ${feedbackMsg ? 'opacity-100 scale-100' : 'opacity-0 scale-95'} ${feedbackType === 'success' ? 'bg-green-500' : feedbackType === 'warning' ? 'bg-yellow-500' : 'bg-red-500'}`} role="status" aria-live="polite" aria-atomic="true">{feedbackMsg || '\u00A0'}</div></div>
 
         <div ref={containerRef} className={`relative ${isFullscreen ? 'fixed inset-0 z-50' : 'rounded-xl border-2'}`} style={{ background: isBoxDarkMode ? "#020202" : "#ffffff", aspectRatio: isFullscreen ? 'auto' : '16/9', maxWidth: '100%', margin: '0 auto', borderColor: isDarkMode ? '#374151' : '#e5e7eb', overflow: 'hidden' }}>
+          {/* Mobile Rotate Device Warning Overlay */}
+          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-gray-950/95 text-center p-6 md:hidden portrait:flex landscape:hidden" aria-hidden="true">
+            <div className="animate-bounce mb-4 text-blue-500">
+              <svg className="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-bold text-white mb-2">Rotate Your Device</h3>
+            <p className="text-sm text-gray-400">Please rotate your device to landscape orientation for the best training experience.</p>
+          </div>
+
           {isFullscreen && gameState === 'playing' && (<><div className="absolute top-4 right-4 z-20 flex gap-3"><button onClick={resetGame} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" title="Reset session" aria-label="Reset drill session"><RefreshCw className="w-5 h-5" /></button><button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle dark mode">{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button><button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle drill area theme"><Eye className="w-5 h-5" /></button><button onClick={() => setSoundEnabled(!soundEnabled)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle sound">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button><button onClick={toggleFullscreen} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Exit fullscreen"><Minimize2 className="w-5 h-5" /></button></div><div className="absolute top-4 left-4 z-20 bg-black/50 backdrop-blur-sm rounded-lg px-4 py-2 text-white text-sm" aria-live="polite">Score: <span className="text-yellow-400 font-bold">{score.toFixed(1)}</span> | Level: <span className="text-purple-400 font-bold">{level}</span></div></>)}
 
           {gameState === 'start' && (<div className={`absolute inset-0 flex items-center justify-center backdrop-blur-sm rounded-xl z-40 ${isBoxDarkMode ? 'bg-gray-900/95' : 'bg-white/95'}`}><div className={`rounded-2xl p-6 sm:p-8 text-center max-w-md mx-4 shadow-xl border ${isBoxDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}><div className="mb-4"><Target className="w-16 h-16 text-rose-500 mx-auto" aria-hidden="true" /></div><h2 className={`text-2xl font-bold mb-2 ${isBoxDarkMode ? 'text-white' : 'text-gray-900'}`}>Distance Judgment</h2><p className={`mb-2 ${isBoxDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>60-second challenge • Intercept at target depth</p><p className={`mb-6 text-sm ${isBoxDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Click INTERCEPT when the moving sphere aligns with the dashed target ring. Auto-levels every 5 trials. Perfect for depth perception training.</p><button onClick={startGame} className="px-8 py-3 bg-gradient-to-r from-rose-500 to-pink-600 text-white rounded-xl font-semibold hover:shadow-lg w-full transition-all transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2" aria-label="Start free distance judgment drill">Start Free Drill</button></div></div>)}

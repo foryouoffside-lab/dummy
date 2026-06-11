@@ -29,7 +29,7 @@ export default function DistractionFighterClient() {
   const [bestCombo, setBestCombo] = useState(0);
   const [lives, setLives] = useState(3);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(true);
   const [isBoxDarkMode, setIsBoxDarkMode] = useState(true);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [loading, setLoading] = useState(true);
@@ -79,7 +79,13 @@ export default function DistractionFighterClient() {
 
   const handleAnswer = useCallback((selectedName) => { if (gameStateRef.current !== 'playing' || !currentTarget || clickCooldownRef.current) return; clickCooldownRef.current = true; clearTargetTimeout(); if (selectedName === currentTarget.trueColor) { scoreRef.current += 2; setScore(scoreRef.current); setCorrectCount(prev => prev + 1); comboRef.current++; setCombo(comboRef.current); if (comboRef.current > bestCombo) setBestCombo(comboRef.current); if (comboRef.current % 5 === 0) { playSound('combo'); showFeedback(`🔥 ${comboRef.current}x Combo! +2`, 'success'); } else { playSound('correct'); showFeedback('✓ +2', 'success'); } } else { handleWrongClick(); } setTimeout(() => { clickCooldownRef.current = false; if (gameStateRef.current === 'playing') generateTrial(); }, 300); }, [currentTarget, bestCombo, playSound, showFeedback, handleWrongClick, generateTrial, clearTargetTimeout]);
 
-  const startDrill = useCallback(() => { if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); clearTargetTimeout(); setGameState('playing'); gameStateRef.current = 'playing'; setScore(0); setTimeRemaining(60); setCorrectCount(0); setErrorCount(0); setTimeoutCount(0); setCombo(0); setBestCombo(0); setLives(3); setFeedback(''); scoreRef.current = 0; comboRef.current = 0; livesRef.current = 3; clickCooldownRef.current = false; }, [clearTargetTimeout]);
+  const startDrill = useCallback(() => {
+    try {
+      if (typeof window !== 'undefined' && !document.fullscreenElement) {
+        if (typeof toggleFullscreen === 'function') toggleFullscreen();
+      }
+    } catch (err) {}
+ if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); clearTargetTimeout(); setGameState('playing'); gameStateRef.current = 'playing'; setScore(0); setTimeRemaining(60); setCorrectCount(0); setErrorCount(0); setTimeoutCount(0); setCombo(0); setBestCombo(0); setLives(3); setFeedback(''); scoreRef.current = 0; comboRef.current = 0; livesRef.current = 3; clickCooldownRef.current = false; }, [clearTargetTimeout]);
   const resetGame = useCallback(() => { if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); clearTargetTimeout(); if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current); setGameState('start'); gameStateRef.current = 'start'; setScore(0); setTimeRemaining(60); setCorrectCount(0); setErrorCount(0); setTimeoutCount(0); setCombo(0); setBestCombo(0); setLives(3); setFeedback(''); setCurrentTarget(null); setOptions([]); scoreRef.current = 0; comboRef.current = 0; livesRef.current = 3; clickCooldownRef.current = false; }, [clearTargetTimeout]);
 
   const sharePage = async () => { if (navigator.share) { try { await navigator.share({ title: 'Free Distraction Fighter Stroop Test | SkillDrills', text: 'Train cognitive inhibition with this free Stroop test!', url: 'https://skilldrills.online/drills/cognitive/focus/distraction-fighter' }); } catch (e) {} } else { navigator.clipboard.writeText('https://skilldrills.online/drills/cognitive/focus/distraction-fighter'); alert('Link copied!'); } };
@@ -121,7 +127,7 @@ export default function DistractionFighterClient() {
           <p>Train cognitive inhibition with the classic Stroop effect paradigm. A color word is displayed in a different ink color. Your task is to identify the INK COLOR not the word meaning. 8 colors with 1.5 second timeout per trial. 60 second challenge with 3 lives and combo streaks. Perfect for cognitive training focus improvement and brain health. No registration required.</p>
         </section>
 
-        <div className="grid grid-cols-8 gap-3 mb-4 h-[88px]">
+        <div className="grid grid-cols-4 sm:grid-cols-8 gap-2 sm:gap-3 mb-4 h-auto min-h-[88px] py-1">
           <StatCard icon={<Target className="text-blue-600" />} value={score} label="Score" isDark={isDarkMode} />
           <StatCard icon={<Trophy className="text-yellow-600" />} value={bestScore} label="Best" isDark={isDarkMode} />
           <StatCard icon={<Timer className={timeRemaining <= 10 ? 'text-red-600' : 'text-green-600'} />} value={`${timeRemaining}s`} label="Time" isDark={isDarkMode} />
@@ -135,6 +141,17 @@ export default function DistractionFighterClient() {
         <div className="h-10 mb-2 flex justify-center items-center"><div className={`px-4 py-1.5 rounded-lg text-white font-semibold text-sm transition-all duration-200 ${feedback ? 'opacity-100 scale-100' : 'opacity-0 scale-95'} ${feedbackType === 'success' ? 'bg-green-500' : feedbackType === 'warning' ? 'bg-blue-500' : 'bg-red-500'}`} role="status" aria-live="polite" aria-atomic="true">{feedback || '\u00A0'}</div></div>
 
         <div ref={containerRef} className={`relative ${isFullscreen ? 'fixed inset-0 z-50' : 'rounded-xl border-2'}`} style={{ background: isBoxDarkMode ? '#0a0a0a' : '#fafafa', aspectRatio: isFullscreen ? 'auto' : '16/9', maxWidth: '100%', margin: '0 auto', borderColor: isDarkMode ? '#374151' : '#e5e7eb', overflow: 'hidden' }}>
+          {/* Mobile Rotate Device Warning Overlay */}
+          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-gray-950/95 text-center p-6 md:hidden portrait:flex landscape:hidden" aria-hidden="true">
+            <div className="animate-bounce mb-4 text-blue-500">
+              <svg className="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-bold text-white mb-2">Rotate Your Device</h3>
+            <p className="text-sm text-gray-400">Please rotate your device to landscape orientation for the best training experience.</p>
+          </div>
+
           {isFullscreen && gameState === 'playing' && (<div className="absolute top-4 right-4 z-30 flex gap-3"><button onClick={resetGame} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" title="Reset session" aria-label="Reset drill session"><RefreshCw className="w-5 h-5" /></button><button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle dark mode">{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button><button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle drill area theme"><Eye className="w-5 h-5" /></button><button onClick={() => setSoundEnabled(!soundEnabled)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle sound">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button><button onClick={toggleFullscreen} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Exit fullscreen"><Minimize2 className="w-5 h-5" /></button></div>)}
 
           <div className="absolute inset-0 flex flex-col items-center justify-center p-4 sm:p-8">

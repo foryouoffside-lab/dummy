@@ -32,7 +32,7 @@ export default function MemorySequenceClient() {
   const [isMemoryMaster, setIsMemoryMaster] = useState(false);
   const [totalSequencesCompleted, setTotalSequencesCompleted] = useState(0);
   const [soundEnabled, setSoundEnabled] = useState(true);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(true);
   const [isBoxDarkMode, setIsBoxDarkMode] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [feedback, setFeedback] = useState('');
@@ -79,7 +79,13 @@ export default function MemorySequenceClient() {
 
   const handleBlockClick = useCallback((index) => { if (gameStateRef.current !== 'input' || clickCooldownRef.current) return; clickCooldownRef.current = true; const nus = [...userSequence, index]; setUserSequence(nus); playTone(index); setActiveBlock(index); setTimeout(() => setActiveBlock(null), 200); const ci = nus.length - 1; if (nus[ci] !== sequence[ci]) { handleMiss('Wrong'); setGameState('fail'); gameStateRef.current = 'fail'; feedbackTimeoutRef.current = setTimeout(() => { startNewRound(Math.max(4, gridSize), sequenceLength, false); }, 1000); } else if (nus.length === sequence.length) { scoreRef.current += 10; setScore(scoreRef.current); setTotalSequencesCompleted(prev => prev + 1); setGameState('success'); gameStateRef.current = 'success'; showFeedback('✓ +10', 'success'); setCurrentStreak(prev => { const ns = prev + 1; if (ns > bestStreak) setBestStreak(ns); return ns; }); playSuccessSound(); const cgs = Math.max(4, gridSize); const msftg = getMaxSequenceForGrid(cgs); if (sequenceLength < msftg) { feedbackTimeoutRef.current = setTimeout(() => { setSequenceLength(prev => prev + 1); startNewRound(cgs, sequenceLength + 1, false); }, 800); } else if (cgs < 7) { const nsz = cgs + 1; const nsl = getStartSequenceForGrid(nsz); feedbackTimeoutRef.current = setTimeout(() => { setGridSize(nsz); setSequenceLength(nsl); setMaxSequenceForCurrentGrid(getMaxSequenceForGrid(nsz)); setCurrentLevel(prev => prev + 1); startNewRound(nsz, nsl, false); }, 800); } else { setGameState('memoryMaster'); gameStateRef.current = 'memoryMaster'; setIsMemoryMaster(true); playMasterSound(); } } setTimeout(() => { clickCooldownRef.current = false; }, 100); }, [userSequence, sequence, gridSize, sequenceLength, bestStreak, playTone, playSuccessSound, playMasterSound, handleMiss, startNewRound, getMaxSequenceForGrid, getStartSequenceForGrid, showFeedback]);
 
-  const startGame = useCallback(() => { if (sequenceTimerRef.current) clearTimeout(sequenceTimerRef.current); if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current); if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); setGameState('playing'); gameStateRef.current = 'playing'; setTimeRemaining(60); setScore(0); setGridSize(4); setSequenceLength(8); setMaxSequenceForCurrentGrid(16); setCurrentLevel(1); setCurrentStreak(0); setBestStreak(0); setTotalSequencesCompleted(0); setLives(3); setUserSequence([]); setFeedback(''); setIsMemoryMaster(false); scoreRef.current = 0; livesRef.current = 3; clickCooldownRef.current = false; initAudio(); setTimeout(() => startNewRound(4, 8, true), 100); }, [startNewRound, initAudio]);
+  const startGame = useCallback(() => {
+    try {
+      if (typeof window !== 'undefined' && !document.fullscreenElement) {
+        if (typeof toggleFullscreen === 'function') toggleFullscreen();
+      }
+    } catch (err) {}
+ if (sequenceTimerRef.current) clearTimeout(sequenceTimerRef.current); if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current); if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); setGameState('playing'); gameStateRef.current = 'playing'; setTimeRemaining(60); setScore(0); setGridSize(4); setSequenceLength(8); setMaxSequenceForCurrentGrid(16); setCurrentLevel(1); setCurrentStreak(0); setBestStreak(0); setTotalSequencesCompleted(0); setLives(3); setUserSequence([]); setFeedback(''); setIsMemoryMaster(false); scoreRef.current = 0; livesRef.current = 3; clickCooldownRef.current = false; initAudio(); setTimeout(() => startNewRound(4, 8, true), 100); }, [startNewRound, initAudio]);
   const resetGame = useCallback(() => { if (sequenceTimerRef.current) clearTimeout(sequenceTimerRef.current); if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current); if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); setGameState('start'); gameStateRef.current = 'start'; setGridSize(4); setSequenceLength(8); setMaxSequenceForCurrentGrid(16); setCurrentLevel(1); setScore(0); setCurrentStreak(0); setBestStreak(0); setTotalSequencesCompleted(0); setLives(3); setUserSequence([]); setGrid([]); setSequence([]); setActiveBlock(null); setFeedback(''); setIsMemoryMaster(false); setFeedbackType(''); scoreRef.current = 0; livesRef.current = 3; clickCooldownRef.current = false; }, []);
   const getGridCellSize = useCallback(() => { const s = Math.max(4, gridSize); if (s === 4) return 'minmax(40px, 60px)'; if (s === 5) return 'minmax(32px, 48px)'; if (s === 6) return 'minmax(26px, 40px)'; return 'minmax(22px, 34px)'; }, [gridSize]);
   const getGridMaxWidth = useCallback(() => { const s = Math.max(4, gridSize); if (s === 4) return '320px'; if (s === 5) return '320px'; return '300px'; }, [gridSize]);
@@ -124,7 +130,7 @@ export default function MemorySequenceClient() {
           <p>Train your working memory by watching and repeating spatial sequences on expanding grids from 4x4 to 7x7. Sequences grow from 8 to 49 steps. Complete sequences earn +10 points with 3 lives protection. Achieve Memory Master status by completing the 7x7 grid. Perfect for cognitive training brain fitness and memory improvement. No registration required.</p>
         </section>
 
-        <div className="grid grid-cols-8 gap-3 mb-4 h-[88px]">
+        <div className="grid grid-cols-4 sm:grid-cols-8 gap-2 sm:gap-3 mb-4 h-auto min-h-[88px] py-1">
           <StatCard icon={<Target className="text-blue-600" />} value={score} label="Score" isDark={isDarkMode} />
           <StatCard icon={<Trophy className="text-yellow-600" />} value={bestScore} label="Best" isDark={isDarkMode} />
           <StatCard icon={<Timer className={timeRemaining <= 10 ? 'text-red-600' : 'text-green-600'} />} value={`${timeRemaining}s`} label="Time" isDark={isDarkMode} />
@@ -138,6 +144,17 @@ export default function MemorySequenceClient() {
         <div className="h-10 mb-2 flex justify-center items-center"><div className={`px-4 py-1.5 rounded-lg text-white font-semibold text-sm transition-all duration-200 ${feedback ? 'opacity-100 scale-100' : 'opacity-0 scale-95'} ${feedbackType === 'success' ? 'bg-green-500' : 'bg-red-500'}`} role="status" aria-live="polite" aria-atomic="true">{feedback || '\u00A0'}</div></div>
 
         <div ref={containerRef} className={`relative ${isFullscreen ? 'fixed inset-0 z-50' : 'rounded-xl border-2'}`} style={{ background: isBoxDarkMode ? '#0a0a0a' : '#ffffff', aspectRatio: isFullscreen ? 'auto' : '16/9', maxWidth: '100%', margin: '0 auto', borderColor: isDarkMode ? '#374151' : '#e5e7eb', overflow: 'hidden' }}>
+          {/* Mobile Rotate Device Warning Overlay */}
+          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-gray-950/95 text-center p-6 md:hidden portrait:flex landscape:hidden" aria-hidden="true">
+            <div className="animate-bounce mb-4 text-blue-500">
+              <svg className="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-bold text-white mb-2">Rotate Your Device</h3>
+            <p className="text-sm text-gray-400">Please rotate your device to landscape orientation for the best training experience.</p>
+          </div>
+
           {isFullscreen && (gameState === 'playing' || gameState === 'showing' || gameState === 'input' || gameState === 'success' || gameState === 'fail') && (<div className="absolute top-4 right-4 z-30 flex gap-3"><button onClick={resetGame} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" title="Reset session" aria-label="Reset memory sequence drill"><RefreshCw className="w-5 h-5" /></button><button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle dark mode">{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button><button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle drill area theme"><Eye className="w-5 h-5" /></button><button onClick={() => setSoundEnabled(!soundEnabled)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle sound">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button><button onClick={toggleFullscreen} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Exit fullscreen"><Minimize2 className="w-5 h-5" /></button></div>)}
 
           <div className="absolute inset-0 flex items-center justify-center p-4">

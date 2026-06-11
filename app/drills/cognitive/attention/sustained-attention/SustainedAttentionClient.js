@@ -29,7 +29,7 @@ export default function SustainedAttentionClient() {
   const [flashInterval, setFlashInterval] = useState(500);
   const [lives, setLives] = useState(5);
   const [soundEnabled, setSoundEnabled] = useState(true);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(true);
   const [isBoxDarkMode, setIsBoxDarkMode] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [feedback, setFeedback] = useState('');
@@ -78,7 +78,13 @@ export default function SustainedAttentionClient() {
 
   const startNewRound = useCallback(() => { const nt = Math.floor(Math.random() * 10); setTargetNumber(nt); setShowTargetDisplay(true); setCurrentNumber(null); setLastNumber(null); setIsClickable(false); setFlashInterval(500); lastNumberRef.current = null; if (flashIntervalRef.current) clearInterval(flashIntervalRef.current); if (missTimeoutRef.current) clearTimeout(missTimeoutRef.current); setTimeout(() => { setShowTargetDisplay(false); startFlashing(); }, 2000); }, [startFlashing]);
 
-  const startGame = useCallback(() => { if (flashIntervalRef.current) clearInterval(flashIntervalRef.current); if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); if (missTimeoutRef.current) clearTimeout(missTimeoutRef.current); setGameState('playing'); gameStateRef.current = 'playing'; setScore(0); setTimeRemaining(60); setSuccessfulHits(0); setMissedHits(0); setWrongHits(0); setCombo(0); setBestCombo(0); setLives(5); setFeedback(''); scoreRef.current = 0; comboRef.current = 0; livesRef.current = 5; initAudio(); startNewRound(); }, [startNewRound, initAudio]);
+  const startGame = useCallback(() => {
+    try {
+      if (typeof window !== 'undefined' && !document.fullscreenElement) {
+        if (typeof toggleFullscreen === 'function') toggleFullscreen();
+      }
+    } catch (err) {}
+ if (flashIntervalRef.current) clearInterval(flashIntervalRef.current); if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); if (missTimeoutRef.current) clearTimeout(missTimeoutRef.current); setGameState('playing'); gameStateRef.current = 'playing'; setScore(0); setTimeRemaining(60); setSuccessfulHits(0); setMissedHits(0); setWrongHits(0); setCombo(0); setBestCombo(0); setLives(5); setFeedback(''); scoreRef.current = 0; comboRef.current = 0; livesRef.current = 5; initAudio(); startNewRound(); }, [startNewRound, initAudio]);
 
   const resetGame = useCallback(() => { if (flashIntervalRef.current) clearInterval(flashIntervalRef.current); if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); if (missTimeoutRef.current) clearTimeout(missTimeoutRef.current); if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current); setGameState('start'); gameStateRef.current = 'start'; setShowTargetDisplay(true); setIsClickable(false); setFeedback(''); setFeedbackType(''); }, []);
 
@@ -121,7 +127,7 @@ export default function SustainedAttentionClient() {
           <p>Train your sustained attention and vigilance with this free interactive drill. Click only when the flashing number matches your memorized target. Numbers 0-9 flash rapidly at adaptive speed from 500ms to 300ms decreasing with each correct hit. Features 5 lives system combo streaks and response accuracy metrics. 60 second challenge format. Perfect for cognitive training focus improvement and attention assessment. No registration required.</p>
         </section>
 
-        <div className="grid grid-cols-8 gap-3 mb-4 h-[88px]">
+        <div className="grid grid-cols-4 sm:grid-cols-8 gap-2 sm:gap-3 mb-4 h-auto min-h-[88px] py-1">
           <StatCard icon={<Target className="text-blue-600" />} value={score} label="Score" isDark={isDarkMode} />
           <StatCard icon={<Trophy className="text-yellow-600" />} value={bestScore} label="Best" isDark={isDarkMode} />
           <StatCard icon={<Timer className={timeRemaining <= 10 ? 'text-red-600' : 'text-green-600'} />} value={`${timeRemaining}s`} label="Time" isDark={isDarkMode} />
@@ -135,6 +141,17 @@ export default function SustainedAttentionClient() {
         <div className="h-10 mb-2 flex justify-center items-center"><div className={`px-4 py-1.5 rounded-lg text-white font-semibold text-sm transition-all duration-200 ${feedback ? 'opacity-100 scale-100' : 'opacity-0 scale-95'} ${feedbackType === 'success' ? 'bg-green-500' : 'bg-red-500'}`} role="status" aria-live="polite" aria-atomic="true">{feedback || '\u00A0'}</div></div>
 
         <div ref={containerRef} className={`relative outline-none focus:outline-none ${isFullscreen ? 'fixed inset-0 z-50' : 'rounded-xl border-2'}`} style={{ background: isBoxDarkMode ? '#0a0a0a' : '#ffffff', aspectRatio: isFullscreen ? 'auto' : '16/9', maxWidth: '100%', margin: '0 auto', borderColor: isDarkMode ? '#374151' : '#e5e7eb', cursor: gameState === 'playing' && !showTargetDisplay ? 'pointer' : 'default', overflow: 'hidden' }} onClick={handleNumberClick} tabIndex={-1} role="button" aria-label={gameState === 'playing' && !showTargetDisplay ? 'Click when target number appears' : 'Game area'}>
+          {/* Mobile Rotate Device Warning Overlay */}
+          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-gray-950/95 text-center p-6 md:hidden portrait:flex landscape:hidden" aria-hidden="true">
+            <div className="animate-bounce mb-4 text-blue-500">
+              <svg className="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-bold text-white mb-2">Rotate Your Device</h3>
+            <p className="text-sm text-gray-400">Please rotate your device to landscape orientation for the best training experience.</p>
+          </div>
+
           {isFullscreen && gameState === 'playing' && (<div className="absolute top-4 right-4 z-30 flex gap-3"><button onClick={(e) => { e.stopPropagation(); resetGame(); }} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" title="Reset session" aria-label="Reset sustained attention drill"><RefreshCw className="w-5 h-5" /></button><button onClick={(e) => { e.stopPropagation(); setIsDarkMode(!isDarkMode); }} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle dark mode">{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button><button onClick={(e) => { e.stopPropagation(); setIsBoxDarkMode(!isBoxDarkMode); }} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle drill area theme"><Eye className="w-5 h-5" /></button><button onClick={(e) => { e.stopPropagation(); setSoundEnabled(!soundEnabled); }} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle sound">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button><button onClick={(e) => { e.stopPropagation(); toggleFullscreen(); }} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Exit fullscreen"><Minimize2 className="w-5 h-5" /></button></div>)}
 
           <div className="absolute inset-0 flex items-center justify-center">

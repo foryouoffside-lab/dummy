@@ -19,7 +19,7 @@ export default function DualTargetFlowClient() {
   
   const [gameState, setGameState] = useState('start');
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(true);
   const [isBoxDarkMode, setIsBoxDarkMode] = useState(true);
   const [soundEnabled, setSoundEnabled] = useState(true);
   
@@ -86,7 +86,13 @@ export default function DualTargetFlowClient() {
 
   const clearAllIntervals = useCallback(() => { if (spawnIntervalLeftRef.current) clearInterval(spawnIntervalLeftRef.current); if (spawnIntervalRightRef.current) clearInterval(spawnIntervalRightRef.current); if (targetIntervalRef.current) clearInterval(targetIntervalRef.current); if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current); animationFramesRef.current.forEach(id => cancelAnimationFrame(id)); animationFramesRef.current.clear(); }, []);
 
-  const startGame = useCallback(() => { clearAllIntervals(); if (leftContainerRef.current) leftContainerRef.current.innerHTML = ''; if (rightContainerRef.current) rightContainerRef.current.innerHTML = ''; setGameState('playing'); gameStateRef.current = 'playing'; setScore(0); setLives(3); setTimeLeft(60); setStreak(0); setBestStreak(0); setSuccessfulHits(0); setMisses(0); setAccuracy(100); setFeedback(''); scoreRef.current = 0; livesRef.current = 3; streakRef.current = 0; bestStreakRef.current = 0; hitsRef.current = 0; missesRef.current = 0; isActiveRef.current = true; initTargets(); spawnIntervalLeftRef.current = setInterval(() => createShape('left'), 600); spawnIntervalRightRef.current = setInterval(() => createShape('right'), 600); targetIntervalRef.current = setInterval(() => { if (isActiveRef.current) { initTargets(); showFeedback('🔄 Targets changed!', 'success'); } }, 30000); timerIntervalRef.current = setInterval(() => { setTimeLeft(prev => { if (prev <= 1) { setGameState('gameOver'); gameStateRef.current = 'gameOver'; isActiveRef.current = false; clearAllIntervals(); if (leftContainerRef.current) leftContainerRef.current.innerHTML = ''; if (rightContainerRef.current) rightContainerRef.current.innerHTML = ''; updateBestScore(scoreRef.current); return 0; } return prev - 1; }); }, 1000); showFeedback('Go! Click matching target shapes!', 'success'); }, [clearAllIntervals, initTargets, createShape, showFeedback, updateBestScore]);
+  const startGame = useCallback(() => {
+    try {
+      if (typeof window !== 'undefined' && !document.fullscreenElement) {
+        if (typeof toggleFullscreen === 'function') toggleFullscreen();
+      }
+    } catch (err) {}
+ clearAllIntervals(); if (leftContainerRef.current) leftContainerRef.current.innerHTML = ''; if (rightContainerRef.current) rightContainerRef.current.innerHTML = ''; setGameState('playing'); gameStateRef.current = 'playing'; setScore(0); setLives(3); setTimeLeft(60); setStreak(0); setBestStreak(0); setSuccessfulHits(0); setMisses(0); setAccuracy(100); setFeedback(''); scoreRef.current = 0; livesRef.current = 3; streakRef.current = 0; bestStreakRef.current = 0; hitsRef.current = 0; missesRef.current = 0; isActiveRef.current = true; initTargets(); spawnIntervalLeftRef.current = setInterval(() => createShape('left'), 600); spawnIntervalRightRef.current = setInterval(() => createShape('right'), 600); targetIntervalRef.current = setInterval(() => { if (isActiveRef.current) { initTargets(); showFeedback('🔄 Targets changed!', 'success'); } }, 30000); timerIntervalRef.current = setInterval(() => { setTimeLeft(prev => { if (prev <= 1) { setGameState('gameOver'); gameStateRef.current = 'gameOver'; isActiveRef.current = false; clearAllIntervals(); if (leftContainerRef.current) leftContainerRef.current.innerHTML = ''; if (rightContainerRef.current) rightContainerRef.current.innerHTML = ''; updateBestScore(scoreRef.current); return 0; } return prev - 1; }); }, 1000); showFeedback('Go! Click matching target shapes!', 'success'); }, [clearAllIntervals, initTargets, createShape, showFeedback, updateBestScore]);
 
   const resetGame = useCallback(() => { clearAllIntervals(); isActiveRef.current = false; setGameState('start'); gameStateRef.current = 'start'; setScore(0); setLives(3); setTimeLeft(60); setStreak(0); setBestStreak(0); setSuccessfulHits(0); setMisses(0); setAccuracy(100); setFeedback(''); scoreRef.current = 0; livesRef.current = 3; streakRef.current = 0; bestStreakRef.current = 0; hitsRef.current = 0; missesRef.current = 0; if (leftContainerRef.current) leftContainerRef.current.innerHTML = ''; if (rightContainerRef.current) rightContainerRef.current.innerHTML = ''; }, [clearAllIntervals]);
 
@@ -107,6 +113,17 @@ export default function DualTargetFlowClient() {
         {!isFullscreen && (<div className="grid grid-cols-6 gap-3 mb-4 h-[88px]"><StatCard icon={<Target className="text-blue-600" />} value={score} label="Score" isDark={isDarkMode} /><StatCard icon={<Trophy className="text-yellow-500" />} value={bestScore} label="Best" isDark={isDarkMode} /><StatCard icon={<Timer className={timeLeft<15?'text-red-600':'text-green-600'} />} value={timeLeft} label="Time" unit="s" isDark={isDarkMode} /><StatCard icon={<Activity className={lives===0?'text-yellow-500':'text-green-500'} />} value={lives} label="Lives" isDark={isDarkMode} /><StatCard icon={<Zap className="text-orange-500" />} value={streak} label="Streak" isDark={isDarkMode} /><StatCard icon={<Award className="text-purple-500" />} value={bestStreak} label="Best Stk" isDark={isDarkMode} /></div>)}
         <div className="h-10 mb-2 flex justify-center items-center"><div className={`px-4 py-1.5 rounded-lg text-white font-semibold text-sm transition-all duration-200 ${feedback?'opacity-100 scale-100':'opacity-0 scale-95'} ${feedbackType==='success'?'bg-green-500':feedbackType==='warning'?'bg-yellow-500':'bg-red-500'}`} role="status" aria-live="polite" aria-atomic="true">{feedback||'\u00A0'}</div></div>
         <div ref={containerRef} className={`relative ${isFullscreen?'fixed inset-0 z-50':'rounded-xl border-2'}`} style={{background:isBoxDarkMode?"#000000":"#ffffff",aspectRatio:isFullscreen?'auto':'16/9',maxWidth:'100%',margin:'0 auto',borderColor:isDarkMode?'#374151':'#e5e7eb',overflow:'hidden'}}>
+          {/* Mobile Rotate Device Warning Overlay */}
+          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-gray-950/95 text-center p-6 md:hidden portrait:flex landscape:hidden" aria-hidden="true">
+            <div className="animate-bounce mb-4 text-blue-500">
+              <svg className="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-bold text-white mb-2">Rotate Your Device</h3>
+            <p className="text-sm text-gray-400">Please rotate your device to landscape orientation for the best training experience.</p>
+          </div>
+
           <div className="absolute top-5 w-full flex justify-between px-16 z-20 pointer-events-none"><div className="flex flex-col items-center gap-1"><span className={`text-sm tracking-wider font-bold ${isBoxDarkMode?'text-gray-500':'text-gray-400'}`}>LEFT TARGET</span><span className={`text-6xl ${isBoxDarkMode?'text-white':'text-gray-800'}`} style={{textShadow:'0 0 15px rgba(255,255,255,0.4)'}}>{leftTarget}</span></div><div className="flex flex-col items-center gap-1"><span className={`text-sm tracking-wider font-bold ${isBoxDarkMode?'text-gray-500':'text-gray-400'}`}>RIGHT TARGET</span><span className={`text-6xl ${isBoxDarkMode?'text-white':'text-gray-800'}`} style={{textShadow:'0 0 15px rgba(255,255,255,0.4)'}}>{rightTarget}</span></div></div>
           <div className="absolute top-0 left-1/2 w-px h-full bg-white/5 z-10" aria-hidden="true" />
           <div ref={leftContainerRef} className="absolute top-0 left-0 w-1/2 h-full overflow-hidden" aria-label="Left target zone" />

@@ -1,6 +1,8 @@
 // app/api/indexnow/route.js
 // Notifies Bing, Yandex, Seznam, & Naver instantly when pages are updated
 
+export const dynamic = 'force-dynamic';
+
 const INDEXNOW_KEY = 'c8f7a3b2e1d4f5a6b7c8d9e0f1a2b3c4';
 const BASE_URL = 'https://skilldrills.online';
 

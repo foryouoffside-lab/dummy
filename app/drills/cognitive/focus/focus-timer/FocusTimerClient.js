@@ -15,7 +15,7 @@ export default function FocusTimerClient() {
   const [timeRemaining, setTimeRemaining] = useState(300);
   const [gameState, setGameState] = useState('start');
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(true);
   const [isBoxDarkMode, setIsBoxDarkMode] = useState(true);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [focusScore, setFocusScore] = useState(0);
@@ -57,7 +57,13 @@ export default function FocusTimerClient() {
 
   useEffect(() => { if (gameState !== 'playing' || !containerRef.current) return; const container = containerRef.current; function createRipple() { const ripple = document.createElement('div'); ripple.className = 'ripple-element'; ripple.style.position = 'absolute'; ripple.style.top = '50%'; ripple.style.left = '50%'; ripple.style.width = '0'; ripple.style.height = '0'; ripple.style.borderRadius = '50%'; ripple.style.border = isBoxDarkMode ? '1px solid rgba(180, 215, 255, 0.45)' : '1px solid rgba(79, 70, 229, 0.35)'; ripple.style.boxShadow = isBoxDarkMode ? '0 0 6px rgba(180, 215, 255, 0.15)' : '0 0 6px rgba(79, 70, 229, 0.1)'; ripple.style.transform = 'translate(-50%, -50%)'; ripple.style.animation = 'expandRipple 18s linear forwards'; ripple.style.pointerEvents = 'none'; ripple.style.zIndex = '1'; container.appendChild(ripple); ripple.addEventListener('animationend', () => ripple.remove()); } createRipple(); rippleIntervalRef.current = setInterval(createRipple, 4500); return () => { if (rippleIntervalRef.current) { clearInterval(rippleIntervalRef.current); rippleIntervalRef.current = null; } if (containerRef.current) { const ripples = containerRef.current.querySelectorAll('.ripple-element'); ripples.forEach(ripple => ripple.remove()); } }; }, [gameState, isBoxDarkMode]);
 
-  const startDrill = useCallback(() => { if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); if (rippleIntervalRef.current) clearInterval(rippleIntervalRef.current); if (focusIntervalRef.current) clearInterval(focusIntervalRef.current); setGameState('playing'); gameStateRef.current = 'playing'; setTimeRemaining(300); setFocusScore(0); setCombo(0); setBestCombo(0); setFeedback(''); focusScoreRef.current = 0; comboRef.current = 0; secondCounterRef.current = 0; playSound('start'); showFeedback('Keep your gaze on the center point', 'success'); }, [playSound, showFeedback]);
+  const startDrill = useCallback(() => {
+    try {
+      if (typeof window !== 'undefined' && !document.fullscreenElement) {
+        if (typeof toggleFullscreen === 'function') toggleFullscreen();
+      }
+    } catch (err) {}
+ if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); if (rippleIntervalRef.current) clearInterval(rippleIntervalRef.current); if (focusIntervalRef.current) clearInterval(focusIntervalRef.current); setGameState('playing'); gameStateRef.current = 'playing'; setTimeRemaining(300); setFocusScore(0); setCombo(0); setBestCombo(0); setFeedback(''); focusScoreRef.current = 0; comboRef.current = 0; secondCounterRef.current = 0; playSound('start'); showFeedback('Keep your gaze on the center point', 'success'); }, [playSound, showFeedback]);
   const resetGame = useCallback(() => { if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); if (rippleIntervalRef.current) clearInterval(rippleIntervalRef.current); if (focusIntervalRef.current) clearInterval(focusIntervalRef.current); if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current); if (containerRef.current) { const ripples = containerRef.current.querySelectorAll('.ripple-element'); ripples.forEach(ripple => ripple.remove()); } setGameState('start'); gameStateRef.current = 'start'; setFeedback(''); setFeedbackType(''); }, []);
   const formatTime = useCallback((seconds) => { const mins = Math.floor(seconds / 60); const secs = seconds % 60; return `${mins}:${secs.toString().padStart(2, '0')}`; }, []);
   const getCompletion = useCallback(() => Math.round((focusScore / 60) * 100), [focusScore]);
@@ -115,6 +121,17 @@ export default function FocusTimerClient() {
         <div className="h-10 mb-2 flex justify-center items-center"><div className={`px-4 py-1.5 rounded-lg text-white font-semibold text-sm transition-all duration-200 ${feedback ? 'opacity-100 scale-100' : 'opacity-0 scale-95'} ${feedbackType === 'success' ? 'bg-green-500' : 'bg-blue-500'}`} role="status" aria-live="polite" aria-atomic="true">{feedback || '\u00A0'}</div></div>
 
         <div ref={containerRef} className={`relative ${isFullscreen ? 'fixed inset-0 z-50' : 'rounded-xl border-2'}`} style={{ background: isBoxDarkMode ? '#070711' : '#f9fafb', aspectRatio: isFullscreen ? 'auto' : '16/9', maxWidth: '100%', margin: '0 auto', borderColor: isDarkMode ? '#374151' : '#e5e7eb', backgroundImage: isBoxDarkMode ? 'radial-gradient(circle at center, #0d0f1f 0%, #070711 70%)' : 'radial-gradient(circle at center, #e0e7ff 0%, #c7d2fe 70%)', overflow: 'hidden' }}>
+          {/* Mobile Rotate Device Warning Overlay */}
+          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-gray-950/95 text-center p-6 md:hidden portrait:flex landscape:hidden" aria-hidden="true">
+            <div className="animate-bounce mb-4 text-blue-500">
+              <svg className="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-bold text-white mb-2">Rotate Your Device</h3>
+            <p className="text-sm text-gray-400">Please rotate your device to landscape orientation for the best training experience.</p>
+          </div>
+
           {isFullscreen && gameState === 'playing' && (<div className="absolute top-4 right-4 z-30 flex gap-3"><button onClick={resetGame} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" title="Reset session" aria-label="Reset focus timer"><RefreshCw className="w-5 h-5" /></button><button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle dark mode">{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button><button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle drill area theme"><Eye className="w-5 h-5" /></button><button onClick={() => setSoundEnabled(!soundEnabled)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle sound">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button><button onClick={toggleFullscreen} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Exit fullscreen"><Minimize2 className="w-5 h-5" /></button></div>)}
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[420px] h-[420px] rounded-full pointer-events-none" style={{ background: isBoxDarkMode ? 'radial-gradient(circle, rgba(140, 180, 240, 0.08), transparent 70%)' : 'radial-gradient(circle, rgba(99, 102, 241, 0.15), transparent 70%)', filter: 'blur(60px)' }}></div>
           <div className="absolute top-1/2 left-1/2 rounded-full transform -translate-x-1/2 -translate-y-1/2 z-5 pointer-events-none" style={{ width: '8px', height: '8px', background: isBoxDarkMode ? 'rgba(190, 220, 255, 0.95)' : 'rgba(79, 70, 229, 0.95)', boxShadow: isBoxDarkMode ? '0 0 12px rgba(190, 220, 255, 0.6)' : '0 0 12px rgba(79, 70, 229, 0.4)' }}></div>

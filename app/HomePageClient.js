@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { 
   Target, ArrowRight, Zap, Trophy, BarChart3, Sparkles, 
@@ -159,6 +160,80 @@ const audienceData = [
 ];
 
 export default function HomePageClient() {
+  const [profile, setProfile] = useState(null);
+  
+  useEffect(() => {
+    try {
+      const keys = Object.keys(localStorage);
+      let totalDrillsPlayed = 0;
+      let totalLevel = 0;
+      let maxLevel = 1;
+      let totalXp = 0;
+      let drillCount = 0;
+      let totalBestScore = 0;
+      
+      const sectorStats = {
+        fps: { name: 'FPS Aim', count: 0, levels: 0, games: 0 },
+        cognitive: { name: 'Cognitive', count: 0, levels: 0, games: 0 },
+        memory: { name: 'Memory', count: 0, levels: 0, games: 0 },
+        academic: { name: 'Academic', count: 0, levels: 0, games: 0 },
+        visual: { name: 'Visual', count: 0, levels: 0, games: 0 },
+        motor: { name: 'Motor Skills', count: 0, levels: 0, games: 0 },
+        productivity: { name: 'Productivity', count: 0, levels: 0, games: 0 },
+        physical: { name: 'Physical', count: 0, levels: 0, games: 0 },
+        'mental-fitness': { name: 'Mental Fitness', count: 0, levels: 0, games: 0 }
+      };
+      
+      keys.forEach(key => {
+        if (key.endsWith('_progression')) {
+          const data = localStorage.getItem(key);
+          if (data) {
+            try {
+              const parsed = JSON.parse(data);
+              totalDrillsPlayed += parsed.totalGames || 0;
+              totalLevel += parsed.level || 1;
+              totalXp += parsed.xp || 0;
+              if (parsed.level > maxLevel) maxLevel = parsed.level;
+              drillCount++;
+              
+              for (const sector in sectorStats) {
+                if (key.includes('/' + sector + '/')) {
+                  sectorStats[sector].count++;
+                  sectorStats[sector].levels += parsed.level || 1;
+                  sectorStats[sector].games += parsed.totalGames || 0;
+                  break;
+                }
+              }
+            } catch (e) {}
+          }
+        }
+      });
+      
+      keys.forEach(key => {
+        if (key.endsWith('BestScore') || key.endsWith('Best') || key.endsWith('HighScore')) {
+          const val = localStorage.getItem(key);
+          if (val) {
+            const score = parseInt(val, 10);
+            if (!isNaN(score)) {
+              totalBestScore += score;
+            }
+          }
+        }
+      });
+
+      if (totalDrillsPlayed > 0 || drillCount > 0) {
+        setProfile({
+          gamesPlayed: totalDrillsPlayed,
+          avgLevel: drillCount > 0 ? Math.round(totalLevel / drillCount) : 1,
+          maxLevel,
+          drillsCount: drillCount,
+          totalXp,
+          fitnessRating: Math.min(100, Math.round((totalLevel * 5) + (totalBestScore / 200) + (totalDrillsPlayed * 2))),
+          sectors: sectorStats
+        });
+      }
+    } catch (e) {}
+  }, []);
   const copyPageLink = () => {
     navigator.clipboard.writeText('https://skilldrills.online');
     alert('Link copied to clipboard! Share SkillDrills with your friends.');
@@ -332,6 +407,84 @@ export default function HomePageClient() {
           </div>
         </div>
       </section>
+
+      {/* PROFILE SECTION */}
+      {profile && (
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
+          <div className="bg-gradient-to-r from-blue-900/30 to-purple-900/30 border border-blue-500/20 rounded-3xl p-6 md:p-8 backdrop-blur-xl shadow-2xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+              <div className="flex items-center gap-5">
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+                  <Brain className="w-8 h-8 text-white animate-pulse" />
+                </div>
+                <div>
+                  <h2 className="text-xl sm:text-2xl font-black text-white uppercase tracking-tight">Your Diagnostic Profile</h2>
+                  <p className="text-xs sm:text-sm text-gray-400">Lifetime training metrics aggregated across all diagnostic sectors</p>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 w-full md:w-auto">
+                <div className="bg-black/40 border border-white/5 p-4 rounded-2xl text-center">
+                  <p className="text-2xl font-black text-white">{profile.gamesPlayed}</p>
+                  <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">Sessions</p>
+                </div>
+                <div className="bg-black/40 border border-white/5 p-4 rounded-2xl text-center">
+                  <p className="text-2xl font-black text-white">{profile.drillsCount}</p>
+                  <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">Drills</p>
+                </div>
+                <div className="bg-black/40 border border-white/5 p-4 rounded-2xl text-center">
+                  <p className="text-2xl font-black text-white">Lvl {profile.avgLevel}</p>
+                  <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">Avg Level</p>
+                </div>
+                <div className="bg-black/40 border border-white/5 p-4 rounded-2xl text-center bg-gradient-to-br from-yellow-500/5 to-amber-500/5 hover:border-yellow-500/20 transition-all">
+                  <p className="text-2xl font-black text-yellow-400 flex items-center justify-center gap-1">
+                    <Trophy className="w-5 h-5" />
+                    {profile.fitnessRating}%
+                  </p>
+                  <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">Fitness Rating</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="mt-6 pt-6 border-t border-white/5">
+              <div className="flex justify-between items-center text-xs mb-2">
+                <span className="text-gray-400 font-bold uppercase tracking-widest">Neuro-Adaptation Progress</span>
+                <span className="text-blue-400 font-black">{profile.totalXp} Cumulative XP</span>
+              </div>
+              <div className="h-2 bg-white/5 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 transition-all duration-1000" 
+                  style={{ width: `${Math.min(100, (profile.totalXp / 1000) * 100)}%` }}
+                />
+              </div>
+            </div>
+
+            {profile.sectors && Object.keys(profile.sectors).some(s => profile.sectors[s].games > 0) && (
+              <div className="mt-8 pt-6 border-t border-white/5">
+                <h3 className="text-xs font-bold text-white uppercase tracking-wider mb-4">Sector Diagnostic Breakdown</h3>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+                  {Object.keys(profile.sectors).map(sector => {
+                    const stats = profile.sectors[sector];
+                    if (stats.games === 0) return null;
+                    const avgLvl = Math.round(stats.levels / stats.count);
+                    return (
+                      <div key={sector} className="bg-black/40 border border-white/5 p-4 rounded-2xl flex flex-col justify-between hover:border-blue-500/20 transition-all">
+                        <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider truncate">{stats.name}</span>
+                        <div className="mt-3 flex justify-between items-end">
+                          <span className="text-xl font-black text-white">Lvl {avgLvl}</span>
+                          <span className="text-[10px] font-semibold text-blue-400">{stats.games} games</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
 
       {/* CATEGORIES SECTION */}
       <section className="py-20 relative border-t border-white/5 bg-black/20" aria-labelledby="categories-heading">
