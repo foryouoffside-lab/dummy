@@ -20,6 +20,11 @@ export default function PomodoroSyncClient() {
       const isMobile = /Mobi|Android|iPhone|iPad|iPod|Windows Phone/i.test(ua) || 
                        (navigator.maxTouchPoints > 0 && 
                         window.screen && Math.max(window.screen.width, window.screen.height) < 1024);
+      if (isMobile) {
+        setShowRotateWarning(true);
+        setWarningMessage("This drill cannot be played on mobile phones");
+        return;
+      }
       if (!isMobile) {
         setShowRotateWarning(false);
         return;
@@ -90,7 +95,7 @@ export default function PomodoroSyncClient() {
   const FOCUS_TIME = 25 * 60;
   const BREAK_TIME = 5 * 60;
 
-  useEffect(() => { setIsClient(true); const timer = setTimeout(() => setLoading(false), 300); return () => clearTimeout(timer); }, []);
+  useEffect(() => { setIsClient(true); const timer = setTimeout(() => setLoading(false), 0); return () => clearTimeout(timer); }, []);
   useEffect(() => { gameStateRef.current = gameState; }, [gameState]);
 
   const toggleFullscreen = useCallback(async () => { try { if (!isFullscreen) { const element = containerRef.current; if (element?.requestFullscreen) { await element.requestFullscreen(); setIsFullscreen(true); } } else { if (document.fullscreenElement) await document.exitFullscreen(); setIsFullscreen(false); } } catch (error) { console.error('Fullscreen error:', error); } }, [isFullscreen]);
@@ -147,7 +152,7 @@ export default function PomodoroSyncClient() {
             </svg>
           </div>
           <h3 className="text-lg font-bold text-white mb-2">{warningMessage}</h3>
-          <p className="text-sm text-gray-400 mb-6">Please use landscape orientation or fullscreen mode for the best training experience.</p>
+          <p className="text-sm text-gray-400 mb-6">{warningMessage === "This drill cannot be played on mobile phones" ? "This drill requires a physical mouse or keyboard and cannot be played on touchscreen devices." : "Please use landscape orientation or fullscreen mode for the best training experience."}</p>
           <Link href="/drills/productivity">
             <button className="px-5 py-2.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-350 hover:text-white font-bold rounded-lg text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">

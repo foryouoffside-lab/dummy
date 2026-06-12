@@ -136,7 +136,7 @@ function ReadingComprehensionClient() {
   const scoreRef = useRef(0);
   const comboRef = useRef(0);
 
-  useEffect(() => { setIsClient(true); setPassages([generatePassage(1), generatePassage(2), generatePassage(3)]); const t = setTimeout(() => setLoading(false), 300); return () => clearTimeout(t); }, []);
+  useEffect(() => { setIsClient(true); setPassages([generatePassage(1), generatePassage(2), generatePassage(3)]); const t = setTimeout(() => setLoading(false), 0); return () => clearTimeout(t); }, []);
 
   const currentPassage = useMemo(() => passages[currentPassageIdx], [passages, currentPassageIdx]);
   const words = useMemo(() => currentPassage?.text.split(' ') || [], [currentPassage]);

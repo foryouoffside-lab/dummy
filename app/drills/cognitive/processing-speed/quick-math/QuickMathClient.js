@@ -86,7 +86,7 @@ export default function QuickMathClient() {
   const livesRef = useRef(3);
   const gameStateRef = useRef('start');
 
-  useEffect(() => { setIsClient(true); try { const savedHistory = localStorage.getItem('mathQuestionHistory'); if (savedHistory) { const historyArray = JSON.parse(savedHistory); setQuestionHistory(new Set(historyArray)); } } catch (e) {} const timer = setTimeout(() => setLoading(false), 300); return () => clearTimeout(timer); }, []);
+  useEffect(() => { setIsClient(true); try { const savedHistory = localStorage.getItem('mathQuestionHistory'); if (savedHistory) { const historyArray = JSON.parse(savedHistory); setQuestionHistory(new Set(historyArray)); } } catch (e) {} const timer = setTimeout(() => setLoading(false), 0); return () => clearTimeout(timer); }, []);
   useEffect(() => { try { const savedBestScore = localStorage.getItem('quickMathDrillBestScore'); if (savedBestScore) { const parsed = parseInt(savedBestScore, 10); if (!isNaN(parsed)) setBestScore(parsed); } } catch (e) {} }, []);
   useEffect(() => { gameStateRef.current = gameState; }, [gameState]);
   useEffect(() => { if (gameState === 'gameOver' && score > bestScore) { setBestScore(score); try { localStorage.setItem('quickMathDrillBestScore', score.toString()); } catch (e) {} } }, [gameState, score, bestScore]);

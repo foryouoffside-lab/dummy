@@ -90,7 +90,7 @@ export default function PathTracingClient() {
 
   useEffect(() => {
     setIsClient(true);
-    const timer = setTimeout(() => setLoading(false), 300);
+    const timer = setTimeout(() => setLoading(false), 0);
     return () => clearTimeout(timer);
   }, []);
 

@@ -81,7 +81,7 @@ export default function VagalBrakeClient() {
   const audioCtxRef = useRef(null);
   const gameStateRef = useRef('start');
 
-  useEffect(() => { setIsClient(true); const t = setTimeout(() => setLoading(false), 300); return () => clearTimeout(t); }, []);
+  useEffect(() => { setIsClient(true); const t = setTimeout(() => setLoading(false), 0); return () => clearTimeout(t); }, []);
   useEffect(() => { gameStateRef.current = gameState; }, [gameState]);
 
   const showFeedback = useCallback((msg, type) => {

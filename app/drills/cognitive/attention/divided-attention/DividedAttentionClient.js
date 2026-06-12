@@ -90,7 +90,7 @@ export default function DividedAttentionClient() {
   const currentNumberRef = useRef(null);
   const bestComboRef = useRef(0);
 
-  useEffect(() => { setIsClient(true); const t = setTimeout(() => setLoading(false), 300); return () => clearTimeout(t); }, []);
+  useEffect(() => { setIsClient(true); const t = setTimeout(() => setLoading(false), 0); return () => clearTimeout(t); }, []);
   useEffect(() => { gameStateRef.current = gameState; }, [gameState]);
   useEffect(() => { soundEnabledRef.current = soundEnabled; }, [soundEnabled]);
   useEffect(() => { currentTargetRef.current = currentTarget; }, [currentTarget]);

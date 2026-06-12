@@ -77,7 +77,7 @@ export default function FocusTimerClient() {
   const gameStateRef = useRef('start');
   const secondCounterRef = useRef(0);
 
-  useEffect(() => { setIsClient(true); const timer = setTimeout(() => setLoading(false), 300); return () => clearTimeout(timer); }, []);
+  useEffect(() => { setIsClient(true); const timer = setTimeout(() => setLoading(false), 0); return () => clearTimeout(timer); }, []);
   useEffect(() => { try { const s = localStorage.getItem('focusRipplesDrillBestScore'); if (s) { const p = parseInt(s, 10); if (!isNaN(p)) setBestScore(p); } } catch (e) {} }, []);
   useEffect(() => { gameStateRef.current = gameState; }, [gameState]);
   useEffect(() => { if (gameState === 'ended' && focusScore > bestScore) { setBestScore(focusScore); try { localStorage.setItem('focusRipplesDrillBestScore', focusScore.toString()); } catch (e) {} } }, [gameState, focusScore, bestScore]);

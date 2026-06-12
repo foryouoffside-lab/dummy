@@ -121,7 +121,7 @@ export default function SentenceSpanClient() {
   const phaseRef = useRef('ready');
   const currentSentencesRef = useRef([]);
 
-  useEffect(() => { setIsClient(true); const timer = setTimeout(() => setLoading(false), 300); return () => clearTimeout(timer); }, []);
+  useEffect(() => { setIsClient(true); const timer = setTimeout(() => setLoading(false), 0); return () => clearTimeout(timer); }, []);
   useEffect(() => { gameStateRef.current = gameState; }, [gameState]);
   useEffect(() => { levelRef.current = level; }, [level]);
   useEffect(() => { phaseRef.current = phase; }, [phase]);

@@ -84,7 +84,7 @@ export default function DistanceJudgmentClient() {
   const audioCtxRef = useRef(null);
   const handleAutoFailRef = useRef(null);
 
-  useEffect(() => { setIsClient(true); const t = setTimeout(() => setLoading(false), 300); return () => clearTimeout(t); }, []);
+  useEffect(() => { setIsClient(true); const t = setTimeout(() => setLoading(false), 0); return () => clearTimeout(t); }, []);
   useEffect(() => { try { const s = localStorage.getItem('distanceJudgmentBestScore'); if (s) { const p = parseFloat(s); if (!isNaN(p)) setBestScore(p); } } catch (e) {} }, []);
 
   const updateBestScore = useCallback((finalScore) => { try { const c = parseFloat(localStorage.getItem('distanceJudgmentBestScore') || '0'); if (finalScore > c) { localStorage.setItem('distanceJudgmentBestScore', finalScore.toString()); setBestScore(finalScore); } } catch (e) {} }, []);

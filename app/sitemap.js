@@ -115,17 +115,17 @@ const drillRoutes = [
   { path: '/drills/motor/timing-accuracy/synchronization', category: 'Motor Skills', priority: 0.85 },
 
   // ==================== PHYSICAL DRILLS (11) ====================
-  { path: '/drills/physical/Balance-Training/dynamic-balance', category: 'Physical Training', priority: 0.75 },
-  { path: '/drills/physical/Balance-Training/single-leg-hold', category: 'Physical Training', priority: 0.75 },
-  { path: '/drills/physical/Balance-Training/stability-challenge', category: 'Physical Training', priority: 0.75 },
-  { path: '/drills/physical/Coordination/complex-pattern', category: 'Physical Training', priority: 0.75 },
-  { path: '/drills/physical/Coordination/cross-body-movement', category: 'Physical Training', priority: 0.75 },
-  { path: '/drills/physical/Fitness/agility-ladder', category: 'Physical Training', priority: 0.75 },
-  { path: '/drills/physical/Fitness/jump-sequence', category: 'Physical Training', priority: 0.75 },
-  { path: '/drills/physical/Fitness/speed-drill', category: 'Physical Training', priority: 0.75 },
-  { path: '/drills/physical/Reflex-Training/drop-catch', category: 'Physical Training', priority: 0.75 },
-  { path: '/drills/physical/Reflex-Training/quick-dodge', category: 'Physical Training', priority: 0.75 },
-  { path: '/drills/physical/Reflex-Training/reaction-chain', category: 'Physical Training', priority: 0.75 },
+  { path: '/drills/physical/balance-training/dynamic-balance', category: 'Physical Training', priority: 0.75 },
+  { path: '/drills/physical/balance-training/single-leg-hold', category: 'Physical Training', priority: 0.75 },
+  { path: '/drills/physical/balance-training/stability-challenge', category: 'Physical Training', priority: 0.75 },
+  { path: '/drills/physical/coordination/complex-pattern', category: 'Physical Training', priority: 0.75 },
+  { path: '/drills/physical/coordination/cross-body-movement', category: 'Physical Training', priority: 0.75 },
+  { path: '/drills/physical/fitness/agility-ladder', category: 'Physical Training', priority: 0.75 },
+  { path: '/drills/physical/fitness/jump-sequence', category: 'Physical Training', priority: 0.75 },
+  { path: '/drills/physical/fitness/speed-drill', category: 'Physical Training', priority: 0.75 },
+  { path: '/drills/physical/reflex-training/drop-catch', category: 'Physical Training', priority: 0.75 },
+  { path: '/drills/physical/reflex-training/quick-dodge', category: 'Physical Training', priority: 0.75 },
+  { path: '/drills/physical/reflex-training/reaction-chain', category: 'Physical Training', priority: 0.75 },
 
   // ==================== PRODUCTIVITY DRILLS (10) ====================
   { path: '/drills/productivity/focus-endurance/concentration-stamina', category: 'Productivity', priority: 0.85 },

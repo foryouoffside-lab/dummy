@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { 
   Target, ArrowRight, Zap, Trophy, BarChart3, Sparkles, 
   TrendingUp, Brain, Crosshair, Eye, Timer, Keyboard, 
-  Dumbbell, Database, Star, Shield, Users
+  Dumbbell, Database, Star, Shield, Users, Lock
 } from 'lucide-react';
 
 const categories = [
@@ -13,11 +13,12 @@ const categories = [
     name: 'FPS Training', 
     description: 'Aim trainer, flick shots, tracking and reflex drills for competitive gaming', 
     icon: Crosshair, 
-    href: '/drills/fps', 
+    href: '#', 
     gradient: 'from-red-500 via-rose-500 to-orange-500',
     iconBg: 'bg-gradient-to-br from-red-500 to-orange-500',
     drills: '21 drills',
-    featured: true 
+    featured: true,
+    locked: true
   },
   { 
     name: 'Cognitive', 
@@ -26,7 +27,8 @@ const categories = [
     href: '/drills/cognitive', 
     gradient: 'from-blue-500 via-indigo-500 to-violet-500',
     iconBg: 'bg-gradient-to-br from-blue-500 to-indigo-500',
-    drills: '16 drills' 
+    drills: '16 drills',
+    locked: false
   },
   { 
     name: 'Visual', 
@@ -35,7 +37,8 @@ const categories = [
     href: '/drills/visual', 
     gradient: 'from-purple-500 via-violet-500 to-pink-500',
     iconBg: 'bg-gradient-to-br from-purple-500 to-pink-500',
-    drills: '14 drills' 
+    drills: '14 drills',
+    locked: false
   },
   { 
     name: 'Academic', 
@@ -44,7 +47,8 @@ const categories = [
     href: '/drills/academic', 
     gradient: 'from-emerald-500 via-green-500 to-teal-500',
     iconBg: 'bg-gradient-to-br from-emerald-500 to-teal-500',
-    drills: '12 drills' 
+    drills: '11 drills',
+    locked: false
   },
   { 
     name: 'Memory', 
@@ -53,7 +57,8 @@ const categories = [
     href: '/drills/memory', 
     gradient: 'from-indigo-500 via-purple-500 to-fuchsia-500',
     iconBg: 'bg-gradient-to-br from-indigo-500 to-purple-500',
-    drills: '15 drills' 
+    drills: '15 drills',
+    locked: false
   },
   { 
     name: 'Mental Fitness', 
@@ -62,7 +67,8 @@ const categories = [
     href: '/drills/mental-fitness', 
     gradient: 'from-teal-500 via-cyan-500 to-blue-500',
     iconBg: 'bg-gradient-to-br from-teal-500 to-cyan-500',
-    drills: '6 drills' 
+    drills: '6 drills',
+    locked: false
   },
   { 
     name: 'Motor Skills', 
@@ -71,7 +77,8 @@ const categories = [
     href: '/drills/motor', 
     gradient: 'from-orange-500 via-amber-500 to-yellow-500',
     iconBg: 'bg-gradient-to-br from-orange-500 to-amber-500',
-    drills: '12 drills' 
+    drills: '12 drills',
+    locked: false
   },
   { 
     name: 'Productivity', 
@@ -80,7 +87,8 @@ const categories = [
     href: '/drills/productivity', 
     gradient: 'from-lime-500 via-green-500 to-emerald-500',
     iconBg: 'bg-gradient-to-br from-lime-500 to-emerald-500',
-    drills: '10 drills' 
+    drills: '10 drills',
+    locked: false
   },
   { 
     name: 'Physical', 
@@ -89,7 +97,8 @@ const categories = [
     href: '/drills/physical', 
     gradient: 'from-rose-500 via-red-500 to-orange-500',
     iconBg: 'bg-gradient-to-br from-rose-500 to-red-500',
-    drills: '11 drills' 
+    drills: '11 drills',
+    locked: false
   },
 ];
 
@@ -234,6 +243,7 @@ export default function HomePageClient() {
       }
     } catch (e) {}
   }, []);
+
   const copyPageLink = () => {
     navigator.clipboard.writeText('https://skilldrills.online');
     alert('Link copied to clipboard! Share SkillDrills with your friends.');
@@ -286,7 +296,9 @@ export default function HomePageClient() {
             </Link>
             
             <nav aria-label="Main navigation" className="hidden sm:flex items-center gap-6">
-              <Link href="/drills/fps" className="text-sm text-gray-400 hover:text-white transition-colors font-medium">FPS</Link>
+              <span className="text-sm text-gray-600 font-medium flex items-center gap-1 cursor-not-allowed">
+                <Lock className="w-3 h-3" /> FPS
+              </span>
               <Link href="/drills/cognitive" className="text-sm text-gray-400 hover:text-white transition-colors font-medium">Cognitive</Link>
               <Link href="/drills/memory" className="text-sm text-gray-400 hover:text-white transition-colors font-medium">Memory</Link>
               <Link href="/drills/academic" className="text-sm text-gray-400 hover:text-white transition-colors font-medium">Academic</Link>
@@ -340,13 +352,10 @@ export default function HomePageClient() {
                 Access All Drills
                 <ArrowRight className="w-5 h-5" aria-hidden="true" />
               </Link>
-              <Link 
-                href="/drills/fps" 
-                className="inline-flex items-center justify-center gap-2 bg-white/5 backdrop-blur-md text-white border border-white/10 px-8 py-4 rounded-xl font-bold hover:bg-white/10 transition transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-black"
-              >
-                <Crosshair className="w-5 h-5 text-red-400" aria-hidden="true" />
-                Aim Trainer
-              </Link>
+              <span className="inline-flex items-center justify-center gap-2 bg-white/5 backdrop-blur-md text-gray-500 border border-white/10 px-8 py-4 rounded-xl font-bold cursor-not-allowed">
+                <Lock className="w-4 h-4" />
+                Aim Trainer - Coming Soon
+              </span>
             </div>
             
             {/* Quick Metrics */}
@@ -501,6 +510,37 @@ export default function HomePageClient() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
             {categories.map((category) => {
               const Icon = category.icon;
+              const isLocked = category.locked;
+
+              if (isLocked) {
+                return (
+                  <div key={category.name} className="group relative bg-[#0E111A]/60 rounded-2xl border border-white/5 p-6 opacity-50 cursor-not-allowed overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 to-orange-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="absolute top-3 right-3 bg-yellow-500/20 border border-yellow-500/30 rounded-lg px-2 py-1 flex items-center gap-1 z-10">
+                      <Lock className="w-3 h-3 text-yellow-400" />
+                      <span className="text-[10px] font-bold text-yellow-400 uppercase">Locked</span>
+                    </div>
+                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br from-gray-600 to-gray-700 flex items-center justify-center mb-5 shadow-lg shadow-black/40`}>
+                      <Icon className="w-6 h-6 text-gray-400" aria-hidden="true" />
+                    </div>
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-lg font-bold text-gray-500 uppercase tracking-tight">{category.name}</h3>
+                      {category.featured && (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-yellow-500/10 border border-yellow-500/20 text-yellow-400/50 text-[10px] font-bold uppercase rounded-full">Popular</span>
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-600 mb-6 leading-relaxed line-clamp-2">{category.description}</p>
+                    <div className="flex items-center justify-between pt-4 border-t border-white/5">
+                      <span className="text-xs font-bold text-gray-600 tracking-wider bg-white/5 px-3 py-1 rounded-lg">{category.drills}</span>
+                      <div className="flex items-center gap-1.5 text-gray-500 font-bold text-xs uppercase tracking-wider">
+                        <Lock className="w-3 h-3" />
+                        <span>Coming Soon</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+
               return (
                 <Link
                   key={category.name}
@@ -508,7 +548,6 @@ export default function HomePageClient() {
                   className="group relative bg-[#0E111A]/60 rounded-2xl border border-white/5 p-6 hover:border-white/10 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 overflow-hidden"
                   title={`${category.name} - ${category.description}`}
                 >
-                  {/* Glowing background on hover */}
                   <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
                   
                   <div className={`w-12 h-12 rounded-xl ${category.iconBg} flex items-center justify-center mb-5 group-hover:scale-110 transition-transform shadow-lg shadow-black/40`}>
@@ -630,12 +669,14 @@ export default function HomePageClient() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8 mb-12">
             <div>
-              <h3 className="text-white font-bold tracking-wider mb-4 text-xs uppercase">FPS Training</h3>
-              <ul className="space-y-2.5 text-sm text-gray-400">
-                <li><Link href="/drills/fps/flick-shot-training" className="hover:text-white transition-colors">Flick Shot Trainer</Link></li>
-                <li><Link href="/drills/fps/target-acquisition" className="hover:text-white transition-colors">Target Acquisition</Link></li>
-                <li><Link href="/drills/fps/reactive-tracking" className="hover:text-white transition-colors">Reactive Tracking</Link></li>
-                <li><Link href="/drills/fps" className="text-blue-400 hover:text-blue-300 transition-colors font-semibold">All 21 FPS Drills →</Link></li>
+              <h3 className="text-white font-bold tracking-wider mb-4 text-xs uppercase flex items-center gap-2">
+                FPS Training <Lock className="w-3 h-3 text-yellow-400" />
+              </h3>
+              <ul className="space-y-2.5 text-sm text-gray-600">
+                <li><span className="cursor-not-allowed">Flick Shot Trainer</span></li>
+                <li><span className="cursor-not-allowed">Target Acquisition</span></li>
+                <li><span className="cursor-not-allowed">Reactive Tracking</span></li>
+                <li><span className="text-gray-500 font-semibold cursor-not-allowed">Coming Soon</span></li>
               </ul>
             </div>
             <div>
@@ -694,7 +735,6 @@ export default function HomePageClient() {
               <button onClick={copyPageLink} className="text-gray-500 hover:text-white transition-colors" title="Copy Link" aria-label="Copy SkillDrills link to clipboard">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
               </button>
-             
               <a href="https://twitter.com/skilldrillss" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-white transition-colors" title="Follow on Twitter" aria-label="Follow SkillDrills on Twitter">
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
               </a>

@@ -100,7 +100,7 @@ export default function SpeedReaderClient() {
   const isPlayingRef = useRef(isPlaying);
   const gameStateRef = useRef(gameState);
 
-  useEffect(() => { setIsClient(true); setColumns(getRandomColumns()); const t = setTimeout(() => setLoading(false), 300); return () => clearTimeout(t); }, [getRandomColumns]);
+  useEffect(() => { setIsClient(true); setColumns(getRandomColumns()); const t = setTimeout(() => setLoading(false), 0); return () => clearTimeout(t); }, [getRandomColumns]);
   useEffect(() => { wpmRef.current = wpm; }, [wpm]);
   useEffect(() => { columnsRef.current = columns; }, [columns]);
   useEffect(() => { activeColumnRef.current = activeColumn; }, [activeColumn]);

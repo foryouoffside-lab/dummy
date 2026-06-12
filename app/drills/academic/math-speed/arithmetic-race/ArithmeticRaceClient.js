@@ -96,7 +96,7 @@ export default function ArithmeticRaceClient() {
 
   useEffect(() => { 
     setIsClient(true); 
-    const t = setTimeout(() => setLoading(false), 300); 
+    const t = setTimeout(() => setLoading(false), 0); 
     return () => clearTimeout(t); 
   }, []);
   

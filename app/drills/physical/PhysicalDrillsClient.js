@@ -194,7 +194,7 @@ export default function PhysicalDrillsClient() {
   const categories = [
     { 
       name: 'Balance Training', 
-      folderName: 'Balance-Training',
+      folderName: 'balance-training',
       icon: Activity,
       color: 'purple',
       bgColor: 'bg-purple-500/10 border-purple-500/20 text-purple-400',
@@ -208,7 +208,7 @@ export default function PhysicalDrillsClient() {
     },
     { 
       name: 'Reflex Training', 
-      folderName: 'Reflex-Training',
+      folderName: 'reflex-training',
       icon: Zap,
       color: 'yellow',
       bgColor: 'bg-yellow-500/10 border-yellow-500/20 text-yellow-400',
@@ -222,7 +222,7 @@ export default function PhysicalDrillsClient() {
     },
     { 
       name: 'Coordination', 
-      folderName: 'Coordination',
+      folderName: 'coordination',
       icon: Hand,
       color: 'green',
       bgColor: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400',
@@ -235,7 +235,7 @@ export default function PhysicalDrillsClient() {
     },
     { 
       name: 'Fitness', 
-      folderName: 'Fitness',
+      folderName: 'fitness',
       icon: Heart,
       color: 'red',
       bgColor: 'bg-rose-500/10 border-rose-500/20 text-rose-400',
@@ -334,13 +334,18 @@ export default function PhysicalDrillsClient() {
             "isPartOf": { "@type": "WebSite", "name": "SkillDrills", "url": "https://skilldrills.online" },
             "about": { "@type": "Thing", "name": "Physical Motor Training" },
             "numberOfItems": 11,
-            "itemListElement": categories.flatMap(cat => cat.drills).map((drill, index) => ({
+            "itemListElement": categories.flatMap(cat => 
+              cat.drills.map(drill => ({
+                ...drill,
+                categoryFolder: cat.folderName
+              }))
+            ).map((drill, index) => ({
               "@type": "ListItem",
               "position": index + 1,
               "item": {
                 "@type": "WebApplication",
                 "name": drill.name,
-                "url": `https://skilldrills.online/drills/physical/${cat.folderName.toLowerCase()}/${drill.folderName}`,
+                "url": `https://skilldrills.online/drills/physical/${drill.categoryFolder}/${drill.folderName}`,
                 "description": drill.description,
                 "applicationCategory": "EducationalApplication",
                 "operatingSystem": "Web"
@@ -518,7 +523,7 @@ export default function PhysicalDrillsClient() {
                 {categoryDrills.map((drill, index) => (
                   <Link 
                     key={index} 
-                    href={`/drills/physical/${category.folderName.toLowerCase()}/${drill.folderName}`} 
+                    href={`/drills/physical/${category.folderName}/${drill.folderName}`} 
                     className={`group relative overflow-hidden bg-slate-950/80 border border-slate-900 transition-all duration-300 hover:-translate-y-1 focus:outline-none focus:ring-1 focus:ring-orange-500/50 ${styles}`}
                     aria-label={`${drill.name} - ${drill.description}. Difficulty: ${drill.difficulty}. Duration: ${drill.duration}.`}
                   >

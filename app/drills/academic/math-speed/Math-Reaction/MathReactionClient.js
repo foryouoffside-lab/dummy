@@ -98,7 +98,7 @@ export default function MathReactionClient() {
   const livesRef = useRef(3);
   const bestStreakRef = useRef(0);
 
-  useEffect(() => { setIsClient(true); const t = setTimeout(() => setLoading(false), 300); return () => clearTimeout(t); }, []);
+  useEffect(() => { setIsClient(true); const t = setTimeout(() => setLoading(false), 0); return () => clearTimeout(t); }, []);
   useEffect(() => { try { const s = localStorage.getItem('mathReactionBestScore'); if (s) { const p = parseInt(s, 10); if (!isNaN(p)) setBestScore(p); } } catch (e) {} }, []);
 
   const updateBestScore = useCallback((finalScore) => { try { const c = parseInt(localStorage.getItem('mathReactionBestScore') || '0', 10); if (finalScore > c) { localStorage.setItem('mathReactionBestScore', finalScore.toString()); setBestScore(finalScore); } } catch (e) {} }, []);

@@ -105,7 +105,7 @@ export default function InferenceDrillClient() {
 
   useEffect(() => { try { const s = localStorage.getItem('comprehensionDrillBestScore'); if (s) { const p = parseInt(s, 10); if (!isNaN(p)) setBestScore(p); } } catch (e) {} }, []);
   useEffect(() => { if ((gameState === 'gameOver' || gameState === 'complete') && score > bestScore) { setBestScore(score); try { localStorage.setItem('comprehensionDrillBestScore', score.toString()); } catch (e) {} } }, [gameState, score, bestScore]);
-  useEffect(() => { const t = setTimeout(() => setLoading(false), 300); return () => clearTimeout(t); }, []);
+  useEffect(() => { const t = setTimeout(() => setLoading(false), 0); return () => clearTimeout(t); }, []);
   useEffect(() => { const h = () => setIsFullscreen(!!document.fullscreenElement); document.addEventListener('fullscreenchange', h); return () => document.removeEventListener('fullscreenchange', h); }, []);
 
   const toggleFullscreen = async () => { try { if (!isFullscreen) { const e = containerRef.current; if (e?.requestFullscreen) { await e.requestFullscreen(); setIsFullscreen(true); } } else { if (document.fullscreenElement) await document.exitFullscreen(); setIsFullscreen(false); } } catch (error) { console.error('Fullscreen error:', error); } };

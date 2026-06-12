@@ -96,7 +96,7 @@ export default function DualTargetFlowClient() {
 
   const PENALTY = 1;
 
-  useEffect(() => { setIsClient(true); const timer = setTimeout(() => setLoading(false), 300); return () => clearTimeout(timer); }, []);
+  useEffect(() => { setIsClient(true); const timer = setTimeout(() => setLoading(false), 0); return () => clearTimeout(timer); }, []);
 
   useEffect(() => {
     try { const savedBestScore = localStorage.getItem('dualTargetFlowBestScore'); if (savedBestScore) setBestScore(parseInt(savedBestScore, 10)); } catch (e) {}

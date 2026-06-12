@@ -103,7 +103,7 @@ export default function ListeningComprehensionClient() {
 
   const loadNewQuestion = useCallback(() => { stopAudio(); if (questionAutoAdvanceRef.current) { clearTimeout(questionAutoAdvanceRef.current); questionAutoAdvanceRef.current = null; } const available = getAvailableQuestions(); if (available.length === 0) { setGameState('complete'); gameStateRef.current = 'complete'; return; } const randomQuestion = available[Math.floor(Math.random() * available.length)]; setCurrentQuestion(randomQuestion); setUserAnswer(''); setShowTranscript(false); setFeedback(''); setFeedbackType(''); setVoiceType(randomQuestion.voice === 'Female' ? 0 : 1); setTimeout(() => { if (inputRef.current) inputRef.current.focus(); }, 100); }, [getAvailableQuestions, stopAudio]);
 
-  useEffect(() => { setIsClient(true); const timer = setTimeout(() => setLoading(false), 300); return () => clearTimeout(timer); }, []);
+  useEffect(() => { setIsClient(true); const timer = setTimeout(() => setLoading(false), 0); return () => clearTimeout(timer); }, []);
   useEffect(() => { try { const saved = localStorage.getItem('listeningComprehensionBestScore'); if (saved) { const p = parseInt(saved, 10); if (!isNaN(p)) setBestScore(p); } } catch (e) {} }, []);
   useEffect(() => { if ((gameState === 'gameOver' || gameState === 'complete') && score > bestScore) { setBestScore(score); try { localStorage.setItem('listeningComprehensionBestScore', score.toString()); } catch (e) {} } }, [gameState, score, bestScore]);
   useEffect(() => { gameStateRef.current = gameState; }, [gameState]);

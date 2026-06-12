@@ -113,7 +113,7 @@ export default function CodeTypingClient() {
 
   useEffect(() => { gameStateRef.current = gameState; }, [gameState]);
   useEffect(() => { languageRef.current = language; }, [language]);
-  useEffect(() => { setIsClient(true); const t = setTimeout(() => setLoading(false), 300); return () => clearTimeout(t); }, []);
+  useEffect(() => { setIsClient(true); const t = setTimeout(() => setLoading(false), 0); return () => clearTimeout(t); }, []);
 
   const availableSnippets = useMemo(() => { const all = CODE_SNIPPETS[language] || []; return all.filter((_, idx) => !completedSnippets.has(`${language}-${idx}`)); }, [language, completedSnippets, CODE_SNIPPETS]);
   const currentSnippet = useMemo(() => availableSnippets[currentSnippetIdx] || { code: "const hello = 'world';" }, [availableSnippets, currentSnippetIdx]);

@@ -322,19 +322,22 @@ export default function CognitiveHubClient() {
             "about": { "@type": "Thing", "name": "Cognitive Training" },
             "numberOfItems": 16,
             "itemListElement": cognitiveCategories.flatMap(category =>
-              category.drills.map((drill, index) => ({
-                "@type": "ListItem",
-                "position": index + 1,
-                "item": {
-                  "@type": "WebApplication",
-                  "name": drill.name,
-                  "url": `https://skilldrills.online/drills/cognitive/${category.folderName}/${drill.folderName}`,
-                  "description": drill.description,
-                  "applicationCategory": "EducationalApplication",
-                  "operatingSystem": "Web"
-                }
+              category.drills.map(drill => ({
+                ...drill,
+                categoryFolder: category.folderName
               }))
-            )
+            ).map((drill, index) => ({
+              "@type": "ListItem",
+              "position": index + 1,
+              "item": {
+                "@type": "WebApplication",
+                "name": drill.name,
+                "url": `https://skilldrills.online/drills/cognitive/${drill.categoryFolder}/${drill.folderName}`,
+                "description": drill.description,
+                "applicationCategory": "EducationalApplication",
+                "operatingSystem": "Web"
+              }
+            }))
           })
         }}
       />

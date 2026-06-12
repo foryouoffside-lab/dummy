@@ -87,7 +87,7 @@ export default function RSVPReaderClient() {
 
   useEffect(() => { gameStateRef.current = gameState; }, [gameState]);
   useEffect(() => { isPlayingRef.current = isPlaying; }, [isPlaying]);
-  useEffect(() => { setIsClient(true); const t = setTimeout(() => setLoading(false), 300); return () => clearTimeout(t); }, []);
+  useEffect(() => { setIsClient(true); const t = setTimeout(() => setLoading(false), 0); return () => clearTimeout(t); }, []);
   useEffect(() => { try { const s = localStorage.getItem('rsvpReaderDrillBestScore'); if (s) { const p = parseInt(s, 10); if (!isNaN(p)) setBestScore(p); } } catch (e) {} }, []);
   useEffect(() => { if (gameState === 'gameOver' && effectiveWPM > bestScore) { setBestScore(effectiveWPM); try { localStorage.setItem('rsvpReaderDrillBestScore', effectiveWPM.toString()); } catch (e) {} } }, [gameState, effectiveWPM, bestScore]);
   useEffect(() => { const h = () => setIsFullscreen(!!document.fullscreenElement); document.addEventListener('fullscreenchange', h); return () => document.removeEventListener('fullscreenchange', h); }, []);

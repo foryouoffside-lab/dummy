@@ -83,7 +83,7 @@ export default function ConcentrationGridClient() {
   const audioContextRef = useRef(null);
   const clickCooldownRef = useRef(false);
 
-  useEffect(() => { setIsClient(true); const t = setTimeout(() => setLoading(false), 300); return () => clearTimeout(t); }, []);
+  useEffect(() => { setIsClient(true); const t = setTimeout(() => setLoading(false), 0); return () => clearTimeout(t); }, []);
   useEffect(() => { try { const s = localStorage.getItem('concentrationGridDrillBestScore'); if (s) { const p = parseInt(s, 10); if (!isNaN(p)) setBestScore(p); } } catch (e) {} }, []);
   useEffect(() => { gameStateRef.current = gameState; }, [gameState]);
   useEffect(() => { if (gameState === 'gameOver' && score > bestScore) { setBestScore(score); try { localStorage.setItem('concentrationGridDrillBestScore', score.toString()); } catch (e) {} } }, [gameState, score, bestScore]);

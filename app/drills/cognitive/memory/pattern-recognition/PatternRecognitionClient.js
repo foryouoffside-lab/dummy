@@ -181,7 +181,7 @@ export default function PatternRecognitionClient() {
   const gameStateRef = useRef('start');
   const soundEnabledRef = useRef(true);
 
-  useEffect(() => { setIsClient(true); usedPatternsRef.current = loadUsedPatterns(); saveCounterRef.current = 0; const t = setTimeout(() => setLoading(false), 300); return () => clearTimeout(t); }, []);
+  useEffect(() => { setIsClient(true); usedPatternsRef.current = loadUsedPatterns(); saveCounterRef.current = 0; const t = setTimeout(() => setLoading(false), 0); return () => clearTimeout(t); }, []);
   useEffect(() => { return () => { if (usedPatternsRef.current) saveUsedPatterns(usedPatternsRef.current); }; }, []);
   useEffect(() => { try { const s = localStorage.getItem('mathPatternDrillBestScore'); if (s) { const p = parseInt(s, 10); if (!isNaN(p)) setBestScore(p); } } catch (e) {} }, []);
   useEffect(() => { gameStateRef.current = gameState; }, [gameState]);

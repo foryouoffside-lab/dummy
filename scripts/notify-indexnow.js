@@ -112,17 +112,17 @@ const ALL_URLS = [
   '/drills/motor/timing-accuracy/synchronization',
 
   // Physical
-  '/drills/physical/Balance-Training/dynamic-balance',
-  '/drills/physical/Balance-Training/single-leg-hold',
-  '/drills/physical/Balance-Training/stability-challenge',
-  '/drills/physical/Coordination/complex-pattern',
-  '/drills/physical/Coordination/cross-body-movement',
-  '/drills/physical/Fitness/agility-ladder',
-  '/drills/physical/Fitness/jump-sequence',
-  '/drills/physical/Fitness/speed-drill',
-  '/drills/physical/Reflex-Training/drop-catch',
-  '/drills/physical/Reflex-Training/quick-dodge',
-  '/drills/physical/Reflex-Training/reaction-chain',
+  '/drills/physical/balance-training/dynamic-balance',
+  '/drills/physical/balance-training/single-leg-hold',
+  '/drills/physical/balance-training/stability-challenge',
+  '/drills/physical/coordination/complex-pattern',
+  '/drills/physical/coordination/cross-body-movement',
+  '/drills/physical/fitness/agility-ladder',
+  '/drills/physical/fitness/jump-sequence',
+  '/drills/physical/fitness/speed-drill',
+  '/drills/physical/reflex-training/drop-catch',
+  '/drills/physical/reflex-training/quick-dodge',
+  '/drills/physical/reflex-training/reaction-chain',
 
   // Productivity
   '/drills/productivity/focus-endurance/concentration-stamina',

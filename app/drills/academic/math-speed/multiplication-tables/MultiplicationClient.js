@@ -85,7 +85,7 @@ export default function MultiplicationClient() {
   const scoreRef = useRef(0);
   const comboRef = useRef(0);
 
-  useEffect(() => { setIsClient(true); const t = setTimeout(() => setLoading(false), 300); return () => clearTimeout(t); }, []);
+  useEffect(() => { setIsClient(true); const t = setTimeout(() => setLoading(false), 0); return () => clearTimeout(t); }, []);
   useEffect(() => { try { const s = localStorage.getItem('multiplicationDrillBestScore'); if (s) { const p = parseInt(s); if (!isNaN(p)) setBestScore(p); } } catch (e) {} }, []);
   useEffect(() => { if (gameState === 'gameOver' && score > bestScore) { setBestScore(score); try { localStorage.setItem('multiplicationDrillBestScore', score.toString()); } catch (e) {} } }, [gameState, score, bestScore]);
   useEffect(() => { const h = () => setIsFullscreen(!!document.fullscreenElement); document.addEventListener('fullscreenchange', h); return () => document.removeEventListener('fullscreenchange', h); }, []);

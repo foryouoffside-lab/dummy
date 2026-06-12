@@ -309,13 +309,18 @@ export default function MotorDrillsClient() {
             "isPartOf": { "@type": "WebSite", "name": "SkillDrills", "url": "https://skilldrills.online" },
             "about": { "@type": "Thing", "name": "Motor Skill Training" },
             "numberOfItems": 12,
-            "itemListElement": categories.flatMap(cat => cat.drills).map((drill, index) => ({
+            "itemListElement": categories.flatMap(cat => 
+              cat.drills.map(drill => ({
+                ...drill,
+                categoryFolder: cat.folderName
+              }))
+            ).map((drill, index) => ({
               "@type": "ListItem",
               "position": index + 1,
               "item": {
                 "@type": "WebApplication",
                 "name": drill.name,
-                "url": `https://skilldrills.online/drills/motor/${cat.folderName}/${drill.folderName}`,
+                "url": `https://skilldrills.online/drills/motor/${drill.categoryFolder}/${drill.folderName}`,
                 "description": drill.description,
                 "applicationCategory": "EducationalApplication",
                 "operatingSystem": "Web"

@@ -108,7 +108,7 @@ const nextConfig = {
   // ============================================
   
   experimental: {
-    optimizeCss: true,
+    optimizeCss: false,
     optimizePackageImports: [
       'lucide-react', 
       '@vercel/analytics',
@@ -121,37 +121,6 @@ const nextConfig = {
   // ============================================
   
   webpack: (config, { isServer, dev }) => {
-    if (!dev && !isServer) {
-      config.optimization.splitChunks = {
-        ...config.optimization.splitChunks,
-        chunks: 'all',
-        cacheGroups: {
-          icons: {
-            test: /[\\/]node_modules[\\/]lucide-react[\\/]/,
-            name: 'icons',
-            chunks: 'all',
-            priority: 20,
-            reuseExistingChunk: true,
-          },
-          vendor: {
-            test: /[\\/]node_modules[\\/]/,
-            name: 'vendors',
-            chunks: 'all',
-            priority: 10,
-            reuseExistingChunk: true,
-          },
-          common: {
-            name: 'common',
-            minChunks: 3,
-            chunks: 'all',
-            priority: 5,
-            reuseExistingChunk: true,
-          },
-        },
-      };
-      config.optimization.usedExports = true;
-      config.optimization.sideEffects = true;
-    }
     return config;
   },
   

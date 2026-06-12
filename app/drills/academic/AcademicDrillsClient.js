@@ -186,7 +186,7 @@ export default function AcademicDrillsClient() {
       name: 'Comprehension',
       folderName: 'comprehension',
       icon: Brain,
-      description: 'Reading, listening, and inference comprehension training',
+      description: 'Reading and inference comprehension training',
       gradient: 'from-purple-500 to-pink-500',
       bg: 'bg-purple-500/10 border-purple-500/20 text-purple-400',
       textColor: 'text-purple-400',
@@ -194,6 +194,7 @@ export default function AcademicDrillsClient() {
     }
   ], []);
 
+  // Listening Comprehension drill REMOVED from this array
   const drills = useMemo(() => [
     { id: 1, name: 'Arithmetic Race', folderName: 'arithmetic-race', category: 'Math Speed', difficulty: 'Medium', duration: '1 min', description: 'Solve addition, subtraction & multiplication with 4-option multiple choice' },
     { id: 2, name: 'Math Reaction', folderName: 'Math-Reaction', category: 'Math Speed', difficulty: 'Hard', duration: '1 min', description: 'Identify odd/even results under adaptive time pressure with lives system' },
@@ -205,8 +206,7 @@ export default function AcademicDrillsClient() {
     { id: 8, name: 'Typing Test', folderName: 'typing-test', category: 'Writing Speed', difficulty: 'Medium', duration: '1 min', description: 'Type 30 unique quotes across Easy/Medium/Hard levels with WPM tracking' },
     { id: 9, name: 'Code Typing', folderName: 'code-typing', category: 'Writing Speed', difficulty: 'Hard', duration: '1 min', description: 'Practice JavaScript, Python & HTML syntax with character-level feedback' },
     { id: 10, name: 'Reading Comprehension', folderName: 'reading-comprehension', category: 'Comprehension', difficulty: 'Medium', duration: '1 min', description: 'Fresh passages every session with scored quizzes across 3 difficulty levels' },
-    { id: 11, name: 'Listening Comprehension', folderName: 'listening-comprehension', category: 'Comprehension', difficulty: 'Medium', duration: '1 min', description: '9 audio passages with male/female voices and transcript option' },
-    { id: 12, name: 'Inference Drill', folderName: 'inference-drill', category: 'Comprehension', difficulty: 'Hard', duration: '1 min', description: '12 critical reasoning passages with detailed answer rationales' }
+    { id: 11, name: 'Inference Drill', folderName: 'inference-drill', category: 'Comprehension', difficulty: 'Hard', duration: '1 min', description: '12 critical reasoning passages with detailed answer rationales' }
   ], []);
 
   const totalDrills = drills.length;
@@ -262,7 +262,8 @@ export default function AcademicDrillsClient() {
       {/* Background visual styles */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-amber-900/10 via-slate-950 to-slate-950 pointer-events-none z-0" />
       <div className="absolute inset-0 bg-[linear-gradient(rgba(18,24,38,0.45)_1px,_transparent_1px),_linear-gradient(90deg,_rgba(18,24,38,0.45)_1px,_transparent_1px)] bg-[size:32px_32px] pointer-events-none z-0" />
-          {/* Mobile Rotate Device Warning Overlay */}
+      
+      {/* Mobile Rotate Device Warning Overlay */}
       {showRotateWarning && (
         <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-gray-950/95 text-center p-6" aria-hidden="true">
           <div className="animate-bounce mb-4 text-blue-500">
@@ -285,7 +286,7 @@ export default function AcademicDrillsClient() {
 
       <canvas style={{ touchAction: 'none' }} ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none z-0 opacity-40" />
 
-      {/* SEO structured schema */}
+      {/* SEO structured schema - Updated to reflect 11 drills */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -294,10 +295,10 @@ export default function AcademicDrillsClient() {
             "@type": "CollectionPage",
             "name": "Academic Training Drills - Speed Reading, Writing & Math",
             "url": "https://skilldrills.online/drills/academic",
-            "description": "Improve your math speed, reading comprehension, writing speed, and critical typing with 12 free academic performance drills.",
+            "description": "Improve your math speed, reading comprehension, writing speed, and critical typing with 11 free academic performance drills.",
             "isPartOf": { "@type": "WebSite", "name": "SkillDrills", "url": "https://skilldrills.online" },
             "about": { "@type": "Thing", "name": "Academic Training" },
-            "numberOfItems": 12,
+            "numberOfItems": 11,
             "itemListElement": drills.map((drill, index) => ({
               "@type": "ListItem",
               "position": index + 1,

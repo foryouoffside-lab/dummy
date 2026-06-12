@@ -126,9 +126,15 @@ export default function MemoryClient() {
   const [calibState, setCalibState] = useState("idle"); // idle, showing, typing, success, fail
   const [highScore, setHighScore] = useState(0);
   const canvasRef = useRef(null);
+  const timeoutRef = useRef(null);
 
   useEffect(() => {
     setIsClient(true);
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
   }, []);
 
   // Binary data grid background animation
@@ -149,33 +155,37 @@ export default function MemoryClient() {
     const columns = Math.floor(canvas.width / 24);
     const dropPositions = Array(columns).fill(0);
 
-    const draw = () => {
-      ctx.fillStyle = "rgba(8, 13, 26, 0.15)";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      
-      ctx.fillStyle = "rgba(99, 102, 241, 0.12)";
-      ctx.font = "12px monospace";
+    let lastTime = 0;
+    const draw = (timestamp) => {
+      if (!timestamp) timestamp = 0;
+      const elapsed = timestamp - lastTime;
+      if (elapsed > 45) {
+        lastTime = timestamp;
+        ctx.fillStyle = "rgba(8, 13, 26, 0.15)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.fillStyle = "rgba(99, 102, 241, 0.12)";
+        ctx.font = "12px monospace";
 
-      dropPositions.forEach((y, x) => {
-        const text = Math.random() > 0.5 ? "1" : "0";
-        const xCoord = x * 24;
-        ctx.fillText(text, xCoord, y);
+        dropPositions.forEach((y, x) => {
+          const text = Math.random() > 0.5 ? "1" : "0";
+          const xCoord = x * 24;
+          ctx.fillText(text, xCoord, y);
 
-        if (y > canvas.height && Math.random() > 0.985) {
-          dropPositions[x] = 0;
-        } else {
-          dropPositions[x] = y + 16;
-        }
-      });
-
+          if (y > canvas.height && Math.random() > 0.985) {
+            dropPositions[x] = 0;
+          } else {
+            dropPositions[x] = y + 16;
+          }
+        });
+      }
       animationFrameId = requestAnimationFrame(draw);
     };
     
-    // Smooth frame pacing
-    const interval = setInterval(draw, 45);
+    animationFrameId = requestAnimationFrame(draw);
 
     return () => {
-      clearInterval(interval);
+      cancelAnimationFrame(animationFrameId);
       window.removeEventListener("resize", resize);
     };
   }, [isClient]);
@@ -201,7 +211,8 @@ export default function MemoryClient() {
     setUserInput("");
     
     // Show sequence for level * 800ms
-    setTimeout(() => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => {
       setCalibState("typing");
     }, level * 800);
   };
@@ -308,19 +319,22 @@ export default function MemoryClient() {
             "about": { "@type": "Thing", "name": "Memory Training & Cognitive Enhancement" },
             "numberOfItems": 15,
             "itemListElement": memoryCategories.flatMap(category =>
-              category.drills.map((drill, index) => ({
-                "@type": "ListItem",
-                "position": index + 1,
-                "item": {
-                  "@type": "WebApplication",
-                  "name": drill.name,
-                  "url": `https://skilldrills.online/drills/memory/${category.folderName}/${drill.folderName}`,
-                  "description": drill.description,
-                  "applicationCategory": "EducationalApplication",
-                  "operatingSystem": "Web"
-                }
+              category.drills.map(drill => ({
+                ...drill,
+                categoryFolder: category.folderName
               }))
-            )
+            ).map((drill, index) => ({
+              "@type": "ListItem",
+              "position": index + 1,
+              "item": {
+                "@type": "WebApplication",
+                "name": drill.name,
+                "url": `https://skilldrills.online/drills/memory/${drill.categoryFolder}/${drill.folderName}`,
+                "description": drill.description,
+                "applicationCategory": "EducationalApplication",
+                "operatingSystem": "Web"
+              }
+            }))
           })
         }}
       />

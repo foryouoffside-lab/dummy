@@ -97,7 +97,7 @@ export default function ConcentrationStaminaClient() {
     nonPrimes: ['1', '4', '6', '8', '9']
   }), []);
 
-  useEffect(() => { setIsClient(true); const t = setTimeout(() => setLoading(false), 300); return () => clearTimeout(t); }, []);
+  useEffect(() => { setIsClient(true); const t = setTimeout(() => setLoading(false), 0); return () => clearTimeout(t); }, []);
   useEffect(() => { mainGameStateRef.current = gameState; }, [gameState]);
   useEffect(() => { try { const s = localStorage.getItem('constantPrimeBestScore'); if (s) setBestScore(parseInt(s, 10)); const str = localStorage.getItem('constantPrimeBestStreak'); if (str) { const p = parseInt(str, 10); setBestStreak(p); bestStreakRef.current = p; } } catch (e) {} }, []);
 
