@@ -168,8 +168,7 @@ export default function SynchronizationClient() {
   }, [playSound, showFeedback]);
 
   useEffect(() => {
-    const h = (e) => { const cvs = canvasRef.current; if (!cvs) return; const rect = cvs.getBoundingClientRect(); const sx = cvs.width / rect.width; const sy = cvs.height / rect.height; mousePositionRef.current = { x: (e.clientX - rect.left) * sx, y: (e.clientY - rect.top) * sy }; };
-    window.addEventListener('mousemove', h); return () => window.removeEventListener('mousemove', h);
+    const h = (e) => { const cvs = canvasRef.current; if (!cvs) return; const rect = cvs.getBoundingClientRect(); const sx = cvs.width / rect.width; const sy = cvs.height / rect.height; mousePositionRef.current = { x: (e.clientX - rect.left) * sx, y: (e.clientY - rect.top) * sy }; }; const th = (e) => { if (e.touches && e.touches[0]) h(e.touches[0]); }; window.addEventListener('mousemove', h); window.addEventListener('touchmove', th, { passive: true }); return () => { window.removeEventListener('mousemove', h); window.removeEventListener('touchmove', th); };
   }, []);
 
   const resetBars = useCallback((cvs) => {
@@ -207,9 +206,23 @@ export default function SynchronizationClient() {
       if (resetTimeoutRef.current) clearTimeout(resetTimeoutRef.current);
       resetTimeoutRef.current = setTimeout(() => { if (isActiveRef.current && gameStateRef.current === 'playing') startNextRound(); }, 400);
     };
+    const handleTouchStart = (e) => {
+      if (e.touches && e.touches[0]) {
+        const touch = e.touches[0];
+        const cvs = canvasRef.current;
+        if (cvs) {
+          const rect = cvs.getBoundingClientRect();
+          const sx = cvs.width / rect.width;
+          const sy = cvs.height / rect.height;
+          mousePositionRef.current = { x: (touch.clientX - rect.left) * sx, y: (touch.clientY - rect.top) * sy };
+        }
+      }
+      handleMouseDown();
+    };
     window.addEventListener('mousedown', handleMouseDown);
+    window.addEventListener('touchstart', handleTouchStart, { passive: true });
     window.addEventListener('contextmenu', (e) => e.preventDefault());
-    return () => { window.removeEventListener('mousedown', handleMouseDown); window.removeEventListener('contextmenu', (e) => e.preventDefault()); };
+    return () => { window.removeEventListener('mousedown', handleMouseDown); window.removeEventListener('touchstart', handleTouchStart); window.removeEventListener('contextmenu', (e) => e.preventDefault()); };
   }, [calculatePoints, applyPenalty, playSound, showFeedback, startNextRound]);
 
   useEffect(() => { return () => { isActiveRef.current = false; if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); if (audioCtxRef.current) { audioCtxRef.current.close(); audioCtxRef.current = null; } }; }, []);
@@ -349,12 +362,20 @@ export default function SynchronizationClient() {
             </svg>
           </div>
           <h3 className="text-lg font-bold text-white mb-2">{warningMessage}</h3>
-          <p className="text-sm text-gray-400">Please use landscape orientation or fullscreen mode for the best training experience.</p>
+          <p className="text-sm text-gray-400 mb-6">Please use landscape orientation or fullscreen mode for the best training experience.</p>
+          <Link href="/drills/motor">
+            <button className="px-5 py-2.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-350 hover:text-white font-bold rounded-lg text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              Go Back
+            </button>
+          </Link>
         </div>
       )}
 
           {isFullscreen && gameState === 'playing' && (<><div className="absolute top-4 right-4 z-20 flex gap-3"><button onClick={resetGame} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Reset"><RefreshCw className="w-5 h-5" /></button><button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle dark mode">{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button><button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle canvas theme"><Eye className="w-5 h-5" /></button><button onClick={() => setSoundEnabled(!soundEnabled)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle sound">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button><button onClick={toggleFullscreen} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Exit fullscreen"><Minimize2 className="w-5 h-5" /></button></div><div className="absolute top-4 left-4 z-20 bg-black/50 backdrop-blur-sm rounded-lg px-4 py-2 text-white text-sm">Score: <span className="text-yellow-400 font-bold">{score}</span> | Velocity: <span className="text-cyan-400 font-bold">{velocity}px/s</span> | Lives: <span className={lives === 0 ? 'text-yellow-400' : 'text-red-400'}>{lives}</span></div></>)}
-          <canvas ref={canvasRef} style={{ display: 'block', position: 'absolute', width: '100%', height: '100%' }} aria-label="Synchronization canvas. Click when bars align at the center line." />
+          <canvas ref={canvasRef} style={{ display: 'block', position: 'absolute', width: '100%', height: '100%', touchAction: 'none' }} aria-label="Synchronization canvas. Click when bars align at the center line." />
           
           {gameState === 'start' && (<div className={`absolute inset-0 flex items-center justify-center backdrop-blur-sm rounded-xl z-40 ${isBoxDarkMode ? 'bg-gray-900/95' : 'bg-white/95'}`}><div className={`rounded-2xl p-6 sm:p-8 text-center max-w-md mx-4 shadow-xl border ${isBoxDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}><div className="mb-4"><GitBranch className="w-16 h-16 text-green-500 mx-auto" aria-hidden="true" /></div><h2 className={`text-2xl font-bold mb-2 ${isBoxDarkMode ? 'text-white' : 'text-gray-900'}`}>Synchronization Elite</h2><p className={`mb-2 ${isBoxDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>60-second challenge • Click when bars align • +1pt per hit</p><p className={`mb-6 text-sm ${isBoxDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Two bars converge at variable speeds. Click precisely at alignment. 3 lives protect your score. Perfect for timing accuracy training.</p><button onClick={startGame} className="px-8 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl font-semibold hover:shadow-lg w-full transition-all transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2" aria-label="Start free synchronization training">Start Free Drill</button></div></div>)}
           

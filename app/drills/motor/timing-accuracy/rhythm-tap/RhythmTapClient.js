@@ -116,10 +116,30 @@ export default function RhythmTapClient() {
 
   const handleMiss = useCallback(() => { if (!isActiveRef.current) return; totalAttemptsRef.current++; setMisses(prev => prev + 1); streakRef.current = 0; setStreak(0); setFeedbackMsg("MISS"); setFeedbackColor("#FF3E3E"); feedbackTimerRef.current = 0.3; if (livesRef.current > 0) { livesRef.current--; setLives(livesRef.current); playSound('miss'); if (livesRef.current === 0) { playSound('lifeLost'); showFeedback('⚠️ Out of lives! Penalty now active!', 'warning'); } else showFeedback(`✗ Off-beat! No penalty • ${livesRef.current} lives left`, 'error'); } else { scoreRef.current = Math.max(0, scoreRef.current - PENALTY); setScore(scoreRef.current); playSound('miss'); showFeedback(`✗ Off-beat! -${PENALTY} point penalty`, 'error'); } updateAccuracy(); }, [PENALTY, updateAccuracy, playSound, showFeedback]);
 
-  useEffect(() => { const h = (e) => { const cvs = canvasRef.current; if (!cvs) return; const rect = cvs.getBoundingClientRect(); const sx = cvs.width / rect.width; const sy = cvs.height / rect.height; mousePositionRef.current = { x: (e.clientX - rect.left) * sx, y: (e.clientY - rect.top) * sy }; }; window.addEventListener('mousemove', h); return () => window.removeEventListener('mousemove', h); }, []);
+  useEffect(() => { const h = (e) => { const cvs = canvasRef.current; if (!cvs) return; const rect = cvs.getBoundingClientRect(); const sx = cvs.width / rect.width; const sy = cvs.height / rect.height; mousePositionRef.current = { x: (e.clientX - rect.left) * sx, y: (e.clientY - rect.top) * sy }; }; const th = (e) => { if (e.touches && e.touches[0]) h(e.touches[0]); }; window.addEventListener('mousemove', h); window.addEventListener('touchmove', th, { passive: true }); return () => { window.removeEventListener('mousemove', h); window.removeEventListener('touchmove', th); }; }, []);
 
   useEffect(() => {
-    const h = () => { if (gameStateRef.current !== 'playing' || !isActiveRef.current) return; const now = performance.now(); const interval = 60000 / bpm; const tic = (now - lastBeatRef.current) % interval; const err = Math.min(tic, interval - tic); totalAttemptsRef.current++; if (err < 40) { hitsRef.current++; perfectHitsRef.current++; setPerfectHits(perfectHitsRef.current); const pts = 1; scoreRef.current += pts; setScore(scoreRef.current); const ns = streakRef.current + 1; streakRef.current = ns; setStreak(ns); if (ns > bestStreakRef.current) { bestStreakRef.current = ns; setBestStreak(ns); try { localStorage.setItem('rhythmTapBestStreak', ns.toString()); } catch (e) {} } setFeedbackMsg("PERFECT!"); setFeedbackColor("#00ff88"); feedbackTimerRef.current = 0.3; if (ns % 5 === 0 && ns > 0) { playSound('streak'); showFeedback(`🔥 ${ns} Streak! +1`, 'success'); } else { playSound('perfect'); showFeedback('✓ PERFECT! +1 point', 'success'); } updateAccuracy(); } else if (err < 80) { hitsRef.current++; const pts = 1; scoreRef.current += pts; setScore(scoreRef.current); const ns = streakRef.current + 1; streakRef.current = ns; setStreak(ns); if (ns > bestStreakRef.current) { bestStreakRef.current = ns; setBestStreak(ns); try { localStorage.setItem('rhythmTapBestStreak', ns.toString()); } catch (e) {} } setFeedbackMsg("GOOD"); setFeedbackColor("#00FFFF"); feedbackTimerRef.current = 0.25; playSound('good'); showFeedback('✓ GOOD! +1 point', 'success'); updateAccuracy(); } else { handleMiss(); } }; window.addEventListener('mousedown', h); window.addEventListener('contextmenu', (e) => e.preventDefault()); return () => { window.removeEventListener('mousedown', h); window.removeEventListener('contextmenu', (e) => e.preventDefault()); }; }, [bpm, playSound, showFeedback, handleMiss, updateAccuracy]);
+    const h = () => { if (gameStateRef.current !== 'playing' || !isActiveRef.current) return; const now = performance.now(); const interval = 60000 / bpm; const tic = (now - lastBeatRef.current) % interval; const err = Math.min(tic, interval - tic); totalAttemptsRef.current++; if (err < 40) { hitsRef.current++; perfectHitsRef.current++; setPerfectHits(perfectHitsRef.current); const pts = 1; scoreRef.current += pts; setScore(scoreRef.current); const ns = streakRef.current + 1; streakRef.current = ns; setStreak(ns); if (ns > bestStreakRef.current) { bestStreakRef.current = ns; setBestStreak(ns); try { localStorage.setItem('rhythmTapBestStreak', ns.toString()); } catch (e) {} } setFeedbackMsg("PERFECT!"); setFeedbackColor("#00ff88"); feedbackTimerRef.current = 0.3; if (ns % 5 === 0 && ns > 0) { playSound('streak'); showFeedback(`🔥 ${ns} Streak! +1`, 'success'); } else { playSound('perfect'); showFeedback('✓ PERFECT! +1 point', 'success'); } updateAccuracy(); } else if (err < 80) { hitsRef.current++; const pts = 1; scoreRef.current += pts; setScore(scoreRef.current); const ns = streakRef.current + 1; streakRef.current = ns; setStreak(ns); if (ns > bestStreakRef.current) { bestStreakRef.current = ns; setBestStreak(ns); try { localStorage.setItem('rhythmTapBestStreak', ns.toString()); } catch (e) {} } setFeedbackMsg("GOOD"); setFeedbackColor("#00FFFF"); feedbackTimerRef.current = 0.25; playSound('good'); showFeedback('✓ GOOD! +1 point', 'success'); updateAccuracy(); } else { handleMiss(); } }; const th = (e) => {
+      if (e.touches && e.touches[0]) {
+        const touch = e.touches[0];
+        const cvs = canvasRef.current;
+        if (cvs) {
+          const rect = cvs.getBoundingClientRect();
+          const sx = cvs.width / rect.width;
+          const sy = cvs.height / rect.height;
+          mousePositionRef.current = { x: (touch.clientX - rect.left) * sx, y: (touch.clientY - rect.top) * sy };
+        }
+      }
+      h();
+    };
+    window.addEventListener('mousedown', h);
+    window.addEventListener('touchstart', th, { passive: true });
+    window.addEventListener('contextmenu', (e) => e.preventDefault());
+    return () => {
+      window.removeEventListener('mousedown', h);
+      window.removeEventListener('touchstart', th);
+      window.removeEventListener('contextmenu', (e) => e.preventDefault());
+    }; }, [bpm, playSound, showFeedback, handleMiss, updateAccuracy]);
 
   useEffect(() => { return () => { isActiveRef.current = false; if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); if (audioCtxRef.current) { audioCtxRef.current.close(); audioCtxRef.current = null; } }; }, []);
 
@@ -189,12 +209,20 @@ export default function RhythmTapClient() {
             </svg>
           </div>
           <h3 className="text-lg font-bold text-white mb-2">{warningMessage}</h3>
-          <p className="text-sm text-gray-400">Please use landscape orientation or fullscreen mode for the best training experience.</p>
+          <p className="text-sm text-gray-400 mb-6">Please use landscape orientation or fullscreen mode for the best training experience.</p>
+          <Link href="/drills/motor">
+            <button className="px-5 py-2.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-350 hover:text-white font-bold rounded-lg text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              Go Back
+            </button>
+          </Link>
         </div>
       )}
 
           {isFullscreen && gameState === 'playing' && (<><div className="absolute top-4 right-4 z-30 flex gap-3"><button onClick={resetGame} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Reset"><RefreshCw className="w-5 h-5" /></button><button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle dark mode">{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button><button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle canvas theme"><Eye className="w-5 h-5" /></button><button onClick={() => setSoundEnabled(!soundEnabled)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle sound">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button><button onClick={toggleFullscreen} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Exit fullscreen"><Minimize2 className="w-5 h-5" /></button></div><div className="absolute top-4 left-4 z-30 bg-black/50 backdrop-blur-sm rounded-lg px-4 py-2 text-white text-sm">Score: <span className="text-yellow-400 font-bold">{score}</span> | BPM: <span className="text-cyan-400 font-bold">{bpm}</span> | Streak: <span className="text-orange-400 font-bold">{streak}</span></div></>)}
-          <canvas ref={canvasRef} style={{ display: 'block', position: 'absolute' }} aria-label="Rhythm tap canvas. Click when the pulse hits the ring." />
+          <canvas ref={canvasRef} style={{ display: 'block', position: 'absolute', touchAction: 'none' }} aria-label="Rhythm tap canvas. Click when the pulse hits the ring." />
           
           {gameState === 'start' && (<div className={`absolute inset-0 flex items-center justify-center backdrop-blur-sm rounded-xl z-40 ${isBoxDarkMode ? 'bg-gray-900/95' : 'bg-white/95'}`}><div className={`rounded-2xl p-6 sm:p-8 text-center max-w-md mx-4 shadow-xl border ${isBoxDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}><div className="mb-4"><Music className="w-16 h-16 text-purple-500 mx-auto" aria-hidden="true" /></div><h2 className={`text-2xl font-bold mb-2 ${isBoxDarkMode ? 'text-white' : 'text-gray-900'}`}>Rhythm Tap Training</h2><p className={`mb-2 ${isBoxDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>60-second challenge • Tap in sync with the beat • +1pt per hit</p><p className={`mb-6 text-sm ${isBoxDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Click when the expanding pulse reaches the ring. BPM changes every 8 beats. 3 lives protect your score. Perfect for musicians and gamers.</p><button onClick={startGame} className="px-8 py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-xl font-semibold hover:shadow-lg w-full transition-all transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2" aria-label="Start free rhythm tap training">Start Free Drill</button></div></div>)}
           

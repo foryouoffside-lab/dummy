@@ -100,12 +100,30 @@ export default function RapidTappingClient() {
 
   useEffect(() => { if (gameState !== 'playing') return; survivalIntervalRef.current = setInterval(() => { setSurvivalTime(prev => prev + 1); totalTimeRef.current += 1; }, 1000); return () => { if (survivalIntervalRef.current) clearInterval(survivalIntervalRef.current); }; }, [gameState]);
 
-  useEffect(() => { const h = (e) => { const cvs = canvasRef.current; if (!cvs) return; const rect = cvs.getBoundingClientRect(); const sx = cvs.width / rect.width; const sy = cvs.height / rect.height; mousePositionRef.current = { x: (e.clientX - rect.left) * sx, y: (e.clientY - rect.top) * sy }; }; window.addEventListener('mousemove', h); return () => window.removeEventListener('mousemove', h); }, []);
+  useEffect(() => { const h = (e) => { const cvs = canvasRef.current; if (!cvs) return; const rect = cvs.getBoundingClientRect(); const sx = cvs.width / rect.width; const sy = cvs.height / rect.height; mousePositionRef.current = { x: (e.clientX - rect.left) * sx, y: (e.clientY - rect.top) * sy }; }; const th = (e) => { if (e.touches && e.touches[0]) h(e.touches[0]); }; window.addEventListener('mousemove', h); window.addEventListener('touchmove', th, { passive: true }); return () => { window.removeEventListener('mousemove', h); window.removeEventListener('touchmove', th); }; }, []);
 
   useEffect(() => {
-    const h = () => { if (gameStateRef.current !== 'playing' || !isActiveRef.current) return; const m = mousePositionRef.current; const cvs = canvasRef.current; if (!cvs) return; const cx = cvs.width / 2; const cy = cvs.height / 2; const dist = Math.hypot(m.x - cx, m.y - cy); if (dist < radiusRef.current + 15) { radiusRef.current = Math.min(140, radiusRef.current + 10); setRadius(radiusRef.current); clicksRef.current += 1; setClicks(clicksRef.current); if (clicksRef.current % 10 === 0) { scoreRef.current += 1; setScore(scoreRef.current); playSound('score'); showFeedback(`⭐ +1 POINT! (${clicksRef.current} clicks)`, 'success'); } else { playSound('click'); showFeedback(`+1 click • ${10 - (clicksRef.current % 10)} to next point`, 'success'); } } };
-    window.addEventListener('mousedown', h); window.addEventListener('contextmenu', (e) => e.preventDefault());
-    return () => { window.removeEventListener('mousedown', h); window.removeEventListener('contextmenu', (e) => e.preventDefault()); };
+    const h = () => { if (gameStateRef.current !== 'playing' || !isActiveRef.current) return; const m = mousePositionRef.current; const cvs = canvasRef.current; if (!cvs) return; const cx = cvs.width / 2; const cy = cvs.height / 2; const dist = Math.hypot(m.x - cx, m.y - cy); if (dist < radiusRef.current + 15) { radiusRef.current = Math.min(140, radiusRef.current + 10); setRadius(radiusRef.current); clicksRef.current += 1; setClicks(clicksRef.current); if (clicksRef.current % 10 === 0) { scoreRef.current += 1; setScore(scoreRef.current); playSound('score'); showFeedback(`⭐ +1 POINT! (${clicksRef.current} clicks)`, 'success'); } else { playSound('click'); showFeedback(`+1 click • ${10 - (clicksRef.current % 10)} to next point`, 'success'); } } }; const th = (e) => {
+      if (e.touches && e.touches[0]) {
+        const touch = e.touches[0];
+        const cvs = canvasRef.current;
+        if (cvs) {
+          const rect = cvs.getBoundingClientRect();
+          const sx = cvs.width / rect.width;
+          const sy = cvs.height / rect.height;
+          mousePositionRef.current = { x: (touch.clientX - rect.left) * sx, y: (touch.clientY - rect.top) * sy };
+        }
+      }
+      h();
+    };
+    window.addEventListener('mousedown', h);
+    window.addEventListener('touchstart', th, { passive: true });
+    window.addEventListener('contextmenu', (e) => e.preventDefault());
+    return () => {
+      window.removeEventListener('mousedown', h);
+      window.removeEventListener('touchstart', th);
+      window.removeEventListener('contextmenu', (e) => e.preventDefault());
+    };
   }, [playSound, showFeedback]);
 
   useEffect(() => { return () => { isActiveRef.current = false; if (survivalIntervalRef.current) clearInterval(survivalIntervalRef.current); }; }, []);
@@ -176,12 +194,20 @@ export default function RapidTappingClient() {
             </svg>
           </div>
           <h3 className="text-lg font-bold text-white mb-2">{warningMessage}</h3>
-          <p className="text-sm text-gray-400">Please use landscape orientation or fullscreen mode for the best training experience.</p>
+          <p className="text-sm text-gray-400 mb-6">Please use landscape orientation or fullscreen mode for the best training experience.</p>
+          <Link href="/drills/motor">
+            <button className="px-5 py-2.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-350 hover:text-white font-bold rounded-lg text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              Go Back
+            </button>
+          </Link>
         </div>
       )}
 
           {isFullscreen && gameState === 'playing' && (<div className="absolute top-4 right-4 z-30 flex gap-3"><button onClick={resetGame} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Reset"><RefreshCw className="w-5 h-5" /></button><button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle dark mode">{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button><button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle canvas theme"><Eye className="w-5 h-5" /></button><button onClick={() => setSoundEnabled(!soundEnabled)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle sound">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button><button onClick={toggleFullscreen} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Exit fullscreen"><Minimize2 className="w-5 h-5" /></button></div>)}
-          <canvas ref={canvasRef} style={{ display: 'block', position: 'absolute' }} aria-label="Rapid tapping canvas. Click the central ball to keep it from shrinking." />
+          <canvas ref={canvasRef} style={{ display: 'block', position: 'absolute', touchAction: 'none' }} aria-label="Rapid tapping canvas. Click the central ball to keep it from shrinking." />
           
           {gameState === 'start' && (<div className={`absolute inset-0 flex items-center justify-center backdrop-blur-sm rounded-xl z-40 ${isBoxDarkMode ? 'bg-gray-900/95' : 'bg-white/95'}`}><div className={`rounded-2xl p-6 sm:p-8 text-center max-w-md mx-4 shadow-xl border ${isBoxDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}><div className="mb-4"><Disc className="w-16 h-16 text-purple-500 mx-auto" aria-hidden="true" /></div><h2 className={`text-2xl font-bold mb-2 ${isBoxDarkMode ? 'text-white' : 'text-gray-900'}`}>Rapid Tapping</h2><p className={`mb-2 ${isBoxDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>10 clicks = 1 point • Endless survival</p><p className={`mb-6 text-sm ${isBoxDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Click the ball to expand it +10px. It constantly shrinks faster every 3 seconds. Survive as long as possible. Perfect for FPS and MOBA click speed training.</p><button onClick={startGame} className="px-8 py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-xl font-semibold hover:shadow-lg w-full transition-all transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2" aria-label="Start free rapid tapping survival">Start Free Drill</button></div></div>)}
           
