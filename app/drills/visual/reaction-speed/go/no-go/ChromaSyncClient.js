@@ -14,6 +14,45 @@ const BALL_RADIUS = 50;
 const colorPalette = { GO: "#00ff77", NO_GO: "#ff3344" };
 
 export default function ChromaSyncClient() {
+  const [showRotateWarning, setShowRotateWarning] = useState(false);
+  const [warningMessage, setWarningMessage] = useState("Rotate Your Device");
+
+  useEffect(() => {
+    const checkSize = () => {
+      if (typeof window === 'undefined') return;
+      const ua = navigator.userAgent || '';
+      const isMobile = /Mobi|Android|iPhone|iPad|iPod|Windows Phone/i.test(ua) || 
+                       (navigator.maxTouchPoints > 0 && 
+                        window.screen && Math.max(window.screen.width, window.screen.height) < 1024);
+      if (!isMobile) {
+        setShowRotateWarning(false);
+        return;
+      }
+      const isPortrait = window.innerHeight > window.innerWidth;
+      if (isPortrait) {
+        if (window.innerWidth < 768) {
+          setShowRotateWarning(true);
+          setWarningMessage("Rotate Your Device");
+          return;
+        }
+      } else {
+        if (window.innerHeight < 320) {
+          setShowRotateWarning(true);
+          setWarningMessage("Screen height too small. Try entering Fullscreen mode.");
+          return;
+        }
+      }
+      setShowRotateWarning(false);
+    };
+    checkSize();
+    window.addEventListener('resize', checkSize);
+    window.addEventListener('orientationchange', checkSize);
+    return () => {
+      window.removeEventListener('resize', checkSize);
+      window.removeEventListener('orientationchange', checkSize);
+    };
+  }, []);
+
   const containerRef = useRef(null);
   const canvasRef = useRef(null);
   const animationRef = useRef(null);
@@ -36,7 +75,7 @@ export default function ChromaSyncClient() {
   const [feedbackType, setFeedbackType] = useState('');
   const [loading, setLoading] = useState(true);
   const [isClient, setIsClient] = useState(false);
-  const [pointerLocked, setPointerLocked] = useState(false);
+  const pointerLocked = true;
 
   const virtualCrosshair = useRef({ x: 0, y: 0 });
   const crosshairInitRef = useRef(false);
@@ -70,38 +109,37 @@ export default function ChromaSyncClient() {
   const playSound = useCallback((type) => { if (!soundEnabled) return; try { const ctx = initAudio(); if (!ctx) return; const o = ctx.createOscillator(), g = ctx.createGain(); o.connect(g); g.connect(ctx.destination); const now = ctx.currentTime; const f = { success: 880, fail: 440, streak: 1046, inhibit: 660 }; o.frequency.setValueAtTime(f[type] || 440, now); g.gain.setValueAtTime(type === 'streak' ? 0.12 : type === 'inhibit' ? 0.08 : 0.1, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.12); o.start(now); o.stop(now + 0.12); } catch (e) {} }, [soundEnabled, initAudio]);
 
   // Pointer Lock
-  const requestPointerLock = useCallback(() => { canvasRef.current?.requestPointerLock(); }, []);
+  const requestPointerLock = useCallback(() => {}, []);
   
-  useEffect(() => {
-    const h = () => {
-      const l = document.pointerLockElement === canvasRef.current;
-      setPointerLocked(l);
-      if (l) crosshairInitRef.current = true;
-      else if (gameState === 'playing') showFeedback('Cursor unlocked - Click canvas', 'error');
-    };
-    document.addEventListener('pointerlockchange', h);
-    document.addEventListener('pointerlockerror', () => showFeedback('Lock failed', 'error'));
-    return () => { document.removeEventListener('pointerlockchange', h); };
-  }, [gameState, showFeedback]);
+  
 
-  useEffect(() => {
-    const c = canvasRef.current; if (!c) return;
-    const h = () => { if (gameState === 'playing' && !pointerLocked) requestPointerLock(); };
-    c.addEventListener('click', h);
-    return () => c.removeEventListener('click', h);
-  }, [gameState, pointerLocked, requestPointerLock]);
+  
 
   // Raw input
   useEffect(() => {
     const h = (e) => {
-      if (document.pointerLockElement !== canvasRef.current) return;
-      virtualCrosshair.current.x += e.movementX || 0;
-      virtualCrosshair.current.y += e.movementY || 0;
       const c = canvasRef.current;
-      if (c) { virtualCrosshair.current.x = Math.max(0, Math.min(c.width, virtualCrosshair.current.x)); virtualCrosshair.current.y = Math.max(0, Math.min(c.height, virtualCrosshair.current.y)); }
+      if (!c) return;
+      const rect = c.getBoundingClientRect();
+      const clientX = e.touches && e.touches[0] ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches && e.touches[0] ? e.touches[0].clientY : e.clientY;
+      const x = clientX - rect.left;
+      const y = clientY - rect.top;
+      const scaleX = c.width / c.clientWidth;
+      const scaleY = c.height / c.clientHeight;
+      virtualCrosshair.current = {
+        x: Math.max(0, Math.min(c.width, x * scaleX)),
+        y: Math.max(0, Math.min(c.height, y * scaleY))
+      };
     };
     document.addEventListener('mousemove', h);
-    return () => document.removeEventListener('mousemove', h);
+    document.addEventListener('touchmove', h, { passive: true });
+    document.addEventListener('touchstart', h, { passive: true });
+    return () => {
+      document.removeEventListener('mousemove', h);
+      document.removeEventListener('touchmove', h);
+      document.removeEventListener('touchstart', h);
+    };
   }, []);
 
   const toggleFullscreen = useCallback(async () => { try { if (!isFullscreen) { const el = containerRef.current; if (el?.requestFullscreen) { await el.requestFullscreen(); setIsFullscreen(true); } } else { if (document.fullscreenElement) await document.exitFullscreen(); setIsFullscreen(false); } } catch (e) {} }, [isFullscreen]);
@@ -146,15 +184,15 @@ export default function ChromaSyncClient() {
   const applyPenalty = useCallback((reason) => {
     if (!isActiveRef.current) return;
     streakRef.current = 0; setStreak(0);
-    if (livesRef.current > 0) { livesRef.current -= 1; setLives(livesRef.current); showFeedback(`✗ ${reason}! -1 life`, 'error'); playSound('fail'); if (livesRef.current === 0) { scoreRef.current = Math.max(0, scoreRef.current - 1); setScore(scoreRef.current); showFeedback('⚠️ No lives! -1 point', 'warning'); } }
-    else { scoreRef.current = Math.max(0, scoreRef.current - 1); setScore(scoreRef.current); showFeedback(`✗ ${reason}! -1 point`, 'error'); playSound('fail'); }
+    if (livesRef.current > 0) { livesRef.current -= 1; setLives(livesRef.current); showFeedback(`✗ ${reason}! -1 life`, 'error'); playSound('fail'); if (livesRef.current === 0) { scoreRef.current = Math.max(0, scoreRef.current - 5); setScore(scoreRef.current); showFeedback('⚠️ No lives! -5 points', 'warning'); } }
+    else { scoreRef.current = Math.max(0, scoreRef.current - 5); setScore(scoreRef.current); showFeedback(`✗ ${reason}! -5 points`, 'error'); playSound('fail'); }
     displayTimeRef.current = Math.min(maxDisplayTime, displayTimeRef.current + 40); setDisplayWindow(displayTimeRef.current);
   }, [playSound, showFeedback]);
 
   // Timer
   useEffect(() => {
     if (gameState !== 'playing') return;
-    timerIntervalRef.current = setInterval(() => { setTimeLeft(prev => { if (prev <= 1) { setGameState('gameOver'); gameStateRef.current = 'gameOver'; isActiveRef.current = false; if (cycleTimeoutRef.current) clearTimeout(cycleTimeoutRef.current); if (signalTimeoutRef.current) clearTimeout(signalTimeoutRef.current); if (timerIntervalRef.current) { clearInterval(timerIntervalRef.current); timerIntervalRef.current = null; } updateBestScore(scoreRef.current); document.exitPointerLock(); return 0; } return prev - 1; }); }, 1000);
+    timerIntervalRef.current = setInterval(() => { setTimeLeft(prev => { if (prev <= 1) { setGameState('gameOver'); gameStateRef.current = 'gameOver'; isActiveRef.current = false; if (cycleTimeoutRef.current) clearTimeout(cycleTimeoutRef.current); if (signalTimeoutRef.current) clearTimeout(signalTimeoutRef.current); if (timerIntervalRef.current) { clearInterval(timerIntervalRef.current); timerIntervalRef.current = null; } updateBestScore(scoreRef.current);  return 0; } return prev - 1; }); }, 1000);
     return () => { if (timerIntervalRef.current) { clearInterval(timerIntervalRef.current); timerIntervalRef.current = null; } };
   }, [gameState, updateBestScore]);
 
@@ -182,11 +220,11 @@ export default function ChromaSyncClient() {
           const reaction = Math.floor(performance.now() - startTimeRef.current);
           setSuccessfulHits(prev => prev + 1);
           if (bestReaction === 0 || reaction < bestReaction) setBestReaction(reaction);
-          scoreRef.current += 1; setScore(scoreRef.current);
+          scoreRef.current += 5; setScore(scoreRef.current);
           streakRef.current++; setStreak(streakRef.current);
           if (streakRef.current > bestStreakRef.current) { bestStreakRef.current = streakRef.current; setBestStreak(streakRef.current); }
-          if (streakRef.current % 5 === 0 && streakRef.current > 0) { playSound('streak'); showFeedback(`🔥 ${streakRef.current} Streak! +1`, 'success'); }
-          else { playSound('success'); showFeedback(`✓ ${reaction}ms | +1`, 'success'); }
+          if (streakRef.current % 5 === 0 && streakRef.current > 0) { playSound('streak'); showFeedback(`🔥 ${streakRef.current} Streak! +5`, 'success'); }
+          else { playSound('success'); showFeedback(`✓ ${reaction}ms | +5`, 'success'); }
           const speedDiff = displayTimeRef.current - reaction;
           if (speedDiff > 50) displayTimeRef.current = Math.max(minDisplayTime, displayTimeRef.current - 20);
           else if (speedDiff < 10) displayTimeRef.current = Math.min(maxDisplayTime, displayTimeRef.current + 15);
@@ -307,7 +345,7 @@ export default function ChromaSyncClient() {
     if (signalTimeoutRef.current) clearTimeout(signalTimeoutRef.current);
     if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
     if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
-    document.exitPointerLock();
+    
   }, [isBoxDarkMode]);
 
   useEffect(() => () => {
@@ -316,7 +354,7 @@ export default function ChromaSyncClient() {
     if (signalTimeoutRef.current) clearTimeout(signalTimeoutRef.current);
     if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
     if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
-    document.exitPointerLock();
+    
   }, []);
 
   if (loading || !isClient) return (<div className="min-h-screen flex items-center justify-center bg-gray-50"><div className="w-16 h-16 border-4 border-green-600 border-t-transparent rounded-full animate-spin mx-auto" /></div>);
@@ -351,7 +389,7 @@ export default function ChromaSyncClient() {
               <button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className={`p-2 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`}><Eye className="w-5 h-5" /></button>
               <button onClick={() => setSoundEnabled(!soundEnabled)} className={`p-2 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`}>{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button>
               <button onClick={toggleFullscreen} className={`p-2 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`}>{isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}</button>
-              <button onClick={pointerLocked ? () => document.exitPointerLock() : requestPointerLock} className={`p-2 rounded-lg border ${pointerLocked ? 'bg-green-500 border-green-600 text-white' : isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`}><Lock className="w-5 h-5" /></button>
+              
             </div>
           </div>
         )}
@@ -373,15 +411,17 @@ export default function ChromaSyncClient() {
 
         <div ref={containerRef} className={`relative ${isFullscreen ? 'fixed inset-0 z-50' : 'rounded-xl border-2'}`} style={{ background: isBoxDarkMode ? "#020202" : "#fff", aspectRatio: isFullscreen ? 'auto' : '16/9', maxWidth: '100%', margin: '0 auto', borderColor: isDarkMode ? '#374151' : '#e5e7eb', overflow: 'hidden' }}>
           {/* Mobile Rotate Device Warning Overlay */}
-          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-gray-950/95 text-center p-6 md:hidden portrait:flex landscape:hidden" aria-hidden="true">
-            <div className="animate-bounce mb-4 text-blue-500">
-              <svg className="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-              </svg>
-            </div>
-            <h3 className="text-lg font-bold text-white mb-2">Rotate Your Device</h3>
-            <p className="text-sm text-gray-400">Please rotate your device to landscape orientation for the best training experience.</p>
+      {showRotateWarning && (
+        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-gray-950/95 text-center p-6" aria-hidden="true">
+          <div className="animate-bounce mb-4 text-blue-500">
+            <svg className="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+            </svg>
           </div>
+          <h3 className="text-lg font-bold text-white mb-2">{warningMessage}</h3>
+          <p className="text-sm text-gray-400">Please use landscape orientation or fullscreen mode for the best training experience.</p>
+        </div>
+      )}
 
           {isFullscreen && gameState === 'playing' && (<div className="absolute top-4 right-4 z-20 opacity-0 pointer-events-none"><button onClick={toggleFullscreen} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70"><Minimize2 className="w-5 h-5" /></button></div>)}
 
@@ -392,7 +432,7 @@ export default function ChromaSyncClient() {
                 <h2 className={`text-2xl font-bold mb-2 ${isBoxDarkMode ? 'text-white' : 'text-gray-900'}`}>Chroma-Sync Lab</h2>
                 <p className={`mb-4 ${isBoxDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Raw input • Go/No-Go • 80-400ms adaptive</p>
                 <div className={`mb-6 p-3 rounded-lg border ${isBoxDarkMode ? 'border-yellow-600 bg-yellow-900/20' : 'border-yellow-200 bg-yellow-50'}`}>
-                  <div className="flex items-center gap-2 mb-2"><AlertCircle className="w-4 h-4 text-yellow-500" /><p className={`text-sm font-medium ${isBoxDarkMode ? 'text-yellow-400' : 'text-yellow-700'}`}>Raw Input via Pointer Lock</p></div>
+                  
                   <p className={`text-xs ${isBoxDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>GREEN = click. RED = don't click. ESC to unlock. Click canvas to re-lock.</p>
                 </div>
                 <button onClick={startGame} className="px-8 py-3 bg-gradient-to-r from-green-500 to-teal-600 text-white rounded-xl font-semibold hover:shadow-lg w-full">Start Training</button>
@@ -441,10 +481,10 @@ export default function ChromaSyncClient() {
                   <div className="space-y-3">
                     <h3 className={`font-semibold flex items-center gap-2 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}><Trophy className="w-5 h-5" />Scoring</h3>
                     <ul className={`space-y-2 text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                      <li className="flex items-start gap-2"><span className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">+1</span><span><span className="font-semibold text-blue-400">Green hit</span> = +1 point</span></li>
+                      <li className="flex items-start gap-2"><span className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">+1</span><span><span className="font-semibold text-blue-400">Green hit</span> = +5 points</span></li>
                       <li className="flex items-start gap-2"><span className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">-1</span><span><span className="font-semibold text-red-400">Red click</span> = -1 life</span></li>
                       <li className="flex items-start gap-2"><span className="w-5 h-5 rounded-full bg-orange-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">-1</span><span><span className="font-semibold text-orange-400">Early click</span> = -1 life</span></li>
-                      <li className="flex items-start gap-2"><span className="w-5 h-5 rounded-full bg-red-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">-1</span><span><span className="font-semibold text-red-400">0 lives</span> = -1 point penalty</span></li>
+                      <li className="flex items-start gap-2"><span className="w-5 h-5 rounded-full bg-red-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">-1</span><span><span className="font-semibold text-red-400">0 lives</span> = -5 points penalty</span></li>
                     </ul>
                   </div>
                   <div className="space-y-3">

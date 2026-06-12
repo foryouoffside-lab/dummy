@@ -11,6 +11,45 @@ import {
 } from 'lucide-react';
 
 export default function SwitchCostIntegratorClient() {
+  const [showRotateWarning, setShowRotateWarning] = useState(false);
+  const [warningMessage, setWarningMessage] = useState("Rotate Your Device");
+
+  useEffect(() => {
+    const checkSize = () => {
+      if (typeof window === 'undefined') return;
+      const ua = navigator.userAgent || '';
+      const isMobile = /Mobi|Android|iPhone|iPad|iPod|Windows Phone/i.test(ua) || 
+                       (navigator.maxTouchPoints > 0 && 
+                        window.screen && Math.max(window.screen.width, window.screen.height) < 1024);
+      if (!isMobile) {
+        setShowRotateWarning(false);
+        return;
+      }
+      const isPortrait = window.innerHeight > window.innerWidth;
+      if (isPortrait) {
+        if (window.innerWidth < 768) {
+          setShowRotateWarning(true);
+          setWarningMessage("Rotate Your Device");
+          return;
+        }
+      } else {
+        if (window.innerHeight < 320) {
+          setShowRotateWarning(true);
+          setWarningMessage("Screen height too small. Try entering Fullscreen mode.");
+          return;
+        }
+      }
+      setShowRotateWarning(false);
+    };
+    checkSize();
+    window.addEventListener('resize', checkSize);
+    window.addEventListener('orientationchange', checkSize);
+    return () => {
+      window.removeEventListener('resize', checkSize);
+      window.removeEventListener('orientationchange', checkSize);
+    };
+  }, []);
+
   const [loading, setLoading] = useState(true);
   const [isClient, setIsClient] = useState(false);
   const canvasRef = useRef(null);
@@ -36,7 +75,7 @@ export default function SwitchCostIntegratorClient() {
   const [feedbackType, setFeedbackType] = useState('');
   const [orbMode, setOrbMode] = useState('direct');
   const [currentInterval, setCurrentInterval] = useState(1000);
-  const [pointerLocked, setPointerLocked] = useState(false);
+  const pointerLocked = true;
   
   const virtualCrosshair = useRef({ x: 0, y: 0 });
   const crosshairInitRef = useRef(false);
@@ -55,7 +94,7 @@ export default function SwitchCostIntegratorClient() {
   const orbTimeoutRef = useRef(null);
   const audioCtxRef = useRef(null);
   const bestStreakRef = useRef(0);
-  const WRONG_CLICK_PENALTY = 1;
+  const WRONG_CLICK_PENALTY = 5;
   const BALL_RADIUS = 20;
 
   useEffect(() => { setIsClient(true); const t = setTimeout(() => setLoading(false), 300); return () => clearTimeout(t); }, []);
@@ -67,37 +106,36 @@ export default function SwitchCostIntegratorClient() {
   const initAudio = useCallback(() => { try { if (!audioCtxRef.current) audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)(); if (audioCtxRef.current.state === 'suspended') audioCtxRef.current.resume(); return audioCtxRef.current; } catch (e) { return null; } }, []);
   const playSound = useCallback((type) => { if (!soundEnabled) return; try { const ctx = initAudio(); if (!ctx) return; const o = ctx.createOscillator(), g = ctx.createGain(); o.connect(g); g.connect(ctx.destination); const n = ctx.currentTime; const f = { hit: 880, miss: 440, wrongClick: 220, streak: 1046.5, lifeLost: 330, speedUp: 1200 }; o.frequency.setValueAtTime(f[type] || 660, n); g.gain.setValueAtTime(type === 'wrongClick' || type === 'lifeLost' ? 0.15 : type === 'streak' ? 0.12 : 0.1, n); g.gain.exponentialRampToValueAtTime(0.001, n + 0.15); o.start(n); o.stop(n + 0.15); } catch (e) {} }, [soundEnabled, initAudio]);
 
-  const requestPointerLock = useCallback(() => { canvasRef.current?.requestPointerLock(); }, []);
+  const requestPointerLock = useCallback(() => {}, []);
   
-  useEffect(() => {
-    const h = () => {
-      const l = document.pointerLockElement === canvasRef.current;
-      setPointerLocked(l);
-      if (l) crosshairInitRef.current = true;
-      else if (gameState === 'playing') showFeedback('Cursor unlocked - Click canvas', 'error');
-    };
-    document.addEventListener('pointerlockchange', h);
-    document.addEventListener('pointerlockerror', () => showFeedback('Lock failed', 'error'));
-    return () => { document.removeEventListener('pointerlockchange', h); };
-  }, [gameState, showFeedback]);
+  
 
-  useEffect(() => {
-    const c = canvasRef.current; if (!c) return;
-    const h = () => { if (gameState === 'playing' && !pointerLocked) requestPointerLock(); };
-    c.addEventListener('click', h);
-    return () => c.removeEventListener('click', h);
-  }, [gameState, pointerLocked, requestPointerLock]);
+  
 
   useEffect(() => {
     const h = (e) => {
-      if (document.pointerLockElement !== canvasRef.current) return;
-      virtualCrosshair.current.x += e.movementX || 0;
-      virtualCrosshair.current.y += e.movementY || 0;
       const c = canvasRef.current;
-      if (c) { virtualCrosshair.current.x = Math.max(0, Math.min(c.width, virtualCrosshair.current.x)); virtualCrosshair.current.y = Math.max(0, Math.min(c.height, virtualCrosshair.current.y)); }
+      if (!c) return;
+      const rect = c.getBoundingClientRect();
+      const clientX = e.touches && e.touches[0] ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches && e.touches[0] ? e.touches[0].clientY : e.clientY;
+      const x = clientX - rect.left;
+      const y = clientY - rect.top;
+      const scaleX = c.width / c.clientWidth;
+      const scaleY = c.height / c.clientHeight;
+      virtualCrosshair.current = {
+        x: Math.max(0, Math.min(c.width, x * scaleX)),
+        y: Math.max(0, Math.min(c.height, y * scaleY))
+      };
     };
     document.addEventListener('mousemove', h);
-    return () => document.removeEventListener('mousemove', h);
+    document.addEventListener('touchmove', h, { passive: true });
+    document.addEventListener('touchstart', h, { passive: true });
+    return () => {
+      document.removeEventListener('mousemove', h);
+      document.removeEventListener('touchmove', h);
+      document.removeEventListener('touchstart', h);
+    };
   }, []);
 
   const toggleFullscreen = useCallback(async () => { try { if (!isFullscreen) { const el = containerRef.current; if (el?.requestFullscreen) { await el.requestFullscreen(); setIsFullscreen(true); } } else { if (document.fullscreenElement) await document.exitFullscreen(); setIsFullscreen(false); } } catch (e) {} }, [isFullscreen]);
@@ -138,9 +176,9 @@ export default function SwitchCostIntegratorClient() {
       const dist = Math.hypot(ch.x - state.orb.targetX, ch.y - state.orb.y);
       state.isOrbActive = false; clearOrbTimeout();
       if (dist < BALL_RADIUS) {
-        state.hits++; state.score++; state.streakCount++;
+        state.hits++; state.score += 5; state.streakCount++;
         setSuccessfulHits(state.hits); setScore(state.score); setStreak(state.streakCount);
-        playSound('hit'); showFeedback('✓ Hit! +1 point', 'success');
+        playSound('hit'); showFeedback('✓ Hit! +5 points', 'success');
         if (state.streakCount > bestStreakRef.current) { bestStreakRef.current = state.streakCount; setBestStreak(state.streakCount); try { localStorage.setItem('switchCostBestStreak', state.streakCount.toString()); } catch (e) {} }
         if (state.streakCount % 5 === 0 && state.streakCount > 0) { playSound('streak'); showFeedback(`🔥 ${state.streakCount} Streak!`, 'success'); }
       } else {
@@ -219,7 +257,7 @@ export default function SwitchCostIntegratorClient() {
     const state = gameStateRef.current; state.isGameActive = false; state.isOrbActive = false;
     setGameState('gameOver'); mainGameStateRef.current = 'gameOver';
     if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
-    clearOrbTimeout(); updateBestScore(state.score); document.exitPointerLock();
+    clearOrbTimeout(); updateBestScore(state.score); 
   }, [clearOrbTimeout, updateBestScore]);
 
   const startGame = useCallback(() => {
@@ -249,13 +287,13 @@ export default function SwitchCostIntegratorClient() {
     if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); clearOrbTimeout();
     if (animationRef.current) cancelAnimationFrame(animationRef.current);
     if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
-    crosshairInitRef.current = false; document.exitPointerLock();
+    crosshairInitRef.current = false; 
   }, [clearOrbTimeout]);
 
   const sharePage = async () => { if (navigator.share) { try { await navigator.share({ title: 'Switch-Cost Integrator | SkillDrills', text: 'Train task switching with direct vs opposite mode.', url: 'https://skilldrills.online/drills/productivity/task-switching/switch-cost' }); } catch (e) {} } else { navigator.clipboard.writeText('https://skilldrills.online/drills/productivity/task-switching/switch-cost'); } };
   const copyPageLink = () => { navigator.clipboard.writeText('https://skilldrills.online/drills/productivity/task-switching/switch-cost'); };
 
-  useEffect(() => () => { if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); clearOrbTimeout(); if (animationRef.current) cancelAnimationFrame(animationRef.current); if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current); document.exitPointerLock(); }, [clearOrbTimeout]);
+  useEffect(() => () => { if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); clearOrbTimeout(); if (animationRef.current) cancelAnimationFrame(animationRef.current); if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);  }, [clearOrbTimeout]);
 
   if (loading || !isClient) return (<div className="min-h-screen flex items-center justify-center bg-gray-50"><div className="w-16 h-16 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto" /></div>);
 
@@ -263,7 +301,7 @@ export default function SwitchCostIntegratorClient() {
     <div className={`min-h-screen select-none ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {!isFullscreen && (<nav className="mb-4"><ol className="flex flex-wrap items-center gap-2 text-sm"><li><Link href="/" className={`hover:underline ${isDarkMode?'text-gray-400 hover:text-gray-200':'text-gray-600 hover:text-gray-900'}`}>Home</Link></li><li className={isDarkMode?'text-gray-500':'text-gray-400'}>/</li><li><Link href="/drills/productivity" className={`hover:underline ${isDarkMode?'text-gray-400 hover:text-gray-200':'text-gray-600 hover:text-gray-900'}`}>Productivity</Link></li><li className={isDarkMode?'text-gray-500':'text-gray-400'}>/</li><li className={`font-medium ${isDarkMode?'text-purple-400':'text-purple-600'}`}>Switch-Cost Trainer</li></ol></nav>)}
-        {!isFullscreen && (<div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6"><div className="flex items-center gap-3"><div className="p-3 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-xl"><Activity className="w-6 h-6 text-white" /></div><div><h1 className={`text-2xl sm:text-3xl font-bold ${isDarkMode?'text-white':'text-gray-900'}`}>Switch-Cost Trainer</h1><p className={`text-sm sm:text-base ${isDarkMode?'text-gray-400':'text-gray-500'}`}>{pointerLocked ? '🟢 Raw input active' : '🔴 Click canvas'} • Direct vs Opposite • 1000-400ms</p></div></div><div className="flex gap-2">{gameState==='playing'&&<button onClick={resetGame} className={`p-2 rounded-lg border ${isDarkMode?'bg-gray-800 border-gray-700 text-gray-300':'bg-white border-gray-200 text-gray-700'}`}><RefreshCw className="w-5 h-5" /></button>}<button onClick={()=>setIsDarkMode(!isDarkMode)} className={`p-2 rounded-lg border ${isDarkMode?'bg-gray-800 border-gray-700 text-gray-300':'bg-white border-gray-200 text-gray-700'}`}>{isDarkMode?<Sun className="w-5 h-5"/>:<Moon className="w-5 h-5"/>}</button><button onClick={()=>setIsBoxDarkMode(!isBoxDarkMode)} className={`p-2 rounded-lg border ${isDarkMode?'bg-gray-800 border-gray-700 text-gray-300':'bg-white border-gray-200 text-gray-700'}`}><Eye className="w-5 h-5"/></button><button onClick={()=>setSoundEnabled(!soundEnabled)} className={`p-2 rounded-lg border ${isDarkMode?'bg-gray-800 border-gray-700 text-gray-300':'bg-white border-gray-200 text-gray-700'}`}>{soundEnabled?<Volume2 className="w-5 h-5"/>:<VolumeX className="w-5 h-5"/>}</button><button onClick={toggleFullscreen} className={`p-2 rounded-lg border ${isDarkMode?'bg-gray-800 border-gray-700 text-gray-300':'bg-white border-gray-200 text-gray-700'}`}>{isFullscreen?<Minimize2 className="w-5 h-5"/>:<Maximize2 className="w-5 h-5"/>}</button><button onClick={pointerLocked?()=>document.exitPointerLock():requestPointerLock} className={`p-2 rounded-lg border ${pointerLocked?'bg-green-500 border-green-600 text-white':isDarkMode?'bg-gray-800 border-gray-700 text-gray-300':'bg-white border-gray-200 text-gray-700'}`}><Lock className="w-5 h-5"/></button></div></div>)}
+        {!isFullscreen && (<div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6"><div className="flex items-center gap-3"><div className="p-3 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-xl"><Activity className="w-6 h-6 text-white" /></div><div><h1 className={`text-2xl sm:text-3xl font-bold ${isDarkMode?'text-white':'text-gray-900'}`}>Switch-Cost Trainer</h1><p className={`text-sm sm:text-base ${isDarkMode?'text-gray-400':'text-gray-500'}`}>{pointerLocked ? '🟢 Raw input active' : '🔴 Click canvas'} • Direct vs Opposite • 1000-400ms</p></div></div><div className="flex gap-2">{gameState==='playing'&&<button onClick={resetGame} className={`p-2 rounded-lg border ${isDarkMode?'bg-gray-800 border-gray-700 text-gray-300':'bg-white border-gray-200 text-gray-700'}`}><RefreshCw className="w-5 h-5" /></button>}<button onClick={()=>setIsDarkMode(!isDarkMode)} className={`p-2 rounded-lg border ${isDarkMode?'bg-gray-800 border-gray-700 text-gray-300':'bg-white border-gray-200 text-gray-700'}`}>{isDarkMode?<Sun className="w-5 h-5"/>:<Moon className="w-5 h-5"/>}</button><button onClick={()=>setIsBoxDarkMode(!isBoxDarkMode)} className={`p-2 rounded-lg border ${isDarkMode?'bg-gray-800 border-gray-700 text-gray-300':'bg-white border-gray-200 text-gray-700'}`}><Eye className="w-5 h-5"/></button><button onClick={()=>setSoundEnabled(!soundEnabled)} className={`p-2 rounded-lg border ${isDarkMode?'bg-gray-800 border-gray-700 text-gray-300':'bg-white border-gray-200 text-gray-700'}`}>{soundEnabled?<Volume2 className="w-5 h-5"/>:<VolumeX className="w-5 h-5"/>}</button><button onClick={toggleFullscreen} className={`p-2 rounded-lg border ${isDarkMode?'bg-gray-800 border-gray-700 text-gray-300':'bg-white border-gray-200 text-gray-700'}`}>{isFullscreen?<Minimize2 className="w-5 h-5"/>:<Maximize2 className="w-5 h-5"/>}</button></div></div>)}
         
         {!isFullscreen && (<div className="grid grid-cols-7 gap-3 mb-4 h-[88px]"><StatCard icon={<Target className="text-blue-600" />} value={score} label="Score" d={isDarkMode} /><StatCard icon={<Trophy className="text-yellow-600" />} value={bestScore} label="Best" d={isDarkMode} /><StatCard icon={<Clock className={timeLeft<=10?'text-red-600':'text-cyan-600'} />} value={timeLeft} label="Time" unit="s" d={isDarkMode} /><StatCard icon={<Heart className={lives===0?'text-yellow-500':'text-red-500'} />} value={lives} label="Lives" d={isDarkMode} /><StatCard icon={<Zap className="text-orange-600" />} value={streak} label="Streak" d={isDarkMode} /><StatCard icon={<Trophy className="text-purple-600" />} value={accuracy} label="Accuracy" unit="%" d={isDarkMode} /><StatCard icon={<Activity className="text-emerald-600" />} value={currentInterval} label="Speed" unit="ms" d={isDarkMode} /></div>)}
         
@@ -271,25 +309,27 @@ export default function SwitchCostIntegratorClient() {
         
         <div ref={containerRef} className={`relative ${isFullscreen?'fixed inset-0 z-50':'rounded-xl border-2'}`} style={{background:isBoxDarkMode?"#000":"#fff",aspectRatio:isFullscreen?'auto':'16/9',maxWidth:'100%',margin:'0 auto',borderColor:isDarkMode?'#374151':'#e5e7eb',overflow:'hidden'}}>
           {/* Mobile Rotate Device Warning Overlay */}
-          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-gray-950/95 text-center p-6 md:hidden portrait:flex landscape:hidden" aria-hidden="true">
-            <div className="animate-bounce mb-4 text-blue-500">
-              <svg className="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-              </svg>
-            </div>
-            <h3 className="text-lg font-bold text-white mb-2">Rotate Your Device</h3>
-            <p className="text-sm text-gray-400">Please rotate your device to landscape orientation for the best training experience.</p>
+      {showRotateWarning && (
+        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-gray-950/95 text-center p-6" aria-hidden="true">
+          <div className="animate-bounce mb-4 text-blue-500">
+            <svg className="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+            </svg>
           </div>
+          <h3 className="text-lg font-bold text-white mb-2">{warningMessage}</h3>
+          <p className="text-sm text-gray-400">Please use landscape orientation or fullscreen mode for the best training experience.</p>
+        </div>
+      )}
 
           {isFullscreen&&gameState==='playing'&&(<div className="absolute top-4 right-4 z-20 opacity-0 pointer-events-none"><button onClick={toggleFullscreen} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70"><Minimize2 className="w-5 h-5"/></button></div>)}
           
-          {gameState==='start'&&(<div className={`absolute inset-0 flex items-center justify-center backdrop-blur-sm z-40 ${isBoxDarkMode?'bg-gray-900/95':'bg-white/95'}`}><div className={`rounded-2xl p-6 sm:p-8 text-center max-w-md mx-4 shadow-xl border ${isBoxDarkMode?'bg-gray-800 border-gray-700':'bg-white border-gray-200'}`}><Activity className="w-16 h-16 text-purple-500 mx-auto mb-4" /><h2 className={`text-2xl font-bold mb-2 ${isBoxDarkMode?'text-white':'text-gray-900'}`}>Switch-Cost Trainer</h2><p className={`mb-4 ${isBoxDarkMode?'text-gray-300':'text-gray-600'}`}>Raw input • Direct vs Opposite modes</p><div className={`mb-6 p-3 rounded-lg border ${isBoxDarkMode?'border-yellow-600 bg-yellow-900/20':'border-yellow-200 bg-yellow-50'}`}><div className="flex items-center gap-2 mb-2"><AlertCircle className="w-4 h-4 text-yellow-500" /><p className={`text-sm font-medium ${isBoxDarkMode?'text-yellow-400':'text-yellow-700'}`}>Raw Input via Pointer Lock</p></div><p className={`text-xs ${isBoxDarkMode?'text-gray-400':'text-gray-600'}`}>TOP = Opposite (click shadow). BOTTOM = Direct (click orb). ESC to unlock.</p></div><button onClick={startGame} className="px-8 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-xl font-semibold hover:shadow-lg w-full">Start Training</button></div></div>)}
+          {gameState==='start'&&(<div className={`absolute inset-0 flex items-center justify-center backdrop-blur-sm z-40 ${isBoxDarkMode?'bg-gray-900/95':'bg-white/95'}`}><div className={`rounded-2xl p-6 sm:p-8 text-center max-w-md mx-4 shadow-xl border ${isBoxDarkMode?'bg-gray-800 border-gray-700':'bg-white border-gray-200'}`}><Activity className="w-16 h-16 text-purple-500 mx-auto mb-4" /><h2 className={`text-2xl font-bold mb-2 ${isBoxDarkMode?'text-white':'text-gray-900'}`}>Switch-Cost Trainer</h2><p className={`mb-4 ${isBoxDarkMode?'text-gray-300':'text-gray-600'}`}>Raw input • Direct vs Opposite modes</p><button onClick={startGame} className="px-8 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-xl font-semibold hover:shadow-lg w-full">Start Training</button></div></div>)}
           
           {gameState==='gameOver'&&(<div className={`absolute inset-0 flex items-center justify-center backdrop-blur-sm z-40 ${isBoxDarkMode?'bg-gray-900/95':'bg-white/95'}`}><div className={`rounded-2xl p-6 sm:p-8 shadow-xl border max-w-[520px] mx-4 ${isBoxDarkMode?'bg-gray-800 border-gray-700':'bg-white border-gray-200'}`}><div className="flex items-center justify-center gap-3 mb-4"><Trophy className="w-10 h-10 text-yellow-500" /><h2 className={`text-2xl font-bold ${isBoxDarkMode?'text-white':'text-gray-900'}`}>Training Complete</h2></div><div className="grid grid-cols-2 gap-3 mb-4"><RC label="Score" v={score} i={<Target className="w-4 h-4" />} c="blue" d={isBoxDarkMode} /><RC label="Best" v={bestScore} i={<Trophy className="w-4 h-4" />} c="yellow" d={isBoxDarkMode} /><RC label="Streak" v={`${bestStreak}x`} i={<Zap className="w-4 h-4" />} c="orange" d={isBoxDarkMode} /><RC label="Accuracy" v={accuracy} u="%" i={<Activity className="w-4 h-4" />} c="purple" d={isBoxDarkMode} /><RC label="Hits" v={successfulHits} i={<Target className="w-4 h-4" />} c="emerald" d={isBoxDarkMode} /><RC label="Wrong" v={wrongClicks} i={<RefreshCw className="w-4 h-4" />} c="red" d={isBoxDarkMode} /></div><div className="flex gap-3"><Link href="/drills/productivity" className="flex-1"><button className={`w-full px-4 py-2.5 rounded-lg font-semibold ${isDarkMode?'bg-gray-700 text-gray-300':'bg-gray-200 text-gray-700'}`}>← Back</button></Link><button onClick={startGame} className="flex-1 px-4 py-2.5 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-lg font-semibold">Play Again →</button></div></div></div>)}
         </div>
         
         {/* Drill Rules */}
-        {!isFullscreen&&(<footer className="mt-6"><div className={`rounded-xl border overflow-hidden ${isDarkMode?'bg-gray-800 border-gray-700':'bg-white border-gray-200'}`}><div className={`px-4 py-3 border-b ${isDarkMode?'border-gray-700 bg-gray-800/50':'border-gray-200 bg-gray-50'}`}><div className="flex items-center gap-2"><Info className={`w-4 h-4 ${isDarkMode?'text-purple-400':'text-purple-600'}`} /><h2 className={`font-semibold text-lg ${isDarkMode?'text-white':'text-gray-900'}`}>Drill Rules & Professional Features</h2></div></div><div className="p-6"><div className="grid grid-cols-1 md:grid-cols-3 gap-6"><div className="space-y-3"><h3 className={`font-semibold flex items-center gap-2 ${isDarkMode?'text-purple-400':'text-purple-600'}`}><Activity className="w-5 h-5" />How to Play</h3><ul className={`space-y-2 text-sm ${isDarkMode?'text-gray-300':'text-gray-600'}`}><li className="flex items-start gap-2"><span className="w-5 h-5 rounded-full bg-purple-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">1</span><span>Click <span className="font-semibold text-purple-400">Start Training</span></span></li><li className="flex items-start gap-2"><span className="w-5 h-5 rounded-full bg-purple-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">2</span><span>Cursor locks for <span className="font-semibold text-purple-400">raw input</span></span></li><li className="flex items-start gap-2"><span className="w-5 h-5 rounded-full bg-purple-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">3</span><span>TOP = <span className="font-semibold">Opposite</span> (click shadow)</span></li><li className="flex items-start gap-2"><span className="w-5 h-5 rounded-full bg-purple-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">4</span><span>BOTTOM = <span className="font-semibold">Direct</span> (click orb)</span></li></ul></div><div className="space-y-3"><h3 className={`font-semibold flex items-center gap-2 ${isDarkMode?'text-blue-400':'text-blue-600'}`}><Trophy className="w-5 h-5" />Scoring</h3><ul className={`space-y-2 text-sm ${isDarkMode?'text-gray-300':'text-gray-600'}`}><li className="flex items-start gap-2"><span className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">+1</span><span><span className="font-semibold text-blue-400">Correct</span> = +1 point</span></li><li className="flex items-start gap-2"><span className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">-1</span><span><span className="font-semibold text-red-400">Wrong</span> = -1 life</span></li><li className="flex items-start gap-2"><span className="w-5 h-5 rounded-full bg-orange-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">-1</span><span><span className="font-semibold text-orange-400">0 lives</span> = -1 point</span></li><li className="flex items-start gap-2"><span className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">✓</span><span><span className="font-semibold text-green-400">Timeout</span> = no penalty</span></li></ul></div><div className="space-y-3"><h3 className={`font-semibold flex items-center gap-2 ${isDarkMode?'text-purple-400':'text-purple-600'}`}><Zap className="w-5 h-5" />Pro Features</h3><ul className={`space-y-2 text-sm ${isDarkMode?'text-gray-300':'text-gray-600'}`}><li className="flex items-start gap-2"><Lock className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" /><span><span className="font-semibold text-green-400">Raw Input</span> - Pointer Lock API</span></li><li className="flex items-start gap-2"><Activity className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" /><span><span className="font-semibold text-blue-400">Adaptive</span> speed 1000-400ms</span></li><li className="flex items-start gap-2"><Timer className="w-4 h-4 text-orange-400 flex-shrink-0 mt-0.5" /><span><span className="font-semibold text-orange-400">Streak</span> tracking</span></li></ul></div></div></div></div></footer>)}
+        {!isFullscreen&&(<footer className="mt-6"><div className={`rounded-xl border overflow-hidden ${isDarkMode?'bg-gray-800 border-gray-700':'bg-white border-gray-200'}`}><div className={`px-4 py-3 border-b ${isDarkMode?'border-gray-700 bg-gray-800/50':'border-gray-200 bg-gray-50'}`}><div className="flex items-center gap-2"><Info className={`w-4 h-4 ${isDarkMode?'text-purple-400':'text-purple-600'}`} /><h2 className={`font-semibold text-lg ${isDarkMode?'text-white':'text-gray-900'}`}>Drill Rules & Professional Features</h2></div></div><div className="p-6"><div className="grid grid-cols-1 md:grid-cols-3 gap-6"><div className="space-y-3"><h3 className={`font-semibold flex items-center gap-2 ${isDarkMode?'text-purple-400':'text-purple-600'}`}><Activity className="w-5 h-5" />How to Play</h3><ul className={`space-y-2 text-sm ${isDarkMode?'text-gray-300':'text-gray-600'}`}><li className="flex items-start gap-2"><span className="w-5 h-5 rounded-full bg-purple-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">1</span><span>Click <span className="font-semibold text-purple-400">Start Training</span></span></li><li className="flex items-start gap-2"><span className="w-5 h-5 rounded-full bg-purple-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">2</span><span>Cursor locks for <span className="font-semibold text-purple-400">raw input</span></span></li><li className="flex items-start gap-2"><span className="w-5 h-5 rounded-full bg-purple-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">3</span><span>TOP = <span className="font-semibold">Opposite</span> (click shadow)</span></li><li className="flex items-start gap-2"><span className="w-5 h-5 rounded-full bg-purple-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">4</span><span>BOTTOM = <span className="font-semibold">Direct</span> (click orb)</span></li></ul></div><div className="space-y-3"><h3 className={`font-semibold flex items-center gap-2 ${isDarkMode?'text-blue-400':'text-blue-600'}`}><Trophy className="w-5 h-5" />Scoring</h3><ul className={`space-y-2 text-sm ${isDarkMode?'text-gray-300':'text-gray-600'}`}><li className="flex items-start gap-2"><span className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">+1</span><span><span className="font-semibold text-blue-400">Correct</span> = +5 points</span></li><li className="flex items-start gap-2"><span className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">-1</span><span><span className="font-semibold text-red-400">Wrong</span> = -1 life</span></li><li className="flex items-start gap-2"><span className="w-5 h-5 rounded-full bg-orange-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">-1</span><span><span className="font-semibold text-orange-400">0 lives</span> = -5 points</span></li><li className="flex items-start gap-2"><span className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">✓</span><span><span className="font-semibold text-green-400">Timeout</span> = no penalty</span></li></ul></div><div className="space-y-3"><h3 className={`font-semibold flex items-center gap-2 ${isDarkMode?'text-purple-400':'text-purple-600'}`}><Zap className="w-5 h-5" />Pro Features</h3><ul className={`space-y-2 text-sm ${isDarkMode?'text-gray-300':'text-gray-600'}`}><li className="flex items-start gap-2"><Lock className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" /><span><span className="font-semibold text-green-400">Raw Input</span> - Pointer Lock API</span></li><li className="flex items-start gap-2"><Activity className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" /><span><span className="font-semibold text-blue-400">Adaptive</span> speed 1000-400ms</span></li><li className="flex items-start gap-2"><Timer className="w-4 h-4 text-orange-400 flex-shrink-0 mt-0.5" /><span><span className="font-semibold text-orange-400">Streak</span> tracking</span></li></ul></div></div></div></div></footer>)}
 
         {/* About Section - Preserved */}
         {!isFullscreen && (

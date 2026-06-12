@@ -12,6 +12,45 @@ import {
 } from 'lucide-react';
 
 export default function ReactionChainClient() {
+  const [showRotateWarning, setShowRotateWarning] = useState(false);
+  const [warningMessage, setWarningMessage] = useState("Rotate Your Device");
+
+  useEffect(() => {
+    const checkSize = () => {
+      if (typeof window === 'undefined') return;
+      const ua = navigator.userAgent || '';
+      const isMobile = /Mobi|Android|iPhone|iPad|iPod|Windows Phone/i.test(ua) || 
+                       (navigator.maxTouchPoints > 0 && 
+                        window.screen && Math.max(window.screen.width, window.screen.height) < 1024);
+      if (!isMobile) {
+        setShowRotateWarning(false);
+        return;
+      }
+      const isPortrait = window.innerHeight > window.innerWidth;
+      if (isPortrait) {
+        if (window.innerWidth < 768) {
+          setShowRotateWarning(true);
+          setWarningMessage("Rotate Your Device");
+          return;
+        }
+      } else {
+        if (window.innerHeight < 320) {
+          setShowRotateWarning(true);
+          setWarningMessage("Screen height too small. Try entering Fullscreen mode.");
+          return;
+        }
+      }
+      setShowRotateWarning(false);
+    };
+    checkSize();
+    window.addEventListener('resize', checkSize);
+    window.addEventListener('orientationchange', checkSize);
+    return () => {
+      window.removeEventListener('resize', checkSize);
+      window.removeEventListener('orientationchange', checkSize);
+    };
+  }, []);
+
   const [loading, setLoading] = useState(true);
   const [isClient, setIsClient] = useState(false);
   
@@ -33,7 +72,7 @@ export default function ReactionChainClient() {
   const [arrestsCount, setArrestsCount] = useState(0);
   const [misses, setMisses] = useState(0);
   const [activeNodes, setActiveNodes] = useState(1);
-  const [pointerLocked, setPointerLocked] = useState(false);
+  const pointerLocked = true;
   
   // ============ ALL REFS ============
   const canvasRef = useRef(null);
@@ -75,15 +114,39 @@ export default function ReactionChainClient() {
   useEffect(() => { const handleFullscreenChange = () => { setIsFullscreen(!!document.fullscreenElement); }; document.addEventListener('fullscreenchange', handleFullscreenChange); return () => document.removeEventListener('fullscreenchange', handleFullscreenChange); }, []);
 
   // Pointer Lock
-  const requestPointerLock = useCallback(() => { canvasRef.current?.requestPointerLock(); }, []);
-  useEffect(() => { const h = () => { const l = document.pointerLockElement === canvasRef.current; setPointerLocked(l); if(l) crosshairInitRef.current = true; else if(gameStateRef.current==='playing') showFeedback('Cursor unlocked - Click canvas','error'); }; document.addEventListener('pointerlockchange',h); return () => document.removeEventListener('pointerlockchange',h); }, [showFeedback]);
-  useEffect(() => { const c = canvasRef.current; if(!c)return; const h = () => { if(gameStateRef.current==='playing'&&!pointerLocked)requestPointerLock(); }; c.addEventListener('click',h); return () => c.removeEventListener('click',h); }, [pointerLocked,requestPointerLock]);
+  const requestPointerLock = useCallback(() => {}, []);
+  
+  
 
   // Raw input
-  useEffect(() => { const h = (e) => { if(document.pointerLockElement!==canvasRef.current)return; virtualCrosshair.current.x+=e.movementX||0; virtualCrosshair.current.y+=e.movementY||0; const c=canvasRef.current; if(c){virtualCrosshair.current.x=Math.max(0,Math.min(c.width,virtualCrosshair.current.x)); virtualCrosshair.current.y=Math.max(0,Math.min(c.height,virtualCrosshair.current.y));} }; document.addEventListener('mousemove',h); return () => document.removeEventListener('mousemove',h); }, []);
+  useEffect(() => {
+    const h = (e) => {
+      const c = canvasRef.current;
+      if (!c) return;
+      const rect = c.getBoundingClientRect();
+      const clientX = e.touches && e.touches[0] ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches && e.touches[0] ? e.touches[0].clientY : e.clientY;
+      const x = clientX - rect.left;
+      const y = clientY - rect.top;
+      const scaleX = c.width / c.clientWidth;
+      const scaleY = c.height / c.clientHeight;
+      virtualCrosshair.current = {
+        x: Math.max(0, Math.min(c.width, x * scaleX)),
+        y: Math.max(0, Math.min(c.height, y * scaleY))
+      };
+    };
+    document.addEventListener('mousemove', h);
+    document.addEventListener('touchmove', h, { passive: true });
+    document.addEventListener('touchstart', h, { passive: true });
+    return () => {
+      document.removeEventListener('mousemove', h);
+      document.removeEventListener('touchmove', h);
+      document.removeEventListener('touchstart', h);
+    };
+  }, []);
 
   // Timer
-  useEffect(() => { if (gameState === 'playing' && timeLeft > 0) { timerIntervalRef.current = setInterval(() => { setTimeLeft(prev => { if (prev <= 1) { setGameState('gameOver'); gameStateRef.current = 'gameOver'; isActiveRef.current = false; const finalScore = Math.floor(scoreRef.current); updateBestScore(finalScore); if (timerIntervalRef.current) { clearInterval(timerIntervalRef.current); timerIntervalRef.current = null; } document.exitPointerLock(); return 0; } return prev - 1; }); }, 1000); } return () => { if (timerIntervalRef.current) { clearInterval(timerIntervalRef.current); timerIntervalRef.current = null; } }; }, [gameState, updateBestScore]);
+  useEffect(() => { if (gameState === 'playing' && timeLeft > 0) { timerIntervalRef.current = setInterval(() => { setTimeLeft(prev => { if (prev <= 1) { setGameState('gameOver'); gameStateRef.current = 'gameOver'; isActiveRef.current = false; const finalScore = Math.floor(scoreRef.current); updateBestScore(finalScore); if (timerIntervalRef.current) { clearInterval(timerIntervalRef.current); timerIntervalRef.current = null; }  return 0; } return prev - 1; }); }, 1000); } return () => { if (timerIntervalRef.current) { clearInterval(timerIntervalRef.current); timerIntervalRef.current = null; } }; }, [gameState, updateBestScore]);
 
   const spawnNode = useCallback((cvs) => { if (!cvs) return null; const side = Math.floor(Math.random() * 4); const isFullscreenMode = isFullscreenRef.current; const baseSpeed = isFullscreenMode ? 600 : 400; const scoreBonus = Math.min(scoreRef.current * 20, 500); const streakBonus = Math.min(streakRef.current * 15, 300); const speed = baseSpeed + scoreBonus + streakBonus; speedRef.current = speed; setCurrentSpeed(Math.round(speed)); let node; if (side === 0) { node = { x: -20, y: Math.random() * cvs.height, vx: speed, vy: 0, active: true }; } else if (side === 1) { node = { x: cvs.width + 20, y: Math.random() * cvs.height, vx: -speed, vy: 0, active: true }; } else if (side === 2) { node = { x: Math.random() * cvs.width, y: -20, vx: 0, vy: speed, active: true }; } else { node = { x: Math.random() * cvs.width, y: cvs.height + 20, vx: 0, vy: -speed, active: true }; } return node; }, []);
 
@@ -99,7 +162,7 @@ export default function ReactionChainClient() {
     const updateCanvasSize = () => { const container = containerRef.current; if (!container) return; const containerRect = container.getBoundingClientRect(); let width = containerRect.width; let height = width * (9 / 16); if (height > containerRect.height) { height = containerRect.height; width = height * (16 / 9); } cvs.width = width; cvs.height = height; canvasSizeRef.current = { width: width, height: height }; cvs.style.position = 'absolute'; cvs.style.left = `${(containerRect.width - width) / 2}px`; cvs.style.top = `${(containerRect.height - height) / 2}px`; if(!crosshairInitRef.current) virtualCrosshair.current = { x: width/2, y: height/2 }; if (isActiveRef.current) { const isFullscreenMode = isFullscreenRef.current; const maxNodes = isFullscreenMode ? 2 : 1; nodesRef.current = []; for (let i = 0; i < maxNodes; i++) { const newNode = spawnNode(cvs); if (newNode) nodesRef.current.push(newNode); } } };
     const resizeObserver = new ResizeObserver(updateCanvasSize); if (containerRef.current) resizeObserver.observe(containerRef.current);
     window.addEventListener('resize', updateCanvasSize); updateCanvasSize();
-    function draw() { const now = performance.now(); const dt = (now - lastTimeRef.current) / 1000; lastTimeRef.current = now; const ch = virtualCrosshair.current; const velX = ch.x - lastMouseRef.current.x; const velY = ch.y - lastMouseRef.current.y; cursorVelRef.current = Math.hypot(velX, velY); setCursorSpeed(Math.round(cursorVelRef.current * 10) / 10); lastMouseRef.current.x = ch.x; lastMouseRef.current.y = ch.y; if (isActiveRef.current) { const isFullscreenMode = isFullscreenRef.current; const maxNodes = isFullscreenMode ? 2 : 1; while (nodesRef.current.length > maxNodes) { nodesRef.current.pop(); } while (nodesRef.current.length < maxNodes) { const newNode = spawnNode(cvs); if (newNode) nodesRef.current.push(newNode); } } for (let i = nodesRef.current.length - 1; i >= 0; i--) { const node = nodesRef.current[i]; if (!node || !node.active) continue; node.x += node.vx * dt; node.y += node.vy * dt; const dist = Math.hypot(ch.x - node.x, ch.y - node.y); if (dist < 20 && isActiveRef.current) { if (cursorVelRef.current < 1.5) { handleArrest(i); break; } else { handleMiss(i); break; } } const padding = 100; if (node.x < -padding || node.x > cvs.width + padding || node.y < -padding || node.y > cvs.height + padding) { handleMiss(i); break; } } ctx.fillStyle = isBoxDarkMode ? "#020202" : "#f9fafb"; ctx.fillRect(0, 0, cvs.width, cvs.height); ctx.strokeStyle = isBoxDarkMode ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'; ctx.lineWidth = 1; for (let i = 0; i < cvs.width; i += 50) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, cvs.height); ctx.stroke(); ctx.moveTo(0, i); ctx.lineTo(cvs.width, i); ctx.stroke(); } ctx.fillStyle = isBoxDarkMode ? "#0a0a0a" : "#e5e7eb"; ctx.font = "bold 120px Courier New"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(scoreRef.current, cvs.width / 2, cvs.height / 2); nodesRef.current.forEach(node => { if (!node || !node.active) return; const speedIntensity = Math.min(1, (speedRef.current - 400) / 800); ctx.beginPath(); ctx.arc(node.x, node.y, 10, 0, Math.PI * 2); if (speedIntensity > 0.5) { const g = Math.floor(255 * (1 - speedIntensity)); ctx.fillStyle = `rgb(255, ${g}, 0)`; ctx.strokeStyle = `rgb(255, ${g}, 0)`; } else { ctx.fillStyle = "#00ff88"; ctx.strokeStyle = "#00ff88"; } ctx.fill(); const angle = Math.atan2(node.vy, node.vx); ctx.beginPath(); ctx.moveTo(node.x, node.y); ctx.lineTo(node.x - Math.cos(angle) * 15, node.y - Math.sin(angle) * 15); ctx.strokeStyle = ctx.fillStyle; ctx.lineWidth = 2; ctx.stroke(); ctx.beginPath(); ctx.arc(node.x, node.y, 20, 0, Math.PI * 2); ctx.strokeStyle = `rgba(255, 255, 255, ${0.1 + speedIntensity * 0.4})`; ctx.lineWidth = 1; ctx.stroke(); }); if (isFullscreenRef.current && isActiveRef.current) { ctx.fillStyle = 'rgba(255, 255, 255, 0.1)'; ctx.font = '12px monospace'; ctx.textAlign = 'left'; ctx.fillText('FULLSCREEN MODE • 2x NODES • HIGH SPEED • NO PENALTY', 10, 20); }
+    function draw() { const now = performance.now(); const dt = (now - lastTimeRef.current) / 1000; lastTimeRef.current = now; const ch = virtualCrosshair.current; const velX = ch.x - lastMouseRef.current.x; const velY = ch.y - lastMouseRef.current.y; cursorVelRef.current = Math.hypot(velX, velY); setCursorSpeed(Math.round(cursorVelRef.current * 10) / 10); lastMouseRef.current.x = ch.x; lastMouseRef.current.y = ch.y; if (isActiveRef.current) { const isFullscreenMode = isFullscreenRef.current; const maxNodes = isFullscreenMode ? 2 : 1; while (nodesRef.current.length > maxNodes) { nodesRef.current.pop(); } while (nodesRef.current.length < maxNodes) { const newNode = spawnNode(cvs); if (newNode) nodesRef.current.push(newNode); } } for (let i = nodesRef.current.length - 1; i >= 0; i--) { const node = nodesRef.current[i]; if (!node || !node.active) continue; node.x += node.vx * dt; node.y += node.vy * dt; const dist = Math.hypot(ch.x - node.x, ch.y - node.y); if (dist < 20 && isActiveRef.current) { if (cursorVelRef.current < 1.5) { handleArrest(i); break; } else { handleMiss(i); break; } } const padding = 100; if (node.x < -padding || node.x > cvs.width + padding || node.y < -padding || node.y > cvs.height + padding) { handleMiss(i); break; } } ctx.fillStyle = isBoxDarkMode ? "#020202" : "#f9fafb"; ctx.fillRect(0, 0, cvs.width, cvs.height); ctx.strokeStyle = isBoxDarkMode ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'; ctx.lineWidth = 1; for (let i = 0; i < cvs.width; i += 50) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, cvs.height); ctx.stroke(); ctx.moveTo(0, i); ctx.lineTo(cvs.width, i); ctx.stroke(); } ctx.fillStyle = isBoxDarkMode ? "#0a0a0a" : "#e5e7eb"; ctx.font = "bold 120px Courier New"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; // ctx.fillText(scoreRef.current, cvs.width / 2, cvs.height / 2); nodesRef.current.forEach(node => { if (!node || !node.active) return; const speedIntensity = Math.min(1, (speedRef.current - 400) / 800); ctx.beginPath(); ctx.arc(node.x, node.y, 10, 0, Math.PI * 2); if (speedIntensity > 0.5) { const g = Math.floor(255 * (1 - speedIntensity)); ctx.fillStyle = `rgb(255, ${g}, 0)`; ctx.strokeStyle = `rgb(255, ${g}, 0)`; } else { ctx.fillStyle = "#00ff88"; ctx.strokeStyle = "#00ff88"; } ctx.fill(); const angle = Math.atan2(node.vy, node.vx); ctx.beginPath(); ctx.moveTo(node.x, node.y); ctx.lineTo(node.x - Math.cos(angle) * 15, node.y - Math.sin(angle) * 15); ctx.strokeStyle = ctx.fillStyle; ctx.lineWidth = 2; ctx.stroke(); ctx.beginPath(); ctx.arc(node.x, node.y, 20, 0, Math.PI * 2); ctx.strokeStyle = `rgba(255, 255, 255, ${0.1 + speedIntensity * 0.4})`; ctx.lineWidth = 1; ctx.stroke(); }); if (isFullscreenRef.current && isActiveRef.current) { ctx.fillStyle = 'rgba(255, 255, 255, 0.1)'; ctx.font = '12px monospace'; ctx.textAlign = 'left'; ctx.fillText('FULLSCREEN MODE • 2x NODES • HIGH SPEED • NO PENALTY', 10, 20); }
       // Professional crosshair
       if (ch.x > 0 && ch.x < cvs.width && ch.y > 0 && ch.y < cvs.height) { const isStill = cursorVelRef.current < 1.5; ctx.beginPath(); ctx.arc(ch.x, ch.y, 15, 0, Math.PI * 2); ctx.strokeStyle = pointerLocked ? (isStill ? "#00ff88" : "rgba(255,255,255,0.6)") : "#ff4444"; ctx.lineWidth = 2; ctx.stroke(); ctx.beginPath(); ctx.arc(ch.x, ch.y, 20, 0, Math.PI * 2); ctx.strokeStyle = pointerLocked ? (isStill ? 'rgba(0,255,136,0.3)' : 'rgba(255,255,255,0.15)') : 'rgba(255,68,68,0.3)'; ctx.lineWidth = 1; ctx.stroke(); ctx.beginPath(); ctx.moveTo(ch.x - 24, ch.y); ctx.lineTo(ch.x - 10, ch.y); ctx.moveTo(ch.x + 10, ch.y); ctx.lineTo(ch.x + 24, ch.y); ctx.moveTo(ch.x, ch.y - 24); ctx.lineTo(ch.x, ch.y - 10); ctx.moveTo(ch.x, ch.y + 10); ctx.lineTo(ch.x, ch.y + 24); ctx.strokeStyle = pointerLocked ? (isStill ? "#00ff88" : "rgba(255,255,255,0.6)") : "#ff4444"; ctx.stroke(); ctx.fillStyle = pointerLocked ? (isStill ? "#00ff88" : "rgba(255,255,255,0.6)") : "#ff4444"; ctx.beginPath(); ctx.arc(ch.x, ch.y, 3, 0, Math.PI * 2); ctx.fill(); ctx.font = "10px monospace"; ctx.textAlign = "center"; ctx.fillStyle = pointerLocked ? (isStill ? "#00ff88" : "rgba(255,255,255,0.6)") : "#ff4444"; ctx.fillText(isStill ? "ARREST READY" : `VEL: ${cursorVelRef.current.toFixed(1)}`, ch.x, ch.y - 25); } animationRef.current = requestAnimationFrame(draw); }
     animationRef.current = requestAnimationFrame(draw);
@@ -113,8 +176,8 @@ export default function ReactionChainClient() {
       }
     } catch (err) {}
  if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); setGameState('playing'); gameStateRef.current = 'playing'; setScore(0); setStreak(0); setBestStreak(0); setTimeLeft(60); setFeedback(''); setCursorSpeed(0); setCurrentSpeed(isFullscreenRef.current ? 600 : 400); setArrestsCount(0); setMisses(0); setActiveNodes(isFullscreenRef.current ? 2 : 1); isActiveRef.current = true; scoreRef.current = 0; streakRef.current = 0; bestStreakRef.current = 0; speedRef.current = isFullscreenRef.current ? 600 : 400; arrestCountRef.current = 0; missesRef.current = 0; nodesRef.current = []; crosshairInitRef.current = false; if (canvasRef.current) { const maxNodes = isFullscreenRef.current ? 2 : 1; for (let i = 0; i < maxNodes; i++) { const newNode = spawnNode(canvasRef.current); if (newNode) nodesRef.current.push(newNode); } } setTimeout(()=>requestPointerLock(),200); setTimeout(()=>{crosshairInitRef.current=true;},400); }, [spawnNode, requestPointerLock]);
-  const resetGame = useCallback(() => { if (animationRef.current) cancelAnimationFrame(animationRef.current); if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current); isActiveRef.current = false; setGameState('start'); gameStateRef.current = 'start'; setScore(0); setStreak(0); setBestStreak(0); setTimeLeft(60); setFeedback(''); setCursorSpeed(0); setCurrentSpeed(400); setArrestsCount(0); setMisses(0); setActiveNodes(1); nodesRef.current = []; crosshairInitRef.current = false; document.exitPointerLock(); }, []);
-  useEffect(() => { return () => { if (animationRef.current) cancelAnimationFrame(animationRef.current); if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current); document.exitPointerLock(); }; }, []);
+  const resetGame = useCallback(() => { if (animationRef.current) cancelAnimationFrame(animationRef.current); if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current); isActiveRef.current = false; setGameState('start'); gameStateRef.current = 'start'; setScore(0); setStreak(0); setBestStreak(0); setTimeLeft(60); setFeedback(''); setCursorSpeed(0); setCurrentSpeed(400); setArrestsCount(0); setMisses(0); setActiveNodes(1); nodesRef.current = []; crosshairInitRef.current = false;  }, []);
+  useEffect(() => { return () => { if (animationRef.current) cancelAnimationFrame(animationRef.current); if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);  }; }, []);
 
   const sharePage = async () => { if (navigator.share) { try { await navigator.share({ title: 'Free Reaction Chain Drill | SkillDrills', text: 'Train precision stopping and impulse control. Free!', url: 'https://skilldrills.online/drills/physical/Reflex-Training/reaction-chain' }); } catch (e) {} } else { navigator.clipboard.writeText('https://skilldrills.online/drills/physical/Reflex-Training/reaction-chain'); alert('Link copied!'); } };
   const copyPageLink = () => { navigator.clipboard.writeText('https://skilldrills.online/drills/physical/Reflex-Training/reaction-chain'); alert('Link copied!'); };
@@ -144,7 +207,7 @@ export default function ReactionChainClient() {
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
             <div className="flex items-center gap-3">
               <div className="p-3 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl flex-shrink-0"><Crosshair className="w-6 h-6 text-white" /></div>
-              <div><h1 className={`text-2xl sm:text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Reaction Chain</h1><p className={`text-sm sm:text-base ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{pointerLocked?'🟢 Raw input active':'🔴 Click canvas'} • Precision stopping • Impulse control</p></div>
+              <div><h1 className={`text-2xl sm:text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Reaction Chain</h1><p className={`text-sm sm:text-base ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}> Precision stopping • Impulse control</p></div>
             </div>
             <div className="flex gap-2 flex-shrink-0">
               {gameState === 'playing' && (<button onClick={resetGame} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700' : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-100'}`} title="Reset session" aria-label="Reset reaction chain drill"><RefreshCw className="w-5 h-5" /></button>)}
@@ -152,7 +215,7 @@ export default function ReactionChainClient() {
               <button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} aria-label="Toggle drill area theme" title="Toggle drill area theme"><Eye className="w-5 h-5" /></button>
               <button onClick={() => setSoundEnabled(!soundEnabled)} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} aria-label={soundEnabled ? 'Mute sounds' : 'Enable sounds'} title={soundEnabled ? 'Mute' : 'Unmute'}>{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button>
               <button onClick={toggleFullscreen} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'} title={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}>{isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}</button>
-              <button onClick={pointerLocked ? () => document.exitPointerLock() : requestPointerLock} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${pointerLocked ? 'bg-green-500 border-green-600 text-white' : isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} aria-label="Pointer lock"><Lock className="w-5 h-5" /></button>
+              
             </div>
           </div>
         )}
@@ -180,15 +243,17 @@ export default function ReactionChainClient() {
         {/* Game Container */}
         <div ref={containerRef} className={`relative ${isFullscreen ? 'fixed inset-0 z-50' : 'rounded-xl border-2'}`} style={{ background: isBoxDarkMode ? "#020202" : "#ffffff", aspectRatio: isFullscreen ? 'auto' : '16/9', maxWidth: '100%', margin: '0 auto', borderColor: isDarkMode ? '#374151' : '#e5e7eb', overflow: 'hidden', cursor: 'none' }}>
           {/* Mobile Rotate Device Warning Overlay */}
-          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-gray-950/95 text-center p-6 md:hidden portrait:flex landscape:hidden" aria-hidden="true">
-            <div className="animate-bounce mb-4 text-blue-500">
-              <svg className="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-              </svg>
-            </div>
-            <h3 className="text-lg font-bold text-white mb-2">Rotate Your Device</h3>
-            <p className="text-sm text-gray-400">Please rotate your device to landscape orientation for the best training experience.</p>
+      {showRotateWarning && (
+        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-gray-950/95 text-center p-6" aria-hidden="true">
+          <div className="animate-bounce mb-4 text-blue-500">
+            <svg className="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+            </svg>
           </div>
+          <h3 className="text-lg font-bold text-white mb-2">{warningMessage}</h3>
+          <p className="text-sm text-gray-400">Please use landscape orientation or fullscreen mode for the best training experience.</p>
+        </div>
+      )}
 
           {isFullscreen && gameState === 'playing' && (
             <div className="absolute top-4 right-4 z-20">
@@ -205,7 +270,7 @@ export default function ReactionChainClient() {
                 <h2 className={`text-2xl font-bold mb-2 ${isBoxDarkMode ? 'text-white' : 'text-gray-900'}`}>Reaction Chain</h2>
                 <p className={`mb-4 ${isBoxDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Raw input • Stop cursor on nodes • No penalties</p>
                 <div className={`mb-6 p-3 rounded-lg border ${isBoxDarkMode ? 'border-yellow-600 bg-yellow-900/20' : 'border-yellow-200 bg-yellow-50'}`}>
-                  <div className="flex items-center gap-2 mb-2"><AlertCircle className="w-4 h-4 text-yellow-500" /><p className={`text-sm font-medium ${isBoxDarkMode ? 'text-yellow-400' : 'text-yellow-700'}`}>Raw Input via Pointer Lock</p></div>
+                  
                   <p className={`text-xs ${isBoxDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Stop cursor on moving nodes. ESC to unlock. Click canvas to re-lock.</p>
                 </div>
                 <button onClick={startGame} className="px-8 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl font-semibold hover:shadow-lg w-full transition-all transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2" aria-label="Start free reaction chain training">Start Free Drill</button>

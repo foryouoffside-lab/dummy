@@ -11,6 +11,45 @@ import {
 } from 'lucide-react';
 
 export default function FlowInductionClient() {
+  const [showRotateWarning, setShowRotateWarning] = useState(false);
+  const [warningMessage, setWarningMessage] = useState("Rotate Your Device");
+
+  useEffect(() => {
+    const checkSize = () => {
+      if (typeof window === 'undefined') return;
+      const ua = navigator.userAgent || '';
+      const isMobile = /Mobi|Android|iPhone|iPad|iPod|Windows Phone/i.test(ua) || 
+                       (navigator.maxTouchPoints > 0 && 
+                        window.screen && Math.max(window.screen.width, window.screen.height) < 1024);
+      if (!isMobile) {
+        setShowRotateWarning(false);
+        return;
+      }
+      const isPortrait = window.innerHeight > window.innerWidth;
+      if (isPortrait) {
+        if (window.innerWidth < 768) {
+          setShowRotateWarning(true);
+          setWarningMessage("Rotate Your Device");
+          return;
+        }
+      } else {
+        if (window.innerHeight < 320) {
+          setShowRotateWarning(true);
+          setWarningMessage("Screen height too small. Try entering Fullscreen mode.");
+          return;
+        }
+      }
+      setShowRotateWarning(false);
+    };
+    checkSize();
+    window.addEventListener('resize', checkSize);
+    window.addEventListener('orientationchange', checkSize);
+    return () => {
+      window.removeEventListener('resize', checkSize);
+      window.removeEventListener('orientationchange', checkSize);
+    };
+  }, []);
+
   const [loading, setLoading] = useState(true);
   const [isClient, setIsClient] = useState(false);
   const canvasRef = useRef(null);
@@ -30,7 +69,7 @@ export default function FlowInductionClient() {
   const [timeLeft, setTimeLeft] = useState(60);
   const [feedback, setFeedback] = useState('');
   const [feedbackType, setFeedbackType] = useState('');
-  const [pointerLocked, setPointerLocked] = useState(false);
+  const pointerLocked = true;
   
   const virtualCrosshair = useRef({ x: 0, y: 0 });
   const crosshairInitRef = useRef(false);
@@ -59,38 +98,37 @@ export default function FlowInductionClient() {
   const playSound = useCallback((type) => { if (!soundEnabled) return; try { const ctx = initAudio(); if (!ctx) return; const o = ctx.createOscillator(), g = ctx.createGain(); o.connect(g); g.connect(ctx.destination); const now = ctx.currentTime; if (type === 'streak') { o.frequency.setValueAtTime(1046.5, now); g.gain.setValueAtTime(0.1, now); } else { o.frequency.setValueAtTime(440, now); g.gain.setValueAtTime(0.08, now); } g.gain.exponentialRampToValueAtTime(0.001, now + 0.15); o.start(now); o.stop(now + 0.15); } catch (e) {} }, [soundEnabled, initAudio]);
 
   // Pointer Lock
-  const requestPointerLock = useCallback(() => { canvasRef.current?.requestPointerLock(); }, []);
+  const requestPointerLock = useCallback(() => {}, []);
   
-  useEffect(() => {
-    const h = () => {
-      const l = document.pointerLockElement === canvasRef.current;
-      setPointerLocked(l);
-      if (l) crosshairInitRef.current = true;
-      else if (gameState === 'playing') showFeedback('Cursor unlocked - Click canvas', 'error');
-    };
-    document.addEventListener('pointerlockchange', h);
-    document.addEventListener('pointerlockerror', () => showFeedback('Lock failed', 'error'));
-    return () => { document.removeEventListener('pointerlockchange', h); };
-  }, [gameState, showFeedback]);
+  
 
-  useEffect(() => {
-    const c = canvasRef.current; if (!c) return;
-    const h = () => { if (gameState === 'playing' && !pointerLocked) requestPointerLock(); };
-    c.addEventListener('click', h);
-    return () => c.removeEventListener('click', h);
-  }, [gameState, pointerLocked, requestPointerLock]);
+  
 
   // Raw input
   useEffect(() => {
     const h = (e) => {
-      if (document.pointerLockElement !== canvasRef.current) return;
-      virtualCrosshair.current.x += e.movementX || 0;
-      virtualCrosshair.current.y += e.movementY || 0;
       const c = canvasRef.current;
-      if (c) { virtualCrosshair.current.x = Math.max(0, Math.min(c.width, virtualCrosshair.current.x)); virtualCrosshair.current.y = Math.max(0, Math.min(c.height, virtualCrosshair.current.y)); }
+      if (!c) return;
+      const rect = c.getBoundingClientRect();
+      const clientX = e.touches && e.touches[0] ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches && e.touches[0] ? e.touches[0].clientY : e.clientY;
+      const x = clientX - rect.left;
+      const y = clientY - rect.top;
+      const scaleX = c.width / c.clientWidth;
+      const scaleY = c.height / c.clientHeight;
+      virtualCrosshair.current = {
+        x: Math.max(0, Math.min(c.width, x * scaleX)),
+        y: Math.max(0, Math.min(c.height, y * scaleY))
+      };
     };
     document.addEventListener('mousemove', h);
-    return () => document.removeEventListener('mousemove', h);
+    document.addEventListener('touchmove', h, { passive: true });
+    document.addEventListener('touchstart', h, { passive: true });
+    return () => {
+      document.removeEventListener('mousemove', h);
+      document.removeEventListener('touchmove', h);
+      document.removeEventListener('touchstart', h);
+    };
   }, []);
 
   const toggleFullscreen = useCallback(async () => { try { if (!isFullscreen) { const el = containerRef.current; if (el?.requestFullscreen) { await el.requestFullscreen(); setIsFullscreen(true); } } else { if (document.fullscreenElement) await document.exitFullscreen(); setIsFullscreen(false); } } catch (e) {} }, [isFullscreen]);
@@ -153,7 +191,7 @@ export default function FlowInductionClient() {
   // Timer
   useEffect(() => {
     if (gameState !== 'playing') return;
-    timerIntervalRef.current = setInterval(() => { setTimeLeft(prev => { if (prev <= 1) { setGameState('gameOver'); gameStateRef.current = 'gameOver'; isActiveRef.current = false; if (timerIntervalRef.current) { clearInterval(timerIntervalRef.current); timerIntervalRef.current = null; } updateBestScore(Math.floor(scoreRef.current)); document.exitPointerLock(); return 0; } return prev - 1; }); }, 1000);
+    timerIntervalRef.current = setInterval(() => { setTimeLeft(prev => { if (prev <= 1) { setGameState('gameOver'); gameStateRef.current = 'gameOver'; isActiveRef.current = false; if (timerIntervalRef.current) { clearInterval(timerIntervalRef.current); timerIntervalRef.current = null; } updateBestScore(Math.floor(scoreRef.current));  return 0; } return prev - 1; }); }, 1000);
     return () => { if (timerIntervalRef.current) { clearInterval(timerIntervalRef.current); timerIntervalRef.current = null; } };
   }, [gameState, updateBestScore]);
 
@@ -260,14 +298,14 @@ export default function FlowInductionClient() {
     setGameState('start'); gameStateRef.current = 'start';
     setScore(0); setStreak(0); setFlowState(0); setFeedback('');
     crosshairInitRef.current = false;
-    document.exitPointerLock();
+    
   }, []);
 
   useEffect(() => () => {
     if (animationRef.current) cancelAnimationFrame(animationRef.current);
     if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
     if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
-    document.exitPointerLock();
+    
   }, []);
 
   const sharePage = async () => { if (navigator.share) { try { await navigator.share({ title: 'Flow State Training | SkillDrills', text: 'Achieve deep focus by tracking a moving ring.', url: 'https://skilldrills.online/drills/productivity/focus-endurance/flow-state' }); } catch (e) {} } else { navigator.clipboard.writeText('https://skilldrills.online/drills/productivity/focus-endurance/flow-state'); } };
@@ -305,7 +343,7 @@ export default function FlowInductionClient() {
               <button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className={`p-2 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`}><Eye className="w-5 h-5" /></button>
               <button onClick={() => setSoundEnabled(!soundEnabled)} className={`p-2 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`}>{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button>
               <button onClick={toggleFullscreen} className={`p-2 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`}>{isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}</button>
-              <button onClick={pointerLocked ? () => document.exitPointerLock() : requestPointerLock} className={`p-2 rounded-lg border ${pointerLocked ? 'bg-green-500 border-green-600 text-white' : isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`}><Lock className="w-5 h-5" /></button>
+              
             </div>
           </div>
         )}
@@ -326,15 +364,17 @@ export default function FlowInductionClient() {
 
         <div ref={containerRef} className={`relative ${isFullscreen ? 'fixed inset-0 z-50' : 'rounded-xl border-2'}`} style={{ background: isBoxDarkMode ? "#020202" : "#fff", aspectRatio: isFullscreen ? 'auto' : '16/9', maxWidth: '100%', margin: '0 auto', borderColor: isDarkMode ? '#374151' : '#e5e7eb', overflow: 'hidden' }}>
           {/* Mobile Rotate Device Warning Overlay */}
-          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-gray-950/95 text-center p-6 md:hidden portrait:flex landscape:hidden" aria-hidden="true">
-            <div className="animate-bounce mb-4 text-blue-500">
-              <svg className="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-              </svg>
-            </div>
-            <h3 className="text-lg font-bold text-white mb-2">Rotate Your Device</h3>
-            <p className="text-sm text-gray-400">Please rotate your device to landscape orientation for the best training experience.</p>
+      {showRotateWarning && (
+        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-gray-950/95 text-center p-6" aria-hidden="true">
+          <div className="animate-bounce mb-4 text-blue-500">
+            <svg className="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+            </svg>
           </div>
+          <h3 className="text-lg font-bold text-white mb-2">{warningMessage}</h3>
+          <p className="text-sm text-gray-400">Please use landscape orientation or fullscreen mode for the best training experience.</p>
+        </div>
+      )}
 
           {isFullscreen && gameState === 'playing' && (<div className="absolute top-4 right-4 z-20 opacity-0 pointer-events-none"><button onClick={toggleFullscreen} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70"><Minimize2 className="w-5 h-5" /></button></div>)}
           <canvas ref={canvasRef} style={{ display: 'block', position: 'absolute', cursor: 'none' }} />
@@ -346,7 +386,7 @@ export default function FlowInductionClient() {
                 <h2 className={`text-2xl font-bold mb-2 ${isBoxDarkMode ? 'text-white' : 'text-gray-900'}`}>Flow State Trainer</h2>
                 <p className={`mb-4 ${isBoxDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Raw input • +1pt/0.5s flow • 60s challenge</p>
                 <div className={`mb-6 p-3 rounded-lg border ${isBoxDarkMode ? 'border-yellow-600 bg-yellow-900/20' : 'border-yellow-200 bg-yellow-50'}`}>
-                  <div className="flex items-center gap-2 mb-2"><AlertCircle className="w-4 h-4 text-yellow-500" /><p className={`text-sm font-medium ${isBoxDarkMode ? 'text-yellow-400' : 'text-yellow-700'}`}>Raw Input via Pointer Lock</p></div>
+                  
                   <p className={`text-xs ${isBoxDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Track the ring. ESC to unlock. Click canvas to re-lock.</p>
                 </div>
                 <button onClick={startGame} className="px-8 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-xl font-semibold hover:shadow-lg w-full">Start Training</button>

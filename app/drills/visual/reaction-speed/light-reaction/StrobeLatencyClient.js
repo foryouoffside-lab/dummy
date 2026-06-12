@@ -14,6 +14,45 @@ const MIN_STAY_TIME = 100;
 const MAX_STAY_TIME = 200;
 
 export default function StrobeLatencyClient() {
+  const [showRotateWarning, setShowRotateWarning] = useState(false);
+  const [warningMessage, setWarningMessage] = useState("Rotate Your Device");
+
+  useEffect(() => {
+    const checkSize = () => {
+      if (typeof window === 'undefined') return;
+      const ua = navigator.userAgent || '';
+      const isMobile = /Mobi|Android|iPhone|iPad|iPod|Windows Phone/i.test(ua) || 
+                       (navigator.maxTouchPoints > 0 && 
+                        window.screen && Math.max(window.screen.width, window.screen.height) < 1024);
+      if (!isMobile) {
+        setShowRotateWarning(false);
+        return;
+      }
+      const isPortrait = window.innerHeight > window.innerWidth;
+      if (isPortrait) {
+        if (window.innerWidth < 768) {
+          setShowRotateWarning(true);
+          setWarningMessage("Rotate Your Device");
+          return;
+        }
+      } else {
+        if (window.innerHeight < 320) {
+          setShowRotateWarning(true);
+          setWarningMessage("Screen height too small. Try entering Fullscreen mode.");
+          return;
+        }
+      }
+      setShowRotateWarning(false);
+    };
+    checkSize();
+    window.addEventListener('resize', checkSize);
+    window.addEventListener('orientationchange', checkSize);
+    return () => {
+      window.removeEventListener('resize', checkSize);
+      window.removeEventListener('orientationchange', checkSize);
+    };
+  }, []);
+
   const canvasRef = useRef(null);
   const animationRef = useRef(null);
   const containerRef = useRef(null);
@@ -36,7 +75,7 @@ export default function StrobeLatencyClient() {
   const [isFlashing, setIsFlashing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isClient, setIsClient] = useState(false);
-  const [pointerLocked, setPointerLocked] = useState(false);
+  const pointerLocked = true;
   const [lockCooldown, setLockCooldown] = useState(false);
   
   const startTimeRef = useRef(0);
@@ -121,27 +160,13 @@ export default function StrobeLatencyClient() {
     } catch (e) {}
   }, [isFullscreen]);
 
-  useEffect(() => {
-    const h = () => setIsFullscreen(!!document.fullscreenElement);
-    document.addEventListener('fullscreenchange', h);
-    return () => document.removeEventListener('fullscreenchange', h);
-  }, []);
+  
 
   const requestPointerLock = useCallback(() => {
     if (!lockCooldown && canvasRef.current) canvasRef.current.requestPointerLock();
   }, [lockCooldown]);
 
-  useEffect(() => {
-    const h = () => {
-      const l = document.pointerLockElement === canvasRef.current;
-      setPointerLocked(l);
-      if (!l && gameState === 'playing') { setLockCooldown(true); setTimeout(() => setLockCooldown(false), 1000); }
-    };
-    const e = () => { setLockCooldown(true); setTimeout(() => setLockCooldown(false), 1000); };
-    document.addEventListener('pointerlockchange', h);
-    document.addEventListener('pointerlockerror', e);
-    return () => { document.removeEventListener('pointerlockchange', h); document.removeEventListener('pointerlockerror', e); };
-  }, [gameState]);
+  
 
   useEffect(() => {
     const c = canvasRef.current; if (!c) return;
@@ -152,21 +177,28 @@ export default function StrobeLatencyClient() {
 
   useEffect(() => {
     const h = (e) => {
-      const cvs = canvasRef.current;
-      if (!cvs) return;
-      if (document.pointerLockElement === cvs) {
-        virtualCrosshair.current.x += e.movementX || 0;
-        virtualCrosshair.current.y += e.movementY || 0;
-      } else {
-        const rect = cvs.getBoundingClientRect();
-        virtualCrosshair.current.x = (e.clientX - rect.left) * (cvs.width / rect.width);
-        virtualCrosshair.current.y = (e.clientY - rect.top) * (cvs.height / rect.height);
-      }
-      virtualCrosshair.current.x = Math.max(0, Math.min(cvs.width, virtualCrosshair.current.x));
-      virtualCrosshair.current.y = Math.max(0, Math.min(cvs.height, virtualCrosshair.current.y));
+      const c = canvasRef.current;
+      if (!c) return;
+      const rect = c.getBoundingClientRect();
+      const clientX = e.touches && e.touches[0] ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches && e.touches[0] ? e.touches[0].clientY : e.clientY;
+      const x = clientX - rect.left;
+      const y = clientY - rect.top;
+      const scaleX = c.width / c.clientWidth;
+      const scaleY = c.height / c.clientHeight;
+      virtualCrosshair.current = {
+        x: Math.max(0, Math.min(c.width, x * scaleX)),
+        y: Math.max(0, Math.min(c.height, y * scaleY))
+      };
     };
-    window.addEventListener('mousemove', h);
-    return () => window.removeEventListener('mousemove', h);
+    document.addEventListener('mousemove', h);
+    document.addEventListener('touchmove', h, { passive: true });
+    document.addEventListener('touchstart', h, { passive: true });
+    return () => {
+      document.removeEventListener('mousemove', h);
+      document.removeEventListener('touchmove', h);
+      document.removeEventListener('touchstart', h);
+    };
   }, []);
 
   const cleanupAllTimers = useCallback(() => {
@@ -188,14 +220,14 @@ export default function StrobeLatencyClient() {
       showFeedback(`✗ ${reason}! -1 life`, 'error');
       playSound('fail');
       if (livesRef.current === 0) {
-        scoreRef.current = Math.max(0, scoreRef.current - 1);
+        scoreRef.current = Math.max(0, scoreRef.current - 5);
         if (isMountedRef.current) setScore(scoreRef.current);
-        showFeedback('⚠️ No lives! -1 point penalty', 'warning');
+        showFeedback('⚠️ No lives! -5 points penalty', 'warning');
       }
     } else {
-      scoreRef.current = Math.max(0, scoreRef.current - 1);
+      scoreRef.current = Math.max(0, scoreRef.current - 5);
       if (isMountedRef.current) setScore(scoreRef.current);
-      showFeedback(`✗ ${reason}! -1 point`, 'error');
+      showFeedback(`✗ ${reason}! -5 points`, 'error');
       playSound('fail');
     }
     stayTimeRef.current = Math.min(MAX_STAY_TIME, stayTimeRef.current + 10);
@@ -235,7 +267,7 @@ export default function StrobeLatencyClient() {
             isActiveRef.current = false;
             cleanupAllTimers();
             updateBestScore(scoreRef.current);
-            document.exitPointerLock();
+            
             return 0;
           }
           return prev - 1;
@@ -269,7 +301,7 @@ export default function StrobeLatencyClient() {
           bestReactionRef.current = reaction;
           if (isMountedRef.current) setBestReaction(reaction);
         }
-        scoreRef.current += 1;
+        scoreRef.current += 5;
         if (isMountedRef.current) { setScore(scoreRef.current); setSuccessfulHits(prev => prev + 1); }
         
         const newStreak = streakRef.current + 1;
@@ -413,7 +445,7 @@ export default function StrobeLatencyClient() {
     setIsFlashing(false);
     setGameState('start'); gameStateRef.current = 'start';
     setFeedback(''); setFeedbackType('');
-    document.exitPointerLock();
+    
     setLockCooldown(true); setTimeout(() => setLockCooldown(false), 1000);
   }, [cleanupAllTimers]);
 
@@ -442,7 +474,7 @@ export default function StrobeLatencyClient() {
       isMountedRef.current = false;
       isActiveRef.current = false;
       cleanupAllTimers();
-      document.exitPointerLock();
+      
     };
   }, [cleanupAllTimers]);
 
@@ -517,7 +549,7 @@ export default function StrobeLatencyClient() {
               <button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className={`p-2 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`}><Eye className="w-5 h-5" /></button>
               <button onClick={() => setSoundEnabled(!soundEnabled)} className={`p-2 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`}>{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button>
               <button onClick={toggleFullscreen} className={`p-2 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`}>{isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}</button>
-              <button onClick={pointerLocked ? () => { document.exitPointerLock(); setLockCooldown(true); setTimeout(() => setLockCooldown(false), 1000); } : requestPointerLock} className={`p-2 rounded-lg border ${pointerLocked ? 'bg-green-500 border-green-600 text-white' : isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`}><Lock className="w-5 h-5" /></button>
+              
             </div>
           </div>
         )}
@@ -539,15 +571,17 @@ export default function StrobeLatencyClient() {
         
         <div ref={containerRef} className={`relative ${isFullscreen ? 'fixed inset-0 z-50' : 'rounded-xl border-2'}`} style={{ background: isBoxDarkMode ? "#020202" : "#fff", aspectRatio: isFullscreen ? 'auto' : '16/9', maxWidth: '100%', margin: '0 auto', borderColor: isDarkMode ? '#374151' : '#e5e7eb', overflow: 'hidden', cursor: 'none' }}>
           {/* Mobile Rotate Device Warning Overlay */}
-          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-gray-950/95 text-center p-6 md:hidden portrait:flex landscape:hidden" aria-hidden="true">
-            <div className="animate-bounce mb-4 text-blue-500">
-              <svg className="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-              </svg>
-            </div>
-            <h3 className="text-lg font-bold text-white mb-2">Rotate Your Device</h3>
-            <p className="text-sm text-gray-400">Please rotate your device to landscape orientation for the best training experience.</p>
+      {showRotateWarning && (
+        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-gray-950/95 text-center p-6" aria-hidden="true">
+          <div className="animate-bounce mb-4 text-blue-500">
+            <svg className="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+            </svg>
           </div>
+          <h3 className="text-lg font-bold text-white mb-2">{warningMessage}</h3>
+          <p className="text-sm text-gray-400">Please use landscape orientation or fullscreen mode for the best training experience.</p>
+        </div>
+      )}
 
           {isFullscreen && gameState === 'playing' && (
             <div className="absolute top-4 right-4 z-20 pointer-events-none">
@@ -563,7 +597,7 @@ export default function StrobeLatencyClient() {
                 <h2 className={`text-2xl font-bold mb-2 ${isBoxDarkMode ? 'text-white' : 'text-gray-900'}`}>Strobe-Latency Lab</h2>
                 <p className={`mb-4 ${isBoxDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Raw input • 100-200ms window • 3 lives</p>
                 <div className={`mb-6 p-3 rounded-lg border ${isBoxDarkMode ? 'border-yellow-600 bg-yellow-900/20' : 'border-yellow-200 bg-yellow-50'}`}>
-                  <div className="flex items-center gap-2 mb-2"><AlertCircle className="w-4 h-4 text-yellow-500" /><p className={`text-sm font-medium ${isBoxDarkMode ? 'text-yellow-400' : 'text-yellow-700'}`}>Raw Input via Pointer Lock</p></div>
+                  
                   <p className={`text-xs ${isBoxDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Click ball when it flashes white. Press ESC to unlock.</p>
                 </div>
                 <button onClick={startGame} className="px-8 py-3 bg-gradient-to-r from-blue-500 to-cyan-600 text-white rounded-xl font-semibold hover:shadow-lg w-full">Start Free Drill</button>
@@ -612,10 +646,10 @@ export default function StrobeLatencyClient() {
                   <div className="space-y-3">
                     <h3 className={`font-semibold flex items-center gap-2 ${isDarkMode ? 'text-green-400' : 'text-green-600'}`}><Trophy className="w-5 h-5" />Scoring System</h3>
                     <ul className={`space-y-2 text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                      <li className="flex items-start gap-2"><span className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">+1</span><span><span className="font-semibold text-green-400">Hit</span> = +1 point</span></li>
+                      <li className="flex items-start gap-2"><span className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">+1</span><span><span className="font-semibold text-green-400">Hit</span> = +5 points</span></li>
                       <li className="flex items-start gap-2"><span className="w-5 h-5 rounded-full bg-orange-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">🔥</span><span><span className="font-semibold text-orange-400">Streak</span> every 5 hits</span></li>
                       <li className="flex items-start gap-2"><span className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">-1</span><span><span className="font-semibold text-red-400">Early click</span> = -1 life</span></li>
-                      <li className="flex items-start gap-2"><span className="w-5 h-5 rounded-full bg-red-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">-1</span><span><span className="font-semibold text-red-400">0 lives</span> = -1 point penalty</span></li>
+                      <li className="flex items-start gap-2"><span className="w-5 h-5 rounded-full bg-red-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">-1</span><span><span className="font-semibold text-red-400">0 lives</span> = -5 points penalty</span></li>
                     </ul>
                   </div>
                   <div className="space-y-3">

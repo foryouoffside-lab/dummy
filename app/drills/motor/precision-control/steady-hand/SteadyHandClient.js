@@ -12,6 +12,45 @@ import {
 } from 'lucide-react';
 
 export default function SteadyHandClient() {
+  const [showRotateWarning, setShowRotateWarning] = useState(false);
+  const [warningMessage, setWarningMessage] = useState("Rotate Your Device");
+
+  useEffect(() => {
+    const checkSize = () => {
+      if (typeof window === 'undefined') return;
+      const ua = navigator.userAgent || '';
+      const isMobile = /Mobi|Android|iPhone|iPad|iPod|Windows Phone/i.test(ua) || 
+                       (navigator.maxTouchPoints > 0 && 
+                        window.screen && Math.max(window.screen.width, window.screen.height) < 1024);
+      if (!isMobile) {
+        setShowRotateWarning(false);
+        return;
+      }
+      const isPortrait = window.innerHeight > window.innerWidth;
+      if (isPortrait) {
+        if (window.innerWidth < 768) {
+          setShowRotateWarning(true);
+          setWarningMessage("Rotate Your Device");
+          return;
+        }
+      } else {
+        if (window.innerHeight < 320) {
+          setShowRotateWarning(true);
+          setWarningMessage("Screen height too small. Try entering Fullscreen mode.");
+          return;
+        }
+      }
+      setShowRotateWarning(false);
+    };
+    checkSize();
+    window.addEventListener('resize', checkSize);
+    window.addEventListener('orientationchange', checkSize);
+    return () => {
+      window.removeEventListener('resize', checkSize);
+      window.removeEventListener('orientationchange', checkSize);
+    };
+  }, []);
+
   const [loading, setLoading] = useState(true);
   const [isClient, setIsClient] = useState(false);
   const canvasRef = useRef(null);
@@ -32,7 +71,7 @@ export default function SteadyHandClient() {
   const [bestLapTime, setBestLapTime] = useState(0);
   const [feedback, setFeedback] = useState('');
   const [feedbackType, setFeedbackType] = useState('');
-  const [pointerLocked, setPointerLocked] = useState(false);
+  const pointerLocked = true;
   
   const virtualCrosshair = useRef({ x: 0, y: 0 });
   const crosshairInitRef = useRef(false);
@@ -64,21 +103,36 @@ export default function SteadyHandClient() {
   const initAudio = useCallback(() => { try { if (!audioCtxRef.current) audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)(); if (audioCtxRef.current.state === 'suspended') audioCtxRef.current.resume(); return audioCtxRef.current; } catch (e) { return null; } }, []);
   const playSound = useCallback((type) => { if (!soundEnabled) return; try { const a = initAudio(); if (!a) return; const o = a.createOscillator(), g = a.createGain(); o.connect(g); g.connect(a.destination); const n = a.currentTime; const fm = { lap: 880, fail: 300, streak: 1046.5, start: 660, penalty: 200, bestLap: 1318.5 }; o.frequency.setValueAtTime(fm[type] || 660, n); g.gain.setValueAtTime(type === 'penalty' || type === 'fail' ? 0.12 : 0.1, n); g.gain.exponentialRampToValueAtTime(0.001, n + 0.15); o.start(n); o.stop(n + 0.15); } catch (e) {} }, [soundEnabled, initAudio]);
 
-  const requestPointerLock = useCallback(() => { canvasRef.current?.requestPointerLock(); }, []);
+  const requestPointerLock = useCallback(() => {}, []);
   
-  useEffect(() => {
-    const h = () => { const l = document.pointerLockElement === canvasRef.current; setPointerLocked(l); if (l) crosshairInitRef.current = true; else if (gameState === 'playing') showFeedback('Cursor unlocked - Click canvas', 'error'); };
-    document.addEventListener('pointerlockchange', h);
-    document.addEventListener('pointerlockerror', () => showFeedback('Lock failed', 'error'));
-    return () => { document.removeEventListener('pointerlockchange', h); };
-  }, [gameState, showFeedback]);
+  
 
-  useEffect(() => { const c = canvasRef.current; if (!c) return; const h = () => { if (gameState === 'playing' && !pointerLocked) requestPointerLock(); }; c.addEventListener('click', h); return () => c.removeEventListener('click', h); }, [gameState, pointerLocked, requestPointerLock]);
+  
 
   useEffect(() => {
-    const h = (e) => { if (document.pointerLockElement !== canvasRef.current) return; virtualCrosshair.current.x += e.movementX || 0; virtualCrosshair.current.y += e.movementY || 0; const c = canvasRef.current; if (c) { virtualCrosshair.current.x = Math.max(0, Math.min(c.width, virtualCrosshair.current.x)); virtualCrosshair.current.y = Math.max(0, Math.min(c.height, virtualCrosshair.current.y)); } };
+    const h = (e) => {
+      const c = canvasRef.current;
+      if (!c) return;
+      const rect = c.getBoundingClientRect();
+      const clientX = e.touches && e.touches[0] ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches && e.touches[0] ? e.touches[0].clientY : e.clientY;
+      const x = clientX - rect.left;
+      const y = clientY - rect.top;
+      const scaleX = c.width / c.clientWidth;
+      const scaleY = c.height / c.clientHeight;
+      virtualCrosshair.current = {
+        x: Math.max(0, Math.min(c.width, x * scaleX)),
+        y: Math.max(0, Math.min(c.height, y * scaleY))
+      };
+    };
     document.addEventListener('mousemove', h);
-    return () => document.removeEventListener('mousemove', h);
+    document.addEventListener('touchmove', h, { passive: true });
+    document.addEventListener('touchstart', h, { passive: true });
+    return () => {
+      document.removeEventListener('mousemove', h);
+      document.removeEventListener('touchmove', h);
+      document.removeEventListener('touchstart', h);
+    };
   }, []);
 
   const toggleFullscreen = useCallback(async () => { try { if (!isFullscreen) { const el = containerRef.current; if (el?.requestFullscreen) { await el.requestFullscreen(); setIsFullscreen(true); } } else { if (document.fullscreenElement) await document.exitFullscreen(); setIsFullscreen(false); } } catch (e) {} }, [isFullscreen]);
@@ -86,7 +140,7 @@ export default function SteadyHandClient() {
 
   const generatePath = useCallback((cvs) => { if (!cvs) return; const path = []; let curY = cvs.height / 2; const segments = 45; const startX = stripOffset + stripW; const endX = cvs.width - (stripOffset + stripW); const step = (endX - startX) / segments; for (let i = 0; i <= segments; i++) { if (i === 0 || i === segments) curY = cvs.height / 2; else { curY += (Math.random() - 0.5) * 300; curY = Math.max(150, Math.min(cvs.height - 150, curY)); } path.push({ x: startX + i * step, y: curY }); } pathRef.current = path; }, []);
 
-  const applyPenalty = useCallback(() => { if (!isActiveRef.current) return; scoreRef.current = Math.max(0, scoreRef.current - 15); setScore(scoreRef.current); playSound('penalty'); showFeedback('✗ Mistake! -15 points', 'error'); }, [playSound, showFeedback]);
+  const applyPenalty = useCallback(() => { if (!isActiveRef.current) return; scoreRef.current = Math.max(0, scoreRef.current - 55); setScore(scoreRef.current); playSound('penalty'); showFeedback('✗ Mistake! -55 points', 'error'); }, [playSound, showFeedback]);
 
   const triggerFail = useCallback((msg, cvs) => {
     if (stateRef.current === 'FAIL') return;
@@ -140,15 +194,15 @@ export default function SteadyHandClient() {
         bestLapStreakRef.current = streakRef.current;
         setBestLapStreak(streakRef.current);
       }
-      scoreRef.current += 15;
+      scoreRef.current += 55;
       setScore(scoreRef.current);
       if (scoreRef.current > bestScore) setBestScore(scoreRef.current);
       if (streakRef.current % 5 === 0 && streakRef.current > 0) {
         playSound('streak');
-        showFeedback(`🔥 ${streakRef.current} Lap Streak! +15`, 'success');
+        showFeedback(`🔥 ${streakRef.current} Lap Streak! +55`, 'success');
       } else {
         playSound('lap');
-        showFeedback(`✓ Lap ${lapsRef.current} Complete! +15`, 'success');
+        showFeedback(`✓ Lap ${lapsRef.current} Complete! +55`, 'success');
       }
       corridorWidthRef.current = Math.max(12, 50 - (streakRef.current * 2));
       setCorridorWidth(corridorWidthRef.current);
@@ -368,7 +422,7 @@ export default function SteadyHandClient() {
         ctx.fillStyle = "#ff4444";
         ctx.font = "bold 18px monospace";
         ctx.textAlign = "center";
-        ctx.fillText(failMsgRef.current, cvs.width / 2, cvs.height / 2);
+        // ctx.fillText(failMsgRef.current, cvs.width / 2, cvs.height / 2);
       }
       
       animationRef.current = requestAnimationFrame(draw);
@@ -429,7 +483,7 @@ export default function SteadyHandClient() {
     setBestLapTime(0);
     setFeedback('');
     crosshairInitRef.current = false;
-    document.exitPointerLock();
+    
   }, []);
 
   const sharePage = async () => {
@@ -452,7 +506,7 @@ export default function SteadyHandClient() {
 
   useEffect(() => () => {
     if (animationRef.current) cancelAnimationFrame(animationRef.current);
-    document.exitPointerLock();
+    
   }, []);
 
   if (loading || !isClient) {
@@ -509,10 +563,7 @@ export default function SteadyHandClient() {
               <button onClick={toggleFullscreen} className={`p-2 rounded-lg border ${isDarkMode?'bg-gray-800 border-gray-700 text-gray-300':'bg-white border-gray-200 text-gray-700'}`}>
                 {isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
               </button>
-              <button onClick={pointerLocked ? () => document.exitPointerLock() : requestPointerLock} 
-                className={`p-2 rounded-lg border ${pointerLocked ? 'bg-green-500 border-green-600 text-white' : isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`}>
-                <Lock className="w-5 h-5" />
-              </button>
+              
             </div>
           </div>
         )}
@@ -549,15 +600,17 @@ export default function SteadyHandClient() {
             overflow: 'hidden'
           }}>
           {/* Mobile Rotate Device Warning Overlay */}
-          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-gray-950/95 text-center p-6 md:hidden portrait:flex landscape:hidden" aria-hidden="true">
-            <div className="animate-bounce mb-4 text-blue-500">
-              <svg className="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-              </svg>
-            </div>
-            <h3 className="text-lg font-bold text-white mb-2">Rotate Your Device</h3>
-            <p className="text-sm text-gray-400">Please rotate your device to landscape orientation for the best training experience.</p>
+      {showRotateWarning && (
+        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-gray-950/95 text-center p-6" aria-hidden="true">
+          <div className="animate-bounce mb-4 text-blue-500">
+            <svg className="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+            </svg>
           </div>
+          <h3 className="text-lg font-bold text-white mb-2">{warningMessage}</h3>
+          <p className="text-sm text-gray-400">Please use landscape orientation or fullscreen mode for the best training experience.</p>
+        </div>
+      )}
 
           
           {isFullscreen && gameState === 'playing' && (
@@ -577,10 +630,7 @@ export default function SteadyHandClient() {
                 <h2 className={`text-2xl font-bold mb-2 ${isBoxDarkMode ? 'text-white' : 'text-gray-900'}`}>Steady Hand Trainer</h2>
                 <p className={`mb-4 ${isBoxDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Raw input • 15pts/lap • Corridor shrinks</p>
                 <div className={`mb-6 p-3 rounded-lg border ${isBoxDarkMode ? 'border-yellow-600 bg-yellow-900/20' : 'border-yellow-200 bg-yellow-50'}`}>
-                  <div className="flex items-center gap-2 mb-2">
-                    <AlertCircle className="w-4 h-4 text-yellow-500" />
-                    <p className={`text-sm font-medium ${isBoxDarkMode ? 'text-yellow-400' : 'text-yellow-700'}`}>Raw Input via Pointer Lock</p>
-                  </div>
+                  
                   <p className={`text-xs ${isBoxDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Click left strip to start. ESC to unlock. Click canvas to re-lock.</p>
                 </div>
                 <button onClick={startGame} className="px-8 py-3 bg-gradient-to-r from-red-500 to-orange-600 text-white rounded-xl font-semibold hover:shadow-lg w-full">
