@@ -667,7 +667,21 @@ export default function ProSmoothPursuitClient() {
         )}
 
         {/* Start / Settings Menu */}
-        {gameState === 'start' && (
+        
+
+        {/* Playing Screen */}
+        <div className={isFullscreen ? "w-full h-full" : "block"}>
+          {/* Large Esports HUD Telemetry */}
+          
+
+          <div 
+            ref={containerRef} 
+            className={isFullscreen 
+              ? "w-full h-full bg-[#050811] relative overflow-hidden flex items-center justify-center animate-pulse" 
+              : "w-full aspect-video min-h-[400px] lg:min-h-[500px] bg-[#050811] border border-slate-800 rounded-xl relative overflow-hidden flex items-center justify-center cursor-none"}
+          >
+            <canvas ref={canvasRef} onClick={handleCanvasClick} />
+            {gameState === 'start' && (
           <div className="absolute inset-0 bg-[#080d1a]/95 flex items-center justify-center p-6 z-30 overflow-y-auto">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
             <div className="lg:col-span-2 bg-[#0c1224]/85 border border-slate-900 rounded-xl p-6 shadow-2xl backdrop-blur-md">
@@ -747,19 +761,54 @@ export default function ProSmoothPursuitClient() {
           </div>
           </div>
         )}
+            {gameState === 'gameOver' && (
+          <div className="absolute inset-0 bg-[#080d1a]/95 flex items-center justify-center p-6 z-30 overflow-y-auto">
+            <div className="max-w-xl mx-auto bg-[#0c1224]/95 border border-slate-800 rounded-2xl p-6 sm:p-8 text-center shadow-2xl backdrop-blur-md relative z-20">
+            <Trophy className="w-16 h-16 text-yellow-500 mx-auto mb-4 animate-bounce" />
+            <h2 className="text-2xl font-black text-white uppercase tracking-wider mb-2">Pursuit Session Complete</h2>
+            <p className="text-xs text-slate-400 leading-relaxed mb-6">
+              Tracking profile {gameType.toUpperCase()} completed. Practice builds solid muscle coordination memory.
+            </p>
 
-        {/* Playing Screen */}
-        <div className={isFullscreen ? "w-full h-full" : "block"}>
-          {/* Large Esports HUD Telemetry */}
-          
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
+              <div className="bg-[#080d1a] border border-slate-900 rounded-lg p-3">
+                <span className="text-[10px] text-slate-550 block mb-0.5">FINAL SCORE</span>
+                <span className="text-white font-bold text-lg">{score}</span>
+              </div>
+              <div className="bg-[#080d1a] border border-slate-900 rounded-lg p-3">
+                <span className="text-[10px] text-slate-550 block mb-0.5">BEST RECORD</span>
+                <span className="text-yellow-500 font-bold text-lg">{bestScore}</span>
+              </div>
+              <div className="bg-[#080d1a] border border-slate-900 rounded-lg p-3">
+                <span className="text-[10px] text-slate-550 block mb-0.5">ACCURACY</span>
+                <span className="text-green-400 font-bold text-lg">{trackingAccuracy}%</span>
+              </div>
+              <div className="bg-[#080d1a] border border-slate-900 rounded-lg p-3">
+                <span className="text-[10px] text-slate-550 block mb-0.5">PEAK ACCURACY</span>
+                <span className="text-blue-400 font-bold text-lg">{bestAccuracy}%</span>
+              </div>
+              <div className="bg-[#080d1a] border border-slate-900 rounded-lg p-3">
+                <span className="text-[10px] text-slate-550 block mb-0.5">BEST STREAK</span>
+                <span className="text-purple-400 font-bold text-lg">{bestStreak} frames</span>
+              </div>
+            </div>
 
-          <div 
-            ref={containerRef} 
-            className={isFullscreen 
-              ? "w-full h-full bg-[#050811] relative overflow-hidden flex items-center justify-center animate-pulse" 
-              : "w-full aspect-video min-h-[400px] lg:min-h-[500px] bg-[#050811] border border-slate-800 rounded-xl relative overflow-hidden flex items-center justify-center cursor-none"}
-          >
-            <canvas ref={canvasRef} onClick={handleCanvasClick} />
+            <div className="flex gap-4">
+              <Link href="/drills/fps" className="flex-1">
+                <button className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-slate-300 font-bold rounded-lg text-xs uppercase tracking-wider transition">
+                  Return to Lobby
+                </button>
+              </Link>
+              <button 
+                onClick={startGame} 
+                className="flex-1 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg text-xs uppercase tracking-wider transition shadow-lg shadow-green-500/20"
+              >
+                Restart Session
+              </button>
+            </div>
+          </div>
+          </div>
+        )}
             {showRotateWarning && (
               <div className="absolute inset-0 z-50 bg-[#05070e]/95 flex flex-col items-center justify-center p-6 text-center select-none animate-fade-in">
                 <div className="animate-bounce mb-4 text-red-500">
@@ -817,54 +866,7 @@ export default function ProSmoothPursuitClient() {
         </div>
 
         {/* Game Over Screen */}
-        {gameState === 'gameOver' && (
-          <div className="absolute inset-0 bg-[#080d1a]/95 flex items-center justify-center p-6 z-30 overflow-y-auto">
-            <div className="max-w-xl mx-auto bg-[#0c1224]/95 border border-slate-800 rounded-2xl p-6 sm:p-8 text-center shadow-2xl backdrop-blur-md relative z-20">
-            <Trophy className="w-16 h-16 text-yellow-500 mx-auto mb-4 animate-bounce" />
-            <h2 className="text-2xl font-black text-white uppercase tracking-wider mb-2">Pursuit Session Complete</h2>
-            <p className="text-xs text-slate-400 leading-relaxed mb-6">
-              Tracking profile {gameType.toUpperCase()} completed. Practice builds solid muscle coordination memory.
-            </p>
-
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
-              <div className="bg-[#080d1a] border border-slate-900 rounded-lg p-3">
-                <span className="text-[10px] text-slate-550 block mb-0.5">FINAL SCORE</span>
-                <span className="text-white font-bold text-lg">{score}</span>
-              </div>
-              <div className="bg-[#080d1a] border border-slate-900 rounded-lg p-3">
-                <span className="text-[10px] text-slate-550 block mb-0.5">BEST RECORD</span>
-                <span className="text-yellow-500 font-bold text-lg">{bestScore}</span>
-              </div>
-              <div className="bg-[#080d1a] border border-slate-900 rounded-lg p-3">
-                <span className="text-[10px] text-slate-550 block mb-0.5">ACCURACY</span>
-                <span className="text-green-400 font-bold text-lg">{trackingAccuracy}%</span>
-              </div>
-              <div className="bg-[#080d1a] border border-slate-900 rounded-lg p-3">
-                <span className="text-[10px] text-slate-550 block mb-0.5">PEAK ACCURACY</span>
-                <span className="text-blue-400 font-bold text-lg">{bestAccuracy}%</span>
-              </div>
-              <div className="bg-[#080d1a] border border-slate-900 rounded-lg p-3">
-                <span className="text-[10px] text-slate-550 block mb-0.5">BEST STREAK</span>
-                <span className="text-purple-400 font-bold text-lg">{bestStreak} frames</span>
-              </div>
-            </div>
-
-            <div className="flex gap-4">
-              <Link href="/drills/fps" className="flex-1">
-                <button className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-slate-300 font-bold rounded-lg text-xs uppercase tracking-wider transition">
-                  Return to Lobby
-                </button>
-              </Link>
-              <button 
-                onClick={startGame} 
-                className="flex-1 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg text-xs uppercase tracking-wider transition shadow-lg shadow-green-500/20"
-              >
-                Restart Session
-              </button>
-            </div>
-          </div>
-          </div>
-        )}
+        
         {/* DRILL RULES & PRO FEATURES */}
         {!isFullscreen && (
           <footer className="mt-8">

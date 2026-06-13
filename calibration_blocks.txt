@@ -1,0 +1,1202 @@
+=== 180-degree-awareness\AwarenessDrillClient.js ===
+No CALIBRATE H3 found
+=== angle-hold-trainer\AngleHoldClient.js ===
+<h3 className="text-sm font-bold text-red-400 mb-4 flex items-center gap-2 border-b border-slate-900 pb-2">
+                  <Info className="w-4 h-4" />
+                  ANGLE DRILL MECHANICS
+                </h3>
+                <ul className="space-y-4 text-xs leading-relaxed text-slate-400">
+                  <li className="flex items-start gap-2">
+                    <span className="text-red-500 font-bold">1.</span>
+                    <span>Hold your crosshair near the edge of the cover box in the center.</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-red-500 font-bold">2.</span>
+                    <span>An opponent will peek randomly from either the left or right edge.</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-red-500 font-bold">3.</span>
+                    <span>Click to shoot the head immediately when they show. React to **Shoulder Peeks** (don't shoot unless they actually step out) vs **Wide swings**.</span>
+                  </li>
+                  <li className="flex items-start gap-2 text-red-300">
+                    <span className="text-green-400 font-bold">★</span>
+                    <span>**Pre-fire penalty**: Shooting before the target peeks incurs a severe point penalty.</span>
+                  </li>
+                </ul>
+              </div>
+              <div className="mt-6 pt-4 border-t border-slate-900 text-[10px] text-slate-550 leading-normal">
+                Trains crosshair holding distance and response gating in tactical esports games.
+              </div>
+            </div>
+
+            <div className="lg:col-span-2 bg-[#0c1224]/80 border border-slate-900 rounded-xl p-6 backdrop-blur-md flex flex-col justify-between">
+              <div>
+                <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2 border-b border-slate-900 pb-2">
+                  <Calculator className="w-4 h-4 text-red-400" />
+                  CALIBRATE TACTICAL ENGINE
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                  <div>
+                    <label className="block text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-2">Game Profile</label>
+                    <select 
+                      value={gameType}
+                      onChange={(e) => setGameType(e.target.value)}
+                      className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-2 text-xs text-white focus:outline-none focus:border-red-500/50 font-mono"
+                    >
+                      <option value="valorant">Valorant</option>
+                      <option value="cs2">CS2 / Global Offensive</option>
+                      <option value="apex">Apex Legends</option>
+                      <option value="overwatch">Overwatch 2</option>
+                      <option value="siege">Rainbow Six Siege</option>
+                      <option value="fortnite">Fortnite</option>
+                      <option value="cod">Call of Duty / Warzone</option>
+                      <option value="pubg">PUBG</option>
+                      <option value="destiny2">Destiny 2</option>
+                      <option value="halo">Halo Infinite</option>
+                      <option value="battlefield">Battlefield 2042</option>
+                      <option value="tf2">Team Fortress 2</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-2">In-Game Sens</label>
+                    <input 
+                      type="number"
+                      step="0.001"
+                      value={inGameSens}
+                      onChange={(e) => setInGameSens(Math.max(0.001, parseFloat(e.target.value) || 0.1))}
+                      className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-2 text-xs text-white focus:outline-none focus:border-red-500/50"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-2">Mouse DPI</label>
+                    <input 
+                      type="number"
+                      step="50"
+                      value={dpi}
+                      onChange={(e) => setDpi(Math.max(100, parseInt(e.target.value, 10) || 800))}
+                      className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-2 text-xs text-white focus:outline-none focus:border-red-500/50"
+                    />
+                  </div>
+                </div>
+
+                <div className="p-4 bg-slate-950/80 rounded border border-slate-900 flex justify-between items-center text-xs">
+                  <div>
+                    <span className="text-[10px] text-slate-550 block uppercase">Aim Translation</span>
+                    <span className="text-white font-bold text-sm">{cmPer360} cm / 360°</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-[10px] text-slate-550 block uppercase">Active Dynamic Covers</span>
+                    <span className="text-red-400 font-bold">Center Obstacle (Obstruction)</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="
+========================================
+=== counter-strafe-trainer\CounterStrafeClient.js ===
+No CALIBRATE H3 found
+=== deadzone-jiggle-snap\DeadzoneJiggleSnapClient.js ===
+No CALIBRATE H3 found
+=== evasive-slide-track\EvasiveSlideTrackClient.js ===
+<h3 className="text-sm font-bold text-blue-400 mb-4 flex items-center gap-2 border-b border-slate-900 pb-2">
+                    <Info className="w-4 h-4" />
+                    APEX/WARZONE SPECS
+                  </h3>
+                  <ul className="space-y-4 text-xs leading-relaxed text-slate-400">
+                    <li className="flex items-start gap-2">
+                      <span className="text-blue-400 font-bold">1.</span>
+                      <span>Target performs slide dashes (red) and jump-pad arcs (yellow).</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-blue-400 font-bold">2.</span>
+                      <span>Hold left mouse button (fire) while tracking to gain 4x score ticks. Firing triggers recoil viewport shake.</span>
+                    </li>
+                    <li className="flex items-start gap-2 text-blue-300">
+                      <span className="text-blue-400 font-bold">★</span>
+                      <span>Tests sub-pixel smooth pursuit coherence and direction swap react adjusting.</span>
+                    </li>
+                  </ul>
+                </div>
+                <div className="mt-6 pt-4 border-t border-slate-900 flex justify-between items-center text-[10px]">
+                  <span className="text-slate-550 uppercase">Voice Feedback:</span>
+                  <button 
+                    onClick={() => setVoiceEnabled(!voiceEnabled)} 
+                    className={`px-3 py-1 rounded text-[10px] font-bold uppercase transition ${voiceEnabled ? 'bg-green-950 text-green-400 border border-green-500/30' : 'bg-slate-900 text-slate-550 border border-slate-800'}`}
+                  >
+                    {voiceEnabled ? 'SPEAK_ON' : 'SPEAK_OFF'}
+                  </button>
+                </div>
+              </div>
+
+              <div className="lg:col-span-2 bg-[#0c1224]/80 border border-slate-900 rounded-xl p-6 backdrop-blur-md flex flex-col justify-between">
+                <div>
+                  <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2 border-b border-slate-900 pb-2">
+                    <Calculator className="w-4 h-4 text-blue-400" />
+                    CALIBRATE TRACKING
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                    <div>
+                      <label className="block text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-2">Esport Setup</label>
+                      <select 
+                      value={gameType}
+                      onChange={(e) => setGameType(e.target.value)}
+                      className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-2 text-xs text-white focus:outline-none focus:border-red-500/50 font-mono"
+                    >
+                      <option value="valorant">Valorant</option>
+                      <option value="cs2">CS2 / Global Offensive</option>
+                      <option value="apex">Apex Legends</option>
+                      <option value="overwatch">Overwatch 2</option>
+                      <option value="siege">Rainbow Six Siege</option>
+                      <option value="fortnite">Fortnite</option>
+                      <option value="cod">Call of Duty / Warzone</option>
+                      <option value="pubg">PUBG</option>
+                      <option value="destiny2">Destiny 2</option>
+                      <option value="halo">Halo Infinite</option>
+                      <option value="battlefield">Battlefield 2042</option>
+                      <option value="tf2">Team Fortress 2</option>
+                    </select>
+                    </div>
+                    <div>
+                      <label className="block text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-2">In-Game Sens</label>
+                      <input 
+                        type="number"
+                        step="0.01"
+                        value={inGameSens}
+                        onChange={(e) => setInGameSens(Math.max(0.001, parseFloat(e.target.value) || 0.1))}
+                        className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-2 text-xs text-white focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-2">Mouse DPI</label>
+                      <input 
+                        type="number"
+                        step="50"
+                        value={dpi}
+                        onChange={(e) => setDpi(Math.max(100, parseInt(e.target.value, 10) || 800))}
+                        className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-2 text-xs text-white focus:outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="p-4 bg-slate-950 rounded border border-slate-900 flex justify-between items-center text-xs">
+                    <div>
+                      <span className="text-[10px] text-slate-550 block uppercase">360 Sweep Distance</span>
+                      <span className="text-white font-bold">{cmPer360} cm / 360°</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[10px] text-slate-550 block uppercase">S+ Target Size</span>
+                      <span className="text-blue-400 font-bold">{TRACK_RADIUS} px</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="
+========================================
+=== flick-shot-training\ProFlickClient.js ===
+<h3 className="text-sm font-bold text-green-400 mb-4 flex items-center gap-2 border-b border-slate-900 pb-2">
+                  <Info className="w-4 h-4" />
+                  DRILL MECHANICS
+                </h3>
+                <ul className="space-y-4 text-xs leading-relaxed text-slate-400">
+                  <li className="flex items-start gap-2">
+                    <span className="text-green-500 font-bold">1.</span>
+                    <span>Random targets spawn on the screen with a decaying timer (850ms down to 600ms).</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-green-500 font-bold">2.</span>
+                    <span>Click and flick as fast as possible to hit the targets. Pure 2D 1:1 raw input.</span>
+                  </li>
+                  <li className="flex items-start gap-2 text-green-300">
+                    <span className="text-green-400 font-bold">★</span>
+                    <span>Adjust sensitivity and target size below to match your comfortable desktop space.</span>
+                  </li>
+                </ul>
+              </div>
+              <div className="mt-6 pt-4 border-t border-slate-900 text-[10px] text-slate-550 leading-normal">
+                Perfects wrist mechanics and straight flick paths under strict timing.
+              </div>
+            </div>
+
+            <div className="lg:col-span-2 bg-[#0c1224]/80 border border-slate-900 rounded-xl p-6 backdrop-blur-md flex flex-col justify-between">
+              <div>
+                <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2 border-b border-slate-900 pb-2">
+                  <Calculator className="w-4 h-4 text-green-400" />
+                  CALIBRATE AIM ENGINE
+                </h3>
+                
+                <div className="mb-6 p-4 bg-slate-950/45 rounded border border-slate-900">
+                  <div className="flex justify-between items-center mb-2">
+                    <label className="block text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                      Universal Sensitivity Multiplier
+                    </label>
+                    <span className="text-green-400 font-mono text-xs font-bold">{universalSens.toFixed(2)}x</span>
+                  </div>
+                  <input 
+                    type="range" 
+                    min="0.1" 
+                    max="3.0" 
+                    step="0.05"
+                    value={universalSens}
+                    onChange={(e) => setUniversalSens(parseFloat(e.target.value))}
+                    className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-green-500"
+                  />
+                  <p className="text-[9px] text-slate-500 mt-2 uppercase tracking-wider text-center">
+                    Adjust slider to match your comfortable desktop cursor speed.
+                  </p>
+                </div>
+
+                <div className="mb-6 p-4 bg-slate-950/45 rounded border border-slate-900">
+                  <div className="flex justify-between items-center mb-2">
+                    <label className="block text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                      Target Pixel Size Radius
+                    </label>
+                    <span className="text-green-400 font-mono text-xs font-bold">{currentTargetSize}px</span>
+                  </div>
+                  <input 
+                    type="range" 
+                    min="10" 
+                    max="80" 
+                    step="2"
+                    value={currentTargetSize}
+                    onChange={(e) => setCurrentTargetSize(parseInt(e.target.value))}
+                    className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-green-500"
+                  />
+                </div>
+              </div>
+
+              <div className="
+========================================
+=== headshot-micro-adjust\HeadshotReflexClient.js ===
+<h3 className="text-sm font-bold text-rose-500 mb-4 flex items-center gap-2 border-b border-slate-900 pb-2">
+                  <Info className="w-4 h-4" />
+                  S+ 180° REFLEX LAWS
+                </h3>
+                <ul className="space-y-4 text-xs leading-relaxed text-slate-400">
+                  <li className="flex items-start gap-2">
+                    <span className="text-rose-500 font-bold">1.</span>
+                    <span>Flash spawns (6px) appear at the extreme horizontal edges. Expire at **180ms - 220ms**.</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-rose-500 font-bold">2.</span>
+                    <span>Simulates raw-reflex flicking to wide flank peeks. Flicks start from visual center.</span>
+                  </li>
+                  <li className="flex items-start gap-2 text-rose-350">
+                    <span className="text-rose-500 font-bold">★</span>
+                    <span>**Voice Assistant Coaching**: Interactive AI voice gives real-time corrections and post-game diagnostics.</span>
+                  </li>
+                </ul>
+              </div>
+              <div className="mt-6 pt-4 border-t border-slate-900 flex justify-between items-center text-[10px]">
+                <span className="text-slate-550 uppercase">Voice Feedback:</span>
+                <button 
+                  onClick={() => setVoiceEnabled(!voiceEnabled)} 
+                  className={`px-3 py-1 rounded text-[10px] font-bold uppercase transition ${voiceEnabled ? 'bg-green-950 text-green-400 border border-green-500/30' : 'bg-slate-900 text-slate-550 border border-slate-800'}`}
+                >
+                  {voiceEnabled ? 'SPEAK_ON' : 'SPEAK_OFF'}
+                </button>
+              </div>
+            </div>
+
+            <div className="lg:col-span-2 bg-[#0c1224]/80 border border-slate-900 rounded-xl p-6 backdrop-blur-md flex flex-col justify-between">
+              <div>
+                <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2 border-b border-slate-900 pb-2">
+                  <Calculator className="w-4 h-4 text-rose-500" />
+                  CALIBRATE MOUSE PROFILE
+                </h3>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                  <div>
+                    <label className="block text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-2">Game Profile</label>
+                    <select 
+                      value={gameType}
+                      onChange={(e) => setGameType(e.target.value)}
+                      className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-2 text-xs text-white focus:outline-none focus:border-red-500/50 font-mono"
+                    >
+                      <option value="valorant">Valorant</option>
+                      <option value="cs2">CS2 / Global Offensive</option>
+                      <option value="apex">Apex Legends</option>
+                      <option value="overwatch">Overwatch 2</option>
+                      <option value="siege">Rainbow Six Siege</option>
+                      <option value="fortnite">Fortnite</option>
+                      <option value="cod">Call of Duty / Warzone</option>
+                      <option value="pubg">PUBG</option>
+                      <option value="destiny2">Destiny 2</option>
+                      <option value="halo">Halo Infinite</option>
+                      <option value="battlefield">Battlefield 2042</option>
+                      <option value="tf2">Team Fortress 2</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-2">Sensitivity</label>
+                    <input 
+                      type="number"
+                      step="0.01"
+                      value={inGameSens}
+                      onChange={(e) => setInGameSens(Math.max(0.001, parseFloat(e.target.value) || 0.1))}
+                      className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-2 text-xs text-white focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-2">Mouse DPI</label>
+                    <input 
+                      type="number"
+                      step="50"
+                      value={dpi}
+                      onChange={(e) => setDpi(Math.max(100, parseInt(e.target.value, 10) || 800))}
+                      className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-2 text-xs text-white focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="p-4 bg-slate-950/80 rounded border border-slate-900 flex justify-between items-center text-xs">
+                  <div>
+                    <span className="text-[10px] text-slate-550 block uppercase">360° Sweep Distance</span>
+                    <span className="text-white font-bold text-sm">{cmPer360} cm / 360°</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-[10px] text-slate-550 block uppercase">Reflex Target Scale</span>
+                    <span className="text-rose-500 font-bold">{TARGET_SIZE} px</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="
+========================================
+=== high-speed-kinetic-trainer\KineticTrainerClient.js ===
+<h3 className="text-sm font-bold text-blue-400 mb-4 flex items-center gap-2 border-b border-slate-900 pb-2">
+                  <Info className="w-4 h-4" />
+                  KINETIC DRILL RULES
+                </h3>
+                <ul className="space-y-4 text-xs leading-relaxed text-slate-400">
+                  <li className="flex items-start gap-2">
+                    <span className="text-blue-500 font-bold">1.</span>
+                    <span>Click bouncing targets. Targets teleport at random times to reset your orientation.</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-blue-500 font-bold">2.</span>
+                    <span>No score penalties for misses. Focus purely on re-aligning your crosshair on the moving orb.</span>
+                  </li>
+                  <li className="flex items-start gap-2 text-blue-300">
+                    <span className="text-green-400 font-bold">★</span>
+                    <span>**High-speed calibration**: Target velocities scale up dynamically with your combo length!</span>
+                  </li>
+                </ul>
+              </div>
+              <div className="mt-6 pt-4 border-t border-slate-900 text-[10px] text-slate-550 leading-normal">
+                Builds muscle memory for tracking fast-moving targets (e.g. Apex slide jumps or OW dashes).
+              </div>
+            </div>
+
+            <div className="lg:col-span-2 bg-[#0c1224]/80 border border-slate-900 rounded-xl p-6 backdrop-blur-md flex flex-col justify-between">
+              <div>
+                <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2 border-b border-slate-900 pb-2">
+                  <Calculator className="w-4 h-4 text-blue-400" />
+                  CALIBRATE AIM ENGINE
+                </h3>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                  <div>
+                    <label className="block text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-2">Game Profile</label>
+                    <select 
+                      value={gameType}
+                      onChange={(e) => setGameType(e.target.value)}
+                      className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-2 text-xs text-white focus:outline-none focus:border-red-500/50 font-mono"
+                    >
+                      <option value="valorant">Valorant</option>
+                      <option value="cs2">CS2 / Global Offensive</option>
+                      <option value="apex">Apex Legends</option>
+                      <option value="overwatch">Overwatch 2</option>
+                      <option value="siege">Rainbow Six Siege</option>
+                      <option value="fortnite">Fortnite</option>
+                      <option value="cod">Call of Duty / Warzone</option>
+                      <option value="pubg">PUBG</option>
+                      <option value="destiny2">Destiny 2</option>
+                      <option value="halo">Halo Infinite</option>
+                      <option value="battlefield">Battlefield 2042</option>
+                      <option value="tf2">Team Fortress 2</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-2">In-Game Sens</label>
+                    <input 
+                      type="number"
+                      step="0.001"
+                      value={inGameSens}
+                      onChange={(e) => setInGameSens(Math.max(0.001, parseFloat(e.target.value) || 0.1))}
+                      className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-2 text-xs text-white focus:outline-none focus:border-green-500/50"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-2">Mouse DPI</label>
+                    <input 
+                      type="number"
+                      step="50"
+                      value={dpi}
+                      onChange={(e) => setDpi(Math.max(100, parseInt(e.target.value, 10) || 800))}
+                      className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-2 text-xs text-white focus:outline-none focus:border-green-500/50"
+                    />
+                  </div>
+                </div>
+
+                <div className="p-4 bg-slate-950/80 rounded border border-slate-900 flex justify-between items-center text-xs">
+                  <div>
+                    <span className="text-[10px] text-slate-550 block uppercase">360° Translation</span>
+                    <span className="text-white font-bold text-sm">{cmPer360} cm / 360°</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-[10px] text-slate-550 block uppercase">Target Setup</span>
+                    <span className="text-blue-400 font-bold">{currentTargetSize} px Radius</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="
+========================================
+=== instant-response\InstantResponseClient.js ===
+No CALIBRATE H3 found
+=== micro-flick-burst\MicroFlickBurstClient.js ===
+<h3 className="text-sm font-bold text-red-500 mb-4 flex items-center gap-2 border-b border-slate-900 pb-2">
+                  <Info className="w-4 h-4" />
+                  S+ GRADE ELITE MECHANICS
+                </h3>
+                <ul className="space-y-4 text-xs leading-relaxed text-slate-400">
+                  <li className="flex items-start gap-2">
+                    <span className="text-red-500 font-bold">1.</span>
+                    <span>Micro-targets (8px) spawn at random points. Expire in **180ms - 220ms**.</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-red-500 font-bold">2.</span>
+                    <span>Designed for Global Rank 1 visual snap reflex workouts. Enforces instant reaction snaps.</span>
+                  </li>
+                  <li className="flex items-start gap-2 text-red-300 animate-pulse">
+                    <span className="text-red-500 font-bold">★</span>
+                    <span>**Visual Threshold limits**: Missing or failing to click before 180ms deducts lives. Pro visual calibration only.</span>
+                  </li>
+                </ul>
+              </div>
+              <div className="mt-6 pt-4 border-t border-slate-900 flex justify-between items-center text-[10px]">
+                <span className="text-slate-550 uppercase">Voice Feedback:</span>
+                <button 
+                  onClick={() => setVoiceEnabled(!voiceEnabled)} 
+                  className={`px-3 py-1 rounded text-[10px] font-bold uppercase transition ${voiceEnabled ? 'bg-green-950 text-green-400 border border-green-500/30' : 'bg-slate-900 text-slate-550 border border-slate-800'}`}
+                >
+                  {voiceEnabled ? 'SPEAK_ON' : 'SPEAK_OFF'}
+                </button>
+              </div>
+            </div>
+
+            <div className="lg:col-span-2 bg-[#0c1224]/80 border border-slate-900 rounded-xl p-6 backdrop-blur-md flex flex-col justify-between">
+              <div>
+                <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2 border-b border-slate-900 pb-2">
+                  <Calculator className="w-4 h-4 text-red-500" />
+                  CALIBRATE ELITE DPI
+                </h3>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                  <div>
+                    <label className="block text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-2">Game Profile</label>
+                    <select 
+                      value={gameType}
+                      onChange={(e) => setGameType(e.target.value)}
+                      className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-2 text-xs text-white focus:outline-none focus:border-red-500/50 font-mono"
+                    >
+                      <option value="valorant">Valorant</option>
+                      <option value="cs2">CS2 / Global Offensive</option>
+                      <option value="apex">Apex Legends</option>
+                      <option value="overwatch">Overwatch 2</option>
+                      <option value="siege">Rainbow Six Siege</option>
+                      <option value="fortnite">Fortnite</option>
+                      <option value="cod">Call of Duty / Warzone</option>
+                      <option value="pubg">PUBG</option>
+                      <option value="destiny2">Destiny 2</option>
+                      <option value="halo">Halo Infinite</option>
+                      <option value="battlefield">Battlefield 2042</option>
+                      <option value="tf2">Team Fortress 2</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-2">In-Game Sens</label>
+                    <input 
+                      type="number"
+                      step="0.001"
+                      value={inGameSens}
+                      onChange={(e) => setInGameSens(Math.max(0.001, parseFloat(e.target.value) || 0.1))}
+                      className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-2 text-xs text-white focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-2">Mouse DPI</label>
+                    <input 
+                      type="number"
+                      step="50"
+                      value={dpi}
+                      onChange={(e) => setDpi(Math.max(100, parseInt(e.target.value, 10) || 800))}
+                      className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-2 text-xs text-white focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="p-4 bg-slate-950/80 rounded border border-slate-900 flex justify-between items-center text-xs">
+                  <div>
+                    <span className="text-[10px] text-slate-550 block uppercase">360° Distance</span>
+                    <span className="text-white font-bold text-sm">{cmPer360} cm / 360°</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-[10px] text-slate-550 block uppercase">Flick Hitbox Radius</span>
+                    <span className="text-red-500 font-bold">{currentTargetSize} px</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="
+========================================
+=== micro-flick-precision\MicroFlickPrecisionClient.js ===
+<h3 className="text-sm font-bold text-red-400 mb-4 flex items-center gap-2 border-b border-slate-900 pb-2">
+                  <Info className="w-4 h-4" />
+                  DRILL MECHANICS
+                </h3>
+                <ul className="space-y-4 text-xs leading-relaxed text-slate-400">
+                  <li className="flex items-start gap-2">
+                    <span className="text-red-500 font-bold">1.</span>
+                    <span>Random targets spawn in a small box around screen center with a short timer (650ms).</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-red-500 font-bold">2.</span>
+                    <span>Micro-adjust your crosshair and snap quickly to the balls. Builds finger-motor dexterity.</span>
+                  </li>
+                  <li className="flex items-start gap-2 text-red-300">
+                    <span className="text-red-400 font-bold">★</span>
+                    <span>**Tactical Snaps**: Ideal for CS2/Valorant headshot adjustments where targets spawn close to crosshair.</span>
+                  </li>
+                </ul>
+              </div>
+              <div className="mt-6 pt-4 border-t border-slate-900 text-[10px] text-slate-550 leading-normal">
+                Refines fine adjustments and micro snap control.
+              </div>
+            </div>
+
+            <div className="lg:col-span-2 bg-[#0c1224]/80 border border-slate-900 rounded-xl p-6 backdrop-blur-md flex flex-col justify-between">
+              <div>
+                <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2 border-b border-slate-900 pb-2">
+                  <Calculator className="w-4 h-4 text-red-400" />
+                  CALIBRATE MOUSE ENGINE
+                </h3>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                  <div>
+                    <label className="block text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-2">Game Profile</label>
+                    <select 
+                      value={gameType}
+                      onChange={(e) => setGameType(e.target.value)}
+                      className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-2 text-xs text-white focus:outline-none focus:border-red-500/50 font-mono"
+                    >
+                      <option value="valorant">Valorant</option>
+                      <option value="cs2">CS2 / Global Offensive</option>
+                      <option value="apex">Apex Legends</option>
+                      <option value="overwatch">Overwatch 2</option>
+                      <option value="siege">Rainbow Six Siege</option>
+                      <option value="fortnite">Fortnite</option>
+                      <option value="cod">Call of Duty / Warzone</option>
+                      <option value="pubg">PUBG</option>
+                      <option value="destiny2">Destiny 2</option>
+                      <option value="halo">Halo Infinite</option>
+                      <option value="battlefield">Battlefield 2042</option>
+                      <option value="tf2">Team Fortress 2</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-2">In-Game Sens</label>
+                    <input 
+                      type="number"
+                      step="0.001"
+                      value={inGameSens}
+                      onChange={(e) => setInGameSens(Math.max(0.001, parseFloat(e.target.value) || 0.1))}
+                      className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-2 text-xs text-white focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-2">Mouse DPI</label>
+                    <input 
+                      type="number"
+                      step="50"
+                      value={dpi}
+                      onChange={(e) => setDpi(Math.max(100, parseInt(e.target.value, 10) || 800))}
+                      className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-2 text-xs text-white focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="p-4 bg-slate-950/80 rounded border border-slate-900 flex justify-between items-center text-xs">
+                  <div>
+                    <span className="text-[10px] text-slate-550 block uppercase">360° Distance</span>
+                    <span className="text-white font-bold text-sm">{cmPer360} cm / 360°</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-[10px] text-slate-550 block uppercase">Flick Hitbox Radius</span>
+                    <span className="text-red-400 font-bold">{currentTargetSize} px</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="
+========================================
+=== parabolic-air-track\ParabolicAirTrackClient.js ===
+H3 found but no mt-8 flex found
+=== pixel-hold-swing\PixelHoldSwingClient.js ===
+No CALIBRATE H3 found
+=== prefire-corner-clearer\PrefireCornerClearerClient.js ===
+No CALIBRATE H3 found
+=== pro-smooth-pursuit\ProSmoothPursuitClient.js ===
+No CALIBRATE H3 found
+=== pro-tracking\ProTrackingClient.js ===
+No CALIBRATE H3 found
+=== pubg-dmr-rhythm\PUBGDMRRhythmClient.js ===
+<h3 className="text-sm font-bold text-red-500 mb-4 flex items-center gap-2 border-b border-slate-900 pb-2">
+                  <Info className="w-4 h-4" />
+                  PUBG DMR MECHANICS
+                </h3>
+                <ul className="space-y-4 text-xs leading-relaxed text-slate-400">
+                  <li className="flex items-start gap-2">
+                    <span className="text-red-500 font-bold">1.</span>
+                    <span>Clicking fires a semi-auto DMR shot. Each shot applies substantial vertical climb and random horizontal sway.</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-red-500 font-bold">2.</span>
+                    <span>Tapping too fast (&lt;250ms) accumulates recoil climb and bullet spread, causing massive inaccuracy.</span>
+                  </li>
+                  <li className="flex items-start gap-2 text-red-300 animate-pulse">
+                    <span className="text-red-500 font-bold">★</span>
+                    <span>Maintain the **optimal rhythmic delay** (250-420ms) to allow the recoil spring to reset back to center before firing.</span>
+                  </li>
+                </ul>
+              </div>
+              <div className="mt-6 pt-4 border-t border-slate-900 flex flex-col gap-3 text-[10px]">
+                <div className="flex justify-between items-center">
+                  <span className="text-slate-400 uppercase font-bold">Voice Guide:</span>
+                  <button 
+                    onClick={() => setVoiceEnabled(!voiceEnabled)} 
+                    className={`px-3 py-1 rounded text-[10px] font-bold uppercase transition ${voiceEnabled ? 'bg-green-950 text-green-400 border border-green-500/30' : 'bg-slate-900 text-slate-400 border border-slate-800'}`}
+                  >
+                    {voiceEnabled ? 'SPEAK_ON' : 'SPEAK_OFF'}
+                  </button>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-slate-400 uppercase font-bold">Tempo Metronome:</span>
+                  <button 
+                    onClick={() => setMetronomeSoundEnabled(!metronomeSoundEnabled)} 
+                    className={`px-3 py-1 rounded text-[10px] font-bold uppercase transition ${metronomeSoundEnabled ? 'bg-red-950 text-red-400 border border-red-500/30' : 'bg-slate-900 text-slate-400 border border-slate-800'}`}
+                  >
+                    {metronomeSoundEnabled ? 'SOUND_ON' : 'SOUND_OFF'}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="lg:col-span-2 bg-[#0c1224]/80 border border-slate-900 rounded-xl p-6 backdrop-blur-md flex flex-col justify-between">
+              <div>
+                <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2 border-b border-slate-900 pb-2">
+                  <Calculator className="w-4 h-4 text-red-500" />
+                  CALIBRATE PUBG SENSITIVITY
+                </h3>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                  <div>
+                    <label className="block text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-2">Game Profile</label>
+                    <select 
+                      value={gameType}
+                      onChange={(e) => setGameType(e.target.value)}
+                      className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-2 text-xs text-white focus:outline-none focus:border-red-500/50 font-mono"
+                    >
+                      <option value="valorant">Valorant</option>
+                      <option value="cs2">CS2 / Global Offensive</option>
+                      <option value="apex">Apex Legends</option>
+                      <option value="overwatch">Overwatch 2</option>
+                      <option value="siege">Rainbow Six Siege</option>
+                      <option value="fortnite">Fortnite</option>
+                      <option value="cod">Call of Duty / Warzone</option>
+                      <option value="pubg">PUBG</option>
+                      <option value="destiny2">Destiny 2</option>
+                      <option value="halo">Halo Infinite</option>
+                      <option value="battlefield">Battlefield 2042</option>
+                      <option value="tf2">Team Fortress 2</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-2">
+                      {gameType === 'pubg' ? 'PUBG General Sensitivity (0-100)' : 'Matched Game Sens'}
+                    </label>
+                    <input 
+                      type="number"
+                      step={gameType === 'pubg' ? '1' : '0.01'}
+                      value={inGameSens}
+                      onChange={(e) => setInGameSens(gameType === 'pubg' ? Math.max(1, Math.min(100, parseFloat(e.target.value) || 45)) : Math.max(0.001, parseFloat(e.target.value) || 0.1))}
+                      className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-2 text-xs text-white focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-2">Mouse DPI</label>
+                    <input 
+                      type="number"
+                      step="50"
+                      value={dpi}
+                      onChange={(e) => setDpi(Math.max(100, parseInt(e.target.value, 10) || 800))}
+                      className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-2 text-xs text-white focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="p-4 bg-slate-950/80 rounded border border-slate-900 flex justify-between items-center text-xs">
+                  <div>
+                    <span className="text-[10px] text-slate-550 block uppercase">Converted 360° Distance</span>
+                    <span className="text-white font-bold text-sm">{cmPer360} cm / 360°</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-[10px] text-slate-550 block uppercase">Optimal Tapping Rate</span>
+                    <span className="text-red-500 font-bold">~330 ms (Mini14 Sweetspot)</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="
+========================================
+=== pubg-drive-by\PUBGDriveByClient.js ===
+<h3 className="text-sm font-bold text-blue-500 mb-4 flex items-center gap-2 border-b border-slate-900 pb-2">
+                  <Info className="w-4 h-4" />
+                  DRIVE-BY MOTION PHYSICS
+                </h3>
+                <ul className="space-y-4 text-xs leading-relaxed text-slate-400">
+                  <li className="flex items-start gap-2">
+                    <span className="text-blue-500 font-bold">1.</span>
+                    <span>Hold **Left Click** to fire your rifle spray. Viewport recoil rattle will shake your crosshair.</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-blue-500 font-bold">2.</span>
+                    <span>The vehicle is moving at **400 px/s**. Stationary dummies fly past. Drag mouse in opposite direction to track them.</span>
+                  </li>
+                  <li className="flex items-start gap-2 text-blue-300 animate-pulse">
+                    <span className="text-blue-500 font-bold">★</span>
+                    <span>Keep cursor locked on dummies to deplete their health. Clearing a dummy awards a **200pt bonus**.</span>
+                  </li>
+                </ul>
+              </div>
+              <div className="mt-6 pt-4 border-t border-slate-900 flex justify-between items-center text-[10px]">
+                <span className="text-slate-550 uppercase">Voice Guide:</span>
+                <button 
+                  onClick={() => setVoiceEnabled(!voiceEnabled)} 
+                  className={`px-3 py-1 rounded text-[10px] font-bold uppercase transition ${voiceEnabled ? 'bg-green-950 text-green-400 border border-green-500/30' : 'bg-slate-900 text-slate-550 border border-slate-800'}`}
+                >
+                  {voiceEnabled ? 'SPEAK_ON' : 'SPEAK_OFF'}
+                </button>
+              </div>
+            </div>
+
+            <div className="lg:col-span-2 bg-[#0c1224]/80 border border-slate-900 rounded-xl p-6 backdrop-blur-md flex flex-col justify-between">
+              <div>
+                <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2 border-b border-slate-900 pb-2">
+                  <Calculator className="w-4 h-4 text-blue-500" />
+                  CALIBRATE VEHICLE Aim SENSITIVITY
+                </h3>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                  <div>
+                    <label className="block text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-2">Game Profile</label>
+                    <select 
+                      value={gameType}
+                      onChange={(e) => setGameType(e.target.value)}
+                      className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-2 text-xs text-white focus:outline-none focus:border-red-500/50 font-mono"
+                    >
+                      <option value="valorant">Valorant</option>
+                      <option value="cs2">CS2 / Global Offensive</option>
+                      <option value="apex">Apex Legends</option>
+                      <option value="overwatch">Overwatch 2</option>
+                      <option value="siege">Rainbow Six Siege</option>
+                      <option value="fortnite">Fortnite</option>
+                      <option value="cod">Call of Duty / Warzone</option>
+                      <option value="pubg">PUBG</option>
+                      <option value="destiny2">Destiny 2</option>
+                      <option value="halo">Halo Infinite</option>
+                      <option value="battlefield">Battlefield 2042</option>
+                      <option value="tf2">Team Fortress 2</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-2">
+                      {gameType === 'pubg' ? 'PUBG General Sensitivity (0-100)' : 'Matched Game Sens'}
+                    </label>
+                    <input 
+                      type="number"
+                      step={gameType === 'pubg' ? '1' : '0.01'}
+                      value={inGameSens}
+                      onChange={(e) => setInGameSens(gameType === 'pubg' ? Math.max(1, Math.min(100, parseFloat(e.target.value) || 45)) : Math.max(0.001, parseFloat(e.target.value) || 0.1))}
+                      className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-2 text-xs text-white focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-2">Mouse DPI</label>
+                    <input 
+                      type="number"
+                      step="50"
+                      value={dpi}
+                      onChange={(e) => setDpi(Math.max(100, parseInt(e.target.value, 10) || 800))}
+                      className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-2 text-xs text-white focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="p-4 bg-slate-950/80 rounded border border-slate-900 flex justify-between items-center text-xs">
+                  <div>
+                    <span className="text-[10px] text-slate-550 block uppercase">360° Physical Distance</span>
+                    <span className="text-white font-bold text-sm">{cmPer360} cm / 360°</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-[10px] text-slate-550 block uppercase">Vehicle Translation Velocity</span>
+                    <span className="text-blue-400 font-bold">400 px/s (Constant)</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="
+========================================
+=== pubg-lead-drop\PUBGLeadDropClient.js ===
+<h3 className="text-sm font-bold text-blue-500 mb-4 flex items-center gap-2 border-b border-slate-900 pb-2">
+                  <Info className="w-4 h-4" />
+                  BULLET PHYSICS DETAILS
+                </h3>
+                <ul className="space-y-4 text-xs leading-relaxed text-slate-400">
+                  <li className="flex items-start gap-2">
+                    <span className="text-blue-500 font-bold">1.</span>
+                    <span>Projectiles take **travel latency** (depth distance / velocity) to land in the target's plane.</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-blue-500 font-bold">2.</span>
+                    <span>Aim **ahead** of running targets to lead them correctly, and **above** to offset gravity drop.</span>
+                  </li>
+                  <li className="flex items-start gap-2 text-blue-300 animate-pulse">
+                    <span className="text-blue-500 font-bold">★</span>
+                    <span>Bolt action takes **1.2 seconds** to reload. Wait for the reload ring to sweep fully.</span>
+                  </li>
+                </ul>
+              </div>
+              <div className="mt-6 pt-4 border-t border-slate-900 flex justify-between items-center text-[10px]">
+                <span className="text-slate-550 uppercase">Voice Guide:</span>
+                <button 
+                  onClick={() => setVoiceEnabled(!voiceEnabled)} 
+                  className={`px-3 py-1 rounded text-[10px] font-bold uppercase transition ${voiceEnabled ? 'bg-green-950 text-green-400 border border-green-500/30' : 'bg-slate-900 text-slate-550 border border-slate-800'}`}
+                >
+                  {voiceEnabled ? 'SPEAK_ON' : 'SPEAK_OFF'}
+                </button>
+              </div>
+            </div>
+
+            <div className="lg:col-span-2 bg-[#0c1224]/80 border border-slate-900 rounded-xl p-6 backdrop-blur-md flex flex-col justify-between">
+              <div>
+                <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2 border-b border-slate-900 pb-2">
+                  <Calculator className="w-4 h-4 text-blue-500" />
+                  CALIBRATE LONG-RANGE SENSITIVITY
+                </h3>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                  <div>
+                    <label className="block text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-2">Game Profile</label>
+                    <select 
+                      value={gameType}
+                      onChange={(e) => setGameType(e.target.value)}
+                      className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-2 text-xs text-white focus:outline-none focus:border-red-500/50 font-mono"
+                    >
+                      <option value="valorant">Valorant</option>
+                      <option value="cs2">CS2 / Global Offensive</option>
+                      <option value="apex">Apex Legends</option>
+                      <option value="overwatch">Overwatch 2</option>
+                      <option value="siege">Rainbow Six Siege</option>
+                      <option value="fortnite">Fortnite</option>
+                      <option value="cod">Call of Duty / Warzone</option>
+                      <option value="pubg">PUBG</option>
+                      <option value="destiny2">Destiny 2</option>
+                      <option value="halo">Halo Infinite</option>
+                      <option value="battlefield">Battlefield 2042</option>
+                      <option value="tf2">Team Fortress 2</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-2">
+                      {gameType === 'pubg' ? 'PUBG General Sensitivity (0-100)' : 'Matched Game Sens'}
+                    </label>
+                    <input 
+                      type="number"
+                      step={gameType === 'pubg' ? '1' : '0.01'}
+                      value={inGameSens}
+                      onChange={(e) => setInGameSens(gameType === 'pubg' ? Math.max(1, Math.min(100, parseFloat(e.target.value) || 45)) : Math.max(0.001, parseFloat(e.target.value) || 0.1))}
+                      className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-2 text-xs text-white focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-2">Mouse DPI</label>
+                    <input 
+                      type="number"
+                      step="50"
+                      value={dpi}
+                      onChange={(e) => setDpi(Math.max(100, parseInt(e.target.value, 10) || 800))}
+                      className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-2 text-xs text-white focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="p-4 bg-slate-950/80 rounded border border-slate-900 flex justify-between items-center text-xs">
+                  <div>
+                    <span className="text-[10px] text-slate-550 block uppercase">360° Physical Distance</span>
+                    <span className="text-white font-bold text-sm">{cmPer360} cm / 360°</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-[10px] text-slate-550 block uppercase">Bullet Muzzle Velocity</span>
+                    <span className="text-blue-400 font-bold">1000 px/s (Depth-wise)</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="
+========================================
+=== reactive-sphere-tracking\ReactiveSphereTrackingClient.js ===
+H3 found but no mt-8 flex found
+=== recoil-control\RecoilControlClient.js ===
+<h3 className="text-sm font-bold text-red-400 mb-4 flex items-center gap-2 border-b border-slate-900 pb-2">
+                  <Info className="w-4 h-4" />
+                  DRILL PROTOCOLS
+                </h3>
+                <ul className="space-y-4 text-xs leading-relaxed text-slate-400">
+                  <li className="flex items-start gap-2">
+                    <span className="text-red-500 font-bold">1.</span>
+                    <span>Hold down left-click to begin firing. The automatic spray recoil will push your crosshair away.</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-red-500 font-bold">2.</span>
+                    <span>Counter-steer the climb! Drag your mouse in the exact opposite direction to keep bullets landing on target.</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-red-500 font-bold">3.</span>
+                    <span>Practice spray transfers. Headshots (dinks) kill targets instantly. Chest / body hits require multiple bullets.</span>
+                  </li>
+                  <li className="flex items-start gap-2 text-green-400">
+                    <span className="text-green-400 font-bold">★</span>
+                    <span>Tapping is fine, but this laboratory is designed to train full 30-round automatic spray adjustments.</span>
+                  </li>
+                </ul>
+              </div>
+              
+              <div className="mt-6 pt-4 border-t border-slate-900 text-[10px] text-slate-500 leading-normal">
+                Features detailed weapon physics configurations. Recoil snapshot plots generated after drill termination.
+              </div>
+            </div>
+
+            {/* Right Form Configuration */}
+            <div className="lg:col-span-2 bg-[#0c1224]/80 border border-slate-900 rounded-xl p-6 backdrop-blur-md flex flex-col justify-between">
+              <div>
+                <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2 border-b border-slate-900 pb-2">
+                  <Cpu className="w-4 h-4 text-red-400" />
+                  WEAPON CHAMBER & CONFIGS
+                </h3>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                  <div>
+                    <label className="block text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-2">Weapon Pattern Profile</label>
+                    <select 
+                      value={selectedWeapon}
+                      onChange={(e) => setSelectedWeapon(e.target.value)}
+                      className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-2 text-xs text-white focus:outline-none focus:border-red-500/50 font-mono"
+                    >
+                      <option value="ak47">AK-47 (CS2 S-Curve climb)</option>
+                      <option value="vandal">Vandal (Valorant T-Sweep climb)</option>
+                      <option value="m4a4">M4A4 (CS2 Tight vertical T)</option>
+                      <option value="phantom">Phantom (Valorant Tight Spray)</option>
+                      <option value="r99">R-99 SMG (Apex Fast Vertical)</option>
+                      <option value="soldier76">Soldier:76 Pulse Rifle (OW Style)</option>
+                      <option value="flatline">Flatline (Apex Staircase)</option>
+                      <option value="voltsmg">Volt SMG (Apex Diagonal)</option>
+                      <option value="m4a1s">M4A1-S (CS2 Tight Vertical)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-2">Sensitivity Game profile</label>
+                    <select 
+                      value={gameType}
+                      onChange={(e) => setGameType(e.target.value)}
+                      className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-2 text-xs text-white focus:outline-none focus:border-red-500/50 font-mono"
+                    >
+                      <option value="valorant">Valorant</option>
+                      <option value="cs2">CS2 / Global Offensive</option>
+                      <option value="apex">Apex Legends</option>
+                      <option value="overwatch">Overwatch 2</option>
+                      <option value="siege">Rainbow Six Siege</option>
+                      <option value="fortnite">Fortnite</option>
+                      <option value="cod">Call of Duty / Warzone</option>
+                      <option value="pubg">PUBG</option>
+                      <option value="destiny2">Destiny 2</option>
+                      <option value="halo">Halo Infinite</option>
+                      <option value="battlefield">Battlefield 2042</option>
+                      <option value="tf2">Team Fortress 2</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                  <div>
+                    <label className="block text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-2">Sensitivity Multiplier</label>
+                    <input 
+                      type="number"
+                      step="0.01"
+                      value={inGameSens}
+                      onChange={(e) => setInGameSens(Math.max(0.01, parseFloat(e.target.value) || 0.1))}
+                      className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-2 text-xs text-white focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-2">Hardware DPI</label>
+                    <input 
+                      type="number"
+                      step="100"
+                      value={dpi}
+                      onChange={(e) => setDpi(Math.max(100, parseInt(e.target.value, 10) || 800))}
+                      className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-2 text-xs text-white focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="p-4 bg-slate-950/80 rounded border border-slate-900 flex justify-between items-center text-xs">
+                  <div>
+                    <span className="text-[10px] text-slate-500 block uppercase">Matched 360 Distance</span>
+                    <span className="text-white font-bold text-sm">{cmPer360} cm</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-[10px] text-slate-500 block uppercase">Profile Magazine</span>
+                    <span className="text-red-400 font-bold">{WEAPON_PROFILES[selectedWeapon].magazine} Rounds</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="
+========================================
+=== sound-spatial-reflex\SoundSpatialReflexClient.js ===
+No CALIBRATE H3 found
+=== strafe-tracking\StrafeTrackingClient.js ===
+No CALIBRATE H3 found
+=== target-acquisition\TargetAcquisitionClient.js ===
+No CALIBRATE H3 found
+=== target-prioritization\TargetPrioritizationClient.js ===
+<h3 className="text-sm font-bold text-blue-400 mb-4 flex items-center gap-2 border-b border-slate-900 pb-2"><Info className="w-4 h-4" />DRILL LOGIC</h3>
+                <ul className="space-y-3 text-xs text-slate-400">
+                  <li className="flex items-start gap-2"><span className="text-red-500 font-bold">🔴 Critical:</span><span>+150 pts, small, decays 1s. Hit first!</span></li>
+                  <li className="flex items-start gap-2"><span className="text-blue-500 font-bold">🔵 Standard:</span><span>+50 pts, decays 2s.</span></li>
+                  <li className="flex items-start gap-2"><span className="text-yellow-500 font-bold">🟡 Decoy:</span><span>-100 pts, resets combo. Avoid!</span></li>
+                  <li className="flex items-start gap-2 text-blue-300"><span className="text-green-400 font-bold">★</span><span>Combo: x1, x2, x3 multiplier for streaks.</span></li>
+                </ul>
+              </div>
+
+              <div className="lg:col-span-2 bg-[#0c1224]/80 border border-slate-900 rounded-xl p-6 backdrop-blur-md flex flex-col justify-between">
+                <div>
+                  <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2 border-b border-slate-900 pb-2">CALIBRATE</h3>
+                  <div className="mb-6 p-4 bg-slate-950/45 rounded border border-slate-900">
+                    <div className="flex justify-between items-center mb-2">
+                      <label className="text-[10px] text-slate-400 font-bold uppercase">Sensitivity</label>
+                      <span className="text-blue-400 font-mono text-xs font-bold">{universalSens.toFixed(2)}x</span>
+                    </div>
+                    <input type="range" min="0.1" max="3.0" step="0.05" value={universalSens} onChange={(e) => setUniversalSens(parseFloat(e.target.value))} className="w-full h-1 bg-slate-800 rounded-lg accent-blue-500 cursor-pointer" />
+                  </div>
+                </div>
+                <div className="
+========================================
+=== vertical-air-pursuit\VerticalAirPursuitClient.js ===
+<h3 className="text-sm font-bold text-blue-400 mb-4 flex items-center gap-2 border-b border-slate-900 pb-2">
+                    <Info className="w-4 h-4" />
+                    AIR SPEED DYNAMICS
+                  </h3>
+                  <ul className="space-y-4 text-xs leading-relaxed text-slate-400">
+                    <li className="flex items-start gap-2">
+                      <span className="text-blue-400 font-bold">1.</span>
+                      <span>Target glides vertical sine paths. Random wind drafts drift it horizontally.</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-blue-400 font-bold">2.</span>
+                      <span>Hold left click while tracking to maximize scores. Recoil vibratory shake applies.</span>
+                    </li>
+                    <li className="flex items-start gap-2 text-blue-300">
+                      <span className="text-blue-400 font-bold">★</span>
+                      <span>**Interactive AI Voice Guide**: Voice coach reads out active cues during play and diagnostics at completion.</span>
+                    </li>
+                  </ul>
+                </div>
+                <div className="mt-6 pt-4 border-t border-slate-900 flex justify-between items-center text-[10px]">
+                  <span className="text-slate-550 uppercase">Voice Feedback:</span>
+                  <button 
+                    onClick={() => setVoiceEnabled(!voiceEnabled)} 
+                    className={`px-3 py-1 rounded text-[10px] font-bold uppercase transition ${voiceEnabled ? 'bg-green-950 text-green-400 border border-green-500/30' : 'bg-slate-900 text-slate-550 border border-slate-800'}`}
+                  >
+                    {voiceEnabled ? 'SPEAK_ON' : 'SPEAK_OFF'}
+                  </button>
+                </div>
+              </div>
+
+              <div className="lg:col-span-2 bg-[#0c1224]/80 border border-slate-900 rounded-xl p-6 backdrop-blur-md flex flex-col justify-between">
+                <div>
+                  <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2 border-b border-slate-900 pb-2">
+                    <Calculator className="w-4 h-4 text-blue-400" />
+                    CALIBRATE AIR SWEEPS
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                    <div>
+                      <label className="block text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-2">Esport Setup</label>
+                      <select 
+                      value={gameType}
+                      onChange={(e) => setGameType(e.target.value)}
+                      className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-2 text-xs text-white focus:outline-none focus:border-red-500/50 font-mono"
+                    >
+                      <option value="valorant">Valorant</option>
+                      <option value="cs2">CS2 / Global Offensive</option>
+                      <option value="apex">Apex Legends</option>
+                      <option value="overwatch">Overwatch 2</option>
+                      <option value="siege">Rainbow Six Siege</option>
+                      <option value="fortnite">Fortnite</option>
+                      <option value="cod">Call of Duty / Warzone</option>
+                      <option value="pubg">PUBG</option>
+                      <option value="destiny2">Destiny 2</option>
+                      <option value="halo">Halo Infinite</option>
+                      <option value="battlefield">Battlefield 2042</option>
+                      <option value="tf2">Team Fortress 2</option>
+                    </select>
+                    </div>
+                    <div>
+                      <label className="block text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-2">In-Game Sens</label>
+                      <input 
+                        type="number"
+                        step="0.01"
+                        value={inGameSens}
+                        onChange={(e) => setInGameSens(Math.max(0.001, parseFloat(e.target.value) || 0.1))}
+                        className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-2 text-xs text-white focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-2">Mouse DPI</label>
+                      <input 
+                        type="number"
+                        step="50"
+                        value={dpi}
+                        onChange={(e) => setDpi(Math.max(100, parseInt(e.target.value, 10) || 800))}
+                        className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-2 text-xs text-white focus:outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="p-4 bg-slate-950 rounded border border-slate-900 flex justify-between items-center text-xs">
+                    <div>
+                      <span className="text-[10px] text-slate-550 block uppercase">360 Sweep Distance</span>
+                      <span className="text-white font-bold">{cmPer360} cm / 360°</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[10px] text-slate-550 block uppercase">Air Pursuit Radius</span>
+                      <span className="text-blue-400 font-bold">{TRACK_RADIUS} px</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="
+========================================
+=== vertical-air-track\VerticalAirTrackClient.js ===
+No CALIBRATE H3 found

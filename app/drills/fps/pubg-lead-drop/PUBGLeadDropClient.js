@@ -932,7 +932,33 @@ export default function PUBGLeadDropClient() {
         )}
 
         {/* Start Game Screen */}
-        {gameState === 'start' && (
+        
+
+        {/* Playing Screen */}
+        <div className={isFullscreen ? "w-full h-full" : "block"}>
+          {gameState === 'playing' && (
+            <div className="flex justify-between items-center bg-slate-950/90 border border-slate-800 rounded-lg p-3 mb-3 text-[11px] uppercase tracking-wider font-mono">
+              <div className="flex gap-4">
+                <span>Score: <strong className="text-blue-400">{score}</strong></span>
+                <span>Time: <strong className="text-white">{timeLeft}s</strong></span>
+                <span>Lives: <strong className="text-red-500">{'♥'.repeat(Math.max(0, lives))}</strong></span>
+              </div>
+              <div className="flex gap-4">
+                <span>Combo: <strong className="text-yellow-500">{combo}</strong></span>
+                <span>Lead Error: <strong className="text-red-400">{leadError}px</strong></span>
+                <span>Drop Error: <strong className="text-blue-400">{dropError}px</strong></span>
+              </div>
+            </div>
+          )}
+
+          <div 
+            ref={containerRef} 
+            className={isFullscreen 
+              ? "w-full h-full bg-[#020306] relative overflow-hidden flex items-center justify-center cursor-none" 
+              : "w-full aspect-video min-h-[400px] lg:min-h-[500px] bg-[#020306] border border-slate-800 rounded-xl relative overflow-hidden flex items-center justify-center cursor-none"}
+          >
+            <canvas ref={canvasRef} onClick={handleCanvasClick} />
+            {gameState === 'start' && (
           <div className="absolute inset-0 bg-[#080d1a]/95 flex items-center justify-center p-6 z-30 overflow-y-auto">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-5xl">
             
@@ -1020,107 +1046,7 @@ export default function PUBGLeadDropClient() {
           </div>
           </div>
         )}
-
-        {/* Playing Screen */}
-        <div className={isFullscreen ? "w-full h-full" : "block"}>
-          {gameState === 'playing' && (
-            <div className="flex justify-between items-center bg-slate-950/90 border border-slate-800 rounded-lg p-3 mb-3 text-[11px] uppercase tracking-wider font-mono">
-              <div className="flex gap-4">
-                <span>Score: <strong className="text-blue-400">{score}</strong></span>
-                <span>Time: <strong className="text-white">{timeLeft}s</strong></span>
-                <span>Lives: <strong className="text-red-500">{'♥'.repeat(Math.max(0, lives))}</strong></span>
-              </div>
-              <div className="flex gap-4">
-                <span>Combo: <strong className="text-yellow-500">{combo}</strong></span>
-                <span>Lead Error: <strong className="text-red-400">{leadError}px</strong></span>
-                <span>Drop Error: <strong className="text-blue-400">{dropError}px</strong></span>
-              </div>
-            </div>
-          )}
-
-          <div 
-            ref={containerRef} 
-            className={isFullscreen 
-              ? "w-full h-full bg-[#020306] relative overflow-hidden flex items-center justify-center cursor-none" 
-              : "w-full aspect-video min-h-[400px] lg:min-h-[500px] bg-[#020306] border border-slate-800 rounded-xl relative overflow-hidden flex items-center justify-center cursor-none"}
-          >
-            <canvas ref={canvasRef} onClick={handleCanvasClick} />
-            {showRotateWarning && (
-              <div className="absolute inset-0 z-50 bg-[#05070e]/95 flex flex-col items-center justify-center p-6 text-center select-none animate-fade-in">
-                <div className="animate-bounce mb-4 text-red-500">
-                  <svg className="w-12 h-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                  </svg>
-                </div>
-                <h3 className="text-sm font-bold text-white uppercase font-mono tracking-widest mb-1.5">{warningMessage}</h3>
-                <p className="text-xs text-slate-400 max-w-xs leading-relaxed mb-6 mx-auto">
-                  {warningMessage === "This drill cannot be played on mobile phones" 
-                    ? "This drill requires a physical mouse or keyboard and cannot be played on touchscreen devices." 
-                    : "Please use landscape orientation or fullscreen mode for the best training experience."}
-                </p>
-                <div className="flex justify-center">
-                  <Link href="/drills/fps">
-                    <button className="px-6 py-2.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-350 hover:text-white font-mono text-[10px] uppercase tracking-wider rounded-lg flex items-center gap-2 transition active:scale-95 shadow-lg font-bold">
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                      </svg>
-                      Go Back
-                    </button>
-                  </Link>
-                </div>
-              </div>
-            )}
-
-            {/* S+ Pro Coach Dynamic Audio Guidance HUD & Alerts (Visual Text Hidden) */}
-
-
-            {/* S+ Pro Coach Dynamic Audio Guidance HUD & Alerts (Visual Text Hidden) */}
-
-
-            {/* S+ Pro Coach Dynamic Audio Guidance HUD */}
-            {gameState === 'playing' && (
-              <div className="absolute bottom-4 left-4 z-20 pointer-events-none flex items-center gap-3 bg-slate-950/85 border border-slate-850 rounded-xl px-4 py-3 backdrop-blur-md max-w-xs sm:max-w-sm transition-all duration-300 shadow-xl">
-                <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${activeCoach?.avatarColor || 'from-cyan-600 to-blue-700'} flex items-center justify-center text-xl shrink-0 border border-white/10 shadow-md ${coachSpeaking ? 'ring-2 ring-red-500/50 scale-105 animate-pulse' : 'opacity-80'}`}>
-                  {activeCoach?.avatarText || '🤖'}
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-[9px] font-mono text-red-500 font-extrabold uppercase tracking-widest flex items-center gap-1">
-                    🟢 COACH {activeCoach?.name || 'ATHENA'} GUIDANCE
-                  </span>
-                  <p className="text-[10px] font-mono text-slate-350 leading-relaxed mt-0.5 max-w-[220px]">
-                    {coachSubtitle ? `"${coachSubtitle}"` : '"Awaiting sniper calibration..."'}
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {/* Feed Notifications overlay */}
-            <div className="absolute inset-0 pointer-events-none flex flex-col justify-center items-center gap-2 overflow-hidden select-none z-10">
-              {feedbacks.map((f) => (
-                <div 
-                  key={f.id} 
-                  className={`px-5 py-2.5 rounded border text-sm font-extrabold animate-bounce shadow-lg uppercase tracking-wider backdrop-blur-sm ${
-                    f.type === 'success' 
-                      ? 'bg-green-950/90 border-green-500/30 text-green-400' 
-                      : f.type === 'warn'
-                        ? 'bg-yellow-950/90 border-yellow-500/30 text-yellow-400'
-                        : 'bg-red-950/90 border-red-500/30 text-red-400'
-                  }`}
-                >
-                  {f.text}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="mt-4 text-center text-[10px] text-slate-550 flex items-center justify-center gap-4">
-            <span>🖱 Aim ahead & above moving targets. Trace lines show landing offset.</span>
-            <span>• Exit using <kbd className="px-1.5 py-0.5 bg-slate-900 border border-slate-800 text-slate-350 rounded font-sans text-[10px]">ESC</kbd>.</span>
-          </div>
-        </div>
-
-        {/* Game Over Screen */}
-        {gameState === 'gameOver' && (
+            {gameState === 'gameOver' && (
           <div className="absolute inset-0 bg-[#080d1a]/95 flex items-center justify-center p-6 z-30 overflow-y-auto">
             <div className="bg-[#0c1224]/85 border border-blue-500/20 rounded-xl p-8 backdrop-blur-md max-w-3xl mx-auto w-full shadow-2xl">
             <h2 className="text-xl font-bold text-blue-400 text-center mb-6 uppercase tracking-widest flex items-center justify-center gap-2 animate-pulse">
@@ -1275,6 +1201,82 @@ export default function PUBGLeadDropClient() {
           </div>
           </div>
         )}
+            {showRotateWarning && (
+              <div className="absolute inset-0 z-50 bg-[#05070e]/95 flex flex-col items-center justify-center p-6 text-center select-none animate-fade-in">
+                <div className="animate-bounce mb-4 text-red-500">
+                  <svg className="w-12 h-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <h3 className="text-sm font-bold text-white uppercase font-mono tracking-widest mb-1.5">{warningMessage}</h3>
+                <p className="text-xs text-slate-400 max-w-xs leading-relaxed mb-6 mx-auto">
+                  {warningMessage === "This drill cannot be played on mobile phones" 
+                    ? "This drill requires a physical mouse or keyboard and cannot be played on touchscreen devices." 
+                    : "Please use landscape orientation or fullscreen mode for the best training experience."}
+                </p>
+                <div className="flex justify-center">
+                  <Link href="/drills/fps">
+                    <button className="px-6 py-2.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-350 hover:text-white font-mono text-[10px] uppercase tracking-wider rounded-lg flex items-center gap-2 transition active:scale-95 shadow-lg font-bold">
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                      </svg>
+                      Go Back
+                    </button>
+                  </Link>
+                </div>
+              </div>
+            )}
+
+            {/* S+ Pro Coach Dynamic Audio Guidance HUD & Alerts (Visual Text Hidden) */}
+
+
+            {/* S+ Pro Coach Dynamic Audio Guidance HUD & Alerts (Visual Text Hidden) */}
+
+
+            {/* S+ Pro Coach Dynamic Audio Guidance HUD */}
+            {gameState === 'playing' && (
+              <div className="absolute bottom-4 left-4 z-20 pointer-events-none flex items-center gap-3 bg-slate-950/85 border border-slate-850 rounded-xl px-4 py-3 backdrop-blur-md max-w-xs sm:max-w-sm transition-all duration-300 shadow-xl">
+                <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${activeCoach?.avatarColor || 'from-cyan-600 to-blue-700'} flex items-center justify-center text-xl shrink-0 border border-white/10 shadow-md ${coachSpeaking ? 'ring-2 ring-red-500/50 scale-105 animate-pulse' : 'opacity-80'}`}>
+                  {activeCoach?.avatarText || '🤖'}
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[9px] font-mono text-red-500 font-extrabold uppercase tracking-widest flex items-center gap-1">
+                    🟢 COACH {activeCoach?.name || 'ATHENA'} GUIDANCE
+                  </span>
+                  <p className="text-[10px] font-mono text-slate-350 leading-relaxed mt-0.5 max-w-[220px]">
+                    {coachSubtitle ? `"${coachSubtitle}"` : '"Awaiting sniper calibration..."'}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Feed Notifications overlay */}
+            <div className="absolute inset-0 pointer-events-none flex flex-col justify-center items-center gap-2 overflow-hidden select-none z-10">
+              {feedbacks.map((f) => (
+                <div 
+                  key={f.id} 
+                  className={`px-5 py-2.5 rounded border text-sm font-extrabold animate-bounce shadow-lg uppercase tracking-wider backdrop-blur-sm ${
+                    f.type === 'success' 
+                      ? 'bg-green-950/90 border-green-500/30 text-green-400' 
+                      : f.type === 'warn'
+                        ? 'bg-yellow-950/90 border-yellow-500/30 text-yellow-400'
+                        : 'bg-red-950/90 border-red-500/30 text-red-400'
+                  }`}
+                >
+                  {f.text}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-4 text-center text-[10px] text-slate-550 flex items-center justify-center gap-4">
+            <span>🖱 Aim ahead & above moving targets. Trace lines show landing offset.</span>
+            <span>• Exit using <kbd className="px-1.5 py-0.5 bg-slate-900 border border-slate-800 text-slate-350 rounded font-sans text-[10px]">ESC</kbd>.</span>
+          </div>
+        </div>
+
+        {/* Game Over Screen */}
+        
         {/* DRILL RULES & PRO FEATURES */}
         {!isFullscreen && (
           <footer className="mt-8">

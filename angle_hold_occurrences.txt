@@ -1,0 +1,65 @@
+Line 46: const [pointerLocked, setPointerLocked] = useState(false);
+  43: const [score, setScore] = useState(0);
+  44: const [bestScore, setBestScore] = useState(0);
+  45: const [timeLeft, setTimeLeft] = useState(DRILL_DURATION);
+  46: const [pointerLocked, setPointerLocked] = useState(false);
+  47: const [gameType, setGameType] = useState('valorant'); // valorant, cs2, apex, overwatch, fortnite
+  48: const [dpi, setDpi] = useState(800);
+  49: const [inGameSens, setInGameSens] = useState(0.35);
+  50: const [cmPer360, setCmPer360] = useState(0);
+  51: 
+  52: const sensitivityMultiplierRef = useRef(1);
+  53: const virtualCrosshair = useRef({ x: 0, y: 0 });
+---------------
+Line 800: const crosshairColor = pointerLocked ? '#00ff88' : '#ffbb00';
+  797: 
+  798: // 3. DRAW DYNAMIC RETICLE
+  799: const ch = virtualCrosshair.current;
+  800: const crosshairColor = pointerLocked ? '#00ff88' : '#ffbb00';
+  801: 
+  802: ctx.strokeStyle = crosshairColor;
+  803: ctx.lineWidth = 2;
+  804: ctx.beginPath();
+  805: 
+  806: const gap = 4;
+  807: const len = 10;
+---------------
+Line 829: if (!pointerLocked) {
+  826: ctx.fill();
+  827: 
+  828: // Cursor warning notification inside canvas when unlocked
+  829: if (!pointerLocked) {
+  830: ctx.fillStyle = 'rgba(8, 13, 26, 0.8)';
+  831: ctx.fillRect(cvs.width / 2 - 180, cvs.height / 2 - 25, 360, 50);
+  832: ctx.strokeStyle = '#ef4444';
+  833: ctx.lineWidth = 1.5;
+  834: ctx.strokeRect(cvs.width / 2 - 180, cvs.height / 2 - 25, 360, 50);
+  835: 
+  836: ctx.fillStyle = '#ffffff';
+---------------
+Line 850: }, [gameState, pointerLocked, triggerNewPeek]);
+  847: cancelAnimationFrame(animationRef.current);
+  848: window.removeEventListener('resize', updateSize);
+  849: };
+  850: }, [gameState, pointerLocked, triggerNewPeek]);
+  851: 
+  852: const avgReactionTime = analytics.avgReactionTime || 0;
+  853: 
+  854: return (
+  855: <div ref={pageRef} className="min-h-screen select-none font-mono bg-[#080d1a] text-slate-100 relative overflow-hidden">
+  856: 
+  857: {/* Visual cyber grids */}
+---------------
+Line 888: {pointerLocked ? '🟢 RAW INPUT CAPTURING' : '🔴 CLICK CANVAS TO CAPTURE'} • {cmPer360} cm/360 • COVERS SWING DYNAMICS
+  885: Angle Hold & Peek Trainer
+  886: </h1>
+  887: <p className="text-xs text-slate-400 tracking-wider mt-0.5">
+  888: {pointerLocked ? '🟢 RAW INPUT CAPTURING' : '🔴 CLICK CANVAS TO CAPTURE'} • {cmPer360} cm/360 • COVERS SWING DYNAMICS
+  889: </p>
+  890: </div>
+  891: </div>
+  892: 
+  893: <div className="flex flex-wrap gap-2">
+  894: <button
+  895: onClick={() => setSoundEnabled(!soundEnabled)}
+---------------

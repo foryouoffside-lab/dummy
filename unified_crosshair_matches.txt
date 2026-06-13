@@ -1,0 +1,81 @@
+=== 180-degree-awareness\AwarenessDrillClient.js ===
+NO pointerLocked check found
+========================================
+=== angle-hold-trainer\AngleHoldClient.js ===
+SUCCESS MATCH: // 3. DRAW DYNAMIC RETICLE const ch = virtualCrosshair.current; const crosshairColor = pointerLocked ? '#00ff88' : '#ffbb00';
+========================================
+=== counter-strafe-trainer\CounterStrafeClient.js ===
+PL found but NO crosshair block start found
+========================================
+=== deadzone-jiggle-snap\DeadzoneJiggleSnapClient.js ===
+SUCCESS MATCH: if (ch.x > 0 && ch.x < cvs.width && ch.y > 0 && ch.y < cvs.height) { // Spread radius visualization const spreadRadius = isDeadzone ?
+========================================
+=== evasive-slide-track\EvasiveSlideTrackClient.js ===
+SUCCESS MATCH: if (ch.x > 0 && ch.x < cvs.width && ch.y > 0 && ch.y < cvs.height) { ctx.strokeStyle = isTracking ? "#00ff88" : "#fbbf24"; ctx.lineWid
+========================================
+=== flick-shot-training\ProFlickClient.js ===
+NO pointerLocked check found
+========================================
+=== headshot-micro-adjust\HeadshotReflexClient.js ===
+SUCCESS MATCH: if (ch.x > 0 && ch.x < cvs.width && ch.y > 0 && ch.y < cvs.height) { ctx.strokeStyle = pointerLocked ? "#00ff88" : "#fbbf24"; ctx.line
+========================================
+=== high-speed-kinetic-trainer\KineticTrainerClient.js ===
+SUCCESS MATCH: if(crosshair.x > 0 && crosshair.x < cw && crosshair.y > 0 && crosshair.y < ch){ ctx.strokeStyle = pointerLocked ? '#00ff88' : '#ffbb00';
+========================================
+=== instant-response\InstantResponseClient.js ===
+NO pointerLocked check found
+========================================
+=== micro-flick-burst\MicroFlickBurstClient.js ===
+SUCCESS MATCH: if (ch.x > 0 && ch.x < cvs.width && ch.y > 0 && ch.y < cvs.height) { ctx.strokeStyle = pointerLocked ? "#00ff88" : "#ffaa00"; ctx.line
+========================================
+=== micro-flick-precision\MicroFlickPrecisionClient.js ===
+SUCCESS MATCH: if (ch.x > 0 && ch.x < cvs.width && ch.y > 0 && ch.y < cvs.height) { ctx.strokeStyle = pointerLocked ? "#00ff88" : "#ffaa00"; ctx.line
+========================================
+=== parabolic-air-track\ParabolicAirTrackClient.js ===
+SUCCESS MATCH: if (ch.x > 0 && ch.x < cvs.width && ch.y > 0 && ch.y < cvs.height) { const cc = pointerLocked ? "#00ff88" : "#ffaa00"; ctx.fillStyle =
+========================================
+=== pixel-hold-swing\PixelHoldSwingClient.js ===
+SUCCESS MATCH: if (ch.x > 0 && ch.x < cvs.width && ch.y > 0 && ch.y < cvs.height) { ctx.strokeStyle = "#00ff88"; ctx.lineWidth = 1.0; const g
+========================================
+=== prefire-corner-clearer\PrefireCornerClearerClient.js ===
+SUCCESS MATCH: if (chRef.x > 0 && chRef.x < cw && chRef.y > 0 && chRef.y < ch) { const speed = Math.abs(playerVelocityX.current); const moving = spee
+========================================
+=== pro-smooth-pursuit\ProSmoothPursuitClient.js ===
+NO pointerLocked check found
+========================================
+=== pro-tracking\ProTrackingClient.js ===
+NO pointerLocked check found
+========================================
+=== pubg-dmr-rhythm\PUBGDMRRhythmClient.js ===
+SUCCESS MATCH: // Draw crosshair center (green) ctx.strokeStyle = pointerLocked ? "#00ff88" : "#ffaa00"; ctx.lineWidth = 1.2; const gap = 4;
+========================================
+=== pubg-drive-by\PUBGDriveByClient.js ===
+NO pointerLocked check found
+========================================
+=== pubg-lead-drop\PUBGLeadDropClient.js ===
+SUCCESS MATCH: if (ch.x > 0 && ch.x < cvs.width && ch.y > 0 && ch.y < cvs.height) { ctx.strokeStyle = pointerLocked ? "#00ff88" : "#ffaa00"; ctx.line
+========================================
+=== reactive-sphere-tracking\ReactiveSphereTrackingClient.js ===
+SUCCESS MATCH: if (ch.x > 0 && ch.x < cvs.width && ch.y > 0 && ch.y < cvs.height) { const cc = pointerLocked ? "#00ff88" : "#ffaa00"; ctx.fillStyle =
+========================================
+=== recoil-control\RecoilControlClient.js ===
+PL found but NO crosshair block start found
+========================================
+=== sound-spatial-reflex\SoundSpatialReflexClient.js ===
+SUCCESS MATCH: // Draw stationary central crosshair (player view center) ctx.strokeStyle = pointerLocked ? '#00ff88' : '#ffbb00'; ctx.lineWidth = 2;
+========================================
+=== strafe-tracking\StrafeTrackingClient.js ===
+SUCCESS MATCH: // 4. DRAW RETICLE ctx.strokeStyle = isLocked ? '#00ff88' : '#ef4444'; ctx.lineWidth = 2; // Standard circular track crosshai
+========================================
+=== target-acquisition\TargetAcquisitionClient.js ===
+NO pointerLocked check found
+========================================
+=== target-prioritization\TargetPrioritizationClient.js ===
+SUCCESS MATCH: if (ch.x > 0 && ch.x < cvs.width && ch.y > 0 && ch.y < cvs.height) { const color = pointerLocked ? '#00ff88' : '#ffbb00'; ctx.strokeSt
+========================================
+=== vertical-air-pursuit\VerticalAirPursuitClient.js ===
+SUCCESS MATCH: if (ch.x > 0 && ch.x < cvs.width && ch.y > 0 && ch.y < cvs.height) { ctx.strokeStyle = isTracking ? "#00ff88" : "#fbbf24"; ctx.lineWid
+========================================
+=== vertical-air-track\VerticalAirTrackClient.js ===
+SUCCESS MATCH: if (crosshair.x > 0 && crosshair.x < cw && crosshair.y > 0 && crosshair.y < ch) { ctx.strokeStyle = pointerLocked ? '#00ff88' : '#ffbb00';
+========================================
