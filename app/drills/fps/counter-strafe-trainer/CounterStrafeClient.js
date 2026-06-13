@@ -23,20 +23,6 @@ const GAME_MULTIPLIERS = {
 };
 
 export default function CounterStrafeClient() {
-const GAME_YAWS = {
-  valorant: 0.07,
-  cs2: 0.022,
-  apex: 0.022,
-  overwatch: 0.0066,
-  siege: 0.0057,
-  fortnite: 0.01,
-  cod: 0.022,
-  pubg: 0.002222,
-  destiny2: 0.0066,
-  halo: 0.022,
-  battlefield: 0.022,
-  tf2: 0.022
-};
 
 
   const canvasRef = useRef(null);
@@ -45,6 +31,45 @@ const GAME_YAWS = {
   const pageRef = useRef(null);
   
   const [gameState, setGameState] = useState('start'); // start, playing, gameOver
+
+  // Pure 2D Universal Standard States
+  const [universalSens, setUniversalSens] = useState(1.0);
+
+  // Stubs to preserve telemetry and coaching dependencies
+  const gameType = 'universal';
+  const setGameType = () => {};
+  const dpi = 800;
+  const setDpi = () => {};
+  const inGameSens = universalSens;
+  const setInGameSens = setUniversalSens;
+  const cmPer360 = (30 / universalSens).toFixed(1);
+  const setCmPer360 = () => {};
+  const sensitivityMultiplierRef = { current: universalSens };
+
+  // Load saved settings
+  useEffect(() => {
+    try {
+      const savedSens = localStorage.getItem('universalSens');
+      if (savedSens) setUniversalSens(parseFloat(savedSens));
+    } catch (e) {}
+  }, []);
+
+  // Auto-save user preferences
+  useEffect(() => {
+    if (gameState === 'playing') return;
+    try {
+      localStorage.setItem('universalSens', universalSens.toString());
+    } catch (e) {}
+  }, [universalSens, gameState]);
+
+  // Pointer Lock Safety Cleanup
+  useEffect(() => {
+    return () => {
+      if (typeof document !== 'undefined' && document.pointerLockElement) {
+        document.exitPointerLock();
+      }
+    };
+  }, []);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [soundEnabled, setSoundEnabled] = useState(true);
@@ -52,13 +77,8 @@ const GAME_YAWS = {
   const [bestScore, setBestScore] = useState(0);
   const [timeLeft, setTimeLeft] = useState(DRILL_DURATION);
   const [pointerLocked, setPointerLocked] = useState(false);
-  const [dpi, setDpi] = useState(800);
-  const [inGameSens, setInGameSens] = useState(0.35);
-  const [gameType, setGameType] = useState('valorant');
-  const [cmPer360, setCmPer360] = useState(0);
-  
-  const sensitivityMultiplierRef = useRef(1);
-  const virtualCrosshair = useRef({ x: 0, y: 0 });
+          
+    const virtualCrosshair = useRef({ x: 0, y: 0 });
   const canvasSizeRef = useRef({ width: 800, height: 450 });
   const activeKeys = useRef({ a: false, d: false });
   
@@ -138,17 +158,7 @@ const GAME_YAWS = {
 
 
   // Auto-save user calibration preferences
-  useEffect(() => {
-    if (gameState === 'playing') return;
-    try {
-      localStorage.setItem('proSens', inGameSens.toString());
-      localStorage.setItem('proDpi', dpi.toString());
-      localStorage.setItem('proGame', gameType);
-      if (gameType === 'pubg') {
-        localStorage.setItem('pubgSens', inGameSens.toString());
-      }
-    } catch (e) {}
-  }, [inGameSens, dpi, gameType, gameState]);
+  
 
 
   // S+ AI Coach Performance Tracking & Sensitivity Auto-Adjustment States
@@ -160,17 +170,7 @@ const GAME_YAWS = {
 
 
   // Auto-save user calibration preferences
-  useEffect(() => {
-    if (gameState === 'playing') return;
-    try {
-      localStorage.setItem('proSens', inGameSens.toString());
-      localStorage.setItem('proDpi', dpi.toString());
-      localStorage.setItem('proGame', gameType);
-      if (gameType === 'pubg') {
-        localStorage.setItem('pubgSens', inGameSens.toString());
-      }
-    } catch (e) {}
-  }, [inGameSens, dpi, gameType, gameState]);
+  
 
   
   // Detailed analytics
@@ -214,36 +214,11 @@ const GAME_YAWS = {
         const parsed = parseInt(savedScore, 10);
         if (!isNaN(parsed)) setBestScore(parsed);
       }
-      const savedDpi = localStorage.getItem('proDpi');
-      if (savedDpi) setDpi(parseInt(savedDpi, 10));
-      const savedGameLocal = localStorage.getItem('proGame') || 'valorant';
-      const savedSens = localStorage.getItem(savedGameLocal === 'pubg' ? 'pubgSens' : 'proSens');
-      if (savedSens) setInGameSens(parseFloat(savedSens));
-      const savedGame = localStorage.getItem('proGame');
-      if (savedGame) {
-        setGameType(savedGame);
-      }
-    } catch (e) {}
+            } catch (e) {}
   }, []);
 
   // Compute sensitivity and cm/360
-  useEffect(() => {
-    const multiplier = GAME_MULTIPLIERS[gameType] || 0.07;
-    const counts = 360 / (multiplier * inGameSens);
-    const inches = counts / dpi;
-    const cm = inches * 2.54;
-    setCmPer360(cm.toFixed(1));
-    
-    // Scale factor to translate physical mouse movements into pixels
-    // Let's calibrate 34.6cm/360 (Valorant 800 DPI 0.47) to standard sensitivity.
-    sensitivityMultiplierRef.current = 45.0 / cm;
-    
-    try {
-      localStorage.setItem('proDpi', dpi.toString());
-      localStorage.setItem('proSens', inGameSens.toString());
-      localStorage.setItem('proGame', gameType);
-    } catch (e) {}
-  }, [dpi, inGameSens, gameType]);
+  
 
   // Audio effects
   const initAudio = useCallback(() => {
@@ -400,20 +375,14 @@ const GAME_YAWS = {
 
   // Mouse movement input
   useEffect(() => {
-    const handleMouseMove = (e) => {
-      if (document.pointerLockElement !== canvasRef.current) return;
-      
-      const sens = sensitivityMultiplierRef.current;
-      const dx = (e.movementX || 0) * sens;
-      const dy = (e.movementY || 0) * sens;
-      
-      virtualCrosshair.current.x += dx;
-      virtualCrosshair.current.y += dy;
-      
-      const cvs = canvasRef.current;
-      if (cvs) {
-        virtualCrosshair.current.x = Math.max(0, Math.min(cvs.width, virtualCrosshair.current.x));
-        virtualCrosshair.current.y = Math.max(0, Math.min(cvs.height, virtualCrosshair.current.y));
+    const handleMouseMove = (e) =>  {
+      if (document.pointerLockElement !== canvasRef.current && !document.pointerLockElement) return;
+      const dx = (e.movementX || 0) * universalSens;
+      const dy = (e.movementY || 0) * universalSens;
+      const c = canvasRef.current;
+      if (c) {
+        virtualCrosshair.current.x = Math.max(0, Math.min(c.width, virtualCrosshair.current.x + dx));
+        virtualCrosshair.current.y = Math.max(0, Math.min(c.height, virtualCrosshair.current.y + dy));
       }
     };
     
@@ -903,57 +872,34 @@ const GAME_YAWS = {
         }
       });
       
-      // 4. DRAW DYNAMIC ACCURACY RETICLE (CROSSHAIR)
-      const ch = virtualCrosshair.current;
-      const speed = Math.abs(velocityX.current);
-      const isMovingAccurate = speed <= speedLimitForAccuracy;
-      
-      // Crosshair color depending on movement accuracy status
-      const crosshairColor = pointerLocked 
-        ? (isMovingAccurate ? '#00ff88' : '#ef4444') 
-        : '#ffbb00';
-      
-      ctx.strokeStyle = crosshairColor;
-      ctx.lineWidth = 2;
-      
-      // Outer expansion ring representing movement error spread
-      const maxVisualError = 65;
-      const speedScale = Math.min(1.0, speed / maxSpeed);
-      const visualSpreadRadius = 8 + (speedScale * maxVisualError);
-      
-      ctx.beginPath();
-      ctx.arc(ch.x, ch.y, visualSpreadRadius, 0, Math.PI * 2);
-      ctx.strokeStyle = isMovingAccurate ? 'rgba(0, 255, 136, 0.25)' : 'rgba(239, 68, 68, 0.45)';
-      ctx.stroke();
-      
-      // Classic Crosshair inner lines
-      ctx.strokeStyle = crosshairColor;
-      ctx.beginPath();
-      
-      const gap = 5;
-      const length = 12;
-      
-      // Left
-      ctx.moveTo(ch.x - gap, ch.y);
-      ctx.lineTo(ch.x - gap - length, ch.y);
-      // Right
-      ctx.moveTo(ch.x + gap, ch.y);
-      ctx.lineTo(ch.x + gap + length, ch.y);
-      // Top
-      ctx.moveTo(ch.x, ch.y - gap);
-      ctx.lineTo(ch.x, ch.y - gap - length);
-      // Bottom
-      ctx.moveTo(ch.x, ch.y + gap);
-      ctx.lineTo(ch.x, ch.y + gap + length);
-      ctx.stroke();
-      
-      // Center dot
-      ctx.fillStyle = crosshairColor;
-      ctx.beginPath();
-      ctx.arc(ch.x, ch.y, 2, 0, Math.PI * 2);
-      ctx.fill();
+      // Sniper Scope Crosshair Reticle (Exact Pure 2D design)
+      {
+        const ch = virtualCrosshair.current;
+        if (ch && ch.x > 0 && ch.x < cvs.width && ch.y > 0 && ch.y < cvs.height) {
+          const activeColor = pointerLocked ? '#00ff88' : '#ffbb00';
+          ctx.strokeStyle = activeColor;
+          
+          // Outer Scope Ring
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(ch.x, ch.y, 20, 0, Math.PI * 2);
+          ctx.stroke();
 
-      // 5. DRAW TACTICAL COUNTER-STRAFE DEADZONE VELOCITY HUD BAR
+          // Inner Scope Crosshairs
+          ctx.beginPath();
+          ctx.lineWidth = 1.5;
+          const innerGap = 8;
+          ctx.moveTo(ch.x, ch.y - 20); ctx.lineTo(ch.x, ch.y - innerGap); // Top
+          ctx.moveTo(ch.x, ch.y + 20); ctx.lineTo(ch.x, ch.y + innerGap); // Bottom
+          ctx.moveTo(ch.x - 20, ch.y); ctx.lineTo(ch.x - innerGap, ch.y); // Left
+          ctx.moveTo(ch.x + 20, ch.y); ctx.lineTo(ch.x + innerGap, ch.y); // Right
+          ctx.stroke();
+          
+          // Center Dot
+          ctx.fillStyle = activeColor;
+          ctx.beginPath(); ctx.arc(ch.x, ch.y, 2, 0, Math.PI * 2); ctx.fill();
+        }
+      }      // 5. DRAW TACTICAL COUNTER-STRAFE DEADZONE VELOCITY HUD BAR
       if (pointerLocked) {
         const barWidth = 120;
         const barHeight = 4;
@@ -1001,18 +947,7 @@ const GAME_YAWS = {
       }
       
       // Visual instructions / lock notification inside screen
-      if (!pointerLocked) {
-        ctx.fillStyle = 'rgba(8, 13, 26, 0.8)';
-        ctx.fillRect(cvs.width / 2 - 170, cvs.height / 2 - 25, 340, 50);
-        ctx.strokeStyle = '#ef4444';
-        ctx.lineWidth = 1;
-        ctx.strokeRect(cvs.width / 2 - 170, cvs.height / 2 - 25, 340, 50);
-        
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 12px monospace';
-        ctx.textAlign = 'center';
-        ctx.fillText('CLICK CANV AS TO LOCK CURSOR & AIM', cvs.width / 2, cvs.height / 2 + 4);
-      }
+      
       
       animationRef.current = requestAnimationFrame(run);
     };
@@ -1146,48 +1081,17 @@ const GAME_YAWS = {
                   AIM ENGINE CALIBRATION
                 </h3>
                 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-                  <div>
-                    <label className="block text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-2">Game Profile</label>
-                    <select 
-                      value={gameType}
-                      onChange={(e) => setGameType(e.target.value)}
-                      className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-2 text-xs text-white focus:outline-none focus:border-red-500/50 font-mono"
-                    >
-                      <option value="valorant">Valorant</option>
-                      <option value="cs2">CS2 / Global Offensive</option>
-                      <option value="apex">Apex Legends</option>
-                      <option value="overwatch">Overwatch 2</option>
-                      <option value="siege">Rainbow Six Siege</option>
-                      <option value="fortnite">Fortnite</option>
-                      <option value="cod">Call of Duty / Warzone</option>
-                      <option value="pubg">PUBG</option>
-                      <option value="destiny2">Destiny 2</option>
-                      <option value="halo">Halo Infinite</option>
-                      <option value="battlefield">Battlefield 2042</option>
-                      <option value="tf2">Team Fortress 2</option>
-                    </select>
+                <div className="mb-6 p-4 bg-slate-950/45 rounded border border-slate-900">
+                  <div className="flex justify-between items-center mb-2">
+                    <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Universal Sens</label>
+                    <span className="text-green-400 font-mono text-xs font-bold">{universalSens.toFixed(2)}x</span>
                   </div>
-                  <div>
-                    <label className="block text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-2">In-Game Sens</label>
-                    <input 
-                      type="number"
-                      step="0.001"
-                      value={inGameSens}
-                      onChange={(e) => setInGameSens(Math.max(0.001, parseFloat(e.target.value) || 0.1))}
-                      className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-2 text-xs text-white focus:outline-none focus:border-red-500/50"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-2">Mouse DPI</label>
-                    <input 
-                      type="number"
-                      step="50"
-                      value={dpi}
-                      onChange={(e) => setDpi(Math.max(100, parseInt(e.target.value, 10) || 800))}
-                      className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-2 text-xs text-white focus:outline-none focus:border-red-500/50"
-                    />
-                  </div>
+                  <input 
+                    type="range" min="0.1" max="3.0" step="0.05" 
+                    value={universalSens} 
+                    onChange={(e) => setUniversalSens(parseFloat(e.target.value))} 
+                    className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-green-500" 
+                  />
                 </div>
 
                 <div className="p-4 bg-slate-950/80 rounded border border-slate-900 flex justify-between items-center text-xs">
@@ -1235,8 +1139,8 @@ const GAME_YAWS = {
             <div 
               ref={containerRef} 
               className={isFullscreen 
-                ? "w-full h-full bg-slate-950 relative overflow-hidden flex items-center justify-center" 
-                : "w-full aspect-video min-h-[400px] lg:min-h-[500px] bg-slate-950 border border-slate-800 rounded-xl relative overflow-hidden flex items-center justify-center"}
+                ? "w-full h-full bg-slate-950 relative overflow-hidden flex items-center justify-center cursor-none" 
+                : "w-full aspect-video min-h-[400px] lg:min-h-[500px] bg-slate-950 border border-slate-800 rounded-xl relative overflow-hidden flex items-center justify-center cursor-none"}
             >
               <canvas ref={canvasRef} onClick={handleCanvasClick} />
 
