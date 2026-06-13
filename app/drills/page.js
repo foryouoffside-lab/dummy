@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Target, ArrowRight, Sparkles, Gamepad2, Brain, Eye, BookOpen, Timer, Hand, Dumbbell, Heart, Database, ChevronRight, Lock } from 'lucide-react';
+import { Target, ArrowRight, Sparkles, Gamepad2, Brain, Eye, BookOpen, Timer, Hand, Dumbbell, Heart, Database, ChevronRight } from 'lucide-react';
 
 export const metadata = {
   title: 'All Training Drills - 90+ Free Exercises | SkillDrills',
@@ -38,15 +38,15 @@ export const metadata = {
 
 
 const drillCategories = [
-  { name: 'FPS Gaming', color: 'from-red-500 to-orange-600', icon: Gamepad2, description: 'Reaction speed, aim training, flick shots, tracking and peripheral vision for competitive FPS gamers', slug: 'fps', drills: '22 drills', keywords: 'aim trainer, flick shots, Valorant, CS2, Overwatch', locked: true },
-  { name: 'Cognitive', color: 'from-purple-500 to-indigo-600', icon: Brain, description: 'Memory, attention, focus, problem-solving and processing speed brain training exercises', slug: 'cognitive', drills: '16 drills', keywords: 'brain training, memory games, attention exercises', locked: false },
-  { name: 'Visual', color: 'from-blue-500 to-cyan-600', icon: Eye, description: 'Reaction speed, tracking accuracy, peripheral vision, depth perception and visual recognition drills', slug: 'visual', drills: '13 drills', keywords: 'visual training, reaction time, eye tracking', locked: false },
-  { name: 'Academic', color: 'from-yellow-500 to-amber-600', icon: BookOpen, description: 'Math speed, reading comprehension, writing speed, typing tests and inference practice', slug: 'academic', drills: '12 drills', keywords: 'typing test, speed reading, math practice', locked: false },
-  { name: 'Productivity', color: 'from-emerald-500 to-teal-600', icon: Timer, description: 'Pomodoro timer, task management, focus sessions, deep work and habit tracking tools', slug: 'productivity', drills: '10 drills', keywords: 'pomodoro timer, focus tools, productivity apps', locked: false },
-  { name: 'Memory', color: 'from-violet-500 to-purple-600', icon: Database, description: 'Short-term, working, long-term, spatial and associative memory training with scientific methods', slug: 'memory', drills: '15 drills', keywords: 'memory training, working memory, n-back', locked: false },
-  { name: 'Motor Skills', color: 'from-green-500 to-emerald-600', icon: Hand, description: 'Hand-eye coordination, timing accuracy, precision control, finger sequencing and movement speed', slug: 'motor', drills: '12 drills', keywords: 'hand-eye coordination, motor skills, precision', locked: false },
-  { name: 'Physical', color: 'from-orange-500 to-red-600', icon: Dumbbell, description: 'Balance training, reflex training, coordination drills, fitness exercises and agility ladder', slug: 'physical', drills: '11 drills', keywords: 'balance training, reflex drills, fitness', locked: false },
-  { name: 'Mental Fitness', color: 'from-pink-500 to-rose-600', icon: Heart, description: 'Stress control, mindfulness, meditation, breathing exercises and biofeedback training', slug: 'mental-fitness', drills: '6 drills', keywords: 'breathing exercises, stress relief, meditation', locked: false },
+  { name: 'FPS Gaming', color: 'from-red-500 to-orange-600', icon: Gamepad2, description: 'Reaction speed, aim training, flick shots, tracking and peripheral vision for competitive FPS gamers', slug: 'fps', drills: '22 drills', keywords: 'aim trainer, flick shots, Valorant, CS2, Overwatch' },
+  { name: 'Cognitive', color: 'from-purple-500 to-indigo-600', icon: Brain, description: 'Memory, attention, focus, problem-solving and processing speed brain training exercises', slug: 'cognitive', drills: '16 drills', keywords: 'brain training, memory games, attention exercises' },
+  { name: 'Visual', color: 'from-blue-500 to-cyan-600', icon: Eye, description: 'Reaction speed, tracking accuracy, peripheral vision, depth perception and visual recognition drills', slug: 'visual', drills: '13 drills', keywords: 'visual training, reaction time, eye tracking' },
+  { name: 'Academic', color: 'from-yellow-500 to-amber-600', icon: BookOpen, description: 'Math speed, reading comprehension, writing speed, typing tests and inference practice', slug: 'academic', drills: '12 drills', keywords: 'typing test, speed reading, math practice' },
+  { name: 'Productivity', color: 'from-emerald-500 to-teal-600', icon: Timer, description: 'Pomodoro timer, task management, focus sessions, deep work and habit tracking tools', slug: 'productivity', drills: '10 drills', keywords: 'pomodoro timer, focus tools, productivity apps' },
+  { name: 'Memory', color: 'from-violet-500 to-purple-600', icon: Database, description: 'Short-term, working, long-term, spatial and associative memory training with scientific methods', slug: 'memory', drills: '15 drills', keywords: 'memory training, working memory, n-back' },
+  { name: 'Motor Skills', color: 'from-green-500 to-emerald-600', icon: Hand, description: 'Hand-eye coordination, timing accuracy, precision control, finger sequencing and movement speed', slug: 'motor', drills: '12 drills', keywords: 'hand-eye coordination, motor skills, precision' },
+  { name: 'Physical', color: 'from-orange-500 to-red-600', icon: Dumbbell, description: 'Balance training, reflex training, coordination drills, fitness exercises and agility ladder', slug: 'physical', drills: '11 drills', keywords: 'balance training, reflex drills, fitness' },
+  { name: 'Mental Fitness', color: 'from-pink-500 to-rose-600', icon: Heart, description: 'Stress control, mindfulness, meditation, breathing exercises and biofeedback training', slug: 'mental-fitness', drills: '6 drills', keywords: 'breathing exercises, stress relief, meditation' },
 ];
 
 export default function DrillsPage() {
@@ -87,9 +87,7 @@ export default function DrillsPage() {
               </span>
             </Link>
             <nav aria-label="Main navigation" className="hidden sm:flex items-center gap-6">
-              <span className="text-sm text-gray-500 hover:text-gray-400 transition-colors font-medium flex items-center gap-1 cursor-not-allowed">
-                <Lock className="w-3 h-3" /> FPS
-              </span>
+              <Link href="/drills/fps" className="text-sm text-gray-400 hover:text-white transition-colors font-medium">FPS</Link>
               <Link href="/drills/cognitive" className="text-sm text-gray-400 hover:text-white transition-colors font-medium">Cognitive</Link>
               <Link href="/drills/memory" className="text-sm text-gray-400 hover:text-white transition-colors font-medium">Memory</Link>
               <Link href="/drills/academic" className="text-sm text-gray-400 hover:text-white transition-colors font-medium">Academic</Link>
@@ -133,36 +131,9 @@ export default function DrillsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
           {drillCategories.map((category) => {
             const Icon = category.icon;
-            const isLocked = category.locked;
-
-            if (isLocked) {
-              return (
-                <div key={category.slug} className="group relative overflow-hidden bg-[#0E111A]/60 rounded-2xl border border-white/5 p-6 opacity-60 cursor-not-allowed">
-                  <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent pointer-events-none" />
-                  <div className="absolute top-3 right-3 bg-yellow-500/20 border border-yellow-500/30 rounded-lg px-2 py-1 flex items-center gap-1 z-10">
-                    <Lock className="w-3 h-3 text-yellow-400" />
-                    <span className="text-[10px] font-bold text-yellow-400 uppercase">Locked</span>
-                  </div>
-                  <div className="relative z-10">
-                    <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center mb-5">
-                      <Icon className="w-6 h-6 text-gray-500" aria-hidden="true" />
-                    </div>
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="text-lg font-bold text-gray-500 uppercase tracking-tight">{category.name}</h3>
-                      <span className="text-[10px] bg-white/5 border border-white/10 text-gray-500 rounded-full px-2.5 py-0.5 font-bold uppercase">{category.drills}</span>
-                    </div>
-                    <p className="text-gray-600 text-sm mb-4 leading-relaxed line-clamp-2">{category.description}</p>
-                    <p className="text-gray-700 text-xs mb-6 italic tracking-wide">{category.keywords}</p>
-                    <div className="flex items-center gap-1.5 text-gray-500 font-bold text-xs uppercase tracking-wider">
-                      <Lock className="w-3 h-3" />
-                      <span>Coming Soon</span>
-                    </div>
-                  </div>
-                </div>
-              );
-            }
-
+            // Define borders & glows depending on category
             const neonBorderHover = {
+              fps: 'hover:border-red-500/40 hover:shadow-[0_0_20px_rgba(239,68,68,0.1)]',
               cognitive: 'hover:border-purple-500/40 hover:shadow-[0_0_20px_rgba(168,85,247,0.1)]',
               visual: 'hover:border-blue-500/40 hover:shadow-[0_0_20px_rgba(59,130,246,0.1)]',
               academic: 'hover:border-green-500/40 hover:shadow-[0_0_20px_rgba(34,197,94,0.1)]',
@@ -198,38 +169,29 @@ export default function DrillsPage() {
         </div>
       </section>
 
-      {/* FPS BANNER - LOCKED */}
-      <section className="mx-4 sm:mx-6 lg:mx-8 rounded-3xl mb-8 overflow-hidden bg-[#0E111A]/60 border border-white/5 shadow-2xl relative opacity-70">
-        <div className="absolute top-0 left-0 bottom-0 w-[4px] bg-gray-600" />
-        <div className="absolute inset-0 bg-black/30 backdrop-blur-[2px] z-10 flex items-center justify-center">
-          <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-2xl px-6 sm:px-8 py-3 sm:py-4 flex items-center gap-3 backdrop-blur-sm">
-            <Lock className="w-6 h-6 sm:w-8 sm:h-8 text-yellow-400" />
-            <div>
-              <p className="text-yellow-400 font-bold text-base sm:text-lg uppercase tracking-wider">FPS Module Locked</p>
-              <p className="text-yellow-400/60 text-xs sm:text-sm">Under maintenance - Coming back stronger</p>
-            </div>
-          </div>
-        </div>
+      {/* FPS BANNER */}
+      <section className="mx-4 sm:mx-6 lg:mx-8 rounded-3xl mb-8 overflow-hidden bg-[#0E111A]/60 border border-white/5 shadow-2xl relative">
+        <div className="absolute top-0 left-0 bottom-0 w-[4px] bg-red-500" />
         <div className="max-w-7xl mx-auto px-8 py-10 sm:py-12">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
             <div className="flex-1 text-center lg:text-left space-y-4">
-              <div className="inline-flex items-center gap-2 bg-gray-500/10 border border-gray-500/20 rounded-full px-3 py-1">
-                <Gamepad2 className="w-4 h-4 text-gray-400" />
-                <span className="text-xs text-gray-400 font-bold uppercase tracking-wider">Tactical Hub</span>
+              <div className="inline-flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-full px-3 py-1">
+                <Gamepad2 className="w-4 h-4 text-red-400" />
+                <span className="text-xs text-red-300 font-bold uppercase tracking-wider">Tactical Hub</span>
               </div>
-              <h2 className="text-2xl sm:text-3xl font-black text-gray-500 uppercase tracking-tight">FPS Aim & Reflex Sector</h2>
-              <p className="text-gray-600 max-w-lg leading-relaxed">Train reaction speed, flick shots, tracking stability, and wide-angle awareness. Optimized for Valorant, CS2, Overwatch 2, and Apex Legends.</p>
-              <button disabled className="inline-flex items-center gap-2 bg-gray-700 text-gray-400 px-6 py-3 rounded-xl font-bold cursor-not-allowed">
-                <Lock className="w-4 h-4" /> Coming Soon
-              </button>
+              <h2 className="text-2xl sm:text-3xl font-black text-white uppercase tracking-tight">FPS Aim & Reflex Sector</h2>
+              <p className="text-gray-400 max-w-lg leading-relaxed">Train reaction speed, flick shots, tracking stability, and wide-angle awareness. Optimized for Valorant, CS2, Overwatch 2, and Apex Legends.</p>
+              <Link href="/drills/fps" className="inline-flex items-center gap-2 bg-gradient-to-r from-red-600 to-orange-600 text-white px-6 py-3 rounded-xl font-bold hover:shadow-lg hover:shadow-red-500/20 transition">
+                Load FPS Modules <ArrowRight className="w-4 h-4" />
+              </Link>
             </div>
             <div className="flex-1 w-full max-w-md">
               <div className="bg-black/40 rounded-2xl p-6 border border-white/5">
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center"><p className="text-3xl font-black text-gray-500">22</p><p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest mt-1">FPS Drills</p></div>
-                  <div className="text-center"><p className="text-3xl font-black text-gray-500">1:1</p><p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest mt-1">Mouse Raw Input</p></div>
-                  <div className="text-center"><p className="text-3xl font-black text-gray-500">360Hz</p><p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest mt-1">Hz Optimized</p></div>
-                  <div className="text-center"><p className="text-3xl font-black text-gray-500">SOON</p><p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest mt-1">Under Maintenance</p></div>
+                  <div className="text-center"><p className="text-3xl font-black text-white">22</p><p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">FPS Drills</p></div>
+                  <div className="text-center"><p className="text-3xl font-black text-white">1:1</p><p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">Mouse Raw Input</p></div>
+                  <div className="text-center"><p className="text-3xl font-black text-white">360Hz</p><p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">Hz Optimized</p></div>
+                  <div className="text-center"><p className="text-3xl font-black text-white">FREE</p><p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">No Sign-Up</p></div>
                 </div>
               </div>
             </div>
@@ -484,9 +446,9 @@ export default function DrillsPage() {
           <h2 className="text-3xl sm:text-4xl font-black text-white uppercase tracking-tight">Initialize Routine</h2>
           <p className="text-gray-400 mb-8 max-w-2xl mx-auto text-base">90+ distinct performance diagnostic tasks. Completely free. Instantly loaded.</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button disabled className="inline-flex items-center justify-center gap-2 bg-gray-700 text-gray-400 px-8 py-3.5 rounded-xl font-bold cursor-not-allowed">
-              <Lock className="w-4 h-4" /> FPS Aim Sectors - Coming Soon
-            </button>
+            <Link href="/drills/fps" className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3.5 rounded-xl font-bold hover:shadow-lg hover:shadow-blue-500/20 transition transform hover:scale-105">
+              Launch FPS Aim Sectors <Gamepad2 className="w-5 h-5" />
+            </Link>
             <Link href="/" className="inline-flex items-center justify-center gap-2 bg-white/5 border border-white/10 text-white px-8 py-3.5 rounded-xl font-bold hover:bg-white/10 transition">
               Return Home <ArrowRight className="w-5 h-5" />
             </Link>
@@ -499,14 +461,12 @@ export default function DrillsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8 mb-12">
             <div>
-              <h3 className="text-white font-bold tracking-wider mb-4 text-xs uppercase flex items-center gap-2">
-                FPS Training <Lock className="w-3 h-3 text-yellow-400" />
-              </h3>
-              <ul className="space-y-2.5 text-sm text-gray-600">
-                <li><span className="cursor-not-allowed">Flick Shot Trainer</span></li>
-                <li><span className="cursor-not-allowed">Headshot Trainer</span></li>
-                <li><span className="cursor-not-allowed">Reactive Tracking</span></li>
-                <li><span className="text-gray-500 font-semibold cursor-not-allowed">Coming Soon</span></li>
+              <h3 className="text-white font-bold tracking-wider mb-4 text-xs uppercase">FPS Training</h3>
+              <ul className="space-y-2.5 text-sm text-gray-400">
+                <li><Link href="/drills/fps/flick-shot-training" className="hover:text-white transition-colors">Flick Shot Trainer</Link></li>
+                <li><Link href="/drills/fps/headshot-trainer" className="hover:text-white transition-colors">Headshot Trainer</Link></li>
+                <li><Link href="/drills/fps/reactive-tracking" className="hover:text-white transition-colors">Reactive Tracking</Link></li>
+                <li><Link href="/drills/fps" className="text-blue-400 hover:text-blue-300 transition-colors font-semibold">All 22 FPS Drills</Link></li>
               </ul>
             </div>
             <div>
