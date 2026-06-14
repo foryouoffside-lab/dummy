@@ -574,7 +574,7 @@ export default function SteadyHandClient() {
         )}
 
         {!isFullscreen && (
-          <div className="grid grid-cols-6 gap-3 mb-4 h-[88px]">
+          <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-3 mb-4 h-auto min-h-[88px] py-1">
             <StatCard icon={<Target className="text-blue-600" />} value={score} label="Score" d={isDarkMode} />
             <StatCard icon={<Trophy className="text-yellow-600" />} value={bestScore} label="Best" d={isDarkMode} />
             <StatCard icon={<Repeat className="text-green-600" />} value={laps} label="Laps" d={isDarkMode} />

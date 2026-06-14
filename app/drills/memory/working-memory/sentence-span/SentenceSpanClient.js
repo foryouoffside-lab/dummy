@@ -221,7 +221,7 @@ export default function SentenceSpanClient() {
           <p>Train your verbal working memory with this free sentence span drill. Read sentences 2 seconds each then recall key nouns. 30 unique sentences with auto advancing display. Level based scoring with 70 percent accuracy threshold to level up. No penalties for wrong answers correct nouns are shown for learning. 60 second timed challenge tracking level progression and accuracy. Perfect for cognitive training brain exercises and memory improvement. No registration required.</p>
         </section>
 
-        <div className="grid grid-cols-5 gap-3 mb-4 h-[88px]">
+        <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-3 mb-4 h-auto min-h-[88px] py-1">
           <StatCard icon={<Target className="text-blue-600" />} value={score} label="Score" isDark={isDarkMode} />
           <StatCard icon={<Trophy className="text-yellow-500" />} value={bestScore} label="Best" isDark={isDarkMode} />
           <StatCard icon={<Timer className={timeLeft <= 10 ? 'text-red-600' : 'text-green-600'} />} value={timeLeft} label="Time" unit="s" isDark={isDarkMode} />

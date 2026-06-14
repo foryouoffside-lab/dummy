@@ -180,7 +180,7 @@ export default function SpeedReaderClient() {
           <p>Train columnar reading with this free speed reading drill featuring 10 rotating text columns covering speed reading techniques neuroplasticity peripheral vision and cognitive science. Adjustable 100-800 WPM speed and 200-500px column width. 60 second timed challenge that trains peripheral vision reduces horizontal eye movements and improves reading stamina. Track effective WPM and words read. Perfect for competitive exam preparation and lifelong learners. No registration required.</p>
         </section>
 
-        <div className="grid grid-cols-7 gap-3 mb-4 h-[88px]">
+        <div className="grid grid-cols-4 sm:grid-cols-7 gap-2 sm:gap-3 mb-4 h-auto min-h-[88px] py-1">
           <StatCard icon={<Zap className="text-emerald-600" />} value={effectiveWPM} label="Effective WPM" isDark={isDarkMode} />
           <StatCard icon={<Trophy className="text-yellow-600" />} value={bestScore} label="Best WPM" isDark={isDarkMode} />
           <StatCard icon={<Timer className={timeLeft <= 10 ? 'text-red-600' : 'text-green-600'} />} value={timeLeft} label="Time" unit="s" isDark={isDarkMode} />

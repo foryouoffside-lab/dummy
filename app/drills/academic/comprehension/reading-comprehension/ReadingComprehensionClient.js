@@ -212,7 +212,7 @@ function ReadingComprehensionClient() {
           <p>Improve your reading speed and comprehension with this free RSVP Rapid Serial Visual Presentation drill. Words flash at a single focal point eliminating eye movement for faster reading. Fresh passages generated every session across 3 difficulty levels Beginner Intermediate and Advanced. Adjustable speed from 100 to 600 WPM. Each passage includes comprehension questions covering main ideas, specific details, vocabulary, and inference. Perfect for IELTS reading practice, TOEFL preparation, GRE verbal, GMAT, SAT, CAT, UPSC, and competitive exams. No registration required.</p>
         </section>
 
-        <div className="grid grid-cols-7 gap-3 mb-4 h-[88px]">
+        <div className="grid grid-cols-4 sm:grid-cols-7 gap-2 sm:gap-3 mb-4 h-auto min-h-[88px] py-1">
           <StatCard icon={<Target className="text-blue-600" />} value={score} label="Score" isDark={isDarkMode} />
           <StatCard icon={<Trophy className="text-yellow-600" />} value={bestScore} label="Best" isDark={isDarkMode} />
           <StatCard icon={<Gauge className="text-purple-600" />} value={wpm} label="WPM" isDark={isDarkMode} />

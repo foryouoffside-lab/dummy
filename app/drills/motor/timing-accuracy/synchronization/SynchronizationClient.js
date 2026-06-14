@@ -345,7 +345,7 @@ export default function SynchronizationClient() {
 
         <section className="sr-only"><h2>Free Synchronization Drill - Bar Alignment Timing Training for Motor Skills</h2><p>Bar convergence timing drill. Two bars move toward the center line at variable speeds 400-1200px/s. Click when they align perfectly. +1 point per hit within 50ms tolerance. 3-life protection system. 60-second challenge with streak tracking. Perfect for timing accuracy motor skills and visual synchronization training.</p></section>
 
-        <div className="grid grid-cols-7 gap-3 mb-4 h-[88px]">
+        <div className="grid grid-cols-4 sm:grid-cols-7 gap-2 sm:gap-3 mb-4 h-auto min-h-[88px] py-1">
           <StatCard icon={<Target className="text-blue-600" />} value={score} label="Score" isDark={isDarkMode} />
           <StatCard icon={<Trophy className="text-yellow-600" />} value={bestScore} label="Best" isDark={isDarkMode} />
           <StatCard icon={<Timer className={timeLeft <= 10 ? 'text-red-600' : 'text-green-600'} />} value={timeLeft} label="Time" unit="s" isDark={isDarkMode} />

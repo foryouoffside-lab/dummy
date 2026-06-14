@@ -182,7 +182,7 @@ export default function CodeTypingClient() {
           <p>Improve your coding speed and accuracy with this free code typing drill. Type real JavaScript Python and HTML code snippets with progressive difficulty and dynamic 15-45s timer per snippet. Features 70+ unique code snippets across 3 programming languages with character by character feedback. Track WPM accuracy combo streaks and best scores. Perfect for developers programmers coding bootcamp students and technical interview preparation. No registration required.</p>
         </section>
 
-        <div className="grid grid-cols-7 gap-3 mb-4 h-[88px]">
+        <div className="grid grid-cols-4 sm:grid-cols-7 gap-2 sm:gap-3 mb-4 h-auto min-h-[88px] py-1">
           <StatCard icon={<Target className="text-blue-600" />} value={score} label="Score" isDark={isDarkMode} />
           <StatCard icon={<Trophy className="text-yellow-600" />} value={bestScore} label="Best" isDark={isDarkMode} />
           <StatCard icon={<Timer className={timeLeft <= 10 ? 'text-red-600' : 'text-green-600'} />} value={timeLeft} label="Time" unit="s" isDark={isDarkMode} />

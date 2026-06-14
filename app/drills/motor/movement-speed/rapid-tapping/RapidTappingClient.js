@@ -179,7 +179,7 @@ export default function RapidTappingClient() {
 
         <section className="sr-only"><h2>Free Rapid Tapping Drill - Click Speed & Mouse Endurance Training for Gamers</h2><p>Endless rapid tapping survival drill. Click the central ball to expand it by 10px per click. 10 clicks earn 1 point. Ball constantly shrinks at an increasing rate +12% difficulty every 3 seconds. Max ball size 140px. Game ends when ball reaches zero. Survival time and best score tracked locally. Perfect for FPS and MOBA gamers improving click speed and mouse endurance. No registration required.</p></section>
 
-        <div className="grid grid-cols-5 gap-3 mb-4 h-[88px]">
+        <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-3 mb-4 h-auto min-h-[88px] py-1">
           <StatCard icon={<Target className="text-blue-600" />} value={score} label="Score" isDark={isDarkMode} />
           <StatCard icon={<Trophy className="text-yellow-600" />} value={bestScore} label="Best" isDark={isDarkMode} />
           <StatCard icon={<Timer className="text-green-600" />} value={formatTime(survivalTime)} label="Survival" isDark={isDarkMode} />

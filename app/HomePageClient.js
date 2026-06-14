@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { 
   Target, ArrowRight, Zap, Trophy, BarChart3, Sparkles, 
   TrendingUp, Brain, Crosshair, Eye, Timer, Keyboard, 
-  Dumbbell, Database, Star, Shield, Users
+  Dumbbell, Database, Star, Shield, Users, Activity
 } from 'lucide-react';
 
 const categories = [
@@ -38,6 +38,15 @@ const categories = [
     drills: '14 drills' 
   },
   { 
+    name: 'Visual Tracking', 
+    description: 'Smooth pursuit, gaze stability, and trajectory prediction training', 
+    icon: Activity, 
+    href: '/drills/visual-tracking', 
+    gradient: 'from-cyan-500 via-blue-500 to-indigo-500',
+    iconBg: 'bg-gradient-to-br from-cyan-500 to-blue-500',
+    drills: '25 drills' 
+  },
+  { 
     name: 'Academic', 
     description: 'Reading comprehension, math speed, typing and writing', 
     icon: Keyboard, 
@@ -55,15 +64,7 @@ const categories = [
     iconBg: 'bg-gradient-to-br from-indigo-500 to-purple-500',
     drills: '15 drills' 
   },
-  { 
-    name: 'Mental Fitness', 
-    description: 'Breathing exercises, stress control and biofeedback', 
-    icon: Timer, 
-    href: '/drills/mental-fitness', 
-    gradient: 'from-teal-500 via-cyan-500 to-blue-500',
-    iconBg: 'bg-gradient-to-br from-teal-500 to-cyan-500',
-    drills: '6 drills' 
-  },
+
   { 
     name: 'Motor Skills', 
     description: 'Hand-eye coordination, precision control and timing', 
@@ -125,7 +126,7 @@ const features = [
   { 
     icon: Target, 
     title: 'Focused Training', 
-    description: 'Target specific skill areas with 135+ specialized drills across 10 categories', 
+    description: 'Target specific skill areas with 130+ specialized drills across 9 categories', 
     gradient: 'from-emerald-400 to-green-500',
     bgGradient: 'from-emerald-50 to-green-50'
   },
@@ -178,10 +179,11 @@ export default function HomePageClient() {
         memory: { name: 'Memory', count: 0, levels: 0, games: 0 },
         academic: { name: 'Academic', count: 0, levels: 0, games: 0 },
         visual: { name: 'Visual', count: 0, levels: 0, games: 0 },
+        'visual-tracking': { name: 'Visual Tracking', count: 0, levels: 0, games: 0 },
         motor: { name: 'Motor Skills', count: 0, levels: 0, games: 0 },
         productivity: { name: 'Productivity', count: 0, levels: 0, games: 0 },
         physical: { name: 'Physical', count: 0, levels: 0, games: 0 },
-        'mental-fitness': { name: 'Mental Fitness', count: 0, levels: 0, games: 0 }
+        
       };
       
       keys.forEach(key => {
@@ -244,7 +246,7 @@ export default function HomePageClient() {
       try {
         await navigator.share({
           title: 'SkillDrills - Free FPS Aim Trainer & Brain Training',
-          text: '135+ free drills for FPS gaming, cognitive skills, memory, and mental fitness. No sign-up!',
+          text: '130+ free drills for FPS gaming, cognitive skills, visual tracking, and mental fitness. No sign-up!',
           url: 'https://skilldrills.online',
         });
       } catch (error) {
@@ -291,6 +293,7 @@ export default function HomePageClient() {
               <Link href="/drills/memory" className="text-sm text-gray-400 hover:text-white transition-colors font-medium">Memory</Link>
               <Link href="/drills/academic" className="text-sm text-gray-400 hover:text-white transition-colors font-medium">Academic</Link>
               <Link href="/drills/visual" className="text-sm text-gray-400 hover:text-white transition-colors font-medium">Visual</Link>
+              <Link href="/drills/visual-tracking" className="text-sm text-gray-400 hover:text-white transition-colors font-medium">Tracking</Link>
               <Link href="/drills" className="text-sm bg-gradient-to-r from-blue-600 to-purple-600 text-white px-5 py-2.5 rounded-xl hover:shadow-lg hover:shadow-blue-500/20 transition-all font-semibold">All Drills</Link>
             </nav>
           </div>
@@ -301,13 +304,13 @@ export default function HomePageClient() {
       <section className="sr-only" aria-label="Platform description">
         <h2>SkillDrills - Free Brain Training and FPS Aim Trainer Platform</h2>
         <p>
-          SkillDrills is a completely free online training platform offering 1+ interactive drills across 10 categories. 
+          SkillDrills is a completely free online training platform offering 130+ interactive drills across 9 categories. 
           FPS aim training for Valorant, CS2, Overwatch, Apex Legends and all competitive shooters. 
           Cognitive brain training including memory games, attention exercises, focus training and problem-solving puzzles. 
-          Academic skills practice with typing tests, speed reading, mental math drills and reading comprehension. 
-          Mental fitness through breathing exercises, stress control and biofeedback training. 
+          Academic skills practice with typing tests, speed reading, mental math drills and reading comprehension.
           Motor skills development for hand-eye coordination, precision control and timing accuracy. 
           Visual training for peripheral vision, depth perception, reaction speed and visual recognition. 
+          Visual tracking for smooth pursuit, gaze stability, and trajectory prediction. 
           Productivity tools for focus endurance, task switching and time management. 
           Physical training with balance exercises, coordination drills and reflex training. 
           No registration, no login, no credit card required. Start training instantly for free at skilldrills.online.
@@ -329,7 +332,7 @@ export default function HomePageClient() {
             </h1>
             
             <p className="text-lg sm:text-xl text-gray-400 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
-              Elevate your visual processing, mechanical aim, and working memory. Leverage 135+ scientific, zero-latency training drills. No installations. No credit cards.
+              Elevate your visual processing, mechanical aim, and working memory. Leverage 130+ scientific, zero-latency training drills. No installations. No credit cards.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
@@ -352,12 +355,12 @@ export default function HomePageClient() {
             {/* Quick Metrics */}
             <div className="grid grid-cols-3 gap-6 max-w-xl mx-auto lg:mx-0 pt-8 border-t border-white/5">
               <div className="text-left">
-                <p className="text-3xl font-black text-white tracking-tight">135+</p>
+                <p className="text-3xl font-black text-white tracking-tight">130+</p>
                 <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mt-1">Free Drills</p>
               </div>
               <div className="text-left">
-                <p className="text-3xl font-black text-white tracking-tight">10</p>
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mt-1">Sectors</p>
+                <p className="text-3xl font-black text-white tracking-tight">9</p>
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mt-1">Categories</p>
               </div>
               <div className="text-left">
                 <p className="text-3xl font-black text-white tracking-tight">240Hz</p>
@@ -491,7 +494,7 @@ export default function HomePageClient() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16 space-y-3">
             <h2 id="categories-heading" className="text-3xl sm:text-4xl font-black tracking-tight text-white uppercase">
-              Training Sectors
+              Training Categories
             </h2>
             <p className="text-gray-500 max-w-2xl mx-auto">
               Select a cognitive or mechanical vector to begin your diagnostic training program.
@@ -657,21 +660,21 @@ export default function HomePageClient() {
               </ul>
             </div>
             <div>
-              <h3 className="text-white font-bold tracking-wider mb-4 text-xs uppercase">Visual & Motor</h3>
+              <h3 className="text-white font-bold tracking-wider mb-4 text-xs uppercase">Visual & Tracking</h3>
               <ul className="space-y-2.5 text-sm text-gray-400">
                 <li><Link href="/drills/visual/reaction-speed/light-reaction" className="hover:text-white transition-colors">Reaction Time Test</Link></li>
                 <li><Link href="/drills/motor/hand-eye-coordination/aim-trainer" className="hover:text-white transition-colors">Hand-Eye Coordination</Link></li>
-                <li><Link href="/drills/visual/tracking-accuracy/moving-target" className="hover:text-white transition-colors">Moving Target Tracking</Link></li>
-                <li><Link href="/drills/visual" className="text-blue-400 hover:text-blue-300 transition-colors font-semibold">All 14 Visual Drills →</Link></li>
+                <li><Link href="/drills/visual-tracking" className="hover:text-white transition-colors">Visual Tracking Drills</Link></li>
+                <li><Link href="/drills/visual" className="text-blue-400 hover:text-blue-300 transition-colors font-semibold">All Visual Drills →</Link></li>
               </ul>
             </div>
             <div>
-              <h3 className="text-white font-bold tracking-wider mb-4 text-xs uppercase">Sector Catalog</h3>
+              <h3 className="text-white font-bold tracking-wider mb-4 text-xs uppercase">More Categories</h3>
               <ul className="space-y-2.5 text-sm text-gray-400">
                 <li><Link href="/drills/memory" className="hover:text-white transition-colors">Memory (15 drills)</Link></li>
                 <li><Link href="/drills/productivity" className="hover:text-white transition-colors">Productivity (10 drills)</Link></li>
-                <li><Link href="/drills/mental-fitness" className="hover:text-white transition-colors">Mental Fitness (6 drills)</Link></li>
                 <li><Link href="/drills/physical" className="hover:text-white transition-colors">Physical (11 drills)</Link></li>
+                <li><Link href="/drills/visual-tracking" className="hover:text-white transition-colors">Tracking (25 drills)</Link></li>
               </ul>
             </div>
           </div>
@@ -685,7 +688,7 @@ export default function HomePageClient() {
             </div>
             <p className="text-sm text-gray-500 mb-3">&copy; 2026 SkillDrills. Elite Performance Training.</p>
             <p className="text-xs text-gray-600 max-w-2xl mx-auto leading-relaxed mb-8">
-              SkillDrills is a free high-performance training platform with 135+ interactive drills across 10 categories including FPS aim training, cognitive brain games, memory exercises, typing speed tests, mental math, speed reading, visual tracking, hand-eye coordination, breathing exercises, and productivity tools. No registration required. Start training instantly at skilldrills.online.
+              SkillDrills is a free high-performance training platform with 130+ interactive drills across 9 categories including FPS aim training, cognitive brain games, memory exercises, typing speed tests, mental math, speed reading, visual tracking, hand-eye coordination, and productivity tools. No registration required. Start training instantly at skilldrills.online.
             </p>
             <div className="flex items-center justify-center gap-6 flex-wrap">
               <button onClick={sharePage} className="text-gray-500 hover:text-white transition-colors" title="Share SkillDrills" aria-label="Share SkillDrills with friends">

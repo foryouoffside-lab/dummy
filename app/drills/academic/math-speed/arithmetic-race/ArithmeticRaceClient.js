@@ -511,7 +511,7 @@ export default function ArithmeticRaceClient() {
           <p>Boost mental calculation speed with this free timed arithmetic race. Choose from 3 difficulty levels Basic Pro Elite. Practice addition subtraction and multiplication with unique non repeating problems. Includes 3 lives system combo bonuses and keyboard shortcuts 1 4 keys for rapid answering. 60 second race format with score tracking and best performance saving. Perfect for competitive exam preparation brain training and cognitive enhancement. No registration required.</p>
         </section>
 
-        <div className="grid grid-cols-7 gap-3 mb-4 h-[88px]">
+        <div className="grid grid-cols-4 sm:grid-cols-7 gap-2 sm:gap-3 mb-4 h-auto min-h-[88px] py-1">
           <StatCard icon={<Target className="text-blue-600" />} value={score} label="Score" isDark={isDarkMode} />
           <StatCard icon={<Trophy className="text-yellow-600" />} value={bestScore} label="Best" isDark={isDarkMode} />
           <StatCard icon={<Timer className={timeLeft <= 10 ? 'text-red-600' : 'text-green-600'} />} value={timeLeft} label="Time" unit="s" isDark={isDarkMode} />

@@ -159,7 +159,7 @@ export default function DistanceJudgmentClient() {
           <p>Train your depth perception and spatial judgment with this free interactive visual drill. Intercept a moving sphere at the target depth with Perfect less than 5 percent error scoring 1 point, Close less than 15 percent error scoring 0.5 points, and Far 15 percent or more error scoring 0 points. Auto-leveling speed increases every 5 trials. 60 second challenge with automatic trial progression. Sphere color and blur provide real time visual feedback on alignment accuracy. Perfect for gamers athletes and visual skills development. No registration required.</p>
         </section>
 
-        <div className="grid grid-cols-5 gap-3 mb-4 h-[88px]">
+        <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-3 mb-4 h-auto min-h-[88px] py-1">
           <StatCard icon={<Target className="text-blue-600" />} value={score.toFixed(1)} label="Score" isDark={isDarkMode} />
           <StatCard icon={<Trophy className="text-yellow-500" />} value={bestScore.toFixed(1)} label="Best" isDark={isDarkMode} />
           <StatCard icon={<Timer className={timeLeft < 15 ? 'text-red-600' : 'text-green-600'} />} value={timeLeft} label="Time" unit="s" isDark={isDarkMode} />

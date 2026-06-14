@@ -175,7 +175,7 @@ export default function ConcentrationStaminaClient() {
           <p>Train sustained attention and cognitive flexibility with this free alternating rule set drill. Rule A VOWELS: Click or press Space when you see vowels A E I O U among consonants. Rule B PRIMES: Click or press Space when you see prime numbers 2 3 5 7 among non-primes. Rules automatically switch every 10 seconds testing task-switching ability. Adaptive speed tightens from 800ms to 400ms based on accuracy. 3 lives protect your score. 60-second challenge with combo streaks every 5 correct hits. Perfect for focus training and cognitive enhancement. No registration required.</p>
         </section>
 
-        <div className="grid grid-cols-7 gap-3 mb-4 h-[88px]">
+        <div className="grid grid-cols-4 sm:grid-cols-7 gap-2 sm:gap-3 mb-4 h-auto min-h-[88px] py-1">
           <StatCard icon={<Target className="text-blue-600" />} value={score} label="Score" isDark={isDarkMode} />
           <StatCard icon={<Trophy className="text-yellow-600" />} value={bestScore} label="Best" isDark={isDarkMode} />
           <StatCard icon={<Clock className={timeLeft <= 10 ? 'text-red-600' : 'text-cyan-600'} />} value={timeLeft} label="Time" unit="s" isDark={isDarkMode} />

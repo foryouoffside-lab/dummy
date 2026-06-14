@@ -147,7 +147,7 @@ export default function FocusTimerClient() {
           <p>Build concentration stamina with this free 5-minute visual meditation focus timer. Fix your gaze on the glowing center point while expanding ripples radiate outward. Observe ripples with peripheral awareness only. Earn 1 point every 5 seconds of sustained focus with milestone notifications at each minute mark. Perfect for deep work preparation flow state entry and attention training. No registration required.</p>
         </section>
 
-        <div className="grid grid-cols-7 gap-3 mb-4 h-[88px]">
+        <div className="grid grid-cols-4 sm:grid-cols-7 gap-2 sm:gap-3 mb-4 h-auto min-h-[88px] py-1">
           <StatCard icon={<Target className="text-blue-600" />} value={focusScore} label="Focus Score" isDark={isDarkMode} />
           <StatCard icon={<Trophy className="text-yellow-600" />} value={bestScore} label="Best" isDark={isDarkMode} />
           <StatCard icon={<Timer className={timeRemaining <= 30 ? 'text-red-600' : 'text-green-600'} />} value={formatTime(timeRemaining)} label="Time" isDark={isDarkMode} />

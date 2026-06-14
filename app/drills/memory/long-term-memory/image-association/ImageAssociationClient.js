@@ -577,7 +577,7 @@ export default function ImageAssociationClient() {
         </section>
 
         {!isFullscreen && (
-          <div className="grid grid-cols-7 gap-3 mb-4 h-[88px]">
+          <div className="grid grid-cols-4 sm:grid-cols-7 gap-2 sm:gap-3 mb-4 h-auto min-h-[88px] py-1">
             <StatCard icon={<Target className="text-blue-600" />} value={score} label="Score" isDark={isDarkMode} />
             <StatCard icon={<Trophy className="text-yellow-600" />} value={bestScore} label="Best" isDark={isDarkMode} />
             <StatCard icon={<Timer className={timeLeft <= 10 ? 'text-red-600' : 'text-green-600'} />} value={timeLeft} label="Time" unit="s" isDark={isDarkMode} />

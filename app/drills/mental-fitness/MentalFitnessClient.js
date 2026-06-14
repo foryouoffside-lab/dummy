@@ -150,8 +150,7 @@ export default function MentalFitnessClient() {
       textColor: 'text-rose-400',
       description: 'Build cognitive resilience and maintain coherence under pressure and distraction',
       drills: [
-        { name: 'Coherence Breathing', folderName: 'biofeedback', difficulty: 'Medium', duration: '5 min', description: '5:6 resonance frequency breathing to optimize heart rate variability and vagal tone' },
-        { name: 'Calm Under Pressure', folderName: 'calm-under-pressure', difficulty: 'Hard', duration: '3 min', description: 'Dual-task training: maintain breathing while random numbers flash as cognitive distraction' },
+                { name: 'Calm Under Pressure', folderName: 'calm-under-pressure', difficulty: 'Hard', duration: '3 min', description: 'Dual-task training: maintain breathing while random numbers flash as cognitive distraction' },
         { name: 'Stress Inoculation', folderName: 'stress-inoculation', difficulty: 'Hard', duration: '5 min', description: 'Controlled stress exposure with red visual strobe and audio induction to build resilience' }
       ]
     }

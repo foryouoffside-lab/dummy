@@ -185,7 +185,7 @@ export default function MentalMathClient() {
           <p>Sharpen your mental arithmetic with this free timed math challenge. Choose from 3 difficulty levels Basic Pro Elite. Practice addition subtraction and multiplication with 4 option multiple choice. Features 3 life protection system combo streaks every 3 correct answers and keyboard shortcuts 1 4 keys for rapid answering. 60 second race format with score tracking and best performance saving. Perfect for competitive exam preparation brain training and cognitive enhancement. No registration required.</p>
         </section>
 
-        <div className="grid grid-cols-7 gap-3 mb-4 h-[88px]">
+        <div className="grid grid-cols-4 sm:grid-cols-7 gap-2 sm:gap-3 mb-4 h-auto min-h-[88px] py-1">
           <StatCard icon={<Target className="text-blue-600" />} value={score.toFixed(1)} label="Score" isDark={isDarkMode} />
           <StatCard icon={<Trophy className="text-yellow-600" />} value={bestScore.toFixed(1)} label="Best" isDark={isDarkMode} />
           <StatCard icon={<Timer className={timeLeft <= 10 ? 'text-red-600' : 'text-green-600'} />} value={timeLeft} label="Time" unit="s" isDark={isDarkMode} />

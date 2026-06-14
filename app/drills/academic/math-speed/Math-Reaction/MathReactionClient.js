@@ -194,7 +194,7 @@ export default function MathReactionClient() {
           <p>Train your mental math speed and reaction time with this free interactive odd even parity drill. Solve addition subtraction and multiplication equations then quickly identify if the result is ODD or EVEN. Adaptive time window tightens with correct answers from 1500ms down to 600ms. 60 second challenge with 3 lives combo streaks and real time reaction tracking. Use keyboard shortcuts A left arrow or D right arrow for faster responses. Perfect for competitive exam preparation brain training and cognitive enhancement. No registration required.</p>
         </section>
 
-        <div className="grid grid-cols-7 gap-3 mb-4 h-[88px]">
+        <div className="grid grid-cols-4 sm:grid-cols-7 gap-2 sm:gap-3 mb-4 h-auto min-h-[88px] py-1">
           <StatCard icon={<Target className="text-blue-600" />} value={score} label="Score" isDark={isDarkMode} />
           <StatCard icon={<Trophy className="text-yellow-500" />} value={bestScore} label="Best" isDark={isDarkMode} />
           <StatCard icon={<Timer className={timeLeft <= 10 ? 'text-red-600' : 'text-green-600'} />} value={timeLeft} label="Time" unit="s" isDark={isDarkMode} />

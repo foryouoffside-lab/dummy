@@ -193,7 +193,7 @@ export default function ContextSwitchClient() {
           <p>Train rapid context switching between two distinct rule sets under time pressure. TOP ZONE Parity: Click EVEN for even numbers ODD for odd numbers. BOTTOM ZONE Magnitude: Click less than 5 for numbers below 5 greater than 5 for numbers above 5. Numbers 1-9 appear randomly in either zone. 1.5 seconds per question before automatic timeout. 3 lives protect your score. 60-second timed challenge with reaction time tracking and combo streaks every 5 correct. Perfect for improving cognitive flexibility executive function and mental agility. No registration required.</p>
         </section>
 
-        <div className="grid grid-cols-7 gap-3 mb-4 h-[88px]">
+        <div className="grid grid-cols-4 sm:grid-cols-7 gap-2 sm:gap-3 mb-4 h-auto min-h-[88px] py-1">
           <StatCard icon={<Target className="text-blue-600" />} value={score} label="Score" isDark={isDarkMode} />
           <StatCard icon={<Trophy className="text-yellow-500" />} value={bestScore} label="Best" isDark={isDarkMode} />
           <StatCard icon={<Timer className={timeLeft < 15 ? 'text-red-600' : 'text-green-600'} />} value={timeLeft} label="Time" unit="s" isDark={isDarkMode} />

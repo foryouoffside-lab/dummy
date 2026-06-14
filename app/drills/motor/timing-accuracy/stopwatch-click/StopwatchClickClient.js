@@ -336,7 +336,7 @@ export default function StopwatchClickClient() {
 
         <section className="sr-only"><h2>Free Stopwatch Timing Drill - Mental Chronometry Training for Musicians Athletes Gamers</h2><p>Mental chronometry drill. Memorize a target time (1-8 seconds) shown for 1.5 seconds. Click when you think the exact time has elapsed. Perfect within 25ms, Good within 75ms, OK within 150ms. +1 point per hit, -1 penalty per miss. 60-second challenge with streak tracking. Perfect for musicians, athletes, gamers, and anyone wanting better timing accuracy. No registration required.</p></section>
 
-        <div className="grid grid-cols-6 gap-3 mb-4 h-[88px]">
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-3 mb-4 h-auto min-h-[88px] py-1">
           <StatCard icon={<Target className="text-blue-600" />} value={score} label="Score" isDark={isDarkMode} />
           <StatCard icon={<Trophy className="text-yellow-600" />} value={bestScore} label="Best" isDark={isDarkMode} />
           <StatCard icon={<Timer className={timeLeft <= 10 ? 'text-red-600' : 'text-green-600'} />} value={timeLeft} label="Time" unit="s" isDark={isDarkMode} />

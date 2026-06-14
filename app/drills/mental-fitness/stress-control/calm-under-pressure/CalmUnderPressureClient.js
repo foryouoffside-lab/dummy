@@ -230,8 +230,6 @@ export default function CalmUnderPressureClient() {
 
   return (
     <div className={`min-h-screen select-none ${isDarkMode?'bg-gray-900':'bg-gray-50'}`}>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify({"@context":"https://schema.org","@type":"WebApplication","name":"Calm Under Pressure - Stress Inoculation Training","url":"https://skilldrills.online/drills/mental-fitness/stress-control/calm-under-pressure","description":"Dual-task stress inoculation drill combining 5:6 coherence breathing with cognitive load distractions. Random numbers flash during pressure phase. 2x points for maintaining coherence under load. 3-minute challenge.","applicationCategory":"HealthApplication","operatingSystem":"Web","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Organization","name":"SkillDrills"},"educationalUse":["Stress Inoculation","Cognitive Resilience","Dual-Task Training","Pressure Performance"],"learningResourceType":"Interactive Exercise","timeRequired":"PT3M","interactivityType":"active","inLanguage":"en-US","teaches":["Stress Management","Cognitive Load Handling","Coherence Under Pressure","Resilience Building"]})}}/>
-      
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <nav className="mb-4">
           <ol className="flex flex-wrap items-center gap-2 text-sm">
@@ -267,93 +265,159 @@ export default function CalmUnderPressureClient() {
           <p>Build stress resilience with this free dual-task breathing drill. Practice 5:6 coherence breathing while random numbers flash as cognitive distractions. 3-minute challenge with 2x points during load phase. Perfect for stress management anxiety reduction and performance under pressure training. No registration required.</p>
         </section>
 
-        <div className="grid grid-cols-5 gap-3 mb-4 h-[88px]">
-          <SCard icon={<Activity className="text-blue-500"/>} value={score} label="Resilience" dark={isDarkMode}/>
-          <SCard icon={<Trophy className="text-yellow-500"/>} value={bestScore} label="Best" dark={isDarkMode}/>
-          <SCard icon={<Wind className="text-cyan-500"/>} value={totalBreaths} label="Breaths" dark={isDarkMode}/>
-          <SCard icon={<Timer className={timeLeft<60?'text-red-500':'text-green-500'}/>} value={updateTimerDisplay(timeLeft)} label="Time Left" dark={isDarkMode}/>
-          <SCard icon={<Brain className="text-purple-500"/>} value={cognitiveLoad?"ACTIVE":"REST"} label="Load Phase" dark={isDarkMode}/>
+        {/* STAT BOARD */}
+        <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-3 mb-4 h-auto min-h-[88px] py-1">
+          <StatCard icon={<Activity className="text-blue-500"/>} value={score} label="Resilience" isDark={isDarkMode}/>
+          <StatCard icon={<Trophy className="text-yellow-500"/>} value={bestScore} label="Best" isDark={isDarkMode}/>
+          <StatCard icon={<Wind className="text-cyan-500"/>} value={totalBreaths} label="Breaths" isDark={isDarkMode}/>
+          <StatCard icon={<Timer className={timeLeft<60?'text-red-500':'text-green-500'}/>} value={updateTimerDisplay(timeLeft)} label="Time Left" isDark={isDarkMode}/>
+          <StatCard icon={<Brain className="text-purple-500"/>} value={cognitiveLoad?"ACTIVE":"REST"} label="Load Phase" isDark={isDarkMode}/>
         </div>
 
         <div className="h-10 mb-2 flex justify-center items-center">
           <div className={`px-4 py-1.5 rounded-lg text-white font-semibold text-sm transition-all duration-200 ${feedback?'opacity-100 scale-100':'opacity-0 scale-95'} ${feedbackType==='success'?'bg-green-500':feedbackType==='warning'?'bg-orange-500':'bg-red-500'}`}>{feedback||'\u00A0'}</div>
         </div>
 
-        <div ref={containerRef} className={`relative ${isFullscreen?'fixed inset-0 z-50':'rounded-xl border-2'}`} style={{background:isBoxDarkMode?'#050505':'#ffffff',aspectRatio:isFullscreen?'auto':'16/9',display:'flex',alignItems:'center',justifyContent:'center',borderColor:isDarkMode?'#374151':'#e5e7eb'}}>
+        <div ref={containerRef} className={`relative overflow-hidden ${isFullscreen?'fixed inset-0 z-50':'rounded-xl border-2'}`} style={{background:isBoxDarkMode?'#050505':'#ffffff',aspectRatio:isFullscreen?'auto':'16/9',display:'flex',alignItems:'center',justifyContent:'center',borderColor:isDarkMode?'#374151':'#e5e7eb'}}>
           {/* Mobile Rotate Device Warning Overlay */}
-      {showRotateWarning && (
-        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-gray-950/95 text-center p-6" aria-hidden="true">
-          <div className="animate-bounce mb-4 text-blue-500">
-            <svg className="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-            </svg>
-          </div>
-          <h3 className="text-lg font-bold text-white mb-2">{warningMessage}</h3>
-          <p className="text-sm text-gray-400 mb-6">Please use landscape orientation or fullscreen mode for the best training experience.</p>
-          <Link href="/drills/mental-fitness">
-            <button className="px-5 py-2.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-350 hover:text-white font-bold rounded-lg text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
-              Go Back
-            </button>
-          </Link>
-        </div>
-      )}
-
-          {isFullscreen&&gameState==='playing'&&(
-            <>
-              <div className="absolute top-4 right-4 z-30 flex gap-3">
-                <button onClick={resetGame} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg hover:bg-black/70 transition text-white" title="Reset"><RefreshCw className="w-5 h-5"/></button>
-                <button onClick={()=>setIsDarkMode(!isDarkMode)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg hover:bg-black/70 transition text-white">{isDarkMode?<Sun className="w-5 h-5"/>:<Moon className="w-5 h-5"/>}</button>
-                <button onClick={()=>setIsBoxDarkMode(!isBoxDarkMode)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg hover:bg-black/70 transition text-white"><Eye className="w-5 h-5"/></button>
-                <button onClick={()=>setSoundEnabled(!soundEnabled)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg hover:bg-black/70 transition text-white">{soundEnabled?<Volume2 className="w-5 h-5"/>:<VolumeX className="w-5 h-5"/>}</button>
-                <button onClick={toggleFullscreen} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg hover:bg-black/70 transition text-white"><Minimize2 className="w-5 h-5"/></button>
+          {showRotateWarning && (
+            <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-gray-950/95 text-center p-6" aria-hidden="true">
+              <div className="animate-bounce mb-4 text-blue-500">
+                <svg className="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
               </div>
-              <div className="absolute top-4 left-4 z-30 bg-black/50 backdrop-blur-sm rounded-lg px-4 py-2 text-white text-sm">Score: <span className="text-yellow-400 font-bold">{score}</span> | Breaths: <span className="text-cyan-400 font-bold">{totalBreaths}</span> | Time: <span className="text-blue-400 font-bold">{updateTimerDisplay(timeLeft)}</span></div>
-            </>
+              <h3 className="text-lg font-bold text-white mb-2">{warningMessage}</h3>
+              <p className="text-sm text-gray-400 mb-6">Please use landscape orientation or fullscreen mode for the best training experience.</p>
+              <Link href="/drills/mental-fitness">
+                <button className="px-5 py-2.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-350 hover:text-white font-bold rounded-lg text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                  </svg>
+                  Go Back
+                </button>
+              </Link>
+            </div>
           )}
 
-          <div className="text-center">
-            <div className="instruction" style={{fontSize:isFullscreen?'2rem':'1.4rem',height:isFullscreen?'45px':'32px',marginBottom:isFullscreen?'35px':'25px',letterSpacing:'3px',userSelect:'none',color:cognitiveLoad?'#ff6b6b':(isBoxDarkMode?'#00f2fe':'#0284c7'),fontWeight:'bold',transition:'color 0.3s ease'}}>{instruction}</div>
-            <div className="pacer-ring" style={{position:'relative',width:isFullscreen?'280px':'200px',height:isFullscreen?'280px':'200px',border:`2px solid ${cognitiveLoad?'rgba(255,107,107,0.3)':(isBoxDarkMode?'rgba(0,242,254,0.2)':'rgba(2,132,199,0.2)')}`,borderRadius:'50%',margin:'0 auto',display:'flex',justifyContent:'center',alignItems:'center'}}>
-              <div style={{position:'absolute',top:'50%',left:'50%',transform:'translate(-50%,-50%)',fontSize:isFullscreen?'4rem':'3rem',fontWeight:'800',color:isBoxDarkMode?'#ffffff':'#000000',opacity:showNumber?1:0,transition:'opacity 0.2s',zIndex:15,pointerEvents:'none'}}>{currentNumber}</div>
-              <div ref={pacerRef} style={{width:isFullscreen?'84px':'60px',height:isFullscreen?'84px':'60px',background:cognitiveLoad?'#ff6b6b':(isBoxDarkMode?'#00f2fe':'#0284c7'),borderRadius:'50%',boxShadow:`0 0 30px ${cognitiveLoad?'rgba(255,107,107,0.5)':(isBoxDarkMode?'#00f2fe':'#0284c7')}`,transition:'transform linear, background 0.3s ease, box-shadow 0.3s ease'}}/>
+          {isFullscreen&&gameState==='playing'&&(
+            <div className="absolute top-4 right-4 z-30 flex gap-3">
+              <button onClick={resetGame} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg hover:bg-black/70 transition text-white" title="Reset"><RefreshCw className="w-5 h-5"/></button>
+              <button onClick={()=>setIsDarkMode(!isDarkMode)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg hover:bg-black/70 transition text-white">{isDarkMode?<Sun className="w-5 h-5"/>:<Moon className="w-5 h-5"/>}</button>
+              <button onClick={()=>setIsBoxDarkMode(!isBoxDarkMode)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg hover:bg-black/70 transition text-white"><Eye className="w-5 h-5"/></button>
+              <button onClick={()=>setSoundEnabled(!soundEnabled)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg hover:bg-black/70 transition text-white">{soundEnabled?<Volume2 className="w-5 h-5"/>:<VolumeX className="w-5 h-5"/>}</button>
+              <button onClick={toggleFullscreen} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg hover:bg-black/70 transition text-white"><Minimize2 className="w-5 h-5"/></button>
             </div>
-            <div className="timer" style={{marginTop:isFullscreen?'50px':'40px',fontSize:isFullscreen?'2rem':'1.4rem',letterSpacing:'2px',userSelect:'none',opacity:0.7,color:isBoxDarkMode?'#ffffff':'#000000'}}>{updateTimerDisplay(timeLeft)}</div>
+          )}
+
+          {/* PLAYING SCREEN - MOBILE OPTIMIZED with visible INHALE/EXHALE text */}
+          <div className="text-center flex flex-col items-center justify-center w-full px-2 sm:px-4">
+            {/* INHALE/EXHALE instruction text - ALWAYS VISIBLE and centered */}
+            <div style={{
+              fontSize: isFullscreen ? '2.5rem' : 'clamp(1.2rem, 4vw, 2rem)',
+              fontWeight: '700',
+              letterSpacing: isFullscreen ? '6px' : '4px',
+              marginBottom: isFullscreen ? '25px' : 'clamp(10px, 2vw, 20px)',
+              color: cognitiveLoad ? '#ff6b6b' : (isBoxDarkMode ? '#00f2fe' : '#0284c7'),
+              textTransform: 'uppercase',
+              lineHeight: 1.2,
+              transition: 'color 0.3s ease',
+              minHeight: isFullscreen ? '50px' : 'clamp(28px, 5vw, 40px)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              {instruction || '\u00A0'}
+            </div>
+            
+            {/* Breathing ball - SMALLER for mobile with centered number overlay */}
+            <div className="pacer-ring flex-shrink-0" style={{
+              position: 'relative',
+              width: isFullscreen ? '260px' : 'min(100px, 28vw)',
+              height: isFullscreen ? '260px' : 'min(100px, 28vw)',
+              border: `2px solid ${cognitiveLoad ? 'rgba(255,107,107,0.3)' : (isBoxDarkMode ? 'rgba(0,242,254,0.2)' : 'rgba(2,132,199,0.2)')}`,
+              borderRadius: '50%',
+              margin: '0 auto',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center'
+            }}>
+              {/* Flash number overlay - centered in ring */}
+              <div style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%,-50%)',
+                fontSize: isFullscreen ? '3.5rem' : 'clamp(1.4rem, 5vw, 2.5rem)',
+                fontWeight: '800',
+                color: isBoxDarkMode ? '#ffffff' : '#000000',
+                opacity: showNumber ? 1 : 0,
+                transition: 'opacity 0.2s',
+                zIndex: 15,
+                pointerEvents: 'none'
+              }}>
+                {currentNumber}
+              </div>
+              {/* Breathing pacer node */}
+              <div ref={pacerRef} style={{
+                width: isFullscreen ? '75px' : 'min(30px, 8vw)',
+                height: isFullscreen ? '75px' : 'min(30px, 8vw)',
+                background: cognitiveLoad ? '#ff6b6b' : (isBoxDarkMode ? '#00f2fe' : '#0284c7'),
+                borderRadius: '50%',
+                boxShadow: `0 0 20px ${cognitiveLoad ? 'rgba(255,107,107,0.5)' : (isBoxDarkMode ? '#00f2fe' : '#0284c7')}`,
+                transition: 'transform linear, background 0.3s ease, box-shadow 0.3s ease'
+              }}/>
+            </div>
+            
+            {/* Timer display - below the ball */}
+            <div style={{
+              fontSize: isFullscreen ? '1.8rem' : 'clamp(0.9rem, 2.5vw, 1.3rem)',
+              letterSpacing: '2px',
+              marginTop: isFullscreen ? '30px' : 'clamp(12px, 2vw, 25px)',
+              marginBottom: isFullscreen ? '20px' : 'clamp(8px, 1.5vw, 15px)',
+              opacity: 0.7,
+              color: isBoxDarkMode ? '#ffffff' : '#000000',
+              fontFamily: 'monospace'
+            }}>
+              {updateTimerDisplay(timeLeft)}
+            </div>
+            
+            {/* End Session button */}
             {gameState==='playing'&&(
-              <button onClick={()=>{if(timerIntervalRef.current)clearInterval(timerIntervalRef.current);if(inhaleTimeoutRef.current)clearTimeout(inhaleTimeoutRef.current);if(exhaleTimeoutRef.current)clearTimeout(exhaleTimeoutRef.current);if(loadIntervalRef.current)clearInterval(loadIntervalRef.current);isActiveRef.current=false;setGameState('gameOver');gameStateRef.current='gameOver';}} className="mt-8 px-6 py-2 rounded-full text-sm transition-all hover:border-red-500 hover:text-red-500" style={{background:'transparent',border:`1px solid ${isBoxDarkMode?'#333':'#ddd'}`,color:isBoxDarkMode?'#666':'#999'}}>End Session</button>
+              <button onClick={()=>{if(timerIntervalRef.current)clearInterval(timerIntervalRef.current);if(inhaleTimeoutRef.current)clearTimeout(inhaleTimeoutRef.current);if(exhaleTimeoutRef.current)clearTimeout(exhaleTimeoutRef.current);if(loadIntervalRef.current)clearInterval(loadIntervalRef.current);isActiveRef.current=false;setGameState('gameOver');gameStateRef.current='gameOver';}} className="px-4 py-1.5 sm:px-6 sm:py-2 rounded-full text-xs sm:text-sm transition-all hover:border-red-500 hover:text-red-500 flex-shrink-0" style={{background:'transparent',border:`1px solid ${isBoxDarkMode?'#333':'#ddd'}`,color:isBoxDarkMode?'#666':'#999'}}>End Session</button>
             )}
           </div>
 
+          {/* START SCREEN */}
           {gameState==='start'&&(
-            <div className="absolute inset-0 flex items-center justify-center rounded-xl z-20 backdrop-blur-sm" style={{background:isBoxDarkMode?'rgba(5,5,5,0.95)':'rgba(255,255,255,0.95)'}}>
-              <div className={`rounded-2xl p-6 sm:p-8 text-center max-w-md mx-4 shadow-xl border ${isBoxDarkMode?'bg-gray-800 border-gray-700':'bg-white border-gray-200'}`}>
-                <Brain className="w-16 h-16 text-purple-500 mx-auto mb-4"/>
-                <h2 className={`text-2xl font-bold mb-2 ${isBoxDarkMode?'text-white':'text-gray-900'}`}>Calm Under Pressure</h2>
-                <p className={`mb-2 ${isBoxDarkMode?'text-gray-300':'text-gray-600'}`}>5:6 breathing + cognitive load • 3-minute challenge</p>
-                <p className={`mb-6 text-sm ${isBoxDarkMode?'text-gray-400':'text-gray-500'}`}>Maintain breathing coherence while random numbers flash as distraction. 10pts/5 breaths normally, 20pts during load phase.</p>
-                <button onClick={startDrill} className="px-8 py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-xl font-semibold hover:shadow-lg w-full transition-all transform hover:scale-[1.02] active:scale-[0.98]">Start Free Drill</button>
+            <div className="absolute inset-0 flex items-center justify-center rounded-xl z-40 backdrop-blur-sm" style={{background:isBoxDarkMode?'rgba(5,5,5,0.95)':'rgba(255,255,255,0.95)'}}>
+              <div className={`rounded-2xl p-4 sm:p-6 md:p-8 text-center max-w-[88%] sm:max-w-md mx-auto shadow-xl border ${isBoxDarkMode?'bg-gray-800 border-gray-700':'bg-white border-gray-200'}`}>
+                <Brain className="w-12 h-12 sm:w-16 sm:h-16 text-purple-500 mx-auto mb-3"/>
+                <h2 className={`text-xl sm:text-2xl font-bold mb-2 ${isBoxDarkMode?'text-white':'text-gray-900'}`}>Calm Under Pressure</h2>
+                <p className={`mb-2 text-sm ${isBoxDarkMode?'text-gray-300':'text-gray-600'}`}>5:6 breathing + cognitive load • 3-minute challenge</p>
+                <p className={`mb-4 sm:mb-6 text-xs sm:text-sm leading-relaxed ${isBoxDarkMode?'text-gray-400':'text-gray-500'}`}>Maintain breathing coherence while random numbers flash as distraction. 10pts/5 breaths normally, 20pts during load phase.</p>
+                <button onClick={startDrill} className="px-6 py-2.5 sm:px-8 sm:py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-xl font-semibold hover:shadow-lg w-full transition-all transform hover:scale-[1.02] active:scale-[0.98] text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2">Start Free Drill</button>
               </div>
             </div>
           )}
 
+          {/* GAME OVER SCREEN */}
           {gameState==='gameOver'&&(
-            <div className="absolute inset-0 flex items-center justify-center rounded-xl z-20 backdrop-blur-sm" style={{background:isBoxDarkMode?'rgba(5,5,5,0.95)':'rgba(255,255,255,0.95)'}}>
-              <div className={`rounded-2xl p-6 sm:p-8 shadow-xl border w-full max-w-[520px] mx-4 ${isBoxDarkMode?'bg-gray-800 border-gray-700':'bg-white border-gray-200'}`}>
-                <div className="flex items-center justify-center gap-3 mb-4"><Award className="w-10 h-10 text-yellow-500"/><h2 className={`text-2xl font-bold ${isBoxDarkMode?'text-white':'text-gray-900'}`}>Training Complete!</h2></div>
-                <p className={`text-center text-sm mb-6 ${isBoxDarkMode?'text-gray-400':'text-gray-500'}`}>Regular dual-task practice builds real-world cognitive resilience and stress tolerance.</p>
-                <div className="grid grid-cols-2 gap-3 mb-6">
-                  <RCard label="Resilience Score" value={score} icon={<Activity className="w-4 h-4"/>} color="blue" dark={isBoxDarkMode}/>
-                  <RCard label="Best Score" value={bestScore} icon={<Trophy className="w-4 h-4"/>} color="yellow" dark={isBoxDarkMode}/>
-                  <RCard label="Total Breaths" value={totalBreaths} icon={<Wind className="w-4 h-4"/>} color="cyan" dark={isBoxDarkMode}/>
-                  <RCard label="Duration" value="3:00" icon={<Timer className="w-4 h-4"/>} color="green" dark={isBoxDarkMode}/>
-                  <RCard label="Load Phase" value="120s" icon={<Brain className="w-4 h-4"/>} color="purple" dark={isBoxDarkMode}/>
-                  <RCard label="Focus Level" value={Math.min(100,Math.floor(score/2))} unit="%" icon={<TrendingUp className="w-4 h-4"/>} color="orange" dark={isBoxDarkMode}/>
+            <div className="absolute inset-0 flex items-center justify-center rounded-xl z-40 backdrop-blur-sm" style={{background:isBoxDarkMode?'rgba(5,5,5,0.95)':'rgba(255,255,255,0.95)'}}>
+              <div className={`rounded-2xl p-4 sm:p-6 md:p-8 shadow-xl border w-full max-w-[88%] sm:max-w-[520px] mx-auto ${isBoxDarkMode?'bg-gray-800 border-gray-700':'bg-white border-gray-200'}`}>
+                <div className="flex items-center justify-center gap-3 mb-3"><Award className="w-8 h-8 sm:w-10 sm:h-10 text-yellow-500"/><h2 className={`text-xl sm:text-2xl font-bold ${isBoxDarkMode?'text-white':'text-gray-900'}`}>Training Complete!</h2></div>
+                <p className={`text-center text-xs sm:text-sm mb-4 sm:mb-6 ${isBoxDarkMode?'text-gray-400':'text-gray-500'}`}>Regular dual-task practice builds real-world cognitive resilience and stress tolerance.</p>
+                <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-4 sm:mb-6">
+                  <ResultCard label="Resilience Score" value={score} icon={<Activity className="w-4 h-4"/>} color="blue" isDark={isBoxDarkMode}/>
+                  <ResultCard label="Best Score" value={bestScore} icon={<Trophy className="w-4 h-4"/>} color="yellow" isDark={isBoxDarkMode}/>
+                  <ResultCard label="Total Breaths" value={totalBreaths} icon={<Wind className="w-4 h-4"/>} color="cyan" isDark={isBoxDarkMode}/>
+                  <ResultCard label="Duration" value="3:00" icon={<Timer className="w-4 h-4"/>} color="green" isDark={isBoxDarkMode}/>
+                  <ResultCard label="Load Phase" value="120s" icon={<Brain className="w-4 h-4"/>} color="purple" isDark={isBoxDarkMode}/>
+                  <ResultCard label="Focus Level" value={Math.min(100,Math.floor(score/2))} unit="%" icon={<TrendingUp className="w-4 h-4"/>} color="orange" isDark={isBoxDarkMode}/>
                 </div>
-                <div className="flex gap-3">
-                  <Link href="/drills/mental-fitness" className="flex-1"><button className={`w-full px-4 py-2.5 rounded-lg font-semibold ${isDarkMode?'bg-gray-700 text-gray-300 hover:bg-gray-600':'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>← Back</button></Link>
-                  <button onClick={resetGame} className="flex-1 px-4 py-2.5 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all transform hover:scale-[1.02] active:scale-[0.98]">Play Again →</button>
+                <div className="flex gap-2 sm:gap-3">
+                  <Link href="/drills/mental-fitness" className="flex-1"><button className={`w-full px-3 py-2 sm:px-4 sm:py-2.5 rounded-lg font-semibold text-sm ${isDarkMode?'bg-gray-700 text-gray-300 hover:bg-gray-600':'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>← Back</button></Link>
+                  <button onClick={resetGame} className="flex-1 px-3 py-2 sm:px-4 sm:py-2.5 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] text-sm">Play Again →</button>
                 </div>
               </div>
             </div>
@@ -436,22 +500,29 @@ export default function CalmUnderPressureClient() {
   );
 }
 
-function SCard({ icon, value, label, unit='', dark }) {
+function StatCard({ icon, value, label, unit='', isDark }) {
   return (
-    <div className={`rounded-xl shadow-sm border p-2 sm:p-3 text-center flex flex-col justify-center h-full ${dark?'bg-gray-800 border-gray-700':'bg-white border-gray-100'}`}>
-      <div className="mb-1 flex justify-center">{icon}</div>
-      <p className={`text-lg sm:text-xl font-bold truncate ${dark?'text-white':'text-gray-900'}`}>{value}{unit}</p>
-      <p className={`text-[10px] sm:text-xs truncate ${dark?'text-gray-400':'text-gray-500'}`}>{label}</p>
+    <div className={`rounded-xl shadow-sm border p-2 sm:p-3 text-center flex flex-col justify-center h-full transition-colors ${isDark?'bg-gray-800 border-gray-700':'bg-white border-gray-100'}`}>
+      <div className="mb-1 flex justify-center" aria-hidden="true">{icon}</div>
+      <p className={`text-lg sm:text-xl font-bold truncate ${isDark?'text-white':'text-gray-900'}`}>{value}{unit}</p>
+      <p className={`text-[10px] sm:text-xs truncate ${isDark?'text-gray-400':'text-gray-500'}`}>{label}</p>
     </div>
   );
 }
 
-function RCard({ label, value, unit='', icon, color, dark }) {
-  const m={blue:'bg-blue-500/10 border-blue-500/30 text-blue-500',yellow:'bg-yellow-500/10 border-yellow-500/30 text-yellow-500',cyan:'bg-cyan-500/10 border-cyan-500/30 text-cyan-500',green:'bg-green-500/10 border-green-500/30 text-green-500',purple:'bg-purple-500/10 border-purple-500/30 text-purple-500',orange:'bg-orange-500/10 border-orange-500/30 text-orange-500'};
-  const c=m[color]||m.blue,[bg,border,text]=c.split(' ');
+function ResultCard({ label, value, unit='', icon, color, isDark }) {
+  const colorMap={
+    blue:'bg-blue-500/10 border-blue-500/30 text-blue-500',
+    yellow:'bg-yellow-500/10 border-yellow-500/30 text-yellow-500',
+    cyan:'bg-cyan-500/10 border-cyan-500/30 text-cyan-500',
+    green:'bg-green-500/10 border-green-500/30 text-green-500',
+    purple:'bg-purple-500/10 border-purple-500/30 text-purple-500',
+    orange:'bg-orange-500/10 border-orange-500/30 text-orange-500'
+  };
+  const c=colorMap[color]||colorMap.blue,[bg,border,text]=c.split(' ');
   return (
     <div className={`flex items-center justify-between p-3 rounded-lg border ${bg} ${border}`}>
-      <div className="flex items-center gap-2 min-w-0"><div className={text}>{icon}</div><span className={`text-xs sm:text-sm truncate ${dark?'text-gray-300':'text-gray-600'}`}>{label}</span></div>
+      <div className="flex items-center gap-2 min-w-0"><div className={text} aria-hidden="true">{icon}</div><span className={`text-xs sm:text-sm truncate ${isDark?'text-gray-300':'text-gray-600'}`}>{label}</span></div>
       <span className={`font-bold text-base sm:text-lg flex-shrink-0 ml-2 ${text}`}>{value}{unit}</span>
     </div>
   );

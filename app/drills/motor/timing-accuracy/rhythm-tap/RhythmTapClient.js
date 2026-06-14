@@ -192,7 +192,7 @@ export default function RhythmTapClient() {
 
         <section className="sr-only"><h2>Free Rhythm Tap Training - Timing Accuracy & Beat Synchronization Drill</h2><p>Train your rhythmic timing accuracy with this free interactive beat synchronization drill. Tap in sync with a dynamic BPM pulse ranging from 50 to 140. Perfect hits within 40ms earn points. Good hits within 80ms earn points. BPM changes every 8 beats keeping you on your toes. 60 second challenge with 3 lives combo streaks and accuracy tracking. Perfect for musicians gamers and anyone wanting better timing precision. No registration required.</p></section>
 
-        <div className="grid grid-cols-7 gap-3 mb-4 h-[88px]">
+        <div className="grid grid-cols-4 sm:grid-cols-7 gap-2 sm:gap-3 mb-4 h-auto min-h-[88px] py-1">
           <StatCard icon={<Target className="text-blue-600" />} value={score} label="Score" isDark={isDarkMode} />
           <StatCard icon={<Trophy className="text-yellow-600" />} value={bestScore} label="Best" isDark={isDarkMode} />
           <StatCard icon={<Timer className={timeLeft <= 10 ? 'text-red-600' : 'text-green-600'} />} value={timeLeft} label="Time" unit="s" isDark={isDarkMode} />

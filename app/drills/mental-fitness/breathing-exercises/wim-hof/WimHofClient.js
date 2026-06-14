@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, ArrowRight, Award, BarChart3, BookOpen, Brain, CheckCircle2, Clock, Code2, Crosshair, Database, Dumbbell, Eye, Flame, GraduationCap, Hash, Heart, Info, Keyboard, Lightbulb, Maximize2, Minimize2, Moon, RefreshCw, Star, Sun, Target, Timer, Trophy, Users, Volume2, VolumeX, Wind, Zap, TrendingUp } from 'lucide-react';
+
 export default function WimHofClient() {
   const [showRotateWarning, setShowRotateWarning] = useState(false);
   const [warningMessage, setWarningMessage] = useState("Rotate Your Device");
@@ -209,92 +210,135 @@ export default function WimHofClient() {
           <p>Practice the Wim Hof Method power breathing with this free interactive breathwork drill. Follow 30 rapid inhale exhale cycles with visual pacer that expands on inhale and contracts on exhale. Track breath count combo streaks and oxygen boost level. Perfect for stress reduction increased energy improved immunity and mental clarity. No registration required.</p>
         </section>
 
-        <div className="grid grid-cols-6 gap-3 mb-4 h-[88px]">
-          <SCard icon={<Flame className="text-orange-500"/>} value={score} label="Score" dark={isDarkMode}/>
-          <SCard icon={<Trophy className="text-yellow-500"/>} value={bestScore} label="Best" dark={isDarkMode}/>
-          <SCard icon={<Wind className="text-green-500"/>} value={`${breathCount}/30`} label="Breaths" dark={isDarkMode}/>
-          <SCard icon={<Zap className="text-purple-500"/>} value={combo} label="Combo" dark={isDarkMode}/>
-          <SCard icon={<Award className="text-amber-500"/>} value={bestCombo} label="Best Combo" dark={isDarkMode}/>
-          <SCard icon={<Brain className="text-cyan-500"/>} value={Math.min(100, Math.floor(score * 3.33))} unit="%" label="Oxygen" dark={isDarkMode}/>
+        {/* STAT BOARD */}
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-3 mb-4 h-auto min-h-[88px] py-1">
+          <StatCard icon={<Flame className="text-orange-500"/>} value={score} label="Score" isDark={isDarkMode}/>
+          <StatCard icon={<Trophy className="text-yellow-500"/>} value={bestScore} label="Best" isDark={isDarkMode}/>
+          <StatCard icon={<Wind className="text-green-500"/>} value={`${breathCount}/30`} label="Breaths" isDark={isDarkMode}/>
+          <StatCard icon={<Zap className="text-purple-500"/>} value={combo} label="Combo" isDark={isDarkMode}/>
+          <StatCard icon={<Award className="text-amber-500"/>} value={bestCombo} label="Best Combo" isDark={isDarkMode}/>
+          <StatCard icon={<Brain className="text-cyan-500"/>} value={Math.min(100, Math.floor(score * 3.33))} unit="%" label="Oxygen" isDark={isDarkMode}/>
         </div>
 
         <div className="h-10 mb-2 flex justify-center items-center">
           <div className={`px-4 py-1.5 rounded-lg text-white font-semibold text-sm transition-all duration-200 ${feedback?'opacity-100 scale-100':'opacity-0 scale-95'} ${feedbackType==='success'?'bg-green-500':'bg-red-500'}`}>{feedback||'\u00A0'}</div>
         </div>
 
-        <div ref={containerRef} className={`relative ${isFullscreen?'fixed inset-0 z-50':'rounded-xl border-2'}`} style={{background:isBoxDarkMode?'#030303':'#ffffff',aspectRatio:isFullscreen?'auto':'16/9',maxWidth:'100%',margin:'0 auto',borderColor:isDarkMode?'#374151':'#e5e7eb'}}>
+        <div ref={containerRef} className={`relative overflow-hidden ${isFullscreen?'fixed inset-0 z-50':'rounded-xl border-2'}`} style={{background:isBoxDarkMode?'#030303':'#ffffff',aspectRatio:isFullscreen?'auto':'16/9',maxWidth:'100%',margin:'0 auto',borderColor:isDarkMode?'#374151':'#e5e7eb'}}>
           {/* Mobile Rotate Device Warning Overlay */}
-      {showRotateWarning && (
-        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-gray-950/95 text-center p-6" aria-hidden="true">
-          <div className="animate-bounce mb-4 text-blue-500">
-            <svg className="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-            </svg>
-          </div>
-          <h3 className="text-lg font-bold text-white mb-2">{warningMessage}</h3>
-          <p className="text-sm text-gray-400 mb-6">Please use landscape orientation or fullscreen mode for the best training experience.</p>
-          <Link href="/drills/mental-fitness">
-            <button className="px-5 py-2.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-350 hover:text-white font-bold rounded-lg text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
-              Go Back
-            </button>
-          </Link>
-        </div>
-      )}
+          {showRotateWarning && (
+            <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-gray-950/95 text-center p-6" aria-hidden="true">
+              <div className="animate-bounce mb-4 text-blue-500">
+                <svg className="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-bold text-white mb-2">{warningMessage}</h3>
+              <p className="text-sm text-gray-400 mb-6">Please use landscape orientation or fullscreen mode for the best training experience.</p>
+              <Link href="/drills/mental-fitness">
+                <button className="px-5 py-2.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-350 hover:text-white font-bold rounded-lg text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                  </svg>
+                  Go Back
+                </button>
+              </Link>
+            </div>
+          )}
 
           {isFullscreen&&gameState==='playing'&&(
-            <>
-              <div className="absolute top-4 right-4 z-30 flex gap-3">
-                <button onClick={resetDrill} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg hover:bg-black/70 transition text-white" title="Reset"><RefreshCw className="w-5 h-5"/></button>
-                <button onClick={()=>setIsDarkMode(!isDarkMode)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg hover:bg-black/70 transition text-white">{isDarkMode?<Sun className="w-5 h-5"/>:<Moon className="w-5 h-5"/>}</button>
-                <button onClick={()=>setIsBoxDarkMode(!isBoxDarkMode)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg hover:bg-black/70 transition text-white"><Eye className="w-5 h-5"/></button>
-                <button onClick={()=>setSoundEnabled(!soundEnabled)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg hover:bg-black/70 transition text-white">{soundEnabled?<Volume2 className="w-5 h-5"/>:<VolumeX className="w-5 h-5"/>}</button>
-                <button onClick={toggleFullscreen} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg hover:bg-black/70 transition text-white"><Minimize2 className="w-5 h-5"/></button>
-              </div>
-              <div className="absolute top-4 left-4 z-30 bg-black/50 backdrop-blur-sm rounded-lg px-4 py-2 text-white text-sm">Score: <span className="text-yellow-400 font-bold">{score}</span> | Breaths: <span className="text-green-400 font-bold">{breathCount}/30</span> | Combo: <span className="text-purple-400 font-bold">{combo}</span></div>
-            </>
+            <div className="absolute top-4 right-4 z-30 flex gap-3">
+              <button onClick={resetDrill} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg hover:bg-black/70 transition text-white" title="Reset"><RefreshCw className="w-5 h-5"/></button>
+              <button onClick={()=>setIsDarkMode(!isDarkMode)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg hover:bg-black/70 transition text-white">{isDarkMode?<Sun className="w-5 h-5"/>:<Moon className="w-5 h-5"/>}</button>
+              <button onClick={()=>setIsBoxDarkMode(!isBoxDarkMode)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg hover:bg-black/70 transition text-white"><Eye className="w-5 h-5"/></button>
+              <button onClick={()=>setSoundEnabled(!soundEnabled)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg hover:bg-black/70 transition text-white">{soundEnabled?<Volume2 className="w-5 h-5"/>:<VolumeX className="w-5 h-5"/>}</button>
+              <button onClick={toggleFullscreen} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg hover:bg-black/70 transition text-white"><Minimize2 className="w-5 h-5"/></button>
+            </div>
           )}
 
           <div className="absolute inset-0 flex items-center justify-center">
+            {/* START SCREEN */}
             {gameState==='start'&&(
-              <div className="absolute inset-0 flex items-center justify-center rounded-xl z-10 backdrop-blur-sm" style={{background:isBoxDarkMode?'rgba(3,3,3,0.95)':'rgba(255,255,255,0.95)'}}>
-                <div className={`rounded-2xl p-6 sm:p-8 text-center max-w-md mx-4 shadow-xl border ${isBoxDarkMode?'bg-gray-800 border-gray-700':'bg-white border-gray-200'}`}>
-                  <Flame className="w-16 h-16 text-cyan-500 mx-auto mb-4"/>
-                  <h2 className={`text-2xl font-bold mb-2 ${isBoxDarkMode?'text-white':'text-gray-900'}`}>WHM Power Breathing</h2>
-                  <p className={`mb-2 ${isBoxDarkMode?'text-gray-300':'text-gray-600'}`}>30 power breaths • 1 point per breath • Combo streaks</p>
-                  <p className={`mb-6 text-sm ${isBoxDarkMode?'text-gray-400':'text-gray-500'}`}>Rapid inhale-exhale cycles following the Wim Hof Method. Node expands on inhale, contracts on exhale. Perfect for boosting energy, immunity, and mental clarity.</p>
-                  <button onClick={startDrill} className="px-8 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-xl font-semibold hover:shadow-lg w-full transition-all transform hover:scale-[1.02] active:scale-[0.98]">Start Free Drill</button>
+              <div className="absolute inset-0 flex items-center justify-center rounded-xl z-40 backdrop-blur-sm" style={{background:isBoxDarkMode?'rgba(3,3,3,0.95)':'rgba(255,255,255,0.95)'}}>
+                <div className={`rounded-2xl p-4 sm:p-6 md:p-8 text-center max-w-[88%] sm:max-w-md mx-auto shadow-xl border ${isBoxDarkMode?'bg-gray-800 border-gray-700':'bg-white border-gray-200'}`}>
+                  <Flame className="w-12 h-12 sm:w-16 sm:h-16 text-cyan-500 mx-auto mb-3"/>
+                  <h2 className={`text-xl sm:text-2xl font-bold mb-2 ${isBoxDarkMode?'text-white':'text-gray-900'}`}>WHM Power Breathing</h2>
+                  <p className={`mb-2 text-sm ${isBoxDarkMode?'text-gray-300':'text-gray-600'}`}>30 power breaths • 1 point per breath • Combo streaks</p>
+                  <p className={`mb-4 sm:mb-6 text-xs sm:text-sm leading-relaxed ${isBoxDarkMode?'text-gray-400':'text-gray-500'}`}>Rapid inhale-exhale cycles following the Wim Hof Method. Node expands on inhale, contracts on exhale. Perfect for boosting energy, immunity, and mental clarity.</p>
+                  <button onClick={startDrill} className="px-6 py-2.5 sm:px-8 sm:py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-xl font-semibold hover:shadow-lg w-full transition-all transform hover:scale-[1.02] active:scale-[0.98] text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2">Start Free Drill</button>
                 </div>
               </div>
             )}
 
+            {/* PLAYING SCREEN - MOBILE OPTIMIZED WITH SMALLER BALL */}
             {gameState==='playing'&&(
-              <div className="text-center" style={{width:isFullscreen?'550px':'400px'}}>
-                <div style={{fontSize:isFullscreen?'3rem':'2.2rem',fontWeight:'200',letterSpacing:'8px',height:isFullscreen?'85px':'65px',color:isBoxDarkMode?'#ffffff':'#000000',textTransform:'uppercase'}}>{action}</div>
-                <div className="pacer-ring" style={{width:isFullscreen?'260px':'180px',height:isFullscreen?'260px':'180px',border:`1px solid ${isBoxDarkMode?'rgba(0,212,255,0.1)':'rgba(2,132,199,0.15)'}`,borderRadius:'50%',margin:'0 auto 50px',display:'flex',justifyContent:'center',alignItems:'center',position:'relative'}}>
-                  <div style={{width:isFullscreen?'45px':'30px',height:isFullscreen?'45px':'30px',background:isBoxDarkMode?'#00d4ff':'#0284c7',borderRadius:'50%',boxShadow:`0 0 35px ${isBoxDarkMode?'#00d4ff':'#0284c7'}`,transition:'transform 1.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 1.5s ease',transform:`scale(${nodeScale})`,opacity:nodeOpacity}}/>
+              <div className="text-center flex flex-col items-center justify-center h-full w-full px-2 sm:px-4">
+                {/* Action text ABOVE the breathing ball */}
+                <div style={{
+                  fontSize: isFullscreen ? '3rem' : 'clamp(1.1rem, 3.5vw, 2.2rem)',
+                  fontWeight: '200',
+                  letterSpacing: '6px',
+                  marginBottom: isFullscreen ? '30px' : 'clamp(8px, 1.5vw, 20px)',
+                  color: isBoxDarkMode ? '#ffffff' : '#000000',
+                  textTransform: 'uppercase',
+                  lineHeight: 1.1
+                }}>
+                  {action}
                 </div>
-                <div style={{fontSize:isFullscreen?'1rem':'0.8rem',letterSpacing:'3px',color:isBoxDarkMode?'#00d4ff':'#0284c7',opacity:0.5,marginTop:'20px'}}>{subData}</div>
+                
+                {/* Breathing ball - SMALLER for mobile */}
+                <div className="pacer-ring flex-shrink-0" style={{
+                  width: isFullscreen ? '260px' : 'min(100px, 25vw)',
+                  height: isFullscreen ? '260px' : 'min(100px, 25vw)',
+                  border: `1px solid ${isBoxDarkMode ? 'rgba(0,212,255,0.1)' : 'rgba(2,132,199,0.15)'}`,
+                  borderRadius: '50%',
+                  margin: '0 auto',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  position: 'relative'
+                }}>
+                  <div style={{
+                    width: isFullscreen ? '45px' : 'min(18px, 5vw)',
+                    height: isFullscreen ? '45px' : 'min(18px, 5vw)',
+                    background: isBoxDarkMode ? '#00d4ff' : '#0284c7',
+                    borderRadius: '50%',
+                    boxShadow: `0 0 25px ${isBoxDarkMode ? '#00d4ff' : '#0284c7'}`,
+                    transition: 'transform 1.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 1.5s ease',
+                    transform: `scale(${nodeScale})`,
+                    opacity: nodeOpacity
+                  }}/>
+                </div>
+                
+                {/* Breath counter BELOW the ball */}
+                <div style={{
+                  fontSize: isFullscreen ? '1rem' : 'clamp(0.7rem, 1.8vw, 0.8rem)',
+                  letterSpacing: '3px',
+                  color: isBoxDarkMode ? '#00d4ff' : '#0284c7',
+                  opacity: 0.5,
+                  marginTop: isFullscreen ? '20px' : 'clamp(8px, 1.5vw, 15px)'
+                }}>
+                  {subData}
+                </div>
               </div>
             )}
 
+            {/* GAME OVER SCREEN */}
             {gameState==='gameOver'&&(
-              <div className="absolute inset-0 flex items-center justify-center rounded-xl z-20 backdrop-blur-sm" style={{background:isBoxDarkMode?'rgba(3,3,3,0.95)':'rgba(255,255,255,0.95)'}}>
-                <div className={`rounded-2xl p-6 sm:p-8 shadow-xl border w-full max-w-[520px] mx-4 ${isBoxDarkMode?'bg-gray-800 border-gray-700':'bg-white border-gray-200'}`}>
-                  <div className="flex items-center justify-center gap-3 mb-4"><Award className="w-10 h-10 text-yellow-500"/><h2 className={`text-2xl font-bold ${isBoxDarkMode?'text-white':'text-gray-900'}`}>Session Complete!</h2></div>
-                  <p className={`text-center text-sm mb-6 ${isBoxDarkMode?'text-gray-400':'text-gray-500'}`}>You've completed all 30 power breaths. Regular WHM practice boosts energy, immunity, and mental clarity.</p>
-                  <div className="grid grid-cols-2 gap-3 mb-6">
-                    <RCard label="Final Score" value={score} icon={<Flame className="w-4 h-4"/>} color="orange" dark={isBoxDarkMode}/>
-                    <RCard label="Best Score" value={bestScore} icon={<Trophy className="w-4 h-4"/>} color="yellow" dark={isBoxDarkMode}/>
-                    <RCard label="Breaths" value={`${breathCount}/30`} icon={<Wind className="w-4 h-4"/>} color="green" dark={isBoxDarkMode}/>
-                    <RCard label="Best Combo" value={bestCombo} icon={<Zap className="w-4 h-4"/>} color="purple" dark={isBoxDarkMode}/>
-                    <RCard label="Oxygen Boost" value={Math.min(100,Math.floor(score*3.33))} unit="%" icon={<Brain className="w-4 h-4"/>} color="cyan" dark={isBoxDarkMode}/>
+              <div className="absolute inset-0 flex items-center justify-center rounded-xl z-40 backdrop-blur-sm" style={{background:isBoxDarkMode?'rgba(3,3,3,0.95)':'rgba(255,255,255,0.95)'}}>
+                <div className={`rounded-2xl p-4 sm:p-6 md:p-8 shadow-xl border w-full max-w-[88%] sm:max-w-[520px] mx-auto ${isBoxDarkMode?'bg-gray-800 border-gray-700':'bg-white border-gray-200'}`}>
+                  <div className="flex items-center justify-center gap-3 mb-3"><Award className="w-8 h-8 sm:w-10 sm:h-10 text-yellow-500"/><h2 className={`text-xl sm:text-2xl font-bold ${isBoxDarkMode?'text-white':'text-gray-900'}`}>Session Complete!</h2></div>
+                  <p className={`text-center text-xs sm:text-sm mb-4 sm:mb-6 ${isBoxDarkMode?'text-gray-400':'text-gray-500'}`}>You've completed all 30 power breaths. Regular WHM practice boosts energy, immunity, and mental clarity.</p>
+                  <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-4 sm:mb-6">
+                    <ResultCard label="Final Score" value={score} icon={<Flame className="w-4 h-4"/>} color="orange" isDark={isBoxDarkMode}/>
+                    <ResultCard label="Best Score" value={bestScore} icon={<Trophy className="w-4 h-4"/>} color="yellow" isDark={isBoxDarkMode}/>
+                    <ResultCard label="Breaths" value={`${breathCount}/30`} icon={<Wind className="w-4 h-4"/>} color="green" isDark={isBoxDarkMode}/>
+                    <ResultCard label="Best Combo" value={bestCombo} icon={<Zap className="w-4 h-4"/>} color="purple" isDark={isBoxDarkMode}/>
+                    <ResultCard label="Oxygen Boost" value={Math.min(100,Math.floor(score*3.33))} unit="%" icon={<Brain className="w-4 h-4"/>} color="cyan" isDark={isBoxDarkMode}/>
                   </div>
-                  <div className="flex gap-3">
-                    <Link href="/drills/mental-fitness" className="flex-1"><button className={`w-full px-4 py-2.5 rounded-lg font-semibold ${isDarkMode?'bg-gray-700 text-gray-300 hover:bg-gray-600':'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>← Back</button></Link>
-                    <button onClick={startDrill} className="flex-1 px-4 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all transform hover:scale-[1.02] active:scale-[0.98]">Breathe Again →</button>
+                  <div className="flex gap-2 sm:gap-3">
+                    <Link href="/drills/mental-fitness" className="flex-1"><button className={`w-full px-3 py-2 sm:px-4 sm:py-2.5 rounded-lg font-semibold text-sm ${isDarkMode?'bg-gray-700 text-gray-300 hover:bg-gray-600':'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>← Back</button></Link>
+                    <button onClick={startDrill} className="flex-1 px-3 py-2 sm:px-4 sm:py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] text-sm">Breathe Again →</button>
                   </div>
                 </div>
               </div>
@@ -361,7 +405,7 @@ export default function WimHofClient() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <Link href="/drills/mental-fitness/breathing-exercises/box-breathing" className={`group relative overflow-hidden rounded-xl border transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${isDarkMode ? 'bg-gray-800 border-gray-700 hover:border-blue-500' : 'bg-white border-gray-200 hover:border-blue-300'}`}><div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-indigo-500"></div><div className="p-4"><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center"><Wind className="w-4 h-4 text-blue-600" /></div><span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>Breathing</span></div><h3 className={`font-semibold text-sm mb-1 ${isDarkMode ? 'text-white group-hover:text-blue-400' : 'text-gray-900 group-hover:text-blue-600'} transition-colors`}>Box Breathing</h3><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>4-4-4-4 pattern used by Navy SEALs for calm focus under pressure.</p><div className="flex items-center gap-1 mt-3 text-blue-500 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">Start Drill <ArrowRight className="w-3 h-3" /></div></div></Link>
               <Link href="/drills/mental-fitness/breathing-exercises/4-7-8" className={`group relative overflow-hidden rounded-xl border transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${isDarkMode ? 'bg-gray-800 border-gray-700 hover:border-purple-500' : 'bg-white border-gray-200 hover:border-purple-300'}`}><div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 to-violet-500"></div><div className="p-4"><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center"><Clock className="w-4 h-4 text-purple-600" /></div><span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>Breathing</span></div><h3 className={`font-semibold text-sm mb-1 ${isDarkMode ? 'text-white group-hover:text-purple-400' : 'text-gray-900 group-hover:text-purple-600'} transition-colors`}>4-7-8 Breathing</h3><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Relaxation technique for deep sleep and anxiety reduction.</p><div className="flex items-center gap-1 mt-3 text-purple-500 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">Start Drill <ArrowRight className="w-3 h-3" /></div></div></Link>
-              <Link href="/drills/mental-fitness/stress-control/biofeedback" className={`group relative overflow-hidden rounded-xl border transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${isDarkMode ? 'bg-gray-800 border-gray-700 hover:border-emerald-500' : 'bg-white border-gray-200 hover:border-emerald-300'}`}><div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-green-500"></div><div className="p-4"><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center"><Brain className="w-4 h-4 text-emerald-600" /></div><span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>Stress Control</span></div><h3 className={`font-semibold text-sm mb-1 ${isDarkMode ? 'text-white group-hover:text-emerald-400' : 'text-gray-900 group-hover:text-emerald-600'} transition-colors`}>Biofeedback</h3><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Heart rate variability training for stress management.</p><div className="flex items-center gap-1 mt-3 text-emerald-500 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">Start Drill <ArrowRight className="w-3 h-3" /></div></div></Link>
+              
               <Link href="/drills/mental-fitness/stress-control/calm-under-pressure" className={`group relative overflow-hidden rounded-xl border transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${isDarkMode ? 'bg-gray-800 border-gray-700 hover:border-orange-500' : 'bg-white border-gray-200 hover:border-orange-300'}`}><div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-500 to-amber-500"></div><div className="p-4"><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center"><Target className="w-4 h-4 text-orange-600" /></div><span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>Stress Control</span></div><h3 className={`font-semibold text-sm mb-1 ${isDarkMode ? 'text-white group-hover:text-orange-400' : 'text-gray-900 group-hover:text-orange-600'} transition-colors`}>Calm Under Pressure</h3><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Decision-making drills under time pressure with stress inoculation.</p><div className="flex items-center gap-1 mt-3 text-orange-500 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">Start Drill <ArrowRight className="w-3 h-3" /></div></div></Link>
               <Link href="/drills/cognitive/focus/focus-timer" className={`group relative overflow-hidden rounded-xl border transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${isDarkMode ? 'bg-gray-800 border-gray-700 hover:border-rose-500' : 'bg-white border-gray-200 hover:border-rose-300'}`}><div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-rose-500 to-pink-500"></div><div className="p-4"><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-rose-100 flex items-center justify-center"><Timer className="w-4 h-4 text-rose-600" /></div><span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>Focus</span></div><h3 className={`font-semibold text-sm mb-1 ${isDarkMode ? 'text-white group-hover:text-rose-400' : 'text-gray-900 group-hover:text-rose-600'} transition-colors`}>Focus Timer</h3><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Build concentration stamina with structured focus sessions.</p><div className="flex items-center gap-1 mt-3 text-rose-500 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">Start Drill <ArrowRight className="w-3 h-3" /></div></div></Link>
               <Link href="/drills/productivity/focus-endurance/deep-work" className={`group relative overflow-hidden rounded-xl border transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${isDarkMode ? 'bg-gray-800 border-gray-700 hover:border-red-500' : 'bg-white border-gray-200 hover:border-red-300'}`}><div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-500 to-rose-500"></div><div className="p-4"><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center"><Brain className="w-4 h-4 text-red-600" /></div><span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>Productivity</span></div><h3 className={`font-semibold text-sm mb-1 ${isDarkMode ? 'text-white group-hover:text-red-400' : 'text-gray-900 group-hover:text-red-600'} transition-colors`}>Deep Work Timer</h3><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Structured focus sessions for peak productivity and flow state.</p><div className="flex items-center gap-1 mt-3 text-red-500 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">Start Drill <ArrowRight className="w-3 h-3" /></div></div></Link>
@@ -378,22 +422,28 @@ export default function WimHofClient() {
   );
 }
 
-function SCard({ icon, value, label, unit='', dark }) {
+function StatCard({ icon, value, label, unit='', isDark }) {
   return (
-    <div className={`rounded-xl shadow-sm border p-2 sm:p-3 text-center flex flex-col justify-center h-full ${dark?'bg-gray-800 border-gray-700':'bg-white border-gray-100'}`}>
-      <div className="mb-1 flex justify-center">{icon}</div>
-      <p className={`text-lg sm:text-xl font-bold truncate ${dark?'text-white':'text-gray-900'}`}>{value}{unit}</p>
-      <p className={`text-[10px] sm:text-xs truncate ${dark?'text-gray-400':'text-gray-500'}`}>{label}</p>
+    <div className={`rounded-xl shadow-sm border p-2 sm:p-3 text-center flex flex-col justify-center h-full transition-colors ${isDark?'bg-gray-800 border-gray-700':'bg-white border-gray-100'}`}>
+      <div className="mb-1 flex justify-center" aria-hidden="true">{icon}</div>
+      <p className={`text-lg sm:text-xl font-bold truncate ${isDark?'text-white':'text-gray-900'}`}>{value}{unit}</p>
+      <p className={`text-[10px] sm:text-xs truncate ${isDark?'text-gray-400':'text-gray-500'}`}>{label}</p>
     </div>
   );
 }
 
-function RCard({ label, value, unit='', icon, color, dark }) {
-  const m={orange:'bg-orange-500/10 border-orange-500/30 text-orange-500',yellow:'bg-yellow-500/10 border-yellow-500/30 text-yellow-500',green:'bg-green-500/10 border-green-500/30 text-green-500',purple:'bg-purple-500/10 border-purple-500/30 text-purple-500',cyan:'bg-cyan-500/10 border-cyan-500/30 text-cyan-500'};
-  const c=m[color]||m.orange; const [bg,border,text]=c.split(' ');
+function ResultCard({ label, value, unit='', icon, color, isDark }) {
+  const colorMap={
+    orange:'bg-orange-500/10 border-orange-500/30 text-orange-500',
+    yellow:'bg-yellow-500/10 border-yellow-500/30 text-yellow-500',
+    green:'bg-green-500/10 border-green-500/30 text-green-500',
+    purple:'bg-purple-500/10 border-purple-500/30 text-purple-500',
+    cyan:'bg-cyan-500/10 border-cyan-500/30 text-cyan-500'
+  };
+  const c=colorMap[color]||colorMap.orange; const [bg,border,text]=c.split(' ');
   return (
     <div className={`flex items-center justify-between p-3 rounded-lg border ${bg} ${border}`}>
-      <div className="flex items-center gap-2 min-w-0"><div className={text}>{icon}</div><span className={`text-xs sm:text-sm truncate ${dark?'text-gray-300':'text-gray-600'}`}>{label}</span></div>
+      <div className="flex items-center gap-2 min-w-0"><div className={text} aria-hidden="true">{icon}</div><span className={`text-xs sm:text-sm truncate ${isDark?'text-gray-300':'text-gray-600'}`}>{label}</span></div>
       <span className={`font-bold text-base sm:text-lg flex-shrink-0 ml-2 ${text}`}>{value}{unit}</span>
     </div>
   );

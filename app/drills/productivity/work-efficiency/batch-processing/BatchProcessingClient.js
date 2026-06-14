@@ -346,7 +346,7 @@ export default function BatchProcessingClient() {
         )}
 
         {!isFullscreen && (
-          <div className="grid grid-cols-7 gap-3 mb-4 h-[88px]">
+          <div className="grid grid-cols-4 sm:grid-cols-7 gap-2 sm:gap-3 mb-4 h-auto min-h-[88px] py-1">
             <StatCard icon={<Target className="text-blue-600" />} value={score} label="Score" d={isDarkMode} />
             <StatCard icon={<Trophy className="text-yellow-500" />} value={bestScore} label="Best" d={isDarkMode} />
             <StatCard icon={<Timer className={timeLeft < 15 ? 'text-red-600' : 'text-green-600'} />} value={timeLeft} label="Time" unit="s" d={isDarkMode} />

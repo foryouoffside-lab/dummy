@@ -158,7 +158,7 @@ export default function TowerOfHanoiClient() {
           <p>Master the classic Tower of Hanoi puzzle with progressive difficulty from 3 to 8 disks. Move all disks from Tower 1 to Tower 3 following these rules: Only one disk can be moved at a time. Never place a larger disk on top of a smaller disk. Each level completion earns +10 points. Perfect solutions minimum moves earn special celebration. Minimum moves scale exponentially: 3 disks = 7, 4 = 15, 5 = 31, 6 = 63, 7 = 127, 8 = 255. No penalties for invalid moves - pure positive problem-solving training. 60-second timed challenge with best score saved locally. Perfect for cognitive development, programming interview preparation, and brain training.</p>
         </section>
 
-        <div className="grid grid-cols-7 gap-3 mb-4 h-[88px]">
+        <div className="grid grid-cols-4 sm:grid-cols-7 gap-2 sm:gap-3 mb-4 h-auto min-h-[88px] py-1">
           <StatCard icon={<Target className="text-blue-600" />} value={score} label="Score" isDark={isDarkMode} />
           <StatCard icon={<Trophy className="text-yellow-600" />} value={bestScore} label="Best" isDark={isDarkMode} />
           <StatCard icon={<Timer className={timeRemaining <= 10 ? 'text-red-600' : 'text-green-600'} />} value={`${timeRemaining}s`} label="Time" isDark={isDarkMode} />

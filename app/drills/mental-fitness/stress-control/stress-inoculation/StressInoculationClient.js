@@ -160,7 +160,7 @@ export default function StressInoculationClient() {
           <p>Build stress resilience through controlled exposure with this free stress inoculation drill. Maintain 5:6 coherence breathing under red visual strobe and audio stress induction. Earn 2x points during the 90-second stress phase. 5-minute progressive session that improves stress tolerance, emotional regulation, and focus under pressure. No registration required.</p>
         </section>
 
-        <div className="grid grid-cols-5 gap-3 mb-4 h-[88px]">
+        <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-3 mb-4 h-auto min-h-[88px] py-1">
           <SCard icon={<Brain className="text-blue-500"/>} value={score} label="Resilience" dark={isDarkMode}/>
           <SCard icon={<Trophy className="text-yellow-500"/>} value={bestScore} label="Best" dark={isDarkMode}/>
           <SCard icon={<Wind className="text-cyan-500"/>} value={totalBreaths} label="Breaths" dark={isDarkMode}/>

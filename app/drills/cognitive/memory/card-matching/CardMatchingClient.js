@@ -185,7 +185,7 @@ export default function CardMatchingClient() {
           <p>Train visual memory by matching pairs of icons on progressively expanding grids. 15+ unique icons including shapes symbols and objects with distinct colors. Grids expand from 12 cards at level 1 to 32+ cards at higher levels. Earn +10 points for completing each grid. Combo streaks at every 3 consecutive matches. No penalties - pure positive reinforcement memory training. 60-second timed challenge with best score saved locally. Perfect for brain training cognitive enhancement and memory improvement. No registration required.</p>
         </section>
 
-        <div className="grid grid-cols-7 gap-3 mb-4 h-[88px]">
+        <div className="grid grid-cols-4 sm:grid-cols-7 gap-2 sm:gap-3 mb-4 h-auto min-h-[88px] py-1">
           <StatCard icon={<Target className="text-blue-600" />} value={score} label="Score" isDark={isDarkMode} />
           <StatCard icon={<Trophy className="text-yellow-600" />} value={bestScore} label="Best" isDark={isDarkMode} />
           <StatCard icon={<Timer className={timeRemaining <= 10 ? 'text-red-600' : 'text-green-600'} />} value={`${timeRemaining}s`} label="Time" isDark={isDarkMode} />

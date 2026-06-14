@@ -175,7 +175,7 @@ export default function ListeningComprehensionClient() {
           <p>Improve auditory processing and memory recall with this free interactive listening comprehension drill. Features 9 audio passages spanning 3 difficulty levels Easy Medium Hard with 18 total questions. Listen to male and female voice narrations answer multiple choice questions and optionally view transcripts. Perfect for IELTS listening practice TOEFL preparation ESL learners and cognitive auditory training. 60-second timed challenge with score accuracy and best performance tracking. No registration required.</p>
         </section>
 
-        <div className="grid grid-cols-7 gap-3 mb-4 h-[88px]">
+        <div className="grid grid-cols-4 sm:grid-cols-7 gap-2 sm:gap-3 mb-4 h-auto min-h-[88px] py-1">
           <StatCard icon={<Target className="text-blue-600" />} value={score} label="Score" isDark={isDarkMode} />
           <StatCard icon={<Trophy className="text-yellow-600" />} value={bestScore} label="Best" isDark={isDarkMode} />
           <StatCard icon={<Timer className={timeLeft <= 10 ? 'text-red-600' : 'text-green-600'} />} value={timeLeft} label="Time" unit="s" isDark={isDarkMode} />

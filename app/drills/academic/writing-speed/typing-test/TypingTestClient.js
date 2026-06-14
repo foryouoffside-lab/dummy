@@ -198,7 +198,7 @@ export default function TypingTestClient() {
           <p>Test and improve your typing speed with this free online typing test featuring 30 unique quotes across Easy Medium and Hard difficulty levels. 60 second timed challenge with real time WPM tracking accuracy percentage error count and combo streak bonuses. No penalties just pure typing practice. Character by character feedback shows correct green and incorrect red typing. Perfect for employment typing tests data entry practice transcription training and anyone wanting to type faster. No registration required.</p>
         </section>
 
-        <div className="grid grid-cols-7 gap-3 mb-4 h-[88px]">
+        <div className="grid grid-cols-4 sm:grid-cols-7 gap-2 sm:gap-3 mb-4 h-auto min-h-[88px] py-1">
           <StatCard icon={<Target className="text-blue-600" />} value={score} label="Score" isDark={isDarkMode} />
           <StatCard icon={<Trophy className="text-yellow-600" />} value={bestScore} label="Best" isDark={isDarkMode} />
           <StatCard icon={<Timer className={timeLeft <= 10 ? 'text-red-600' : 'text-green-600'} />} value={timeLeft} label="Time" unit="s" isDark={isDarkMode} />

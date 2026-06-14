@@ -178,7 +178,7 @@ export default function EliteNeuroSwitch() {
           <p>Train selective attention and cognitive switching with this free neuro-switch drill. Click only RED targets while ignoring BLUE distractors under time pressure. Features 5 lives system combo streaks adaptive target repositioning every 950ms and 60 second timed challenge. Perfect for brain training cognitive enhancement ADHD focus training and mental agility. No registration required.</p>
         </section>
 
-        <div className="grid grid-cols-7 gap-3 mb-4 h-[88px]">
+        <div className="grid grid-cols-4 sm:grid-cols-7 gap-2 sm:gap-3 mb-4 h-auto min-h-[88px] py-1">
           <StatCard icon={<Target className="text-blue-600" />} value={score} label="Score" isDark={isDarkMode} />
           <StatCard icon={<Trophy className="text-yellow-600" />} value={bestScore} label="Best" isDark={isDarkMode} />
           <StatCard icon={<Timer className={timeLeft < 15 ? 'text-red-600' : 'text-green-600'} />} value={`${timeLeft}s`} label="Time" isDark={isDarkMode} />

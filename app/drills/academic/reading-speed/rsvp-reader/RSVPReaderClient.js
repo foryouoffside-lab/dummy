@@ -158,7 +158,7 @@ export default function RSVPReaderClient() {
           <p>Master speed reading with this free RSVP Rapid Serial Visual Presentation reader. Words flash at the Optimal Recognition Point ORP for maximum comprehension without eye movements. Adjustable speed from 100 to 1000 WPM with educational text about neuroplasticity and speed reading. Train your brain to read 3-4x faster. Perfect for students professionals competitive exam preparation and lifelong learners. No registration required.</p>
         </section>
 
-        <div className="grid grid-cols-7 gap-3 mb-4 h-[88px]">
+        <div className="grid grid-cols-4 sm:grid-cols-7 gap-2 sm:gap-3 mb-4 h-auto min-h-[88px] py-1">
           <StatCard icon={<Zap className="text-violet-600" />} value={effectiveWPM} label="Effective WPM" isDark={isDarkMode} />
           <StatCard icon={<Trophy className="text-yellow-600" />} value={bestScore} label="Best WPM" isDark={isDarkMode} />
           <StatCard icon={<Timer className="text-blue-600" />} value={timeElapsed} label="Time" unit="s" isDark={isDarkMode} />
