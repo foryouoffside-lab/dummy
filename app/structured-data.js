@@ -4,7 +4,7 @@
 
 const BASE_URL = 'https://skilldrills.online';
 const ORG_NAME = 'SkillDrills';
-const ORG_DESCRIPTION = 'Free online training platform with 149+ interactive drills for FPS gaming skills, cognitive enhancement, brain training, memory improvement, typing speed, visual tracking, and mental fitness.';
+const ORG_DESCRIPTION = 'Free online training platform with 135+ interactive drills for FPS gaming skills, cognitive enhancement, brain training, memory improvement, typing speed, visual tracking, and mental fitness.';
 const TODAY = new Date().toISOString().split('T')[0];
 
 // ============================================

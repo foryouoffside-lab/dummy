@@ -2,8 +2,8 @@ import Link from 'next/link';
 import { Target, ArrowRight, Sparkles, Gamepad2, Brain, Eye, BookOpen, Timer, Hand, Dumbbell, Heart, Database, ChevronRight } from 'lucide-react';
 
 export const metadata = {
-  title: 'All Training Drills - 149+ Free Exercises | SkillDrills',
-  description: 'Browse 149+ free training drills across 10 categories. FPS aim trainer, cognitive brain training, visual tracking, memory games, and mental fitness. No sign-up.',
+  title: 'All Training Drills - 135+ Free Exercises | SkillDrills',
+  description: 'Browse 135+ free training drills across 10 categories. FPS aim trainer, cognitive brain training, visual tracking, memory games, and mental fitness. No sign-up.',
   keywords: [
     'training drills', 'brain training', 'FPS aim trainer', 'cognitive exercises',
     'free drills online', 'skilldrills', 'all drills', 'free training',
@@ -11,8 +11,8 @@ export const metadata = {
     'productivity tools', 'motor skills', 'physical training', 'mental fitness',
   ],
   openGraph: {
-    title: 'All Training Drills - 149+ Free Exercises | SkillDrills',
-    description: '149+ free interactive drills for gaming, cognitive, and motor skills training. No sign-up.',
+    title: 'All Training Drills - 135+ Free Exercises | SkillDrills',
+    description: '135+ free interactive drills for gaming, cognitive, and motor skills training. No sign-up.',
     type: 'website',
     url: 'https://skilldrills.online/drills',
     siteName: 'SkillDrills',
@@ -27,7 +27,7 @@ export const metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'All Training Drills | SkillDrills',
-    description: '149+ free drills across 10 categories. No sign-up.',
+    description: '135+ free drills across 10 categories. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -63,7 +63,7 @@ export default function DrillsPage() {
       
       {/* SEO Content */}
       <section className="sr-only" aria-label="Drills directory for search engines">
-        <h2>All Training Drills - 149+ Free Exercises Across 10 Categories</h2>
+        <h2>All Training Drills - 135+ Free Exercises Across 10 Categories</h2>
         <p>
           Browse all free training drills on SkillDrills. 10 categories including FPS gaming aim trainer, visual tracking, cognitive brain training,
           visual reaction speed tests, academic typing and reading drills, productivity tools, memory exercises, motor skills training,
@@ -126,7 +126,7 @@ export default function DrillsPage() {
         <div className="text-center mb-12">
           <h2 id="categories-heading" className="text-2xl sm:text-3xl font-black text-white uppercase tracking-tight">Training Sectors</h2>
           <p className="text-gray-500 max-w-2xl mx-auto text-sm mt-1">
-            Browse through 10 specialized category modules comprising 149+ distinct performance diagnostic tasks.
+            Browse through 10 specialized category modules comprising 135+ distinct performance diagnostic tasks.
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">

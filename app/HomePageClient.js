@@ -125,7 +125,7 @@ const features = [
   { 
     icon: Target, 
     title: 'Focused Training', 
-    description: 'Target specific skill areas with 149+ specialized drills across 10 categories', 
+    description: 'Target specific skill areas with 135+ specialized drills across 10 categories', 
     gradient: 'from-emerald-400 to-green-500',
     bgGradient: 'from-emerald-50 to-green-50'
   },
@@ -244,7 +244,7 @@ export default function HomePageClient() {
       try {
         await navigator.share({
           title: 'SkillDrills - Free FPS Aim Trainer & Brain Training',
-          text: '149+ free drills for FPS gaming, cognitive skills, memory, and mental fitness. No sign-up!',
+          text: '135+ free drills for FPS gaming, cognitive skills, memory, and mental fitness. No sign-up!',
           url: 'https://skilldrills.online',
         });
       } catch (error) {
@@ -301,7 +301,7 @@ export default function HomePageClient() {
       <section className="sr-only" aria-label="Platform description">
         <h2>SkillDrills - Free Brain Training and FPS Aim Trainer Platform</h2>
         <p>
-          SkillDrills is a completely free online training platform offering 149+ interactive drills across 10 categories. 
+          SkillDrills is a completely free online training platform offering 1+ interactive drills across 10 categories. 
           FPS aim training for Valorant, CS2, Overwatch, Apex Legends and all competitive shooters. 
           Cognitive brain training including memory games, attention exercises, focus training and problem-solving puzzles. 
           Academic skills practice with typing tests, speed reading, mental math drills and reading comprehension. 
@@ -329,7 +329,7 @@ export default function HomePageClient() {
             </h1>
             
             <p className="text-lg sm:text-xl text-gray-400 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
-              Elevate your visual processing, mechanical aim, and working memory. Leverage 149+ scientific, zero-latency training drills. No installations. No credit cards.
+              Elevate your visual processing, mechanical aim, and working memory. Leverage 135+ scientific, zero-latency training drills. No installations. No credit cards.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
@@ -352,7 +352,7 @@ export default function HomePageClient() {
             {/* Quick Metrics */}
             <div className="grid grid-cols-3 gap-6 max-w-xl mx-auto lg:mx-0 pt-8 border-t border-white/5">
               <div className="text-left">
-                <p className="text-3xl font-black text-white tracking-tight">149+</p>
+                <p className="text-3xl font-black text-white tracking-tight">135+</p>
                 <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mt-1">Free Drills</p>
               </div>
               <div className="text-left">
@@ -685,7 +685,7 @@ export default function HomePageClient() {
             </div>
             <p className="text-sm text-gray-500 mb-3">&copy; 2026 SkillDrills. Elite Performance Training.</p>
             <p className="text-xs text-gray-600 max-w-2xl mx-auto leading-relaxed mb-8">
-              SkillDrills is a free high-performance training platform with 149+ interactive drills across 10 categories including FPS aim training, cognitive brain games, memory exercises, typing speed tests, mental math, speed reading, visual tracking, hand-eye coordination, breathing exercises, and productivity tools. No registration required. Start training instantly at skilldrills.online.
+              SkillDrills is a free high-performance training platform with 135+ interactive drills across 10 categories including FPS aim training, cognitive brain games, memory exercises, typing speed tests, mental math, speed reading, visual tracking, hand-eye coordination, breathing exercises, and productivity tools. No registration required. Start training instantly at skilldrills.online.
             </p>
             <div className="flex items-center justify-center gap-6 flex-wrap">
               <button onClick={sharePage} className="text-gray-500 hover:text-white transition-colors" title="Share SkillDrills" aria-label="Share SkillDrills with friends">

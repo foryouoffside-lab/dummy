@@ -16,7 +16,7 @@ export const metadata = {
     default: 'SkillDrills - Free FPS Aim Trainer & Cognitive Brain Training Platform',
     template: '%s',
   },
-  description: 'Master your mind and mechanics with 149+ free online training drills. Improve FPS aim, reaction time, memory, focus, typing speed, and cognitive skills. No sign-up required. Practice directly in your browser.',
+  description: 'Master your mind and mechanics with 135+ free online training drills. Improve FPS aim, reaction time, memory, focus, typing speed, and cognitive skills. No sign-up required. Practice directly in your browser.',
   keywords: [
     'free aim trainer', 'FPS aim trainer', 'aim trainer online', 'flick shot training',
     'tracking aim trainer', 'reaction time test', 'headshot trainer', 'mouse accuracy trainer',
@@ -50,7 +50,7 @@ export const metadata = {
   },
   openGraph: {
     title: 'SkillDrills - Free FPS Aim Trainer & Cognitive Brain Training Platform',
-    description: 'Master your mind and mechanics. 149+ free drills for FPS gaming, cognitive enhancement, memory, typing speed, and mental fitness. No sign-up, instant browser access.',
+    description: 'Master your mind and mechanics. 135+ free drills for FPS gaming, cognitive enhancement, memory, typing speed, and mental fitness. No sign-up, instant browser access.',
     url: 'https://skilldrills.online',
     siteName: 'SkillDrills',
     images: [{
@@ -65,7 +65,7 @@ export const metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'SkillDrills - Free FPS Aim & Brain Training',
-    description: '149+ free drills. FPS aim trainer, brain games, memory exercises, typing tests. No sign-up.',
+    description: '135+ free drills. FPS aim trainer, brain games, memory exercises, typing tests. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: {
@@ -154,7 +154,7 @@ export default function RootLayout({ children }) {
               "name": "SkillDrills",
               "url": "https://skilldrills.online",
               "logo": "https://skilldrills.online/icons/icon-512x512.png",
-              "description": "Free online platform with 149+ training drills for FPS gaming skills, cognitive enhancement, brain training, memory improvement, typing speed, and mental fitness.",
+              "description": "Free online platform with 135+ training drills for FPS gaming skills, cognitive enhancement, brain training, memory improvement, typing speed, and mental fitness.",
               "email": "support@skilldrills.online",
               "foundingDate": "2026",
               "slogan": "Master Your Mind & Mechanics",
