@@ -38,7 +38,7 @@ export const metadata = {
 
 
 const drillCategories = [
-  { name: 'FPS Gaming', color: 'from-red-500 to-orange-600', icon: Gamepad2, description: 'Reaction speed, aim training, flick shots, tracking and peripheral vision for competitive FPS gamers', slug: 'fps', drills: '28 drills', keywords: 'aim trainer, flick shots, Valorant, CS2, Overwatch' },
+  { name: 'FPS Gaming', color: 'from-red-500 to-orange-600', icon: Gamepad2, description: 'Reaction speed, aim training, flick shots, tracking and peripheral vision for competitive FPS gamers', slug: 'fps', drills: '15 drills', keywords: 'aim trainer, flick shots, Valorant, CS2, Overwatch' },
   { name: 'Cognitive', color: 'from-purple-500 to-indigo-600', icon: Brain, description: 'Memory, attention, focus, problem-solving and processing speed brain training exercises', slug: 'cognitive', drills: '16 drills', keywords: 'brain training, memory games, attention exercises' },
   { name: 'Visual', color: 'from-blue-500 to-cyan-600', icon: Eye, description: 'Reaction speed, tracking accuracy, peripheral vision, depth perception and visual recognition drills', slug: 'visual', drills: '14 drills', keywords: 'visual training, reaction time, eye tracking' },
   { name: 'Visual Tracking', color: 'from-cyan-500 to-blue-600', icon: Eye, description: 'Smooth pursuit, visual velocity estimation, gaze stability, trajectory prediction and saccadic training', slug: 'visual-tracking', drills: '25 drills', keywords: 'smooth pursuit, eye tracking, gaze stability' },
@@ -190,7 +190,7 @@ export default function DrillsPage() {
             <div className="flex-1 w-full max-w-md">
               <div className="bg-black/40 rounded-2xl p-6 border border-white/5">
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center"><p className="text-3xl font-black text-white">22</p><p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">FPS Drills</p></div>
+                  <div className="text-center"><p className="text-3xl font-black text-white">15</p><p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">FPS Drills</p></div>
                   <div className="text-center"><p className="text-3xl font-black text-white">1:1</p><p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">Mouse Raw Input</p></div>
                   <div className="text-center"><p className="text-3xl font-black text-white">360Hz</p><p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">Hz Optimized</p></div>
                   <div className="text-center"><p className="text-3xl font-black text-white">FREE</p><p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">No Sign-Up</p></div>
@@ -468,7 +468,7 @@ export default function DrillsPage() {
                 <li><Link href="/drills/fps/flick-shot-training" className="hover:text-white transition-colors">Flick Shot Trainer</Link></li>
                 <li><Link href="/drills/fps/headshot-trainer" className="hover:text-white transition-colors">Headshot Trainer</Link></li>
                 <li><Link href="/drills/fps/reactive-tracking" className="hover:text-white transition-colors">Reactive Tracking</Link></li>
-                <li><Link href="/drills/fps" className="text-blue-400 hover:text-blue-300 transition-colors font-semibold">All 22 FPS Drills</Link></li>
+                <li><Link href="/drills/fps" className="text-blue-400 hover:text-blue-300 transition-colors font-semibold">All 15 FPS Drills</Link></li>
               </ul>
             </div>
             <div>
