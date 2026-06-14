@@ -5,7 +5,7 @@ import { COACHES, getActiveCoach, getCoachResponse, speakCoachText, handleCoachF
 import { recordDrillResult } from '../../../../lib/performanceTelemetry';
 import { getAdaptiveParams } from '../../../../lib/adaptiveDifficulty';
 import Link from 'next/link';
-import { Volume2, VolumeX, Maximize2, Minimize2, Sun, Moon, Eye, Timer, Trophy, Target, Zap, Activity, Info, Lock, AlertCircle, RefreshCw, Home, ChevronRight, Play, BarChart3, TrendingUp, Lightbulb, Clock, CheckCircle2, GraduationCap, ArrowRight, Sparkles, Award, Crosshair } from 'lucide-react';;
+import { Activity, AlertCircle, ArrowRight, Award, BarChart3, CheckCircle2, ChevronRight, Clock, Crosshair, Eye, GraduationCap, Home, Info, Lightbulb, Lock, Maximize2, Minimize2, Moon, Play, RefreshCw, Sparkles, Star, Sun, Target, Timer, TrendingUp, Trophy, Volume2, VolumeX, Zap } from 'lucide-react';;;
 
 const DRILL_DURATION = 60; // 60 seconds
 const BALL_COUNT = 6;
@@ -692,6 +692,16 @@ export default function ProTrackingClient() {
     crosshairInitRef.current = true;
   }, [startTimer, requestPointerLock, gameType]);
 
+    // Display helpers for stats board
+  const displayScore = trackingScore;
+  const displayBest = bestScore;
+  const displayTime = typeof timeLeft !== 'undefined' ? `${timeLeft}s` : '60s';
+  const displayAccuracy = typeof trackingAccuracy !== 'undefined' ? `${trackingAccuracy}%` : '100%';
+  const displayCombo = typeof trackingCombo !== 'undefined' ? trackingCombo : 0;
+  const displayMaxCombo = typeof bestCombo !== 'undefined' ? bestCombo : '-';
+  const displayReaction = '-';
+  const displaySens = typeof universalSens !== 'undefined' ? `${universalSens.toFixed(2)}x` : '1.00x';
+
   return (
     <div ref={pageRef} className="min-h-screen select-none font-mono bg-[#080d1a] text-slate-100 relative overflow-hidden">
       
@@ -740,6 +750,20 @@ export default function ProTrackingClient() {
         <div className={isFullscreen ? "w-full h-full" : "block"}>
           {/* Large Esports HUD Telemetry */}
           
+
+          {/* Stats Board */}
+          {!isFullscreen && (
+            <div className="grid grid-cols-4 sm:grid-cols-8 gap-2 sm:gap-3 mb-6 h-auto min-h-[88px] py-1">
+              <StatCard icon={<Target className="text-red-500 w-5 h-5" />} value={displayScore} label="Score" />
+              <StatCard icon={<Trophy className="text-yellow-500 w-5 h-5" />} value={displayBest} label="Best" />
+              <StatCard icon={<Timer className="text-green-500 w-5 h-5" />} value={displayTime} label="Time" />
+              <StatCard icon={<BarChart3 className="text-purple-500 w-5 h-5" />} value={displayAccuracy} label="Accuracy" />
+              <StatCard icon={<Zap className="text-orange-500 w-5 h-5" />} value={displayCombo} label="Combo" />
+              <StatCard icon={<Star className="text-yellow-400 w-5 h-5" />} value={displayMaxCombo} label="Max Combo" />
+              <StatCard icon={<Clock className="text-blue-500 w-5 h-5" />} value={displayReaction} label="Avg Reaction" />
+              <StatCard icon={<Crosshair className="text-green-400 w-5 h-5" />} value={displaySens} label="Sens" />
+            </div>
+          )}
 
           <div 
             ref={containerRef} 
@@ -1236,6 +1260,22 @@ export default function ProTrackingClient() {
 
 
       </div>
+    </div>
+  );
+}
+
+// Hoisted StatCard Component for unified HUD telemetry display
+function StatCard({ icon, value, label, unit = '' }) {
+  return (
+    <div className="group rounded-xl border border-slate-900 bg-slate-950/40 p-2 text-center flex flex-col justify-center h-full transition-all duration-300 hover:scale-[1.03] hover:border-slate-800 backdrop-blur-sm">
+      <div className="mb-0.5 flex justify-center transition-transform duration-300 group-hover:scale-110" aria-hidden="true">
+        {icon}
+      </div>
+      <p className="text-xs sm:text-sm md:text-base font-extrabold tracking-tight truncate text-white">
+        {value}
+        <span className="text-[10px] sm:text-xs font-semibold ml-0.5 opacity-80 text-slate-400">{unit}</span>
+      </p>
+      <p className="text-[8px] sm:text-[9px] font-mono font-bold uppercase tracking-wider text-slate-500 truncate">{label}</p>
     </div>
   );
 }

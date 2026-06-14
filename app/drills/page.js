@@ -2,8 +2,8 @@ import Link from 'next/link';
 import { Target, ArrowRight, Sparkles, Gamepad2, Brain, Eye, BookOpen, Timer, Hand, Dumbbell, Heart, Database, ChevronRight } from 'lucide-react';
 
 export const metadata = {
-  title: 'All Training Drills - 90+ Free Exercises | SkillDrills',
-  description: 'Browse 90+ free training drills across 9 categories. FPS aim trainer, cognitive brain training, visual reaction speed, memory games, and mental fitness. No sign-up.',
+  title: 'All Training Drills - 149+ Free Exercises | SkillDrills',
+  description: 'Browse 149+ free training drills across 10 categories. FPS aim trainer, cognitive brain training, visual tracking, memory games, and mental fitness. No sign-up.',
   keywords: [
     'training drills', 'brain training', 'FPS aim trainer', 'cognitive exercises',
     'free drills online', 'skilldrills', 'all drills', 'free training',
@@ -11,8 +11,8 @@ export const metadata = {
     'productivity tools', 'motor skills', 'physical training', 'mental fitness',
   ],
   openGraph: {
-    title: 'All Training Drills - 90+ Free Exercises | SkillDrills',
-    description: '90+ free interactive drills for gaming, cognitive, and motor skills training. No sign-up.',
+    title: 'All Training Drills - 149+ Free Exercises | SkillDrills',
+    description: '149+ free interactive drills for gaming, cognitive, and motor skills training. No sign-up.',
     type: 'website',
     url: 'https://skilldrills.online/drills',
     siteName: 'SkillDrills',
@@ -27,7 +27,7 @@ export const metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'All Training Drills | SkillDrills',
-    description: '90+ free drills across 9 categories. No sign-up.',
+    description: '149+ free drills across 10 categories. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -38,9 +38,10 @@ export const metadata = {
 
 
 const drillCategories = [
-  { name: 'FPS Gaming', color: 'from-red-500 to-orange-600', icon: Gamepad2, description: 'Reaction speed, aim training, flick shots, tracking and peripheral vision for competitive FPS gamers', slug: 'fps', drills: '22 drills', keywords: 'aim trainer, flick shots, Valorant, CS2, Overwatch' },
+  { name: 'FPS Gaming', color: 'from-red-500 to-orange-600', icon: Gamepad2, description: 'Reaction speed, aim training, flick shots, tracking and peripheral vision for competitive FPS gamers', slug: 'fps', drills: '28 drills', keywords: 'aim trainer, flick shots, Valorant, CS2, Overwatch' },
   { name: 'Cognitive', color: 'from-purple-500 to-indigo-600', icon: Brain, description: 'Memory, attention, focus, problem-solving and processing speed brain training exercises', slug: 'cognitive', drills: '16 drills', keywords: 'brain training, memory games, attention exercises' },
-  { name: 'Visual', color: 'from-blue-500 to-cyan-600', icon: Eye, description: 'Reaction speed, tracking accuracy, peripheral vision, depth perception and visual recognition drills', slug: 'visual', drills: '13 drills', keywords: 'visual training, reaction time, eye tracking' },
+  { name: 'Visual', color: 'from-blue-500 to-cyan-600', icon: Eye, description: 'Reaction speed, tracking accuracy, peripheral vision, depth perception and visual recognition drills', slug: 'visual', drills: '14 drills', keywords: 'visual training, reaction time, eye tracking' },
+  { name: 'Visual Tracking', color: 'from-cyan-500 to-blue-600', icon: Eye, description: 'Smooth pursuit, visual velocity estimation, gaze stability, trajectory prediction and saccadic training', slug: 'visual-tracking', drills: '25 drills', keywords: 'smooth pursuit, eye tracking, gaze stability' },
   { name: 'Academic', color: 'from-yellow-500 to-amber-600', icon: BookOpen, description: 'Math speed, reading comprehension, writing speed, typing tests and inference practice', slug: 'academic', drills: '12 drills', keywords: 'typing test, speed reading, math practice' },
   { name: 'Productivity', color: 'from-emerald-500 to-teal-600', icon: Timer, description: 'Pomodoro timer, task management, focus sessions, deep work and habit tracking tools', slug: 'productivity', drills: '10 drills', keywords: 'pomodoro timer, focus tools, productivity apps' },
   { name: 'Memory', color: 'from-violet-500 to-purple-600', icon: Database, description: 'Short-term, working, long-term, spatial and associative memory training with scientific methods', slug: 'memory', drills: '15 drills', keywords: 'memory training, working memory, n-back' },
@@ -62,9 +63,9 @@ export default function DrillsPage() {
       
       {/* SEO Content */}
       <section className="sr-only" aria-label="Drills directory for search engines">
-        <h2>All Training Drills - 90+ Free Exercises Across 9 Categories</h2>
+        <h2>All Training Drills - 149+ Free Exercises Across 10 Categories</h2>
         <p>
-          Browse all free training drills on SkillDrills. 9 categories including FPS gaming aim trainer, cognitive brain training,
+          Browse all free training drills on SkillDrills. 10 categories including FPS gaming aim trainer, visual tracking, cognitive brain training,
           visual reaction speed tests, academic typing and reading drills, productivity tools, memory exercises, motor skills training,
           physical fitness drills, and mental wellness exercises. All drills are completely free with no registration required.
         </p>
@@ -125,7 +126,7 @@ export default function DrillsPage() {
         <div className="text-center mb-12">
           <h2 id="categories-heading" className="text-2xl sm:text-3xl font-black text-white uppercase tracking-tight">Training Sectors</h2>
           <p className="text-gray-500 max-w-2xl mx-auto text-sm mt-1">
-            Browse through 9 specialized category modules comprising 90+ distinct performance diagnostic tasks.
+            Browse through 10 specialized category modules comprising 149+ distinct performance diagnostic tasks.
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
@@ -136,6 +137,7 @@ export default function DrillsPage() {
               fps: 'hover:border-red-500/40 hover:shadow-[0_0_20px_rgba(239,68,68,0.1)]',
               cognitive: 'hover:border-purple-500/40 hover:shadow-[0_0_20px_rgba(168,85,247,0.1)]',
               visual: 'hover:border-blue-500/40 hover:shadow-[0_0_20px_rgba(59,130,246,0.1)]',
+              'visual-tracking': 'hover:border-cyan-500/40 hover:shadow-[0_0_20px_rgba(6,182,212,0.1)]',
               academic: 'hover:border-green-500/40 hover:shadow-[0_0_20px_rgba(34,197,94,0.1)]',
               productivity: 'hover:border-emerald-500/40 hover:shadow-[0_0_20px_rgba(16,185,129,0.1)]',
               memory: 'hover:border-violet-500/40 hover:shadow-[0_0_20px_rgba(99,102,241,0.1)]',

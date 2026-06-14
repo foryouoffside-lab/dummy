@@ -2,7 +2,7 @@ import VisualTrackingDrillsClient from './VisualTrackingDrillsClient';
 
 export const metadata = {
   title: 'Visual Tracking Training - 25 Free Eye Drills | SkillDrills',
-  description: 'Improve smooth pursuit, velocity estimation, and gaze stability with 16 free visual eye tracking drills. No sign-up.',
+  description: 'Improve smooth pursuit, velocity estimation, and gaze stability with 25 free visual eye tracking drills. No sign-up.',
   keywords: [
     'visual tracking training', 'eye tracking exercises', 'ocular pursuit drills',
     'gaze stability practice', 'saccade latency calibrator', 'free brain tracking',
@@ -12,7 +12,7 @@ export const metadata = {
   ],
   openGraph: {
     title: 'Visual Tracking Training - 25 Free Eye Drills | SkillDrills',
-    description: 'Improve smooth pursuit, velocity estimation, and gaze stability with 16 free visual eye tracking drills. No sign-up.',
+    description: 'Improve smooth pursuit, velocity estimation, and gaze stability with 25 free visual eye tracking drills. No sign-up.',
     type: 'website',
     url: 'https://skilldrills.online/drills/visual-tracking',
     siteName: 'SkillDrills',
@@ -27,7 +27,7 @@ export const metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Visual Tracking Training - 25 Free Eye Drills | SkillDrills',
-    description: 'Improve smooth pursuit, velocity estimation, and gaze stability with 16 free visual eye tracking drills. No sign-up.',
+    description: 'Improve smooth pursuit, velocity estimation, and gaze stability with 25 free visual eye tracking drills. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },

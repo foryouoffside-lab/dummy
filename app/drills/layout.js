@@ -3,7 +3,7 @@
     default: 'Training Drills - SkillDrills',
     template: '%s | SkillDrills',
   },
-  description: 'Free interactive training drills for FPS gaming, cognitive skills, memory, typing speed, visual tracking, motor skills, and mental fitness. 90+ drills across 9 categories.',
+  description: 'Free interactive training drills for FPS gaming, cognitive skills, memory, typing speed, visual tracking, motor skills, and mental fitness. 149+ drills across 10 categories.',
   keywords: [
     'training drills', 'brain training', 'FPS aim trainer', 'cognitive drills',
     'free online drills', 'skill training', 'interactive exercises',
@@ -11,7 +11,7 @@
   ],
   openGraph: {
     title: 'Training Drills | SkillDrills',
-    description: '90+ free interactive drills for gaming, cognitive, and motor skills training.',
+    description: '149+ free interactive drills for gaming, cognitive, and motor skills training.',
     type: 'website',
   },
   robots: {
@@ -26,8 +26,8 @@ export default function DrillsLayout({ children }) {
       <section className="sr-only" aria-label="Drills section description">
         <h2>SkillDrills Training Platform</h2>
         <p>
-          Browse 90+ free interactive training drills organized into 9 categories: FPS Gaming, 
-          Cognitive Training, Visual Training, Academic Drills, Productivity, Memory Training, 
+          Browse 149+ free interactive training drills organized into 10 categories: FPS Gaming, 
+          Cognitive Training, Visual Training, Visual Tracking, Academic Drills, Productivity, Memory Training, 
           Motor Skills, Physical Training, and Mental Fitness. All drills are free with no 
           registration required.
         </p>

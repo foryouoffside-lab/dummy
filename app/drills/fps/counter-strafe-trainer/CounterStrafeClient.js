@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { recordDrillResult } from '../../../../lib/performanceTelemetry';
 import { getAdaptiveParams } from '../../../../lib/adaptiveDifficulty';
 
-import { Crosshair, Zap, Timer, Trophy, Volume2, VolumeX, Maximize2, Minimize2, Sun, Moon, Eye, Info, Activity, Lock, AlertCircle, RefreshCw, Home, ChevronRight, Calculator, Sparkles, Cpu, TrendingUp, Award, Play, Target, CheckCircle2, ArrowRight, GraduationCap, Clock, Lightbulb, BarChart3 } from 'lucide-react';;
+import { Activity, AlertCircle, ArrowRight, Award, BarChart3, Calculator, CheckCircle2, ChevronRight, Clock, Cpu, Crosshair, Eye, GraduationCap, Home, Info, Lightbulb, Lock, Maximize2, Minimize2, Moon, Play, RefreshCw, Sparkles, Star, Sun, Target, Timer, TrendingUp, Trophy, Volume2, VolumeX, Zap } from 'lucide-react';;;
 
 const TARGET_SIZE = 45;
 const SPAWN_INTERVAL = 1200; // time between target spawns in ms
@@ -1013,6 +1013,16 @@ export default function CounterStrafeClient() {
   const totalShots = analytics.totalShots || 1;
   const cleanStrafePercentage = Math.round((analytics.cleanStrafes / totalShots) * 100);
 
+    // Display helpers for stats board
+  const displayScore = score;
+  const displayBest = bestScore;
+  const displayTime = typeof timeLeft !== 'undefined' ? `${timeLeft}s` : '60s';
+  const displayAccuracy = typeof trackingAccuracy !== 'undefined' ? `${trackingAccuracy}%` : '100%';
+  const displayCombo = typeof combo !== 'undefined' ? combo : 0;
+  const displayMaxCombo = '-';
+  const displayReaction = typeof avgReaction !== 'undefined' && avgReaction > 0 ? `${Math.round(avgReaction)}ms` : '-';
+  const displaySens = typeof universalSens !== 'undefined' ? `${universalSens.toFixed(2)}x` : '1.00x';
+
   return (
     <div ref={pageRef} className={`min-h-screen select-none font-mono ${isDarkMode ? 'bg-[#080d1a] text-slate-100' : 'bg-slate-50 text-slate-900'}`}>
       
@@ -1092,6 +1102,20 @@ export default function CounterStrafeClient() {
             
 
             {/* Main Interactive Training Box */}
+            {/* Stats Board */}
+            {!isFullscreen && (
+              <div className="grid grid-cols-4 sm:grid-cols-8 gap-2 sm:gap-3 mb-6 h-auto min-h-[88px] py-1">
+                <StatCard icon={<Target className="text-red-500 w-5 h-5" />} value={displayScore} label="Score" />
+                <StatCard icon={<Trophy className="text-yellow-500 w-5 h-5" />} value={displayBest} label="Best" />
+                <StatCard icon={<Timer className="text-green-500 w-5 h-5" />} value={displayTime} label="Time" />
+                <StatCard icon={<BarChart3 className="text-purple-500 w-5 h-5" />} value={displayAccuracy} label="Accuracy" />
+                <StatCard icon={<Zap className="text-orange-500 w-5 h-5" />} value={displayCombo} label="Combo" />
+                <StatCard icon={<Star className="text-yellow-400 w-5 h-5" />} value={displayMaxCombo} label="Max Combo" />
+                <StatCard icon={<Clock className="text-blue-500 w-5 h-5" />} value={displayReaction} label="Avg Reaction" />
+                <StatCard icon={<Crosshair className="text-green-400 w-5 h-5" />} value={displaySens} label="Sens" />
+              </div>
+            )}
+
             <div 
               ref={containerRef} 
               className={isFullscreen 
@@ -1697,6 +1721,23 @@ export default function CounterStrafeClient() {
 
 
       </div>
+    </div>
+  );
+}
+
+
+// Hoisted StatCard Component for unified HUD telemetry display
+function StatCard({ icon, value, label, unit = '' }) {
+  return (
+    <div className="group rounded-xl border border-slate-900 bg-slate-950/40 p-2 text-center flex flex-col justify-center h-full transition-all duration-300 hover:scale-[1.03] hover:border-slate-800 backdrop-blur-sm">
+      <div className="mb-0.5 flex justify-center transition-transform duration-300 group-hover:scale-110" aria-hidden="true">
+        {icon}
+      </div>
+      <p className="text-xs sm:text-sm md:text-base font-extrabold tracking-tight truncate text-white">
+        {value}
+        <span className="text-[10px] sm:text-xs font-semibold ml-0.5 opacity-80 text-slate-400">{unit}</span>
+      </p>
+      <p className="text-[8px] sm:text-[9px] font-mono font-bold uppercase tracking-wider text-slate-500 truncate">{label}</p>
     </div>
   );
 }

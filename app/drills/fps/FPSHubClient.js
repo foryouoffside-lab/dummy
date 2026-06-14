@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from "next/link";
-import { ArrowLeft, Clock, Play, Target, Crosshair, Star, Zap, Eye, Brain, Gamepad2, Home, ChevronRight, Calculator, Settings, Activity, Sparkles, Cpu, Award, MessageSquare, Volume2 } from "lucide-react";
+import { ArrowLeft, Clock, Play, Target, Crosshair, Star, Zap, Eye, Brain, Gamepad2, Home, ChevronRight, Calculator, Settings, Activity, Sparkles, Cpu, Award, MessageSquare, Volume2, AlertTriangle, X, Smartphone } from "lucide-react";
 import { COACHES, getActiveCoach, getCoachResponse, speakCoachText, getCoachDashboardRecommendation } from "../../../lib/coachVoice";
 import { getWeaknessProfile, getWeakestPillar, getProgressionTrend, getTrendDisplay } from "../../../lib/performanceTelemetry";
 import { getAllDrillTiers, getTierDisplay } from "../../../lib/adaptiveDifficulty";
@@ -38,7 +38,6 @@ const FOLDER_TO_DRILL_ID = {
   'parabolic-air-track': 'parabolic-air-track',
   'pixel-hold-swing': 'pixel-hold-swing',
 };
-
 
 const fpsCategories = [
   {
@@ -138,6 +137,36 @@ export default function FPSHubClient() {
   const [latencyResult, setLatencyResult] = useState(null);
   const [latencyTesting, setLatencyTesting] = useState(false);
 
+  // Mobile detection and notification state
+  const [isMobile, setIsMobile] = useState(false);
+  const [showMobileWarning, setShowMobileWarning] = useState(false);
+  const [mobileWarningDismissed, setMobileWarningDismissed] = useState(false);
+
+  // Detect mobile device
+  useEffect(() => {
+    const checkMobile = () => {
+      if (typeof window === 'undefined') return false;
+      const ua = navigator.userAgent || '';
+      const mobileRegex = /Mobi|Android|iPhone|iPad|iPod|Windows Phone|webOS|BlackBerry|Opera Mini|IEMobile|Mobile/i;
+      const isMobileDevice = mobileRegex.test(ua) || 
+        (navigator.maxTouchPoints > 0 && window.innerWidth < 1024);
+      setIsMobile(isMobileDevice);
+      return isMobileDevice;
+    };
+    
+    const isMobileDevice = checkMobile();
+    
+    // Check if warning was previously dismissed in this session
+    const dismissed = sessionStorage.getItem('mobileWarningDismissed') === 'true';
+    setMobileWarningDismissed(dismissed);
+    
+    // Show warning on mobile if not dismissed
+    if (isMobileDevice && !dismissed) {
+      // Show after a short delay
+      setTimeout(() => setShowMobileWarning(true), 1500);
+    }
+  }, []);
+
   const runLatencyTest = (e) => {
     e.preventDefault();
     const t0 = performance.now();
@@ -149,6 +178,21 @@ export default function FPSHubClient() {
         setLatencyTesting(false);
       });
     });
+  };
+
+  // Handle mobile drill click
+  const handleDrillClick = (e, drillFolderName) => {
+    if (isMobile) {
+      e.preventDefault();
+      setShowMobileWarning(true);
+    }
+  };
+
+  // Dismiss mobile warning
+  const dismissMobileWarning = () => {
+    setShowMobileWarning(false);
+    setMobileWarningDismissed(true);
+    sessionStorage.setItem('mobileWarningDismissed', 'true');
   };
 
   useEffect(() => {
@@ -169,33 +213,22 @@ export default function FPSHubClient() {
   useEffect(() => {
     if (!isClient) return;
     try {
-      // 1. Spray Control
       const recoil = parseInt(localStorage.getItem('recoilBestScore') || '0', 10);
-      
-      // 2. Stop Sync
       const strafeVal = parseInt(localStorage.getItem('counterStrafeBestScore') || '0', 10);
       const prefireVal = parseInt(localStorage.getItem('prefireCornerClearerBestScore') || '0', 10);
       const strafe = Math.round((strafeVal + prefireVal) / 2);
-      
-      // 3. Symmetrical Pursuit
       const smoothPursuitVal = parseInt(localStorage.getItem('proSmoothPursuitBestScore') || '0', 10);
       const strafeTrackingVal = parseInt(localStorage.getItem('trackingBestScore') || '0', 10);
       const verticalAirTrackVal = parseInt(localStorage.getItem('verticalAirTrackBestScore') || '0', 10);
       const tracking = Math.round((smoothPursuitVal + strafeTrackingVal + verticalAirTrackVal) / 3);
-      
-      // 4. Reflex React
       const instantResponseVal = parseInt(localStorage.getItem('instantResponseBest') || '0', 10);
       const kineticVal = parseInt(localStorage.getItem('kineticDrillBestScore') || '0', 10);
       const awarenessVal = parseInt(localStorage.getItem('awarenessDrillBestScore') || '0', 10);
       const soundSpatialVal = parseInt(localStorage.getItem('soundSpatialReflexBestScore') || '0', 10);
       const reflex = Math.round((instantResponseVal + kineticVal + awarenessVal + soundSpatialVal) / 4);
-      
-      // 5. Angle Hold
       const angleHoldVal = parseInt(localStorage.getItem('angleHoldBestScore') || '0', 10);
       const targetAcquisitionVal = parseInt(localStorage.getItem('targetAcquisitionBestScore') || '0', 10);
       const angleHold = Math.round((angleHoldVal + targetAcquisitionVal) / 2);
-      
-      // 6. Priorities
       const proFlickVal = parseInt(localStorage.getItem('proFlickBestScore') || '0', 10);
       const proTrackingVal = parseInt(localStorage.getItem('proTrackingBest') || '0', 10);
       const priorityVal = parseInt(localStorage.getItem('priorityBestScore') || '0', 10);
@@ -204,7 +237,6 @@ export default function FPSHubClient() {
       
       setLocalScores({ recoil, strafe, tracking, reflex, angleHold, prioritization });
 
-      // Load telemetry-based drill tiers and weakness profile
       try {
         setDrillTiers(getAllDrillTiers());
         setWeaknessData(getWeakestPillar());
@@ -214,15 +246,9 @@ export default function FPSHubClient() {
 
   const getWeakestLink = () => {
     const { recoil, strafe, tracking, reflex, angleHold, prioritization } = localScores;
-    
-    // Check if the user is unranked in everything
-    const allZero = [
-      recoil, strafe, tracking, reflex, angleHold, prioritization
-    ].every(score => score === 0);
-    
+    const allZero = [recoil, strafe, tracking, reflex, angleHold, prioritization].every(score => score === 0);
     if (allZero) return 'none';
     
-    // Compute percentages for each, treating 0 as the absolute weakest (0%)
     const rPct = recoil > 0 ? (recoil / 25) * 100 : 0;
     const sPct = strafe > 0 ? (strafe / 15) * 100 : 0;
     const tPct = tracking > 0 ? (tracking / 30) * 100 : 0;
@@ -239,7 +265,6 @@ export default function FPSHubClient() {
     return 'prioritization';
   };
 
-  // Floating tactical target crosshairs background animation
   useEffect(() => {
     if (!isClient) return;
     const canvas = canvasRef.current;
@@ -287,12 +312,10 @@ export default function FPSHubClient() {
         ctx.translate(t.x, t.y);
         ctx.rotate(t.angle);
 
-        // Draw reticle style circle
         ctx.beginPath();
         ctx.arc(0, 0, t.radius, 0, Math.PI * 2);
         ctx.stroke();
 
-        // Draw target cross lines
         ctx.beginPath();
         ctx.moveTo(-t.radius - 4, 0);
         ctx.lineTo(-t.radius + 2, 0);
@@ -453,6 +476,58 @@ export default function FPSHubClient() {
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none z-0 opacity-40" />
       <div className="absolute inset-0 bg-[linear-gradient(rgba(18,24,38,0.45)_1px,_transparent_1px),_linear-gradient(90deg,_rgba(18,24,38,0.45)_1px,_transparent_1px)] bg-[size:32px_32px] pointer-events-none z-0" />
 
+      {/* Mobile Warning Modal */}
+      {showMobileWarning && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="bg-slate-900 border border-red-500/30 rounded-2xl p-6 sm:p-8 max-w-md w-full shadow-2xl shadow-red-500/10 animate-in fade-in zoom-in duration-300">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl">
+                <Smartphone className="w-6 h-6 text-red-400" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-white">Mobile Device Detected</h3>
+                <p className="text-xs text-red-400 font-mono uppercase tracking-wider">DESKTOP REQUIRED</p>
+              </div>
+            </div>
+            
+            <div className="space-y-3 mb-6 text-sm text-slate-300 leading-relaxed">
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="w-4 h-4 text-yellow-500 flex-shrink-0 mt-0.5" />
+                <p>These FPS aim training drills require a <span className="text-white font-semibold">physical mouse</span> and <span className="text-white font-semibold">keyboard</span> to function correctly.</p>
+              </div>
+              <div className="bg-slate-950 rounded-lg p-3 border border-slate-800 text-xs text-slate-400 space-y-1.5">
+                <p className="font-bold text-red-400 uppercase text-[10px] tracking-wider mb-1">Why mobile doesn't work:</p>
+                <ul className="list-disc pl-4 space-y-1">
+                  <li>Touchscreens lack precise cursor control</li>
+                  <li>Pointer Lock API requires a mouse</li>
+                  <li>Drills use raw mouse input for 1:1 tracking</li>
+                  <li>Physical mouse movement is essential for muscle memory</li>
+                </ul>
+              </div>
+              <p className="text-xs text-slate-500 italic">
+                Please switch to a desktop or laptop with a mouse for the full training experience.
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={dismissMobileWarning}
+                className="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg text-xs uppercase tracking-wider transition flex items-center justify-center gap-2"
+              >
+                <X className="w-4 h-4" />
+                I Understand
+              </button>
+              <button
+                onClick={dismissMobileWarning}
+                className="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 font-bold rounded-lg text-xs uppercase tracking-wider transition"
+              >
+                Continue Anyway
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* SEO Structured Data */}
       <script
         type="application/ld+json"
@@ -490,6 +565,13 @@ export default function FPSHubClient() {
               <p className="text-slate-400 mt-2 text-sm sm:text-base max-w-xl leading-relaxed">
                 Hone mouse raw-input reflexes, smooth target tracking, and extreme 180° awareness indicators.
               </p>
+              {/* Mobile warning badge */}
+              {isMobile && (
+                <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 bg-yellow-500/10 border border-yellow-500/20 rounded-lg text-yellow-400 text-xs">
+                  <Smartphone className="w-3.5 h-3.5" />
+                  <span className="font-mono font-bold uppercase tracking-wider">Desktop Recommended</span>
+                </div>
+              )}
             </div>
           </div>
           <div className="flex flex-wrap gap-2 self-start md:self-center">
@@ -670,6 +752,7 @@ export default function FPSHubClient() {
                   <div className="flex gap-2">
                     <Link
                       href={`/drills/fps/${activePlaylist[playlistStep]}`}
+                      onClick={(e) => isMobile && handleDrillClick(e, activePlaylist[playlistStep])}
                       className="w-full text-center py-2 bg-yellow-600 hover:bg-yellow-750 text-slate-950 font-bold rounded text-[10px] uppercase transition shadow-md shadow-yellow-500/20"
                     >
                       Resume Routine
@@ -986,7 +1069,6 @@ export default function FPSHubClient() {
               </div>
               
               {(() => {
-                // Prefer telemetry-based recommendation if available
                 if (weaknessData && weaknessData.recommendation) {
                   const rec = weaknessData.recommendation;
                   return (
@@ -1001,6 +1083,7 @@ export default function FPSHubClient() {
                       </div>
                       <Link 
                         href={rec.drill.path || '#'}
+                        onClick={(e) => isMobile && handleDrillClick(e, rec.drill.path?.split('/').pop())}
                         className="flex items-center justify-between w-full py-2 px-3 bg-red-950/40 hover:bg-red-900/30 border border-red-500/20 hover:border-red-500/40 rounded-lg transition group"
                       >
                         <span className="text-[10px] font-mono font-bold text-red-400 uppercase tracking-wider group-hover:text-red-300">{rec.drill.name}</span>
@@ -1010,7 +1093,6 @@ export default function FPSHubClient() {
                   );
                 }
                 
-                // Fallback: old weakest-link approach
                 const weakest = getWeakestLink();
                 if (weakest === 'none') return null;
                 return (
@@ -1025,6 +1107,7 @@ export default function FPSHubClient() {
                             weakest === 'reflex' ? "/drills/fps/instant-response" :
                             weakest === 'angleHold' ? "/drills/fps/angle-hold-trainer" :
                             "/drills/fps/target-prioritization"}
+                      onClick={(e) => isMobile && handleDrillClick(e, weakest)}
                       className="text-[9px] font-mono font-bold bg-red-600 hover:bg-red-700 text-white px-3.5 py-1.5 rounded transition uppercase tracking-wider shadow shadow-red-500/20"
                     >
                       Launch Drill
@@ -1136,7 +1219,8 @@ export default function FPSHubClient() {
                   return (
                     <Link 
                       key={index} 
-                      href={drillPath} 
+                      href={drillPath}
+                      onClick={(e) => isMobile && handleDrillClick(e, drill.folderName)}
                       className={`group relative overflow-hidden bg-slate-950/80 border border-slate-900 transition-all duration-300 hover:-translate-y-1 focus:outline-none focus:ring-1 focus:ring-red-500/50 ${getCategoryCardBorder(category.name)}`}
                       aria-label={`${drill.name} - ${drill.description}. Difficulty: ${drill.difficulty}. Duration: ${drill.duration}.`}
                     >
@@ -1146,7 +1230,6 @@ export default function FPSHubClient() {
                             <CategoryIcon className="w-5 h-5" />
                           </div>
                           <div className="flex items-center gap-1.5">
-                            {/* Tier Badge */}
                             {tierInfo && tierInfo.tier !== 'silver' && (
                               <div className={`px-2 py-0.5 rounded-full text-[9px] font-mono font-bold tracking-wide border ${tierInfo.display.bgColor} ${tierInfo.display.borderColor} ${tierInfo.display.textColor}`}>
                                 {tierInfo.display.icon} {tierInfo.display.label}
@@ -1175,7 +1258,6 @@ export default function FPSHubClient() {
                             <Cpu className="w-3.5 h-3.5" />
                             <span>Aim Engine</span>
                           </div>
-                          {/* Progression trend arrow */}
                           {trend !== 'insufficient' && (
                             <div className="flex items-center gap-0.5 ml-auto" style={{ color: trendDisplay.color }}>
                               <span className="text-sm font-bold">{trendDisplay.arrow}</span>

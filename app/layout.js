@@ -16,7 +16,7 @@ export const metadata = {
     default: 'SkillDrills - Free FPS Aim Trainer & Cognitive Brain Training Platform',
     template: '%s',
   },
-  description: 'Master your mind and mechanics with 90+ free online training drills. Improve FPS aim, reaction time, memory, focus, typing speed, and cognitive skills. No sign-up required. Practice directly in your browser.',
+  description: 'Master your mind and mechanics with 149+ free online training drills. Improve FPS aim, reaction time, memory, focus, typing speed, and cognitive skills. No sign-up required. Practice directly in your browser.',
   keywords: [
     'free aim trainer', 'FPS aim trainer', 'aim trainer online', 'flick shot training',
     'tracking aim trainer', 'reaction time test', 'headshot trainer', 'mouse accuracy trainer',
@@ -50,7 +50,7 @@ export const metadata = {
   },
   openGraph: {
     title: 'SkillDrills - Free FPS Aim Trainer & Cognitive Brain Training Platform',
-    description: 'Master your mind and mechanics. 90+ free drills for FPS gaming, cognitive enhancement, memory, typing speed, and mental fitness. No sign-up, instant browser access.',
+    description: 'Master your mind and mechanics. 149+ free drills for FPS gaming, cognitive enhancement, memory, typing speed, and mental fitness. No sign-up, instant browser access.',
     url: 'https://skilldrills.online',
     siteName: 'SkillDrills',
     images: [{
@@ -65,7 +65,7 @@ export const metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'SkillDrills - Free FPS Aim & Brain Training',
-    description: '90+ free drills. FPS aim trainer, brain games, memory exercises, typing tests. No sign-up.',
+    description: '149+ free drills. FPS aim trainer, brain games, memory exercises, typing tests. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: {
@@ -154,7 +154,7 @@ export default function RootLayout({ children }) {
               "name": "SkillDrills",
               "url": "https://skilldrills.online",
               "logo": "https://skilldrills.online/icons/icon-512x512.png",
-              "description": "Free online platform with 90+ training drills for FPS gaming skills, cognitive enhancement, brain training, memory improvement, typing speed, and mental fitness.",
+              "description": "Free online platform with 149+ training drills for FPS gaming skills, cognitive enhancement, brain training, memory improvement, typing speed, and mental fitness.",
               "email": "support@skilldrills.online",
               "foundingDate": "2026",
               "slogan": "Master Your Mind & Mechanics",
@@ -206,10 +206,11 @@ export default function RootLayout({ children }) {
                 { "@type": "SiteNavigationElement", "position": 3, "name": "Academic Drills", "url": "https://skilldrills.online/drills/academic" },
                 { "@type": "SiteNavigationElement", "position": 4, "name": "Memory Games", "url": "https://skilldrills.online/drills/memory" },
                 { "@type": "SiteNavigationElement", "position": 5, "name": "Visual Training", "url": "https://skilldrills.online/drills/visual" },
-                { "@type": "SiteNavigationElement", "position": 6, "name": "Motor Skills", "url": "https://skilldrills.online/drills/motor" },
-                { "@type": "SiteNavigationElement", "position": 7, "name": "Productivity", "url": "https://skilldrills.online/drills/productivity" },
-                { "@type": "SiteNavigationElement", "position": 8, "name": "Mental Fitness", "url": "https://skilldrills.online/drills/mental-fitness" },
-                { "@type": "SiteNavigationElement", "position": 9, "name": "Physical Training", "url": "https://skilldrills.online/drills/physical" }
+                { "@type": "SiteNavigationElement", "position": 6, "name": "Visual Tracking", "url": "https://skilldrills.online/drills/visual-tracking" },
+                { "@type": "SiteNavigationElement", "position": 7, "name": "Motor Skills", "url": "https://skilldrills.online/drills/motor" },
+                { "@type": "SiteNavigationElement", "position": 8, "name": "Productivity", "url": "https://skilldrills.online/drills/productivity" },
+                { "@type": "SiteNavigationElement", "position": 9, "name": "Mental Fitness", "url": "https://skilldrills.online/drills/mental-fitness" },
+                { "@type": "SiteNavigationElement", "position": 10, "name": "Physical Training", "url": "https://skilldrills.online/drills/physical" }
               ]
             })
           }}
