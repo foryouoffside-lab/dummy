@@ -1,0 +1,130 @@
+﻿import PrioritySortingClient from './PrioritySortingClient';
+
+export const metadata = {
+  title: 'Priority Sorting - Task Prioritization | SkillDrills',
+  description: 'Click RED, GREEN, BLUE targets matching the priority rule. Rules change every 3-4s. Shrinking items add urgency. 3 lives. No sign-up.',
+  keywords: [
+    'priority sorting', 'task prioritization', 'time management training',
+    'decision making drill', 'priority training', 'task triage',
+    'cognitive prioritization', 'eisenhower matrix practice', 'rapid decision making',
+    'color sorting game', 'attention management', 'priority matrix training',
+    'productivity drill', 'task management practice', 'free prioritization training',
+    'priority sorting free', 'task prioritization drill free', 'priority rule drill',
+    'dynamic priority training', 'shrinking target drill', 'cognitive flexibility game',
+    'red green blue priority', 'decision speed training', 'task triage practice',
+    'skilldrills priority sorting', 'skilldrills prioritization', 'skilldrills productivity',
+    'rule switching drill', 'priority target practice', 'attention switching training',
+    'color priority game', 'rapid prioritization drill', 'task sorting practice',
+  ],
+  openGraph: {
+    title: 'Priority Sorting - Task Prioritization | SkillDrills',
+    description: 'Click RED, GREEN, BLUE targets matching the priority rule. Rules change every 3-4s. Shrinking items add urgency. 3 lives. No sign-up.',
+    type: 'article',
+    url: 'https://skilldrills.online/drills/cognitive/problem-solving/priority-sorting',
+    siteName: 'SkillDrills',
+    locale: 'en_US',
+    images: [{
+      url: 'https://skilldrills.online/icons/icon-512x512.png',
+      width: 512,
+      height: 512,
+      alt: 'Priority Sorting Drill',
+    }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Priority Sorting - Task Prioritization | SkillDrills',
+    description: 'Click RED, GREEN, BLUE targets matching the priority rule. Rules change every 3-4s. Shrinking items add urgency. 3 lives. No sign-up.',
+    images: ['https://skilldrills.online/icons/icon-512x512.png'],
+  },
+  robots: { index: true, follow: true },
+  alternates: {
+    canonical: 'https://skilldrills.online/drills/cognitive/problem-solving/priority-sorting',
+  },
+};
+
+export default function PrioritySortingPage() {
+  return (
+    <>
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://skilldrills.online" },
+              { "@type": "ListItem", "position": 2, "name": "Productivity Training", "item": "https://skilldrills.online/drills/cognitive" },
+              { "@type": "ListItem", "position": 3, "name": "Time Management", "item": "https://skilldrills.online/drills/cognitive/time-management" },
+              { "@type": "ListItem", "position": 4, "name": "Priority Sorting" }
+            ]
+          })
+        }}
+      />
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebApplication",
+            "name": "Priority Sorting Drill",
+            "url": "https://skilldrills.online/drills/cognitive/problem-solving/priority-sorting",
+            "description": "Free task prioritization drill. Click RED, GREEN, BLUE targets matching priority rule. Rules change every 3-4s. Shrinking items. 3 lives.",
+            "applicationCategory": "EducationalApplication",
+            "operatingSystem": "All",
+            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+            "author": { "@type": "Organization", "name": "SkillDrills" },
+            "isAccessibleForFree": true
+          })
+        }}
+      />
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "What is the Priority Sorting Drill?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "A free task prioritization exercise. Click RED, GREEN, BLUE targets matching current priority. Rules change every 3-4s. Shrinking items add urgency."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "How does the priority rule system work?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Priority color displayed at top changes every 3-4s. New priority item auto-spawns on change. Non-priority items cost lives when priorities exist."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "What skills does this improve?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Task prioritization, cognitive flexibility, decision-making speed, task triage, and attention management under dynamic rules."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Do I need to sign up?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "No registration required. This priority sorting drill is completely free and works instantly in your browser."
+                }
+              }
+            ]
+          })
+        }}
+      />
+
+      <PrioritySortingClient />
+    </>
+  );
+}

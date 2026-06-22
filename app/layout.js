@@ -32,7 +32,7 @@ export const metadata = {
     'free LSAT practice', 'GMAT verbal practice', 'critical reasoning practice',
     'logic puzzles online', 'free sudoku', 'problem solving exercises',
     'logical reasoning test', 'critical thinking exercises', 'analytical reasoning',
-    'focus timer', 'deep work timer', 'pomodoro timer free', 'productivity tools',
+    'focus timer', 'deep work timer', 'flow state training', 'cognitive training',
     'concentration exercises', 'flow state training', 'task switching practice',
     'hand eye coordination test', 'mouse precision trainer', 'visual tracking exercises',
     'peripheral vision test', 'depth perception test', 'reaction speed test',
@@ -141,6 +141,7 @@ export default function RootLayout({ children }) {
         <main id="main-content">
           {children}
         </main>
+        
         <Analytics />
         <SpeedInsights />
         
@@ -208,9 +209,7 @@ export default function RootLayout({ children }) {
                 { "@type": "SiteNavigationElement", "position": 5, "name": "Visual Training", "url": "https://skilldrills.online/drills/visual" },
                 { "@type": "SiteNavigationElement", "position": 6, "name": "Visual Tracking", "url": "https://skilldrills.online/drills/visual-tracking" },
                 { "@type": "SiteNavigationElement", "position": 7, "name": "Motor Skills", "url": "https://skilldrills.online/drills/motor" },
-                { "@type": "SiteNavigationElement", "position": 8, "name": "Productivity", "url": "https://skilldrills.online/drills/productivity" },
-                { "@type": "SiteNavigationElement", "position": 9, "name": "Mental Fitness", "url": "https://skilldrills.online/drills/mental-fitness" },
-                { "@type": "SiteNavigationElement", "position": 10, "name": "Physical Training", "url": "https://skilldrills.online/drills/physical" }
+                { "@type": "SiteNavigationElement", "position": 8, "name": "Physical Training", "url": "https://skilldrills.online/drills/physical" }
               ]
             })
           }}

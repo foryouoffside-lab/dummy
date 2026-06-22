@@ -1,23 +1,27 @@
 import AimTrainerClient from './AimTrainerClient';
 
 export const metadata = {
-  title: 'Aim Trainer - Mouse Accuracy Drill | SkillDrills',
-  description: 'Dynamic shrinking targets from 20px to 8px with streak progression. 3-life system, reaction tracking. For FPS gaming and mouse control. No sign-up.',
+  title: 'Free Aim Trainer Online - Mouse Accuracy Drill | SkillDrills',
+  description: 'Free aim trainer online. Click shrinking targets from 20px to 8px — the best aim training game for FPS players. Reaction time tracking, streak progression, 3-life system. No sign-up required.',
   keywords: [
-    'aim trainer', 'mouse accuracy', 'click trainer', 'hand-eye coordination',
-    'aim training', 'fps aim practice', 'reaction time test', 'target clicking',
-    'mouse precision', 'aim drill', 'accuracy trainer', 'gaming aim trainer',
-    'free aim trainer', 'mouse coordination', 'click speed test',
-    'aim trainer free', 'mouse accuracy drill free', 'hand eye coordination training',
-    'fps aim trainer', 'target practice drill', 'mouse control training',
-    'precision clicking drill', 'gaming mouse practice', 'aim training online',
-    'skilldrills aim trainer', 'skilldrills motor drills', 'skilldrills fps',
-    'shrinking target trainer', 'reaction time drill', 'click accuracy practice',
-    'mouse precision test', 'cursor accuracy training', 'aim practice free',
+    'free aim trainer', 'aim trainer online', 'aim trainer free', 'best aim trainer',
+    'aim training game', 'aim training online', 'fps aim trainer', 'mouse aim trainer',
+    'mouse accuracy test', 'mouse accuracy drill', 'mouse accuracy training',
+    'click accuracy game', 'click accuracy test', 'click accuracy drill',
+    'aim practice online', 'free aim practice', 'aim drill free',
+    'hand eye coordination game', 'hand eye coordination training', 'hand eye coordination drill',
+    'reaction time test', 'reaction time training', 'reflex training game',
+    'Valorant aim trainer', 'CS2 aim training', 'Apex Legends aim trainer',
+    'Overwatch aim practice', 'FPS gaming training', 'esports aim trainer',
+    'shrinking target game', 'target clicking game', 'precision clicking drill',
+    'mouse precision test', 'cursor accuracy training', 'mouse control training',
+    'gaming aim practice', 'aim improvement game', 'click speed game',
+    'skilldrills aim trainer', 'skilldrills motor drills', 'no download aim trainer',
+    'browser aim trainer', 'online aim practice', 'instant aim training',
   ],
   openGraph: {
-    title: 'Aim Trainer - Mouse Accuracy Drill | SkillDrills',
-    description: 'Dynamic shrinking targets with 3-life system. Free FPS aim training.',
+    title: 'Free Aim Trainer Online - Best Mouse Accuracy Drill | SkillDrills',
+    description: 'Free aim trainer online. Click shrinking targets — best aim training game for FPS players. Reaction tracking, streak progression. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/motor/hand-eye-coordination/aim-trainer',
     siteName: 'SkillDrills',
@@ -26,13 +30,13 @@ export const metadata = {
       url: 'https://skilldrills.online/icons/icon-512x512.png',
       width: 512,
       height: 512,
-      alt: 'Aim Trainer Elite',
+      alt: 'Free Aim Trainer Online - Mouse Accuracy Drill',
     }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Aim Trainer - Mouse Accuracy Drill | SkillDrills',
-    description: 'Dynamic shrinking targets. Streak-based colors. Free.',
+    title: 'Free Aim Trainer Online - Best Mouse Accuracy Drill | SkillDrills',
+    description: 'Free aim trainer. Click shrinking targets. Best online aim training for FPS gamers. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -44,7 +48,6 @@ export const metadata = {
 export default function AimTrainerPage() {
   return (
     <>
-
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -55,21 +58,20 @@ export default function AimTrainerPage() {
               { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://skilldrills.online" },
               { "@type": "ListItem", "position": 2, "name": "Motor Training", "item": "https://skilldrills.online/drills/motor" },
               { "@type": "ListItem", "position": 3, "name": "Hand-Eye Coordination", "item": "https://skilldrills.online/drills/motor/hand-eye-coordination" },
-              { "@type": "ListItem", "position": 4, "name": "Aim Trainer" }
+              { "@type": "ListItem", "position": 4, "name": "Free Aim Trainer Online" }
             ]
           })
         }}
       />
-
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "WebApplication",
-            "name": "Aim Trainer Elite",
+            "name": "Free Aim Trainer Online - Mouse Accuracy Drill",
             "url": "https://skilldrills.online/drills/motor/hand-eye-coordination/aim-trainer",
-            "description": "Free aim trainer with shrinking targets (20px to 8px). 3-life system, streak-based color progression. Reaction time tracking in milliseconds.",
+            "description": "Free aim trainer online and mouse accuracy drill. Targets shrink from 20px to 8px with streak. 3-life system, millisecond reaction tracking. Best free aim training game for Valorant, CS2, Apex Legends.",
             "applicationCategory": "GameApplication",
             "operatingSystem": "All",
             "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
@@ -78,7 +80,6 @@ export default function AimTrainerPage() {
           })
         }}
       />
-
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -88,41 +89,40 @@ export default function AimTrainerPage() {
             "mainEntity": [
               {
                 "@type": "Question",
-                "name": "What is the Aim Trainer Elite?",
+                "name": "What is this free aim trainer online?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "A free mouse accuracy drill. Targets shrink from 20px to 8px with streak. 3-life system: misclicks cost lives first, then points. Expired targets incur no penalty."
+                  "text": "A free aim trainer online and mouse accuracy drill. Targets shrink from 20px to 8px with streak progression. 3-life system: misclicks cost lives. Millisecond reaction time tracked. Best free aim training game available."
                 }
               },
               {
                 "@type": "Question",
-                "name": "How does the shrinking target system work?",
+                "name": "Is this aim trainer good for FPS games?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Targets shrink 0.15px per streak count (min 8px). Colors: white (0-7), green (8-14), cyan (15+). Lifespan decreases with streak. 10x streak bonuses."
+                  "text": "Yes. This free aim trainer directly improves click accuracy, target acquisition speed, and mouse precision — all critical for Valorant, CS2, Apex Legends, Overwatch 2, and Call of Duty."
                 }
               },
               {
                 "@type": "Question",
-                "name": "What skills does this improve?",
+                "name": "How does the shrinking target system work in this aim trainer?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Mouse precision, click accuracy, target tracking, reaction speed, and hand-eye coordination. Transfers to FPS gaming and general computer use."
+                  "text": "Targets shrink 0.15px per streak count (minimum 8px). Colors: white (0-7 streak), green (8-14), cyan (15+). Target lifespan decreases with streak. 10x streak bonuses. Increasingly difficult as you improve."
                 }
               },
               {
                 "@type": "Question",
-                "name": "Do I need to sign up?",
+                "name": "Do I need to sign up for this aim trainer?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "No registration required. This aim trainer is completely free and works instantly in your browser."
+                  "text": "No registration required. This free aim trainer online works instantly in your browser — no downloads, no sign-up needed."
                 }
               }
             ]
           })
         }}
       />
-
       <AimTrainerClient />
     </>
   );

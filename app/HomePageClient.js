@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { 
   Target, ArrowRight, Zap, Trophy, BarChart3, Sparkles, 
   TrendingUp, Brain, Crosshair, Eye, Timer, Keyboard, 
-  Dumbbell, Database, Star, Shield, Users, Activity
+  Dumbbell, Database, Star, Shield, Users, Activity,
+  AlertTriangle, Monitor, AlertCircle, MessageSquare, Lightbulb
 } from 'lucide-react';
 
 const categories = [
@@ -16,7 +17,7 @@ const categories = [
     href: '/drills/fps', 
     gradient: 'from-red-500 via-rose-500 to-orange-500',
     iconBg: 'bg-gradient-to-br from-red-500 to-orange-500',
-    drills: '21 drills',
+    drills: '12 drills',
     featured: true 
   },
   { 
@@ -26,7 +27,7 @@ const categories = [
     href: '/drills/cognitive', 
     gradient: 'from-blue-500 via-indigo-500 to-violet-500',
     iconBg: 'bg-gradient-to-br from-blue-500 to-indigo-500',
-    drills: '16 drills' 
+    drills: '20 drills' 
   },
   { 
     name: 'Visual', 
@@ -35,7 +36,7 @@ const categories = [
     href: '/drills/visual', 
     gradient: 'from-purple-500 via-violet-500 to-pink-500',
     iconBg: 'bg-gradient-to-br from-purple-500 to-pink-500',
-    drills: '14 drills' 
+    drills: '15 drills' 
   },
   { 
     name: 'Visual Tracking', 
@@ -53,7 +54,7 @@ const categories = [
     href: '/drills/academic', 
     gradient: 'from-emerald-500 via-green-500 to-teal-500',
     iconBg: 'bg-gradient-to-br from-emerald-500 to-teal-500',
-    drills: '12 drills' 
+    drills: '8 drills' 
   },
   { 
     name: 'Memory', 
@@ -62,9 +63,8 @@ const categories = [
     href: '/drills/memory', 
     gradient: 'from-indigo-500 via-purple-500 to-fuchsia-500',
     iconBg: 'bg-gradient-to-br from-indigo-500 to-purple-500',
-    drills: '15 drills' 
+    drills: '13 drills' 
   },
-
   { 
     name: 'Motor Skills', 
     description: 'Hand-eye coordination, precision control and timing', 
@@ -73,15 +73,6 @@ const categories = [
     gradient: 'from-orange-500 via-amber-500 to-yellow-500',
     iconBg: 'bg-gradient-to-br from-orange-500 to-amber-500',
     drills: '12 drills' 
-  },
-  { 
-    name: 'Productivity', 
-    description: 'Focus endurance, time management and work efficiency', 
-    icon: BarChart3, 
-    href: '/drills/productivity', 
-    gradient: 'from-lime-500 via-green-500 to-emerald-500',
-    iconBg: 'bg-gradient-to-br from-lime-500 to-emerald-500',
-    drills: '10 drills' 
   },
   { 
     name: 'Physical', 
@@ -126,7 +117,7 @@ const features = [
   { 
     icon: Target, 
     title: 'Focused Training', 
-    description: 'Target specific skill areas with 130+ specialized drills across 9 categories', 
+    description: 'Target specific skill areas with 115+ specialized drills across 8 categories', 
     gradient: 'from-emerald-400 to-green-500',
     bgGradient: 'from-emerald-50 to-green-50'
   },
@@ -156,14 +147,21 @@ const audienceData = [
     icon: BarChart3, 
     gradient: 'from-emerald-500 to-green-500',
     title: 'Professionals', 
-    description: 'Enhance productivity, focus endurance, and cognitive flexibility for peak workplace performance.' 
+    description: 'Focus, memory, attention, problem solving, and cognitive skill training.' 
   },
 ];
 
 export default function HomePageClient() {
   const [profile, setProfile] = useState(null);
+  const [showBetaNotice, setShowBetaNotice] = useState(false);
   
   useEffect(() => {
+    // Session Storage Check for Beta Notice
+    const noticeShown = sessionStorage.getItem('home_beta_notice_shown');
+    if (!noticeShown) {
+      setShowBetaNotice(true);
+    }
+
     try {
       const keys = Object.keys(localStorage);
       let totalDrillsPlayed = 0;
@@ -181,9 +179,7 @@ export default function HomePageClient() {
         visual: { name: 'Visual', count: 0, levels: 0, games: 0 },
         'visual-tracking': { name: 'Visual Tracking', count: 0, levels: 0, games: 0 },
         motor: { name: 'Motor Skills', count: 0, levels: 0, games: 0 },
-        productivity: { name: 'Productivity', count: 0, levels: 0, games: 0 },
         physical: { name: 'Physical', count: 0, levels: 0, games: 0 },
-        
       };
       
       keys.forEach(key => {
@@ -236,6 +232,12 @@ export default function HomePageClient() {
       }
     } catch (e) {}
   }, []);
+
+  const handleDismissNotice = () => {
+    sessionStorage.setItem('home_beta_notice_shown', 'true');
+    setShowBetaNotice(false);
+  };
+
   const copyPageLink = () => {
     navigator.clipboard.writeText('https://skilldrills.online');
     alert('Link copied to clipboard! Share SkillDrills with your friends.');
@@ -246,7 +248,7 @@ export default function HomePageClient() {
       try {
         await navigator.share({
           title: 'SkillDrills - Free FPS Aim Trainer & Brain Training',
-          text: '130+ free drills for FPS gaming, cognitive skills, visual tracking, and mental fitness. No sign-up!',
+          text: '115+ free drills for FPS gaming, cognitive skills, visual tracking, and mental fitness. No sign-up!',
           url: 'https://skilldrills.online',
         });
       } catch (error) {
@@ -265,6 +267,44 @@ export default function HomePageClient() {
         backgroundSize: '100% 100%, 48px 48px, 48px 48px' 
       }}
     >
+      {/* BETA NOTICE MODAL */}
+      {showBetaNotice && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+          <div className="bg-[#0b101e] border border-blue-500/40 rounded-2xl p-6 sm:p-8 max-w-lg w-full shadow-[0_0_40px_rgba(59,130,246,0.2)] relative overflow-hidden animate-in fade-in zoom-in duration-300 max-h-[90vh] overflow-y-auto">
+            <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-500 via-indigo-500 to-blue-500"></div>
+            
+            <h2 className="text-xl sm:text-2xl font-black text-white mb-5 flex items-center gap-3 font-mono tracking-tight uppercase">
+              <AlertTriangle className="text-blue-500 w-7 h-7 shrink-0" />
+              Notice / Beta Phase
+            </h2>
+            
+            <div className="space-y-4 text-sm text-slate-300 mb-8">
+              <div className="flex items-start gap-3 bg-blue-500/10 border border-blue-500/20 p-3 rounded-xl">
+                <Monitor className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" />
+                <p><strong>Desktop Recommended for FPS:</strong> FPS Aim Drills heavily rely on hardware pointer-lock and raw mouse inputs. They will not function correctly on mobile devices. (Cognitive & Memory drills work great on mobile!)</p>
+              </div>
+
+              <div className="flex items-start gap-3 bg-yellow-500/10 border border-yellow-500/20 p-3 rounded-xl">
+                <AlertCircle className="w-5 h-5 text-yellow-400 shrink-0 mt-0.5" />
+                <p><strong>Testing Phase:</strong> The platform is currently in testing. You might encounter minor performance or UI discrepancies as we continue to optimize the engine.</p>
+              </div>
+
+              <div className="flex items-start gap-3 bg-green-500/10 border border-green-500/20 p-3 rounded-xl">
+                <MessageSquare className="w-5 h-5 text-green-400 shrink-0 mt-0.5" />
+                <p><strong>We Need Your Feedback:</strong> Encountered a bug or want a new feature? Please cooperate and let us know via social media links in the footer below. Your feedback is vital!</p>
+              </div>
+            </div>
+            
+            <button 
+              onClick={handleDismissNotice}
+              className="w-full py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:brightness-110 text-white font-black rounded-xl transition-all shadow-lg active:scale-95 uppercase tracking-widest text-sm"
+            >
+              I Understand, Let's Train
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Decorative Blur Shapes */}
       <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-blue-600/10 rounded-full filter blur-[120px] pointer-events-none" />
       <div className="absolute bottom-10 right-10 w-[600px] h-[600px] bg-purple-600/10 rounded-full filter blur-[150px] pointer-events-none" />
@@ -304,14 +344,14 @@ export default function HomePageClient() {
       <section className="sr-only" aria-label="Platform description">
         <h2>SkillDrills - Free Brain Training and FPS Aim Trainer Platform</h2>
         <p>
-          SkillDrills is a completely free online training platform offering 130+ interactive drills across 9 categories. 
+          SkillDrills is a completely free online training platform offering 115+ interactive drills across 9 categories. 
           FPS aim training for Valorant, CS2, Overwatch, Apex Legends and all competitive shooters. 
           Cognitive brain training including memory games, attention exercises, focus training and problem-solving puzzles. 
           Academic skills practice with typing tests, speed reading, mental math drills and reading comprehension.
           Motor skills development for hand-eye coordination, precision control and timing accuracy. 
           Visual training for peripheral vision, depth perception, reaction speed and visual recognition. 
           Visual tracking for smooth pursuit, gaze stability, and trajectory prediction. 
-          Productivity tools for focus endurance, task switching and time management. 
+          Cognitive training for attention, focus, memory, and problem solving. 
           Physical training with balance exercises, coordination drills and reflex training. 
           No registration, no login, no credit card required. Start training instantly for free at skilldrills.online.
         </p>
@@ -332,7 +372,7 @@ export default function HomePageClient() {
             </h1>
             
             <p className="text-lg sm:text-xl text-gray-400 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
-              Elevate your visual processing, mechanical aim, and working memory. Leverage 130+ scientific, zero-latency training drills. No installations. No credit cards.
+              Elevate your visual processing, mechanical aim, and working memory. Leverage 115+ scientific, zero-latency training drills. No installations. No credit cards.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
@@ -355,7 +395,7 @@ export default function HomePageClient() {
             {/* Quick Metrics */}
             <div className="grid grid-cols-3 gap-6 max-w-xl mx-auto lg:mx-0 pt-8 border-t border-white/5">
               <div className="text-left">
-                <p className="text-3xl font-black text-white tracking-tight">130+</p>
+                <p className="text-3xl font-black text-white tracking-tight">115+</p>
                 <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mt-1">Free Drills</p>
               </div>
               <div className="text-left">
@@ -637,8 +677,8 @@ export default function HomePageClient() {
               <ul className="space-y-2.5 text-sm text-gray-400">
                 <li><Link href="/drills/fps/flick-shot-training" className="hover:text-white transition-colors">Flick Shot Trainer</Link></li>
                 <li><Link href="/drills/fps/target-acquisition" className="hover:text-white transition-colors">Target Acquisition</Link></li>
-                <li><Link href="/drills/fps/reactive-tracking" className="hover:text-white transition-colors">Reactive Tracking</Link></li>
-                <li><Link href="/drills/fps" className="text-blue-400 hover:text-blue-300 transition-colors font-semibold">All 21 FPS Drills →</Link></li>
+               
+                <li><Link href="/drills/fps" className="text-blue-400 hover:text-blue-300 transition-colors font-semibold">All 12 FPS Drills →</Link></li>
               </ul>
             </div>
             <div>
@@ -647,7 +687,7 @@ export default function HomePageClient() {
                 <li><Link href="/drills/cognitive/memory/card-matching" className="hover:text-white transition-colors">Memory Games</Link></li>
                 <li><Link href="/drills/cognitive/attention/divided-attention" className="hover:text-white transition-colors">Attention Drills</Link></li>
                 <li><Link href="/drills/cognitive/problem-solving/logic-puzzles" className="hover:text-white transition-colors">Logic Puzzles</Link></li>
-                <li><Link href="/drills/cognitive" className="text-blue-400 hover:text-blue-300 transition-colors font-semibold">All 16 Cognitive Drills →</Link></li>
+                <li><Link href="/drills/cognitive" className="text-blue-400 hover:text-blue-300 transition-colors font-semibold">All 20 Cognitive Drills →</Link></li>
               </ul>
             </div>
             <div>
@@ -656,7 +696,7 @@ export default function HomePageClient() {
                 <li><Link href="/drills/academic/writing-speed/typing-test" className="hover:text-white transition-colors">Typing Speed Test</Link></li>
                 <li><Link href="/drills/academic/reading-speed/speed-reader" className="hover:text-white transition-colors">Speed Reader</Link></li>
                 <li><Link href="/drills/academic/math-speed/mental-math" className="hover:text-white transition-colors">Mental Math</Link></li>
-                <li><Link href="/drills/academic" className="text-blue-400 hover:text-blue-300 transition-colors font-semibold">All 12 Academic Drills →</Link></li>
+                <li><Link href="/drills/academic" className="text-blue-400 hover:text-blue-300 transition-colors font-semibold">All 8 Academic Drills →</Link></li>
               </ul>
             </div>
             <div>
@@ -671,8 +711,8 @@ export default function HomePageClient() {
             <div>
               <h3 className="text-white font-bold tracking-wider mb-4 text-xs uppercase">More Categories</h3>
               <ul className="space-y-2.5 text-sm text-gray-400">
-                <li><Link href="/drills/memory" className="hover:text-white transition-colors">Memory (15 drills)</Link></li>
-                <li><Link href="/drills/productivity" className="hover:text-white transition-colors">Productivity (10 drills)</Link></li>
+                <li><Link href="/drills/memory" className="hover:text-white transition-colors">Memory (13 drills)</Link></li>
+                <li><Link href="/drills/cognitive" className="hover:text-white transition-colors">Cognitive</Link></li>
                 <li><Link href="/drills/physical" className="hover:text-white transition-colors">Physical (11 drills)</Link></li>
                 <li><Link href="/drills/visual-tracking" className="hover:text-white transition-colors">Tracking (25 drills)</Link></li>
               </ul>
@@ -688,7 +728,7 @@ export default function HomePageClient() {
             </div>
             <p className="text-sm text-gray-500 mb-3">&copy; 2026 SkillDrills. Elite Performance Training.</p>
             <p className="text-xs text-gray-600 max-w-2xl mx-auto leading-relaxed mb-8">
-              SkillDrills is a free high-performance training platform with 130+ interactive drills across 9 categories including FPS aim training, cognitive brain games, memory exercises, typing speed tests, mental math, speed reading, visual tracking, hand-eye coordination, and productivity tools. No registration required. Start training instantly at skilldrills.online.
+              SkillDrills is a free high-performance training platform with 115+ interactive drills across 9 categories including FPS aim training, cognitive brain games, memory exercises, typing speed tests, mental math, speed reading, visual tracking, hand-eye coordination, and cognitive training tools. No registration required. Start training instantly at skilldrills.online.
             </p>
             <div className="flex items-center justify-center gap-6 flex-wrap">
               <button onClick={sharePage} className="text-gray-500 hover:text-white transition-colors" title="Share SkillDrills" aria-label="Share SkillDrills with friends">

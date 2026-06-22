@@ -1,23 +1,27 @@
 import ComplexPatternClient from './ComplexPatternClient';
 
 export const metadata = {
-  title: 'Complex Pattern - Memory & Coordination | SkillDrills',
-  description: 'Memorize path patterns in 2 seconds, then draw from memory. Shape-based scoring. Adaptive complexity 2-8 waypoints. No sign-up.',
+  title: 'Pattern Memory Game - Free Coordination Training Online | SkillDrills',
+  description: 'Free pattern memory game online. Memorize path patterns in 2 seconds then draw from memory — the best coordination training and spatial memory exercise. Adaptive complexity 2–8 waypoints. No sign-up.',
   keywords: [
-    'complex pattern training', 'pattern memory drill', 'motor coordination exercise',
-    'shape drawing practice', 'pattern replication game', 'hand-eye coordination',
-    'spatial memory training', 'motor control patterns', 'drawing accuracy test',
-    'visual memory drill', 'coordination challenge', 'free pattern game',
-    'adaptive difficulty patterns', 'motor skills assessment', 'path drawing practice',
-    'fine motor control training', 'visual motor integration', 'pattern recognition test',
-    'spatial reasoning practice', 'mouse control drill', 'precision drawing exercise',
-    'cognitive motor training', 'brain body coordination', 'visual spatial memory',
+    'pattern memory game', 'pattern memory game online', 'free pattern memory game',
+    'memory game online', 'coordination training online', 'coordination exercises online',
+    'free coordination game', 'coordination training game', 'motor coordination exercises',
+    'spatial memory training', 'spatial memory game', 'visual memory game online',
+    'pattern recognition game', 'pattern drawing game', 'shape memory challenge',
+    'hand eye coordination game', 'hand eye coordination training', 'hand eye coordination drill',
+    'motor control patterns', 'fine motor training', 'visual motor integration',
+    'cognitive motor training', 'brain training game free', 'memory coordination drill',
+    'adaptive pattern game', 'drawing accuracy test', 'path replication game',
+    'pattern matching exercise', 'memory drawing challenge', 'coordination skill game',
+    'FPS coordination training', 'gaming motor skills', 'esports coordination',
+    'mouse precision pattern', 'cursor accuracy game', 'drawing skill online',
     'skilldrills pattern drill', 'skilldrills coordination', 'free motor skills game',
-    'online coordination test', 'browser pattern game', 'no download coordination drill',
+    'online coordination test', 'browser pattern game', 'no download memory game',
   ],
   openGraph: {
-    title: 'Complex Pattern - Memory & Coordination | SkillDrills',
-    description: 'Memorize path patterns in 2 seconds, then draw from memory. Shape-based scoring. Adaptive complexity 2-8 waypoints. No sign-up.',
+    title: 'Pattern Memory Game - Free Coordination Training Online | SkillDrills',
+    description: 'Free pattern memory game and coordination training. Memorize path patterns in 2 seconds, draw from memory. Adaptive complexity. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/physical/coordination/complex-pattern',
     siteName: 'SkillDrills',
@@ -26,13 +30,13 @@ export const metadata = {
       url: 'https://skilldrills.online/icons/icon-512x512.png',
       width: 512,
       height: 512,
-      alt: 'Complex Pattern Elite',
+      alt: 'Pattern Memory Game - Coordination Training',
     }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Complex Pattern - Memory & Coordination | SkillDrills',
-    description: 'Memorize path patterns in 2 seconds, then draw from memory. Shape-based scoring. Adaptive complexity 2-8 waypoints. No sign-up.',
+    title: 'Pattern Memory Game - Free Coordination Training Online | SkillDrills',
+    description: 'Free pattern memory game. Memorize path patterns in 2 seconds and draw from memory. Best coordination training game. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -55,7 +59,7 @@ export default function ComplexPatternPage() {
               { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://skilldrills.online" },
               { "@type": "ListItem", "position": 2, "name": "Physical Training", "item": "https://skilldrills.online/drills/physical" },
               { "@type": "ListItem", "position": 3, "name": "Coordination", "item": "https://skilldrills.online/drills/physical/coordination" },
-              { "@type": "ListItem", "position": 4, "name": "Complex Pattern" }
+              { "@type": "ListItem", "position": 4, "name": "Pattern Memory Game - Coordination Training" }
             ]
           })
         }}
@@ -67,9 +71,9 @@ export default function ComplexPatternPage() {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "WebApplication",
-            "name": "Complex Pattern Elite",
+            "name": "Pattern Memory Game - Free Coordination Training",
             "url": "https://skilldrills.online/drills/physical/coordination/complex-pattern",
-            "description": "Free coordination drill. Memorize path patterns in 2s, draw from memory. Shape-based scoring (60% shape, 30% direction, 10% endpoints). Adaptive 2-8 waypoints.",
+            "description": "Free pattern memory game and coordination training exercise. Memorize path patterns for 2 seconds, draw from memory. Shape-based scoring (60% path, 30% direction, 10% endpoints). Adaptive complexity 2-8 waypoints.",
             "applicationCategory": "HealthApplication",
             "operatingSystem": "All",
             "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
@@ -88,34 +92,34 @@ export default function ComplexPatternPage() {
             "mainEntity": [
               {
                 "@type": "Question",
-                "name": "What is the Complex Pattern Elite drill?",
+                "name": "What is this pattern memory game?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "A free coordination exercise. Memorize path patterns for 2s, draw from memory. Shape-based scoring. Adaptive complexity 2-8 waypoints."
+                  "text": "A free pattern memory game and coordination training exercise. Memorize a path pattern for 2 seconds, then draw it from memory. Shape-based scoring system rewards accuracy. Adaptive complexity scales from 2 to 8 waypoints."
                 }
               },
               {
                 "@type": "Question",
-                "name": "How does pattern scoring work?",
+                "name": "How does pattern scoring work in this coordination training game?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Shape-based: 60% path similarity, 30% direction accuracy, 10% start/end proximity. 60%+ score = success. Both paths resampled to 100 points."
+                  "text": "Shape-based scoring: 60% path similarity, 30% direction accuracy, 10% start/end proximity. Scoring 60%+ is a success. Both patterns are resampled to 100 points for fair comparison. High accuracy earns bonus points."
                 }
               },
               {
                 "@type": "Question",
-                "name": "What skills does this improve?",
+                "name": "What skills does this pattern memory game improve?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Spatial memory, fine motor control, visual-motor integration, pattern recognition, and hand-eye coordination."
+                  "text": "Spatial memory, fine motor coordination, visual-motor integration, pattern recognition, hand-eye coordination, and short-term working memory — all core coordination training skills."
                 }
               },
               {
                 "@type": "Question",
-                "name": "Do I need to sign up?",
+                "name": "Do I need to sign up for this pattern memory game?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "No registration required. This pattern drill is completely free and works instantly in your browser."
+                  "text": "No registration required. This free pattern memory game and coordination training drill works instantly in your browser — no downloads needed."
                 }
               }
             ]

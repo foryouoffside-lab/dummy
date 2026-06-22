@@ -14,9 +14,8 @@ const categoryPages = [
   { path: '/drills/fps', priority: 1.0, changefreq: 'weekly' },
   { path: '/drills/memory', priority: 0.85, changefreq: 'weekly' },
   { path: '/drills/mental-fitness', priority: 0.8, changefreq: 'monthly' },
-  { path: '/drills/motor', priority: 0.85, changefreq: 'weekly' },
-  { path: '/drills/physical', priority: 0.75, changefreq: 'monthly' },
-  { path: '/drills/productivity', priority: 0.85, changefreq: 'weekly' },
+  { path: '/drills/motor', priority: 0.9, changefreq: 'weekly' },
+  { path: '/drills/physical', priority: 0.9, changefreq: 'weekly' },
   { path: '/drills/visual', priority: 0.85, changefreq: 'weekly' },
   { path: '/drills/visual-tracking', priority: 0.85, changefreq: 'weekly' },
 ];
@@ -36,7 +35,7 @@ const drillRoutes = [
   { path: '/drills/academic/reading-speed/peripheral-reader', category: 'Academic > Reading Speed', priority: 0.9 },
   { path: '/drills/academic/reading-speed/rsvp-reader', category: 'Academic > Reading Speed', priority: 0.9 },
   { path: '/drills/academic/reading-speed/speed-reader', category: 'Academic > Reading Speed', priority: 0.9 },
-  { path: '/drills/academic/writing-speed/code-typing', category: 'Academic > Writing Speed', priority: 0.9 },
+  // /drills/academic/writing-speed/code-typing - REMOVED (route does not exist)
   { path: '/drills/academic/writing-speed/typing-test', category: 'Academic > Writing Speed', priority: 0.9 },
 
   // ==================== COGNITIVE DRILLS ====================
@@ -57,35 +56,23 @@ const drillRoutes = [
   { path: '/drills/cognitive/processing-speed/reaction-time', category: 'Cognitive > Processing Speed', priority: 0.85 },
   { path: '/drills/cognitive/processing-speed/symbol-matching', category: 'Cognitive > Processing Speed', priority: 0.85 },
 
-  // ==================== FPS TRAINING DRILLS ====================
+  // ==================== FPS TRAINING DRILLS (12 active) ====================
   { path: '/drills/fps/180-degree-awareness', category: 'FPS Training', priority: 1.0 },
   { path: '/drills/fps/angle-hold-trainer', category: 'FPS Training', priority: 1.0 },
-  { path: '/drills/fps/counter-strafe-trainer', category: 'FPS Training', priority: 1.0 },
-  { path: '/drills/fps/deadzone-jiggle-snap', category: 'FPS Training', priority: 1.0 },
-  { path: '/drills/fps/evasive-slide-track', category: 'FPS Training', priority: 1.0 },
   { path: '/drills/fps/flick-shot-training', category: 'FPS Training', priority: 1.0 },
-  { path: '/drills/fps/headshot-micro-adjust', category: 'FPS Training', priority: 1.0 },
-  { path: '/drills/fps/high-speed-kinetic-trainer', category: 'FPS Training', priority: 1.0 },
   { path: '/drills/fps/instant-response', category: 'FPS Training', priority: 1.0 },
-  { path: '/drills/fps/micro-flick-burst', category: 'FPS Training', priority: 1.0 },
-  { path: '/drills/fps/micro-flick-precision', category: 'FPS Training', priority: 1.0 },
-  { path: '/drills/fps/parabolic-air-track', category: 'FPS Training', priority: 1.0 },
-  { path: '/drills/fps/pixel-hold-swing', category: 'FPS Training', priority: 1.0 },
-  { path: '/drills/fps/prefire-corner-clearer', category: 'FPS Training', priority: 1.0 },
   { path: '/drills/fps/pro-smooth-pursuit', category: 'FPS Training', priority: 1.0 },
-  { path: '/drills/fps/pro-tracking', category: 'FPS Training', priority: 1.0 },
-  { path: '/drills/fps/pubg-dmr-rhythm', category: 'FPS Training', priority: 1.0 },
-  { path: '/drills/fps/pubg-drive-by', category: 'FPS Training', priority: 1.0 },
-  { path: '/drills/fps/pubg-lead-drop', category: 'FPS Training', priority: 1.0 },
-  { path: '/drills/fps/reactive-sphere-tracking', category: 'FPS Training', priority: 1.0 },
   { path: '/drills/fps/recoil-control', category: 'FPS Training', priority: 1.0 },
-  { path: '/drills/fps/sound-spatial-reflex', category: 'FPS Training', priority: 1.0 },
   { path: '/drills/fps/strafe-tracking', category: 'FPS Training', priority: 1.0 },
   { path: '/drills/fps/target-acquisition', category: 'FPS Training', priority: 1.0 },
   { path: '/drills/fps/target-prioritization', category: 'FPS Training', priority: 1.0 },
   { path: '/drills/fps/target-switching-swarm', category: 'FPS Training', priority: 1.0 },
-  { path: '/drills/fps/vertical-air-pursuit', category: 'FPS Training', priority: 1.0 },
   { path: '/drills/fps/vertical-air-track', category: 'FPS Training', priority: 1.0 },
+  // Removed 16 non-existent routes: counter-strafe-trainer, deadzone-jiggle-snap,
+  // evasive-slide-track, headshot-micro-adjust, high-speed-kinetic-trainer,
+  // micro-flick-burst, micro-flick-precision, parabolic-air-track, pixel-hold-swing,
+  // prefire-corner-clearer, pro-tracking, pubg-dmr-rhythm, pubg-drive-by,
+  // pubg-lead-drop, sound-spatial-reflex, vertical-air-pursuit
 
   // ==================== MEMORY TRAINING DRILLS ====================
   { path: '/drills/memory/associative-memory/concept-linking', category: 'Memory Training > Associative Memory', priority: 0.85 },
@@ -113,43 +100,39 @@ const drillRoutes = [
   { path: '/drills/mental-fitness/stress-control/stress-inoculation', category: 'Mental Fitness > Stress Control', priority: 0.8 },
 
   // ==================== MOTOR SKILLS DRILLS ====================
-  { path: '/drills/motor/hand-eye-coordination/aim-trainer', category: 'Motor Skills > Hand Eye Coordination', priority: 0.85 },
-  { path: '/drills/motor/hand-eye-coordination/click-accuracy', category: 'Motor Skills > Hand Eye Coordination', priority: 0.85 },
-  { path: '/drills/motor/hand-eye-coordination/drag-and-drop', category: 'Motor Skills > Hand Eye Coordination', priority: 0.85 },
-  { path: '/drills/motor/movement-speed/finger-sequencing', category: 'Motor Skills > Movement Speed', priority: 0.85 },
-  { path: '/drills/motor/movement-speed/gesture-speed', category: 'Motor Skills > Movement Speed', priority: 0.85 },
-  { path: '/drills/motor/movement-speed/rapid-tapping', category: 'Motor Skills > Movement Speed', priority: 0.85 },
-  { path: '/drills/motor/precision-control/fine-motor', category: 'Motor Skills > Precision Control', priority: 0.85 },
-  { path: '/drills/motor/precision-control/steady-hand', category: 'Motor Skills > Precision Control', priority: 0.85 },
-  { path: '/drills/motor/precision-control/tracing', category: 'Motor Skills > Precision Control', priority: 0.85 },
-  { path: '/drills/motor/timing-accuracy/rhythm-tap', category: 'Motor Skills > Timing Accuracy', priority: 0.85 },
-  { path: '/drills/motor/timing-accuracy/stopwatch-click', category: 'Motor Skills > Timing Accuracy', priority: 0.85 },
-  { path: '/drills/motor/timing-accuracy/synchronization', category: 'Motor Skills > Timing Accuracy', priority: 0.85 },
+  { path: '/drills/motor/hand-eye-coordination/aim-trainer', category: 'Motor Skills > Hand Eye Coordination', priority: 0.9 },
+  { path: '/drills/motor/hand-eye-coordination/click-accuracy', category: 'Motor Skills > Hand Eye Coordination', priority: 0.9 },
+  { path: '/drills/motor/hand-eye-coordination/drag-and-drop', category: 'Motor Skills > Hand Eye Coordination', priority: 0.9 },
+  { path: '/drills/motor/movement-speed/finger-sequencing', category: 'Motor Skills > Movement Speed', priority: 0.9 },
+  { path: '/drills/motor/movement-speed/gesture-speed', category: 'Motor Skills > Movement Speed', priority: 0.9 },
+  { path: '/drills/motor/movement-speed/rapid-tapping', category: 'Motor Skills > Movement Speed', priority: 0.9 },
+  { path: '/drills/motor/precision-control/fine-motor', category: 'Motor Skills > Precision Control', priority: 0.9 },
+  { path: '/drills/motor/precision-control/steady-hand', category: 'Motor Skills > Precision Control', priority: 0.9 },
+  { path: '/drills/motor/precision-control/tracing', category: 'Motor Skills > Precision Control', priority: 0.9 },
+  // /drills/motor/timing-accuracy/rhythm-tap - REMOVED (route does not exist)
+  { path: '/drills/motor/timing-accuracy/stopwatch-click', category: 'Motor Skills > Timing Accuracy', priority: 0.9 },
+  { path: '/drills/motor/timing-accuracy/synchronization', category: 'Motor Skills > Timing Accuracy', priority: 0.9 },
 
   // ==================== PHYSICAL TRAINING DRILLS ====================
-  { path: '/drills/physical/balance-training/dynamic-balance', category: 'Physical Training > Balance Training', priority: 0.75 },
-  { path: '/drills/physical/balance-training/single-leg-hold', category: 'Physical Training > Balance Training', priority: 0.75 },
-  { path: '/drills/physical/balance-training/stability-challenge', category: 'Physical Training > Balance Training', priority: 0.75 },
-  { path: '/drills/physical/coordination/complex-pattern', category: 'Physical Training > Coordination', priority: 0.75 },
-  { path: '/drills/physical/coordination/cross-body-movement', category: 'Physical Training > Coordination', priority: 0.75 },
-  { path: '/drills/physical/fitness/agility-ladder', category: 'Physical Training > Fitness', priority: 0.75 },
-  { path: '/drills/physical/fitness/jump-sequence', category: 'Physical Training > Fitness', priority: 0.75 },
-  { path: '/drills/physical/fitness/speed-drill', category: 'Physical Training > Fitness', priority: 0.75 },
-  { path: '/drills/physical/reflex-training/drop-catch', category: 'Physical Training > Reflex Training', priority: 0.75 },
-  { path: '/drills/physical/reflex-training/quick-dodge', category: 'Physical Training > Reflex Training', priority: 0.75 },
-  { path: '/drills/physical/reflex-training/reaction-chain', category: 'Physical Training > Reflex Training', priority: 0.75 },
+  { path: '/drills/physical/balance-training/dynamic-balance', category: 'Physical Training > Balance Training', priority: 0.9 },
+  { path: '/drills/physical/balance-training/single-leg-hold', category: 'Physical Training > Balance Training', priority: 0.9 },
+  { path: '/drills/physical/balance-training/stability-challenge', category: 'Physical Training > Balance Training', priority: 0.9 },
+  { path: '/drills/physical/coordination/complex-pattern', category: 'Physical Training > Coordination', priority: 0.9 },
+  { path: '/drills/physical/coordination/cross-body-movement', category: 'Physical Training > Coordination', priority: 0.9 },
+  { path: '/drills/physical/fitness/agility-ladder', category: 'Physical Training > Fitness', priority: 0.9 },
+  { path: '/drills/physical/fitness/jump-sequence', category: 'Physical Training > Fitness', priority: 0.9 },
+  { path: '/drills/physical/fitness/speed-drill', category: 'Physical Training > Fitness', priority: 0.9 },
+  { path: '/drills/physical/reflex-training/drop-catch', category: 'Physical Training > Reflex Training', priority: 0.9 },
+  { path: '/drills/physical/reflex-training/quick-dodge', category: 'Physical Training > Reflex Training', priority: 0.9 },
+  { path: '/drills/physical/reflex-training/reaction-chain', category: 'Physical Training > Reflex Training', priority: 0.9 },
 
-  // ==================== PRODUCTIVITY DRILLS ====================
-  { path: '/drills/productivity/focus-endurance/concentration-stamina', category: 'Productivity > Focus Endurance', priority: 0.85 },
-  { path: '/drills/productivity/focus-endurance/deep-work', category: 'Productivity > Focus Endurance', priority: 0.85 },
-  { path: '/drills/productivity/focus-endurance/flow-state', category: 'Productivity > Focus Endurance', priority: 0.85 },
-  { path: '/drills/productivity/task-switching/context-switch', category: 'Productivity > Task Switching', priority: 0.85 },
-  { path: '/drills/productivity/task-switching/multi-tasking', category: 'Productivity > Task Switching', priority: 0.85 },
-  { path: '/drills/productivity/task-switching/switch-cost', category: 'Productivity > Task Switching', priority: 0.85 },
-  { path: '/drills/productivity/time-management/pomodoro-timer', category: 'Productivity > Time Management', priority: 0.85 },
-  { path: '/drills/productivity/time-management/priority-sorting', category: 'Productivity > Time Management', priority: 0.85 },
-  { path: '/drills/productivity/time-management/time-estimation', category: 'Productivity > Time Management', priority: 0.85 },
-  { path: '/drills/productivity/work-efficiency/batch-processing', category: 'Productivity > Work Efficiency', priority: 0.85 },
+  { path: '/drills/cognitive/attention/concentration-stamina', category: 'Cognitive > Attention', priority: 0.85 },
+  { path: '/drills/visual/tracking-accuracy/flow-state', category: 'Cognitive > Attention', priority: 0.85 },
+  { path: '/drills/cognitive/attention/multi-tasking', category: 'Cognitive > Attention', priority: 0.85 },
+  { path: '/drills/cognitive/attention/switch-cost', category: 'Cognitive > Attention', priority: 0.85 },
+  { path: '/drills/cognitive/problem-solving/priority-sorting', category: 'Cognitive > Problem Solving', priority: 0.85 },
+  { path: '/drills/motor/timing-accuracy/time-estimation', category: 'Motor > Timing Accuracy', priority: 0.85 },
+  { path: '/drills/cognitive/attention/batch-processing', category: 'Cognitive > Attention', priority: 0.85 },
 
   // ==================== VISUAL TRAINING DRILLS ====================
   { path: '/drills/visual/depth-perception/distance-judgment', category: 'Visual Training > Depth Perception', priority: 0.85 },
@@ -167,32 +150,34 @@ const drillRoutes = [
   { path: '/drills/visual/visual-recognition/rhythm-anomaly', category: 'Visual Training > Visual Recognition', priority: 0.85 },
   { path: '/drills/visual/visual-recognition/visual-search', category: 'Visual Training > Visual Recognition', priority: 0.85 },
 
-  // ==================== VISUAL TRACKING DRILLS ====================
-  { path: '/drills/visual-tracking/barrier-sequence-pursuit', category: 'Visual Tracking', priority: 0.85 },
-  { path: '/drills/visual-tracking/circular-pursuit', category: 'Visual Tracking', priority: 0.85 },
-  { path: '/drills/visual-tracking/constant-slow-pursuit', category: 'Visual Tracking', priority: 0.85 },
-  { path: '/drills/visual-tracking/directional-chaos-pursuit', category: 'Visual Tracking', priority: 0.85 },
-  { path: '/drills/visual-tracking/dynamic-evasion-pursuit', category: 'Visual Tracking', priority: 0.85 },
-  { path: '/drills/visual-tracking/ghosting-suppress-pursuit', category: 'Visual Tracking', priority: 0.85 },
-  { path: '/drills/visual-tracking/infinity-pursuit', category: 'Visual Tracking', priority: 0.85 },
-  { path: '/drills/visual-tracking/market-doors-pursuit', category: 'Visual Tracking', priority: 0.85 },
-  { path: '/drills/visual-tracking/momentum-teleport-pursuit', category: 'Visual Tracking', priority: 0.85 },
-  { path: '/drills/visual-tracking/peripheral-ping-pursuit', category: 'Visual Tracking', priority: 0.85 },
-  { path: '/drills/visual-tracking/predictive-pursuit', category: 'Visual Tracking', priority: 0.85 },
-  { path: '/drills/visual-tracking/reaction-simulator', category: 'Visual Tracking', priority: 0.85 },
-  { path: '/drills/visual-tracking/reactive-strafe-pursuit', category: 'Visual Tracking', priority: 0.85 },
-  { path: '/drills/visual-tracking/saccadic-gallery', category: 'Visual Tracking', priority: 0.85 },
-  { path: '/drills/visual-tracking/saccadic-snap', category: 'Visual Tracking', priority: 0.85 },
-  { path: '/drills/visual-tracking/sine-wave-pursuit', category: 'Visual Tracking', priority: 0.85 },
-  { path: '/drills/visual-tracking/slide-dash-acceleration', category: 'Visual Tracking', priority: 0.85 },
-  { path: '/drills/visual-tracking/slow-precision-tracking', category: 'Visual Tracking', priority: 0.85 },
-  { path: '/drills/visual-tracking/spatial-shift-pursuit', category: 'Visual Tracking', priority: 0.85 },
-  { path: '/drills/visual-tracking/split-screen-tracking', category: 'Visual Tracking', priority: 0.85 },
-  { path: '/drills/visual-tracking/staircase-step', category: 'Visual Tracking', priority: 0.85 },
-  { path: '/drills/visual-tracking/stop-and-go-dash', category: 'Visual Tracking', priority: 0.85 },
-  { path: '/drills/visual-tracking/strobe-prediction-pursuit', category: 'Visual Tracking', priority: 0.85 },
-  { path: '/drills/visual-tracking/triangular-pursuit', category: 'Visual Tracking', priority: 0.85 },
-  { path: '/drills/visual-tracking/zig-zag-path-pursuit', category: 'Visual Tracking', priority: 0.85 },
+  // ==================== VISUAL TRACKING DRILLS - TRACKING (17) ====================
+  { path: '/drills/visual-tracking/circular-pursuit', category: 'Visual Tracking > Tracking', priority: 0.85 },
+  { path: '/drills/visual-tracking/constant-slow-pursuit', category: 'Visual Tracking > Tracking', priority: 0.85 },
+  { path: '/drills/visual-tracking/directional-chaos-pursuit', category: 'Visual Tracking > Tracking', priority: 0.85 },
+  { path: '/drills/visual-tracking/dynamic-evasion-pursuit', category: 'Visual Tracking > Tracking', priority: 0.85 },
+  { path: '/drills/visual-tracking/ghosting-suppress-pursuit', category: 'Visual Tracking > Tracking', priority: 0.85 },
+  { path: '/drills/visual-tracking/infinity-pursuit', category: 'Visual Tracking > Tracking', priority: 0.85 },
+  { path: '/drills/visual-tracking/momentum-teleport-pursuit', category: 'Visual Tracking > Tracking', priority: 0.85 },
+  { path: '/drills/visual-tracking/peripheral-ping-pursuit', category: 'Visual Tracking > Tracking', priority: 0.85 },
+  { path: '/drills/visual-tracking/predictive-pursuit', category: 'Visual Tracking > Tracking', priority: 0.85 },
+  { path: '/drills/visual-tracking/sine-wave-pursuit', category: 'Visual Tracking > Tracking', priority: 0.85 },
+  { path: '/drills/visual-tracking/slow-precision-tracking', category: 'Visual Tracking > Tracking', priority: 0.85 },
+  { path: '/drills/visual-tracking/spatial-shift-pursuit', category: 'Visual Tracking > Tracking', priority: 0.85 },
+  { path: '/drills/visual-tracking/split-screen-tracking', category: 'Visual Tracking > Tracking', priority: 0.85 },
+  { path: '/drills/visual-tracking/staircase-step', category: 'Visual Tracking > Tracking', priority: 0.85 },
+  { path: '/drills/visual-tracking/strobe-prediction-pursuit', category: 'Visual Tracking > Tracking', priority: 0.85 },
+  { path: '/drills/visual-tracking/triangular-pursuit', category: 'Visual Tracking > Tracking', priority: 0.85 },
+  { path: '/drills/visual-tracking/zig-zag-path-pursuit', category: 'Visual Tracking > Tracking', priority: 0.85 },
+
+  // ==================== VISUAL TRACKING DRILLS - REACTIVE (8) ====================
+  { path: '/drills/visual-tracking/barrier-sequence-pursuit', category: 'Visual Tracking > Reactive', priority: 0.85 },
+  { path: '/drills/visual-tracking/market-doors-pursuit', category: 'Visual Tracking > Reactive', priority: 0.85 },
+  { path: '/drills/visual-tracking/reaction-simulator', category: 'Visual Tracking > Reactive', priority: 0.85 },
+  { path: '/drills/visual-tracking/reactive-strafe-pursuit', category: 'Visual Tracking > Reactive', priority: 0.85 },
+  { path: '/drills/visual-tracking/saccadic-gallery', category: 'Visual Tracking > Reactive', priority: 0.85 },
+  { path: '/drills/visual-tracking/saccadic-snap', category: 'Visual Tracking > Reactive', priority: 0.85 },
+  { path: '/drills/visual-tracking/slide-dash-acceleration', category: 'Visual Tracking > Reactive', priority: 0.85 },
+  { path: '/drills/visual-tracking/stop-and-go-dash', category: 'Visual Tracking > Reactive', priority: 0.85 },
 ];
 
 // ============================================
@@ -231,13 +216,13 @@ export default async function sitemap() {
   ├── Category Pages: 11
   │   ├── Priority 1.0: Homepage, FPS Hub
   │   ├── Priority 0.9: Academic, Cognitive
-  │   ├── Priority 0.85: Memory, Motor, Productivity, Visual, Visual Tracking
+  │   ├── Priority 0.85: Memory, Motor, Visual, Visual Tracking
   │   └── Priority 0.75-0.8: Mental Fitness, Physical
   │
   └── Drill Pages: 149
       ├── Priority 1.0: FPS Drills (28)
       ├── Priority 0.9: Academic Drills (12)
-      ├── Priority 0.85: Cognitive (16), Memory (15), Motor (12), Productivity (10), Visual (14), Visual Tracking (25)
+      ├── Priority 0.85: Cognitive (16), Memory (15), Motor (12), Cognitive Extended, Visual (14), Visual Tracking (25)
       └── Priority 0.75-0.8: Mental Fitness (6), Physical (11)
 */
 

@@ -1,24 +1,27 @@
 import SteadyHandClient from './SteadyHandClient';
 
 export const metadata = {
-  title: 'Steady Hand - Path Tracking Drill | SkillDrills',
-  description: 'Trace a winding corridor with steady cursor control. Complete laps for 15 points. Corridor shrinks 50px to 12px with streak. No sign-up.',
+  title: 'Steady Hand Game - Free Mouse Path Tracing Drill | SkillDrills',
+  description: 'Free steady hand game online. Trace a winding corridor with steady cursor control — the best mouse precision and hand steadiness drill. Corridor shrinks with streak. No sign-up.',
   keywords: [
-    'steady hand drill', 'path tracing game', 'precision tracking test', 'motor endurance training',
-    'steady cursor control', 'hand stability training', 'path following drill online',
-    'precision motor control', 'circuit training game', 'mouse steadiness practice',
-    'fine motor endurance', 'hand tremor control', 'smooth movement practice',
-    'free steady hand drill', 'stability training', 'cursor precision test',
-    'hand eye coordination mouse', 'motor skill development', 'fine motor control exercise',
-    'mouse accuracy training', 'cursor path following', 'steady hand challenge',
-    'motor control assessment', 'hand steadiness test', 'precision movement drill',
-    'free motor skills practice', 'online coordination game', 'mouse control improvement',
-    'gamer hand steadiness', 'artist cursor control', 'surgeon hand training',
+    'steady hand game', 'steady hand game online', 'free steady hand game',
+    'steady hand test', 'steady hand drill', 'hand steadiness test',
+    'mouse path tracing', 'path tracing game', 'mouse tracing game',
+    'cursor path game', 'mouse maze game', 'mouse control game',
+    'mouse precision training', 'mouse precision test', 'cursor precision game',
+    'hand eye coordination game', 'hand eye coordination training', 'hand eye coordination test',
+    'fine motor control game', 'fine motor skills game', 'fine motor training',
+    'motor control exercise', 'motor precision drill', 'precision movement game',
+    'hand tremor game', 'hand stability training', 'smooth cursor control',
+    'gaming mouse steadiness', 'digital artist mouse control', 'graphic design precision',
+    'surgeon hand training', 'occupational therapy game', 'motor rehabilitation game',
+    'circuit tracing game', 'winding path game', 'corridor tracing drill',
     'skilldrills steady hand', 'skilldrills motor drill', 'free precision training',
+    'browser steady hand game', 'no download tracing game', 'instant mouse game',
   ],
   openGraph: {
-    title: 'Steady Hand - Path Tracking Drill | SkillDrills',
-    description: 'Trace winding corridor with steady cursor. 15pts per lap. Free.',
+    title: 'Steady Hand Game - Free Mouse Path Tracing Drill | SkillDrills',
+    description: 'Free steady hand game online. Trace a winding corridor with steady cursor control. Best hand steadiness and mouse precision drill. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/motor/precision-control/steady-hand',
     siteName: 'SkillDrills',
@@ -27,13 +30,13 @@ export const metadata = {
       url: 'https://skilldrills.online/icons/icon-512x512.png',
       width: 512,
       height: 512,
-      alt: 'Sustained Circuit Drill',
+      alt: 'Steady Hand Game - Mouse Path Tracing',
     }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Steady Hand - Path Tracking Drill | SkillDrills',
-    description: 'Trace the path, keep steady. Free precision training.',
+    title: 'Steady Hand Game - Free Mouse Path Tracing Drill | SkillDrills',
+    description: 'Free steady hand game. Trace a winding corridor. Best mouse precision and hand steadiness drill. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -45,7 +48,6 @@ export const metadata = {
 export default function SteadyHandPage() {
   return (
     <>
-
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -56,21 +58,20 @@ export default function SteadyHandPage() {
               { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://skilldrills.online" },
               { "@type": "ListItem", "position": 2, "name": "Motor Training", "item": "https://skilldrills.online/drills/motor" },
               { "@type": "ListItem", "position": 3, "name": "Precision Control", "item": "https://skilldrills.online/drills/motor/precision-control" },
-              { "@type": "ListItem", "position": 4, "name": "Steady Hand" }
+              { "@type": "ListItem", "position": 4, "name": "Steady Hand Game - Mouse Path Tracing" }
             ]
           })
         }}
       />
-
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "WebApplication",
-            "name": "Sustained Circuit Drill",
+            "name": "Steady Hand Game - Free Mouse Path Tracing Drill",
             "url": "https://skilldrills.online/drills/motor/precision-control/steady-hand",
-            "description": "Free steady hand drill. Trace winding corridor with cursor. 15pts per lap. Corridor shrinks 50px to 12px with streak. 30s lap time limit.",
+            "description": "Free steady hand game and mouse path tracing drill. Trace a winding corridor with cursor. 15pts per lap. Corridor shrinks 50px to 12px with streak. 30-second lap time limit. Best hand steadiness game online.",
             "applicationCategory": "GameApplication",
             "operatingSystem": "All",
             "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
@@ -79,7 +80,6 @@ export default function SteadyHandPage() {
           })
         }}
       />
-
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -89,41 +89,40 @@ export default function SteadyHandPage() {
             "mainEntity": [
               {
                 "@type": "Question",
-                "name": "What is the Sustained Circuit drill?",
+                "name": "What is this steady hand game?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "A free precision motor drill. Trace a winding corridor with cursor. 15pts per lap. Corridor shrinks 50px to 12px with streak."
+                  "text": "A free steady hand game and mouse path tracing drill. Trace a winding corridor with cursor. 15pts per completed lap. Corridor shrinks from 50px to 12px width with streak. 30-second lap time limit. Best free hand steadiness game online."
                 }
               },
               {
                 "@type": "Question",
-                "name": "How does the corridor shrinking work?",
+                "name": "How does corridor shrinking work in this steady hand game?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Starts at 50px wide. Each lap shrinks by 2px (min 12px). Fail resets to 50px. Longer streak = narrower path."
+                  "text": "Corridor starts at 50px wide. Each completed lap shrinks by 2px down to a minimum of 12px. Failure resets corridor to 50px. The longer your streak, the narrower the path — demanding increasingly precise hand steadiness."
                 }
               },
               {
                 "@type": "Question",
-                "name": "Does this help with hand tremors?",
+                "name": "Who should play this steady hand game?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Regular practice can help train smoother controlled movements. Not medical treatment but useful for improving cursor stability."
+                  "text": "Gamers wanting smoother mouse control, digital artists needing hand steadiness, medical professionals training fine motor precision, and occupational therapy patients improving cursor stability."
                 }
               },
               {
                 "@type": "Question",
-                "name": "Do I need to sign up?",
+                "name": "Do I need to sign up for this steady hand game?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "No registration required. This steady hand drill is completely free and works instantly in your browser."
+                  "text": "No registration required. This free steady hand game and mouse path tracing drill works instantly in your browser — no downloads needed."
                 }
               }
             ]
           })
         }}
       />
-
       <SteadyHandClient />
     </>
   );

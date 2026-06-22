@@ -1,25 +1,27 @@
 import FineMotorClient from './FineMotorClient';
 
 export const metadata = {
-  title: 'Fine Motor - Precision Path Tracking | SkillDrills',
-  description: 'Track a scrolling wave path with your cursor. +1pt/sec on path, no penalties. Dynamic and Extreme phases with adaptive speed. No sign-up.',
+  title: 'Fine Motor Skills Training - Free Precision Path Tracking | SkillDrills',
+  description: 'Free fine motor skills training online. Track a scrolling wave path with your cursor — the best fine motor control and mouse precision exercise for gamers, artists, and therapists. No sign-up.',
   keywords: [
-    'fine motor control drill', 'path tracking training', 'mouse precision practice',
-    'steady hand training', 'precision tracking drill', 'motor accuracy training',
-    'hand steadiness exercise', 'cursor control practice', 'wave tracking drill',
-    'fine motor skills training', 'mouse control practice free', 'smooth movement drill',
-    'free motor drill', 'precision motor training', 'hand-eye tracking online',
-    'cursor precision test', 'mouse accuracy drill', 'motor control exercise',
-    'fine motor skills for gamers', 'precision control training', 'mouse steadiness test',
-    'free online motor drill', 'precision path following', 'adaptive motor training',
+    'fine motor skills', 'fine motor skills training', 'fine motor skills exercises',
+    'fine motor control', 'fine motor skills game', 'fine motor training online',
+    'fine motor exercises online', 'fine motor skills for adults', 'fine motor development',
+    'mouse precision training', 'mouse precision game', 'cursor precision test',
+    'path tracking game', 'wave tracking drill', 'cursor tracking exercise',
+    'hand steadiness training', 'steady cursor drill', 'smooth movement practice',
+    'hand eye coordination drill', 'hand eye coordination training', 'hand eye coordination game',
+    'motor control exercise', 'precision motor training', 'motor skill development',
+    'fine motor skills for gamers', 'gaming mouse precision', 'aim smoothing drill',
+    'fine motor skills for artists', 'digital art mouse training', 'graphic design precision',
+    'fine motor rehabilitation', 'occupational therapy online', 'hand tremor training',
+    'adaptive motor training', 'precision path following', 'scrolling wave game',
     'skilldrills fine motor', 'skilldrills motor control', 'free precision training',
-    'hand coordination drill', 'dexterity training online', 'motor skill development',
-    'fine motor precision test', 'cursor tracking practice', 'mouse movement control',
-    'precision hand training', 'fine motor skills for artists', 'motor accuracy online',
+    'browser motor drill', 'no download motor training', 'instant precision game',
   ],
   openGraph: {
-    title: 'Fine Motor - Precision Path Tracking | SkillDrills',
-    description: 'Track scrolling wave path with cursor. +1/sec on path. Free.',
+    title: 'Fine Motor Skills Training - Free Precision Path Tracking | SkillDrills',
+    description: 'Free fine motor skills training. Track a scrolling wave path — best fine motor control exercise for gamers, artists, and rehabilitation. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/motor/precision-control/fine-motor',
     siteName: 'SkillDrills',
@@ -28,13 +30,13 @@ export const metadata = {
       url: 'https://skilldrills.online/icons/icon-512x512.png',
       width: 512,
       height: 512,
-      alt: 'Fine Motor Control Drill',
+      alt: 'Fine Motor Skills Training - Precision Path Tracking',
     }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Fine Motor - Precision Path Tracking | SkillDrills',
-    description: 'Track scrolling wave path. +1/sec on path. Free.',
+    title: 'Fine Motor Skills Training - Free Precision Path Tracking | SkillDrills',
+    description: 'Free fine motor skills training. Track a scrolling wave path. Best fine motor control exercise. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -46,7 +48,6 @@ export const metadata = {
 export default function FineMotorPage() {
   return (
     <>
-
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -57,21 +58,20 @@ export default function FineMotorPage() {
               { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://skilldrills.online" },
               { "@type": "ListItem", "position": 2, "name": "Motor Training", "item": "https://skilldrills.online/drills/motor" },
               { "@type": "ListItem", "position": 3, "name": "Precision Control", "item": "https://skilldrills.online/drills/motor/precision-control" },
-              { "@type": "ListItem", "position": 4, "name": "Fine Motor Control" }
+              { "@type": "ListItem", "position": 4, "name": "Fine Motor Skills Training - Precision Path Tracking" }
             ]
           })
         }}
       />
-
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "WebApplication",
-            "name": "Fine Motor Control Drill",
+            "name": "Fine Motor Skills Training - Free Precision Path Tracking",
             "url": "https://skilldrills.online/drills/motor/precision-control/fine-motor",
-            "description": "Free precision tracking drill. Follow scrolling wave path with cursor. +1pt/sec on path, no penalties. Dynamic (0-30s) and Extreme (30-60s) phases.",
+            "description": "Free fine motor skills training and precision path tracking drill. Follow a scrolling wave path with cursor. +1pt/sec on path, no penalties. Dynamic (0-30s) and Extreme (30-60s) phases with adaptive speed.",
             "applicationCategory": "EducationalApplication",
             "operatingSystem": "All",
             "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
@@ -80,7 +80,6 @@ export default function FineMotorPage() {
           })
         }}
       />
-
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -90,41 +89,40 @@ export default function FineMotorPage() {
             "mainEntity": [
               {
                 "@type": "Question",
-                "name": "What is the Fine Motor Control drill?",
+                "name": "What is this fine motor skills training drill?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "A free precision tracking exercise. Follow a scrolling wave path with cursor. +1pt/sec on path, no penalties. Adaptive scroll speed."
+                  "text": "A free fine motor skills training and precision cursor tracking exercise. Follow a scrolling wave path with your cursor. +1pt/sec on path, no penalties. Adaptive scroll speed with two phases: Dynamic (moderate waves, 0-30s) and Extreme (amplified waves, 30-60s)."
                 }
               },
               {
                 "@type": "Question",
-                "name": "What are the Dynamic and Extreme phases?",
+                "name": "Who benefits from this fine motor skills training?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Dynamic (0-30s): moderate waves (200-260px). Extreme (30-60s): amplified waves (280-360px) with higher frequency."
+                  "text": "Gamers wanting smoother aim, digital artists and graphic designers needing cursor precision, occupational therapy patients improving fine motor skills, and anyone wanting better hand steadiness and mouse control."
                 }
               },
               {
                 "@type": "Question",
-                "name": "Who benefits from this training?",
+                "name": "What are the Dynamic and Extreme phases in this fine motor drill?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Gamers, digital artists, surgeons, and anyone wanting better cursor precision and steady hand control."
+                  "text": "Dynamic phase (0-30s): moderate waves 200-260px amplitude. Extreme phase (30-60s): amplified waves 280-360px with higher frequency. Fine motor skills are tested progressively harder throughout the session."
                 }
               },
               {
                 "@type": "Question",
-                "name": "Do I need to sign up?",
+                "name": "Do I need to sign up for this fine motor skills training?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "No registration required. This fine motor control drill is completely free and works instantly in your browser."
+                  "text": "No registration required. This free fine motor skills training exercise works instantly in your browser — no downloads needed."
                 }
               }
             ]
           })
         }}
       />
-
       <FineMotorClient />
     </>
   );

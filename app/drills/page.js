@@ -8,11 +8,11 @@ export const metadata = {
     'training drills', 'brain training', 'FPS aim trainer', 'cognitive exercises',
     'free drills online', 'skilldrills', 'all drills', 'free training',
     'FPS gaming', 'memory training', 'visual training', 'academic drills',
-    'productivity tools', 'motor skills', 'physical training',
+    'cognitive training', 'motor skills', 'physical training',
   ],
   openGraph: {
-    title: 'All Training Drills - 130+ Free Exercises | SkillDrills',
-    description: '130+ free interactive drills for gaming, cognitive, and motor skills training. No sign-up.',
+    title: 'All Training Drills - 115+ Free Exercises | SkillDrills',
+    description: '115+ free interactive drills for gaming, cognitive, and motor skills training. No sign-up.',
     type: 'website',
     url: 'https://skilldrills.online/drills',
     siteName: 'SkillDrills',
@@ -27,7 +27,7 @@ export const metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'All Training Drills | SkillDrills',
-    description: '130+ free drills across 9 categories. No sign-up.',
+    description: '115+ free drills across 8 categories. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -38,13 +38,12 @@ export const metadata = {
 
 
 const drillCategories = [
-  { name: 'FPS Gaming', color: 'from-red-500 to-orange-600', icon: Gamepad2, description: 'Reaction speed, aim training, flick shots, tracking and peripheral vision for competitive FPS gamers', slug: 'fps', drills: '15 drills', keywords: 'aim trainer, flick shots, Valorant, CS2, Overwatch' },
-  { name: 'Cognitive', color: 'from-purple-500 to-indigo-600', icon: Brain, description: 'Memory, attention, focus, problem-solving and processing speed brain training exercises', slug: 'cognitive', drills: '16 drills', keywords: 'brain training, memory games, attention exercises' },
-  { name: 'Visual', color: 'from-blue-500 to-cyan-600', icon: Eye, description: 'Reaction speed, tracking accuracy, peripheral vision, depth perception and visual recognition drills', slug: 'visual', drills: '14 drills', keywords: 'visual training, reaction time, eye tracking' },
+  { name: 'FPS Gaming', color: 'from-red-500 to-orange-600', icon: Gamepad2, description: 'Reaction speed, aim training, flick shots, tracking and peripheral vision for competitive FPS gamers', slug: 'fps', drills: '13 drills', keywords: 'aim trainer, flick shots, Valorant, CS2, Overwatch' },
+  { name: 'Cognitive', color: 'from-purple-500 to-indigo-600', icon: Brain, description: 'Memory, attention, focus, problem-solving and processing speed brain training exercises', slug: 'cognitive', drills: '20 drills', keywords: 'brain training, memory games, attention exercises' },
+  { name: 'Visual', color: 'from-blue-500 to-cyan-600', icon: Eye, description: 'Reaction speed, tracking accuracy, peripheral vision, depth perception and visual recognition drills', slug: 'visual', drills: '15 drills', keywords: 'visual training, reaction time, eye tracking' },
   { name: 'Visual Tracking', color: 'from-cyan-500 to-blue-600', icon: Eye, description: 'Smooth pursuit, visual velocity estimation, gaze stability, trajectory prediction and saccadic training', slug: 'visual-tracking', drills: '25 drills', keywords: 'smooth pursuit, eye tracking, gaze stability' },
-  { name: 'Academic', color: 'from-yellow-500 to-amber-600', icon: BookOpen, description: 'Math speed, reading comprehension, writing speed, typing tests and inference practice', slug: 'academic', drills: '12 drills', keywords: 'typing test, speed reading, math practice' },
-  { name: 'Productivity', color: 'from-emerald-500 to-teal-600', icon: Timer, description: 'Pomodoro timer, task management, focus sessions, deep work and habit tracking tools', slug: 'productivity', drills: '10 drills', keywords: 'pomodoro timer, focus tools, productivity apps' },
-  { name: 'Memory', color: 'from-violet-500 to-purple-600', icon: Database, description: 'Short-term, working, long-term, spatial and associative memory training with scientific methods', slug: 'memory', drills: '15 drills', keywords: 'memory training, working memory, n-back' },
+  { name: 'Academic', color: 'from-yellow-500 to-amber-600', icon: BookOpen, description: 'Math speed, reading comprehension, writing speed, typing tests and inference practice', slug: 'academic', drills: '8 drills', keywords: 'typing test, speed reading, math practice' },
+  { name: 'Memory', color: 'from-violet-500 to-purple-600', icon: Database, description: 'Short-term, working, long-term, spatial and associative memory training with scientific methods', slug: 'memory', drills: '13 drills', keywords: 'memory training, working memory, n-back' },
   { name: 'Motor Skills', color: 'from-green-500 to-emerald-600', icon: Hand, description: 'Hand-eye coordination, timing accuracy, precision control, finger sequencing and movement speed', slug: 'motor', drills: '12 drills', keywords: 'hand-eye coordination, motor skills, precision' },
   { name: 'Physical', color: 'from-orange-500 to-red-600', icon: Dumbbell, description: 'Balance training, reflex training, coordination drills, fitness exercises and agility ladder', slug: 'physical', drills: '11 drills', keywords: 'balance training, reflex drills, fitness' },
 ];
@@ -58,14 +57,14 @@ export default function DrillsPage() {
         backgroundSize: '100% 100%, 48px 48px, 48px 48px' 
       }}
     >
-      <h1 style={{ position: "absolute", width: "1px", height: "1px", padding: "0", margin: "-1px", overflow: "hidden", clip: "rect(0,0,0,0)", whiteSpace: "nowrap", border: "0" }}>All Training Drills - 130+ Free Exercises Across 9 Categories</h1>
+      <h1 style={{ position: "absolute", width: "1px", height: "1px", padding: "0", margin: "-1px", overflow: "hidden", clip: "rect(0,0,0,0)", whiteSpace: "nowrap", border: "0" }}>All Training Drills - 115+ Free Exercises Across 8 Categories</h1>
       
       {/* SEO Content */}
       <section className="sr-only" aria-label="Drills directory for search engines">
-        <h2>All Training Drills - 130+ Free Exercises Across 9 Categories</h2>
+        <h2>All Training Drills - 115+ Free Exercises Across 8 Categories</h2>
         <p>
-          Browse all free training drills on SkillDrills. 9 categories including FPS gaming aim trainer, visual tracking, cognitive brain training,
-          visual reaction speed tests, academic typing and reading drills, productivity tools, memory exercises, motor skills training,
+          Browse all free training drills on SkillDrills. 8 categories including FPS gaming aim trainer, visual tracking, cognitive brain training,
+          visual reaction speed tests, academic typing and reading drills, memory exercises, motor skills training,
           and physical fitness drills. All drills are completely free with no registration required.
         </p>
       </section>
@@ -125,7 +124,7 @@ export default function DrillsPage() {
         <div className="text-center mb-12">
           <h2 id="categories-heading" className="text-2xl sm:text-3xl font-black text-white uppercase tracking-tight">Training Sectors</h2>
           <p className="text-gray-500 max-w-2xl mx-auto text-sm mt-1">
-            Browse through 9 specialized category modules comprising 130+ distinct performance diagnostic tasks.
+            Browse through 8 specialized category modules comprising 115+ distinct performance diagnostic tasks.
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
@@ -138,7 +137,7 @@ export default function DrillsPage() {
               visual: 'hover:border-blue-500/40 hover:shadow-[0_0_20px_rgba(59,130,246,0.1)]',
               'visual-tracking': 'hover:border-cyan-500/40 hover:shadow-[0_0_20px_rgba(6,182,212,0.1)]',
               academic: 'hover:border-green-500/40 hover:shadow-[0_0_20px_rgba(34,197,94,0.1)]',
-              productivity: 'hover:border-emerald-500/40 hover:shadow-[0_0_20px_rgba(16,185,129,0.1)]',
+              
               memory: 'hover:border-violet-500/40 hover:shadow-[0_0_20px_rgba(99,102,241,0.1)]',
               motor: 'hover:border-yellow-500/40 hover:shadow-[0_0_20px_rgba(234,179,8,0.1)]',
               physical: 'hover:border-orange-500/40 hover:shadow-[0_0_20px_rgba(249,115,22,0.1)]',
@@ -188,7 +187,7 @@ export default function DrillsPage() {
             <div className="flex-1 w-full max-w-md">
               <div className="bg-black/40 rounded-2xl p-6 border border-white/5">
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center"><p className="text-3xl font-black text-white">15</p><p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">FPS Drills</p></div>
+                  <div className="text-center"><p className="text-3xl font-black text-white">12</p><p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">FPS Drills</p></div>
                   <div className="text-center"><p className="text-3xl font-black text-white">1:1</p><p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">Mouse Raw Input</p></div>
                   <div className="text-center"><p className="text-3xl font-black text-white">360Hz</p><p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">Hz Optimized</p></div>
                   <div className="text-center"><p className="text-3xl font-black text-white">FREE</p><p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">No Sign-Up</p></div>
@@ -289,7 +288,7 @@ export default function DrillsPage() {
         </div>
       </section>
 
-      {/* PRODUCTIVITY BANNER */}
+      {/* COGNITIVE EXTENDED BANNER */}
       <section className="mx-4 sm:mx-6 lg:mx-8 rounded-3xl mb-8 overflow-hidden bg-[#0E111A]/60 border border-white/5 shadow-2xl relative">
         <div className="absolute top-0 left-0 bottom-0 w-[4px] bg-emerald-500" />
         <div className="max-w-7xl mx-auto px-8 py-10 sm:py-12">
@@ -299,9 +298,9 @@ export default function DrillsPage() {
                 <Timer className="w-4 h-4 text-emerald-400" />
                 <span className="text-xs text-emerald-300 font-bold uppercase tracking-wider">Efficiency Lab</span>
               </div>
-              <h2 className="text-2xl sm:text-3xl font-black text-white uppercase tracking-tight">Productivity Control Sector</h2>
-              <p className="text-gray-400 max-w-lg leading-relaxed">Condition concentration endurance, multi-tasking flow, Pomodoro synchronization, and temporal cost context-switching parameters.</p>
-              <Link href="/drills/productivity" className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-6 py-3 rounded-xl font-bold hover:shadow-lg hover:shadow-emerald-500/20 transition">
+              <h2 className="text-2xl sm:text-3xl font-black text-white uppercase tracking-tight">Cognitive Training Hub</h2>
+              <p className="text-gray-400 max-w-lg leading-relaxed">Master attention stamina, flow state, task switching, priority sorting and cognitive speed.st context-switching parameters.</p>
+              <Link href="/drills/cognitive" className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-6 py-3 rounded-xl font-bold hover:shadow-lg hover:shadow-emerald-500/20 transition">
                 Load Efficiency Modules <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
@@ -470,7 +469,7 @@ export default function DrillsPage() {
               <h3 className="text-white font-bold tracking-wider mb-4 text-xs uppercase">More Categories</h3>
               <ul className="space-y-2.5 text-sm text-gray-400">
                 <li><Link href="/drills/memory" className="hover:text-white transition-colors">Memory (15 drills)</Link></li>
-                <li><Link href="/drills/productivity" className="hover:text-white transition-colors">Productivity (10 drills)</Link></li>
+                <li><Link href="/drills/cognitive" className="hover:text-white transition-colors">Cognitive</Link></li>
                 <li><Link href="/drills/physical" className="hover:text-white transition-colors">Physical (11 drills)</Link></li>
               </ul>
             </div>

@@ -1,25 +1,26 @@
 import SingleLegEquilibriumClient from './SingleLegEquilibriumClient';
 
 export const metadata = {
-  title: 'Single Leg Hold - Balance Stability | SkillDrills',
-  description: 'Maintain link between cursor and bouncing anchor. +1pt/2s connected, -1pt/s broken. Stability %, streak tracking. No sign-up.',
+  title: 'Single Leg Balance Exercises - Free Balance Training Online | SkillDrills',
+  description: 'Free single leg balance exercises online. Maintain cursor link to a moving anchor — the best balance training game for stability and motor control. 60-second timed challenge. No sign-up.',
   keywords: [
-    'single leg balance drill', 'equilibrium training', 'balance stability drill',
-    'motor control exercise', 'cursor tracking stability', 'balance game online',
-    'hand-eye coordination training', 'stability practice free', 'balance test online',
-    'motor skills assessment', 'reaction balance training', 'free balance drill',
-    'stability metrics', 'coordination exercise', 'balance challenge',
-    'equilibrium test', 'motor control practice', 'sustained attention training',
-    'mouse control drill', 'cursor accuracy practice', 'tracking stability test',
-    'physical therapy exercise', 'balance rehabilitation', 'coordination assessment',
-    'FPS aim training', 'mouse precision drill', 'hand stability exercise',
-    'free coordination drill', 'online balance game', 'motor learning exercise',
-    'skilldrills equilibrium', 'skilldrills balance', 'free physical training',
-    'browser balance drill', 'no download coordination test', 'web based motor test',
+    'single leg balance exercises', 'single leg balance training', 'balance training online',
+    'balance training game', 'free balance training', 'balance test online',
+    'balance exercises online', 'balance training for athletes', 'balance drill free',
+    'motor control exercise', 'stability training online', 'stability drill free',
+    'hand eye coordination training', 'coordination training online', 'coordination game free',
+    'equilibrium training', 'balance stability drill', 'balance challenge game',
+    'physical therapy balance exercises', 'balance rehabilitation online', 'vestibular training',
+    'cursor tracking stability', 'mouse precision training', 'tracking accuracy test',
+    'FPS aim training', 'mouse control drill', 'gaming coordination practice',
+    'balance game online free', 'online balance test', 'free motor skills test',
+    'brain body balance training', 'neuromuscular training', 'proprioception exercises',
+    'skilldrills equilibrium', 'skilldrills balance', 'free physical training online',
+    'browser balance drill', 'no download balance test', 'instant balance game',
   ],
   openGraph: {
-    title: 'Single Leg Hold - Balance Stability | SkillDrills',
-    description: 'Maintain link between cursor and bouncing anchor. Free.',
+    title: 'Single Leg Balance Exercises - Free Balance Training Online | SkillDrills',
+    description: 'Free single leg balance exercises and balance training game online. Track a moving anchor — 60-second timed stability challenge. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/physical/balance-training/single-leg-hold',
     siteName: 'SkillDrills',
@@ -28,13 +29,13 @@ export const metadata = {
       url: 'https://skilldrills.online/icons/icon-512x512.png',
       width: 512,
       height: 512,
-      alt: 'Single Leg Equilibrium',
+      alt: 'Single Leg Balance Exercises - Balance Training Online',
     }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Single Leg Hold - Balance Stability | SkillDrills',
-    description: 'Train motor control and stability. Free.',
+    title: 'Single Leg Balance Exercises - Free Balance Training Online | SkillDrills',
+    description: 'Free single leg balance exercises online. Best balance training game for motor control. 60 seconds. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -57,7 +58,7 @@ export default function SingleLegEquilibriumPage() {
               { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://skilldrills.online" },
               { "@type": "ListItem", "position": 2, "name": "Physical Training", "item": "https://skilldrills.online/drills/physical" },
               { "@type": "ListItem", "position": 3, "name": "Balance Training", "item": "https://skilldrills.online/drills/physical/balance-training" },
-              { "@type": "ListItem", "position": 4, "name": "Single Leg Equilibrium" }
+              { "@type": "ListItem", "position": 4, "name": "Single Leg Balance Exercises" }
             ]
           })
         }}
@@ -69,9 +70,9 @@ export default function SingleLegEquilibriumPage() {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "WebApplication",
-            "name": "Single Leg Equilibrium Drill",
+            "name": "Single Leg Balance Exercises - Balance Training Online",
             "url": "https://skilldrills.online/drills/physical/balance-training/single-leg-hold",
-            "description": "Free balance drill. Maintain cursor-anchor link. Green connected: +1pt/2s. Red broken: -1pt/s. Stability tracking. 60s challenge.",
+            "description": "Free single leg balance exercises and online balance training game. Maintain cursor-anchor link to a bouncing target. +1pt/2s connected, -1pt/s broken. Stability tracking, streaks, 60-second challenge.",
             "applicationCategory": "HealthApplication",
             "operatingSystem": "All",
             "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
@@ -90,26 +91,26 @@ export default function SingleLegEquilibriumPage() {
             "mainEntity": [
               {
                 "@type": "Question",
-                "name": "What is the Single Leg Equilibrium Drill?",
+                "name": "What are single leg balance exercises online?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "A free balance exercise. Maintain cursor-anchor link. Green connected: +1pt/2s. Red broken: -1pt/s. Tracks stability, streaks, mistakes."
+                  "text": "A free digital balance training game that simulates single leg balance exercises. Maintain cursor-anchor link to a bouncing target. Green connected: +1pt/2s. Red broken: -1pt/s. Tracks stability percentage, streaks, and mistakes."
                 }
               },
               {
                 "@type": "Question",
-                "name": "Is this useful for FPS gaming?",
+                "name": "How does this balance training help athletes?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Yes. Smooth tracking and directional changes translate to better aim in Valorant, CS2, Overwatch, Apex Legends."
+                  "text": "Smooth cursor tracking and directional control transfers to real balance training skills. Also improves aim precision in FPS games like Valorant, CS2, Overwatch, and Apex Legends."
                 }
               },
               {
                 "@type": "Question",
-                "name": "What skills does this improve?",
+                "name": "What skills do these balance exercises improve?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Balance stability, motor control, hand-eye coordination, sustained attention, mouse precision, and tracking accuracy."
+                  "text": "Balance stability, motor control, hand-eye coordination, sustained attention, mouse precision, tracking accuracy, and neuromuscular coordination — all developed through this online balance training drill."
                 }
               },
               {
@@ -117,7 +118,7 @@ export default function SingleLegEquilibriumPage() {
                 "name": "Do I need to sign up?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "No registration required. This equilibrium drill is completely free and works instantly in your browser."
+                  "text": "No registration required. These single leg balance exercises and balance training drills are completely free and work instantly in your browser."
                 }
               }
             ]

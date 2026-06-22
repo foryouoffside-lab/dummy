@@ -17,6 +17,10 @@ const cognitiveCategories = [
       { name: "Divided Attention", folderName: "divided-attention", difficulty: "Intermediate", duration: "60s", description: "Dual-task training: track moving balls while matching even numbers simultaneously" },
       { name: "Selective Attention", folderName: "selective-attention", difficulty: "Intermediate", duration: "60s", description: "Visual search: find items matching both color and shape among distractors" },
       { name: "Sustained Attention", folderName: "sustained-attention", difficulty: "Beginner", duration: "60s", description: "Vigilance training: click only when the flashing number matches your memorized target" },
+      { name: "Batch Processing", folderName: "batch-processing", difficulty: "Intermediate", duration: "60s", description: "Process RED, BLUE, GREEN batches in 2-second windows with progressive difficulty" },
+      { name: "Multi-Tasking", folderName: "multi-tasking", difficulty: "Advanced", duration: "60s", description: "Juggle multiple cognitive tasks simultaneously with increasing complexity" },
+      { name: "Concentration Stamina", folderName: "concentration-stamina", difficulty: "Advanced", duration: "60s", description: "Rule-switching endurance: alternate between VOWELS and PRIMES every 10 seconds" },
+      { name: "Switch Cost", folderName: "switch-cost", difficulty: "Advanced", duration: "60s", description: "Measure cognitive penalty when switching between different task types" },
     ]
   },
   {
@@ -28,9 +32,8 @@ const cognitiveCategories = [
     textColor: "text-purple-400",
     description: "Build deep work stamina, resist distractions, and enter flow state more easily",
     drills: [
-      { name: "Concentration Grid", folderName: "concentration-grid", difficulty: "Intermediate", duration: "60s", description: "Sequential search: find numbers 1→2→3 on expanding 3×3 to 8×8 grids with level bonuses" },
+      { name: "Concentration Grid", folderName: "concentration-grid", difficulty: "Intermediate", duration: "60s", description: "Sequential search: find numbers on expanding 3x3 to 8x8 grids with level bonuses" },
       { name: "Distraction Fighter", folderName: "distraction-fighter", difficulty: "Advanced", duration: "60s", description: "Stroop test: identify ink colors while ignoring conflicting word meanings" },
-      { name: "Focus Ripples", folderName: "focus-timer", difficulty: "Beginner", duration: "5 min", description: "Sustained attention: 5-minute visual meditation with expanding ripple patterns" },
     ]
   },
   {
@@ -43,8 +46,7 @@ const cognitiveCategories = [
     description: "Working memory, spatial recall, pattern recognition, and sequence memory exercises",
     drills: [
       { name: "Card Matching", folderName: "card-matching", difficulty: "Beginner", duration: "60s", description: "Visual memory: match icon pairs on expanding 12 to 32+ card grids with 15+ unique icons" },
-      { name: "Memory Sequence", folderName: "memory-sequence", difficulty: "Intermediate", duration: "60s", description: "Spatial recall: repeat sequences on 4×4 to 7×7 grids with Memory Master achievement" },
-      { name: "Number Recall", folderName: "number-recall", difficulty: "Advanced", duration: "60s", description: "Digit span: memorize and reproduce sequences from 4 to 49 digits across 5 levels" },
+      { name: "Memory Sequence", folderName: "memory-sequence", difficulty: "Intermediate", duration: "60s", description: "Spatial recall: repeat sequences on 4x4 to 7x7 grids with Memory Master achievement" },
       { name: "Pattern Recognition", folderName: "pattern-recognition", difficulty: "Intermediate", duration: "60s", description: "5 pattern types: arithmetic, geometric, squares, Fibonacci, and alternating sequences" },
     ]
   },
@@ -58,7 +60,8 @@ const cognitiveCategories = [
     description: "Logic puzzles, strategic planning, recursive thinking, and critical reasoning",
     drills: [
       { name: "Logic Puzzles", folderName: "logic-puzzles", difficulty: "Advanced", duration: "60s", description: "8 puzzle types including sequences, algebra, PEMDAS, percentages & number manipulation" },
-      { name: "Sudoku", folderName: "sudoku", difficulty: "Intermediate", duration: "60s", description: "Progressive 4×4 to 7×7 Sudoku with adaptive box constraints & Master achievement" },
+      { name: "Priority Sorting", folderName: "priority-sorting", difficulty: "Intermediate", duration: "60s", description: "Organize and prioritize tasks based on urgency and importance matrices" },
+      { name: "Sudoku", folderName: "sudoku", difficulty: "Intermediate", duration: "60s", description: "Progressive 4x4 to 7x7 Sudoku with adaptive box constraints & Master achievement" },
       { name: "Tower of Hanoi", folderName: "tower-of-hanoi", difficulty: "Expert", duration: "60s", description: "Classic recursive puzzle: 3-8 disk levels with perfect move celebrations & no penalties" },
     ]
   },
@@ -69,10 +72,9 @@ const cognitiveCategories = [
     color: "emerald",
     bgColor: "bg-emerald-500/10 border-emerald-500/20 text-emerald-400",
     textColor: "text-emerald-400",
-    description: "Quick math, reaction time tests, cognitive flexibility, and symbol matching",
+    description: "Reaction time tests, cognitive flexibility, and symbol matching exercises",
     drills: [
-      { name: "Quick Math", folderName: "quick-math", difficulty: "Intermediate", duration: "60s", description: "Rapid arithmetic with adaptive difficulty, unique non-repeating problems & keyboard input" },
-      { name: "Reaction Time", folderName: "reaction-time", difficulty: "Beginner", duration: "60s", description: "Neuro-switch: click RED targets only, ignore BLUE — targets reposition every 950ms" },
+      { name: "Reaction Time", folderName: "reaction-time", difficulty: "Beginner", duration: "60s", description: "Neuro-switch: click RED targets only, ignore BLUE - targets reposition every 950ms" },
       { name: "Symbol Matching", folderName: "symbol-matching", difficulty: "Advanced", duration: "75s", description: "Cognitive flexibility: match Greek symbols to numbers with keys that change every answer" },
     ]
   },
@@ -256,12 +258,12 @@ export default function CognitiveHubClient() {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "CollectionPage",
-            "name": "Cognitive Brain Training - 16 Free Drills",
+            "name": "Cognitive Brain Training - Free Drills",
             "url": "https://skilldrills.online/drills/cognitive",
-            "description": "Science-based cognitive training with 16 free drills across 5 domains: Attention, Focus, Memory, Problem Solving, and Processing Speed. No login required.",
+            "description": "Science-based cognitive training with free drills across 5 domains: Attention, Focus, Memory, Problem Solving, and Processing Speed. No login required.",
             "isPartOf": { "@type": "WebSite", "name": "SkillDrills", "url": "https://skilldrills.online" },
             "about": { "@type": "Thing", "name": "Cognitive Training" },
-            "numberOfItems": 16,
+            "numberOfItems": totalDrills,
             "itemListElement": cognitiveCategories.flatMap(category =>
               category.drills.map(drill => ({
                 ...drill,
@@ -315,10 +317,10 @@ export default function CognitiveHubClient() {
             </div>
           </div>
           <div className="flex flex-wrap gap-2 self-start md:self-center">
-            <span className="px-2.5 py-1 bg-slate-950 border border-slate-800 text-slate-300 rounded-md text-xs font-mono font-semibold tracking-wide">👁️ ATTN</span>
-            <span className="px-2.5 py-1 bg-slate-950 border border-slate-800 text-slate-300 rounded-md text-xs font-mono font-semibold tracking-wide">🎯 FOCUS</span>
-            <span className="px-2.5 py-1 bg-slate-950 border border-slate-800 text-slate-300 rounded-md text-xs font-mono font-semibold tracking-wide">🧠 MEM</span>
-            <span className="px-2.5 py-1 bg-slate-950 border border-slate-800 text-slate-300 rounded-md text-xs font-mono font-semibold tracking-wide">🧩 LOGIC</span>
+            <span className="px-2.5 py-1 bg-slate-950 border border-slate-800 text-slate-300 rounded-md text-xs font-mono font-semibold tracking-wide">ATTN</span>
+            <span className="px-2.5 py-1 bg-slate-950 border border-slate-800 text-slate-300 rounded-md text-xs font-mono font-semibold tracking-wide">FOCUS</span>
+            <span className="px-2.5 py-1 bg-slate-950 border border-slate-800 text-slate-300 rounded-md text-xs font-mono font-semibold tracking-wide">MEM</span>
+            <span className="px-2.5 py-1 bg-slate-950 border border-slate-800 text-slate-300 rounded-md text-xs font-mono font-semibold tracking-wide">LOGIC</span>
           </div>
         </div>
 
@@ -471,10 +473,10 @@ export default function CognitiveHubClient() {
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
             {[
-              { emoji: "🧠", title: "Working Memory", desc: "Augment sensory sequence mapping and pattern retention matrices." },
-              { emoji: "🎯", title: "Focus Inhibition", desc: "Suppress cognitive ambient noise to preserve high focus waveforms." },
-              { emoji: "⚡", title: "Synapse Speed", desc: "Optimize dual-task response coefficients under split-load tests." },
-              { emoji: "🧩", title: "Logical Deduction", desc: "Maximize structural planning capability and recursive analysis vectors." }
+              { emoji: "\uD83E\uDDE0", title: "Working Memory", desc: "Augment sensory sequence mapping and pattern retention matrices." },
+              { emoji: "\uD83C\uDFAF", title: "Focus Inhibition", desc: "Suppress cognitive ambient noise to preserve high focus waveforms." },
+              { emoji: "\u26A1", title: "Synapse Speed", desc: "Optimize dual-task response coefficients under split-load tests." },
+              { emoji: "\uD83E\uDDE9", title: "Logical Deduction", desc: "Maximize structural planning capability and recursive analysis vectors." }
             ].map((benefit, i) => (
               <div key={i} className="bg-slate-900/30 border border-slate-900 hover:border-slate-800 transition rounded-xl p-5">
                 <h4 className="font-bold text-purple-400 mb-2 flex items-center gap-2 uppercase text-xs tracking-wider font-mono">
@@ -491,10 +493,10 @@ export default function CognitiveHubClient() {
           <h2 className="text-lg font-bold tracking-widest text-center text-white font-mono uppercase mb-8">Explore Adjacent Sectors</h2>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
             {[
-              { href: "/drills/memory", emoji: "💾", title: "Memory Sector", desc: "Working & spatial recall" },
-              { href: "/drills/productivity", emoji: "⏱️", title: "Productivity", desc: "Pomodoro focus metrics" },
-              { href: "/drills/academic", emoji: "📚", title: "Academic Hub", desc: "Reading speed & equations" },
-              { href: "/drills/fps", emoji: "🎮", title: "Tactical Aim", desc: "Crosshair tracking labs" }
+              { href: "/drills/memory", emoji: "\uD83D\uDCBE", title: "Memory Sector", desc: "Working & spatial recall" },
+              { href: "/drills/cognitive", emoji: "\u23F1\uFE0F", title: "Productivity", desc: "Pomodoro focus metrics" },
+              { href: "/drills/academic", emoji: "\uD83D\uDCDA", title: "Academic Hub", desc: "Reading speed & equations" },
+              { href: "/drills/fps", emoji: "\uD83C\uDFAE", title: "Tactical Aim", desc: "Crosshair tracking labs" }
             ].map((link, i) => (
               <Link 
                 key={i} 
@@ -508,7 +510,17 @@ export default function CognitiveHubClient() {
             ))}
           </div>
         </div>
+      
+
+      {/* Social Links */}
+      <div className="flex items-center justify-center gap-3 flex-wrap mt-8 mb-4">
+        <a href="https://youtube.com/@skilldrills.online" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="YouTube"><svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>
+        <a href="https://www.facebook.com/profile.php?id=61590093843779" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="Facebook"><svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a>
+        <a href="https://x.com/skilldrillss" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="X / Twitter"><svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.747l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+        <a href="https://www.instagram.com/skilldrills.online/?__pwa=1" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="Instagram"><svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg></a>
+        <a href="https://pinterest.com/skilldrills" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="Pinterest"><svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738a.36.36 0 0 1 .083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.632-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/></svg></a>
       </div>
+    </div>
     </div>
   );
 }

@@ -1,271 +1,909 @@
-'use client';
+﻿'use client';
 
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
+
 import { 
-  ArrowLeft, Target, Zap, Clock, Award, Activity, 
-  Volume2, VolumeX, Maximize2, Minimize2, Sun, Moon, 
-  Eye, Brain, BarChart3, Timer, Trophy, Info, Disc, RefreshCw,
-  Crosshair, Dumbbell, Database, Keyboard, Star, Users,
-  GraduationCap, Lightbulb, TrendingUp, ArrowRight,
-  BookOpen, Hash, Code2, CheckCircle2, Calculator, Heart, Gauge
+  Activity, AlertCircle, ArrowRight, BarChart3, ChevronRight, 
+  Clock, Crosshair, Eye, GraduationCap, Info, Lightbulb, 
+  Maximize2, Minimize2, Play, RefreshCw, Star, Target, 
+  Timer, TrendingUp, Trophy, Volume2, VolumeX, Zap, 
+  Share2, Code2, Calculator, CheckCircle2, Shield, Users,
+  Disc, Move, XCircle, Award, Keyboard, Heart, Gauge
 } from 'lucide-react';
 
-export default function RapidTappingClient() {
-  const [showRotateWarning, setShowRotateWarning] = useState(false);
-  const [warningMessage, setWarningMessage] = useState("Rotate Your Device");
+// ============================================================
+// ZERO-LATENCY AUDIO SYNTHESIZER
+// ============================================================
+class AudioSynthesizer {
+  constructor() {
+    this.ctx = null;
+    this.enabled = true;
+  }
+  
+  init() {
+    if (!this.ctx) {
+      this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+  }
 
-  useEffect(() => {
-    const checkSize = () => {
-      if (typeof window === 'undefined') return;
-      const ua = navigator.userAgent || '';
-      const isMobile = /Mobi|Android|iPhone|iPad|iPod|Windows Phone/i.test(ua) || 
-                       (navigator.maxTouchPoints > 0 && 
-                        window.screen && Math.max(window.screen.width, window.screen.height) < 1024);
-      if (isMobile) {
-        setShowRotateWarning(true);
-        setWarningMessage("This drill cannot be played on mobile phones");
-        return;
-      }
-      if (!isMobile) {
-        setShowRotateWarning(false);
-        return;
-      }
-      const isPortrait = window.innerHeight > window.innerWidth;
-      if (isPortrait) {
-        if (window.innerWidth < 768) {
-          setShowRotateWarning(true);
-          setWarningMessage("Rotate Your Device");
-          return;
-        }
+  playSound(type) {
+    if (!this.enabled || !this.ctx) return;
+    try {
+      if (this.ctx.state === 'suspended') this.ctx.resume();
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.connect(gain); 
+      gain.connect(this.ctx.destination);
+      const now = this.ctx.currentTime;
+      
+      const freqMap = { 
+        click: 880, 
+        score: 1200, 
+        collapse: 200, 
+        difficulty: 440 
+      };
+      
+      osc.type = type === 'collapse' ? 'sawtooth' : 'sine';
+      osc.frequency.setValueAtTime(freqMap[type] || 660, now);
+      
+      // Volume envelopes
+      if (type === 'score') {
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+        osc.start(now); osc.stop(now + 0.3);
+      } else if (type === 'collapse') {
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+        osc.start(now); osc.stop(now + 0.5);
       } else {
-        if (window.innerHeight < 320) {
-          setShowRotateWarning(true);
-          setWarningMessage("Screen height too small. Try entering Fullscreen mode.");
-          return;
-        }
+        gain.gain.setValueAtTime(0.05, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+        osc.start(now); osc.stop(now + 0.1);
       }
-      setShowRotateWarning(false);
-    };
-    checkSize();
-    window.addEventListener('resize', checkSize);
-    window.addEventListener('orientationchange', checkSize);
-    return () => {
-      window.removeEventListener('resize', checkSize);
-      window.removeEventListener('orientationchange', checkSize);
-    };
-  }, []);
+    } catch (e) {}
+  }
 
-  const [loading, setLoading] = useState(true);
-  const canvasRef = useRef(null);
-  const animationRef = useRef(null);
-  const containerRef = useRef(null);
-  const [gameState, setGameState] = useState('start');
+  setEnabled(status) {
+    this.enabled = status;
+  }
+}
+
+const audioSynth = typeof window !== 'undefined' ? new AudioSynthesizer() : null;
+
+// ============================================================
+// MAIN COMPONENT
+// ============================================================
+export default function RapidTappingClient() {
+  // === UI & Viewport State ===
+  const [gameState, setGameState] = useState('start'); 
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(true);
-  const [isBoxDarkMode, setIsBoxDarkMode] = useState(true);
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [flashBg, setFlashBg] = useState(null);
+  
+  // === Gameplay State ===
   const [score, setScore] = useState(0);
   const [bestScore, setBestScore] = useState(0);
+  const [clicks, setClicks] = useState(0);
+  const [survivalTime, setSurvivalTime] = useState(0);
+  const [isNewBest, setIsNewBest] = useState(false);
+  
+  // Real-time HUD State
   const [radius, setRadius] = useState(50);
   const [shrinkRate, setShrinkRate] = useState(45);
-  const [difficultyTimer, setDifficultyTimer] = useState(0);
-  const [survivalTime, setSurvivalTime] = useState(0);
-  const [clicks, setClicks] = useState(0);
-  const [feedback, setFeedback] = useState('');
-  const [feedbackType, setFeedbackType] = useState('');
-  const [isClient, setIsClient] = useState(false);
+
+  // Analytics State
+  const [analytics, setAnalytics] = useState({
+    finalScore: 0,
+    survivalTime: 0,
+    totalClicks: 0,
+    maxDifficulty: 0,
+    cps: 0
+  });
+
+  // === High-performance Mutable Refs ===
+  const canvasRef = useRef(null);
+  const containerRef = useRef(null);
+  const animationRef = useRef(null);
+  const pageRef = useRef(null);
   
-  const radiusRef = useRef(50);
-  const shrinkRateRef = useRef(45);
-  const baseShrinkRef = useRef(45);
-  const difficultyTimerRef = useRef(0);
-  const totalTimeRef = useRef(0);
-  const scoreRef = useRef(0);
-  const clicksRef = useRef(0);
-  const mousePositionRef = useRef({ x: 0, y: 0 });
-  const feedbackTimeoutRef = useRef(null);
-  const isActiveRef = useRef(false);
-  const gameStateRef = useRef('start');
-  const audioCtxRef = useRef(null);
-  const survivalIntervalRef = useRef(null);
+  // === Game Logic Engine Refs ===
+  const engine = useRef({
+    radius: 50,
+    shrinkRate: 45,
+    baseShrink: 45,
+    difficultyTimer: 0,
+    
+    score: 0,
+    clicks: 0,
+    survivalTime: 0,
+    
+    mousePos: { x: 0, y: 0 },
+    particles: [],
+    screenShake: 0,
+    totalFrames: 0
+  });
 
-  useEffect(() => { setIsClient(true); const t = setTimeout(() => setLoading(false), 0); return () => clearTimeout(t); }, []);
-  useEffect(() => { try { const s = localStorage.getItem('perpetualSingularityBestScore'); if (s) { const p = parseInt(s, 10); if (!isNaN(p)) setBestScore(p); } } catch (e) {} }, []);
-  useEffect(() => { gameStateRef.current = gameState; }, [gameState]);
-
-  const toggleFullscreen = useCallback(async () => { try { if (!isFullscreen) { const e = containerRef.current; if (e?.requestFullscreen) { await e.requestFullscreen(); setIsFullscreen(true); } } else { if (document.fullscreenElement) await document.exitFullscreen(); setIsFullscreen(false); } } catch (e) { console.error('Fullscreen error:', e); } }, [isFullscreen]);
-  useEffect(() => { const h = () => setIsFullscreen(!!document.fullscreenElement); document.addEventListener('fullscreenchange', h); return () => document.removeEventListener('fullscreenchange', h); }, []);
-
-  const updateBestScore = useCallback((finalScore) => { try { const c = parseInt(localStorage.getItem('perpetualSingularityBestScore') || '0', 10); if (finalScore > c) { localStorage.setItem('perpetualSingularityBestScore', finalScore.toString()); setBestScore(finalScore); } } catch (e) {} }, []);
-
-  const showFeedback = useCallback((message, type) => { if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current); setFeedback(message); setFeedbackType(type); feedbackTimeoutRef.current = setTimeout(() => { setFeedback(''); setFeedbackType(''); }, 500); }, []);
-  const initAudio = useCallback(() => { try { if (!audioCtxRef.current) audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)(); if (audioCtxRef.current.state === 'suspended') audioCtxRef.current.resume(); return audioCtxRef.current; } catch (e) { return null; } }, []);
-  const playSound = useCallback((type) => { if (!soundEnabled) return; try { const a = initAudio(); if (!a) return; const o = a.createOscillator(); const g = a.createGain(); o.connect(g); g.connect(a.destination); const n = a.currentTime; const fm = { click: 880, score: 1200, collapse: 200, difficulty: 440 }; o.frequency.setValueAtTime(fm[type] || 660, n); g.gain.setValueAtTime(type === 'score' ? 0.12 : type === 'collapse' ? 0.15 : 0.06, n); g.gain.exponentialRampToValueAtTime(0.001, n + 0.15); o.start(n); o.stop(n + 0.15); } catch (e) {} }, [soundEnabled, initAudio]);
-
-  useEffect(() => { if (gameState !== 'playing') return; survivalIntervalRef.current = setInterval(() => { setSurvivalTime(prev => prev + 1); totalTimeRef.current += 1; }, 1000); return () => { if (survivalIntervalRef.current) clearInterval(survivalIntervalRef.current); }; }, [gameState]);
-
-  useEffect(() => { const h = (e) => { const cvs = canvasRef.current; if (!cvs) return; const rect = cvs.getBoundingClientRect(); const sx = cvs.width / rect.width; const sy = cvs.height / rect.height; mousePositionRef.current = { x: (e.clientX - rect.left) * sx, y: (e.clientY - rect.top) * sy }; }; const th = (e) => { if (e.touches && e.touches[0]) h(e.touches[0]); }; window.addEventListener('mousemove', h); window.addEventListener('touchmove', th, { passive: true }); return () => { window.removeEventListener('mousemove', h); window.removeEventListener('touchmove', th); }; }, []);
+  // === Initialization & Local Storage ===
+  useEffect(() => {
+    try {
+      const savedBest = localStorage.getItem('rapidTapping_bestScore');
+      if (savedBest) setBestScore(parseInt(savedBest, 10));
+    } catch (e) {}
+  }, []);
 
   useEffect(() => {
-    const h = () => { if (gameStateRef.current !== 'playing' || !isActiveRef.current) return; const m = mousePositionRef.current; const cvs = canvasRef.current; if (!cvs) return; const cx = cvs.width / 2; const cy = cvs.height / 2; const dist = Math.hypot(m.x - cx, m.y - cy); if (dist < radiusRef.current + 15) { radiusRef.current = Math.min(140, radiusRef.current + 10); setRadius(radiusRef.current); clicksRef.current += 1; setClicks(clicksRef.current); if (clicksRef.current % 10 === 0) { scoreRef.current += 1; setScore(scoreRef.current); playSound('score'); showFeedback(`⭐ +1 POINT! (${clicksRef.current} clicks)`, 'success'); } else { playSound('click'); showFeedback(`+1 click • ${10 - (clicksRef.current % 10)} to next point`, 'success'); } } }; const th = (e) => {
-      if (e.touches && e.touches[0]) {
-        const touch = e.touches[0];
+    if (audioSynth) audioSynth.setEnabled(soundEnabled);
+  }, [soundEnabled]);
+
+  const formatTime = useCallback((s) => {
+    const m = Math.floor(s / 60);
+    const sec = Math.floor(s % 60);
+    return `${m}:${sec.toString().padStart(2, '0')}`;
+  }, []);
+
+  // === Core Game Management ===
+  const endGame = useCallback(() => {
+    setGameState('gameOver');
+    
+    const e = engine.current;
+    
+    const finalTime = e.survivalTime;
+    const finalCPS = finalTime > 0 ? (e.clicks / finalTime).toFixed(1) : 0;
+    const diffPercent = Math.floor(((e.shrinkRate / e.baseShrink) - 1) * 100);
+
+    setAnalytics({
+      finalScore: e.score,
+      survivalTime: finalTime,
+      totalClicks: e.clicks,
+      maxDifficulty: diffPercent,
+      cps: finalCPS
+    });
+
+    setBestScore(prev => {
+      if (e.score > prev) {
+        setIsNewBest(true);
+        try { localStorage.setItem('rapidTapping_bestScore', e.score.toString()); } catch(err){}
+        return e.score;
+      }
+      return prev;
+    });
+  }, []);
+
+  const createExplosion = (x, y, color) => {
+    for (let i = 0; i < 15; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = Math.random() * 6 + 2;
+      engine.current.particles.push({ x, y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, life: 1.0, color });
+    }
+  };
+
+  const startGame = useCallback(async () => {
+    if (audioSynth) audioSynth.init(); 
+
+    setIsNewBest(false);
+    setScore(0);
+    setClicks(0);
+    setSurvivalTime(0);
+    setRadius(50);
+    setShrinkRate(45);
+    setGameState('playing');
+    
+    engine.current = {
+      radius: 50,
+      shrinkRate: 45,
+      baseShrink: 45,
+      difficultyTimer: 0,
+      score: 0,
+      clicks: 0,
+      survivalTime: 0,
+      mousePos: { x: window.innerWidth / 2, y: window.innerHeight / 2 },
+      particles: [],
+      screenShake: 0,
+      totalFrames: 0
+    };
+
+    try {
+      if (containerRef.current && !document.fullscreenElement) {
+        await containerRef.current.requestFullscreen();
+      }
+    } catch(e) {}
+  }, []);
+
+  // === Raw Mouse Input & Firing Listeners ===
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      if (gameState !== 'playing' || !canvasRef.current) return;
+      const cvs = canvasRef.current;
+      const rect = cvs.getBoundingClientRect();
+      const sx = cvs.width / rect.width;
+      const sy = cvs.height / rect.height;
+      engine.current.mousePos = { 
+        x: (e.clientX - rect.left) * sx, 
+        y: (e.clientY - rect.top) * sy 
+      };
+    };
+
+    const handleMouseDown = (e) => {
+      if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
+      if (gameState === 'playing' && canvasRef.current) {
+        const eRef = engine.current;
         const cvs = canvasRef.current;
-        if (cvs) {
-          const rect = cvs.getBoundingClientRect();
-          const sx = cvs.width / rect.width;
-          const sy = cvs.height / rect.height;
-          mousePositionRef.current = { x: (touch.clientX - rect.left) * sx, y: (touch.clientY - rect.top) * sy };
+        const cx = cvs.width / 2;
+        const cy = cvs.height / 2;
+        
+        const dist = Math.hypot(eRef.mousePos.x - cx, eRef.mousePos.y - cy);
+        
+        // Hit Detection (+15px forgiveness buffer on visual edge)
+        if (dist < eRef.radius + 15) { 
+          eRef.radius = Math.min(140, eRef.radius + 10);
+          eRef.clicks++;
+          
+          if (eRef.clicks % 10 === 0) {
+            eRef.score++;
+            if (audioSynth) audioSynth.playSound('score');
+            createExplosion(cx, cy, '#d946ef'); // Fuchsia explosion on point
+            eRef.screenShake = 5;
+            setScore(eRef.score);
+            
+            setFlashBg('fuchsia');
+            setTimeout(() => setFlashBg(null), 100);
+          } else {
+            if (audioSynth) audioSynth.playSound('click');
+          }
         }
       }
-      h();
     };
-    window.addEventListener('mousedown', h);
-    window.addEventListener('touchstart', th, { passive: true });
-    window.addEventListener('contextmenu', (e) => e.preventDefault());
-    return () => {
-      window.removeEventListener('mousedown', h);
-      window.removeEventListener('touchstart', th);
-      window.removeEventListener('contextmenu', (e) => e.preventDefault());
-    };
-  }, [playSound, showFeedback]);
 
-  useEffect(() => { return () => { isActiveRef.current = false; if (survivalIntervalRef.current) clearInterval(survivalIntervalRef.current); }; }, []);
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mousedown', handleMouseDown);
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mousedown', handleMouseDown);
+    };
+  }, [gameState]);
+
+  const toggleFullscreen = useCallback(async () => {
+    if (!document.fullscreenElement) {
+      if (containerRef.current) await containerRef.current.requestFullscreen().catch(()=>{});
+    } else {
+      await document.exitFullscreen().catch(()=>{});
+    }
+  }, []);
 
   useEffect(() => {
-    if (gameState !== 'playing') return;
-    const cvs = canvasRef.current; if (!cvs) return;
-    const ctx = cvs.getContext('2d');
-    const updateCanvasSize = () => { const cont = containerRef.current; if (!cont) return; const cr = cont.getBoundingClientRect(); let w = cr.width; let h = w * (9 / 16); if (h > cr.height) { h = cr.height; w = h * (16 / 9); } cvs.width = w; cvs.height = h; cvs.style.position = 'absolute'; cvs.style.left = `${(cr.width - w) / 2}px`; cvs.style.top = `${(cr.height - h) / 2}px`; };
-    const ro = new ResizeObserver(updateCanvasSize); if (containerRef.current) ro.observe(containerRef.current); window.addEventListener('resize', updateCanvasSize); updateCanvasSize();
-    let lft = performance.now();
-    function update(dt) { if (!isActiveRef.current) return; difficultyTimerRef.current += dt; totalTimeRef.current += dt; if (difficultyTimerRef.current > 3) { shrinkRateRef.current *= 1.12; setShrinkRate(shrinkRateRef.current); difficultyTimerRef.current = 0; setDifficultyTimer(0); playSound('difficulty'); showFeedback('⚡ Difficulty +12%', 'warning'); } setDifficultyTimer(difficultyTimerRef.current); radiusRef.current -= shrinkRateRef.current * dt; setRadius(Math.max(0, radiusRef.current)); if (radiusRef.current <= 0) { playSound('collapse'); isActiveRef.current = false; setGameState('gameOver'); gameStateRef.current = 'gameOver'; updateBestScore(scoreRef.current); } }
-    function draw() { const now = performance.now(); const dt = Math.min(0.033, (now - lft) / 1000); lft = now; update(dt); ctx.fillStyle = isBoxDarkMode ? "#020202" : "#f9fafb"; ctx.fillRect(0, 0, cvs.width, cvs.height); const cx = cvs.width / 2; const cy = cvs.height / 2; const cr = Math.max(0, radiusRef.current); const fp = cr / 140; ctx.beginPath(); ctx.arc(cx, cy, 150, 0, Math.PI * 2); ctx.strokeStyle = isBoxDarkMode ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)"; ctx.lineWidth = 1; ctx.stroke(); ctx.beginPath(); ctx.arc(cx, cy, cr, 0, Math.PI * 2); ctx.strokeStyle = isBoxDarkMode ? "#ffffff" : "#000000"; ctx.lineWidth = 2; ctx.stroke(); ctx.fillStyle = isBoxDarkMode ? `rgba(255,255,255,${0.05 + fp * 0.1})` : `rgba(0,0,0,${0.03 + fp * 0.07})`; ctx.fill(); ctx.beginPath(); ctx.arc(cx, cy, 3, 0, Math.PI * 2); ctx.fillStyle = isBoxDarkMode ? "#ffffff" : "#000000"; ctx.fill(); ctx.font = "12px monospace"; ctx.fillStyle = isBoxDarkMode ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.3)"; ctx.textAlign = "center"; ctx.fillText(`${Math.floor(fp * 100)}%`, cx, cy - cr - 10); const m = mousePositionRef.current; if (m.x > 0 && m.x < cvs.width && m.y > 0 && m.y < cvs.height) { ctx.beginPath(); ctx.arc(m.x, m.y, 10, 0, Math.PI * 2); ctx.strokeStyle = isBoxDarkMode ? "#ffffff" : "#000000"; ctx.lineWidth = 2; ctx.stroke(); ctx.beginPath(); ctx.arc(m.x, m.y, 4, 0, Math.PI * 2); ctx.fillStyle = isBoxDarkMode ? "#ffffff" : "#000000"; ctx.fill(); ctx.strokeStyle = isBoxDarkMode ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.2)"; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(m.x - 20, m.y); ctx.lineTo(m.x - 14, m.y); ctx.moveTo(m.x + 14, m.y); ctx.lineTo(m.x + 20, m.y); ctx.moveTo(m.x, m.y - 20); ctx.lineTo(m.x, m.y - 14); ctx.moveTo(m.x, m.y + 14); ctx.lineTo(m.x, m.y + 20); ctx.stroke(); } animationRef.current = requestAnimationFrame(draw); }
-    animationRef.current = requestAnimationFrame(draw);
-    return () => { if (animationRef.current) cancelAnimationFrame(animationRef.current); window.removeEventListener('resize', updateCanvasSize); ro.disconnect(); };
-  }, [gameState, isBoxDarkMode, playSound, showFeedback, updateBestScore]);
+    const fsListener = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener('fullscreenchange', fsListener);
+    return () => document.removeEventListener('fullscreenchange', fsListener);
+  }, []);
 
-  const startGame = useCallback(() => {
-    try {
-      if (typeof window !== 'undefined' && !document.fullscreenElement) {
-        if (typeof toggleFullscreen === 'function') toggleFullscreen();
+  // === Render & Physics Loop (Delta Time) ===
+  useEffect(() => {
+    const cvs = canvasRef.current; 
+    const container = containerRef.current;
+    if (!cvs || !container) return;
+    const ctx = cvs.getContext('2d', { alpha: false });
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const { width, height } = entry.contentRect;
+        if (width > 0 && height > 0) {
+          cvs.width = width;
+          cvs.height = height;
+        }
       }
-    } catch (err) {}
- setGameState('playing'); gameStateRef.current = 'playing'; setScore(0); setRadius(50); setShrinkRate(45); setDifficultyTimer(0); setSurvivalTime(0); setClicks(0); setFeedback(''); isActiveRef.current = true; radiusRef.current = 50; shrinkRateRef.current = 45; difficultyTimerRef.current = 0; totalTimeRef.current = 0; scoreRef.current = 0; clicksRef.current = 0; showFeedback('10 clicks = 1 point • Click the ball!', 'success'); }, [showFeedback]);
-  const resetGame = useCallback(() => { if (animationRef.current) cancelAnimationFrame(animationRef.current); if (survivalIntervalRef.current) clearInterval(survivalIntervalRef.current); if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current); isActiveRef.current = false; setGameState('start'); gameStateRef.current = 'start'; setScore(0); setRadius(50); setShrinkRate(45); setDifficultyTimer(0); setSurvivalTime(0); setClicks(0); setFeedback(''); radiusRef.current = 50; shrinkRateRef.current = 45; difficultyTimerRef.current = 0; totalTimeRef.current = 0; scoreRef.current = 0; clicksRef.current = 0; }, []);
-  const formatTime = useCallback((s) => { const m = Math.floor(s / 60); const sec = s % 60; return `${m}:${sec.toString().padStart(2, '0')}`; }, []);
+    });
+    resizeObserver.observe(container);
 
-  const sharePage = async () => { if (navigator.share) { try { await navigator.share({ title: 'Free Rapid Tapping Drill | SkillDrills', text: 'Endless survival clicking. 10 clicks = 1 point. Free!', url: 'https://skilldrills.online/drills/motor/movement-speed/rapid-tapping' }); } catch (e) {} } else { navigator.clipboard.writeText('https://skilldrills.online/drills/motor/movement-speed/rapid-tapping'); alert('Link copied!'); } };
-  const copyPageLink = () => { navigator.clipboard.writeText('https://skilldrills.online/drills/motor/movement-speed/rapid-tapping'); alert('Link copied!'); };
+    let lastTime = performance.now();
 
-  if (loading || !isClient) { return (<div className="min-h-screen flex items-center justify-center bg-gray-50"><div className="text-center"><div className="w-16 h-16 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div><p className="text-gray-600">Loading rapid tapping drill...</p></div></div>); }
+    const loop = (time) => {
+      const deltaTimeMs = time - lastTime;
+      lastTime = time; 
+      const dt = Math.min(deltaTimeMs / 1000, 0.033); // Clamp dt
+      const e = engine.current;
+
+      if (gameState === 'playing') {
+        
+        // Exact Delta-Time Clock processing
+        e.survivalTime += dt;
+        e.difficultyTimer += dt;
+        
+        // Difficulty scaling: +12% shrink rate every 3 seconds
+        if (e.difficultyTimer >= 3.0) {
+          e.shrinkRate *= 1.12;
+          e.difficultyTimer = 0;
+          if (audioSynth) audioSynth.playSound('difficulty');
+        }
+
+        // Apply constant shrinking
+        e.radius -= e.shrinkRate * dt;
+        
+        if (e.radius <= 0) {
+          e.radius = 0;
+          if (audioSynth) audioSynth.playSound('collapse');
+          endGame();
+        }
+
+        e.totalFrames++;
+        // Throttle UI Updates (every ~50ms)
+        if (e.totalFrames % 3 === 0) {
+          setSurvivalTime(e.survivalTime);
+          setRadius(e.radius);
+          setClicks(e.clicks);
+          setShrinkRate(e.shrinkRate);
+        }
+      }
+
+      // --- RENDERING PHASE ---
+      ctx.save();
+      
+      if (e.screenShake > 0) {
+        const sx = (Math.random() - 0.5) * e.screenShake;
+        const sy = (Math.random() - 0.5) * e.screenShake;
+        ctx.translate(sx, sy);
+        e.screenShake *= 0.85;
+        if (e.screenShake < 0.5) e.screenShake = 0;
+      }
+
+      ctx.fillStyle = '#050508';
+      ctx.fillRect(0, 0, cvs.width, cvs.height);
+
+      const cx = cvs.width / 2;
+      const cy = cvs.height / 2;
+
+      // Environment Grid
+      ctx.strokeStyle = 'rgba(217, 70, 239, 0.03)'; // Fuchsia tint
+      ctx.lineWidth = 1; 
+      for(let i = 0; i < cvs.width; i+= 50) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, cvs.height); ctx.stroke(); }
+      for(let j = 0; j < cvs.height; j+= 50) { ctx.beginPath(); ctx.moveTo(0, j); ctx.lineTo(cvs.width, j); ctx.stroke(); }
+
+      // Maximum Boundary Ring (140px)
+      ctx.beginPath();
+      ctx.arc(cx, cy, 140, 0, Math.PI * 2);
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.05)";
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      // Active Target Ball
+      const fillPercent = Math.max(0, e.radius / 140);
+      ctx.beginPath();
+      ctx.arc(cx, cy, Math.max(0, e.radius), 0, Math.PI * 2);
+      
+      // Gradient coloring based on size (Danger -> Safe)
+      const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, e.radius);
+      if (fillPercent < 0.3) {
+        gradient.addColorStop(0, "rgba(239, 68, 68, 0.8)"); // Red
+        gradient.addColorStop(1, "rgba(239, 68, 68, 0.2)");
+        ctx.strokeStyle = "#ef4444";
+      } else {
+        gradient.addColorStop(0, "rgba(217, 70, 239, 0.8)"); // Fuchsia
+        gradient.addColorStop(1, "rgba(217, 70, 239, 0.2)");
+        ctx.strokeStyle = "#d946ef";
+      }
+      
+      ctx.fillStyle = gradient;
+      ctx.fill();
+      ctx.lineWidth = 2.5; 
+      ctx.stroke();
+
+      // Center Dot
+      ctx.beginPath();
+      ctx.arc(cx, cy, 3, 0, Math.PI * 2);
+      ctx.fillStyle = "#ffffff";
+      ctx.fill();
+
+      // Percentage Text
+      if (gameState === 'playing') {
+        ctx.font = "bold 14px monospace";
+        ctx.fillStyle = "rgba(255,255,255,0.5)";
+        ctx.textAlign = "center";
+        ctx.fillText(`${Math.floor(fillPercent * 100)}%`, cx, cy - Math.max(20, e.radius) - 15);
+      }
+
+      // Render Particles
+      for (let i = e.particles.length - 1; i >= 0; i--) {
+        const p = e.particles[i];
+        p.x += p.vx; p.y += p.vy; p.life -= dt * 2.0;
+        if (p.life <= 0) { e.particles.splice(i, 1); continue; }
+        ctx.globalAlpha = p.life; ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, 3, 3);
+      }
+      ctx.globalAlpha = 1.0;
+
+      // Draw Custom Cursor
+      const m = e.mousePos;
+      if (m.x > 0 && m.x < cvs.width && m.y > 0 && m.y < cvs.height && (gameState === 'playing' || gameState === 'start')) {
+        ctx.strokeStyle = '#d946ef';
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(m.x, m.y, 10, 0, Math.PI * 2); ctx.stroke();
+
+        ctx.lineWidth = 1.5;
+        const gap = 4;
+        ctx.beginPath();
+        ctx.moveTo(m.x, m.y - 14); ctx.lineTo(m.x, m.y - gap);
+        ctx.moveTo(m.x, m.y + 14); ctx.lineTo(m.x, m.y + gap);
+        ctx.moveTo(m.x - 14, m.y); ctx.lineTo(m.x - gap, m.y);
+        ctx.moveTo(m.x + 14, m.y); ctx.lineTo(m.x + gap, m.y);
+        ctx.stroke();
+        
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath(); ctx.arc(m.x, m.y, 2, 0, Math.PI * 2); ctx.fill();
+      }
+
+      ctx.restore();
+      animationRef.current = requestAnimationFrame(loop);
+    };
+
+    animationRef.current = requestAnimationFrame(loop);
+
+    return () => {
+      cancelAnimationFrame(animationRef.current);
+      resizeObserver.disconnect();
+    };
+  }, [gameState, endGame]);
+
+  const shareDrillLink = useCallback(() => {
+    const url = typeof window !== 'undefined' ? window.location.href : '';
+    if (navigator.share) {
+      navigator.share({ title: 'Rapid Tapping Drill', url }).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(url).then(() => alert('Link copied!'));
+    }
+  }, []);
 
   return (
-    <div className={`min-h-screen select-none ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
+    <div ref={pageRef} className="min-h-screen select-none bg-[#050508] text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <nav aria-label="Breadcrumb" className="mb-4"><ol className="flex flex-wrap items-center gap-2 text-sm"><li><Link href="/" className={`hover:underline transition-colors ${isDarkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-600 hover:text-gray-900'}`}>Home</Link></li><li className={`${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`} aria-hidden="true">/</li><li><Link href="/drills/motor" className={`hover:underline transition-colors ${isDarkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-600 hover:text-gray-900'}`}>Motor Drills</Link></li><li className={`${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`} aria-hidden="true">/</li><li className={`${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Movement Speed</li><li className={`${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`} aria-hidden="true">/</li><li className={`font-medium ${isDarkMode ? 'text-purple-400' : 'text-purple-600'}`} aria-current="page">Rapid Tapping</li></ol></nav>
         
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-          <div className="flex items-center gap-3"><div className="p-3 bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl flex-shrink-0"><Disc className="w-6 h-6 text-white" /></div><div><h1 className={`text-2xl sm:text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Rapid Tapping</h1><p className={`text-sm sm:text-base ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>10 clicks = 1 point • Endless survival • Difficulty +12% every 3s • Free click speed training</p></div></div>
-          <div className="flex gap-2 flex-shrink-0">
-            {gameState === 'playing' && (<button onClick={resetGame} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700' : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-100'}`} title="Reset" aria-label="Reset rapid tapping drill"><RefreshCw className="w-5 h-5" /></button>)}
-            <button onClick={() => setIsDarkMode(!isDarkMode)} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}>{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button>
-            <button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} aria-label="Toggle canvas theme"><Eye className="w-5 h-5" /></button>
-            <button onClick={() => setSoundEnabled(!soundEnabled)} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} aria-label={soundEnabled ? 'Mute sounds' : 'Enable sounds'}>{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button>
-            <button onClick={toggleFullscreen} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}>{isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}</button>
-          </div>
-        </div>
-
-        <section className="sr-only"><h2>Free Rapid Tapping Drill - Click Speed & Mouse Endurance Training for Gamers</h2><p>Endless rapid tapping survival drill. Click the central ball to expand it by 10px per click. 10 clicks earn 1 point. Ball constantly shrinks at an increasing rate +12% difficulty every 3 seconds. Max ball size 140px. Game ends when ball reaches zero. Survival time and best score tracked locally. Perfect for FPS and MOBA gamers improving click speed and mouse endurance. No registration required.</p></section>
-
-        <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-3 mb-4 h-auto min-h-[88px] py-1">
-          <StatCard icon={<Target className="text-blue-600" />} value={score} label="Score" isDark={isDarkMode} />
-          <StatCard icon={<Trophy className="text-yellow-600" />} value={bestScore} label="Best" isDark={isDarkMode} />
-          <StatCard icon={<Timer className="text-green-600" />} value={formatTime(survivalTime)} label="Survival" isDark={isDarkMode} />
-          <StatCard icon={<Activity className="text-purple-600" />} value={clicks} label="Clicks" isDark={isDarkMode} />
-          <StatCard icon={<Disc className="text-cyan-600" />} value={Math.floor(radius)} unit="px" label="Size" isDark={isDarkMode} />
-        </div>
-
-        <div className="h-10 mb-2 flex justify-center items-center"><div className={`px-4 py-1.5 rounded-lg text-white font-semibold text-sm transition-all duration-200 ${feedback ? 'opacity-100 scale-100' : 'opacity-0 scale-95'} ${feedbackType === 'success' ? 'bg-green-500' : feedbackType === 'warning' ? 'bg-yellow-500' : 'bg-red-500'}`} role="status" aria-live="polite">{feedback || '\u00A0'}</div></div>
-
-        <div ref={containerRef} className={`relative ${isFullscreen ? 'fixed inset-0 z-50' : 'rounded-xl border-2'}`} style={{ background: isBoxDarkMode ? "#020202" : "#ffffff", aspectRatio: isFullscreen ? 'auto' : '16/9', maxWidth: '100%', margin: '0 auto', borderColor: isDarkMode ? '#374151' : '#e5e7eb', overflow: 'hidden', cursor: 'none' }}>
-          {/* Mobile Rotate Device Warning Overlay */}
-      {showRotateWarning && (
-        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-gray-950/95 text-center p-6" aria-hidden="true">
-          <div className="animate-bounce mb-4 text-blue-500">
-            <svg className="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-            </svg>
-          </div>
-          <h3 className="text-lg font-bold text-white mb-2">{warningMessage}</h3>
-          <p className="text-sm text-gray-400 mb-6">{warningMessage === "This drill cannot be played on mobile phones" ? "This drill requires a physical mouse or keyboard and cannot be played on touchscreen devices." : "Please use landscape orientation or fullscreen mode for the best training experience."}</p>
-          <Link href="/drills/motor">
-            <button className="px-5 py-2.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-350 hover:text-white font-bold rounded-lg text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
-              Go Back
-            </button>
-          </Link>
-        </div>
-      )}
-
-          {isFullscreen && gameState === 'playing' && (<div className="absolute top-4 right-4 z-30 flex gap-3"><button onClick={resetGame} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Reset"><RefreshCw className="w-5 h-5" /></button><button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle dark mode">{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button><button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle canvas theme"><Eye className="w-5 h-5" /></button><button onClick={() => setSoundEnabled(!soundEnabled)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle sound">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button><button onClick={toggleFullscreen} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Exit fullscreen"><Minimize2 className="w-5 h-5" /></button></div>)}
-          <canvas ref={canvasRef} style={{ display: 'block', position: 'absolute', touchAction: 'none' }} aria-label="Rapid tapping canvas. Click the central ball to keep it from shrinking." />
-          
-          {gameState === 'start' && (<div className={`absolute inset-0 flex items-center justify-center backdrop-blur-sm rounded-xl z-40 ${isBoxDarkMode ? 'bg-gray-900/95' : 'bg-white/95'}`}><div className={`rounded-2xl p-6 sm:p-8 text-center max-w-md mx-4 shadow-xl border ${isBoxDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}><div className="mb-4"><Disc className="w-16 h-16 text-purple-500 mx-auto" aria-hidden="true" /></div><h2 className={`text-2xl font-bold mb-2 ${isBoxDarkMode ? 'text-white' : 'text-gray-900'}`}>Rapid Tapping</h2><p className={`mb-2 ${isBoxDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>10 clicks = 1 point • Endless survival</p><p className={`mb-6 text-sm ${isBoxDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Click the ball to expand it +10px. It constantly shrinks faster every 3 seconds. Survive as long as possible. Perfect for FPS and MOBA click speed training.</p><button onClick={startGame} className="px-8 py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-xl font-semibold hover:shadow-lg w-full transition-all transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2" aria-label="Start free rapid tapping survival">Start Free Drill</button></div></div>)}
-          
-          {gameState === 'gameOver' && (<div className={`absolute inset-0 flex items-center justify-center backdrop-blur-sm rounded-xl z-40 ${isBoxDarkMode ? 'bg-gray-900/95' : 'bg-white/95'}`}><div className={`rounded-2xl p-6 sm:p-8 shadow-xl border w-full max-w-[480px] mx-4 ${isBoxDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}><div className="flex items-center justify-center gap-3 mb-4"><Award className="w-10 h-10 text-yellow-500" aria-hidden="true" /><h2 className={`text-2xl font-bold ${isBoxDarkMode ? 'text-white' : 'text-gray-900'}`}>Collapse!</h2></div><p className={`text-center text-sm mb-6 ${isBoxDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>The ball has shrunk to zero. Try to survive longer next time!</p><div className="grid grid-cols-2 gap-3 mb-6"><ResultCard label="Final Score" value={score} icon={<Target className="w-4 h-4" />} color="blue" isDark={isBoxDarkMode} /><ResultCard label="Best Score" value={bestScore} icon={<Trophy className="w-4 h-4" />} color="yellow" isDark={isBoxDarkMode} /><ResultCard label="Survival Time" value={formatTime(survivalTime)} icon={<Timer className="w-4 h-4" />} color="green" isDark={isBoxDarkMode} /><ResultCard label="Total Clicks" value={clicks} icon={<Activity className="w-4 h-4" />} color="purple" isDark={isBoxDarkMode} /><ResultCard label="Final Size" value={`${Math.floor(radius)}px`} icon={<Disc className="w-4 h-4" />} color="cyan" isDark={isBoxDarkMode} /><ResultCard label="Max Difficulty" value={`+${Math.floor((shrinkRate / baseShrinkRef.current - 1) * 100)}%`} icon={<Zap className="w-4 h-4" />} color="orange" isDark={isBoxDarkMode} /></div><div className="flex gap-3"><Link href="/drills/motor" className="flex-1"><button className={`w-full px-4 py-2.5 rounded-lg font-semibold transition-all ${isDarkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>← Back to Motor</button></Link><button onClick={startGame} className="flex-1 px-4 py-2.5 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2">Play Again →</button></div></div></div>)}
-        </div>
-
-        {/* 1. DRILL RULES & SCORING */}
-        {!isFullscreen && (<footer className="mt-6" aria-label="Drill rules"><div className={`rounded-xl border overflow-hidden ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}><div className={`px-4 py-3 border-b ${isDarkMode ? 'border-gray-700 bg-gray-800/50' : 'border-gray-200 bg-gray-50'}`}><div className="flex items-center gap-2"><Info className={`w-4 h-4 ${isDarkMode ? 'text-purple-400' : 'text-purple-600'}`} aria-hidden="true" /><h2 className={`font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Drill Rules & Scoring</h2></div></div><div className="p-4"><div className="grid grid-cols-1 md:grid-cols-2 gap-4"><div className="space-y-3"><div className="flex items-start gap-2"><div className="w-5 h-5 rounded-full bg-purple-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">1</div><p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Click the <span className="font-semibold text-purple-500">central ball</span> to expand it +10px per click</p></div><div className="flex items-start gap-2"><div className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">2</div><p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Ball constantly <span className="font-semibold text-red-500">shrinks at increasing rate</span></p></div><div className="flex items-start gap-2"><div className="w-5 h-5 rounded-full bg-orange-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">3</div><p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Every 3 seconds: <span className="font-semibold text-orange-500">difficulty +12%</span></p></div></div><div className="space-y-3"><div className="flex items-start gap-2"><div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">4</div><p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Scoring: <span className="font-semibold text-green-500">1 point per 10 clicks</span></p></div><div className="flex items-start gap-2"><div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">5</div><p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Game ends when <span className="font-semibold text-blue-500">ball shrinks to zero</span></p></div><div className="flex items-start gap-2"><div className="w-5 h-5 rounded-full bg-yellow-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">6</div><p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Max size: <span className="font-semibold text-yellow-500">140px</span> • Best Score saves locally</p></div></div></div><div className={`mt-4 pt-3 border-t flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs ${isDarkMode ? 'border-gray-700 text-gray-400' : 'border-gray-200 text-gray-500'}`}><span>🎯 Click ball to expand • Survive the perpetual collapse</span><span>🏆 Best Score saves locally • Free forever</span></div></div></div></footer>)}
-
-        {/* 2. ABOUT THIS DRILL */}
+        {/* Header (Hidden in Fullscreen) */}
         {!isFullscreen && (
-          <section className="mt-8" aria-label="About this rapid tapping drill">
-            <div className={`rounded-xl border overflow-hidden ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
-              <div className={`px-4 py-3 border-b ${isDarkMode ? 'border-gray-700 bg-gray-800/50' : 'border-gray-200 bg-gray-50'}`}><div className="flex items-center gap-2"><GraduationCap className={`w-5 h-5 ${isDarkMode ? 'text-purple-400' : 'text-purple-600'}`} aria-hidden="true" /><h2 className={`font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>About This Free Rapid Tapping Drill</h2></div></div>
-              <div className="p-5">
-                <p className={`text-sm leading-relaxed mb-5 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>This free rapid tapping drill is an endless survival challenge that tests and improves your click speed and mouse endurance. Click the central ball to expand it while it constantly shrinks at an accelerating rate. Perfect for FPS and MOBA gamers needing faster clicking and longer stamina.</p>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
-                  <div className={`p-4 rounded-xl border ${isDarkMode ? 'bg-gray-700/50 border-gray-600' : 'bg-purple-50 border-purple-100'}`}><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-purple-500 flex items-center justify-center"><GraduationCap className="w-4 h-4 text-white" /></div><h3 className={`text-sm font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Who It's For</h3></div><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>FPS gamers, MOBA players, anyone wanting faster click speed, and those training mouse endurance.</p></div>
-                  <div className={`p-4 rounded-xl border ${isDarkMode ? 'bg-gray-700/50 border-gray-600' : 'bg-green-50 border-green-100'}`}><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-green-500 flex items-center justify-center"><TrendingUp className="w-4 h-4 text-white" /></div><h3 className={`text-sm font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Skills Improved</h3></div><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Click speed, mouse endurance, hand-eye coordination, and sustained attention under pressure.</p></div>
-                  <div className={`p-4 rounded-xl border ${isDarkMode ? 'bg-gray-700/50 border-gray-600' : 'bg-pink-50 border-pink-100'}`}><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-pink-500 flex items-center justify-center"><BarChart3 className="w-4 h-4 text-white" /></div><h3 className={`text-sm font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>What You'll Track</h3></div><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Score, survival time, total clicks, ball size, and difficulty level.</p></div>
+          <div className="mb-6">
+            <nav className="mb-4">
+              <ol className="flex flex-wrap items-center gap-2 text-sm text-gray-500">
+                <li><Link href="/" className="hover:text-gray-300">Home</Link></li>
+                <li><ChevronRight className="w-4 h-4 text-gray-600" /></li>
+                <li><Link href="/drills/motor" className="hover:text-gray-300">Motor</Link></li>
+                <li><ChevronRight className="w-4 h-4 text-gray-600" /></li>
+                <li className="text-fuchsia-400 font-medium">Rapid Tapping</li>
+              </ol>
+            </nav>
+
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-gradient-to-br from-fuchsia-500 to-purple-600 rounded-xl shadow-[0_0_20px_rgba(217,70,239,0.3)]">
+                  <Activity className="w-7 h-7 text-white" />
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className={`p-4 rounded-xl border ${isDarkMode ? 'bg-gray-700/50 border-gray-600' : 'bg-yellow-50 border-yellow-100'}`}><div className="flex items-center gap-2 mb-3"><div className="w-8 h-8 rounded-lg bg-yellow-500 flex items-center justify-center"><Lightbulb className="w-4 h-4 text-white" /></div><h3 className={`text-sm font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Why Practice Rapid Tapping?</h3></div><ul className={`text-xs space-y-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}><li className="flex items-start gap-2"><CheckCircle2 className="w-3 h-3 text-yellow-500 mt-0.5 flex-shrink-0" /> Essential for FPS games requiring fast firing</li><li className="flex items-start gap-2"><CheckCircle2 className="w-3 h-3 text-yellow-500 mt-0.5 flex-shrink-0" /> Builds mouse endurance for long gaming sessions</li><li className="flex items-start gap-2"><CheckCircle2 className="w-3 h-3 text-yellow-500 mt-0.5 flex-shrink-0" /> Improves click accuracy under fatigue</li></ul></div>
-                  <div className={`p-4 rounded-xl border ${isDarkMode ? 'bg-gray-700/50 border-gray-600' : 'bg-amber-50 border-amber-100'}`}><div className="flex items-center gap-2 mb-3"><div className="w-8 h-8 rounded-lg bg-amber-500 flex items-center justify-center"><Clock className="w-4 h-4 text-white" /></div><h3 className={`text-sm font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>How to Practice Effectively</h3></div><ol className={`text-xs space-y-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}><li className="flex items-start gap-2"><span className="w-5 h-5 rounded-full bg-amber-500 text-white text-xs flex items-center justify-center flex-shrink-0 mt-0.5">1</span> Position your mouse comfortably before starting</li><li className="flex items-start gap-2"><span className="w-5 h-5 rounded-full bg-amber-500 text-white text-xs flex items-center justify-center flex-shrink-0 mt-0.5">2</span> Click rapidly on the ball to keep it from shrinking</li><li className="flex items-start gap-2"><span className="w-5 h-5 rounded-full bg-amber-500 text-white text-xs flex items-center justify-center flex-shrink-0 mt-0.5">3</span> Maintain consistent rhythm as difficulty increases</li><li className="flex items-start gap-2"><span className="w-5 h-5 rounded-full bg-amber-500 text-white text-xs flex items-center justify-center flex-shrink-0 mt-0.5">4</span> Practice 2-3 times daily for best improvement</li></ol></div>
+                <div>
+                  <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Rapid Tapping</h1>
+                  <p className="text-sm text-gray-400 mt-1 font-medium">Endless Survival • Click Speed Training</p>
+                </div>
+              </div>
+              
+              <div className="flex gap-2">
+                <button onClick={() => setSoundEnabled(v => !v)} className="p-2.5 rounded-lg border border-gray-700 bg-gray-900 text-gray-400 hover:text-white transition-all">
+                  {soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
+                </button>
+                <button onClick={toggleFullscreen} className="p-2.5 rounded-lg border border-gray-700 bg-gray-900 text-gray-400 hover:text-white transition-all">
+                  <Maximize2 className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Live HUD Stats */}
+        {!isFullscreen && (
+          <div className="grid grid-cols-4 lg:grid-cols-7 gap-2 mb-2">
+            <StatCard icon={<Target className="text-fuchsia-400" />} value={score} label="Score" />
+            <StatCard icon={<Timer className="text-emerald-400" />} value={formatTime(survivalTime)} label="Survival" />
+            <StatCard icon={<Activity className="text-purple-400" />} value={clicks} label="Total Clicks" />
+            <StatCard icon={<Disc className="text-cyan-400" />} value={Math.floor(radius)} label="Target Size" unit="px" />
+            <StatCard icon={<TrendingUp className="text-orange-400" />} value={`+${Math.floor(((shrinkRate / 45) - 1) * 100)}%`} label="Difficulty Multiplier" />
+            <StatCard icon={<Trophy className="text-yellow-500" />} value={bestScore} label="Best Score" />
+          </div>
+        )}
+
+        {/* Engine Container */}
+        <div 
+          ref={containerRef} 
+          className={`relative overflow-hidden transition-colors outline-none ${
+            isFullscreen ? 'w-full h-full' : 'w-full aspect-video min-h-[500px] rounded-2xl border border-gray-700 shadow-2xl'
+          }`}
+          style={{ backgroundColor: flashBg === 'fuchsia' ? '#4a044e' : '#05060b', cursor: 'none' }}
+        >
+          {/* Fullscreen Overlay Controls */}
+          {isFullscreen && gameState === 'playing' && (
+            <div className="absolute top-4 right-4 z-[60] flex gap-2">
+              <button onClick={() => setSoundEnabled(v => !v)} className="p-3 bg-black/60 border border-gray-600 rounded-xl text-white hover:bg-gray-800 transition-colors">
+                {soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
+              </button>
+              <button onClick={toggleFullscreen} className="p-3 bg-black/60 border border-gray-600 rounded-xl text-white hover:bg-gray-800 transition-colors">
+                <Minimize2 className="w-5 h-5" />
+              </button>
+            </div>
+          )}
+
+          {/* Core Canvas */}
+          <canvas 
+            ref={canvasRef} 
+            className="block absolute top-0 left-0 w-full h-full touch-none z-10 cursor-none" 
+          />
+
+          {/* START SCREEN */}
+          {gameState === 'start' && (
+            <div className="absolute inset-0 flex items-center justify-center z-50 bg-black/70 backdrop-blur-md p-4 overflow-y-auto cursor-default">
+              <div className="rounded-3xl p-8 text-center max-w-lg w-full border border-gray-700 bg-gray-900 shadow-2xl my-auto">
+                <div className="w-16 h-16 bg-gradient-to-br from-fuchsia-500 to-purple-600 rounded-2xl mx-auto flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(217,70,239,0.3)]">
+                  <Activity className="w-8 h-8 text-white" />
+                </div>
+                <h2 className="text-3xl font-black mb-3 tracking-tight text-white uppercase">Rapid Tapping</h2>
+                <p className="text-sm mb-6 text-gray-400 leading-relaxed">
+                  Click the central ball rapidly to expand it and prevent it from shrinking to zero. Every 10 clicks grants a point. The shrink rate accelerates drastically over time.
+                </p>
+                
+                <button 
+                  onClick={startGame}
+                  className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-fuchsia-600 to-purple-600 text-white rounded-xl font-black text-lg hover:brightness-110 transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-[0_0_20px_rgba(217,70,239,0.3)]"
+                >
+                  <Play className="w-6 h-6 fill-white" /> BEGIN SURVIVAL
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* GAME OVER DASHBOARD */}
+          {gameState === 'gameOver' && (
+            <div className="absolute inset-0 flex items-center justify-center z-50 bg-black/90 backdrop-blur-md p-4 animate-in fade-in duration-300 overflow-y-auto cursor-default">
+              <div className="rounded-3xl max-w-2xl w-full shadow-2xl border border-gray-800 bg-gray-950 overflow-hidden my-auto">
+                <div className="bg-gradient-to-br from-fuchsia-900/40 to-purple-900/40 p-6 border-b border-gray-800 text-center relative">
+                  {isNewBest && (
+                    <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-yellow-500 text-black text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-[0_0_15px_rgba(234,179,8,0.5)]">
+                      ⭐ New Personal Best
+                    </div>
+                  )}
+                  <h2 className="text-2xl font-black text-white tracking-tight mt-4">Collapse Reached</h2>
+                  <p className="text-fuchsia-400 font-medium text-sm mt-1">Endurance Session Concluded</p>
+                </div>
+
+                <div className="p-6">
+                  {/* Top Stats */}
+                  <div className="flex flex-col sm:flex-row gap-4 mb-6">
+                    <div className="flex-1 bg-gray-900 rounded-2xl p-4 border border-gray-800 flex justify-between items-center">
+                      <div>
+                        <span className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1 block">Final Score</span>
+                        <div className="flex items-end gap-1">
+                          <span className="text-4xl font-black text-white leading-none">{analytics.finalScore}</span>
+                          <span className="text-xs text-gray-500 font-bold mb-1">PTS</span>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1 block">Click Speed</span>
+                        <span className="text-3xl font-black text-fuchsia-400">
+                          {analytics.cps} <span className="text-sm">CPS</span>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Reaction Diagnostics Block */}
+                  <div className="bg-[#0a0a0a] border border-fuchsia-900/50 rounded-xl p-5 mb-6 text-left shadow-inner">
+                    <h3 className="text-xs font-bold text-fuchsia-400 font-mono uppercase tracking-widest border-b border-fuchsia-900/50 pb-2 mb-4 flex items-center gap-2">
+                      <BarChart3 className="w-4 h-4 text-fuchsia-400" />
+                      ENDURANCE TELEMETRY DIAGNOSTICS
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-xs leading-relaxed text-gray-300">
+                      
+                      <div className="space-y-3 sm:border-r border-gray-800 sm:pr-6">
+                        <p className="font-bold text-white uppercase text-[10px] tracking-wider font-mono">Performance Log:</p>
+                        <ul className="space-y-2">
+                          <li className="flex justify-between items-center bg-gray-900/50 p-2 rounded border border-gray-800">
+                            <span className="text-gray-400">Survival Time:</span>
+                            <span className="font-bold text-emerald-400">{formatTime(analytics.survivalTime)}</span>
+                          </li>
+                          <li className="flex justify-between items-center bg-gray-900/50 p-2 rounded border border-gray-800">
+                            <span className="text-gray-400">Total Clicks:</span>
+                            <span className="font-bold text-purple-400">{analytics.totalClicks}</span>
+                          </li>
+                          <li className="flex justify-between items-center bg-gray-900/50 p-2 rounded border border-gray-800">
+                            <span className="text-gray-400">Max Difficulty Hit:</span>
+                            <span className="font-bold text-orange-400">+{analytics.maxDifficulty}% Shrink</span>
+                          </li>
+                        </ul>
+                      </div>
+
+                      <div className="space-y-3 flex flex-col justify-between">
+                        <div>
+                          <p className="font-bold text-white uppercase text-[10px] tracking-wider font-mono mb-2">Prescribed Advice:</p>
+                          <p className="text-gray-400 leading-relaxed font-sans">
+                            {analytics.cps < 4 ? (
+                              <span className="text-red-300">Your base clicking speed is too slow to combat the escalating shrink rate. Consider exploring techniques like jitter clicking or butterfly clicking to drastically raise your baseline CPS.</span>
+                            ) : analytics.survivalTime < 20 ? (
+                              <span className="text-yellow-300">You collapsed early despite a decent CPS. Ensure you are rapidly expanding the ball to its maximum 140px safe buffer before the difficulty multipliers stack up.</span>
+                            ) : (
+                              <span className="text-green-300">Excellent stamina and burst control. You maintained solid rhythm and endurance against aggressive, compounding difficulty multipliers.</span>
+                            )}
+                          </p>
+                        </div>
+                      </div>
+
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex gap-3">
+                    <button onClick={startGame} className="flex-1 py-4 bg-fuchsia-600 text-white rounded-xl font-black tracking-wide hover:bg-fuchsia-500 transition-all active:scale-95 flex items-center justify-center gap-2 shadow-lg">
+                      <RefreshCw className="w-5 h-5" /> TRAIN AGAIN
+                    </button>
+                    {isFullscreen && (
+                       <button onClick={toggleFullscreen} className="px-6 py-4 bg-gray-800 text-white rounded-xl font-bold hover:bg-gray-700 transition-all border border-gray-700">
+                         Exit
+                       </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ABOUT THIS DRILL SECTION */}
+        {!isFullscreen && (
+          <section className="mt-10">
+            <div className="rounded-2xl border border-gray-800 overflow-hidden bg-gray-900 shadow-2xl pointer-events-none">
+              <div className="px-6 py-5 border-b border-gray-800 bg-black/40 flex items-center gap-3">
+                <Info className="w-5 h-5 text-fuchsia-400" /><h2 className="font-bold text-white text-lg tracking-wide">Drill Instructions & Scoring</h2>
+              </div>
+              <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-5">
+                  <RuleItem num="1" color="fuchsia" text="Expand the Target" highlight="+10px Per Click" result="Counters the shrink" />
+                  <RuleItem num="2" color="indigo" text="Scoring Threshold" highlight="10 Clicks = 1 Point" result="Build score rapidly" />
+                </div>
+                <div className="space-y-5">
+                  <RuleItem num="3" color="orange" text="Dynamic Shrink Rate" highlight="+12% Every 3s" result="Forces faster clicking" />
+                  <RuleItem num="4" color="blue" text="Collapse Condition" highlight="Target hits 0px" result="Game Over" />
                 </div>
               </div>
             </div>
           </section>
         )}
 
-        {/* 3. RELATED DRILLS */}
+        {/* ============================================================ */}
+        {/* ABOUT THIS DRILL */}
+        {/* ============================================================ */}
         {!isFullscreen && (
-          <section className="mt-8" aria-label="Related training drills">
-            <div className="flex items-center gap-2 mb-4"><div className="w-1 h-6 rounded-full bg-gradient-to-b from-purple-500 to-pink-600"></div><h2 className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Explore Related Free Drills</h2><span className={`text-xs px-2 py-0.5 rounded-full ${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>8 drills</span></div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <Link href="/drills/motor/hand-eye-coordination/aim-trainer" className={`group relative overflow-hidden rounded-xl border transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${isDarkMode ? 'bg-gray-800 border-gray-700 hover:border-blue-500' : 'bg-white border-gray-200 hover:border-blue-300'}`}><div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-cyan-500"></div><div className="p-4"><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center"><Target className="w-4 h-4 text-blue-600" /></div><span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>Motor</span></div><h3 className={`font-semibold text-sm mb-1 ${isDarkMode ? 'text-white group-hover:text-blue-400' : 'text-gray-900 group-hover:text-blue-600'} transition-colors`}>Aim Trainer</h3><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Click targets appearing randomly to improve hand-eye coordination.</p><div className="flex items-center gap-1 mt-3 text-blue-500 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">Start Drill <ArrowRight className="w-3 h-3" /></div></div></Link>
-              <Link href="/drills/motor/movement-speed/finger-sequencing" className={`group relative overflow-hidden rounded-xl border transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${isDarkMode ? 'bg-gray-800 border-gray-700 hover:border-purple-500' : 'bg-white border-gray-200 hover:border-purple-300'}`}><div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 to-violet-500"></div><div className="p-4"><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center"><Keyboard className="w-4 h-4 text-purple-600" /></div><span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>Motor</span></div><h3 className={`font-semibold text-sm mb-1 ${isDarkMode ? 'text-white group-hover:text-purple-400' : 'text-gray-900 group-hover:text-purple-600'} transition-colors`}>Finger Sequencing</h3><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Practice rapid finger movement patterns for keyboard speed.</p><div className="flex items-center gap-1 mt-3 text-purple-500 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">Start Drill <ArrowRight className="w-3 h-3" /></div></div></Link>
-              <Link href="/drills/fps/flick-shot-training" className={`group relative overflow-hidden rounded-xl border transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${isDarkMode ? 'bg-gray-800 border-gray-700 hover:border-orange-500' : 'bg-white border-gray-200 hover:border-orange-300'}`}><div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-500 to-red-500"></div><div className="p-4"><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center"><Crosshair className="w-4 h-4 text-orange-600" /></div><span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>FPS</span></div><h3 className={`font-semibold text-sm mb-1 ${isDarkMode ? 'text-white group-hover:text-orange-400' : 'text-gray-900 group-hover:text-orange-600'} transition-colors`}>Flick Shot Training</h3><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Improve one-tap flick accuracy for Valorant, CS2, and competitive FPS.</p><div className="flex items-center gap-1 mt-3 text-orange-500 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">Start Drill <ArrowRight className="w-3 h-3" /></div></div></Link>
-              <Link href="/drills/cognitive/processing-speed/reaction-time" className={`group relative overflow-hidden rounded-xl border transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${isDarkMode ? 'bg-gray-800 border-gray-700 hover:border-green-500' : 'bg-white border-gray-200 hover:border-green-300'}`}><div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-green-500 to-emerald-500"></div><div className="p-4"><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center"><Zap className="w-4 h-4 text-green-600" /></div><span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>Cognitive</span></div><h3 className={`font-semibold text-sm mb-1 ${isDarkMode ? 'text-white group-hover:text-green-400' : 'text-gray-900 group-hover:text-green-600'} transition-colors`}>Reaction Time</h3><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Test and improve visual reaction speed with simple click tests.</p><div className="flex items-center gap-1 mt-3 text-green-500 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">Start Drill <ArrowRight className="w-3 h-3" /></div></div></Link>
-              <Link href="/drills/motor/timing-accuracy/rhythm-tap" className={`group relative overflow-hidden rounded-xl border transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${isDarkMode ? 'bg-gray-800 border-gray-700 hover:border-cyan-500' : 'bg-white border-gray-200 hover:border-cyan-300'}`}><div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-500 to-teal-500"></div><div className="p-4"><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-cyan-100 flex items-center justify-center"><Clock className="w-4 h-4 text-cyan-600" /></div><span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>Motor</span></div><h3 className={`font-semibold text-sm mb-1 ${isDarkMode ? 'text-white group-hover:text-cyan-400' : 'text-gray-900 group-hover:text-cyan-600'} transition-colors`}>Rhythm Tap</h3><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Tap in sync with visual and audio cues for timing accuracy.</p><div className="flex items-center gap-1 mt-3 text-cyan-500 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">Start Drill <ArrowRight className="w-3 h-3" /></div></div></Link>
-              <Link href="/drills/motor/hand-eye-coordination/click-accuracy" className={`group relative overflow-hidden rounded-xl border transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${isDarkMode ? 'bg-gray-800 border-gray-700 hover:border-red-500' : 'bg-white border-gray-200 hover:border-red-300'}`}><div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-500 to-rose-500"></div><div className="p-4"><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center"><Target className="w-4 h-4 text-red-600" /></div><span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>Motor</span></div><h3 className={`font-semibold text-sm mb-1 ${isDarkMode ? 'text-white group-hover:text-red-400' : 'text-gray-900 group-hover:text-red-600'} transition-colors`}>Click Accuracy</h3><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Hit small targets precisely with timed clicking challenges.</p><div className="flex items-center gap-1 mt-3 text-red-500 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">Start Drill <ArrowRight className="w-3 h-3" /></div></div></Link>
-              <Link href="/drills/fps/360fps-reflex" className={`group relative overflow-hidden rounded-xl border transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${isDarkMode ? 'bg-gray-800 border-gray-700 hover:border-teal-500' : 'bg-white border-gray-200 hover:border-teal-300'}`}><div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-teal-500 to-green-500"></div><div className="p-4"><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-teal-100 flex items-center justify-center"><Gauge className="w-4 h-4 text-teal-600" /></div><span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>FPS</span></div><h3 className={`font-semibold text-sm mb-1 ${isDarkMode ? 'text-white group-hover:text-teal-400' : 'text-gray-900 group-hover:text-teal-600'} transition-colors`}>360 FPS Reflex</h3><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Ultra-fast reflex training at 360 FPS for competitive gaming.</p><div className="flex items-center gap-1 mt-3 text-teal-500 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">Start Drill <ArrowRight className="w-3 h-3" /></div></div></Link>
-              <Link href="/drills/motor/precision-control/steady-hand" className={`group relative overflow-hidden rounded-xl border transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${isDarkMode ? 'bg-gray-800 border-gray-700 hover:border-indigo-500' : 'bg-white border-gray-200 hover:border-indigo-300'}`}><div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 to-blue-500"></div><div className="p-4"><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center"><Heart className="w-4 h-4 text-indigo-600" /></div><span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>Motor</span></div><h3 className={`font-semibold text-sm mb-1 ${isDarkMode ? 'text-white group-hover:text-indigo-400' : 'text-gray-900 group-hover:text-indigo-600'} transition-colors`}>Steady Hand</h3><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Navigate a path without touching edges to improve precision.</p><div className="flex items-center gap-1 mt-3 text-indigo-500 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">Start Drill <ArrowRight className="w-3 h-3" /></div></div></Link>
+          <section className="mt-12" aria-label="About this drill">
+            <div className="rounded-2xl border border-gray-800 overflow-hidden bg-gray-900 shadow-xl">
+              <div className="px-6 py-5 border-b border-gray-800 bg-black/40 flex items-center gap-3">
+                <GraduationCap className="w-5 h-5 text-fuchsia-400" />
+                <h2 className="font-bold text-white text-lg tracking-wide">About Rapid Tapping</h2>
+              </div>
+              <div className="p-8">
+                <p className="text-sm leading-relaxed mb-6 text-gray-300">
+                  This free rapid tapping drill is an endless survival challenge that tests and improves your click speed and mouse endurance. Click the central ball to expand it while it constantly shrinks at an accelerating rate. Perfect for FPS and MOBA gamers needing faster clicking and longer stamina.
+                </p>
+
+                {/* Grid Section */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
+                  <div className="p-5 rounded-xl border border-gray-800 bg-black/40">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center"><Users className="w-4 h-4 text-white" /></div>
+                      <h3 className="text-sm font-bold text-white">Who It's For</h3>
+                    </div>
+                    <p className="text-xs leading-relaxed text-gray-400">FPS gamers, MOBA players, clicker game enthusiasts, and anyone wanting to push their hardware clicking limits.</p>
+                  </div>
+                  <div className="p-5 rounded-xl border border-gray-800 bg-black/40">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-8 h-8 rounded-lg bg-green-600 flex items-center justify-center"><TrendingUp className="w-4 h-4 text-white" /></div>
+                      <h3 className="text-sm font-bold text-white">Skills Improved</h3>
+                    </div>
+                    <p className="text-xs leading-relaxed text-gray-400">Raw Clicks Per Second (CPS), forearm endurance, sustained rhythm under pressure, and fatigue resistance.</p>
+                  </div>
+                  <div className="p-5 rounded-xl border border-gray-800 bg-black/40">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-8 h-8 rounded-lg bg-purple-600 flex items-center justify-center"><BarChart3 className="w-4 h-4 text-white" /></div>
+                      <h3 className="text-sm font-bold text-white">What You'll Track</h3>
+                    </div>
+                    <p className="text-xs leading-relaxed text-gray-400">Total Score, Survival Time, Clicks Per Second (CPS), and maximum difficulty multipliers handled.</p>
+                  </div>
+                </div>
+
+                {/* How to Play & Scoring */}
+                <div className="mb-8 bg-[#0b0f19]/40 border border-gray-800 rounded-xl p-6">
+                  <h3 className="text-base font-bold text-white uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <Target className="w-5 h-5 text-fuchsia-500" /> How to Play & Strategy
+                  </h3>
+                  <div className="grid sm:grid-cols-2 gap-6 text-sm text-gray-300">
+                    <ol className="space-y-3 list-decimal pl-5">
+                      <li>Position your mouse comfortably over the center target.</li>
+                      <li>Spam click rapidly to expand the ball to its max limit (140px).</li>
+                      <li>Maintain rhythm as the shrink rate aggressively accelerates.</li>
+                    </ol>
+                    <ul className="space-y-3">
+                      <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-yellow-500" /> <span className="text-white font-bold">Technique:</span> Use jitter clicking or butterfly clicking for high bursts.</li>
+                      <li className="flex items-center gap-2"><AlertCircle className="w-4 h-4 text-orange-400" /> <span className="text-white font-bold">Warning:</span> Fatigue sets in fast. Don't tense your whole arm.</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
             </div>
           </section>
         )}
 
-        {/* 4. GLOBAL FOOTER */}
-        {!isFullscreen && (<footer className="mt-12 bg-gray-900 text-gray-400 rounded-xl py-10 px-6" role="contentinfo"><div className="max-w-7xl mx-auto"><div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8 mb-8"><div><h3 className="text-white font-semibold mb-3 text-sm">FPS Training</h3><ul className="space-y-2 text-sm"><li><Link href="/drills/fps/flick-shot-training" className="hover:text-white transition-colors">Flick Shot Trainer</Link></li><li><Link href="/drills/fps/target-acquisition" className="hover:text-white transition-colors">Target Acquisition</Link></li><li><Link href="/drills/fps/reactive-tracking" className="hover:text-white transition-colors">Reactive Tracking</Link></li><li><Link href="/drills/fps" className="text-blue-400 hover:text-blue-300 transition-colors font-medium">All 21 FPS Drills →</Link></li></ul></div><div><h3 className="text-white font-semibold mb-3 text-sm">Cognitive</h3><ul className="space-y-2 text-sm"><li><Link href="/drills/cognitive/memory/card-matching" className="hover:text-white transition-colors">Memory Games</Link></li><li><Link href="/drills/cognitive/attention/divided-attention" className="hover:text-white transition-colors">Attention Drills</Link></li><li><Link href="/drills/cognitive/problem-solving/logic-puzzles" className="hover:text-white transition-colors">Logic Puzzles</Link></li><li><Link href="/drills/cognitive" className="text-blue-400 hover:text-blue-300 transition-colors font-medium">All 16 Cognitive Drills →</Link></li></ul></div><div><h3 className="text-white font-semibold mb-3 text-sm">Academic</h3><ul className="space-y-2 text-sm"><li><Link href="/drills/academic/writing-speed/typing-test" className="hover:text-white transition-colors">Typing Speed Test</Link></li><li><Link href="/drills/academic/reading-speed/speed-reader" className="hover:text-white transition-colors">Speed Reader</Link></li><li><Link href="/drills/academic/math-speed/mental-math" className="hover:text-white transition-colors">Mental Math</Link></li><li><Link href="/drills/academic" className="text-blue-400 hover:text-blue-300 transition-colors font-medium">All 12 Academic Drills →</Link></li></ul></div><div><h3 className="text-white font-semibold mb-3 text-sm">Visual & Motor</h3><ul className="space-y-2 text-sm"><li><Link href="/drills/visual/reaction-speed/light-reaction" className="hover:text-white transition-colors">Reaction Time Test</Link></li><li><Link href="/drills/motor/hand-eye-coordination/aim-trainer" className="hover:text-white transition-colors">Hand-Eye Coordination</Link></li><li><Link href="/drills/visual/tracking-accuracy/moving-target" className="hover:text-white transition-colors">Moving Target Tracking</Link></li><li><Link href="/drills/visual" className="text-blue-400 hover:text-blue-300 transition-colors font-medium">All 14 Visual Drills →</Link></li></ul></div><div><h3 className="text-white font-semibold mb-3 text-sm">More Categories</h3><ul className="space-y-2 text-sm"><li><Link href="/drills/memory" className="hover:text-white transition-colors">Memory (15 drills)</Link></li><li><Link href="/drills/productivity" className="hover:text-white transition-colors">Productivity (10 drills)</Link></li><li><Link href="/drills/mental-fitness" className="hover:text-white transition-colors">Mental Fitness (6 drills)</Link></li><li><Link href="/drills/physical" className="hover:text-white transition-colors">Physical (11 drills)</Link></li></ul></div></div><div className="border-t border-gray-800 pt-8 text-center"><div className="flex items-center justify-center gap-3 mb-4"><div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center"><Target className="w-5 h-5 text-white" aria-hidden="true" /></div><span className="text-white font-bold text-lg">SkillDrills</span></div><p className="text-sm mb-2">&copy; 2026 SkillDrills. All rights reserved.</p><p className="text-xs max-w-2xl mx-auto leading-relaxed mb-6">Free online rapid tapping drill for click speed and mouse endurance training. Endless survival challenge with increasing difficulty. Perfect for FPS and MOBA gamers. No registration required. More free drills at skilldrills.online.</p><div className="flex items-center justify-center gap-5 flex-wrap"><button onClick={sharePage} className="text-gray-500 hover:text-white transition-colors" title="Share" aria-label="Share this drill"><svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg></button><button onClick={copyPageLink} className="text-gray-500 hover:text-white transition-colors" title="Copy" aria-label="Copy link"><svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg></button><a href="https://twitter.com/skilldrillss" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-white transition-colors" title="Twitter X"><svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a><a href="https://instagram.com/skilldrills.online" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-white transition-colors" title="Instagram"><svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg></a><a href="https://youtube.com/@skilldrills.online" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-white transition-colors" title="YouTube"><svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a><a href="https://pinterest.com/skilldrills" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-white transition-colors" title="Pinterest"><svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0C5.373 0 0 5.372 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738.098.119.112.224.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.631-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12 0-6.628-5.373-12-12-12z"/></svg></a></div></div></div></footer>)}
+        {/* RELATED DRILLS SECTION */}
+        {!isFullscreen && (
+          <section className="mt-14" aria-label="Explore related aim and response drills">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-1 h-5 rounded-full bg-fuchsia-500"></div>
+              <h2 className="text-xs font-bold text-white uppercase tracking-widest font-mono">
+                Explore Related Drills
+              </h2>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <RelatedCard href="/drills/motor/hand-eye-coordination/aim-trainer" title="Aim Trainer" desc="Hone spatial coordinate click speed." color="blue" icon={<Target className="w-4 h-4" />} />
+              <RelatedCard href="/drills/motor/movement-speed/finger-sequencing" title="Finger Sequencing" desc="Practice rapid finger patterns." color="purple" icon={<Keyboard className="w-4 h-4" />} />
+              <RelatedCard href="/drills/fps/flick-shot-training" title="Flick Shot Trainer" desc="Snap to targets in time-attack mode." color="orange" icon={<Crosshair className="w-4 h-4" />} />
+              <RelatedCard href="/drills/cognitive/processing-speed/reaction-time" title="Reaction Time" desc="Test visual reaction speed directly." color="green" icon={<Zap className="w-4 h-4" />} />
+              <RelatedCard href="/drills/motor/timing-accuracy/stopwatch-click" title="Rhythm Tap" desc="Tap in sync with visual cues." color="cyan" icon={<Clock className="w-4 h-4" />} />
+              <RelatedCard href="/drills/motor/hand-eye-coordination/click-accuracy" title="Click Accuracy" desc="Hit small targets precisely." color="red" icon={<Target className="w-4 h-4" />} />
+              <RelatedCard href="/drills/motor/timing-accuracy/synchronization" title="360 FPS Reflex" desc="Ultra-fast reflex training." color="teal" icon={<Gauge className="w-4 h-4" />} />
+              <RelatedCard href="/drills/motor/precision-control/steady-hand" title="Steady Hand" desc="Navigate paths without touching edges." color="indigo" icon={<Heart className="w-4 h-4" />} />
+            </div>
+          </section>
+        )}
+
+        {/* FOOTER SECTION */}
+        {!isFullscreen && (
+          <footer className="mt-12 bg-slate-950/40 border border-slate-900 text-slate-500 rounded-xl py-10 px-6 font-mono text-[10px]" role="contentinfo">
+            <div className="max-w-7xl mx-auto">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8 mb-8">
+                <div>
+                  <h3 className="text-white font-bold mb-3 uppercase tracking-wider">Motor & FPS</h3>
+                  <ul className="space-y-2">
+                    <li><Link href="/drills/motor/hand-eye-coordination/aim-trainer" className="hover:text-fuchsia-400 transition-colors">Aim Trainer Elite</Link></li>
+                    <li><Link href="/drills/fps/flick-shot-training" className="hover:text-fuchsia-400 transition-colors">Flick Shot Trainer</Link></li>
+                    <li><Link href="/drills/fps" className="text-fuchsia-500 hover:text-fuchsia-400 transition-colors font-bold">All FPS Drills →</Link></li>
+                  </ul>
+                </div>
+                <div>
+                  <h3 className="text-white font-bold mb-3 uppercase tracking-wider">Memory</h3>
+                  <ul className="space-y-2">
+                    <li><Link href="/drills/memory/working-memory/n-back" className="hover:text-fuchsia-400 transition-colors">3-Back Training</Link></li>
+                    <li><Link href="/drills/memory/short-term-memory/color-sequence" className="hover:text-fuchsia-400 transition-colors">Color Sequence</Link></li>
+                    <li><Link href="/drills/memory" className="text-fuchsia-500 hover:text-fuchsia-400 transition-colors font-bold">All Memory Drills →</Link></li>
+                  </ul>
+                </div>
+                <div>
+                  <h3 className="text-white font-bold mb-3 uppercase tracking-wider">Cognitive</h3>
+                  <ul className="space-y-2">
+                    <li><Link href="/drills/cognitive/memory/card-matching" className="hover:text-fuchsia-400 transition-colors">Memory Games</Link></li>
+                    <li><Link href="/drills/cognitive/attention/divided-attention" className="hover:text-fuchsia-400 transition-colors">Attention Drills</Link></li>
+                    <li><Link href="/drills/cognitive" className="text-fuchsia-500 hover:text-fuchsia-400 transition-colors font-bold">All Cognitive Drills →</Link></li>
+                  </ul>
+                </div>
+                <div>
+                  <h3 className="text-white font-bold mb-3 uppercase tracking-wider">Academic</h3>
+                  <ul className="space-y-2">
+                    <li><Link href="/drills/academic/writing-speed/typing-test" className="hover:text-fuchsia-400 transition-colors">Typing Speed Test</Link></li>
+                    <li><Link href="/drills/academic/math-speed/mental-math" className="hover:text-fuchsia-400 transition-colors">Mental Math</Link></li>
+                    <li><Link href="/drills/academic" className="text-fuchsia-500 hover:text-fuchsia-400 transition-colors font-bold">All Academic Drills →</Link></li>
+                  </ul>
+                </div>
+                <div>
+                  <h3 className="text-white font-bold mb-3 uppercase tracking-wider">More Sectors</h3>
+                  <ul className="space-y-2">
+                    <li><Link href="/drills/visual" className="hover:text-fuchsia-400 transition-colors">Visual (14)</Link></li>
+                                        
+                    <li><Link href="/drills/physical" className="hover:text-fuchsia-400 transition-colors">Physical (11)</Link></li>
+                  </ul>
+                </div>
+              </div>
+              
+              <div className="border-t border-slate-900 pt-8 text-center">
+                <div className="flex items-center justify-center gap-2 mb-4">
+                  <div className="w-6 h-6 bg-gradient-to-br from-fuchsia-500/25 to-purple-500/25 border border-fuchsia-500/30 rounded-lg flex items-center justify-center">
+                    <Crosshair className="w-3.5 h-3.5 text-fuchsia-400" />
+                  </div>
+                  <span className="text-white font-black tracking-widest text-xs uppercase">SkillDrills</span>
+                </div>
+                <p className="text-[9px] mb-2">&copy; 2026 SkillDrills. All rights reserved.</p>
+                <p className="text-[9px] max-w-2xl mx-auto leading-relaxed mb-6">
+                  Free online rapid tapping drill for click speed and mouse endurance training. Endless survival challenge with increasing difficulty. Free forever. No downloads required.
+                </p>
+                <div className="flex items-center justify-center gap-3 flex-wrap">
+                  <a href="https://youtube.com/@skilldrills.online" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="YouTube">
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                  </a>
+                  <a href="https://www.facebook.com/profile.php?id=61590093843779" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="Facebook">
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                  </a>
+                  <a href="https://x.com/skilldrillss" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="X / Twitter">
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.747l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                  </a>
+                  <a href="https://www.instagram.com/skilldrills.online/?__pwa=1" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="Instagram">
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
+                  </a>
+                  <a href="https://pinterest.com/skilldrills" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="Pinterest">
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738a.36.36 0 0 1 .083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.632-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/></svg>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </footer>
+        )}
+
       </div>
     </div>
   );
 }
 
-function StatCard({ icon, value, label, unit = '', isDark }) { return (<div className={`rounded-xl shadow-sm border p-2 sm:p-3 text-center flex flex-col justify-center h-full transition-colors ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'}`}><div className="mb-1 flex justify-center" aria-hidden="true">{icon}</div><p className={`text-lg sm:text-xl font-bold truncate ${isDark ? 'text-white' : 'text-gray-900'}`}>{value}{unit}</p><p className={`text-[10px] sm:text-xs truncate ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{label}</p></div>); }
-function ResultCard({ label, value, unit = '', icon, color, isDark }) { const colorMap = { blue: { bg: 'bg-blue-500/10', border: 'border-blue-500/30', text: 'text-blue-500' }, yellow: { bg: 'bg-yellow-500/10', border: 'border-yellow-500/30', text: 'text-yellow-500' }, green: { bg: 'bg-green-500/10', border: 'border-green-500/30', text: 'text-green-500' }, purple: { bg: 'bg-purple-500/10', border: 'border-purple-500/30', text: 'text-purple-500' }, cyan: { bg: 'bg-cyan-500/10', border: 'border-cyan-500/30', text: 'text-cyan-500' }, orange: { bg: 'bg-orange-500/10', border: 'border-orange-500/30', text: 'text-orange-500' } }; const c = colorMap[color] || colorMap.yellow; return (<div className={`flex items-center justify-between p-3 rounded-lg border ${c.bg} ${c.border}`}><div className="flex items-center gap-2 min-w-0"><div className={c.text} aria-hidden="true">{icon}</div><span className={`text-xs sm:text-sm truncate ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>{label}</span></div><span className={`font-bold text-base sm:text-lg flex-shrink-0 ml-2 ${c.text}`}>{value}{unit}</span></div>); }
+// === Subcomponents ===
+
+function StatCard({ icon, value, label, unit = '' }) {
+  return (
+    <div className="group rounded-xl border border-slate-900 bg-slate-950/40 p-2 text-center flex flex-col justify-center h-full transition-all duration-300 hover:scale-[1.03] hover:border-slate-800">
+      <div className="mb-1 flex justify-center transition-transform duration-300 group-hover:scale-110">
+        {icon}
+      </div>
+      <p className="text-xs sm:text-sm font-extrabold tracking-tight truncate text-white">
+        {value} <span className="text-[10px] font-semibold text-slate-400">{unit}</span>
+      </p>
+      <p className="text-[9px] font-mono font-bold uppercase tracking-wider text-slate-500 truncate">{label}</p>
+    </div>
+  );
+}
+
+function RuleItem({ num, color, text, highlight = '', result }) {
+  const colorMap = { 
+    blue: 'bg-blue-600 text-blue-300 border-blue-500', 
+    indigo: 'bg-indigo-600 text-indigo-300 border-indigo-500', 
+    red: 'bg-red-600 text-red-300 border-red-500', 
+    orange: 'bg-orange-600 text-orange-300 border-orange-500',
+    purple: 'bg-purple-600 text-purple-300 border-purple-500',
+    cyan: 'bg-cyan-600 text-cyan-300 border-cyan-500',
+    green: 'bg-green-600 text-green-300 border-green-500',
+    fuchsia: 'bg-fuchsia-600 text-fuchsia-300 border-fuchsia-500'
+  };
+  const colors = colorMap[color] || 'bg-slate-600 text-slate-300 border-slate-500';
+  const [bg, txt, border] = colors.split(' ');
+  
+  return (
+    <div className="flex items-center gap-4 bg-[#0b0f19]/40 p-4 rounded-xl border border-slate-800 shadow-sm">
+      <div className={`w-8 h-8 rounded-xl ${bg} border border-t-white/20 flex items-center justify-center text-white text-base font-black shadow-lg flex-shrink-0`}>{num}</div>
+      <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <p className="text-sm font-medium text-slate-300">
+          {text}{highlight && <span className={`font-black ${txt}`}> {highlight}</span>}
+        </p>
+        <div className={`text-xs font-black px-3 py-1.5 rounded-lg bg-[#050811] border ${border} ${txt} whitespace-nowrap shadow-inner tracking-wide text-center sm:text-left`}>
+          {result}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RelatedCard({ href, title, desc, color, icon }) {
+  const gradients = {
+    blue: 'from-blue-500 to-indigo-500',
+    orange: 'from-orange-500 to-amber-500',
+    red: 'from-red-500 to-rose-500',
+    purple: 'from-purple-500 to-violet-500',
+    green: 'from-green-500 to-emerald-500',
+    cyan: 'from-cyan-500 to-blue-500',
+    indigo: 'from-indigo-500 to-purple-500',
+    teal: 'from-teal-500 to-green-500',
+    fuchsia: 'from-fuchsia-500 to-purple-500'
+  };
+  return (
+    <Link href={href} className="group relative overflow-hidden rounded-2xl border border-slate-800 bg-[#0b0f19]/40 transition-all hover:-translate-y-1 hover:border-fuchsia-500/50 block p-5">
+      <div className={`absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r ${gradients[color] || 'from-fuchsia-500 to-purple-500'}`}></div>
+      <div className="w-10 h-10 rounded-xl bg-[#050811] border border-slate-700 flex items-center justify-center text-slate-400 group-hover:text-white mb-3 shadow-inner">
+        {icon}
+      </div>
+      <h3 className="font-bold text-base mb-1.5 text-white group-hover:text-fuchsia-400 transition-colors">{title}</h3>
+      <p className="text-xs text-slate-500 mb-4">{desc}</p>
+      <div className="flex items-center gap-1.5 text-fuchsia-400 text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-wider">
+        Start Drill <ArrowRight className="w-3.5 h-3.5" />
+      </div>
+    </Link>
+  );
+}

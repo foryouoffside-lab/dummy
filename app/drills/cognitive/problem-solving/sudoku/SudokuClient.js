@@ -1,276 +1,1022 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { 
-  ArrowLeft, Target, Zap, Timer, Trophy, Heart, 
-  Volume2, VolumeX, Maximize2, Minimize2, Sun, Moon, Eye,
+  Target, Zap, Timer, Trophy, 
+  Volume2, VolumeX, Maximize2, Minimize2, Eye,
   BarChart3, Info, Grid3X3, CheckCircle2, RefreshCw,
-  Crosshair, Dumbbell, Database, Keyboard, Star, Users,
-  GraduationCap, Lightbulb, TrendingUp, Clock, ArrowRight,
-  BookOpen, Brain, Code2, Hash, Calculator
+  Crosshair, Users, Share2,
+  GraduationCap, Lightbulb, TrendingUp, ArrowRight,
+  ChevronRight, Play, XCircle
 } from 'lucide-react';
+import useGameEngine from '../../../../../lib/useGameEngine';
 
+// ============================================================
+// LEVEL & DIFFICULTY SYSTEM
+// ============================================================
+const DIFFICULTY_LEVELS = [
+  { level: 1, name: 'Normal', color: 'text-blue-500', emoji: '🎯', promoteThreshold: Infinity }
+];
+
+// ============================================================
+// LOCAL STORAGE
+// ============================================================
+const STORAGE_KEY = 'skilldrills_sudoku_v2';
+
+const getSavedData = () => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return { bestScore: 0 };
+    const data = JSON.parse(raw);
+    return { bestScore: Math.max(0, parseInt(data.bestScore) || 0) };
+  } catch (e) {
+    return { bestScore: 0 };
+  }
+};
+
+const saveData = (data) => {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ bestScore: data.bestScore }));
+  } catch (e) {}
+};
+
+// ============================================================
+// ZERO-LATENCY AUDIO SYNTHESIZER
+// ============================================================
+class AudioSynthesizer {
+  constructor() {
+    this.ctx = null;
+    this.enabled = true;
+  }
+  
+  init() {
+    if (!this.ctx) {
+      this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (this.ctx.state === 'suspended') this.ctx.resume();
+  }
+
+  playCorrect() {
+    if (!this.enabled || !this.ctx) return;
+    try {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(880, this.ctx.currentTime);
+      gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.1);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start();
+      osc.stop(this.ctx.currentTime + 0.1);
+    } catch(e) {}
+  }
+
+  playPenalty() {
+    if (!this.enabled || !this.ctx) return;
+    try {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(220, this.ctx.currentTime);
+      gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.2);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start();
+      osc.stop(this.ctx.currentTime + 0.2);
+    } catch(e) {}
+  }
+
+  playComplete() {
+    if (!this.enabled || !this.ctx) return;
+    try {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(660, this.ctx.currentTime);
+      osc.frequency.linearRampToValueAtTime(880, this.ctx.currentTime + 0.1);
+      osc.frequency.linearRampToValueAtTime(1320, this.ctx.currentTime + 0.2);
+      gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.3);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start();
+      osc.stop(this.ctx.currentTime + 0.3);
+    } catch(e) {}
+  }
+  
+  setEnabled(status) {
+    this.enabled = status;
+  }
+}
+
+const audioSynth = typeof window !== 'undefined' ? new AudioSynthesizer() : null;
+
+// ============================================================
+// MAIN COMPONENT
+// ============================================================
 export default function SudokuClient() {
-  const [showRotateWarning, setShowRotateWarning] = useState(false);
-  const [warningMessage, setWarningMessage] = useState("Rotate Your Device");
+  
+  // === UI State ===
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [isClient, setIsClient] = useState(false);
+  const [playerNameInput, setPlayerNameInput] = useState('');
+  const [showNameInput, setShowNameInput] = useState(false);
+  const [localFeedback, setLocalFeedback] = useState({ id: 0, text: '', type: 'success', visible: false });
 
-  useEffect(() => {
-    const checkSize = () => {
-      if (typeof window === 'undefined') return;
-      const ua = navigator.userAgent || '';
-      const isMobile = /Mobi|Android|iPhone|iPad|iPod|Windows Phone/i.test(ua) || 
-                       (navigator.maxTouchPoints > 0 && 
-                        window.screen && Math.max(window.screen.width, window.screen.height) < 1024);
-      if (!isMobile) {
-        setShowRotateWarning(false);
-        return;
-      }
-      const isPortrait = window.innerHeight > window.innerWidth;
-      if (isPortrait) {
-        if (window.innerWidth < 768) {
-          setShowRotateWarning(true);
-          setWarningMessage("Rotate Your Device");
-          return;
-        }
-      } else {
-        if (window.innerHeight < 320) {
-          setShowRotateWarning(true);
-          setWarningMessage("Screen height too small. Try entering Fullscreen mode.");
-          return;
-        }
-      }
-      setShowRotateWarning(false);
-    };
-    checkSize();
-    window.addEventListener('resize', checkSize);
-    window.addEventListener('orientationchange', checkSize);
-    return () => {
-      window.removeEventListener('resize', checkSize);
-      window.removeEventListener('orientationchange', checkSize);
-    };
-  }, []);
-
-  const containerRef = useRef(null);
-  const [gameState, setGameState] = useState('start');
+  // === Game State ===
+  const [gridSize, setGridSize] = useState(4);
   const [grid, setGrid] = useState([]);
   const [solution, setSolution] = useState([]);
   const [initialIndices, setInitialIndices] = useState(new Set());
   const [selectedCell, setSelectedCell] = useState(null);
-  const [gridSize, setGridSize] = useState(4);
+  
   const [score, setScore] = useState(0);
   const [bestScore, setBestScore] = useState(0);
-  const [timeRemaining, setTimeRemaining] = useState(60);
-  const [combo, setCombo] = useState(0);
-  const [bestCombo, setBestCombo] = useState(0);
+  const [isNewBest, setIsNewBest] = useState(false);
   const [completedGrids, setCompletedGrids] = useState(0);
   const [mistakes, setMistakes] = useState(0);
   const [totalCorrect, setTotalCorrect] = useState(0);
-  const [lives, setLives] = useState(3);
-  const [soundEnabled, setSoundEnabled] = useState(true);
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(true);
-  const [isBoxDarkMode, setIsBoxDarkMode] = useState(true);
-  const [feedback, setFeedback] = useState('');
-  const [feedbackType, setFeedbackType] = useState('');
-  const [isMasterComplete, setIsMasterComplete] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [isClient, setIsClient] = useState(false);
+
+  // === Custom Decoupled Timer ===
+  const [localTimeRemaining, setLocalTimeRemaining] = useState(60);
+  const [isTimeUp, setIsTimeUp] = useState(false);
+
+  // === Absolute Truth Refs (Zero-latency) ===
+  const mountedRef = useRef(false);
+  const gameContainerRef = useRef(null);
   
-  const feedbackTimeoutRef = useRef(null);
-  const timerIntervalRef = useRef(null);
-  const audioContextRef = useRef(null);
   const scoreRef = useRef(0);
-  const comboRef = useRef(0);
-  const livesRef = useRef(3);
+  const gridSizeRef = useRef(4);
+  const mistakesRef = useRef(0);
+  const localTimeRef = useRef(60);
+
+  const timerIntervalRef = useRef(null);
+  const feedbackTimerRef = useRef(null);
   const gameStateRef = useRef('start');
   const clickCooldownRef = useRef(false);
+  const hasProcessedEndRef = useRef(false);
 
-  useEffect(() => { setIsClient(true); const t = setTimeout(() => setLoading(false), 0); return () => clearTimeout(t); }, []);
-  useEffect(() => { try { const s = localStorage.getItem('sudokuDrillBestScore'); if (s) { const p = parseInt(s, 10); if (!isNaN(p)) setBestScore(p); } } catch (e) {} }, []);
-  useEffect(() => { gameStateRef.current = gameState; }, [gameState]);
-  useEffect(() => { if (gameState === 'ended' && score > bestScore) { setBestScore(score); try { localStorage.setItem('sudokuDrillBestScore', score.toString()); } catch (e) {} } }, [gameState, score, bestScore]);
-  useEffect(() => { return () => { if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current); if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); if (audioContextRef.current) audioContextRef.current.close(); }; }, []);
+  // === Game Engine ===
+  const engine = useGameEngine({
+    category: 'cognitive',
+    drillId: 'sudoku-speed',
+    drillName: 'Sudoku Speed-Logic',
+    totalGameTime: 9999, 
+    lives: 9999, 
+    infiniteLives: true, 
+    sharePath: 'drills/cognitive/problem-solving/sudoku',
+  });
 
-  const toggleFullscreen = useCallback(async () => { try { if (!isFullscreen) { const e = containerRef.current; if (e?.requestFullscreen) { await e.requestFullscreen(); setIsFullscreen(true); } } else { if (document.fullscreenElement) await document.exitFullscreen(); setIsFullscreen(false); } } catch (e) { console.error('Fullscreen error:', e); } }, [isFullscreen]);
-  useEffect(() => { const h = () => setIsFullscreen(!!document.fullscreenElement); document.addEventListener('fullscreenchange', h); return () => document.removeEventListener('fullscreenchange', h); }, []);
+  const engineRef = useRef(engine);
 
-  const showFeedback = useCallback((message, type) => { if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current); setFeedback(message); setFeedbackType(type); feedbackTimeoutRef.current = setTimeout(() => { setFeedback(''); setFeedbackType(''); }, 600); }, []);
-  const initAudio = useCallback(() => { try { if (!audioContextRef.current) audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)(); if (audioContextRef.current.state === 'suspended') audioContextRef.current.resume(); return audioContextRef.current; } catch (e) { return null; } }, []);
-  const playSound = useCallback((type) => { if (!soundEnabled) return; try { const ctx = initAudio(); if (!ctx) return; const osc = ctx.createOscillator(); const gain = ctx.createGain(); osc.connect(gain); gain.connect(ctx.destination); const now = ctx.currentTime; const fm = { correct: 880, wrong: 440, penalty: 220, combo: 1046.5, complete: 660 }; if (type === 'complete') { osc.frequency.setValueAtTime(660, now); osc.frequency.linearRampToValueAtTime(880, now + 0.1); osc.frequency.linearRampToValueAtTime(1320, now + 0.2); gain.gain.setValueAtTime(0.15, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3); osc.start(now); osc.stop(now + 0.3); } else { osc.frequency.setValueAtTime(fm[type] || 660, now); gain.gain.setValueAtTime(type === 'combo' ? 0.12 : type === 'penalty' ? 0.15 : 0.1, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15); osc.start(now); osc.stop(now + 0.15); } } catch (e) {} }, [soundEnabled, initAudio]);
+  useEffect(() => {
+    engineRef.current = engine;
+    gameStateRef.current = engine.gameState;
+    if (engine.gameState === 'playing') {
+      setIsNewBest(false);
+    }
+  }, [engine.gameState]);
 
-  useEffect(() => { if (gameState !== 'playing') return; timerIntervalRef.current = setInterval(() => { setTimeRemaining(prev => { if (prev <= 1) { setGameState('ended'); gameStateRef.current = 'ended'; if (timerIntervalRef.current) { clearInterval(timerIntervalRef.current); timerIntervalRef.current = null; } return 0; } return prev - 1; }); }, 1000); return () => { if (timerIntervalRef.current) { clearInterval(timerIntervalRef.current); timerIntervalRef.current = null; } }; }, [gameState]);
+  // === Custom Precision Timer ===
+  useEffect(() => {
+    if (engine.gameState !== 'playing') {
+      if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+      return;
+    }
+    
+    if (!isTimeUp && localTimeRef.current === 60 && localTimeRemaining === 60) {
+      // Intentionally empty init logic
+    } else if (!isTimeUp && localTimeRef.current <= 0) {
+      localTimeRef.current = 60;
+      setLocalTimeRemaining(60);
+    }
 
-  const isValid = useCallback((grid, row, col, num, size) => { for (let x = 0; x < size; x++) { if (grid[row * size + x] === num) return false; } for (let x = 0; x < size; x++) { if (grid[x * size + col] === num) return false; } if (size === 6) { const br = Math.floor(row / 2); const bc = Math.floor(col / 3); for (let i = 0; i < 2; i++) { for (let j = 0; j < 3; j++) { if (grid[(br * 2 + i) * size + (bc * 3 + j)] === num) return false; } } } else if (size === 5 || size === 7) { return true; } else { const bs = Math.floor(Math.sqrt(size)); for (let i = 0; i < bs; i++) { for (let j = 0; j < bs; j++) { if (grid[(Math.floor(row / bs) * bs + i) * size + (Math.floor(col / bs) * bs + j)] === num) return false; } } } return true; }, []);
+    timerIntervalRef.current = setInterval(() => {
+      localTimeRef.current -= 1;
+      setLocalTimeRemaining(localTimeRef.current);
+      
+      if (localTimeRef.current <= 0) {
+        clearInterval(timerIntervalRef.current);
+        setIsTimeUp(true); 
+        if (typeof engineRef.current?.endGame === 'function') {
+          engineRef.current.endGame();
+        }
+      }
+    }, 1000);
+    
+    return () => {
+      if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    };
+  }, [engine.gameState, isTimeUp, localTimeRemaining]);
 
-  const solveSudoku = useCallback((grid, size) => { const solve = (ga) => { for (let i = 0; i < size * size; i++) { if (ga[i] === null) { const row = Math.floor(i / size); const col = i % size; const nums = Array.from({ length: size }, (_, i) => i + 1); for (let k = nums.length - 1; k > 0; k--) { const j = Math.floor(Math.random() * (k + 1)); [nums[k], nums[j]] = [nums[j], nums[k]]; } for (const num of nums) { if (isValid(ga, row, col, num, size)) { ga[i] = num; if (solve(ga)) return true; ga[i] = null; } } return false; } } return true; }; const gc = [...grid]; solve(gc); return gc; }, [isValid]);
+  // Audio Sync
+  useEffect(() => {
+    if (audioSynth) audioSynth.setEnabled(soundEnabled);
+  }, [soundEnabled]);
 
-  const generateSudoku = useCallback((size) => { const tc = size * size; const eg = Array(tc).fill(null); const solved = solveSudoku(eg, size); const puzzle = [...solved]; const initial = new Set(); let ctk; if (size === 4) ctk = 8; else if (size === 5) ctk = 10; else if (size === 6) ctk = 14; else ctk = 18; const indices = Array.from({ length: tc }, (_, i) => i).sort(() => Math.random() - 0.5); for (let i = 0; i < tc; i++) { if (i < ctk) { initial.add(indices[i]); } else { puzzle[indices[i]] = null; } } setSolution(solved); setGrid(puzzle); setInitialIndices(initial); }, [solveSudoku]);
-
-  const getAccuracy = useCallback(() => { const t = totalCorrect + mistakes; if (t === 0) return 100; return Math.round((totalCorrect / t) * 100); }, [totalCorrect, mistakes]);
-
-  const handleMiss = useCallback(() => { setMistakes(prev => prev + 1); comboRef.current = 0; setCombo(0); if (livesRef.current > 0) { livesRef.current -= 1; setLives(livesRef.current); playSound('wrong'); showFeedback('✗ Wrong! -1 life', 'error'); } if (livesRef.current === 0) { scoreRef.current = Math.max(0, scoreRef.current - 10); setScore(scoreRef.current); playSound('penalty'); showFeedback('✗ Wrong! -10 points', 'error'); } }, [playSound, showFeedback]);
-
-  const handleNumberInput = useCallback((num) => { if (selectedCell === null || gameStateRef.current !== 'playing' || isMasterComplete) return; if (clickCooldownRef.current) return; clickCooldownRef.current = true; const isCorrect = solution[selectedCell] === num; if (isCorrect) { const ng = [...grid]; ng[selectedCell] = num; setGrid(ng); scoreRef.current += 10; setScore(scoreRef.current); setTotalCorrect(prev => prev + 1); comboRef.current++; setCombo(comboRef.current); if (comboRef.current > bestCombo) setBestCombo(comboRef.current); if (comboRef.current % 5 === 0) { playSound('combo'); showFeedback(`🔥 ${comboRef.current}x Combo! +10`, 'success'); } else { playSound('correct'); showFeedback('✓ +10', 'success'); } setSelectedCell(null); if (!ng.includes(null)) { setCompletedGrids(prev => prev + 1); const lb = 10 * gridSize; scoreRef.current += lb; setScore(scoreRef.current); playSound('complete'); if (gridSize === 4) { showFeedback(`🎯 4×4 Complete! Moving to 5×5! +${lb}`, 'success'); setGridSize(5); setTimeout(() => generateSudoku(5), 100); } else if (gridSize === 5) { showFeedback(`🎯 5×5 Complete! Moving to 6×6! +${lb}`, 'success'); setGridSize(6); setTimeout(() => generateSudoku(6), 100); } else if (gridSize === 6) { showFeedback(`🎯 6×6 Complete! Moving to 7×7! +${lb}`, 'success'); setGridSize(7); setTimeout(() => generateSudoku(7), 100); } else if (gridSize === 7) { setIsMasterComplete(true); setGameState('ended'); gameStateRef.current = 'ended'; showFeedback(`🏆 MASTER! All grids completed! +${lb}`, 'success'); playSound('complete'); } } } else { handleMiss(); } setTimeout(() => { clickCooldownRef.current = false; }, 100); }, [selectedCell, isMasterComplete, solution, grid, gridSize, bestCombo, playSound, showFeedback, handleMiss, generateSudoku]);
-
-  const handleCellClick = useCallback((index) => { if (gameStateRef.current !== 'playing' || initialIndices.has(index) || isMasterComplete) return; setSelectedCell(index); }, [initialIndices, isMasterComplete]);
-
-  const startGame = useCallback(() => {
+  // Load Best Score on Mount
+  useEffect(() => {
+    setIsClient(true);
+    mountedRef.current = true;
     try {
-      if (typeof window !== 'undefined' && !document.fullscreenElement) {
-        if (typeof toggleFullscreen === 'function') toggleFullscreen();
+      const savedData = getSavedData();
+      if (savedData.bestScore) setBestScore(savedData.bestScore);
+      const name = localStorage.getItem('skilldrills_player_name');
+      if (name) setPlayerNameInput(name);
+    } catch (e) {}
+    setTimeout(() => { if (mountedRef.current) setLoading(false); }, 200);
+
+    return () => {
+      mountedRef.current = false;
+      if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
+      if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    };
+  }, []);
+
+  // Fullscreen Guard & Touch Restrictions
+  useEffect(() => {
+    const fsHandler = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener('fullscreenchange', fsHandler);
+    
+    const preventZoom = (e) => { if (e.touches && e.touches.length > 1) e.preventDefault(); };
+    document.addEventListener('touchmove', preventZoom, { passive: false });
+
+    return () => {
+      document.removeEventListener('fullscreenchange', fsHandler);
+      document.removeEventListener('touchmove', preventZoom);
+    };
+  }, []);
+
+  // Game End Logic (Save Score)
+  useEffect(() => {
+    if ((engine.gameState !== 'ended' && !isTimeUp) || hasProcessedEndRef.current) return;
+    hasProcessedEndRef.current = true;
+
+    if (document.fullscreenElement) {
+      try { document.exitFullscreen(); } catch (e) {}
+    }
+    const finalScore = scoreRef.current;
+    if (finalScore > bestScore && finalScore > 0) {
+      setIsNewBest(true);
+      setBestScore(finalScore);
+      saveData({ bestScore: finalScore });
+    }
+  }, [engine.gameState, isTimeUp, bestScore]);
+
+  // === UI Handlers ===
+  const savePlayerName = useCallback(() => {
+    const name = playerNameInput.trim() || 'Anonymous Player';
+    try { localStorage.setItem('skilldrills_player_name', name); } catch (e) {}
+    setShowNameInput(false);
+  }, [playerNameInput]);
+
+  const toggleFullscreen = useCallback(async () => {
+    try {
+      if (!document.fullscreenElement && gameContainerRef.current) {
+        await gameContainerRef.current.requestFullscreen();
+      } else if (document.fullscreenElement) {
+        await document.exitFullscreen();
       }
     } catch (err) {}
- if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); setGameState('playing'); gameStateRef.current = 'playing'; setScore(0); setGridSize(4); setTimeRemaining(60); setCombo(0); setBestCombo(0); setMistakes(0); setCompletedGrids(0); setTotalCorrect(0); setLives(3); setSelectedCell(null); setIsMasterComplete(false); setFeedback(''); scoreRef.current = 0; comboRef.current = 0; livesRef.current = 3; clickCooldownRef.current = false; generateSudoku(4); playSound('correct'); }, [generateSudoku, playSound]);
-  const resetGame = useCallback(() => { if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current); setGameState('start'); gameStateRef.current = 'start'; setScore(0); setGridSize(4); setTimeRemaining(60); setCombo(0); setBestCombo(0); setMistakes(0); setCompletedGrids(0); setTotalCorrect(0); setLives(3); setSelectedCell(null); setIsMasterComplete(false); setGrid([]); setSolution([]); setInitialIndices(new Set()); setFeedback(''); setFeedbackType(''); scoreRef.current = 0; comboRef.current = 0; livesRef.current = 3; clickCooldownRef.current = false; }, []);
+  }, []);
 
-  const getCellSize = useCallback(() => { const bs = 65; const ms = 38; return Math.max(ms, bs - (gridSize - 4) * 8); }, [gridSize]);
-  const getFontSize = useCallback(() => { const bf = 26; const mf = 15; return Math.max(mf, bf - (gridSize - 4) * 3); }, [gridSize]);
+  const triggerFeedback = useCallback((text, type = 'success') => {
+    setLocalFeedback({ id: Date.now(), text, type, visible: true });
+    if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
+    feedbackTimerRef.current = setTimeout(() => {
+      if (mountedRef.current) setLocalFeedback(prev => ({ ...prev, visible: false }));
+    }, 800);
+  }, []);
+
+  // === SUDOKU ENGINE ===
+  const isValid = useCallback((checkGrid, row, col, num, size) => { 
+    for (let x = 0; x < size; x++) { if (checkGrid[row * size + x] === num) return false; } 
+    for (let x = 0; x < size; x++) { if (checkGrid[x * size + col] === num) return false; } 
+    if (size === 6) { 
+      const br = Math.floor(row / 2); const bc = Math.floor(col / 3); 
+      for (let i = 0; i < 2; i++) { 
+        for (let j = 0; j < 3; j++) { if (checkGrid[(br * 2 + i) * size + (bc * 3 + j)] === num) return false; } 
+      } 
+    } else if (size === 5 || size === 7) { 
+      return true; // Latin Square constraints
+    } else { 
+      const bs = Math.floor(Math.sqrt(size)); 
+      for (let i = 0; i < bs; i++) { 
+        for (let j = 0; j < bs; j++) { if (checkGrid[(Math.floor(row / bs) * bs + i) * size + (Math.floor(col / bs) * bs + j)] === num) return false; } 
+      } 
+    } 
+    return true; 
+  }, []);
+
+  const solveSudoku = useCallback((gridToSolve, size) => { 
+    const solve = (ga) => { 
+      for (let i = 0; i < size * size; i++) { 
+        if (ga[i] === null) { 
+          const row = Math.floor(i / size); const col = i % size; 
+          const nums = Array.from({ length: size }, (_, n) => n + 1); 
+          for (let k = nums.length - 1; k > 0; k--) { const j = Math.floor(Math.random() * (k + 1)); [nums[k], nums[j]] = [nums[j], nums[k]]; } 
+          for (const num of nums) { 
+            if (isValid(ga, row, col, num, size)) { ga[i] = num; if (solve(ga)) return true; ga[i] = null; } 
+          } 
+          return false; 
+        } 
+      } 
+      return true; 
+    }; 
+    const gc = [...gridToSolve]; 
+    solve(gc); 
+    return gc; 
+  }, [isValid]);
+
+  const generateSudoku = useCallback((size) => { 
+    const tc = size * size; 
+    const eg = Array(tc).fill(null); 
+    const solved = solveSudoku(eg, size); 
+    const puzzle = [...solved]; 
+    const initial = new Set(); 
+    
+    let ctk; 
+    if (size === 4) ctk = 8; 
+    else if (size === 5) ctk = 10; 
+    else if (size === 6) ctk = 14; 
+    else ctk = 18; 
+    
+    const indices = Array.from({ length: tc }, (_, i) => i).sort(() => Math.random() - 0.5); 
+    for (let i = 0; i < tc; i++) { 
+      if (i < ctk) { initial.add(indices[i]); } 
+      else { puzzle[indices[i]] = null; } 
+    } 
+    
+    setSolution(solved); 
+    setGrid(puzzle); 
+    setInitialIndices(initial); 
+  }, [solveSudoku]);
+
+  // === INPUT HANDLER (STRICT SCORING) ===
+  const handleNumberInput = useCallback((num, e) => { 
+    if (e) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
+    
+    if (selectedCell === null || gameStateRef.current !== 'playing' || isTimeUp) return; 
+    if (clickCooldownRef.current) return; 
+    clickCooldownRef.current = true; 
+    
+    const isCorrect = solution[selectedCell] === num; 
+    
+    if (isCorrect) { 
+      const ng = [...grid]; 
+      ng[selectedCell] = num; 
+      setGrid(ng); 
+      setTotalCorrect(prev => prev + 1); 
+      if (audioSynth) audioSynth.playCorrect();
+      setSelectedCell(null); 
+      
+      // GRID COMPLETION CHECK
+      if (!ng.includes(null)) { 
+        setCompletedGrids(prev => prev + 1); 
+        
+        scoreRef.current += 20; 
+        setScore(scoreRef.current); 
+        
+        localTimeRef.current = Math.min(60, localTimeRef.current + 15);
+        setLocalTimeRemaining(localTimeRef.current);
+
+        if (audioSynth) audioSynth.playComplete(); 
+        triggerFeedback(`Grid Cleared! +20 PTS | +15s`, 'success'); 
+        
+        if (gridSizeRef.current < 7) {
+          gridSizeRef.current += 1;
+          setGridSize(gridSizeRef.current);
+        }
+        
+        setTimeout(() => generateSudoku(gridSizeRef.current), 150); 
+      } 
+    } else { 
+      mistakesRef.current += 1;
+      setMistakes(mistakesRef.current);
+      
+      scoreRef.current = Math.max(0, scoreRef.current - 2); 
+      setScore(scoreRef.current); 
+
+      localTimeRef.current -= 2;
+      setLocalTimeRemaining(Math.max(0, localTimeRef.current));
+      
+      if (audioSynth) audioSynth.playPenalty(); 
+      triggerFeedback('Mistake! -2 PTS | -2s', 'error'); 
+
+      if (localTimeRef.current <= 0) {
+        setIsTimeUp(true);
+        if (engineRef.current?.endGame) engineRef.current.endGame();
+      }
+    } 
+    
+    setTimeout(() => { clickCooldownRef.current = false; }, 100); 
+  }, [selectedCell, solution, grid, isTimeUp, generateSudoku, triggerFeedback]);
+
+  const handleCellClick = useCallback((index, e) => { 
+    if (e) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
+    if (gameStateRef.current !== 'playing' || initialIndices.has(index)) return; 
+    setSelectedCell(index); 
+  }, [initialIndices]);
+
+  const handleStartGame = useCallback(async () => {
+    if (audioSynth) audioSynth.init(); 
+    
+    try {
+      if (gameContainerRef.current && !document.fullscreenElement) {
+        await gameContainerRef.current.requestFullscreen();
+      }
+    } catch (err) {}
+
+    setIsTimeUp(false);
+    hasProcessedEndRef.current = false;
+    localTimeRef.current = 60;
+    setLocalTimeRemaining(60);
+    
+    scoreRef.current = 0;
+    setScore(0);
+    
+    gridSizeRef.current = 4;
+    setGridSize(4);
+    
+    mistakesRef.current = 0;
+    setMistakes(0);
+    
+    setCompletedGrids(0);
+    setTotalCorrect(0);
+    setSelectedCell(null);
+    setLocalFeedback({ id: 0, text: '', type: 'success', visible: false });
+    
+    generateSudoku(4); 
+    engineRef.current.startGame();
+  }, [generateSudoku]);
+
+  const shareDrillLink = useCallback(() => {
+    const url = 'https://skilldrills.online/drills/cognitive/problem-solving/sudoku';
+    if (navigator.share) {
+      navigator.share({ title: 'Sudoku Speed-Logic Drill', text: 'Free progressive Sudoku drill! Can you beat my score?', url }).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(url).then(() => alert('Link copied!')).catch(() => prompt('Copy:', url));
+    }
+  }, []);
+
   const getGridLabel = useCallback(() => { if (gridSize === 4) return '4×4'; if (gridSize === 5) return '5×5'; if (gridSize === 6) return '6×6'; return '7×7'; }, [gridSize]);
   const getAvailableNumbers = useCallback(() => Array.from({ length: gridSize }, (_, i) => i + 1), [gridSize]);
-  const getRuleDescription = useCallback(() => { if (gridSize === 5 || gridSize === 7) return `Each row and column must contain numbers 1-${gridSize} once`; else if (gridSize === 6) return `Each row, column, and 2×3 box must contain 1-6 once`; else return `Each row, column, and ${Math.sqrt(gridSize)}×${Math.sqrt(gridSize)} box must contain 1-${gridSize} once`; }, [gridSize]);
 
-  const sharePage = async () => { if (navigator.share) { try { await navigator.share({ title: 'Free Sudoku Speed-Logic Drill | SkillDrills', text: 'Progressive Sudoku from 4×4 to 7×7. Free!', url: 'https://skilldrills.online/drills/cognitive/problem-solving/sudoku' }); } catch (e) {} } else { navigator.clipboard.writeText('https://skilldrills.online/drills/cognitive/problem-solving/sudoku'); alert('Link copied!'); } };
-  const copyPageLink = () => { navigator.clipboard.writeText('https://skilldrills.online/drills/cognitive/problem-solving/sudoku'); alert('Link copied!'); };
+  if (loading || !isClient) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#050505]">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4 shadow-[0_0_20px_rgba(59,130,246,0.5)]"></div>
+          <p className="text-gray-400 font-medium tracking-widest uppercase text-sm animate-pulse">Loading Engine...</p>
+        </div>
+      </div>
+    );
+  }
 
-  if (loading || !isClient) { return (<div className="min-h-screen flex items-center justify-center bg-gray-50"><div className="text-center"><div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div><p className="text-gray-600">Loading sudoku drill...</p></div></div>); }
+  const accuracy = totalCorrect + mistakes > 0 
+    ? Math.round((totalCorrect / (totalCorrect + mistakes)) * 100) 
+    : 0;
+  const strokeDasharray = 100;
+  const strokeDashoffset = strokeDasharray - accuracy;
 
   return (
-    <div className={`min-h-screen select-none ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
+    <div className="min-h-screen select-none bg-[#050505] text-white selection:bg-transparent font-sans" style={{ WebkitTapHighlightColor: 'transparent' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <nav aria-label="Breadcrumb" className="mb-4">
+        
+        {/* Breadcrumb */}
+        <nav className="mb-4">
           <ol className="flex flex-wrap items-center gap-2 text-sm">
-            <li><Link href="/" className={`hover:underline transition-colors ${isDarkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-600 hover:text-gray-900'}`}>Home</Link></li>
-            <li className={`${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`} aria-hidden="true">/</li>
-            <li><Link href="/drills/cognitive" className={`hover:underline transition-colors ${isDarkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-600 hover:text-gray-900'}`}>Cognitive Drills</Link></li>
-            <li className={`${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`} aria-hidden="true">/</li>
-            <li className={`${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Problem Solving</li>
-            <li className={`${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`} aria-hidden="true">/</li>
-            <li className={`font-medium ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`} aria-current="page">Sudoku Speed-Logic</li>
+            <li><Link href="/" className="text-gray-500 hover:text-gray-300 transition-colors">Home</Link></li>
+            <li className="text-gray-600"><ChevronRight className="w-4 h-4" /></li>
+            <li><Link href="/drills/cognitive" className="text-gray-500 hover:text-gray-300 transition-colors">Cognitive</Link></li>
+            <li className="text-gray-600"><ChevronRight className="w-4 h-4" /></li>
+            <li className="text-gray-500">Problem Solving</li>
+            <li className="text-gray-600"><ChevronRight className="w-4 h-4" /></li>
+            <li className="text-blue-400 font-medium">Sudoku Speed-Logic</li>
           </ol>
         </nav>
         
+        {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-gradient-to-r from-blue-500 to-cyan-600 rounded-xl flex-shrink-0"><Grid3X3 className="w-6 h-6 text-white" /></div>
-            <div><h1 className={`text-2xl sm:text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Sudoku Speed-Logic</h1><p className={`text-sm sm:text-base ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>4×4 → 7×7 progressive grids • +10 per correct • 3 lives • Free brain training</p></div>
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl shadow-[0_0_20px_rgba(59,130,246,0.3)]">
+              <Grid3X3 className="w-7 h-7 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Sudoku Speed-Logic</h1>
+              <p className="text-sm text-gray-400 mt-1 font-medium">Progressive Grids • Endless Mode • Time Attack</p>
+            </div>
           </div>
-          <div className="flex gap-2 flex-shrink-0">
-            {gameState === 'playing' && (<button onClick={resetGame} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700' : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-100'}`} title="Reset session" aria-label="Reset sudoku drill"><RefreshCw className="w-5 h-5" /></button>)}
-            <button onClick={() => setIsDarkMode(!isDarkMode)} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'} title={isDarkMode ? 'Light mode' : 'Dark mode'}>{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button>
-            <button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} aria-label="Toggle drill area theme" title="Toggle drill area theme"><Eye className="w-5 h-5" /></button>
-            <button onClick={() => setSoundEnabled(!soundEnabled)} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} aria-label={soundEnabled ? 'Mute sounds' : 'Enable sounds'} title={soundEnabled ? 'Mute' : 'Unmute'}>{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button>
-            <button onClick={toggleFullscreen} className={`p-2 rounded-lg border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`} aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'} title={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}>{isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}</button>
-          </div>
-        </div>
-
-        <section className="sr-only" aria-label="Drill description for search engines">
-          <h2>Free Sudoku Speed-Logic Drill - Progressive Grid Puzzle Training for Brain Fitness</h2>
-          <p>Master Sudoku with progressive grid sizes from 4×4 to 7×7. 4×4 uses standard 2×2 boxes, 5×5 uses row and column constraints only, 6×6 uses 2×3 boxes, 7×7 uses row and column constraints only. Each correct cell placement earns +10 points with combo streaks at 5x. Complete each grid for level bonus. Complete all 4 grids to achieve Sudoku Master status. 3 lives protect your score. 60-second timed challenge with best score saved locally. Perfect for brain training, cognitive enhancement, and logical reasoning practice. No registration required.</p>
-        </section>
-
-        <div className="grid grid-cols-4 sm:grid-cols-8 gap-2 sm:gap-3 mb-4 h-auto min-h-[88px] py-1">
-          <StatCard icon={<Target className="text-blue-600" />} value={score} label="Score" isDark={isDarkMode} />
-          <StatCard icon={<Trophy className="text-yellow-600" />} value={bestScore} label="Best" isDark={isDarkMode} />
-          <StatCard icon={<Timer className={timeRemaining <= 10 ? 'text-red-600' : 'text-green-600'} />} value={`${timeRemaining}s`} label="Time" isDark={isDarkMode} />
-          <StatCard icon={<Grid3X3 className="text-amber-500" />} value={getGridLabel()} label="Grid" isDark={isDarkMode} />
-          <StatCard icon={<CheckCircle2 className="text-emerald-500" />} value={`${completedGrids}/4`} label="Done" isDark={isDarkMode} />
-          <StatCard icon={<BarChart3 className="text-purple-600" />} value={getAccuracy()} label="Accuracy" unit="%" isDark={isDarkMode} />
-          <StatCard icon={<Zap className="text-orange-600" />} value={combo} label="Combo" isDark={isDarkMode} />
-          <StatCard icon={<Heart className="text-red-500" />} value={lives} label="Lives" isDark={isDarkMode} />
-        </div>
-
-        <div className="h-10 mb-2 flex justify-center items-center"><div className={`px-4 py-1.5 rounded-lg text-white font-semibold text-sm transition-all duration-200 ${feedback ? 'opacity-100 scale-100' : 'opacity-0 scale-95'} ${feedbackType === 'success' ? 'bg-green-500' : 'bg-red-500'}`} role="status" aria-live="polite" aria-atomic="true">{feedback || '\u00A0'}</div></div>
-
-        <div ref={containerRef} className={`relative ${isFullscreen ? 'fixed inset-0 z-50' : 'rounded-xl border-2'}`} style={{ background: isBoxDarkMode ? '#0a0a0a' : '#ffffff', aspectRatio: isFullscreen ? 'auto' : '16/9', maxWidth: '100%', margin: '0 auto', borderColor: isDarkMode ? '#374151' : '#e5e7eb', overflow: 'hidden' }}>
-          {/* Mobile Rotate Device Warning Overlay */}
-      {showRotateWarning && (
-        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-gray-950/95 text-center p-6" aria-hidden="true">
-          <div className="animate-bounce mb-4 text-blue-500">
-            <svg className="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-            </svg>
-          </div>
-          <h3 className="text-lg font-bold text-white mb-2">{warningMessage}</h3>
-          <p className="text-sm text-gray-400 mb-6">Please use landscape orientation or fullscreen mode for the best training experience.</p>
-          <Link href="/drills/cognitive">
-            <button className="px-5 py-2.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-350 hover:text-white font-bold rounded-lg text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
-              Go Back
+          
+          <div className="flex gap-2 flex-wrap">
+            
+            {engine.gameState === 'playing' && !isTimeUp && (
+              <button onClick={() => { if(engineRef.current) engineRef.current.endGame(); handleStartGame(); }} className="p-2.5 rounded-lg border border-gray-700 bg-gray-900 text-gray-400 hover:text-white hover:border-gray-500 transition-all active:scale-95" title="Reset">
+                <RefreshCw className="w-5 h-5" />
+              </button>
+            )}
+            <button onClick={() => setSoundEnabled(v => !v)} className="p-2.5 rounded-lg border border-gray-700 bg-gray-900 text-gray-400 hover:text-white hover:border-gray-500 transition-all active:scale-95" title="Toggle Sound">
+              {soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
             </button>
-          </Link>
-        </div>
-      )}
-
-          {isFullscreen && gameState === 'playing' && (<div className="absolute top-4 right-4 z-30 flex gap-3"><button onClick={resetGame} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" title="Reset session" aria-label="Reset sudoku drill"><RefreshCw className="w-5 h-5" /></button><button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle dark mode">{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button><button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle drill area theme"><Eye className="w-5 h-5" /></button><button onClick={() => setSoundEnabled(!soundEnabled)} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Toggle sound">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button><button onClick={toggleFullscreen} className="p-2.5 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-all" aria-label="Exit fullscreen"><Minimize2 className="w-5 h-5" /></button></div>)}
-
-          <div className="absolute inset-0 flex items-center justify-center p-2 sm:p-4">
-            {gameState === 'start' && (<div className={`absolute inset-0 flex items-center justify-center backdrop-blur-sm rounded-xl z-40 ${isBoxDarkMode ? 'bg-gray-900/95' : 'bg-white/95'}`}><div className={`rounded-2xl p-6 sm:p-8 text-center max-w-md mx-4 shadow-xl border ${isBoxDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}><div className="mb-4"><Grid3X3 className="w-16 h-16 text-blue-500 mx-auto" aria-hidden="true" /></div><h2 className={`text-2xl font-bold mb-2 ${isBoxDarkMode ? 'text-white' : 'text-gray-900'}`}>Sudoku Speed-Logic</h2><p className={`mb-2 ${isBoxDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>60-second challenge • +10 per correct • 4 grid sizes</p><p className={`mb-6 text-sm ${isBoxDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Place numbers 1-N in each row, column, and box. Start at 4×4 and work up to 7×7. Complete all 4 to become a Sudoku Master. Perfect for brain training and logical reasoning.</p><button onClick={startGame} className="px-8 py-3 bg-gradient-to-r from-blue-500 to-cyan-600 text-white rounded-xl font-semibold hover:shadow-lg w-full transition-all transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" aria-label="Start free sudoku drill">Start Free Drill</button></div></div>)}
-
-            {gameState === 'playing' && (<div className="w-full max-w-lg"><div className="grid gap-1 sm:gap-1.5 mb-4 sm:mb-6 mx-auto" style={{ gridTemplateColumns: `repeat(${gridSize}, 1fr)`, maxWidth: `${gridSize * getCellSize()}px` }}>{grid.map((val, i) => { const isInitial = initialIndices.has(i); const isSelected = selectedCell === i; return (<button key={i} onClick={() => handleCellClick(i)} className={`aspect-square rounded-lg font-bold transition-all flex items-center justify-center relative ${isInitial ? (isBoxDarkMode ? 'bg-gray-700 text-gray-400 cursor-default' : 'bg-gray-200 text-gray-600 cursor-default') : val !== null ? (isBoxDarkMode ? 'bg-green-900/50 text-green-300 cursor-default' : 'bg-green-100 text-green-700 cursor-default') : (isBoxDarkMode ? 'bg-gray-600 text-white hover:bg-gray-500 cursor-pointer' : 'bg-blue-50 text-blue-600 hover:bg-blue-100 cursor-pointer')} ${isSelected ? 'ring-4 ring-blue-400 transform scale-105 z-10' : ''} hover:scale-105 active:scale-95 focus:outline-none`} style={{ width: `${getCellSize()}px`, height: `${getCellSize()}px`, fontSize: `${getFontSize()}px` }} aria-label={`Cell ${i + 1}${val ? `, value ${val}` : ', empty'}${isInitial ? ', given' : ''}${isSelected ? ', selected' : ''}`}>{val}{isSelected && !isInitial && !val && (<div className="absolute inset-0 flex items-center justify-center" aria-hidden="true"><div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse" /></div>)}</button>); })}</div><div className={`text-center mb-3 sm:mb-4 text-xs ${isBoxDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{getRuleDescription()}</div><div className="flex justify-center gap-1.5 sm:gap-2 flex-wrap" role="group" aria-label="Number buttons">{getAvailableNumbers().map(num => (<button key={num} onClick={() => handleNumberInput(num)} className={`py-2.5 sm:py-3 px-4 sm:px-5 rounded-xl text-lg sm:text-xl font-black transition-all active:scale-95 ${isBoxDarkMode ? 'bg-blue-900 text-white hover:bg-blue-800' : 'bg-blue-600 text-white hover:bg-blue-700'} hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-400`} style={{ minWidth: `${Math.max(44, 65 - (gridSize - 4) * 5)}px` }} aria-label={`Place number ${num}`}>{num}</button>))}</div></div>)}
-
-            {gameState === 'ended' && (<div className={`absolute inset-0 flex items-center justify-center backdrop-blur-sm rounded-xl z-40 ${isBoxDarkMode ? 'bg-gray-900/95' : 'bg-white/95'}`}><div className={`rounded-2xl p-6 sm:p-8 shadow-xl border w-full max-w-[480px] mx-4 ${isBoxDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>{isMasterComplete ? (<><Trophy className="w-20 h-20 text-yellow-500 mx-auto mb-4" aria-hidden="true" /><h2 className={`text-3xl font-bold mb-2 text-center ${isBoxDarkMode ? 'text-yellow-400' : 'text-yellow-600'}`}>🏆 SUDOKU MASTER!</h2><p className={`mb-6 text-center text-lg ${isBoxDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>You&apos;ve conquered all 4 grids!</p></>) : (<><div className="flex items-center justify-center gap-3 mb-4"><Timer className="w-10 h-10 text-orange-500" aria-hidden="true" /><h2 className={`text-2xl font-bold ${isBoxDarkMode ? 'text-white' : 'text-gray-900'}`}>Time&apos;s Up!</h2></div><p className={`text-center text-sm mb-6 ${isBoxDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Keep practicing to improve your logical deduction and Sudoku solving speed.</p></>)}<div className="grid grid-cols-2 gap-3 mb-6"><ResultCard label="Final Score" value={score} icon={<Target className="w-4 h-4" />} color="yellow" isDark={isBoxDarkMode} /><ResultCard label="Best Score" value={bestScore} icon={<Trophy className="w-4 h-4" />} color="yellow" isDark={isBoxDarkMode} /><ResultCard label="Accuracy" value={getAccuracy()} unit="%" icon={<BarChart3 className="w-4 h-4" />} color="purple" isDark={isBoxDarkMode} /><ResultCard label="Grids Done" value={`${completedGrids}/4`} icon={<Grid3X3 className="w-4 h-4" />} color="amber" isDark={isBoxDarkMode} /><ResultCard label="Correct" value={totalCorrect} icon={<CheckCircle2 className="w-4 h-4" />} color="emerald" isDark={isBoxDarkMode} /><ResultCard label="Best Combo" value={`${bestCombo}x`} icon={<Zap className="w-4 h-4" />} color="orange" isDark={isBoxDarkMode} /></div><div className="flex gap-3"><Link href="/drills/cognitive" className="flex-1"><span className={`block w-full px-4 py-2.5 rounded-lg font-semibold transition-all text-center ${isDarkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>← Back to Drills</span></Link><button onClick={resetGame} className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-cyan-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"><RefreshCw className="w-4 h-4 inline mr-2" /> Play Again</button></div></div></div>)}
+            <button onClick={toggleFullscreen} className="p-2.5 rounded-lg border border-gray-700 bg-gray-900 text-gray-400 hover:text-white hover:border-gray-500 transition-all active:scale-95" title="Toggle Fullscreen">
+              {isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
+            </button>
           </div>
         </div>
 
-        {/* 1. DRILL RULES & SCORING */}
-        {!isFullscreen && (<footer className="mt-6" aria-label="Drill rules and scoring information"><div className={`rounded-xl border overflow-hidden ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}><div className={`px-4 py-3 border-b ${isDarkMode ? 'border-gray-700 bg-gray-800/50' : 'border-gray-200 bg-gray-50'}`}><div className="flex items-center gap-2"><Info className={`w-4 h-4 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`} aria-hidden="true" /><h2 className={`font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Drill Rules & Scoring</h2></div></div><div className="p-4"><div className="grid grid-cols-1 md:grid-cols-2 gap-4"><div className="space-y-3"><div className="flex items-start gap-2"><div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">1</div><p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Place numbers 1-N in <span className="font-semibold text-blue-500">each row, column & box</span> once</p></div><div className="flex items-start gap-2"><div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">2</div><p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Correct placement: <span className="font-semibold text-green-500">+10 points</span></p></div><div className="flex items-start gap-2"><div className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">3</div><p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Wrong placement: <span className="font-semibold text-red-500">-1 life</span> • 3 lives total</p></div></div><div className="space-y-3"><div className="flex items-start gap-2"><div className="w-5 h-5 rounded-full bg-orange-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">4</div><p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>At 0 lives: <span className="font-semibold text-orange-500">-10 point penalty</span> per mistake</p></div><div className="flex items-start gap-2"><div className="w-5 h-5 rounded-full bg-amber-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">5</div><p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Grid complete: <span className="font-semibold text-amber-500">+10 × grid size bonus</span> (+40 to +70)</p></div><div className="flex items-start gap-2"><div className="w-5 h-5 rounded-full bg-purple-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">6</div><p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Complete 4×4→5×5→6×6→<span className="font-semibold text-purple-500">7×7 for Master</span></p></div></div></div><div className={`mt-4 pt-3 border-t flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs ${isDarkMode ? 'border-gray-700 text-gray-400' : 'border-gray-200 text-gray-500'}`}><span>🔢 4×4 (2×2) • 5×5 (rows/cols) • 6×6 (2×3) • 7×7 (rows/cols)</span><span>🏆 Best Score saves locally • Free forever</span></div></div></div></footer>)}
+        {showNameInput && (
+          <div className="mb-6 p-4 rounded-xl border border-gray-700 bg-gray-900 shadow-xl animate-in fade-in slide-in-from-top-2">
+            <div className="flex items-center gap-3">
+              <input type="text" value={playerNameInput} onChange={e => setPlayerNameInput(e.target.value)} placeholder="Enter your display name" maxLength={20}
+                className="flex-1 px-4 py-2.5 rounded-lg border border-gray-600 bg-black text-white placeholder-gray-500 text-sm focus:outline-none focus:border-blue-500 transition-colors"
+                onKeyDown={e => e.key === 'Enter' && savePlayerName()} />
+              <button onClick={savePlayerName} className="px-5 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-500 transition-colors shadow-lg shadow-blue-600/20">Save</button>
+            </div>
+          </div>
+        )}
 
-        {/* 2. ABOUT THIS DRILL */}
-        {!isFullscreen && (
-          <section className="mt-8" aria-label="About this sudoku drill">
-            <div className={`rounded-xl border overflow-hidden ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
-              <div className={`px-4 py-3 border-b ${isDarkMode ? 'border-gray-700 bg-gray-800/50' : 'border-gray-200 bg-gray-50'}`}>
-                <div className="flex items-center gap-2"><GraduationCap className={`w-5 h-5 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`} aria-hidden="true" /><h2 className={`font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>About This Free Sudoku Drill</h2></div>
+        {/* Dynamic HUD */}
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5 sm:gap-3 mb-2 h-auto py-1">
+          <StatCard icon={<Target className="text-blue-400" />} value={score} label="Score" />
+          <StatCard icon={<Timer className={localTimeRemaining <= 10 ? 'text-red-400 animate-pulse' : 'text-green-400'} />} value={localTimeRemaining} label="Time" unit="s" />
+          <StatCard icon={<Grid3X3 className="text-cyan-400" />} value={getGridLabel()} label="Grid Size" />
+          <StatCard icon={<CheckCircle2 className="text-emerald-400" />} value={completedGrids} label="Cleared" />
+          <StatCard icon={<XCircle className="text-red-400" />} value={mistakes} label="Penalties" />
+          <StatCard icon={<Trophy className="text-yellow-400" />} value={bestScore} label="Best Score" />
+        </div>
+
+        {/* Dynamic Feedback Popup */}
+        <div className="h-8 mb-2 flex justify-center items-center pointer-events-none">
+          {localFeedback.visible && (
+            <div key={localFeedback.id} className={`animate-in zoom-in-75 fade-in duration-150 px-5 py-1.5 rounded-full text-white font-black tracking-widest text-sm shadow-xl ${localFeedback.type === 'success' ? 'bg-green-500/20 text-green-400 border border-green-500/50 shadow-green-500/20' : 'bg-red-500/20 text-red-400 border border-red-500/50 shadow-red-500/20'}`}>
+              {localFeedback.text}
+            </div>
+          )}
+        </div>
+
+        {/* Game Container: Adaptive sizing for mobile vs desktop */}
+        <div ref={gameContainerRef} 
+          onContextMenu={(e) => { if(engine.gameState === 'playing') e.preventDefault(); }}
+          className={`relative overflow-hidden flex flex-col items-center justify-center bg-[#050505] transition-all duration-100 ${
+            isFullscreen 
+              ? 'fixed inset-0 z-50 w-[100vw] h-[100dvh] rounded-none' 
+              : 'w-full rounded-2xl border border-gray-700 shadow-[0_0_40px_rgba(0,0,0,0.5)] min-h-[60vh] md:min-h-[500px]'
+          }`}
+          style={{ 
+            aspectRatio: 'auto',
+            margin: '0 auto',
+            touchAction: (engine.gameState === 'playing' && !isTimeUp) ? 'none' : 'auto', 
+            overscrollBehavior: (engine.gameState === 'playing' && !isTimeUp) ? 'none' : 'auto'
+          }}>
+          
+          {/* Time Progress Bar */}
+          {engine.gameState === 'playing' && !isTimeUp && (
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gray-900 z-[60]">
+              <div 
+                className={`h-full transition-all duration-1000 ease-linear ${localTimeRemaining <= 10 ? 'bg-red-500 animate-pulse' : 'bg-blue-500'}`}
+                style={{ width: `${Math.min(100, (localTimeRemaining / 60) * 100)}%` }} 
+              />
+            </div>
+          )}
+
+          {/* In-Game Controls (Fullscreen) */}
+          {isFullscreen && engine.gameState === 'playing' && !isTimeUp && (
+            <div className="absolute top-4 right-4 z-[60] flex gap-2">
+              <button onClick={() => { if(engineRef.current) engineRef.current.endGame(); handleStartGame(); }} className="p-3 bg-black/60 border border-gray-600 rounded-xl text-white hover:bg-gray-800 transition-colors"><RefreshCw className="w-5 h-5" /></button>
+              <button onClick={() => setSoundEnabled(v => !v)} className="p-3 bg-black/60 border border-gray-600 rounded-xl text-white hover:bg-gray-800 transition-colors">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button>
+              <button onClick={toggleFullscreen} className="p-3 bg-black/60 border border-gray-600 rounded-xl text-white hover:bg-gray-800 transition-colors"><Minimize2 className="w-5 h-5" /></button>
+            </div>
+          )}
+
+          {/* Phase 2: The Grid Area */}
+          {engine.gameState === 'playing' && !isTimeUp && (
+            <div className="relative w-full h-full flex flex-col items-center justify-center p-4 sm:p-6 my-auto">
+              <div 
+                className="grid mx-auto"
+                style={{ 
+                  gap: gridSize >= 6 ? '4px' : '6px',
+                  gridTemplateColumns: `repeat(${gridSize}, 1fr)`,
+                  gridTemplateRows: `repeat(${gridSize}, 1fr)`,
+                  width: isFullscreen ? 'min(90vw, 65dvh)' : 'min(90vw, 55vh)', 
+                  height: isFullscreen ? 'min(90vw, 65dvh)' : 'min(90vw, 55vh)',
+                }}
+              >
+                {grid.map((val, i) => { 
+                  const isInitial = initialIndices.has(i); 
+                  const isSelected = selectedCell === i; 
+                  return (
+                    <button 
+                      key={i} 
+                      onPointerDown={(e) => handleCellClick(i, e)} 
+                      className={`
+                        w-full h-full rounded-md sm:rounded-lg font-black transition-all flex items-center justify-center relative touch-none
+                        text-base sm:text-xl md:text-2xl lg:text-3xl focus:outline-none
+                        ${isInitial ? 'bg-gray-800 text-gray-500 cursor-default shadow-inner' : val !== null ? 'bg-green-500/20 text-green-400 border border-green-500/30 cursor-default' : 'bg-gray-700 text-white hover:bg-gray-600 border border-gray-600 cursor-pointer shadow-md'} 
+                        ${isSelected ? 'ring-2 sm:ring-4 ring-blue-500 transform scale-105 z-10' : ''} 
+                        active:scale-95
+                      `} 
+                    >
+                      {val}
+                      {isSelected && !isInitial && !val && (
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                          <div className="w-2 h-2 sm:w-3 sm:h-3 bg-blue-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(59,130,246,0.8)]" />
+                        </div>
+                      )}
+                    </button>
+                  ); 
+                })}
               </div>
-              <div className="p-5">
-                <p className={`text-sm leading-relaxed mb-5 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>This free Sudoku drill challenges your logical deduction skills with progressive grid sizes from 4×4 to 7×7. Each grid must be filled so every row, column, and box contains numbers 1 through N exactly once. Complete all 4 grid sizes to achieve Sudoku Master status. Perfect for brain training, cognitive enhancement, and improving logical reasoning abilities.</p>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
-                  <div className={`p-4 rounded-xl border ${isDarkMode ? 'bg-gray-700/50 border-gray-600' : 'bg-blue-50 border-blue-100'}`}><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-blue-500 flex items-center justify-center"><GraduationCap className="w-4 h-4 text-white" /></div><h3 className={`text-sm font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Who It's For</h3></div><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Puzzle enthusiasts, students improving logical reasoning, seniors maintaining cognitive fitness, and anyone who enjoys number puzzles and brain training.</p></div>
-                  <div className={`p-4 rounded-xl border ${isDarkMode ? 'bg-gray-700/50 border-gray-600' : 'bg-green-50 border-green-100'}`}><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-green-500 flex items-center justify-center"><TrendingUp className="w-4 h-4 text-white" /></div><h3 className={`text-sm font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Skills Improved</h3></div><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Logical deduction, pattern recognition, constraint satisfaction, working memory, and systematic problem-solving under time pressure.</p></div>
-                  <div className={`p-4 rounded-xl border ${isDarkMode ? 'bg-gray-700/50 border-gray-600' : 'bg-purple-50 border-purple-100'}`}><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-purple-500 flex items-center justify-center"><BarChart3 className="w-4 h-4 text-white" /></div><h3 className={`text-sm font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>What You'll Track</h3></div><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Score, accuracy, combo streaks, grids completed, lives remaining, and progression from 4×4 to Master level.</p></div>
+
+              {/* Number Input Bar */}
+              <div className="mt-6 sm:mt-10 flex justify-center gap-1.5 sm:gap-2 flex-wrap max-w-lg w-full">
+                {getAvailableNumbers().map(num => (
+                  <button 
+                    key={num} 
+                    onPointerDown={(e) => handleNumberInput(num, e)} 
+                    className={`
+                      flex-1 py-2 sm:py-3 rounded-lg sm:rounded-xl text-lg sm:text-xl font-black transition-all touch-none
+                      bg-gradient-to-br from-blue-600 to-cyan-600 border border-blue-400 text-white
+                      hover:scale-105 active:scale-95 focus:outline-none shadow-lg shadow-blue-500/20 min-w-[40px] sm:min-w-[50px]
+                    `}
+                  >
+                    {num}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* START SCREEN (Scrollable) */}
+          {engine.gameState === 'start' && (
+            <div className="absolute inset-0 flex items-center justify-center z-40 bg-black/90 backdrop-blur-sm overflow-y-auto">
+              <div className="rounded-3xl p-6 sm:p-8 text-center max-w-sm w-full mx-4 border border-gray-700 bg-gray-900 shadow-2xl max-h-[95vh] overflow-y-auto my-auto flex flex-col">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-2xl mx-auto flex items-center justify-center mb-8 rotate-3 shadow-[0_0_30px_rgba(59,130,246,0.3)] shrink-0">
+                  <Grid3X3 className="w-8 h-8 sm:w-10 sm:h-10 text-white -rotate-3" />
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className={`p-4 rounded-xl border ${isDarkMode ? 'bg-gray-700/50 border-gray-600' : 'bg-yellow-50 border-yellow-100'}`}><div className="flex items-center gap-2 mb-3"><div className="w-8 h-8 rounded-lg bg-yellow-500 flex items-center justify-center"><Lightbulb className="w-4 h-4 text-white" /></div><h3 className={`text-sm font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Why Practice Sudoku?</h3></div><ul className={`text-xs space-y-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}><li className="flex items-start gap-2"><CheckCircle2 className="w-3 h-3 text-yellow-500 mt-0.5 flex-shrink-0" /> Improves logical thinking and deduction skills</li><li className="flex items-start gap-2"><CheckCircle2 className="w-3 h-3 text-yellow-500 mt-0.5 flex-shrink-0" /> Enhances concentration and attention to detail</li><li className="flex items-start gap-2"><CheckCircle2 className="w-3 h-3 text-yellow-500 mt-0.5 flex-shrink-0" /> Builds pattern recognition abilities</li></ul></div>
-                  <div className={`p-4 rounded-xl border ${isDarkMode ? 'bg-gray-700/50 border-gray-600' : 'bg-orange-50 border-orange-100'}`}><div className="flex items-center gap-2 mb-3"><div className="w-8 h-8 rounded-lg bg-orange-500 flex items-center justify-center"><Clock className="w-4 h-4 text-white" /></div><h3 className={`text-sm font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>How to Practice Effectively</h3></div><ol className={`text-xs space-y-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}><li className="flex items-start gap-2"><span className="w-5 h-5 rounded-full bg-orange-500 text-white text-xs flex items-center justify-center flex-shrink-0 mt-0.5">1</span> Scan rows, columns, and boxes for missing numbers</li><li className="flex items-start gap-2"><span className="w-5 h-5 rounded-full bg-orange-500 text-white text-xs flex items-center justify-center flex-shrink-0 mt-0.5">2</span> Start with 4×4 and progress through all grid sizes</li><li className="flex items-start gap-2"><span className="w-5 h-5 rounded-full bg-orange-500 text-white text-xs flex items-center justify-center flex-shrink-0 mt-0.5">3</span> Focus on accuracy first, then speed</li><li className="flex items-start gap-2"><span className="w-5 h-5 rounded-full bg-orange-500 text-white text-xs flex items-center justify-center flex-shrink-0 mt-0.5">4</span> Practice 2-3 times daily for best improvement in 2-3 weeks</li></ol></div>
+                <h2 className="text-xl sm:text-2xl font-black mb-2 tracking-tight">Sudoku Speed-Logic</h2>
+                <p className="text-xs sm:text-sm mb-8 text-gray-400 leading-relaxed">Pure Endless Time-Attack mode. No lives, no combos. Only speed and accuracy matter.</p>
+                
+                <button 
+                  onClick={handleStartGame}
+                  className="w-full flex items-center justify-center gap-2 px-6 py-4 sm:py-5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-xl font-black text-base sm:text-lg hover:brightness-110 transition-all active:scale-95 shadow-[0_0_20px_rgba(59,130,246,0.3)] shrink-0">
+                  <Play className="w-5 h-5 fill-white" /> START DRILL
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* END SCREEN (Scrollable) */}
+          {(engine.gameState === 'ended' || isTimeUp) && (
+            <div className="absolute inset-0 flex items-center justify-center z-[70] bg-black/95 pointer-events-auto animate-in fade-in duration-300 overflow-y-auto px-4 py-6">
+              <div className="rounded-3xl max-w-md w-full shadow-2xl border border-gray-800 bg-gray-950 flex flex-col max-h-[95vh] overflow-y-auto my-auto">
+                
+                <div className="bg-gradient-to-br from-blue-900/40 to-indigo-900/40 p-4 sm:p-6 border-b border-gray-800 relative overflow-hidden pointer-events-none shrink-0 rounded-t-3xl">
+                  <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-blue-500/20 rounded-full blur-3xl"></div>
+                  <div className="absolute bottom-0 left-0 -mb-4 -ml-4 w-32 h-32 bg-indigo-500/20 rounded-full blur-3xl"></div>
+                  <div className="relative z-10 flex flex-col items-center">
+                    {isNewBest && (
+                      <div className="bg-yellow-500 text-black text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-2 shadow-[0_0_15px_rgba(234,179,8,0.5)]">
+                        ⭐ New Personal Best
+                      </div>
+                    )}
+                    <h2 className="text-2xl sm:text-3xl font-black text-white mb-1 tracking-tight">Time Expired</h2>
+                    <p className="text-blue-400 font-medium text-sm">Sudoku Speed-Logic • {completedGrids} Clears</p>
+                  </div>
+                </div>
+
+                <div className="p-4 sm:p-6 pointer-events-none shrink-0">
+                  <div className="flex justify-between items-center mb-6">
+                    <div className="flex flex-col">
+                      <span className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Final Score</span>
+                      <div className="flex items-end gap-1">
+                        <span className="text-5xl sm:text-6xl font-black text-white leading-none tracking-tighter">{score}</span>
+                        <span className="text-sm sm:text-lg text-gray-500 font-bold mb-1">PTS</span>
+                      </div>
+                    </div>
+                    
+                    <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center">
+                      <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
+                        <path className="text-gray-800" strokeWidth="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        <path 
+                          className={`${accuracy >= 80 ? 'text-green-500' : accuracy >= 50 ? 'text-yellow-500' : 'text-red-500'} transition-all duration-1000 ease-out`} 
+                          strokeWidth="3" strokeDasharray={`${strokeDasharray}`} strokeDashoffset={`${strokeDashoffset}`} strokeLinecap="round" stroke="currentColor" fill="none" 
+                          d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" 
+                        />
+                      </svg>
+                      <div className="absolute inset-0 flex flex-col items-center justify-center">
+                        <span className={`text-lg sm:text-xl font-black ${accuracy >= 80 ? 'text-green-400' : accuracy >= 50 ? 'text-yellow-400' : 'text-red-400'}`}>{accuracy}%</span>
+                        <span className="text-[7px] sm:text-[8px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">Accuracy</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-2">
+                    <div className="bg-gray-900/50 rounded-xl p-2 sm:p-3 text-center border border-gray-800">
+                      <div className="text-gray-400 text-[9px] sm:text-[10px] uppercase font-bold tracking-wider mb-1">Max Matrix Size</div>
+                      <div className="text-lg sm:text-xl font-black text-cyan-400">{gridSize}x{gridSize}</div>
+                    </div>
+                    <div className="bg-gray-900/50 rounded-xl p-2 sm:p-3 text-center border border-gray-800">
+                      <div className="text-gray-400 text-[9px] sm:text-[10px] uppercase font-bold tracking-wider mb-1">Total Penalties</div>
+                      <div className="text-lg sm:text-xl font-black text-red-400">{mistakes}</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-3 sm:p-5 bg-gray-900/50 border-t border-gray-800 flex gap-2 sm:gap-3 shrink-0 rounded-b-3xl">
+                  <button onClick={() => { if(engineRef.current) engineRef.current.endGame(); handleStartGame(); }} className="flex-1 py-3 sm:py-4 bg-blue-600 text-white rounded-xl font-black tracking-wide hover:bg-blue-500 transition-all active:scale-95 flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(37,99,235,0.4)] text-sm sm:text-base">
+                    <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5" /> PLAY AGAIN
+                  </button>
+                  <button onClick={shareDrillLink} className="px-4 sm:px-5 py-3 sm:py-4 bg-gray-800 text-white rounded-xl font-bold hover:bg-gray-700 transition-all active:scale-95 border border-gray-700 flex items-center justify-center" title="Share Drill">
+                    <Share2 className="w-4 h-4 sm:w-5 sm:h-5" />
+                  </button>
+                </div>
+                
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* DRILL RULES & SCORING */}
+        {!isFullscreen && (
+          <section className="mt-10">
+            <div className="rounded-2xl border border-gray-800 overflow-hidden bg-gray-900 shadow-2xl pointer-events-none">
+              <div className="px-6 py-5 border-b border-gray-800 bg-black/40 flex items-center gap-3">
+                <Info className="w-5 h-5 text-blue-400" /><h2 className="font-bold text-white text-lg tracking-wide">Drill Rules & High-Stakes Economy</h2>
+              </div>
+              <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-5">
+                  <RuleItem num="1" color="blue" text="Tap empty cell" highlight="and input number" result="Zero Points" />
+                  <RuleItem num="2" color="indigo" text="Complete the entire grid" result="+20 PTS & +15s Time" />
+                </div>
+                <div className="space-y-5">
+                  <RuleItem num="3" color="red" text="Inputting a wrong number" result="-2 PTS & -2s Penalty" />
+                  <RuleItem num="4" color="purple" text="Scale up to" highlight="7x7 Grids" result="Adaptive Difficulty" />
                 </div>
               </div>
             </div>
           </section>
         )}
 
-        {/* 3. RELATED DRILLS */}
+        {/* ABOUT THIS DRILL */}
         {!isFullscreen && (
-          <section className="mt-8" aria-label="Related training drills and resources">
-            <div className="flex items-center gap-2 mb-4"><div className="w-1 h-6 rounded-full bg-gradient-to-b from-blue-500 to-cyan-600"></div><h2 className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Explore Related Free Drills</h2><span className={`text-xs px-2 py-0.5 rounded-full ${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>8 drills</span></div>
+          <section className="mt-12" aria-label="About this drill">
+            <div className="rounded-2xl border border-gray-800 overflow-hidden bg-gray-900 shadow-xl">
+              <div className="px-6 py-5 border-b border-gray-800 bg-black/40 flex items-center gap-3">
+                <GraduationCap className="w-5 h-5 text-blue-400" />
+                <h2 className="font-bold text-white text-lg tracking-wide">About Sudoku Speed-Logic</h2>
+              </div>
+              <div className="p-8">
+                <p className="text-sm leading-relaxed mb-6 text-gray-300">
+                  This cognitive drill is engineered to train <strong className="text-white font-semibold">rapid constraint satisfaction</strong> and <strong className="text-white font-semibold">logical deduction under pressure</strong>. Unlike standard slow-paced puzzles, this is an aggressive Time-Attack mode. You are constantly fighting the clock, but completing grids quickly awards you with crucial time extensions and mass score bonuses.
+                </p>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
+                  <div className="p-5 rounded-xl border border-gray-800 bg-black/40">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center"><Users className="w-4 h-4 text-white" /></div>
+                      <h3 className="text-sm font-bold text-white tracking-tight">Who It's For</h3>
+                    </div>
+                    <p className="text-xs leading-relaxed text-gray-400">Puzzle enthusiasts, students improving mathematical deduction, and professionals seeking to combat mental fatigue through active problem solving.</p>
+                  </div>
+                  <div className="p-5 rounded-xl border border-gray-800 bg-black/40">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-8 h-8 rounded-lg bg-green-600 flex items-center justify-center"><TrendingUp className="w-4 h-4 text-white" /></div>
+                      <h3 className="text-sm font-bold text-white tracking-tight">Skills Improved</h3>
+                    </div>
+                    <p className="text-xs leading-relaxed text-gray-400">Logical deduction, constraint pattern recognition, visual spatial filtering, and high-speed decision-making.</p>
+                  </div>
+                  <div className="p-5 rounded-xl border border-gray-800 bg-black/40">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-8 h-8 rounded-lg bg-purple-600 flex items-center justify-center"><BarChart3 className="w-4 h-4 text-white" /></div>
+                      <h3 className="text-sm font-bold text-white tracking-tight">Difficulty Scaling</h3>
+                    </div>
+                    <p className="text-xs leading-relaxed text-gray-400">The drill dynamically adapts. As you clear matrices, the grid will progressively expand from a simple 4x4 up to a complex 7x7 board.</p>
+                  </div>
+                </div>
+                
+                <div className="p-5 rounded-xl border border-gray-800 bg-black/40 mb-8">
+                  <div className="flex items-center gap-3 mb-4">
+                    <Lightbulb className="w-5 h-5 text-yellow-400" />
+                    <h3 className="text-sm font-bold text-white uppercase tracking-wider">How to Play & Practice Effectively</h3>
+                  </div>
+                  <ol className="text-sm leading-relaxed space-y-3 list-decimal pl-5 text-gray-400">
+                    <li><strong className="text-gray-200">Phase 1 (Analyze):</strong> Look for rows, columns, or sub-grids that are mostly filled. These constrained areas are your easiest targets.</li>
+                    <li><strong className="text-gray-200">Phase 2 (Execute):</strong> Tap an empty cell on the grid, then immediately select the correct number from the input bar at the bottom.</li>
+                    <li><strong className="text-gray-200">Survival Mechanics:</strong> Clearing a full grid adds <span className="text-cyan-400 font-bold">+15 Seconds</span> and <span className="text-green-400 font-bold">+20 Points</span>. However, a single mistake instantly deducts <span className="text-red-400 font-bold">-2 Seconds and -2 Points</span>.</li>
+                    <li><strong className="text-gray-200">Zero Guessing:</strong> Do not randomly guess numbers. The penalty system will destroy your score very quickly. Use strict logic.</li>
+                  </ol>
+                </div>
+
+                {/* FAQ Section */}
+                <div className="p-5 rounded-xl border border-gray-800 bg-black/40">
+                  <div className="flex items-center gap-3 mb-4">
+                    <Info className="w-5 h-5 text-blue-400" />
+                    <h3 className="text-sm font-bold text-white uppercase tracking-wider">Frequently Asked Questions</h3>
+                  </div>
+                  <div className="space-y-5">
+                    <div>
+                      <h4 className="text-sm font-bold text-gray-200 tracking-tight">Is there a penalty for an incorrect tap?</h4>
+                      <p className="text-xs text-gray-400 mt-1.5 leading-relaxed">Yes. A strict -2 point and -2 second penalty is applied immediately for every incorrect number placed. However, unlike standard endless modes, it does not end your game—you must keep fighting the clock to recover.</p>
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-gray-200 tracking-tight">How does the timer work?</h4>
+                      <p className="text-xs text-gray-400 mt-1.5 leading-relaxed">You start with exactly 60 seconds. The only way to survive and extend your run is by completely solving grids, which grants a +15 second time extension per completion.</p>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* ============================================================ */}
+        {/* RELATED DRILLS */}
+        {/* ============================================================ */}
+        {!isFullscreen && (
+          <section className="mt-14" aria-label="Related drills">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-1.5 h-6 rounded-full bg-gradient-to-b from-blue-500 to-indigo-600"></div>
+              <h2 className="text-xl font-bold text-white">Explore Cognitive Drills</h2>
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <Link href="/drills/cognitive/problem-solving/logic-puzzles" className={`group relative overflow-hidden rounded-xl border transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${isDarkMode ? 'bg-gray-800 border-gray-700 hover:border-purple-500' : 'bg-white border-gray-200 hover:border-purple-300'}`}><div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 to-violet-500"></div><div className="p-4"><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center"><Brain className="w-4 h-4 text-purple-600" /></div><span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>Problem Solving</span></div><h3 className={`font-semibold text-sm mb-1 ${isDarkMode ? 'text-white group-hover:text-purple-400' : 'text-gray-900 group-hover:text-purple-600'} transition-colors`}>Logic Puzzles</h3><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Solve complex deductive reasoning puzzles under time pressure.</p><div className="flex items-center gap-1 mt-3 text-purple-500 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">Start Drill <ArrowRight className="w-3 h-3" /></div></div></Link>
-              <Link href="/drills/cognitive/problem-solving/tower-of-hanoi" className={`group relative overflow-hidden rounded-xl border transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${isDarkMode ? 'bg-gray-800 border-gray-700 hover:border-amber-500' : 'bg-white border-gray-200 hover:border-amber-300'}`}><div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 to-orange-500"></div><div className="p-4"><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center"><Zap className="w-4 h-4 text-amber-600" /></div><span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>Problem Solving</span></div><h3 className={`font-semibold text-sm mb-1 ${isDarkMode ? 'text-white group-hover:text-amber-400' : 'text-gray-900 group-hover:text-amber-600'} transition-colors`}>Tower of Hanoi</h3><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Strategic planning and sequential thinking puzzle challenge.</p><div className="flex items-center gap-1 mt-3 text-amber-500 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">Start Drill <ArrowRight className="w-3 h-3" /></div></div></Link>
-              <Link href="/drills/cognitive/memory/pattern-recognition" className={`group relative overflow-hidden rounded-xl border transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${isDarkMode ? 'bg-gray-800 border-gray-700 hover:border-teal-500' : 'bg-white border-gray-200 hover:border-teal-300'}`}><div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-teal-500 to-green-500"></div><div className="p-4"><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-teal-100 flex items-center justify-center"><Target className="w-4 h-4 text-teal-600" /></div><span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>Memory</span></div><h3 className={`font-semibold text-sm mb-1 ${isDarkMode ? 'text-white group-hover:text-teal-400' : 'text-gray-900 group-hover:text-teal-600'} transition-colors`}>Pattern Recognition</h3><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Identify and remember visual patterns to strengthen memory.</p><div className="flex items-center gap-1 mt-3 text-teal-500 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">Start Drill <ArrowRight className="w-3 h-3" /></div></div></Link>
-              <Link href="/drills/cognitive/processing-speed/quick-math" className={`group relative overflow-hidden rounded-xl border transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${isDarkMode ? 'bg-gray-800 border-gray-700 hover:border-orange-500' : 'bg-white border-gray-200 hover:border-orange-300'}`}><div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-500 to-amber-500"></div><div className="p-4"><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center"><Calculator className="w-4 h-4 text-orange-600" /></div><span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>Processing Speed</span></div><h3 className={`font-semibold text-sm mb-1 ${isDarkMode ? 'text-white group-hover:text-orange-400' : 'text-gray-900 group-hover:text-orange-600'} transition-colors`}>Quick Math</h3><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Rapid fire mental arithmetic practice for brain training.</p><div className="flex items-center gap-1 mt-3 text-orange-500 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">Start Drill <ArrowRight className="w-3 h-3" /></div></div></Link>
-              <Link href="/drills/academic/math-speed/mental-math" className={`group relative overflow-hidden rounded-xl border transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${isDarkMode ? 'bg-gray-800 border-gray-700 hover:border-blue-500' : 'bg-white border-gray-200 hover:border-blue-300'}`}><div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-indigo-500"></div><div className="p-4"><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center"><Brain className="w-4 h-4 text-blue-600" /></div><span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>Math Speed</span></div><h3 className={`font-semibold text-sm mb-1 ${isDarkMode ? 'text-white group-hover:text-blue-400' : 'text-gray-900 group-hover:text-blue-600'} transition-colors`}>Mental Math</h3><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Advanced mental calculation challenges with 3 difficulty tiers.</p><div className="flex items-center gap-1 mt-3 text-blue-500 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">Start Drill <ArrowRight className="w-3 h-3" /></div></div></Link>
-              <Link href="/drills/cognitive/focus/concentration-grid" className={`group relative overflow-hidden rounded-xl border transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${isDarkMode ? 'bg-gray-800 border-gray-700 hover:border-red-500' : 'bg-white border-gray-200 hover:border-red-300'}`}><div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-500 to-rose-500"></div><div className="p-4"><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center"><Hash className="w-4 h-4 text-red-600" /></div><span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>Focus</span></div><h3 className={`font-semibold text-sm mb-1 ${isDarkMode ? 'text-white group-hover:text-red-400' : 'text-gray-900 group-hover:text-red-600'} transition-colors`}>Concentration Grid</h3><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Find numbers in sequence under time pressure.</p><div className="flex items-center gap-1 mt-3 text-red-500 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">Start Drill <ArrowRight className="w-3 h-3" /></div></div></Link>
-              <Link href="/drills/academic/comprehension/inference-drill" className={`group relative overflow-hidden rounded-xl border transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${isDarkMode ? 'bg-gray-800 border-gray-700 hover:border-cyan-500' : 'bg-white border-gray-200 hover:border-cyan-300'}`}><div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-500 to-blue-500"></div><div className="p-4"><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-cyan-100 flex items-center justify-center"><BookOpen className="w-4 h-4 text-cyan-600" /></div><span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>Comprehension</span></div><h3 className={`font-semibold text-sm mb-1 ${isDarkMode ? 'text-white group-hover:text-cyan-400' : 'text-gray-900 group-hover:text-cyan-600'} transition-colors`}>Inference Analytics</h3><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>12 critical reasoning passages with detailed answer rationales.</p><div className="flex items-center gap-1 mt-3 text-cyan-500 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">Start Drill <ArrowRight className="w-3 h-3" /></div></div></Link>
-              <Link href="/drills/productivity/focus-endurance/deep-work" className={`group relative overflow-hidden rounded-xl border transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${isDarkMode ? 'bg-gray-800 border-gray-700 hover:border-indigo-500' : 'bg-white border-gray-200 hover:border-indigo-300'}`}><div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 to-blue-500"></div><div className="p-4"><div className="flex items-center gap-2 mb-2"><div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center"><Timer className="w-4 h-4 text-indigo-600" /></div><span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isDarkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>Productivity</span></div><h3 className={`font-semibold text-sm mb-1 ${isDarkMode ? 'text-white group-hover:text-indigo-400' : 'text-gray-900 group-hover:text-indigo-600'} transition-colors`}>Deep Work Timer</h3><p className={`text-xs leading-relaxed ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Build focus endurance with structured deep work sessions.</p><div className="flex items-center gap-1 mt-3 text-indigo-500 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">Start Drill <ArrowRight className="w-3 h-3" /></div></div></Link>
+              <RelatedCard href="/drills/cognitive/memory/card-matching" title="Card Matching" desc="Find hidden matching pairs under pressure." color="rose" icon={<Grid3X3 className="w-4 h-4" />} />
+              <RelatedCard href="/drills/cognitive/attention/selective-attention" title="Selective Attention" desc="Focus on relevant info while ignoring distractions." color="cyan" icon={<Eye className="w-4 h-4" />} />
+              <RelatedCard href="/drills/memory/spatial-memory/memory-sequence" title="Memory Sequence" desc="Memorize progressive visual pattern sequences." color="purple" icon={<Target className="w-4 h-4" />} />
+              <RelatedCard href="/drills/cognitive/problem-solving/mental-math" title="Mental Math Speed" desc="Calculate equations rapidly against the clock." color="blue" icon={<Zap className="w-4 h-4" />} />
             </div>
           </section>
         )}
 
-        {/* 4. GLOBAL FOOTER */}
-        {!isFullscreen && (<footer className="mt-12 bg-gray-900 text-gray-400 rounded-xl py-10 px-6" role="contentinfo"><div className="max-w-7xl mx-auto"><div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8 mb-8"><div><h3 className="text-white font-semibold mb-3 text-sm">FPS Training</h3><ul className="space-y-2 text-sm"><li><Link href="/drills/fps/flick-shot-training" className="hover:text-white transition-colors">Flick Shot Trainer</Link></li><li><Link href="/drills/fps/target-acquisition" className="hover:text-white transition-colors">Target Acquisition</Link></li><li><Link href="/drills/fps/reactive-tracking" className="hover:text-white transition-colors">Reactive Tracking</Link></li><li><Link href="/drills/fps" className="text-blue-400 hover:text-blue-300 transition-colors font-medium">All 21 FPS Drills →</Link></li></ul></div><div><h3 className="text-white font-semibold mb-3 text-sm">Cognitive</h3><ul className="space-y-2 text-sm"><li><Link href="/drills/cognitive/memory/card-matching" className="hover:text-white transition-colors">Memory Games</Link></li><li><Link href="/drills/cognitive/attention/divided-attention" className="hover:text-white transition-colors">Attention Drills</Link></li><li><Link href="/drills/cognitive/problem-solving/logic-puzzles" className="hover:text-white transition-colors">Logic Puzzles</Link></li><li><Link href="/drills/cognitive" className="text-blue-400 hover:text-blue-300 transition-colors font-medium">All 16 Cognitive Drills →</Link></li></ul></div><div><h3 className="text-white font-semibold mb-3 text-sm">Academic</h3><ul className="space-y-2 text-sm"><li><Link href="/drills/academic/writing-speed/typing-test" className="hover:text-white transition-colors">Typing Speed Test</Link></li><li><Link href="/drills/academic/reading-speed/speed-reader" className="hover:text-white transition-colors">Speed Reader</Link></li><li><Link href="/drills/academic/math-speed/mental-math" className="hover:text-white transition-colors">Mental Math</Link></li><li><Link href="/drills/academic" className="text-blue-400 hover:text-blue-300 transition-colors font-medium">All 12 Academic Drills →</Link></li></ul></div><div><h3 className="text-white font-semibold mb-3 text-sm">Visual & Motor</h3><ul className="space-y-2 text-sm"><li><Link href="/drills/visual/reaction-speed/light-reaction" className="hover:text-white transition-colors">Reaction Time Test</Link></li><li><Link href="/drills/motor/hand-eye-coordination/aim-trainer" className="hover:text-white transition-colors">Hand-Eye Coordination</Link></li><li><Link href="/drills/visual/tracking-accuracy/moving-target" className="hover:text-white transition-colors">Moving Target Tracking</Link></li><li><Link href="/drills/visual" className="text-blue-400 hover:text-blue-300 transition-colors font-medium">All 14 Visual Drills →</Link></li></ul></div><div><h3 className="text-white font-semibold mb-3 text-sm">More Categories</h3><ul className="space-y-2 text-sm"><li><Link href="/drills/memory" className="hover:text-white transition-colors">Memory (15 drills)</Link></li><li><Link href="/drills/productivity" className="hover:text-white transition-colors">Productivity (10 drills)</Link></li><li><Link href="/drills/mental-fitness" className="hover:text-white transition-colors">Mental Fitness (6 drills)</Link></li><li><Link href="/drills/physical" className="hover:text-white transition-colors">Physical (11 drills)</Link></li></ul></div></div><div className="border-t border-gray-800 pt-8 text-center"><div className="flex items-center justify-center gap-3 mb-4"><div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center"><Target className="w-5 h-5 text-white" aria-hidden="true" /></div><span className="text-white font-bold text-lg">SkillDrills</span></div><p className="text-sm mb-2">&copy; 2026 SkillDrills. All rights reserved.</p><p className="text-xs max-w-2xl mx-auto leading-relaxed mb-6">Free online Sudoku speed-logic drill with progressive grids from 4×4 to 7×7. Train logical deduction, pattern recognition, and working memory. Perfect for brain training, cognitive enhancement, and puzzle enthusiasts. No registration required. More free drills at skilldrills.online.</p><div className="flex items-center justify-center gap-5 flex-wrap"><button onClick={sharePage} className="text-gray-500 hover:text-white transition-colors" title="Share this drill" aria-label="Share this free Sudoku drill"><svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg></button><button onClick={copyPageLink} className="text-gray-500 hover:text-white transition-colors" title="Copy link" aria-label="Copy drill link to clipboard"><svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg></button><a href="https://twitter.com/skilldrillss" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-white transition-colors" title="Follow on Twitter X" aria-label="Follow SkillDrills on Twitter X"><svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a><a href="https://instagram.com/skilldrills.online" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-white transition-colors" title="Follow on Instagram" aria-label="Follow SkillDrills on Instagram"><svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg></a><a href="https://youtube.com/@skilldrills.online" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-white transition-colors" title="Subscribe on YouTube" aria-label="Subscribe to SkillDrills on YouTube"><svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a><a href="https://pinterest.com/skilldrills" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-white transition-colors" title="Follow on Pinterest" aria-label="Follow SkillDrills on Pinterest"><svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0C5.373 0 0 5.372 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738.098.119.112.224.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.631-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12 0-6.628-5.373-12-12-12z"/></svg></a></div></div></div></footer>)}
+        {/* ============================================================ */}
+        {/* FOOTER */}
+        {/* ============================================================ */}
+        {!isFullscreen && (
+          <footer className="mt-16 bg-gray-950 text-gray-400 rounded-3xl py-12 px-8 border border-gray-800 shadow-xl" role="contentinfo">
+            <div className="max-w-7xl mx-auto">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8 mb-10">
+                <div>
+                  <h3 className="text-white font-bold mb-4 text-sm tracking-wide">FPS Training</h3>
+                  <ul className="space-y-3 text-sm">
+                    <li><Link href="/drills/fps/flick-shot-training" className="hover:text-white transition-colors">Flick Shot Trainer</Link></li>
+                    <li><Link href="/drills/fps/target-acquisition" className="hover:text-white transition-colors">Target Acquisition</Link></li>
+                    <li><Link href="/drills/fps" className="text-blue-400 hover:text-blue-300 font-medium transition-colors mt-2 block">All 21 FPS Drills →</Link></li>
+                  </ul>
+                </div>
+                <div>
+                  <h3 className="text-white font-bold mb-4 text-sm tracking-wide">Cognitive</h3>
+                  <ul className="space-y-3 text-sm">
+                    <li><Link href="/drills/cognitive/memory/card-matching" className="hover:text-white transition-colors">Memory Games</Link></li>
+                    <li><Link href="/drills/cognitive/attention/divided-attention" className="hover:text-white transition-colors">Divided Attention</Link></li>
+                    <li><Link href="/drills/cognitive" className="text-blue-400 hover:text-blue-300 font-medium transition-colors mt-2 block">All 16 Cognitive Drills →</Link></li>
+                  </ul>
+                </div>
+                <div>
+                  <h3 className="text-white font-bold mb-4 text-sm tracking-wide">Academic</h3>
+                  <ul className="space-y-3 text-sm">
+                    <li><Link href="/drills/academic/writing-speed/typing-test" className="hover:text-white transition-colors">Typing Speed Test</Link></li>
+                    <li><Link href="/drills/academic/reading-speed/speed-reader" className="hover:text-white transition-colors">Speed Reader</Link></li>
+                    <li><Link href="/drills/academic" className="text-blue-400 hover:text-blue-300 font-medium transition-colors mt-2 block">All 12 Academic Drills →</Link></li>
+                  </ul>
+                </div>
+                <div>
+                  <h3 className="text-white font-bold mb-4 text-sm tracking-wide">Visual & Motor</h3>
+                  <ul className="space-y-3 text-sm">
+                    <li><Link href="/drills/visual/reaction-speed/light-reaction" className="hover:text-white transition-colors">Reaction Time Test</Link></li>
+                    <li><Link href="/drills/motor/hand-eye-coordination/aim-trainer" className="hover:text-white transition-colors">Hand-Eye Coordination</Link></li>
+                    <li><Link href="/drills/visual" className="text-blue-400 hover:text-blue-300 font-medium transition-colors mt-2 block">All 14 Visual Drills →</Link></li>
+                  </ul>
+                </div>
+                <div>
+                  <h3 className="text-white font-bold mb-4 text-sm tracking-wide">More Sections</h3>
+                  <ul className="space-y-3 text-sm">
+                    <li><Link href="/drills/memory" className="hover:text-white transition-colors">Memory (15 drills)</Link></li>
+                    <li><Link href="/drills/cognitive" className="hover:text-white transition-colors">Cognitive</Link></li>
+                    <li><Link href="/drills/physical" className="hover:text-white transition-colors">Physical (11 drills)</Link></li>
+                  </ul>
+                </div>
+              </div>
+              
+              <div className="border-t border-gray-800 pt-10 text-center">
+                <div className="flex items-center justify-center gap-3 mb-5">
+                  <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/20">
+                    <Grid3X3 className="w-6 h-6 text-white" />
+                  </div>
+                  <span className="text-white font-black text-xl tracking-tight">SkillDrills</span>
+                </div>
+                <p className="text-sm mb-3 font-medium">&copy; 2026 SkillDrills. All rights reserved.</p>
+                <p className="text-xs max-w-2xl mx-auto leading-relaxed mb-8 text-gray-500">
+                  Premium online cognitive training. Push your brain's processing speed, focus stamina, and deductive logic to the limit with hardcore, data-driven web drills.
+                </p>
+                
+                <div className="flex items-center justify-center gap-6 flex-wrap">
+                  <button onClick={shareDrillLink} className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="Share this drill">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                  </button>
+                  <a href="https://youtube.com/@skilldrills.online" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="YouTube">
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                  </a>
+                  <a href="https://www.facebook.com/profile.php?id=61590093843779" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="Facebook">
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                  </a>
+                  <a href="https://x.com/skilldrillss" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="Twitter / X">
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                  </a>
+                  <a href="https://www.instagram.com/skilldrills.online/?__pwa=1" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="Instagram">
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                  </a>
+                  <a href="https://pinterest.com/skilldrills" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="Pinterest">
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.372 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738a.36.36 0 0 1 .083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.631-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12 0-6.628-5.373-12-12-12z"/></svg>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </footer>
+        )}
       </div>
     </div>
   );
 }
 
-function StatCard({ icon, value, label, unit = '', isDark }) {
-  return (<div className={`rounded-xl shadow-sm border p-2 sm:p-3 text-center flex flex-col justify-center h-full transition-colors ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'}`}><div className="mb-1 flex justify-center" aria-hidden="true">{icon}</div><p className={`text-lg sm:text-xl font-bold truncate ${isDark ? 'text-white' : 'text-gray-900'}`}>{value}{unit}</p><p className={`text-[10px] sm:text-xs truncate ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{label}</p></div>);
+// === Subcomponents ===
+
+function StatCard({ icon, value, label, unit = '' }) {
+  return (
+    <div className="rounded-xl border border-gray-800 bg-gray-900 p-1.5 sm:p-3 text-center flex flex-col justify-center h-full transition-all duration-300 pointer-events-none">
+      <div className="mb-0.5 sm:mb-1.5 flex justify-center opacity-90 scale-75 sm:scale-100">{icon}</div>
+      <p className="text-sm sm:text-2xl lg:text-3xl font-black tracking-tighter truncate text-white leading-none mt-0.5 sm:mt-0">
+        {value}<span className="text-[10px] sm:text-sm font-bold ml-0.5 text-gray-500">{unit}</span>
+      </p>
+      <p className="text-[8px] sm:text-[10px] font-bold uppercase tracking-widest truncate text-gray-500 mt-1">{label}</p>
+    </div>
+  );
 }
 
-function ResultCard({ label, value, unit = '', icon, color, isDark }) {
-  const colorMap = { yellow: { bg: 'bg-yellow-500/10', border: 'border-yellow-500/30', text: 'text-yellow-500', icon: 'text-yellow-500' }, purple: { bg: 'bg-purple-500/10', border: 'border-purple-500/30', text: 'text-purple-500', icon: 'text-purple-500' }, amber: { bg: 'bg-amber-500/10', border: 'border-amber-500/30', text: 'text-amber-500', icon: 'text-amber-500' }, green: { bg: 'bg-green-500/10', border: 'border-green-500/30', text: 'text-green-500', icon: 'text-green-500' }, emerald: { bg: 'bg-emerald-500/10', border: 'border-emerald-500/30', text: 'text-emerald-500', icon: 'text-emerald-500' }, red: { bg: 'bg-red-500/10', border: 'border-red-500/30', text: 'text-red-500', icon: 'text-red-500' }, orange: { bg: 'bg-orange-500/10', border: 'border-orange-500/30', text: 'text-orange-500', icon: 'text-orange-500' }, blue: { bg: 'bg-blue-500/10', border: 'border-blue-500/30', text: 'text-blue-500', icon: 'text-blue-500' } };
-  const colors = colorMap[color] || colorMap.yellow;
-  return (<div className={`flex items-center justify-between p-3 rounded-lg border ${colors.bg} ${colors.border}`}><div className="flex items-center gap-2 min-w-0"><div className={colors.icon} aria-hidden="true">{icon}</div><span className={`text-xs sm:text-sm truncate ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>{label}</span></div><span className={`font-bold text-base sm:text-lg flex-shrink-0 ml-2 ${colors.text}`}>{value}{unit}</span></div>);
+function RuleItem({ num, color, text, highlight = '', result }) {
+  const colorMap = { 
+    blue: 'bg-blue-600 text-blue-300 border-blue-500', 
+    indigo: 'bg-indigo-600 text-indigo-300 border-indigo-500', 
+    red: 'bg-red-600 text-red-300 border-red-500', 
+    purple: 'bg-purple-600 text-purple-300 border-purple-500',
+    green: 'bg-green-600 text-green-300 border-green-500'
+  };
+  const colors = colorMap[color] || 'bg-gray-600 text-gray-300 border-gray-500';
+  const [bg, txt, border] = colors.split(' ');
+  
+  return (
+    <div className="flex items-center gap-4 bg-black/40 p-4 rounded-xl border border-gray-800 shadow-sm">
+      <div className={`w-8 h-8 rounded-xl ${bg} border border-t-white/20 flex items-center justify-center text-white text-base font-black shadow-lg flex-shrink-0`}>{num}</div>
+      <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <p className="text-sm font-medium text-gray-300">
+          {text}{highlight && <span className={`font-black ${txt}`}> {highlight}</span>}
+        </p>
+        <div className={`text-[10px] sm:text-xs font-black px-3 py-1.5 rounded-lg bg-gray-900 border ${border} ${txt} whitespace-nowrap shadow-inner tracking-wide text-center sm:text-left`}>
+          {result}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RelatedCard({ href, title, desc, color, icon }) {
+  const gradients = {
+    blue: 'from-blue-500 to-indigo-500',
+    cyan: 'from-cyan-500 to-teal-500',
+    purple: 'from-purple-500 to-violet-500',
+    orange: 'from-orange-500 to-amber-500',
+    emerald: 'from-emerald-500 to-green-500',
+    rose: 'from-rose-500 to-pink-500',
+    teal: 'from-teal-500 to-emerald-500',
+    indigo: 'from-indigo-500 to-blue-500',
+    red: 'from-red-500 to-rose-500'
+  };
+  
+  return (
+    <Link href={href} className="group relative overflow-hidden rounded-2xl border border-gray-800 bg-gray-900/80 transition-all duration-300 hover:shadow-[0_0_20px_rgba(255,255,255,0.05)] hover:-translate-y-1 hover:border-gray-600">
+      <div className={`absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r ${gradients[color] || 'from-purple-500 to-indigo-500'}`}></div>
+      <div className="p-5">
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-10 h-10 rounded-xl bg-black border border-gray-700 flex items-center justify-center text-gray-400 group-hover:text-white transition-colors shadow-inner">
+            {icon}
+          </div>
+        </div>
+        <h3 className="font-bold text-base mb-1.5 text-white group-hover:text-purple-400 transition-colors tracking-tight">{title}</h3>
+        <p className="text-xs leading-relaxed text-gray-500">{desc}</p>
+        <div className="flex items-center gap-1.5 mt-4 text-purple-400 text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-wider">
+          Start Drill <ArrowRight className="w-3.5 h-3.5" />
+        </div>
+      </div>
+    </Link>
+  );
 }

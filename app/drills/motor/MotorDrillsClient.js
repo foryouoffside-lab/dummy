@@ -1,18 +1,28 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { 
   ArrowLeft, Clock, Zap, Star, Play, Hand, Target, 
   MousePointer, Timer, Move, Gauge, Activity, 
-  GitBranch, Crosshair, Droplets, Sparkles, Home, ChevronRight, Cpu
+  GitBranch, Crosshair, Droplets, Sparkles, Home, ChevronRight, Cpu,
+  AlertTriangle, Monitor, AlertCircle, MessageSquare, Lightbulb
 } from 'lucide-react';
 
 export default function MotorDrillsClient() {
   const [showRotateWarning, setShowRotateWarning] = useState(false);
   const [warningMessage, setWarningMessage] = useState("Rotate Your Device");
 
+  // Notice Modal State - Default false to prevent hydration mismatch
+  const [showBetaNotice, setShowBetaNotice] = useState(false);
+
   useEffect(() => {
+    // Session Storage Check for Beta Notice
+    const noticeShown = sessionStorage.getItem('motor_beta_notice_shown');
+    if (!noticeShown) {
+      setShowBetaNotice(true);
+    }
+
     const checkSize = () => {
       if (typeof window === 'undefined') return;
       const ua = navigator.userAgent || '';
@@ -138,6 +148,11 @@ export default function MotorDrillsClient() {
     };
   }, [isClient]);
 
+  const handleDismissNotice = () => {
+    sessionStorage.setItem('motor_beta_notice_shown', 'true');
+    setShowBetaNotice(false);
+  };
+
   const startCalibrator = () => {
     try {
       if (typeof window !== 'undefined' && !document.fullscreenElement) {
@@ -185,7 +200,7 @@ export default function MotorDrillsClient() {
     }
   };
 
-  // Categories with exact folder names
+  // Categories aligned perfectly with the provided folder tree
   const categories = [
     { 
       name: 'Hand-Eye Coordination', 
@@ -202,17 +217,17 @@ export default function MotorDrillsClient() {
       ]
     },
     { 
-      name: 'Timing Accuracy', 
-      folderName: 'timing-accuracy',
-      icon: Timer,
-      color: 'purple',
-      bgColor: 'bg-purple-500/10 border-purple-500/20 text-purple-400',
-      textColor: 'text-purple-400',
-      description: 'Develop precise timing, rhythm, and synchronization',
+      name: 'Movement Speed', 
+      folderName: 'movement-speed',
+      icon: Gauge,
+      color: 'green',
+      bgColor: 'bg-green-500/10 border-green-500/20 text-green-400',
+      textColor: 'text-green-400',
+      description: 'Increase movement speed, sequencing, and gesture velocity',
       drills: [
-        { name: 'Rhythm Tap', folderName: 'rhythm-tap', difficulty: 'Medium', duration: '60s', description: 'Tap in sync with a dynamic BPM pulse (50-140 range)' },
-        { name: 'Stopwatch Click', folderName: 'stopwatch-click', difficulty: 'Hard', duration: '60s', description: 'Click at exact memorized target time (1-8 seconds)' },
-        { name: 'Synchronization', folderName: 'synchronization', difficulty: 'Expert', duration: '60s', description: 'Click when converging bars align at center line' }
+        { name: 'Finger Sequencing', folderName: 'finger-sequencing', difficulty: 'Medium', duration: '60s', description: 'Click 3 nodes from largest to smallest with 2s timer' },
+        { name: 'Gesture Speed', folderName: 'gesture-speed', difficulty: 'Medium', duration: '60s', description: 'Flick to gate within 350ms then return to center' },
+        { name: 'Rapid Tapping', folderName: 'rapid-tapping', difficulty: 'Easy', duration: 'Untimed', description: 'Endless survival clicking with escalating difficulty' }
       ]
     },
     { 
@@ -224,23 +239,23 @@ export default function MotorDrillsClient() {
       textColor: 'text-orange-400',
       description: 'Master fine motor skills and precise cursor movements',
       drills: [
-        { name: 'Steady Hand', folderName: 'steady-hand', difficulty: 'Hard', duration: '60s', description: 'Trace a winding path corridor with shrinking width on streak' },
         { name: 'Fine Motor', folderName: 'fine-motor', difficulty: 'Medium', duration: '60s', description: 'Track a scrolling wave path through Dynamic and Extreme phases' },
+        { name: 'Steady Hand', folderName: 'steady-hand', difficulty: 'Hard', duration: '60s', description: 'Trace a winding path corridor with shrinking width on streak' },
         { name: 'Tracing', folderName: 'tracing', difficulty: 'Medium', duration: '60s', description: 'Follow a red wave filament with auto-pause and resume' }
       ]
     },
     { 
-      name: 'Movement Speed', 
-      folderName: 'movement-speed',
-      icon: Gauge,
-      color: 'green',
-      bgColor: 'bg-green-500/10 border-green-500/20 text-green-400',
-      textColor: 'text-green-400',
-      description: 'Increase movement speed, sequencing, and gesture velocity',
+      name: 'Timing Accuracy', 
+      folderName: 'timing-accuracy',
+      icon: Timer,
+      color: 'purple',
+      bgColor: 'bg-purple-500/10 border-purple-500/20 text-purple-400',
+      textColor: 'text-purple-400',
+      description: 'Develop precise timing, rhythm, and synchronization',
       drills: [
-        { name: 'Rapid Tapping', folderName: 'rapid-tapping', difficulty: 'Easy', duration: 'Untimed', description: 'Endless survival clicking with escalating difficulty' },
-        { name: 'Finger Sequencing', folderName: 'finger-sequencing', difficulty: 'Medium', duration: '60s', description: 'Click 3 nodes from largest to smallest with 2s timer' },
-        { name: 'Gesture Speed', folderName: 'gesture-speed', difficulty: 'Medium', duration: '60s', description: 'Flick to gate within 350ms then return to center' }
+        { name: 'Stopwatch Click', folderName: 'stopwatch-click', difficulty: 'Hard', duration: '60s', description: 'Click at exact memorized target time (1-8 seconds)' },
+        { name: 'Synchronization', folderName: 'synchronization', difficulty: 'Expert', duration: '60s', description: 'Click when converging bars align at center line' },
+        { name: 'Time Estimation', folderName: 'time-estimation', difficulty: 'Medium', duration: '60s', description: 'Estimate elapsed time without visual cues and click to lock' }
       ]
     }
   ];
@@ -293,6 +308,71 @@ export default function MotorDrillsClient() {
       
       {/* Background patterns */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-900/10 via-slate-950 to-slate-950 pointer-events-none z-0" />
+      
+      {/* BETA / DESKTOP REQUIREMENT MODAL (Session-based) */}
+      {showBetaNotice && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+          <div className="bg-[#0b101e] border border-emerald-500/40 rounded-2xl p-6 sm:p-8 max-w-lg w-full shadow-[0_0_40px_rgba(16,185,129,0.2)] relative overflow-hidden animate-in fade-in zoom-in duration-300 max-h-[90vh] overflow-y-auto">
+            <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-emerald-500 via-cyan-500 to-emerald-500"></div>
+            
+            <h2 className="text-xl sm:text-2xl font-black text-white mb-5 flex items-center gap-3 font-mono tracking-tight uppercase">
+              <AlertTriangle className="text-emerald-500 w-7 h-7 shrink-0" />
+              Notice / Beta Phase
+            </h2>
+            
+            <div className="space-y-4 text-sm text-slate-300 mb-8">
+              <div className="flex items-start gap-3 bg-blue-500/10 border border-blue-500/20 p-3 rounded-xl">
+                <Monitor className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" />
+                <p><strong>Desktop/Laptop Only:</strong> These drills require raw keyboard and mouse inputs. They do not work well on mobile devices. Please use a PC for the proper experience.</p>
+              </div>
+
+              <div className="flex items-start gap-3 bg-red-500/10 border border-red-500/20 p-3 rounded-xl">
+                <AlertCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
+                <p><strong>Testing Phase:</strong> The platform is currently in testing. Due to lack of extensive testing facilities, you might encounter some timing issues or bugs.</p>
+              </div>
+
+              <div className="flex items-start gap-3 bg-emerald-500/10 border border-emerald-500/20 p-3 rounded-xl">
+                <MessageSquare className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+                <p><strong>We Need Your Feedback:</strong> Sorry if you encounter any issues! Please cooperate and inform me via Instagram or Facebook (links in the footer below). Your feedback is vital.</p>
+              </div>
+
+              <div className="flex items-start gap-3 bg-purple-500/10 border border-purple-500/20 p-3 rounded-xl">
+                <Lightbulb className="w-5 h-5 text-purple-400 shrink-0 mt-0.5" />
+                <p><strong>Request a Specific Drill:</strong> Want a custom drill? If there is a specific physical or reflex drill you'd like to see added, reach out to me on social media through the footer!</p>
+              </div>
+            </div>
+            
+            <button 
+              onClick={handleDismissNotice}
+              className="w-full py-3.5 bg-gradient-to-r from-emerald-600 to-cyan-600 hover:brightness-110 text-white font-black rounded-xl transition-all shadow-lg active:scale-95 uppercase tracking-widest text-sm"
+            >
+              I Understand, Let's Train
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Mobile Rotate Device Warning Overlay */}
+      {showRotateWarning && (
+        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-gray-950/95 text-center p-6" aria-hidden="true">
+          <div className="animate-bounce mb-4 text-blue-500">
+            <svg className="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <h3 className="text-lg font-bold text-white mb-2">{warningMessage}</h3>
+          <p className="text-sm text-gray-400 mb-6">Please use landscape orientation or fullscreen mode for the best training experience.</p>
+          <Link href="/drills/motor">
+            <button className="px-5 py-2.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-350 hover:text-white font-bold rounded-lg text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              Go Back
+            </button>
+          </Link>
+        </div>
+      )}
+
       <canvas style={{ touchAction: 'none' }} ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none z-0 opacity-40" />
       <div className="absolute inset-0 bg-[linear-gradient(rgba(18,24,38,0.45)_1px,_transparent_1px),_linear-gradient(90deg,_rgba(18,24,38,0.45)_1px,_transparent_1px)] bg-[size:32px_32px] pointer-events-none z-0" />
 
@@ -405,27 +485,6 @@ export default function MotorDrillsClient() {
               onClick={handleContainerClick}
               className="flex-1 flex flex-col items-center justify-center min-h-[140px] rounded-xl border border-slate-900 bg-slate-950 relative overflow-hidden cursor-crosshair"
             >
-          {/* Mobile Rotate Device Warning Overlay */}
-      {showRotateWarning && (
-        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-gray-950/95 text-center p-6" aria-hidden="true">
-          <div className="animate-bounce mb-4 text-blue-500">
-            <svg className="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-            </svg>
-          </div>
-          <h3 className="text-lg font-bold text-white mb-2">{warningMessage}</h3>
-          <p className="text-sm text-gray-400 mb-6">Please use landscape orientation or fullscreen mode for the best training experience.</p>
-          <Link href="/drills/motor">
-            <button className="px-5 py-2.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-350 hover:text-white font-bold rounded-lg text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
-              Go Back
-            </button>
-          </Link>
-        </div>
-      )}
-
               {calibState === "idle" && (
                 <div className="text-center z-10 p-4">
                   <p className="text-xs font-mono text-slate-400 mb-3">Benchmark your click accuracy in 10s sprint.</p>
@@ -568,25 +627,37 @@ export default function MotorDrillsClient() {
         <div className="mt-16 mb-8 border-t border-slate-900 pt-12">
           <h2 className="text-lg font-bold tracking-widest text-center text-white font-mono uppercase mb-8">Explore Adjacent Sectors</h2>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
-            {[
-              { href: "/drills/cognitive", emoji: "🧠", title: "Cognitive Sector", desc: "Neural reaction speed" },
-              { href: "/drills/productivity", emoji: "⏱️", title: "Productivity", desc: "Pomodoro focus timelines" },
-              { href: "/drills/memory", emoji: "💾", title: "Memory Hub", desc: "Sequence span tests" },
-              { href: "/drills/fps", emoji: "🎮", title: "Tactical Aim", desc: "Aim Flick & Smooth Pursuit" }
-            ].map((link, i) => (
-              <Link 
-                key={i} 
-                href={link.href} 
-                className="group bg-slate-950/80 border border-slate-900 rounded-xl p-5 hover:border-emerald-500/40 hover:shadow-[0_0_20px_rgba(16,185,129,0.05)] transition-all duration-200 hover:-translate-y-1 text-center"
-              >
-                <div className="text-2xl mb-2">{link.emoji}</div>
-                <h3 className="font-bold text-slate-200 group-hover:text-emerald-400 transition-colors uppercase text-xs tracking-wider font-mono">{link.title}</h3>
-                <p className="text-[10px] text-slate-500 uppercase mt-1 font-mono">{link.desc}</p>
-              </Link>
-            ))}
+            <Link href="/drills/cognitive" className="group bg-slate-950/80 border border-slate-900 rounded-xl p-5 hover:border-purple-500/40 hover:shadow-[0_0_20px_rgba(168,85,247,0.05)] transition-all duration-200 hover:-translate-y-1 text-center">
+              <div className="text-2xl mb-2">🧠</div>
+              <h3 className="font-bold text-slate-200 group-hover:text-purple-400 transition-colors uppercase text-xs tracking-wider font-mono">Cognitive</h3>
+              <p className="text-[10px] text-slate-500 uppercase mt-1 font-mono">Memory, focus & solving</p>
+            </Link>
+            <Link href="/drills/visual" className="group bg-slate-950/80 border border-slate-900 rounded-xl p-5 hover:border-blue-500/40 hover:shadow-[0_0_20px_rgba(59,130,246,0.05)] transition-all duration-200 hover:-translate-y-1 text-center">
+              <div className="text-2xl mb-2">👁️</div>
+              <h3 className="font-bold text-slate-200 group-hover:text-blue-400 transition-colors uppercase text-xs tracking-wider font-mono">Visual</h3>
+              <p className="text-[10px] text-slate-500 uppercase mt-1 font-mono">Reaction, tracking & fov</p>
+            </Link>
+            <Link href="/drills/fps" className="group bg-slate-950/80 border border-slate-900 rounded-xl p-5 hover:border-red-500/40 hover:shadow-[0_0_20px_rgba(239,68,68,0.05)] transition-all duration-200 hover:-translate-y-1 text-center">
+              <div className="text-2xl mb-2">🎮</div>
+              <h3 className="font-bold text-slate-200 group-hover:text-red-400 transition-colors uppercase text-xs tracking-wider font-mono">FPS Aim</h3>
+              <p className="text-[10px] text-slate-500 uppercase mt-1 font-mono">Flick & Smooth Pursuit</p>
+            </Link>
+            <Link href="/drills/memory" className="group bg-slate-950/80 border border-slate-900 rounded-xl p-5 hover:border-indigo-500/40 hover:shadow-[0_0_20px_rgba(99,102,241,0.05)] transition-all duration-200 hover:-translate-y-1 text-center">
+              <div className="text-2xl mb-2">💾</div>
+              <h3 className="font-bold text-slate-200 group-hover:text-indigo-400 transition-colors uppercase text-xs tracking-wider font-mono">Memory</h3>
+              <p className="text-[10px] text-slate-500 uppercase mt-1 font-mono">Working & sequence recall</p>
+            </Link>
           </div>
         </div>
 
+        {/* Social Links */}
+        <div className="flex items-center justify-center gap-3 flex-wrap mt-8 mb-4">
+          <a href="https://youtube.com/@skilldrills.online" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="YouTube"><svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>
+          <a href="https://www.facebook.com/profile.php?id=61590093843779" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="Facebook"><svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a>
+          <a href="https://x.com/skilldrillss" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="X / Twitter"><svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.747l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+          <a href="https://www.instagram.com/skilldrills.online/?__pwa=1" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="Instagram"><svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg></a>
+          <a href="https://pinterest.com/skilldrills" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="Pinterest"><svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738a.36.36 0 0 1 .083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.632-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/></svg></a>
+        </div>
       </div>
     </div>
   );

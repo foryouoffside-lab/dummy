@@ -1,27 +1,28 @@
 import JumpSequenceClient from './JumpSequenceClient';
 
 export const metadata = {
-  title: 'Jump Sequence - Precision & Trajectory | SkillDrills',
-  description: 'Charge-and-launch with mid-air steering. Land on green targets for points. Combo streaks every 5 hits. 60-second challenge. No sign-up.',
+  title: 'Reaction Time Training - Free Jump Sequence Precision Drill | SkillDrills',
+  description: 'Free reaction time training game. Charge-and-launch with mid-air steering, land on targets — the best trajectory control and reaction training drill. Combo streaks every 5 hits. 60-second challenge. No sign-up.',
   keywords: [
-    'jump sequence drill', 'precision jumping game', 'trajectory control training',
-    'charge and launch drill', 'motor control jumping', 'aim training game free',
-    'projectile control practice', 'jump accuracy test', 'free jumping drill online',
-    'hand-eye coordination jump', 'charged jump practice', 'trajectory aiming game',
-    'precision motor skills training', 'jump timing training', 'ball launching game',
-    'mid-air steering practice', 'mouse control jumping', 'target landing drill',
-    'physics jumping game', 'skill-based jumping', 'coordination training online',
-    'free motor skills drill', 'jump sequence practice', 'trajectory prediction training',
-    'online jumping challenge', 'precision landing game', 'charge mechanic training',
-    'skilldrills jump sequence', 'skilldrills physical drill', 'free coordination game',
-    'gaming motor skills', 'esports coordination training', 'mouse precision practice',
-    'timing accuracy drill', 'reaction jumping test', 'physics trajectory game',
-    'free online coordination test', 'hand-eye training game', 'precision aim practice',
-    'competitive gaming skills', 'reflex jumping drill', 'movement prediction training',
+    'reaction time training', 'reaction training game', 'free reaction time training',
+    'reaction time drill', 'reaction training online', 'reaction speed training',
+    'trajectory control game', 'trajectory training online', 'precision jumping game',
+    'jump sequence drill', 'charge and launch game', 'projectile control practice',
+    'aim training reaction', 'free aim trainer game', 'online aim training',
+    'hand eye coordination jump', 'hand eye coordination game', 'coordination training game',
+    'precision motor training', 'mouse control training', 'cursor trajectory game',
+    'mid air steering game', 'physics game online free', 'jumping accuracy drill',
+    'target landing game', 'landing precision training', 'timing accuracy training',
+    'combo streak game', 'gaming reaction training', 'FPS reaction drill',
+    'Valorant reaction training', 'CS2 reaction drill', 'esports reaction game',
+    'competitive gaming reaction', 'motor skills reaction', 'quick decision training',
+    'skilldrills jump sequence', 'skilldrills reaction', 'free physical training online',
+    'browser reaction game', 'no download reaction test', 'instant reaction training',
+    'projectile aim game', 'trajectory prediction training', 'physics skill game',
   ],
   openGraph: {
-    title: 'Jump Sequence - Precision & Trajectory | SkillDrills',
-    description: 'Charge-and-launch with mid-air steering. Land on green targets for points. Combo streaks every 5 hits. 60-second challenge. No sign-up.',
+    title: 'Reaction Time Training - Free Jump Sequence Precision Drill | SkillDrills',
+    description: 'Free reaction time training. Charge-and-launch with mid-air steering — best trajectory control and reaction training drill. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/physical/fitness/jump-sequence',
     siteName: 'SkillDrills',
@@ -30,13 +31,13 @@ export const metadata = {
       url: 'https://skilldrills.online/icons/icon-512x512.png',
       width: 512,
       height: 512,
-      alt: 'Jump Sequence Drill',
+      alt: 'Reaction Time Training - Jump Sequence Precision Drill',
     }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Jump Sequence - Precision & Trajectory | SkillDrills',
-    description: 'Charge-and-launch with mid-air steering. Land on green targets for points. Combo streaks every 5 hits. 60-second challenge. No sign-up.',
+    title: 'Reaction Time Training - Free Jump Sequence Precision Drill | SkillDrills',
+    description: 'Free reaction time training and trajectory control drill. Best reaction training game for gamers and athletes. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -59,7 +60,7 @@ export default function JumpSequencePage() {
               { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://skilldrills.online" },
               { "@type": "ListItem", "position": 2, "name": "Physical Training", "item": "https://skilldrills.online/drills/physical" },
               { "@type": "ListItem", "position": 3, "name": "Fitness", "item": "https://skilldrills.online/drills/physical/fitness" },
-              { "@type": "ListItem", "position": 4, "name": "Jump Sequence" }
+              { "@type": "ListItem", "position": 4, "name": "Reaction Time Training - Jump Sequence" }
             ]
           })
         }}
@@ -71,9 +72,9 @@ export default function JumpSequencePage() {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "WebApplication",
-            "name": "Jump Sequence Drill",
+            "name": "Reaction Time Training - Jump Sequence Precision Drill",
             "url": "https://skilldrills.online/drills/physical/fitness/jump-sequence",
-            "description": "Free trajectory control drill. Charge-and-launch with mid-air steering. Land on green targets. Combo streaks every 5 hits. 60s challenge.",
+            "description": "Free reaction time training and trajectory control drill. Charge-and-launch mechanic with mid-air mouse steering. Land on green targets for points. Combo streaks every 5 hits. Best reaction training drill for gamers and athletes.",
             "applicationCategory": "HealthApplication",
             "operatingSystem": "All",
             "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
@@ -92,34 +93,34 @@ export default function JumpSequencePage() {
             "mainEntity": [
               {
                 "@type": "Question",
-                "name": "What is the Jump Sequence Drill?",
+                "name": "What is this reaction time training drill?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "A free coordination game. Click-hold to charge, release to launch, steer mid-air with mouse. Land on green targets. Combo streaks every 5 hits."
+                  "text": "A free reaction time training and trajectory control game. Click-hold to charge, release to launch, steer mid-air with mouse. Land on green targets for points. Combo streaks every 5 hits in this 60-second reaction training challenge."
                 }
               },
               {
                 "@type": "Question",
-                "name": "How do charge-and-launch mechanics work?",
+                "name": "How do charge-and-launch mechanics work in this reaction training game?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Hold mouse on ball to charge (cyan bar). Longer hold = higher jump. Release to launch. Move mouse mid-air to steer left/right."
+                  "text": "Hold mouse on the ball to charge (cyan progress bar). Longer hold = higher jump. Release to launch. Move mouse mid-air to steer left or right and land on the target. Reaction time and precision both matter."
                 }
               },
               {
                 "@type": "Question",
-                "name": "What skills does this improve?",
+                "name": "What skills does this reaction time training improve?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Trajectory control, mouse precision, hand-eye coordination, timing accuracy, and quick decision-making for projectile aim."
+                  "text": "Reaction time, trajectory control, mouse precision, hand-eye coordination, timing accuracy, and quick decision-making for projectile aim — all critical skills in FPS games like Valorant, CS2, and Apex Legends."
                 }
               },
               {
                 "@type": "Question",
-                "name": "Do I need to sign up?",
+                "name": "Do I need to sign up for this reaction time training?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "No registration required. This jump sequence drill is completely free and works instantly in your browser."
+                  "text": "No registration required. This free reaction time training game works instantly in your browser — no downloads needed."
                 }
               }
             ]

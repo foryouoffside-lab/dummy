@@ -1,25 +1,27 @@
 import StopwatchClickClient from './StopwatchClickClient';
 
 export const metadata = {
-  title: 'Stopwatch Timing - Mental Chronometry | SkillDrills',
-  description: 'Memorize target times (1-8s) and click at the exact moment. Perfect <25ms, Good <75ms, OK <150ms. 60-second challenge. No sign-up.',
+  title: 'Reaction Time Test - Free Stopwatch Timing & Chronometry Drill | SkillDrills',
+  description: 'Free reaction time test with stopwatch timing. Memorize target times 1–8s and click at the exact moment — the best timing accuracy drill for gamers, musicians, and athletes. No sign-up.',
   keywords: [
-    'stopwatch click drill', 'timing accuracy test', 'mental chronometry training', 'time estimation practice',
-    'click timing drill online', 'precision timing test free', 'reaction prediction drill', 'time perception training',
-    'stopwatch training online', 'timing precision test', 'internal clock training', 'temporal accuracy drill',
-    'free timing drill', 'click at exact time', 'stopwatch game online',
-    'mental clock training', 'timing skills test', 'precision clicking practice', 'time sense training',
-    'musician timing drill', 'drummer timing practice', 'rhythm timing test', 'metronome training alternative',
-    'gamer timing accuracy', 'esports reaction timing', 'FPS timing drill', 'competitive gaming timing',
-    'athlete timing training', 'sports timing accuracy', 'motor timing skills', 'coordination timing drill',
-    'cognitive timing test', 'brain timing exercise', 'neuroscience timing drill', 'cerebellum training',
-    'perfect timing practice', 'millisecond accuracy test', 'sub-second timing drill', 'stopwatch precision game',
-    'skilldrills stopwatch', 'skilldrills timing drill', 'free online timing test',
-    'browser timing game', 'no download timing drill', 'instant timing practice',
+    'reaction time test', 'free reaction time test', 'online reaction time test',
+    'timing accuracy test', 'timing accuracy drill', 'timing precision test',
+    'stopwatch game online', 'stopwatch timing game', 'stopwatch click game',
+    'time estimation test', 'time perception test', 'internal clock training',
+    'mental chronometry test', 'time sense test', 'temporal accuracy drill',
+    'click timing drill', 'precision timing game', 'millisecond accuracy test',
+    'musician timing drill', 'drummer timing test', 'rhythm timing game',
+    'metronome timing practice', 'beat timing test', 'music timing game',
+    'gamer timing test', 'esports reaction timing', 'FPS timing accuracy',
+    'athlete timing training', 'sports timing test', 'motor timing drill',
+    'brain timing test', 'cognitive timing game', 'cerebellum training game',
+    'perfect timing practice', 'sub-second timing game', 'stopwatch precision drill',
+    'skilldrills stopwatch', 'skilldrills timing drill', 'free timing test online',
+    'browser timing game', 'no download reaction test', 'instant timing drill',
   ],
   openGraph: {
-    title: 'Stopwatch Timing - Mental Chronometry | SkillDrills',
-    description: 'Memorize target times (1-8s), click at exact moment. Free.',
+    title: 'Reaction Time Test - Free Stopwatch Timing & Chronometry Drill | SkillDrills',
+    description: 'Free reaction time test with stopwatch timing. Memorize target times and click at exact moment — best timing accuracy drill for gamers and musicians. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/motor/timing-accuracy/stopwatch-click',
     siteName: 'SkillDrills',
@@ -28,13 +30,13 @@ export const metadata = {
       url: 'https://skilldrills.online/icons/icon-512x512.png',
       width: 512,
       height: 512,
-      alt: 'Stopwatch Timing Drill',
+      alt: 'Reaction Time Test - Stopwatch Timing Drill',
     }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Stopwatch Timing - Mental Chronometry | SkillDrills',
-    description: 'Train your internal clock. Click at exact target times. Free.',
+    title: 'Reaction Time Test - Free Stopwatch Timing & Chronometry Drill | SkillDrills',
+    description: 'Free reaction time test and stopwatch timing game. Click at exact target times. Best timing accuracy drill. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -46,7 +48,6 @@ export const metadata = {
 export default function StopwatchClickPage() {
   return (
     <>
-
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -57,21 +58,20 @@ export default function StopwatchClickPage() {
               { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://skilldrills.online" },
               { "@type": "ListItem", "position": 2, "name": "Motor Training", "item": "https://skilldrills.online/drills/motor" },
               { "@type": "ListItem", "position": 3, "name": "Timing Accuracy", "item": "https://skilldrills.online/drills/motor/timing-accuracy" },
-              { "@type": "ListItem", "position": 4, "name": "Stopwatch Timing" }
+              { "@type": "ListItem", "position": 4, "name": "Reaction Time Test - Stopwatch Timing Drill" }
             ]
           })
         }}
       />
-
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "WebApplication",
-            "name": "Stopwatch Timing Drill",
+            "name": "Reaction Time Test - Free Stopwatch Timing & Chronometry Drill",
             "url": "https://skilldrills.online/drills/motor/timing-accuracy/stopwatch-click",
-            "description": "Free mental chronometry drill. Memorize target times (1-8s), click at exact moment. Perfect <25ms, Good <75ms, OK <150ms. 60-second challenge.",
+            "description": "Free reaction time test and stopwatch timing drill. Memorize target times (1-8s) and click at the exact moment. Rated: Perfect <25ms, Good <75ms, OK <150ms. 60-second timing accuracy challenge.",
             "applicationCategory": "GameApplication",
             "operatingSystem": "All",
             "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
@@ -80,7 +80,6 @@ export default function StopwatchClickPage() {
           })
         }}
       />
-
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -90,41 +89,40 @@ export default function StopwatchClickPage() {
             "mainEntity": [
               {
                 "@type": "Question",
-                "name": "What is the Stopwatch Timing Drill?",
+                "name": "What is this reaction time test and stopwatch timing drill?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "A free mental chronometry exercise. Memorize target time (1-8s), click at exact moment. Rated: Perfect <25ms, Good <75ms, OK <150ms."
+                  "text": "A free reaction time test and stopwatch timing game. Memorize a target time (1-8 seconds), then click at exactly that moment without watching a counter. Rated: Perfect <25ms, Good <75ms, OK <150ms. Unique timing accuracy drill for internal clock training."
                 }
               },
               {
                 "@type": "Question",
-                "name": "Who benefits from this training?",
+                "name": "Who benefits from this stopwatch timing reaction test?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Musicians, drummers, athletes, competitive gamers, and anyone wanting better time estimation and internal clock calibration."
+                  "text": "Musicians and drummers (rhythmic timing), competitive gamers (reaction time accuracy), athletes (precise movement timing), and anyone wanting to improve time estimation and internal clock calibration through this reaction time test."
                 }
               },
               {
                 "@type": "Question",
-                "name": "What target times are used?",
+                "name": "What target times are used in this timing accuracy drill?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Random 1-8 seconds. Displayed for 1.5s then disappears. Rely on internal clock. Covers short and long duration timing."
+                  "text": "Random target times from 1 to 8 seconds. Displayed for 1.5 seconds then hidden. You rely entirely on your internal clock. The reaction time test covers both short (1-2s) and long (5-8s) duration timing accuracy."
                 }
               },
               {
                 "@type": "Question",
-                "name": "Do I need to sign up?",
+                "name": "Do I need to sign up for this reaction time test?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "No registration required. This stopwatch timing drill is completely free and works instantly in your browser."
+                  "text": "No registration required. This free reaction time test and stopwatch timing drill works instantly in your browser — no downloads needed."
                 }
               }
             ]
           })
         }}
       />
-
       <StopwatchClickClient />
     </>
   );

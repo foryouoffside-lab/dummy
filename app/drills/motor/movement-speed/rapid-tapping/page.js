@@ -1,24 +1,27 @@
 import RapidTappingClient from './RapidTappingClient';
 
 export const metadata = {
-  title: 'Rapid Tapping - Click Speed Test | SkillDrills',
-  description: 'Endless survival tapping. Click the shrinking ball to keep it alive. 10 clicks = 1 point. Difficulty +12% every 3s. Max ball 140px. No sign-up.',
+  title: 'Click Speed Test - Free Rapid Tapping & CPS Test | SkillDrills',
+  description: 'Free click speed test online. Tap rapidly to keep a shrinking ball alive — the best CPS test and click endurance drill. Difficulty scales every 3 seconds. No sign-up required.',
   keywords: [
-    'rapid tapping drill', 'click speed test', 'tapping endurance training', 'mouse clicking speed test',
-    'click per second test', 'tapping drill online', 'endurance clicking practice', 'rapid click training',
-    'mouse spam test', 'click speed drill free', 'tapping stamina training', 'perpetual clicking game',
-    'free tapping test', 'click endurance drill', 'mouse speed endurance', 'click speed challenge',
-    'FPS clicking practice', 'MOBA click training', 'gaming mouse speed', 'fast clicking test',
-    'click speed improver', 'mouse endurance test', 'tapping survival game', 'click rate test',
-    'speed clicking practice', 'mouse button spam', 'click fatigue training', 'rapid fire clicking',
+    'click speed test', 'free click speed test', 'online click speed test',
+    'cps test', 'cps test online', 'clicks per second test',
+    'click speed game', 'clicking speed test', 'click rate test',
+    'rapid tapping test', 'tapping speed test', 'tap speed test',
+    'mouse click speed', 'fast clicking test', 'click endurance test',
+    'rapid clicking game', 'clicking endurance drill', 'tapping survival game',
+    'click per second game', 'mouse spam test', 'clicking challenge',
+    'FPS clicking practice', 'gaming click speed', 'MOBA clicking training',
+    'Minecraft clicking speed', 'PvP click test', 'competitive clicking',
+    'hand eye coordination click', 'reflex clicking game', 'motor speed training',
+    'tapping stamina training', 'perpetual clicking game', 'endless click game',
     'skilldrills tapping', 'skilldrills click speed', 'free clicking drill',
-    'online tapping test', 'browser click test', 'no download click speed',
-    'endless clicker game', 'click survival challenge', 'mouse accuracy and speed',
-    'hand eye coordination click', 'reflex clicking practice', 'competitive clicking',
+    'browser click test', 'no download cps test', 'instant clicking game',
+    'click fatigue training', 'mouse endurance test', 'rapid fire clicking',
   ],
   openGraph: {
-    title: 'Rapid Tapping - Click Speed Test | SkillDrills',
-    description: 'Endless survival tapping. 10 clicks = 1 point. Free.',
+    title: 'Click Speed Test - Free Rapid Tapping & CPS Test | SkillDrills',
+    description: 'Free click speed test. Tap rapidly to keep a ball alive — best CPS test and clicking endurance drill. Scales every 3 seconds. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/motor/movement-speed/rapid-tapping',
     siteName: 'SkillDrills',
@@ -27,13 +30,13 @@ export const metadata = {
       url: 'https://skilldrills.online/icons/icon-512x512.png',
       width: 512,
       height: 512,
-      alt: 'Rapid Tapping Drill',
+      alt: 'Click Speed Test - CPS Test Online',
     }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Rapid Tapping - Click Speed Test | SkillDrills',
-    description: 'Endless survival clicking. 10 clicks = 1 point. Free.',
+    title: 'Click Speed Test - Free Rapid Tapping & CPS Test | SkillDrills',
+    description: 'Free click speed test and CPS test. Keep the shrinking ball alive. Best clicking endurance drill. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -45,7 +48,6 @@ export const metadata = {
 export default function RapidTappingPage() {
   return (
     <>
-
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -56,21 +58,20 @@ export default function RapidTappingPage() {
               { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://skilldrills.online" },
               { "@type": "ListItem", "position": 2, "name": "Motor Training", "item": "https://skilldrills.online/drills/motor" },
               { "@type": "ListItem", "position": 3, "name": "Movement Speed", "item": "https://skilldrills.online/drills/motor/movement-speed" },
-              { "@type": "ListItem", "position": 4, "name": "Rapid Tapping" }
+              { "@type": "ListItem", "position": 4, "name": "Click Speed Test - Rapid Tapping" }
             ]
           })
         }}
       />
-
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "WebApplication",
-            "name": "Rapid Tapping Drill",
+            "name": "Click Speed Test - Free Rapid Tapping & CPS Test",
             "url": "https://skilldrills.online/drills/motor/movement-speed/rapid-tapping",
-            "description": "Free endless survival tapping drill. Click shrinking ball to keep it alive. 10 clicks = 1 point. Difficulty +12% every 3s. Max ball 140px.",
+            "description": "Free click speed test and CPS test. Endless survival clicking: tap to keep the shrinking ball alive. 10 clicks = 1 point. Difficulty increases 12% every 3 seconds. Best click endurance drill online.",
             "applicationCategory": "GameApplication",
             "operatingSystem": "All",
             "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
@@ -79,7 +80,6 @@ export default function RapidTappingPage() {
           })
         }}
       />
-
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -89,41 +89,40 @@ export default function RapidTappingPage() {
             "mainEntity": [
               {
                 "@type": "Question",
-                "name": "What is the Rapid Tapping Drill?",
+                "name": "What is this click speed test?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "A free endless survival clicking game. Click the ball to expand it 10px per click. Ball shrinks at increasing rate. 10 clicks = 1 point."
+                  "text": "A free click speed test and CPS test game. Tap rapidly to keep a shrinking ball alive. Each click expands it 10px. Ball shrinks at increasing rate. 10 clicks = 1 point. Survive as long as possible in this endless click speed challenge."
                 }
               },
               {
                 "@type": "Question",
-                "name": "How does difficulty increase?",
+                "name": "How does difficulty increase in this CPS test?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Shrink rate increases 12% every 3 seconds. Longer survival requires faster clicking. Max ball size 140px."
+                  "text": "Shrink rate in this click speed test increases 12% every 3 seconds. Longer survival requires faster clicking. Maximum ball size is 140px. The longer you survive, the higher your clicks per second (CPS) must be."
                 }
               },
               {
                 "@type": "Question",
-                "name": "Does this help with FPS/MOBA gaming?",
+                "name": "Is this click speed test good for gaming?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Yes. Improves click speed and mouse endurance for FPS (Valorant, CS2) and MOBA games. Survival format simulates competitive pressure."
+                  "text": "Yes. This CPS test and rapid tapping drill improves click speed and mouse endurance for FPS games (Valorant, CS2), MOBA games, and Minecraft PvP where fast clicking gives a competitive advantage."
                 }
               },
               {
                 "@type": "Question",
-                "name": "Do I need to sign up?",
+                "name": "Do I need to sign up for this click speed test?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "No registration required. This rapid tapping drill is completely free and works instantly in your browser."
+                  "text": "No registration required. This free click speed test and CPS test works instantly in your browser — no downloads needed."
                 }
               }
             ]
           })
         }}
       />
-
       <RapidTappingClient />
     </>
   );

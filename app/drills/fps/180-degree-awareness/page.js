@@ -1,42 +1,65 @@
+
 import AwarenessDrillClient from './AwarenessDrillClient';
 
 export const metadata = {
-  title: '180-Degree Awareness - FPS Vision | SkillDrills',
-  description: 'Train 180-degree awareness with edge targets at 8% and 92% horizontal. Raw mouse input via Pointer Lock. 60-second challenge. No sign-up.',
+  title: 'FPS Awareness Trainer - 180° Peripheral Vision Drill',
+  description:
+    'Train peripheral vision, situational awareness, and rapid target detection with this free FPS Awareness Trainer. Practice 180° target acquisition and reaction speed online.',
   keywords: [
-    '180 degree awareness trainer', 'FPS awareness training', 'peripheral vision FPS drill',
-    'aim training peripheral', 'gaming awareness drill', 'reaction time FPS test',
-    'edge target training', 'field of view training', 'FPS aim drill free',
-    'peripheral reaction test', 'gaming vision training', '180 degree FPS drill',
-    'awareness trainer online', 'free FPS training', 'raw mouse input trainer',
-    'pointer lock aim training', 'Valorant awareness practice', 'CS2 peripheral training',
-    'Overwatch aim trainer', 'Apex Legends awareness drill', 'competitive FPS training',
-    'wide angle target acquisition', 'edge spawn aim trainer', 'screen edge reaction test',
-    'FPS peripheral awareness', 'gaming peripheral vision', 'esports awareness training',
-    'skilldrills awareness', 'skilldrills FPS drill', 'free aim training online',
-    'mouse control training', 'raw input FPS practice', 'browser FPS trainer',
+    'fps awareness trainer',
+    'peripheral vision training',
+    'peripheral awareness test',
+    '180 degree awareness drill',
+    'situational awareness training',
+    'peripheral reaction training',
+    'fps awareness drill',
+    'target detection training',
+    'peripheral vision game',
+    'fps reaction training',
+    'peripheral vision exercise',
+    '180 degree reaction training',
+    'competitive fps awareness',
+    'gaming awareness training',
+    'fps target detection',
+    'valorant awareness training',
+    'cs2 awareness training',
+    'apex legends awareness training',
+    'peripheral vision test',
+    'situational awareness game',
+    'fps peripheral vision',
+    'edge target reaction training',
+    'wide angle awareness training',
+    'free fps awareness trainer',
+    'browser awareness trainer'
   ],
   openGraph: {
-    title: '180-Degree Awareness - FPS Vision | SkillDrills',
-    description: 'Train 180-degree awareness with edge targets at 8% and 92% horizontal. Raw mouse input via Pointer Lock. 60-second challenge. No sign-up.',
-    type: 'article',
+    title: 'FPS Awareness Trainer - 180° Peripheral Vision Drill',
+    description:
+      'Train peripheral vision, situational awareness, and rapid target detection with this free FPS Awareness Trainer. Improve 180° target acquisition and reaction speed.',
+    type: 'website',
     url: 'https://skilldrills.online/drills/fps/180-degree-awareness',
     siteName: 'SkillDrills',
     locale: 'en_US',
-    images: [{
-      url: 'https://skilldrills.online/icons/icon-512x512.png',
-      width: 512,
-      height: 512,
-      alt: '180 Degree Awareness Trainer',
-    }],
+    images: [
+      {
+        url: 'https://skilldrills.online/icons/icon-512x512.png',
+        width: 512,
+        height: 512,
+        alt: 'FPS Awareness Trainer - 180 Degree Peripheral Vision Drill',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: '180-Degree Awareness - FPS Vision | SkillDrills',
-    description: 'Train 180-degree awareness with edge targets at 8% and 92% horizontal. Raw mouse input via Pointer Lock. 60-second challenge. No sign-up.',
+    title: 'FPS Awareness Trainer - 180° Peripheral Vision Drill',
+    description:
+      'Train peripheral vision, situational awareness, and rapid target detection online with this free FPS Awareness Trainer.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
-  robots: { index: true, follow: true },
+  robots: {
+    index: true,
+    follow: true,
+  },
   alternates: {
     canonical: 'https://skilldrills.online/drills/fps/180-degree-awareness',
   },
@@ -45,19 +68,32 @@ export const metadata = {
 export default function AwarenessDrillPage() {
   return (
     <>
-
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "BreadcrumbList",
-            "itemListElement": [
-              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://skilldrills.online" },
-              { "@type": "ListItem", "position": 2, "name": "FPS Training", "item": "https://skilldrills.online/drills/fps" },
-              { "@type": "ListItem", "position": 3, "name": "180° Awareness Trainer" }
-            ]
-          })
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            itemListElement: [
+              {
+                '@type': 'ListItem',
+                position: 1,
+                name: 'Home',
+                item: 'https://skilldrills.online',
+              },
+              {
+                '@type': 'ListItem',
+                position: 2,
+                name: 'FPS Training',
+                item: 'https://skilldrills.online/drills/fps',
+              },
+              {
+                '@type': 'ListItem',
+                position: 3,
+                name: 'FPS Awareness Trainer',
+              },
+            ],
+          }),
         }}
       />
 
@@ -65,17 +101,25 @@ export default function AwarenessDrillPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "WebApplication",
-            "name": "180° Awareness Trainer",
-            "url": "https://skilldrills.online/drills/fps/180-degree-awareness",
-            "description": "Free FPS awareness drill with edge targets at 8% and 92% horizontal. Raw mouse input via Pointer Lock API. 60-second challenge with combo streaks.",
-            "applicationCategory": "GamingApplication",
-            "operatingSystem": "All",
-            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-            "author": { "@type": "Organization", "name": "SkillDrills" },
-            "isAccessibleForFree": true
-          })
+            '@context': 'https://schema.org',
+            '@type': 'WebApplication',
+            name: 'FPS Awareness Trainer - 180° Peripheral Vision Drill',
+            url: 'https://skilldrills.online/drills/fps/180-degree-awareness',
+            description:
+              'A browser-based FPS awareness trainer designed to improve peripheral vision, situational awareness, target detection, and 180-degree reaction speed for competitive gamers.',
+            applicationCategory: 'GameApplication',
+            operatingSystem: 'All',
+            offers: {
+              '@type': 'Offer',
+              price: '0',
+              priceCurrency: 'USD',
+            },
+            author: {
+              '@type': 'Organization',
+              name: 'SkillDrills',
+            },
+            isAccessibleForFree: true,
+          }),
         }}
       />
 
@@ -83,43 +127,51 @@ export default function AwarenessDrillPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "FAQPage",
-            "mainEntity": [
+            '@context': 'https://schema.org',
+            '@type': 'FAQPage',
+            mainEntity: [
               {
-                "@type": "Question",
-                "name": "What is the 180 Degree Awareness Trainer?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "A free FPS training drill using raw mouse input via Pointer Lock API. Edge targets spawn at 8% and 92% horizontal to train 180-degree peripheral vision for competitive gaming."
-                }
+                '@type': 'Question',
+                name: 'How do professional FPS players improve peripheral vision?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'Professional players improve peripheral vision through awareness drills that force them to detect and react to targets appearing at extreme screen angles. Consistent practice improves visual scanning speed and situational awareness.',
+                },
               },
               {
-                "@type": "Question",
-                "name": "How does raw mouse input work?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "Uses browser Pointer Lock API to capture raw mouse movement without acceleration or smoothing, similar to in-game raw input settings."
-                }
+                '@type': 'Question',
+                name: 'What is peripheral awareness in FPS games?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'Peripheral awareness is the ability to detect threats outside your direct focus. Strong peripheral awareness helps players react faster to flanks, side peeks, and unexpected enemy movements.',
+                },
               },
               {
-                "@type": "Question",
-                "name": "What FPS games does this help with?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "Valorant, CS2, Overwatch 2, Apex Legends, Call of Duty, Rainbow Six Siege, Fortnite, Rust, Escape from Tarkov, and Destiny 2."
-                }
+                '@type': 'Question',
+                name: 'Can peripheral vision training improve reaction time?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'Yes. Peripheral vision training improves how quickly players identify targets appearing outside their central vision, leading to faster target acquisition and better reaction speed.',
+                },
               },
               {
-                "@type": "Question",
-                "name": "Do I need to sign up?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "No registration required. This awareness trainer is completely free and works instantly in your browser."
-                }
-              }
-            ]
-          })
+                '@type': 'Question',
+                name: 'How do I stop getting flanked in FPS games?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'Improving situational awareness and peripheral target detection helps players notice enemy movement earlier, reducing surprise engagements and improving defensive reactions.',
+                },
+              },
+              {
+                '@type': 'Question',
+                name: 'What is 180 degree awareness training?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: '180 degree awareness training develops the ability to quickly detect, locate, and react to targets appearing across a wide field of view, improving spatial awareness and reaction consistency.',
+                },
+              },
+            ],
+          }),
         }}
       />
 

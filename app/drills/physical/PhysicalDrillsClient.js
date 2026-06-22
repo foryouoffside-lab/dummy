@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
@@ -6,14 +6,24 @@ import {
   ArrowLeft, Clock, Zap, Star, Play, Dumbbell, Target, 
   Activity, Eye, Hand, TrendingUp, Battery, Gauge, 
   GitBranch, Timer, BarChart3, Award, Heart, Brain,
-  Home, ChevronRight, Cpu, Sparkles
+  Home, ChevronRight, Cpu, Sparkles, AlertTriangle, Monitor, 
+  AlertCircle, MessageSquare, Lightbulb
 } from 'lucide-react';
 
 export default function PhysicalDrillsClient() {
   const [showRotateWarning, setShowRotateWarning] = useState(false);
   const [warningMessage, setWarningMessage] = useState("Rotate Your Device");
+  
+  // Notice Modal State - Default false to prevent hydration mismatch
+  const [showBetaNotice, setShowBetaNotice] = useState(false);
 
   useEffect(() => {
+    // Session Storage Check for Beta Notice
+    const noticeShown = sessionStorage.getItem('physical_beta_notice_shown');
+    if (!noticeShown) {
+      setShowBetaNotice(true);
+    }
+
     const checkSize = () => {
       if (typeof window === 'undefined') return;
       const ua = navigator.userAgent || '';
@@ -124,6 +134,11 @@ export default function PhysicalDrillsClient() {
     };
   }, [isClient]);
 
+  const handleDismissNotice = () => {
+    sessionStorage.setItem('physical_beta_notice_shown', 'true');
+    setShowBetaNotice(false);
+  };
+
   const startReflexTest = () => {
     try {
       if (typeof window !== 'undefined' && !document.fullscreenElement) {
@@ -201,23 +216,9 @@ export default function PhysicalDrillsClient() {
       textColor: 'text-purple-400',
       description: 'Improve stability, equilibrium, and motor control',
       drills: [
-        { name: 'Dynamic Balance Elite', folderName: 'dynamic-balance', difficulty: 'Hard', duration: '60s', description: 'Track a Lissajous-trajectory target with cursor for sustained tracking points' },
+        { name: 'Dynamic Balance', folderName: 'dynamic-balance', difficulty: 'Hard', duration: '60s', description: 'Track a Lissajous-trajectory target with cursor for sustained tracking points' },
         { name: 'Single Leg Hold', folderName: 'single-leg-hold', difficulty: 'Medium', duration: '60s', description: 'Maintain link with bouncing anchor point for balance stability scoring' },
         { name: 'Stability Challenge', folderName: 'stability-challenge', difficulty: 'Medium', duration: '60s', description: 'Resist wind forces to keep cursor centered with adaptive difficulty' }
-      ]
-    },
-    { 
-      name: 'Reflex Training', 
-      folderName: 'reflex-training',
-      icon: Zap,
-      color: 'yellow',
-      bgColor: 'bg-yellow-500/10 border-yellow-500/20 text-yellow-400',
-      textColor: 'text-yellow-400',
-      description: 'Enhance reaction speed, evasion, and impulse control',
-      drills: [
-        { name: 'Drop Catch', folderName: 'drop-catch', difficulty: 'Easy', duration: '60s', description: 'Catch green falling balls while avoiding red decoy balls with X markers' },
-        { name: 'Quick Dodge', folderName: 'quick-dodge', difficulty: 'Medium', duration: '60s', description: 'Dodge red homing obstacles with adaptive speed and fullscreen chaos mode' },
-        { name: 'Kinetic Arrest', folderName: 'reaction-chain', difficulty: 'Hard', duration: '60s', description: 'Stop cursor on moving nodes to arrest them with no miss penalties' }
       ]
     },
     { 
@@ -229,8 +230,8 @@ export default function PhysicalDrillsClient() {
       textColor: 'text-emerald-400',
       description: 'Improve bilateral coordination and motor patterning',
       drills: [
-        { name: 'Cross Body Movement', folderName: 'cross-body-movement', difficulty: 'Medium', duration: '60s', description: 'Connect nodes across screen along straight vector paths for +5 points each' },
-        { name: 'Complex Pattern', folderName: 'complex-pattern', difficulty: 'Hard', duration: '60s', description: 'Memorize and draw path patterns from memory with shape-based scoring' }
+        { name: 'Complex Pattern', folderName: 'complex-pattern', difficulty: 'Hard', duration: '60s', description: 'Memorize and draw path patterns from memory with shape-based scoring' },
+        { name: 'Cross Body Movement', folderName: 'cross-body-movement', difficulty: 'Medium', duration: '60s', description: 'Connect nodes across screen along straight vector paths for +5 points each' }
       ]
     },
     { 
@@ -245,6 +246,20 @@ export default function PhysicalDrillsClient() {
         { name: 'Agility Ladder', folderName: 'agility-ladder', difficulty: 'Medium', duration: '60s', description: 'Step rungs Left→Right→Left→Right on scrolling ladders with adaptive speed' },
         { name: 'Jump Sequence', folderName: 'jump-sequence', difficulty: 'Hard', duration: '60s', description: 'Charge and launch ball toward targets with mid-air steering control' },
         { name: 'Speed Drill', folderName: 'speed-drill', difficulty: 'Medium', duration: '60s', description: 'Click shrinking rings before they vanish with velocity scaling to 5.0x' }
+      ]
+    },
+    { 
+      name: 'Reflex Training', 
+      folderName: 'reflex-training',
+      icon: Zap,
+      color: 'yellow',
+      bgColor: 'bg-yellow-500/10 border-yellow-500/20 text-yellow-400',
+      textColor: 'text-yellow-400',
+      description: 'Enhance reaction speed, evasion, and impulse control',
+      drills: [
+        { name: 'Drop Catch', folderName: 'drop-catch', difficulty: 'Easy', duration: '60s', description: 'Catch green falling balls while avoiding red decoy balls with X markers' },
+        { name: 'Quick Dodge', folderName: 'quick-dodge', difficulty: 'Medium', duration: '60s', description: 'Dodge red homing obstacles with adaptive speed and fullscreen chaos mode' },
+        { name: 'Reaction Chain', folderName: 'reaction-chain', difficulty: 'Hard', duration: '60s', description: 'Stop cursor on moving nodes to arrest them with no miss penalties' }
       ]
     }
   ];
@@ -297,7 +312,51 @@ export default function PhysicalDrillsClient() {
       
       {/* Background patterns */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-orange-900/10 via-slate-950 to-slate-950 pointer-events-none z-0" />
-          {/* Mobile Rotate Device Warning Overlay */}
+      
+      {/* BETA / DESKTOP REQUIREMENT MODAL */}
+      {showBetaNotice && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+          <div className="bg-[#0b101e] border border-orange-500/40 rounded-2xl p-6 sm:p-8 max-w-lg w-full shadow-[0_0_40px_rgba(249,115,22,0.2)] relative overflow-hidden animate-in fade-in zoom-in duration-300 max-h-[90vh] overflow-y-auto">
+            <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-orange-500 via-red-500 to-orange-500"></div>
+            
+            <h2 className="text-xl sm:text-2xl font-black text-white mb-5 flex items-center gap-3 font-mono tracking-tight uppercase">
+              <AlertTriangle className="text-orange-500 w-7 h-7 shrink-0" />
+              Notice / Beta Phase
+            </h2>
+            
+            <div className="space-y-4 text-sm text-slate-300 mb-8">
+              <div className="flex items-start gap-3 bg-blue-500/10 border border-blue-500/20 p-3 rounded-xl">
+                <Monitor className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" />
+                <p><strong>Desktop/Laptop Only:</strong> These drills require raw keyboard and mouse inputs. They do not work well on mobile devices. Please use a PC for the proper experience.</p>
+              </div>
+
+              <div className="flex items-start gap-3 bg-red-500/10 border border-red-500/20 p-3 rounded-xl">
+                <AlertCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
+                <p><strong>Testing Phase:</strong> The platform is currently in testing. Due to lack of extensive testing facilities, you might encounter some timing issues or bugs.</p>
+              </div>
+
+              <div className="flex items-start gap-3 bg-green-500/10 border border-green-500/20 p-3 rounded-xl">
+                <MessageSquare className="w-5 h-5 text-green-400 shrink-0 mt-0.5" />
+                <p><strong>We Need Your Feedback:</strong> Sorry if you encounter any issues! Please cooperate and inform me via Instagram or Facebook (links in the footer below). Your feedback is vital.</p>
+              </div>
+
+              <div className="flex items-start gap-3 bg-purple-500/10 border border-purple-500/20 p-3 rounded-xl">
+                <Lightbulb className="w-5 h-5 text-purple-400 shrink-0 mt-0.5" />
+                <p><strong>Request a Specific Drill:</strong> Want a custom drill? If there is a specific physical or reflex drill you'd like to see added, reach out to me on social media through the footer!</p>
+              </div>
+            </div>
+            
+            <button 
+              onClick={handleDismissNotice}
+              className="w-full py-3.5 bg-gradient-to-r from-orange-600 to-red-600 hover:brightness-110 text-white font-black rounded-xl transition-all shadow-lg active:scale-95 uppercase tracking-widest text-sm"
+            >
+              I Understand, Let's Train
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Mobile Rotate Device Warning Overlay */}
       {showRotateWarning && (
         <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-gray-950/95 text-center p-6" aria-hidden="true">
           <div className="animate-bounce mb-4 text-blue-500">
@@ -307,7 +366,7 @@ export default function PhysicalDrillsClient() {
           </div>
           <h3 className="text-lg font-bold text-white mb-2">{warningMessage}</h3>
           <p className="text-sm text-gray-400 mb-6">Please use landscape orientation or fullscreen mode for the best training experience.</p>
-          <Link href="/drills/physical">
+          <Link href="/drills">
             <button className="px-5 py-2.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-350 hover:text-white font-bold rounded-lg text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -601,7 +660,7 @@ export default function PhysicalDrillsClient() {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
             {[
               { href: "/drills/cognitive", emoji: "🧠", title: "Cognitive Sector", desc: "Focus & reaction speed" },
-              { href: "/drills/productivity", emoji: "⏱️", title: "Productivity", desc: "Pomodoro focus timelines" },
+              { href: "/drills/cognitive", emoji: "⏱️", title: "Productivity", desc: "Pomodoro focus timelines" },
               { href: "/drills/memory", emoji: "💾", title: "Memory Sector", desc: "Sequence span tests" },
               { href: "/drills/fps", emoji: "🎮", title: "Tactical Aim", desc: "Aim Flick & Smooth Pursuit" }
             ].map((link, i) => (
@@ -618,7 +677,15 @@ export default function PhysicalDrillsClient() {
           </div>
         </div>
 
+      {/* Social Links */}
+      <div className="flex items-center justify-center gap-3 flex-wrap mt-8 mb-4">
+        <a href="https://youtube.com/@skilldrills.online" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="YouTube"><svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>
+        <a href="https://www.facebook.com/profile.php?id=61590093843779" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="Facebook"><svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a>
+        <a href="https://x.com/skilldrillss" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="X / Twitter"><svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.747l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+        <a href="https://www.instagram.com/skilldrills.online/?__pwa=1" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="Instagram"><svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg></a>
+        <a href="https://pinterest.com/skilldrills" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="Pinterest"><svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738a.36.36 0 0 1 .083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.632-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/></svg></a>
       </div>
+    </div>
     </div>
   );
 }

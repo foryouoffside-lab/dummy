@@ -1,21 +1,104 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { COACHES, getActiveCoach, getCoachResponse, speakCoachText, handleCoachFeedback } from '../../../../lib/coachVoice';
 import Link from 'next/link';
-import { recordDrillResult } from '../../../../lib/performanceTelemetry';
-import { getAdaptiveParams } from '../../../../lib/adaptiveDifficulty';
 
-import { Activity, AlertCircle, ArrowRight, Award, BarChart3, Calculator, CheckCircle2, ChevronRight, Clock, Cpu, Crosshair, Eye, GraduationCap, Home, Info, Lightbulb, Lock, Maximize2, Minimize2, Moon, Play, RefreshCw, Shield, Sparkles, Star, Sun, Target, Timer, TrendingUp, Trophy, Volume2, VolumeX, Zap } from 'lucide-react';
+import { 
+  Activity, AlertCircle, ArrowRight, BarChart3, ChevronRight, 
+  Clock, Crosshair, Eye, GraduationCap, Info, Lightbulb, 
+  Maximize2, Minimize2, Play, RefreshCw, Star, Target, 
+  Timer, TrendingUp, Trophy, Volume2, VolumeX, Zap, 
+  Share2, Code2, Calculator, CheckCircle2, Shield, Users, Cpu
+} from 'lucide-react';
 
-const DRILL_DURATION = 60;
+// ============================================================
+// ZERO-LATENCY AUDIO SYNTHESIZER
+// ============================================================
+class AudioSynthesizer {
+  constructor() {
+    this.ctx = null;
+    this.enabled = true;
+  }
+  
+  init() {
+    if (!this.ctx) {
+      this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+  }
 
-// Single weapon with increased recoil
+  playShoot() {
+    if (!this.enabled || !this.ctx) return;
+    try {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(320, this.ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(70, this.ctx.currentTime + 0.09);
+      gain.gain.setValueAtTime(0.06, this.ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.09);
+      osc.connect(gain); gain.connect(this.ctx.destination);
+      osc.start(); osc.stop(this.ctx.currentTime + 0.09);
+    } catch(e) {}
+  }
+
+  playDink() {
+    if (!this.enabled || !this.ctx) return;
+    try {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(2200, this.ctx.currentTime);
+      gain.gain.setValueAtTime(0.05, this.ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.12);
+      osc.connect(gain); gain.connect(this.ctx.destination);
+      osc.start(); osc.stop(this.ctx.currentTime + 0.12);
+    } catch(e) {}
+  }
+
+  playKill() {
+    if (!this.enabled || !this.ctx) return;
+    try {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(523.25, this.ctx.currentTime); 
+      osc.frequency.exponentialRampToValueAtTime(783.99, this.ctx.currentTime + 0.2); 
+      gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.2);
+      osc.connect(gain); gain.connect(this.ctx.destination);
+      osc.start(); osc.stop(this.ctx.currentTime + 0.2);
+    } catch(e) {}
+  }
+
+  playClick() {
+    if (!this.enabled || !this.ctx) return;
+    try {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(800, this.ctx.currentTime);
+      gain.gain.setValueAtTime(0.02, this.ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.03);
+      osc.connect(gain); gain.connect(this.ctx.destination);
+      osc.start(); osc.stop(this.ctx.currentTime + 0.03);
+    } catch(e) {}
+  }
+  
+  setEnabled(status) {
+    this.enabled = status;
+  }
+}
+
+const audioSynth = typeof window !== 'undefined' ? new AudioSynthesizer() : null;
+
+// ============================================================
+// WEAPON CONFIG
+// ============================================================
 const WEAPON_CONFIG = {
   name: "AK-47 (Heavy Recoil)",
   magazine: 30,
-  fireRate: 90,
-  recoilScale: 2.5, // Increased from 1.6
+  fireRate: 90, // ms per shot
+  recoilScale: 2.5,
   pattern: [
     {x: 0, y: 0}, {x: 0, y: -15}, {x: 2, y: -32}, {x: -2, y: -48}, {x: -5, y: -62},
     {x: -8, y: -74}, {x: -6, y: -84}, {x: -2, y: -92}, {x: 5, y: -98}, {x: 12, y: -102},
@@ -24,311 +107,206 @@ const WEAPON_CONFIG = {
     {x: -33, y: -104}, {x: -30, y: -104}, {x: -22, y: -104}, {x: -14, y: -104}, {x: -3, y: -104},
     {x: 8, y: -104}, {x: 17, y: -104}, {x: 24, y: -104}, {x: 28, y: -104}, {x: 25, y: -104}
   ],
-  inaccuracy: 2.0 // Increased from 1.5
+  inaccuracy: 2.0 
 };
 
-const FAQ_ITEMS = [
-  {
-    q: "What is recoil spray control in FPS games?",
-    a: "Recoil control (or spray control) is the physical mouse technique used to counter automatic weapon kickback. Players pull down and sweep their mouse in the inverse shape of the weapon's spray pattern to keep bullets concentrated on target."
-  },
-  {
-    q: "Why is recoil training important for competitive players?",
-    a: "In competitive shooters like Valorant and CS2, automatic weapons kick upwards and sideways in predefined patterns. Knowing how to compensate for these patterns ensures your multi-shot sprays remain accurate at medium-to-long distances."
-  },
-  {
-    q: "How does the online recoil simulator work?",
-    a: "It simulates the exact vertical S-curve and horizontal sway patterns of tactical rifles. Raw mouse input via Pointer Lock API maps your adjustments to compare them against the perfect pattern profile in real time."
-  },
-  {
-    q: "Is this recoil control tool free?",
-    a: "Yes, this recoil control lab runs entirely in modern web browsers for free, requiring no software installation or registration."
-  }
-];
+const DRILL_DURATION = 60; // Strict 60 seconds
 
-const StatCard = ({ icon, value, label }) => (
-  <div className="rounded-xl border p-2 sm:p-3 text-center flex flex-col justify-center h-full bg-slate-950/60 border-slate-900 shadow-sm">
-    <div className="mb-1 flex justify-center text-slate-450">{icon}</div>
-    <p className="text-lg sm:text-xl font-bold truncate text-white">{value}</p>
-    <p className="text-[10px] sm:text-xs truncate text-slate-500 font-mono uppercase tracking-wider">{label}</p>
-  </div>
-);
-
-const RelatedDrillCard = ({ title, category, href, description, colorClass = "from-red-500 to-orange-500", icon: Icon }) => (
-  <Link href={href} className="group relative overflow-hidden rounded-xl border transition-all duration-300 hover:shadow-lg hover:-translate-y-1 bg-slate-950/40 border-slate-900 hover:border-red-500/50">
-    <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${colorClass}`} />
-    <div className="p-4">
-      <div className="flex items-center gap-2 mb-2">
-        <div className="w-8 h-8 rounded-lg bg-red-950/30 flex items-center justify-center text-red-500">
-          <Icon className="w-4 h-4" />
-        </div>
-        <span className="text-[10px] px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-450 font-mono font-bold uppercase">{category}</span>
-      </div>
-      <h3 className="font-bold text-sm mb-1 text-white group-hover:text-red-400 transition-colors">{title}</h3>
-      <p className="text-xs text-slate-400 leading-relaxed mt-2">{description}</p>
-      <div className="flex items-center gap-1 mt-3 text-red-500 text-[10px] font-bold uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity">
-        Start Drill <ArrowRight className="w-3.5 h-3.5" />
-      </div>
-    </div>
-  </Link>
-);
-
+// ============================================================
+// MAIN COMPONENT
+// ============================================================
 export default function RecoilControlClient() {
-  const canvasRef = useRef(null);
-  const animationRef = useRef(null);
-  const containerRef = useRef(null);
-  const pageRef = useRef(null);
-
-  useEffect(() => {
-    const checkSize = () => {
-      if (typeof window === 'undefined') return;
-      const ua = navigator.userAgent || '';
-      const isMobile = /Mobi|Android|iPhone|iPad|iPod|Windows Phone/i.test(ua) || 
-                       (navigator.maxTouchPoints > 0 && 
-                        window.screen && Math.max(window.screen.width, window.screen.height) < 1024);
-      if (isMobile) {
-        setShowRotateWarning(true);
-        setWarningMessage("This drill cannot be played on mobile phones");
-        return;
-      }
-      const isPortrait = window.innerHeight > window.innerWidth;
-      if (isPortrait) {
-        if (window.innerWidth < 768) {
-          setShowRotateWarning(true);
-          setWarningMessage("Rotate Your Device");
-          return;
-        }
-      } else {
-        if (window.innerHeight < 320) {
-          setShowRotateWarning(true);
-          setWarningMessage("Screen height too small. Try entering Fullscreen mode.");
-          return;
-        }
-      }
-      setShowRotateWarning(false);
-    };
-    checkSize();
-    window.addEventListener('resize', checkSize);
-    window.addEventListener('orientationchange', checkSize);
-    return () => {
-      window.removeEventListener('resize', checkSize);
-      window.removeEventListener('orientationchange', checkSize);
-    };
-  }, []);
-  
-  const [gameState, setGameState] = useState('start');
-  const [showRotateWarning, setShowRotateWarning] = useState(false);
-  const [warningMessage, setWarningMessage] = useState("Rotate Your Device");
-  const [activeFaq, setActiveFaq] = useState(null);
-
-  const [universalSens, setUniversalSens] = useState(1.0);
-  const gameType = 'universal';
-  const dpi = 800;
-  const inGameSens = universalSens;
-  const cmPer360 = (30 / universalSens).toFixed(1);
-
-  useEffect(() => {
-    try {
-      const savedSens = localStorage.getItem('universalSens');
-      if (savedSens) setUniversalSens(parseFloat(savedSens));
-    } catch (e) {}
-  }, []);
-
-  useEffect(() => {
-    if (gameState === 'playing') return;
-    try {
-      localStorage.setItem('universalSens', universalSens.toString());
-    } catch (e) {}
-  }, [universalSens, gameState]);
-
-  useEffect(() => {
-    return () => {
-      if (typeof document !== 'undefined' && document.pointerLockElement) {
-        document.exitPointerLock();
-      }
-    };
-  }, []);
-
+  // === UI & Viewport State ===
+  const [gameState, setGameState] = useState('start'); // 'start', 'playing', 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [pointerLocked, setPointerLocked] = useState(false);
+  
+  // === Settings State ===
+  const [universalSens, setUniversalSens] = useState(1.0);
+  const [showPatternGuide, setShowPatternGuide] = useState(true);
+
+  // === Gameplay State ===
   const [score, setScore] = useState(0);
   const [bestScore, setBestScore] = useState(0);
   const [timeLeft, setTimeLeft] = useState(DRILL_DURATION);
-  const [pointerLocked, setPointerLocked] = useState(false);
-  const [showPatternGuide, setShowPatternGuide] = useState(true);
-  
-  const virtualCrosshair = useRef({ x: 0, y: 0 });
-  const canvasSizeRef = useRef({ width: 800, height: 450 });
-  const isFiring = useRef(false);
-  
-  const bulletIndex = useRef(0);
-  const lastShotTime = useRef(0);
-  const sprayStartTime = useRef(0);
-  const recoilOffset = useRef({ x: 0, y: 0 });
-  const targetRef = useRef(null);
-  const decalsRef = useRef([]);
-  
-  const scoreRef = useRef(0);
-  const timeLeftRef = useRef(DRILL_DURATION);
-  const timerIntervalRef = useRef(null);
-  const audioCtxRef = useRef(null);
-  const crosshairInitializedRef = useRef(false);
+  const [isNewBest, setIsNewBest] = useState(false);
 
+  // Analytics State
   const [analytics, setAnalytics] = useState({
-    targetsEliminated: 0,
+    accuracy: 100,
     totalShots: 0,
     headshots: 0,
     bodyshots: 0,
     misses: 0,
-    accuracy: 100,
     avgTimeToKill: 0
   });
+
+  // === High-performance Mutable Refs ===
+  const canvasRef = useRef(null);
+  const containerRef = useRef(null);
+  const animationRef = useRef(null);
+  const timerRef = useRef(null);
+  const pageRef = useRef(null);
   
-  const analyticsRef = useRef({
-    targetsEliminated: 0,
+  // === Game Logic Engine Refs ===
+  const engine = useRef({
+    crosshair: { x: 0, y: 0, initialized: false },
+    recoilOffset: { x: 0, y: 0 },
+    isFiring: false,
+    bulletIndex: 0,
+    sprayStartTime: 0,
+    decals: [],
+    target: { x: 400, y: 300, health: 150, maxHealth: 150, spawnTime: 0 },
+    score: 0,
+    timeLeft: DRILL_DURATION,
+    
+    // Telemetry
     totalShots: 0,
     headshots: 0,
     bodyshots: 0,
     misses: 0,
-    spawnTimes: [],
-    killTimes: []
+    killTimes: [],
+    spawnTimes: []
   });
 
-  const resetGame = useCallback(() => {
-    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
-    setGameState('start');
-    if (document.pointerLockElement) {
-      document.exitPointerLock();
-    }
+  const cmPer360 = (30 / universalSens).toFixed(1);
+
+  // === Initialization & Local Storage ===
+  useEffect(() => {
+    try {
+      const savedSens = localStorage.getItem('recoil_sens');
+      if (savedSens) setUniversalSens(parseFloat(savedSens));
+      const savedBest = localStorage.getItem('recoil_bestScore');
+      if (savedBest) setBestScore(parseInt(savedBest, 10));
+    } catch (e) {}
   }, []);
 
   useEffect(() => {
-    try {
-      const savedScore = localStorage.getItem('recoilBestScore');
-      if (savedScore) {
-        const parsed = parseInt(savedScore, 10);
-        if (!isNaN(parsed)) setBestScore(parsed);
-      }
-    } catch (e) {}
-  }, []);
-
-  const initAudio = useCallback(() => {
-    try {
-      if (!audioCtxRef.current) {
-        audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
-      }
-      if (audioCtxRef.current.state === 'suspended') {
-        audioCtxRef.current.resume();
-      }
-      return audioCtxRef.current;
-    } catch (e) {
-      return null;
+    if (gameState !== 'playing') {
+      try { localStorage.setItem('recoil_sens', universalSens.toString()); } catch (e) {}
     }
+    if (audioSynth) audioSynth.setEnabled(soundEnabled);
+  }, [universalSens, gameState, soundEnabled]);
+
+  // === Core Game Management ===
+  const endGame = useCallback(() => {
+    setGameState('gameOver');
+    if (document.pointerLockElement) document.exitPointerLock();
+    
+    const e = engine.current;
+    
+    // Calculate Final Analytics
+    const totalHits = e.headshots + e.bodyshots;
+    const finalAccuracy = e.totalShots > 0 ? Math.round((totalHits / e.totalShots) * 100) : 0;
+    
+    let totalTtk = 0;
+    let killCount = 0;
+    for (let i = 0; i < e.killTimes.length; i++) {
+      if (e.spawnTimes[i]) {
+        totalTtk += (e.killTimes[i] - e.spawnTimes[i]) / 1000;
+        killCount++;
+      }
+    }
+    const avgTtk = killCount > 0 ? (totalTtk / killCount).toFixed(2) : 0;
+
+    setAnalytics({
+      accuracy: finalAccuracy,
+      totalShots: e.totalShots,
+      headshots: e.headshots,
+      bodyshots: e.bodyshots,
+      misses: e.misses,
+      avgTimeToKill: avgTtk
+    });
+
+    setBestScore(prev => {
+      if (e.score > prev) {
+        setIsNewBest(true);
+        try { localStorage.setItem('recoil_bestScore', e.score.toString()); } catch(err){}
+        return e.score;
+      }
+      return prev;
+    });
   }, []);
 
-  const playSound = useCallback((type) => {
-    if (!soundEnabled) return;
-    try {
-      const ctx = initAudio();
-      if (!ctx) return;
-      
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      const now = ctx.currentTime;
-      
-      if (type === 'shoot') {
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(320, now);
-        osc.frequency.exponentialRampToValueAtTime(70, now + 0.09);
-        gain.gain.setValueAtTime(0.06, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
-        osc.start(now);
-        osc.stop(now + 0.09);
-      } else if (type === 'dink') {
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(2200, now);
-        gain.gain.setValueAtTime(0.05, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
-        osc.start(now);
-        osc.stop(now + 0.12);
-      } else if (type === 'kill') {
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(523.25, now);
-        osc.frequency.exponentialRampToValueAtTime(783.99, now + 0.2);
-        gain.gain.setValueAtTime(0.05, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
-        osc.start(now);
-        osc.stop(now + 0.2);
-      } else if (type === 'click') {
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(800, now);
-        gain.gain.setValueAtTime(0.02, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
-        osc.start(now);
-        osc.stop(now + 0.03);
-      }
-    } catch (e) {}
-  }, [soundEnabled, initAudio]);
-
-  const updateBestScore = useCallback((finalScore) => {
-    try {
-      const currentBest = parseInt(localStorage.getItem('recoilBestScore') || '0', 10);
-      if (finalScore > currentBest) {
-        localStorage.setItem('recoilBestScore', finalScore.toString());
-        setBestScore(finalScore);
-      }
-    } catch (e) {}
-  }, []);
-
-  const toggleFullscreen = useCallback(async () => {
-    try {
-      if (!isFullscreen) {
-        const el = pageRef.current;
-        if (el?.requestFullscreen) {
-          el.requestFullscreen().catch((e) => console.warn("Fullscreen request blocked", e));
-          setIsFullscreen(true);
-        }
-      } else {
-        if (document.fullscreenElement) {
-          await document.exitFullscreen();
-        }
-        setIsFullscreen(false);
-      }
-    } catch (e) {}
-  }, [isFullscreen]);
-
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      const active = !!document.fullscreenElement;
-      setIsFullscreen(active);
-      if (!active && gameState === 'playing') {
-        resetGame();
-      }
+  const spawnTarget = useCallback((width, height) => {
+    const pad = 100;
+    const spawnTime = performance.now();
+    engine.current.spawnTimes.push(spawnTime);
+    return {
+      x: Math.random() * (width - pad * 2) + pad,
+      y: Math.random() * ((height - 150) - pad * 2) + pad,
+      health: 150,
+      maxHealth: 150,
+      spawnTime
     };
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
-  }, [gameState, resetGame]);
-
-  const requestPointerLock = useCallback(() => {
-    canvasRef.current?.requestPointerLock();
   }, []);
 
-  const handleCanvasClick = useCallback(() => {
-    if (gameState === 'playing' && !document.pointerLockElement) {
-      canvasRef.current?.requestPointerLock();
-    }
-  }, [gameState]);
+  const startGame = useCallback(async () => {
+    if (audioSynth) audioSynth.init(); 
 
+    setIsNewBest(false);
+    setScore(0);
+    setAnalytics({ accuracy: 100, totalShots: 0, headshots: 0, bodyshots: 0, misses: 0, avgTimeToKill: 0 });
+    setTimeLeft(DRILL_DURATION);
+    setGameState('playing');
+    
+    // Reset Engine State
+    engine.current = {
+      crosshair: { ...engine.current.crosshair },
+      recoilOffset: { x: 0, y: 0 },
+      isFiring: false,
+      bulletIndex: 0,
+      sprayStartTime: 0,
+      decals: [],
+      target: { x: 400, y: 300, health: 150, maxHealth: 150, spawnTime: performance.now() },
+      score: 0,
+      timeLeft: DRILL_DURATION,
+      totalShots: 0, headshots: 0, bodyshots: 0, misses: 0, killTimes: [], spawnTimes: [performance.now()]
+    };
+
+    // Native Container Fullscreen
+    try {
+      if (containerRef.current && !document.fullscreenElement) {
+        await containerRef.current.requestFullscreen();
+      }
+    } catch(e) {}
+
+    // Delay pointer lock slightly to ensure fullscreen transition finishes
+    setTimeout(() => {
+      if (canvasRef.current && !document.pointerLockElement) {
+        canvasRef.current.requestPointerLock().catch(()=>{});
+        
+        // Spawn first target appropriately centered
+        engine.current.target = spawnTarget(canvasRef.current.width, canvasRef.current.height);
+      }
+    }, 150);
+  }, [spawnTarget]);
+
+  // === Strict Timer Management ===
+  useEffect(() => {
+    if (gameState === 'playing' && pointerLocked) {
+      timerRef.current = setInterval(() => {
+        engine.current.timeLeft -= 1;
+        setTimeLeft(engine.current.timeLeft);
+        if (engine.current.timeLeft <= 0) {
+          clearInterval(timerRef.current);
+          endGame();
+        }
+      }, 1000);
+    } else {
+      clearInterval(timerRef.current);
+    }
+    return () => clearInterval(timerRef.current);
+  }, [gameState, pointerLocked, endGame]);
+
+  // === Raw Mouse Input & Firing Listeners ===
   useEffect(() => {
     const handlePointerLockChange = () => {
       const locked = document.pointerLockElement === canvasRef.current;
       setPointerLocked(locked);
-      if (locked) {
-        crosshairInitializedRef.current = true;
-      } else if (gameState === 'playing') {
-        isFiring.current = false;
+      if (!locked && gameState === 'playing') {
+        engine.current.isFiring = false;
       }
     };
     document.addEventListener('pointerlockchange', handlePointerLockChange);
@@ -337,338 +315,200 @@ export default function RecoilControlClient() {
 
   useEffect(() => {
     const handleMouseMove = (e) => {
-      if (document.pointerLockElement !== canvasRef.current && !document.pointerLockElement) return;
-      const dx = (e.movementX || 0) * universalSens;
-      const dy = (e.movementY || 0) * universalSens;
-      const c = canvasRef.current;
-      if (c) {
-        virtualCrosshair.current.x = Math.max(0, Math.min(c.width, virtualCrosshair.current.x + dx));
-        virtualCrosshair.current.y = Math.max(0, Math.min(c.height, virtualCrosshair.current.y + dy));
-      }
+      if (gameState !== 'playing' || !pointerLocked || !canvasRef.current) return;
+      const cvs = canvasRef.current;
+      const dx = e.movementX * universalSens;
+      const dy = e.movementY * universalSens;
+      engine.current.crosshair.x = Math.max(0, Math.min(cvs.width, engine.current.crosshair.x + dx));
+      engine.current.crosshair.y = Math.max(0, Math.min(cvs.height, engine.current.crosshair.y + dy));
     };
-    document.addEventListener('mousemove', handleMouseMove);
-    return () => document.removeEventListener('mousemove', handleMouseMove);
-  }, []);
 
-  useEffect(() => {
     const handleMouseDown = (e) => {
       if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
       if (gameState === 'playing') {
-        if (!pointerLocked) {
-          requestPointerLock();
-        } else {
-          isFiring.current = true;
-          sprayStartTime.current = performance.now();
-          lastShotTime.current = 0;
-          bulletIndex.current = 0;
+        if (!pointerLocked && canvasRef.current) {
+          canvasRef.current.requestPointerLock();
+        } else if (pointerLocked) {
+          engine.current.isFiring = true;
+          engine.current.sprayStartTime = performance.now();
+          engine.current.bulletIndex = 0;
         }
       }
     };
 
-    const handleMouseUp = (e) => {
-      isFiring.current = false;
+    const handleMouseUp = () => {
+      engine.current.isFiring = false;
     };
 
+    document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mousedown', handleMouseDown);
     document.addEventListener('mouseup', handleMouseUp);
     return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mousedown', handleMouseDown);
       document.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [gameState, pointerLocked, requestPointerLock]);
+  }, [gameState, pointerLocked, universalSens]);
 
-  const spawnTarget = useCallback(() => {
-    const cvs = canvasRef.current;
-    if (!cvs) return null;
-    
-    const pad = 100;
-    const tX = Math.random() * (cvs.width - pad * 2) + pad;
-    const tY = Math.random() * (cvs.height - pad * 2) + pad;
-    
-    analyticsRef.current.spawnTimes.push(performance.now());
-    
-    return {
-      x: tX,
-      y: tY,
-      health: 250, // Increased from 100
-      maxHealth: 250
-    };
+  const toggleFullscreen = useCallback(async () => {
+    if (!document.fullscreenElement) {
+      if (containerRef.current) await containerRef.current.requestFullscreen().catch(()=>{});
+    } else {
+      await document.exitFullscreen().catch(()=>{});
+    }
   }, []);
 
-  const fireBullet = useCallback((wp) => {
-    if (bulletIndex.current >= wp.magazine) {
-      playSound('click');
-      isFiring.current = false;
-      return;
-    }
+  useEffect(() => {
+    const fsListener = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener('fullscreenchange', fsListener);
+    return () => document.removeEventListener('fullscreenchange', fsListener);
+  }, []);
 
-    const idx = bulletIndex.current;
-    const currentRecoil = wp.pattern[idx] || wp.pattern[wp.pattern.length - 1];
-    
-    let rx = 0;
-    let ry = 0;
-    
-    if (idx > 0) {
-      const prevRecoil = wp.pattern[idx - 1];
-      rx = (currentRecoil.x - prevRecoil.x) * wp.recoilScale;
-      ry = (currentRecoil.y - prevRecoil.y) * wp.recoilScale;
-    } else {
-      rx = currentRecoil.x * wp.recoilScale;
-      ry = currentRecoil.y * wp.recoilScale;
-    }
-    
-    recoilOffset.current.x += rx;
-    recoilOffset.current.y += ry;
-    
-    virtualCrosshair.current.x += rx;
-    virtualCrosshair.current.y += ry;
-    
-    const bloomAngle = Math.random() * Math.PI * 2;
-    const bloomDist = Math.random() * wp.inaccuracy;
-    
-    const bulletX = virtualCrosshair.current.x + Math.cos(bloomAngle) * bloomDist;
-    const bulletY = virtualCrosshair.current.y + Math.sin(bloomAngle) * bloomDist;
-    
-    playSound('shoot');
-    analyticsRef.current.totalShots++;
-    
-    const target = targetRef.current;
-    let hitType = 'miss';
-    
-    if (target) {
-      const headDist = Math.hypot(bulletX - target.x, bulletY - (target.y - 25));
-      const inChestX = Math.abs(bulletX - target.x) <= 18;
-      const inChestY = bulletY >= (target.y - 5) && bulletY <= (target.y + 35);
-      const inLimbsX = Math.abs(bulletX - target.x) <= 12;
-      const inLimbsY = bulletY > (target.y + 35) && bulletY <= (target.y + 65);
-      
-      if (headDist <= 12) {
-        hitType = 'head';
-        target.health -= 100;
-        analyticsRef.current.headshots++;
-        playSound('dink');
-      } else if (inChestX && inChestY) {
-        hitType = 'chest';
-        target.health -= 25; // Reduced damage for body shots
-        analyticsRef.current.bodyshots++;
-      } else if (inLimbsX && inLimbsY) {
-        hitType = 'limbs';
-        target.health -= 12; // Reduced damage for limb shots
-        analyticsRef.current.bodyshots++;
-      } else {
-        analyticsRef.current.misses++;
-      }
-      
-      if (target.health <= 0) {
-        playSound('kill');
-        scoreRef.current++;
-        setScore(scoreRef.current);
-        analyticsRef.current.targetsEliminated++;
-        analyticsRef.current.killTimes.push(performance.now());
-        
-        targetRef.current = spawnTarget();
-        decalsRef.current = [];
-      }
-    } else {
-      analyticsRef.current.misses++;
-    }
-    
-    decalsRef.current.push({
-      x: bulletX,
-      y: bulletY,
-      time: performance.now(),
-      type: hitType
-    });
-    
-    bulletIndex.current++;
-  }, [playSound, spawnTarget]);
+  // === Render & Physics Loop ===
+  useEffect(() => {
+    const cvs = canvasRef.current; 
+    const container = containerRef.current;
+    if (!cvs || !container) return;
+    const ctx = cvs.getContext('2d', { alpha: false });
 
-  const startTimer = useCallback(() => {
-    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
-    
-    timeLeftRef.current = DRILL_DURATION;
-    setTimeLeft(DRILL_DURATION);
-    
-    timerIntervalRef.current = setInterval(() => {
-      timeLeftRef.current -= 1;
-      setTimeLeft(timeLeftRef.current);
-      
-      if (timeLeftRef.current <= 0) {
-        clearInterval(timerIntervalRef.current);
-        timerIntervalRef.current = null;
-        setGameState('gameOver');
-        document.exitPointerLock();
-        updateBestScore(scoreRef.current);
-        
-        try {
-          recordDrillResult('recoil-control', {
-            score: scoreRef.current,
-            accuracy: null,
-            reactionTimeMs: null,
-            trackingAccuracy: null,
-            comboMax: 0,
-            overshoots: 0,
-            undershoots: 0,
-            sensitivity: inGameSens,
-            dpi,
-            gameType,
-            duration: DRILL_DURATION
-          });
-        } catch (e) {}
-        
-        const tShots = analyticsRef.current.totalShots || 1;
-        const totalHits = analyticsRef.current.headshots + analyticsRef.current.bodyshots;
-        
-        let totalTtk = 0;
-        let killCount = 0;
-        for (let i = 0; i < analyticsRef.current.killTimes.length; i++) {
-          if (analyticsRef.current.spawnTimes[i]) {
-            totalTtk += (analyticsRef.current.killTimes[i] - analyticsRef.current.spawnTimes[i]) / 1000;
-            killCount++;
+    // Robust Resize Observer
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const { width, height } = entry.contentRect;
+        if (width > 0 && height > 0) {
+          cvs.width = width;
+          cvs.height = height;
+          if (!engine.current.crosshair.initialized) {
+            engine.current.crosshair.x = width / 2;
+            engine.current.crosshair.y = height / 2;
+            engine.current.crosshair.initialized = true;
           }
         }
-        
-        setAnalytics({
-          targetsEliminated: analyticsRef.current.targetsEliminated,
-          totalShots: analyticsRef.current.totalShots,
-          headshots: analyticsRef.current.headshots,
-          bodyshots: analyticsRef.current.bodyshots,
-          misses: analyticsRef.current.misses,
-          accuracy: Math.round((totalHits / tShots) * 100),
-          avgTimeToKill: killCount > 0 ? (totalTtk / killCount).toFixed(2) : 0
-        });
       }
-    }, 1000);
-  }, [updateBestScore]);
+    });
+    resizeObserver.observe(container);
 
-  const startGame = useCallback(() => {
-    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
-    
-    try {
-      const el = pageRef.current;
-      if (el && !document.fullscreenElement) {
-        el.requestFullscreen().catch((e) => console.warn("Fullscreen request blocked", e));
-        setIsFullscreen(true);
-      }
-    } catch (e) {
-      console.warn("Fullscreen request blocked", e);
-    }
-
-    setGameState('playing');
-    setScore(0);
-    scoreRef.current = 0;
-    
-    analyticsRef.current = {
-      targetsEliminated: 0,
-      totalShots: 0,
-      headshots: 0,
-      bodyshots: 0,
-      misses: 0,
-      spawnTimes: [],
-      killTimes: []
-    };
-    
-    decalsRef.current = [];
-    recoilOffset.current = { x: 0, y: 0 };
-    isFiring.current = false;
-    bulletIndex.current = 0;
-    
-    targetRef.current = spawnTarget();
-    startTimer();
-    
-    if (canvasRef.current) {
-      try {
-        canvasRef.current.requestPointerLock();
-      } catch (e) {
-        console.warn("Pointer lock blocked", e);
-      }
-    }
-    crosshairInitializedRef.current = true;
-  }, [startTimer, requestPointerLock, spawnTarget]);
-
-  useEffect(() => {
-    if (gameState !== 'playing') return;
-    
-    const cvs = canvasRef.current;
-    if (!cvs) return;
-    const ctx = cvs.getContext('2d');
-    
-    const updateSize = () => {
-      const cr = containerRef.current;
-      if (!cr) return;
-      const rect = cr.getBoundingClientRect();
-      
-      let w = rect.width;
-      let h = w * (9 / 16);
-      if (h > rect.height) {
-        h = rect.height;
-        w = h * (16 / 9);
-      }
-      cvs.width = w;
-      cvs.height = h;
-      cvs.style.width = `${w}px`;
-      cvs.style.height = `${h}px`;
-      canvasSizeRef.current = { width: w, height: h };
-      cvs.style.position = 'absolute';
-      cvs.style.left = `${(rect.width - w) / 2}px`;
-      cvs.style.top = `${(rect.height - h) / 2}px`;
-      
-      if (w > 0 && h > 0 && !crosshairInitializedRef.current) {
-        virtualCrosshair.current = { x: w / 2, y: h / 2 };
-        crosshairInitializedRef.current = true;
-      }
-    };
-    
-    updateSize();
-    window.addEventListener('resize', updateSize);
-    
-    let lastFrameTime = performance.now();
-    
+    let lastTime = performance.now();
     const wp = WEAPON_CONFIG;
-    
-    const run = (timestamp) => {
-      if (gameState !== 'playing') return;
-      
-      let dt = (timestamp - lastFrameTime) / 1000;
-      lastFrameTime = timestamp;
-      if (dt > 0.1) dt = 0.1;
-      
-      if (isFiring.current) {
-        const timeSinceStart = timestamp - sprayStartTime.current;
-        const nextShotDue = bulletIndex.current * wp.fireRate;
+
+    const loop = (time) => {
+      const deltaTimeMs = time - lastTime;
+      lastTime = time;
+      const dt = Math.min(deltaTimeMs / 1000, 0.1); 
+      const e = engine.current;
+
+      if (gameState === 'playing' && pointerLocked) {
         
-        if (timeSinceStart >= nextShotDue) {
-          fireBullet(wp);
+        // 1. RECOIL APPLICATION & FIRING
+        if (e.isFiring) {
+          const timeSinceStart = time - e.sprayStartTime;
+          const nextShotDue = e.bulletIndex * wp.fireRate;
+          
+          if (timeSinceStart >= nextShotDue) {
+            if (e.bulletIndex < wp.magazine) {
+              // FIRE BULLET
+              const idx = e.bulletIndex;
+              const currentRecoil = wp.pattern[idx] || wp.pattern[wp.pattern.length - 1];
+              
+              let rx = 0, ry = 0;
+              if (idx > 0) {
+                const prevRecoil = wp.pattern[idx - 1];
+                rx = (currentRecoil.x - prevRecoil.x) * wp.recoilScale;
+                ry = (currentRecoil.y - prevRecoil.y) * wp.recoilScale;
+              } else {
+                rx = currentRecoil.x * wp.recoilScale;
+                ry = currentRecoil.y * wp.recoilScale;
+              }
+              
+              e.recoilOffset.x += rx;
+              e.recoilOffset.y += ry;
+              e.crosshair.x += rx;
+              e.crosshair.y += ry;
+              
+              // Bloom
+              const bloomAngle = Math.random() * Math.PI * 2;
+              const bloomDist = Math.random() * wp.inaccuracy;
+              const bulletX = e.crosshair.x + Math.cos(bloomAngle) * bloomDist;
+              const bulletY = e.crosshair.y + Math.sin(bloomAngle) * bloomDist;
+              
+              if (audioSynth) audioSynth.playShoot();
+              e.totalShots++;
+              
+              // Collision Math
+              let hitType = 'miss';
+              const t = e.target;
+              
+              const headDist = Math.hypot(bulletX - t.x, bulletY - (t.y - 25));
+              const inChestX = Math.abs(bulletX - t.x) <= 18;
+              const inChestY = bulletY >= (t.y - 5) && bulletY <= (t.y + 35);
+              const inLimbsX = Math.abs(bulletX - t.x) <= 12;
+              const inLimbsY = bulletY > (t.y + 35) && bulletY <= (t.y + 65);
+              
+              if (headDist <= 12) {
+                hitType = 'head';
+                t.health -= 100;
+                e.headshots++;
+                if (audioSynth) audioSynth.playDink();
+              } else if (inChestX && inChestY) {
+                hitType = 'chest';
+                t.health -= 25;
+                e.bodyshots++;
+              } else if (inLimbsX && inLimbsY) {
+                hitType = 'limbs';
+                t.health -= 12;
+                e.bodyshots++;
+              } else {
+                e.misses++;
+              }
+              
+              // Decal Record
+              e.decals.push({ x: bulletX, y: bulletY, time: performance.now(), type: hitType });
+              
+              // Kill Check
+              if (t.health <= 0) {
+                if (audioSynth) audioSynth.playKill();
+                e.score += 2;
+                setScore(e.score);
+                
+                e.killTimes.push(performance.now());
+                e.target = spawnTarget(cvs.width, cvs.height);
+                e.decals = []; // Clear old bullet holes
+              }
+              
+              e.bulletIndex++;
+            } else {
+              // Magazine Empty
+              e.isFiring = false;
+              if (audioSynth) audioSynth.playClick();
+            }
+          }
+        } else {
+          // RECOVERY MECHANIC
+          const recoveryRate = 12.0;
+          const decayX = e.recoilOffset.x * (1 - Math.exp(-recoveryRate * dt));
+          const decayY = e.recoilOffset.y * (1 - Math.exp(-recoveryRate * dt));
+          
+          e.recoilOffset.x -= decayX;
+          e.recoilOffset.y -= decayY;
+          e.crosshair.x -= decayX;
+          e.crosshair.y -= decayY;
         }
-      } else {
-        const recoveryRate = 12.0;
-        const decayX = recoilOffset.current.x * (1 - Math.exp(-recoveryRate * dt));
-        const decayY = recoilOffset.current.y * (1 - Math.exp(-recoveryRate * dt));
-        
-        recoilOffset.current.x -= decayX;
-        recoilOffset.current.y -= decayY;
-        
-        virtualCrosshair.current.x -= decayX;
-        virtualCrosshair.current.y -= decayY;
       }
-      
-      ctx.fillStyle = '#080d1a';
+
+      // --- RENDERING PHASE ---
+      ctx.fillStyle = '#050508';
       ctx.fillRect(0, 0, cvs.width, cvs.height);
-      
+
       // Grid
       ctx.strokeStyle = 'rgba(239, 68, 68, 0.04)';
       ctx.lineWidth = 1;
-      const gSpacing = 60;
-      for (let x = 0; x < cvs.width; x += gSpacing) {
-        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, cvs.height); ctx.stroke();
-      }
-      for (let y = 0; y < cvs.height; y += gSpacing) {
-        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(cvs.width, y); ctx.stroke();
-      }
-      
-      // Target
-      const target = targetRef.current;
-      if (target) {
+      for (let i = 0; i < cvs.width; i += 60) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, cvs.height); ctx.stroke(); }
+      for (let j = 0; j < cvs.height; j += 60) { ctx.beginPath(); ctx.moveTo(0, j); ctx.lineTo(cvs.width, j); ctx.stroke(); }
+
+      const t = e.target;
+
+      // Draw Dummy Target
+      if (gameState === 'playing' || gameState === 'start') {
         ctx.shadowBlur = 15;
         ctx.shadowColor = 'rgba(239, 68, 68, 0.15)';
         
@@ -676,580 +516,487 @@ export default function RecoilControlClient() {
         ctx.fillStyle = 'rgba(239, 68, 68, 0.12)';
         ctx.strokeStyle = 'rgba(239, 68, 68, 0.4)';
         ctx.lineWidth = 2;
-        
         ctx.beginPath();
-        const rx = target.x - 17.5;
-        const ry = target.y - 5;
-        const rw = 35;
-        const rh = 40;
-        const radius = 8;
-        ctx.moveTo(rx + radius, ry);
-        ctx.lineTo(rx + rw - radius, ry);
-        ctx.quadraticCurveTo(rx + rw, ry, rx + rw, ry + radius);
-        ctx.lineTo(rx + rw, ry + rh - radius);
-        ctx.quadraticCurveTo(rx + rw, ry + rh, rx + rw - radius, ry + rh);
-        ctx.lineTo(rx + radius, ry + rh);
-        ctx.quadraticCurveTo(rx, ry + rh, rx, ry + rh - radius);
-        ctx.lineTo(rx, ry + radius);
-        ctx.quadraticCurveTo(rx, ry, rx + radius, ry);
+        const rx = t.x - 17.5, ry = t.y - 5, rw = 35, rh = 40, r = 8;
+        ctx.moveTo(rx + r, ry); ctx.lineTo(rx + rw - r, ry);
+        ctx.quadraticCurveTo(rx + rw, ry, rx + rw, ry + r);
+        ctx.lineTo(rx + rw, ry + rh - r);
+        ctx.quadraticCurveTo(rx + rw, ry + rh, rx + rw - r, ry + rh);
+        ctx.lineTo(rx + r, ry + rh);
+        ctx.quadraticCurveTo(rx, ry + rh, rx, ry + rh - r);
+        ctx.lineTo(rx, ry + r);
+        ctx.quadraticCurveTo(rx, ry, rx + r, ry);
         ctx.closePath();
         ctx.fill(); ctx.stroke();
         
         // Head
-        ctx.beginPath();
-        ctx.arc(target.x, target.y - 25, 12, 0, Math.PI * 2);
-        ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.arc(t.x, t.y - 25, 12, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
         
         // Legs
         ctx.fillStyle = 'rgba(239, 68, 68, 0.08)';
         ctx.strokeStyle = 'rgba(239, 68, 68, 0.25)';
-        ctx.beginPath();
-        ctx.rect(target.x - 12.5, target.y + 35, 25, 30);
-        ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.rect(t.x - 12.5, t.y + 35, 25, 30); ctx.fill(); ctx.stroke();
         
         ctx.shadowBlur = 0;
         
         // Health bar
         ctx.fillStyle = '#1e293b';
-        ctx.fillRect(target.x - 25, target.y - 55, 50, 5);
-        
-        const healthPercent = Math.max(0, target.health / target.maxHealth);
+        ctx.fillRect(t.x - 25, t.y - 55, 50, 5);
+        const healthPercent = Math.max(0, t.health / t.maxHealth);
         ctx.fillStyle = healthPercent > 0.5 ? '#ef4444' : healthPercent > 0.25 ? '#f59e0b' : '#22c55e';
-        ctx.fillRect(target.x - 25, target.y - 55, 50 * healthPercent, 5);
-      }
-      
-      // Spray pattern guide
-      if (showPatternGuide && target) {
-        ctx.strokeStyle = 'rgba(0, 255, 136, 0.12)';
-        ctx.lineWidth = 2;
-        ctx.setLineDash([4, 4]);
-        
-        ctx.beginPath();
-        wp.pattern.forEach((pt, i) => {
-          const x = target.x + pt.x * wp.recoilScale;
-          const y = target.y + pt.y * wp.recoilScale;
-          
-          if (i === 0) ctx.moveTo(x, y);
-          else ctx.lineTo(x, y);
-        });
-        ctx.stroke();
-        ctx.setLineDash([]);
-        
-        if (isFiring.current && bulletIndex.current < wp.pattern.length) {
-          const pt = wp.pattern[bulletIndex.current];
-          ctx.fillStyle = 'rgba(0, 255, 136, 0.5)';
-          ctx.beginPath();
-          ctx.arc(target.x + pt.x * wp.recoilScale, target.y + pt.y * wp.recoilScale, 4, 0, Math.PI * 2);
-          ctx.fill();
-        }
-      }
-      
-      // Bullet holes
-      decalsRef.current.forEach((d) => {
-        const age = timestamp - d.time;
-        const opacity = Math.max(0.1, 1 - (age / 8000));
-        
-        if (d.type === 'head') {
-          ctx.fillStyle = `rgba(0, 255, 136, ${opacity})`;
-        } else if (d.type === 'chest' || d.type === 'limbs') {
-          ctx.fillStyle = `rgba(239, 68, 68, ${opacity})`;
-        } else {
-          ctx.fillStyle = `rgba(255, 187, 0, ${opacity})`;
-        }
-        
-        ctx.beginPath();
-        ctx.arc(d.x, d.y, 2.5, 0, Math.PI * 2);
-        ctx.fill();
-      });
-      
-      // Crosshair
-      {
-        const ch = virtualCrosshair.current;
-        if (ch && ch.x > 0 && ch.x < cvs.width && ch.y > 0 && ch.y < cvs.height) {
-          const activeColor = pointerLocked ? '#00ff88' : '#ffbb00';
-          ctx.strokeStyle = activeColor;
-          
+        ctx.fillRect(t.x - 25, t.y - 55, 50 * healthPercent, 5);
+
+        // Spray Pattern Guide
+        if (showPatternGuide) {
+          ctx.strokeStyle = 'rgba(0, 255, 136, 0.12)';
           ctx.lineWidth = 2;
+          ctx.setLineDash([4, 4]);
           ctx.beginPath();
-          ctx.arc(ch.x, ch.y, 16, 0, Math.PI * 2);
+          wp.pattern.forEach((pt, i) => {
+            const x = t.x + pt.x * wp.recoilScale;
+            const y = t.y + pt.y * wp.recoilScale;
+            if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+          });
           ctx.stroke();
-
-          ctx.beginPath();
-          ctx.lineWidth = 1.5;
-          const innerGap = 6;
-          ctx.moveTo(ch.x, ch.y - 16); ctx.lineTo(ch.x, ch.y - innerGap);
-          ctx.moveTo(ch.x, ch.y + 16); ctx.lineTo(ch.x, ch.y + innerGap);
-          ctx.moveTo(ch.x - 16, ch.y); ctx.lineTo(ch.x - innerGap, ch.y);
-          ctx.moveTo(ch.x + 16, ch.y); ctx.lineTo(ch.x + innerGap, ch.y);
-          ctx.stroke();
+          ctx.setLineDash([]);
           
-          ctx.fillStyle = activeColor;
-          ctx.beginPath(); ctx.arc(ch.x, ch.y, 2, 0, Math.PI * 2); ctx.fill();
+          if (e.isFiring && e.bulletIndex < wp.pattern.length) {
+            const pt = wp.pattern[e.bulletIndex];
+            ctx.fillStyle = 'rgba(0, 255, 136, 0.5)';
+            ctx.beginPath(); ctx.arc(t.x + pt.x * wp.recoilScale, t.y + pt.y * wp.recoilScale, 4, 0, Math.PI * 2); ctx.fill();
+          }
         }
       }
-      
-      animationRef.current = requestAnimationFrame(run);
-    };
-    
-    animationRef.current = requestAnimationFrame(run);
-    
-    return () => {
-      cancelAnimationFrame(animationRef.current);
-      window.removeEventListener('resize', updateSize);
-    };
-  }, [gameState, pointerLocked, showPatternGuide, fireBullet]);
 
-  const avgTTK = analytics.avgTimeToKill;
-  
-  const displayScore = score;
-  const displayBest = bestScore;
-  const displayTime = `${timeLeft}s`;
-  const displayAccuracy = gameState === 'gameOver' ? `${analytics.accuracy}%` : '100%';
-  const displayCombo = 0;
-  const displayMaxCombo = 0;
-  const displayReaction = '-';
-  const displaySens = `${universalSens.toFixed(2)}x`;
-  const handleResetClick = resetGame;
+      // Draw Bullet Holes (Decals)
+      e.decals.forEach((d) => {
+        const age = time - d.time;
+        const opacity = Math.max(0.1, 1 - (age / 8000)); 
+        
+        if (d.type === 'head') ctx.fillStyle = `rgba(0, 255, 136, ${opacity})`;
+        else if (d.type === 'chest' || d.type === 'limbs') ctx.fillStyle = `rgba(239, 68, 68, ${opacity})`;
+        else ctx.fillStyle = `rgba(255, 187, 0, ${opacity})`;
+        
+        ctx.beginPath(); ctx.arc(d.x, d.y, 2.5, 0, Math.PI * 2); ctx.fill();
+      });
+
+      // Draw Crosshair
+      const ch = e.crosshair;
+      if (ch.initialized && (gameState === 'playing' || gameState === 'start')) {
+        const activeColor = pointerLocked ? '#00ff88' : '#eab308';
+        ctx.strokeStyle = activeColor;
+        ctx.fillStyle = activeColor;
+        
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(ch.x, ch.y, 20, 0, Math.PI * 2); ctx.stroke();
+
+        ctx.lineWidth = 1.5;
+        const gap = 8;
+        ctx.beginPath();
+        ctx.moveTo(ch.x, ch.y - 20); ctx.lineTo(ch.x, ch.y - gap); 
+        ctx.moveTo(ch.x, ch.y + 20); ctx.lineTo(ch.x, ch.y + gap); 
+        ctx.moveTo(ch.x - 20, ch.y); ctx.lineTo(ch.x - gap, ch.y); 
+        ctx.moveTo(ch.x + 20, ch.y); ctx.lineTo(ch.x + gap, ch.y); 
+        ctx.stroke();
+        
+        ctx.beginPath(); ctx.arc(ch.x, ch.y, 2, 0, Math.PI * 2); ctx.fill();
+      }
+      
+      animationRef.current = requestAnimationFrame(loop);
+    }
+    
+    animationRef.current = requestAnimationFrame(loop);
+    
+    return () => { 
+      if (animationRef.current) cancelAnimationFrame(animationRef.current); 
+      resizeObserver.disconnect();
+    };
+  }, [gameState, pointerLocked, showPatternGuide, spawnTarget]);
+
+  const shareDrillLink = useCallback(() => {
+    const url = typeof window !== 'undefined' ? window.location.href : '';
+    if (navigator.share) {
+      navigator.share({ title: 'Recoil Control Spray Lab', url }).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(url).then(() => alert('Link copied!'));
+    }
+  }, []);
 
   return (
-    <div ref={pageRef} className="min-h-screen select-none font-sans bg-black text-slate-100 relative overflow-hidden">
-      
-      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-red-950/10 via-black to-black pointer-events-none z-0" />
-      <div className="fixed inset-0 bg-[linear-gradient(rgba(239,68,68,0.015)_1px,_transparent_1px),_linear-gradient(90deg,_rgba(239,68,68,0.015)_1px,_transparent_1px)] bg-[size:40px_40px] pointer-events-none z-0" />
-      
-      <div className={isFullscreen ? "w-full h-screen p-0 m-0" : "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 relative z-10"}>
+    <div ref={pageRef} className="min-h-screen select-none bg-[#050508] text-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
+        {/* Header (Hidden in Fullscreen) */}
         {!isFullscreen && (
-          <nav aria-label="Breadcrumb" className="mb-6">
-            <ol className="flex flex-wrap items-center gap-2 text-xs font-mono text-slate-500 uppercase tracking-wider">
-              <li><Link href="/" className="hover:text-red-400 transition-colors">HQ</Link></li>
-              <li aria-hidden="true">/</li>
-              <li><Link href="/drills/fps" className="hover:text-red-400 transition-colors">FPS Sector</Link></li>
-              <li aria-hidden="true">/</li>
-              <li className="font-semibold text-red-500" aria-current="page">Recoil Spray Control Lab</li>
-            </ol>
-          </nav>
-        )}
-        
-        {!isFullscreen && (
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-            <div className="flex items-center gap-3">
-              <div className="p-3 bg-gradient-to-br from-red-500/20 to-orange-500/20 border border-red-500/30 rounded-xl flex-shrink-0">
-                <Crosshair className="w-6 h-6 text-red-500" />
+          <div className="mb-6">
+            <nav className="mb-4">
+              <ol className="flex flex-wrap items-center gap-2 text-sm text-gray-500">
+                <li><Link href="/" className="hover:text-gray-300">Home</Link></li>
+                <li><ChevronRight className="w-4 h-4 text-gray-600" /></li>
+                <li><Link href="/drills/fps" className="hover:text-gray-300">FPS</Link></li>
+                <li><ChevronRight className="w-4 h-4 text-gray-600" /></li>
+                <li className="text-red-400 font-medium">Recoil Control</li>
+              </ol>
+            </nav>
+
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-gradient-to-br from-red-600 to-orange-600 rounded-xl shadow-[0_0_20px_rgba(239,68,68,0.3)]">
+                  <Crosshair className="w-7 h-7 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Recoil Control Lab</h1>
+                  <p className="text-sm text-gray-400 mt-1 font-medium">Desktop Exclusive • 1:1 Raw Input</p>
+                </div>
               </div>
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">Recoil Spray Control Lab</h1>
-                <p className="text-sm text-slate-400 mt-1">
-                  {pointerLocked ? "🟢 RAW INPUT CAPTURING" : "🔴 CLICK CANVAS TO CAPTURE"} • Pro FPS aim training mechanics
-                </p>
+              
+              <div className="flex gap-2">
+                <button onClick={() => setSoundEnabled(v => !v)} className="p-2.5 rounded-lg border border-gray-700 bg-gray-900 text-gray-400 hover:text-white transition-all">
+                  {soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
+                </button>
+                <button onClick={toggleFullscreen} className="p-2.5 rounded-lg border border-gray-700 bg-gray-900 text-gray-400 hover:text-white transition-all">
+                  <Maximize2 className="w-5 h-5" />
+                </button>
               </div>
             </div>
-            <div className="flex gap-2 flex-shrink-0">
-              {gameState === "playing" && (
-                <button onClick={handleResetClick} className="p-2 rounded-lg border border-slate-900 bg-slate-950 text-slate-400 hover:text-white hover:border-slate-800 transition-all hover:scale-105 active:scale-95" title="Reset Session">
-                  <RefreshCw className="w-5 h-5" />
-                </button>
-              )}
-              <button onClick={() => setSoundEnabled(!soundEnabled)} className="p-2 rounded-lg border border-slate-900 bg-slate-950 text-slate-400 hover:text-white hover:border-slate-800 transition-all hover:scale-105 active:scale-95" title={soundEnabled ? "Mute Sounds" : "Enable Sounds"}>
+          </div>
+        )}
+
+        {/* Live HUD Stats */}
+        {!isFullscreen && (
+          <div className="grid grid-cols-4 lg:grid-cols-4 gap-2 mb-2">
+            <StatCard icon={<Target className="text-red-400" />} value={score} label="Score / Kills" />
+            <StatCard icon={<Timer className={timeLeft <= 10 ? 'text-orange-400 animate-pulse' : 'text-red-400'} />} value={timeLeft} label="Time" unit="s" />
+            <StatCard icon={<Info className="text-blue-400" />} value={`${universalSens.toFixed(2)}x`} label="Sens" />
+            <StatCard icon={<Trophy className="text-yellow-500" />} value={bestScore} label="Best Kills" />
+          </div>
+        )}
+
+        {/* Engine Container */}
+        <div 
+          ref={containerRef} 
+          className={`relative overflow-hidden bg-[#05060b] transition-colors outline-none ${
+            isFullscreen ? 'w-full h-full' : 'w-full aspect-video min-h-[500px] rounded-2xl border border-gray-700 shadow-2xl'
+          }`}
+        >
+          {/* Progress Bar */}
+          {gameState === 'playing' && (
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gray-900 z-[60]">
+              <div 
+                className={`h-full transition-all duration-1000 ease-linear ${timeLeft <= 10 ? 'bg-orange-500 animate-pulse' : 'bg-red-600'}`}
+                style={{ width: `${Math.min(100, (timeLeft / DRILL_DURATION) * 100)}%` }} 
+              />
+            </div>
+          )}
+
+          {/* Fullscreen Overlay Controls */}
+          {isFullscreen && gameState === 'playing' && (
+            <div className="absolute top-4 right-4 z-[60] flex gap-2">
+              <button onClick={() => setSoundEnabled(v => !v)} className="p-3 bg-black/60 border border-gray-600 rounded-xl text-white hover:bg-gray-800 transition-colors">
                 {soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
               </button>
-              <button onClick={toggleFullscreen} className="p-2 rounded-lg border border-slate-900 bg-slate-950 text-slate-400 hover:text-white hover:border-slate-800 transition-all hover:scale-105 active:scale-95" title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}>
-                {isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
+              <button onClick={toggleFullscreen} className="p-3 bg-black/60 border border-gray-600 rounded-xl text-white hover:bg-gray-800 transition-colors">
+                <Minimize2 className="w-5 h-5" />
               </button>
             </div>
-          </div>
-        )}
+          )}
 
-        {!isFullscreen && (
-          <div className="grid grid-cols-4 sm:grid-cols-8 gap-2 sm:gap-3 mb-6 h-auto min-h-[88px] py-1">
-            <StatCard icon={<Target className="text-red-500 w-5 h-5" />} value={displayScore} label="Score" />
-            <StatCard icon={<Trophy className="text-yellow-500 w-5 h-5" />} value={displayBest} label="Best" />
-            <StatCard icon={<Timer className="text-green-500 w-5 h-5" />} value={displayTime} label="Time" />
-            <StatCard icon={<BarChart3 className="text-purple-500 w-5 h-5" />} value={displayAccuracy} label="Accuracy" />
-            <StatCard icon={<Zap className="text-orange-500 w-5 h-5" />} value={displayCombo} label="Combo" />
-            <StatCard icon={<Star className="text-yellow-400 w-5 h-5" />} value={displayMaxCombo} label="Max Combo" />
-            <StatCard icon={<Clock className="text-blue-500 w-5 h-5" />} value={displayReaction} label="Avg Reaction" />
-            <StatCard icon={<Crosshair className="text-green-400 w-5 h-5" />} value={displaySens} label="Sens" />
-          </div>
-        )}
+          {/* Paused Overlay */}
+          {gameState === 'playing' && !pointerLocked && (
+            <div 
+              className="absolute inset-0 z-40 bg-black/60 backdrop-blur-sm flex items-center justify-center cursor-pointer"
+              onClick={(e) => { 
+                e.stopPropagation(); 
+                if (canvasRef.current) canvasRef.current.requestPointerLock(); 
+              }}
+            >
+              <div className="text-center animate-pulse pointer-events-none">
+                <AlertCircle className="w-12 h-12 text-yellow-500 mx-auto mb-4" />
+                <h2 className="text-3xl font-black text-white tracking-widest uppercase mb-2">Game Paused</h2>
+                <p className="text-gray-300 font-medium">Click anywhere on the screen to lock cursor and resume.</p>
+              </div>
+            </div>
+          )}
 
-        <div className={isFullscreen ? "w-full h-full" : "block"}>
-          <div 
-            ref={containerRef} 
-            className={isFullscreen 
-              ? "w-full h-full bg-black relative overflow-hidden flex items-center justify-center cursor-none" 
-              : "w-full aspect-video min-h-[400px] lg:min-h-[500px] bg-black border border-slate-900 rounded-xl relative overflow-hidden flex items-center justify-center cursor-none"}
-          >
-            <canvas ref={canvasRef} onClick={handleCanvasClick} />
-            
-            {gameState === 'start' && (
-              <div className="absolute inset-0 bg-[#080d1a]/95 flex items-center justify-center p-6 z-30 overflow-y-auto">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                  <div className="lg:col-span-1 bg-[#0c1224]/80 border border-slate-900 rounded-xl p-6 flex flex-col justify-between backdrop-blur-md">
-                    <div>
-                      <h3 className="text-sm font-bold text-red-400 mb-4 flex items-center gap-2 border-b border-slate-900 pb-2">
-                        <Info className="w-4 h-4" />
-                        DRILL PROTOCOLS
-                      </h3>
-                      <ul className="space-y-4 text-xs leading-relaxed text-slate-400">
-                        <li className="flex items-start gap-2">
-                          <span className="text-red-500 font-bold">1.</span>
-                          <span>Hold down left-click to begin firing. The AK-47 spray recoil will push your crosshair heavily upward and sideways.</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-red-500 font-bold">2.</span>
-                          <span>Counter-steer the climb! Pull down and sweep your mouse opposite to the recoil pattern to keep bullets on target.</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-red-500 font-bold">3.</span>
-                          <span>Targets have 250HP. Headshots deal 100 damage, chest hits 25, limb hits 12. Requires sustained accuracy!</span>
-                        </li>
-                        <li className="flex items-start gap-2 text-green-400">
-                          <span className="text-green-400 font-bold">★</span>
-                          <span>Practice full 30-round magazine sprays. The ghost line shows the expected bullet path.</span>
-                        </li>
-                      </ul>
+          {/* Core Canvas */}
+          <canvas 
+            ref={canvasRef} 
+            onClick={() => { if (gameState === 'playing' && !pointerLocked) canvasRef.current?.requestPointerLock(); }}
+            className={`block absolute top-0 left-0 w-full h-full touch-none z-10 ${gameState === 'playing' ? 'cursor-none' : ''}`} 
+          />
+
+          {/* START SCREEN */}
+          {gameState === 'start' && (
+            <div className="absolute inset-0 flex items-center justify-center z-50 bg-black/70 backdrop-blur-md p-4 overflow-y-auto">
+              <div className="rounded-3xl p-8 text-center max-w-lg w-full border border-gray-700 bg-gray-900 shadow-2xl my-auto">
+                <div className="w-16 h-16 bg-gradient-to-br from-red-600 to-orange-600 rounded-2xl mx-auto flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(239,68,68,0.3)]">
+                  <Target className="w-8 h-8 text-white" />
+                </div>
+                <h2 className="text-3xl font-black mb-3 tracking-tight text-white uppercase">Recoil Control Lab</h2>
+                <p className="text-sm mb-6 text-gray-400 leading-relaxed">
+                  Hold left-click to fire. The weapon's recoil will kick your crosshair up and sideways. Counter-steer your mouse to keep the bullets on target.
+                </p>
+
+                {/* Configuration Panel */}
+                <div className="mb-8 p-5 bg-black/50 rounded-xl border border-gray-800 text-left space-y-5">
+                  <div>
+                    <div className="flex justify-between items-center mb-2">
+                      <label className="text-xs text-gray-400 font-bold uppercase tracking-wider flex items-center gap-2">
+                        <Crosshair className="w-4 h-4 text-red-500"/> Universal Sens
+                      </label>
+                      <span className="text-red-400 font-mono text-sm font-bold">{universalSens.toFixed(2)}x</span>
                     </div>
-                    <div className="mt-6 pt-4 border-t border-slate-900 text-[10px] text-slate-500 leading-normal">
-                      AK-47 Heavy Recoil • 250HP Targets • 30 Round Magazine
-                    </div>
+                    <input 
+                      type="range" min="0.1" max="3.0" step="0.05" 
+                      value={universalSens} 
+                      onChange={(e) => setUniversalSens(parseFloat(e.target.value))} 
+                      className="w-full h-1.5 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-red-500" 
+                    />
+                    <div className="text-[10px] text-gray-500 mt-1.5 text-right">Approx: {cmPer360} cm/360</div>
                   </div>
 
-                  <div className="lg:col-span-2 bg-[#0c1224]/80 border border-slate-900 rounded-xl p-6 backdrop-blur-md flex flex-col justify-between">
-                    <div>
-                      <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2 border-b border-slate-900 pb-2">
-                        <Cpu className="w-4 h-4 text-red-400" />
-                        RECOIL CALIBRATION
-                      </h3>
-                      
-                      <div className="mb-6 p-4 bg-black/45 rounded border border-slate-900">
-                        <div className="flex justify-between items-center mb-2">
-                          <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Universal Sens</label>
-                          <span className="text-green-400 font-mono text-xs font-bold">{universalSens.toFixed(2)}x</span>
-                        </div>
-                        <input 
-                          type="range" min="0.1" max="3.0" step="0.05" 
-                          value={universalSens} 
-                          onChange={(e) => setUniversalSens(parseFloat(e.target.value))} 
-                          className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-green-500" 
-                        />
-                      </div>
-
-                      <div className="p-4 bg-black/80 rounded border border-slate-900 flex justify-between items-center text-xs">
-                        <div>
-                          <span className="text-[10px] text-slate-500 block uppercase">Matched 360 Distance</span>
-                          <span className="text-white font-bold text-sm">{cmPer360} cm</span>
-                        </div>
-                        <div className="text-right">
-                          <span className="text-[10px] text-slate-500 block uppercase">Weapon</span>
-                          <span className="text-red-400 font-bold">AK-47 Heavy Recoil</span>
-                        </div>
-                      </div>
+                  <div className="pt-4 border-t border-gray-800">
+                    <div className="flex items-center gap-3">
+                      <input 
+                        type="checkbox" 
+                        id="guide"
+                        checked={showPatternGuide}
+                        onChange={(e) => setShowPatternGuide(e.target.checked)}
+                        className="w-5 h-5 accent-red-500 rounded border-gray-800 cursor-pointer"
+                      />
+                      <label htmlFor="guide" className="text-sm font-bold text-gray-300 uppercase tracking-wider cursor-pointer">Show Ghost Spray Guide</label>
                     </div>
+                  </div>
+                </div>
+                
+                <button 
+                  onClick={startGame}
+                  className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-red-600 to-orange-600 text-white rounded-xl font-black text-lg hover:brightness-110 transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-[0_0_20px_rgba(239,68,68,0.3)]"
+                >
+                  <Play className="w-6 h-6 fill-white" /> INITIATE SPRAY DRILL
+                </button>
+              </div>
+            </div>
+          )}
 
-                    <div className="mt-8 flex flex-col sm:flex-row gap-4 items-center justify-between border-t border-slate-900 pt-6">
+          {/* GAME OVER DASHBOARD */}
+          {gameState === 'gameOver' && (
+            <div className="absolute inset-0 flex items-center justify-center z-50 bg-black/90 backdrop-blur-md p-4 animate-in fade-in duration-300 overflow-y-auto">
+              <div className="rounded-3xl max-w-2xl w-full shadow-2xl border border-gray-800 bg-gray-950 overflow-hidden my-auto">
+                <div className="bg-gradient-to-br from-red-900/40 to-orange-900/40 p-6 border-b border-gray-800 text-center relative">
+                  {isNewBest && (
+                    <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-yellow-500 text-black text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-[0_0_15px_rgba(234,179,8,0.5)]">
+                      ⭐ New Personal Best
+                    </div>
+                  )}
+                  <h2 className="text-2xl font-black text-white tracking-tight mt-4">Spray Analysis Complete</h2>
+                  <p className="text-red-400 font-medium text-sm mt-1">60 Second Session</p>
+                </div>
+
+                <div className="p-6">
+                  {/* Top Stats */}
+                  <div className="flex flex-col sm:flex-row gap-4 mb-6">
+                    <div className="flex-1 bg-gray-900 rounded-2xl p-4 border border-gray-800 flex justify-between items-center">
                       <div>
-                        <span className="text-[10px] text-slate-500 block uppercase">Personal Best Record</span>
-                        <span className="text-white font-bold text-lg flex items-center gap-1.5">
-                          <Trophy className="w-4 h-4 text-yellow-500" />
-                          {bestScore} Kills
+                        <span className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1 block">Targets Eliminated</span>
+                        <div className="flex items-end gap-1">
+                          <span className="text-4xl font-black text-white leading-none">{score}</span>
+                          <span className="text-xs text-gray-500 font-bold mb-1">KILLS</span>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1 block">Spray Accuracy</span>
+                        <span className={`text-3xl font-black ${analytics.accuracy >= 70 ? 'text-green-400' : analytics.accuracy >= 40 ? 'text-yellow-400' : 'text-red-400'}`}>
+                          {analytics.accuracy}%
                         </span>
                       </div>
-                      
-                      <button
-                        onClick={startGame}
-                        className="w-full sm:w-auto px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg text-sm flex items-center justify-center gap-2 shadow-lg shadow-red-500/25 uppercase tracking-wider transition"
-                      >
-                        <Play className="w-4 h-4 fill-white" />
-                        Initiate Spray Control Lab
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-            
-            {gameState === 'gameOver' && (
-              <div className="absolute inset-0 bg-[#080d1a]/95 flex items-center justify-center p-6 z-30 overflow-y-auto">
-                <div className="bg-[#0c1224]/80 border border-slate-900 rounded-xl p-8 backdrop-blur-md max-w-3xl mx-auto">
-                  <h2 className="text-xl font-bold text-red-400 text-center mb-6 uppercase tracking-widest flex items-center justify-center gap-2">
-                    <Award className="w-5 h-5 text-yellow-500" />
-                    LAB REPORT: RECOIL RESULTS
-                  </h2>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                    <div className="space-y-4">
-                      <div className="bg-black p-4 rounded border border-slate-900">
-                        <div className="flex justify-between items-center text-xs">
-                          <span className="text-slate-500 uppercase">Targets Eliminated</span>
-                          <span className="text-white font-bold text-lg">{analytics.targetsEliminated} Kills</span>
-                        </div>
-                      </div>
-                      
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="bg-black p-3 rounded border border-slate-900 text-center">
-                          <span className="text-[10px] text-slate-500 block uppercase">Total Shots</span>
-                          <span className="text-white font-bold text-sm">{analytics.totalShots}</span>
-                        </div>
-                        <div className="bg-black p-3 rounded border border-slate-900 text-center">
-                          <span className="text-[10px] text-slate-500 block uppercase">Spray Accuracy</span>
-                          <span className="text-white font-bold text-sm">{analytics.accuracy}%</span>
-                        </div>
-                      </div>
-
-                      <div className="bg-black p-4 rounded border border-slate-900">
-                        <div className="flex justify-between items-center text-xs mb-1">
-                          <span className="text-slate-500 uppercase">Average Time-to-Kill</span>
-                          <span className="text-red-400 font-bold">{avgTTK}s</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-4">
-                      <div className="bg-black p-4 rounded border border-slate-900">
-                        <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-900 pb-2 mb-3">
-                          HITBOX LANDINGS
-                        </h4>
-                        
-                        <div className="space-y-2 text-xs">
-                          <div className="flex justify-between">
-                            <span className="text-slate-500">Headshots (100 DMG):</span>
-                            <span className="text-green-400 font-bold">{analytics.headshots}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-slate-500">Body Hits:</span>
-                            <span className="text-blue-400 font-bold">{analytics.bodyshots}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-slate-500">Misses:</span>
-                            <span className="text-red-500 font-bold">{analytics.misses}</span>
-                          </div>
-                        </div>
-                      </div>
                     </div>
                   </div>
 
-                  <div className="flex flex-col sm:flex-row gap-4 justify-center items-center border-t border-slate-900 pt-6">
-                    <button
-                      onClick={startGame}
-                      className="w-full sm:w-auto px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition"
-                    >
-                      <RefreshCw className="w-4 h-4" />
-                      Retrain Spray
+                  {/* Hitbox Diagnostics Block */}
+                  <div className="bg-[#0a0a0a] border border-red-900/50 rounded-xl p-5 mb-6 text-left shadow-inner">
+                    <h3 className="text-xs font-bold text-red-400 font-mono uppercase tracking-widest border-b border-red-900/50 pb-2 mb-4 flex items-center gap-2">
+                      <Target className="w-4 h-4 text-red-400" />
+                      HITBOX TELEMETRY DIAGNOSTICS
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-xs leading-relaxed text-gray-300">
+                      
+                      <div className="space-y-3 sm:border-r border-gray-800 sm:pr-6">
+                        <p className="font-bold text-white uppercase text-[10px] tracking-wider font-mono">Bullet Landings:</p>
+                        <ul className="space-y-2">
+                          <li className="flex justify-between items-center bg-gray-900/50 p-2 rounded border border-gray-800">
+                            <span className="text-gray-400">Total Shots Fired:</span>
+                            <span className="font-bold text-white">{analytics.totalShots}</span>
+                          </li>
+                          <li className="flex justify-between items-center bg-gray-900/50 p-2 rounded border border-gray-800">
+                            <span className="text-gray-400">Headshots (100 DMG):</span>
+                            <span className="font-bold text-green-400">{analytics.headshots}</span>
+                          </li>
+                          <li className="flex justify-between items-center bg-gray-900/50 p-2 rounded border border-gray-800">
+                            <span className="text-gray-400">Body/Limb Hits:</span>
+                            <span className="font-bold text-blue-400">{analytics.bodyshots}</span>
+                          </li>
+                          <li className="flex justify-between items-center bg-gray-900/50 p-2 rounded border border-gray-800">
+                            <span className="text-gray-400">Misses:</span>
+                            <span className="font-bold text-red-500">{analytics.misses}</span>
+                          </li>
+                        </ul>
+                      </div>
+
+                      <div className="space-y-3 flex flex-col justify-between">
+                        <div>
+                          <p className="font-bold text-white uppercase text-[10px] tracking-wider font-mono mb-2">Performance Summary:</p>
+                          <p className="text-gray-400 leading-relaxed font-sans">
+                            <span className="block mb-2"><strong>Average Time-To-Kill:</strong> <span className="text-orange-400">{analytics.avgTimeToKill}s</span></span>
+                            {analytics.misses > (analytics.headshots + analytics.bodyshots) ? (
+                              <span className="text-yellow-300">You are missing more shots than you land. Do not hold the spray if you lose control. Stop firing, let the crosshair reset, and burst in small groups.</span>
+                            ) : (
+                              <span className="text-green-300">Solid recoil control. Try toggling off the "Ghost Pattern" guide on the next run to test pure muscle memory.</span>
+                            )}
+                          </p>
+                        </div>
+                      </div>
+
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex gap-3">
+                    <button onClick={startGame} className="flex-1 py-4 bg-red-600 text-white rounded-xl font-black tracking-wide hover:bg-red-500 transition-all active:scale-95 flex items-center justify-center gap-2 shadow-lg">
+                      <RefreshCw className="w-5 h-5" /> TRAIN AGAIN
                     </button>
-                    <Link href="/drills/fps" className="w-full sm:w-auto">
-                      <button className="w-full px-6 py-2.5 bg-slate-900 border border-slate-900 hover:border-slate-700 text-slate-350 font-bold rounded-lg text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition">
-                        Return to Sector
-                      </button>
-                    </Link>
+                    {isFullscreen && (
+                       <button onClick={toggleFullscreen} className="px-6 py-4 bg-gray-800 text-white rounded-xl font-bold hover:bg-gray-700 transition-all border border-gray-700">
+                         Exit
+                       </button>
+                    )}
                   </div>
                 </div>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
 
-        {/* DRILL RULES & PRO FEATURES */}
+        {/* DRILL INSTRUCTIONS & SCORING SECTION */}
         {!isFullscreen && (
-          <footer className="mt-8">
-            <div className="rounded-xl border border-slate-900 bg-slate-950/40 overflow-hidden backdrop-blur-md">
-              <div className="px-5 py-4 border-b border-slate-900 bg-slate-950/60 flex items-center gap-2">
-                <Info className="w-4 h-4 text-red-500" />
-                <h2 className="font-bold text-sm text-white">
-                  Drill Rules & Professional Features
-                </h2>
+          <section className="mt-10">
+            <div className="rounded-2xl border border-gray-800 overflow-hidden bg-gray-900 shadow-2xl pointer-events-none">
+              <div className="px-6 py-5 border-b border-gray-800 bg-black/40 flex items-center gap-3">
+                <Info className="w-5 h-5 text-red-400" /><h2 className="font-bold text-white text-lg tracking-wide">Drill Instructions & Scoring</h2>
               </div>
-              <div className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs text-slate-400">
-                  <div className="space-y-3">
-                    <h3 className="font-bold text-white uppercase tracking-wider flex items-center gap-2">
-                      <Crosshair className="w-4 h-4 text-red-500" />
-                      How to Play
-                    </h3>
-                    <ol className="space-y-2 list-decimal pl-4">
-                      <li>Click <span className="text-white">Launch Fullscreen Training</span> to begin.</li>
-                      <li>Allow browser to lock cursor for <span className="text-red-400">1:1 raw mouse input</span>.</li>
-                      <li>Hold left-click to spray. Pull mouse down and counter-sway the recoil.</li>
-                      <li>Eliminate targets to maximize score. Headshots deal 100 damage.</li>
-                    </ol>
-                  </div>
-                  <div className="space-y-3">
-                    <h3 className="font-bold text-white uppercase tracking-wider flex items-center gap-2">
-                      <Trophy className="w-4 h-4 text-yellow-500" />
-                      Scoring
-                    </h3>
-                    <ul className="space-y-2 list-disc pl-4">
-                      <li><span className="text-red-400 font-bold">Kills</span>: Each eliminated target adds 1 point.</li>
-                      <li><span className="text-green-400 font-bold">Headshots</span>: Critical 100 damage for instant kills.</li>
-                      <li><span className="text-slate-300 font-bold">Accuracy</span>: Tracked for precision benchmarking.</li>
-                    </ul>
-                  </div>
-                  <div className="space-y-3">
-                    <h3 className="font-bold text-white uppercase tracking-wider flex items-center gap-2">
-                      <Zap className="w-4 h-4 text-orange-500" />
-                      Pro Features
-                    </h3>
-                    <ul className="space-y-2 list-disc pl-4">
-                      <li><span className="text-red-400">Pointer Lock API</span> locks cursor to capture raw input.</li>
-                      <li><span className="text-blue-400">Recoil Physics</span>: Real weapon pattern simulation.</li>
-                      <li><span className="text-purple-400">Spray Guide</span>: Ghost line shows expected bullet path.</li>
-                    </ul>
-                  </div>
+              <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-5">
+                  <RuleItem num="1" color="green" text="Target Elimination" highlight="+2 PTS" result="Deal 150 DMG" />
+                  <RuleItem num="2" color="orange" text="Headshots" highlight="100 DMG" result="Faster TTK" />
                 </div>
-              </div>
-            </div>
-          </footer>
-        )}
-
-        {/* ABOUT DRILL */}
-        {!isFullscreen && (
-          <section className="mt-8" aria-label="About this recoil trainer">
-            <div className="rounded-xl border border-slate-900 bg-slate-950/40 overflow-hidden backdrop-blur-md">
-              <div className="px-5 py-4 border-b border-slate-900 bg-slate-950/60 flex items-center gap-2">
-                <GraduationCap className="w-4 h-4 text-red-500" />
-                <h2 className="font-bold text-sm text-white uppercase tracking-wider font-mono">
-                  Recoil Control & Spray Simulator Training Guide
-                </h2>
-              </div>
-              <div className="p-6 space-y-8">
-                
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                  <div className="p-5 rounded-xl border border-slate-900 bg-slate-950/20">
-                    <h3 className="text-xs font-bold text-red-400 uppercase tracking-widest font-mono mb-2">What This Drill Trains</h3>
-                    <p className="text-[11px] text-slate-400 leading-relaxed">
-                      The Esports Recoil Spray Control Lab trains muscle memory for weapon spray pattern compensation. Automatic weapons generate recoil kickback, causing bullets to climb vertically and drift horizontally in predetermined paths. This drill isolates and trains the counter-movements required to keep your weapon's bullet grouping tightly concentrated on target.
-                    </p>
-                  </div>
-                  <div className="p-5 rounded-xl border border-slate-900 bg-slate-950/20">
-                    <h3 className="text-xs font-bold text-red-400 uppercase tracking-widest font-mono mb-2">How to Practice Effectively</h3>
-                    <p className="text-[11px] text-slate-400 leading-relaxed">
-                      Click and hold left click on the target to initiate a continuous spray. Pull down and sway your mouse in the inverse shape of the weapon's spray path. Follow the ghost pattern outline for guidance. Targets have 250HP - headshots deal 100 damage, requiring sustained accuracy for eliminations.
-                    </p>
-                  </div>
-                  <div className="p-5 rounded-xl border border-slate-900 bg-slate-950/20">
-                    <h3 className="text-xs font-bold text-red-400 uppercase tracking-widest font-mono mb-2">Reflex & Focus Benefits</h3>
-                    <p className="text-[11px] text-slate-400 leading-relaxed">
-                      Mastering recoil patterns provides a massive competitive advantage during spray transfers and long-range duels. The simulator's real-time accuracy telemetry quantifies your progression, helping identify over-compensation or under-compensation at specific stages of the magazine.
-                    </p>
-                  </div>
+                <div className="space-y-5">
+                  <RuleItem num="3" color="red" text="Recoil Compensation" result="Pull opposite to spray" />
+                  <RuleItem num="4" color="blue" text="Raw Input" highlight="Desktop Exclusive" result="1:1 Mouse Tracking" />
                 </div>
-
-                <div className="border-t border-slate-900 pt-6">
-                  <h3 className="text-sm font-bold text-white uppercase tracking-wider font-mono mb-4 flex items-center gap-2">
-                    <Info className="w-4 h-4 text-red-500" />
-                    Frequently Asked Questions (FAQ)
-                  </h3>
-                  <div className="space-y-3">
-                    {FAQ_ITEMS.map((item, idx) => {
-                      const isOpen = activeFaq === idx;
-                      return (
-                        <div key={idx} className="border border-slate-900 rounded-lg overflow-hidden bg-slate-950/10">
-                          <button
-                            onClick={() => setActiveFaq(isOpen ? null : idx)}
-                            className="w-full px-5 py-3.5 text-left flex items-center justify-between text-xs font-bold font-mono text-slate-200 hover:text-white hover:bg-slate-950/30 transition-all"
-                            aria-expanded={isOpen}
-                          >
-                            <span>{item.q}</span>
-                            <span className={`text-xs transition-transform duration-200 ${isOpen ? 'rotate-90 text-red-500' : 'text-slate-500'}`}>▶</span>
-                          </button>
-                          {isOpen && (
-                            <div className="px-5 py-4 border-t border-slate-900/60 bg-slate-950/5 text-[11px] text-slate-400 leading-relaxed">
-                              {item.a}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
               </div>
             </div>
           </section>
         )}
 
-        {/* RELATED DRILLS */}
+        {/* ABOUT THIS DRILL SECTION */}
         {!isFullscreen && (
-          <section className="mt-8" aria-label="Explore related aim and response drills">
+          <section className="mt-12" aria-label="About this drill">
+            <div className="rounded-2xl border border-gray-800 overflow-hidden bg-gray-900 shadow-xl">
+              <div className="px-6 py-5 border-b border-gray-800 bg-black/40 flex items-center gap-3">
+                <GraduationCap className="w-5 h-5 text-red-400" />
+                <h2 className="font-bold text-white text-lg tracking-wide">About Recoil Control & Spray Simulator</h2>
+              </div>
+              <div className="p-8">
+                <p className="text-sm leading-relaxed mb-6 text-gray-300">
+                  Automatic weapons in competitive shooters generate recoil kickback, causing bullets to climb vertically and drift horizontally in predetermined paths. This simulator isolates and trains the counter-movements required to keep your weapon's bullet grouping tightly concentrated on target using exact raw-mouse telemetry.
+                </p>
+
+                {/* Grid Section */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
+                  <div className="p-5 rounded-xl border border-gray-800 bg-black/40">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center"><Users className="w-4 h-4 text-white" /></div>
+                      <h3 className="text-sm font-bold text-white">Who It's For</h3>
+                    </div>
+                    <p className="text-xs leading-relaxed text-gray-400">FPS players looking to perfect their spray transfers and long-range bursts in games with heavy recoil patterns like CS2, Valorant, or PUBG.</p>
+                  </div>
+                  <div className="p-5 rounded-xl border border-gray-800 bg-black/40">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-8 h-8 rounded-lg bg-green-600 flex items-center justify-center"><TrendingUp className="w-4 h-4 text-white" /></div>
+                      <h3 className="text-sm font-bold text-white">Skills Improved</h3>
+                    </div>
+                    <p className="text-xs leading-relaxed text-gray-400">Muscle memory for recoil compensation, trigger discipline, spray-control pacing, and rapid crosshair resetting.</p>
+                  </div>
+                  <div className="p-5 rounded-xl border border-gray-800 bg-black/40">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-8 h-8 rounded-lg bg-purple-600 flex items-center justify-center"><BarChart3 className="w-4 h-4 text-white" /></div>
+                      <h3 className="text-sm font-bold text-white">What You'll Track</h3>
+                    </div>
+                    <p className="text-xs leading-relaxed text-gray-400">Overall bullet accuracy percentage, exact headshot frequency, total misses, and your exact average Time-To-Kill (TTK).</p>
+                  </div>
+                </div>
+
+                {/* Integrated How to Play Block */}
+                <div className="mb-8 bg-[#0b0f19]/40 border border-gray-800 rounded-xl p-6">
+                  <h3 className="text-base font-bold text-white uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <Crosshair className="w-5 h-5 text-red-500" /> How to Play
+                  </h3>
+                  <div className="grid sm:grid-cols-2 gap-6 text-sm text-gray-300">
+                    <ol className="space-y-3 list-decimal pl-5">
+                      <li>Adjust your <strong>Sens</strong> to properly match your main game.</li>
+                      <li>Click <strong>Begin Drill</strong> to lock your mouse inside the engine.</li>
+                      <li>Click and <strong>Hold</strong> the Left Mouse Button to fire an automatic spray.</li>
+                      <li>Pull down and sway your mouse opposite to the visual "Ghost Spray Guide" to keep bullets hitting inside the target.</li>
+                    </ol>
+                    <ul className="space-y-3">
+                      <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-green-500" /> <span className="text-white font-bold">150HP Targets:</span> Requires multiple accurate body shots or 1 headshot + 1 body shot.</li>
+                      <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-orange-400" /> <span className="text-white font-bold">Headshots:</span> Deal exactly 100 DMG for significantly faster kill times.</li>
+                      <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-indigo-400" /> <span className="text-white font-bold">Scoring:</span> Earn +2 Points per target eliminated within the strict 60-second window.</li>
+                    </ul>
+                  </div>
+                </div>
+
+                {/* FAQ Section */}
+                <div className="p-5 rounded-xl border border-gray-800 bg-black/40">
+                  <div className="flex items-center gap-3 mb-4">
+                    <Lightbulb className="w-5 h-5 text-yellow-400" />
+                    <h3 className="text-sm font-bold text-white uppercase tracking-wider">Frequently Asked Questions</h3>
+                  </div>
+                  <div className="space-y-4">
+                    <div>
+                      <h4 className="text-sm font-bold text-gray-200">How does the recoil pattern work?</h4>
+                      <p className="text-xs text-gray-400 mt-1">The weapon follows a fixed mathematical array of vertical and horizontal movement over time. You must pull your mouse in the exact opposite direction of the current index to keep the crosshair centered. Releasing the mouse button rapidly resets the index and the recoil bloom.</p>
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-gray-200">What is the "Ghost Spray Guide"?</h4>
+                      <p className="text-xs text-gray-400 mt-1">It is a visual dashed line projected over the target that outlines the exact path the crosshair will take if you do not move your mouse. By pulling your mouse along the exact opposite reflection of this line, you will achieve perfect bullet accuracy.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* RELATED DRILLS SECTION (STRICTLY 4 FPS DRILLS) */}
+        {!isFullscreen && (
+          <section className="mt-14" aria-label="Explore related aim and response drills">
             <div className="flex items-center gap-2 mb-4">
               <div className="w-1 h-5 rounded-full bg-red-500"></div>
-              <h2 className="text-xl font-bold text-white">
-                Explore Related Drills
+              <h2 className="text-xs font-bold text-white uppercase tracking-widest font-mono">
+                Explore Related FPS Drills
               </h2>
-              <span className="text-[10px] px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-450 font-mono font-bold uppercase">
-                8 Drills
-              </span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <RelatedDrillCard 
-                title="Aim Trainer" 
-                category="Motor Sector" 
-                href="/drills/motor/hand-eye-coordination/aim-trainer" 
-                description="Hone spatial coordinate click speed."
-                icon={Target}
-                colorClass="from-blue-500 to-indigo-500"
-              />
-              <RelatedDrillCard 
-                title="Click Accuracy" 
-                category="Motor Sector" 
-                href="/drills/motor/hand-eye-coordination/click-accuracy" 
-                description="Develop micro-click spatial accuracy."
-                icon={Target}
-                colorClass="from-blue-500 to-indigo-500"
-              />
-              <RelatedDrillCard 
-                title="Reflex Grade" 
-                category="Visual Tracking" 
-                href="/drills/visual-tracking/reaction-simulator" 
-                description="Test visual stimulus identification speed."
-                icon={Timer}
-                colorClass="from-cyan-500 to-blue-500"
-              />
-              <RelatedDrillCard 
-                title="Saccadic Calibration" 
-                category="Visual Tracking" 
-                href="/drills/visual-tracking/saccadic-snap" 
-                description="Optimize saccadic gaze acquisition limits."
-                icon={Eye}
-                colorClass="from-cyan-500 to-blue-500"
-              />
-              <RelatedDrillCard 
-                title="180° Awareness" 
-                category="FPS Sector" 
-                href="/drills/fps/180-degree-awareness" 
-                description="Alternate snapping between opposite horizons."
-                icon={Eye}
-                colorClass="from-red-500 to-orange-500"
-              />
-              <RelatedDrillCard 
-                title="Angle Hold Trainer" 
-                category="FPS Sector" 
-                href="/drills/fps/angle-hold-trainer" 
-                description="Hone tactical crosshair placement holds."
-                icon={Shield}
-                colorClass="from-red-500 to-orange-500"
-              />
-              <RelatedDrillCard 
-                title="Counter Strafe" 
-                category="FPS Sector" 
-                href="/drills/fps/counter-strafe-trainer" 
-                description="Coordinate movement deadzones and firing accuracy."
-                icon={Zap}
-                colorClass="from-red-500 to-orange-500"
-              />
-              <RelatedDrillCard 
-                title="Flick Shot Trainer" 
-                category="FPS Sector" 
-                href="/drills/fps/flick-shot-training" 
-                description="Raw input flick training with adaptive target windows."
-                icon={Crosshair}
-                colorClass="from-red-500 to-orange-500"
-              />
+              <RelatedCard href="/drills/fps/flick-shot-training" title="Pro Flick Trainer" desc="Snap to targets in time-attack mode." color="blue" icon={<Crosshair className="w-4 h-4" />} />
+              <RelatedCard href="/drills/motor/hand-eye-coordination/aim-trainer" title="Aim Trainer Elite" desc="Dynamic shrinking bullseye survival." color="green" icon={<Target className="w-4 h-4" />} />
+              <RelatedCard href="/drills/fps/180-degree-awareness" title="180° Awareness" desc="Alternate snapping opposite horizons." color="orange" icon={<Zap className="w-4 h-4" />} />
+             
             </div>
           </section>
         )}
 
-        {/* FOOTER */}
+        {/* FOOTER SECTION */}
         {!isFullscreen && (
           <footer className="mt-12 bg-slate-950/40 border border-slate-900 text-slate-500 rounded-xl py-10 px-6 font-mono text-[10px]" role="contentinfo">
             <div className="max-w-7xl mx-auto">
@@ -1275,7 +1022,7 @@ export default function RecoilControlClient() {
                   <ul className="space-y-2">
                     <li><Link href="/drills/cognitive/memory/card-matching" className="hover:text-red-400 transition-colors">Memory Games</Link></li>
                     <li><Link href="/drills/cognitive/attention/divided-attention" className="hover:text-red-400 transition-colors">Attention Drills</Link></li>
-                    <li><Link href="/drills/cognitive" className="text-red-455 hover:text-red-400 transition-colors font-bold">All Cognitive Drills →</Link></li>
+                    <li><Link href="/drills/cognitive" className="text-red-450 hover:text-red-400 transition-colors font-bold">All Cognitive Drills →</Link></li>
                   </ul>
                 </div>
                 <div>
@@ -1290,8 +1037,6 @@ export default function RecoilControlClient() {
                   <h3 className="text-white font-bold mb-3 uppercase tracking-wider">More Sectors</h3>
                   <ul className="space-y-2">
                     <li><Link href="/drills/visual" className="hover:text-red-400 transition-colors">Visual (14)</Link></li>
-                    <li><Link href="/drills/productivity" className="hover:text-red-400 transition-colors">Productivity (10)</Link></li>
-                    <li><Link href="/drills/mental-fitness" className="hover:text-red-400 transition-colors">Mental Fitness (6)</Link></li>
                     <li><Link href="/drills/physical" className="hover:text-red-400 transition-colors">Physical (11)</Link></li>
                   </ul>
                 </div>
@@ -1300,7 +1045,7 @@ export default function RecoilControlClient() {
               <div className="border-t border-slate-900 pt-8 text-center">
                 <div className="flex items-center justify-center gap-2 mb-4">
                   <div className="w-6 h-6 bg-gradient-to-br from-red-500/25 to-orange-500/25 border border-red-500/30 rounded-lg flex items-center justify-center">
-                    <Crosshair className="w-3.5 h-3.5 text-red-500" />
+                    <Crosshair className="w-3.5 h-3.5 text-red-400" />
                   </div>
                   <span className="text-white font-black tracking-widest text-xs uppercase">SkillDrills</span>
                 </div>
@@ -1308,13 +1053,22 @@ export default function RecoilControlClient() {
                 <p className="text-[9px] max-w-2xl mx-auto leading-relaxed mb-6">
                   Open-source telemetry training platform using hardware pointer lock. Free forever. No downloads required.
                 </p>
-                <div className="flex items-center justify-center gap-4 flex-wrap text-slate-500">
-                  <button onClick={() => { if (typeof window !== "undefined" && navigator.share) { navigator.share({ title: document.title, url: window.location.href }).catch(() => {}); } }} className="hover:text-white transition-colors">Share Page</button>
-                  <button onClick={() => { if (typeof window !== "undefined") { navigator.clipboard.writeText(window.location.href); alert("Link copied to clipboard!"); } }} className="hover:text-white transition-colors">Copy Link</button>
-                  <a href="https://twitter.com/skilldrillss" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Twitter X</a>
-                  <a href="https://instagram.com/skilldrills.online" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Instagram</a>
-                  <a href="https://youtube.com/@skilldrills.online" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">YouTube</a>
-                  <a href="https://pinterest.com/skilldrills" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Pinterest</a>
+                <div className="flex items-center justify-center gap-3 flex-wrap">
+                  <a href="https://youtube.com/@skilldrills.online" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="YouTube">
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                  </a>
+                  <a href="https://www.facebook.com/profile.php?id=61590093843779" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="Facebook">
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                  </a>
+                  <a href="https://x.com/skilldrillss" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="X / Twitter">
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.747l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                  </a>
+                  <a href="https://www.instagram.com/skilldrills.online/?__pwa=1" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="Instagram">
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
+                  </a>
+                  <a href="https://pinterest.com/skilldrills" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="Pinterest">
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738a.36.36 0 0 1 .083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.632-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/></svg>
+                  </a>
                 </div>
               </div>
             </div>
@@ -1323,5 +1077,74 @@ export default function RecoilControlClient() {
 
       </div>
     </div>
+  );
+}
+
+// === Subcomponents ===
+
+function StatCard({ icon, value, label, unit = '' }) {
+  return (
+    <div className="group rounded-xl border border-slate-900 bg-slate-950/40 p-2 text-center flex flex-col justify-center h-full transition-all duration-300 hover:scale-[1.03] hover:border-slate-800">
+      <div className="mb-1 flex justify-center transition-transform duration-300 group-hover:scale-110">
+        {icon}
+      </div>
+      <p className="text-xs sm:text-sm font-extrabold tracking-tight truncate text-white">
+        {value} <span className="text-[10px] font-semibold text-slate-400">{unit}</span>
+      </p>
+      <p className="text-[9px] font-mono font-bold uppercase tracking-wider text-slate-500 truncate">{label}</p>
+    </div>
+  );
+}
+
+function RuleItem({ num, color, text, highlight = '', result }) {
+  const colorMap = { 
+    blue: 'bg-blue-600 text-blue-300 border-blue-500', 
+    indigo: 'bg-indigo-600 text-indigo-300 border-indigo-500', 
+    gray: 'bg-gray-600 text-gray-300 border-gray-500', 
+    green: 'bg-green-600 text-green-300 border-green-500',
+    red: 'bg-red-600 text-red-300 border-red-500',
+    orange: 'bg-orange-600 text-orange-300 border-orange-500'
+  };
+  const colors = colorMap[color] || 'bg-slate-600 text-slate-300 border-slate-500';
+  const [bg, txt, border] = colors.split(' ');
+  
+  return (
+    <div className="flex items-center gap-4 bg-[#0b0f19]/40 p-4 rounded-xl border border-slate-800 shadow-sm">
+      <div className={`w-8 h-8 rounded-xl ${bg} border border-t-white/20 flex items-center justify-center text-white text-base font-black shadow-lg flex-shrink-0`}>{num}</div>
+      <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <p className="text-sm font-medium text-slate-300">
+          {text}{highlight && <span className={`font-black ${txt}`}> {highlight}</span>}
+        </p>
+        <div className={`text-xs font-black px-3 py-1.5 rounded-lg bg-[#050811] border ${border} ${txt} whitespace-nowrap shadow-inner tracking-wide text-center sm:text-left`}>
+          {result}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RelatedCard({ href, title, desc, color, icon }) {
+  const gradients = {
+    blue: 'from-blue-500 to-indigo-500',
+    orange: 'from-orange-500 to-amber-500',
+    red: 'from-red-500 to-rose-500',
+    purple: 'from-purple-500 to-violet-500',
+    green: 'from-green-500 to-emerald-500',
+    cyan: 'from-cyan-500 to-blue-500',
+    indigo: 'from-indigo-500 to-purple-500',
+    rose: 'from-rose-500 to-pink-500'
+  };
+  return (
+    <Link href={href} className="group relative overflow-hidden rounded-2xl border border-slate-800 bg-[#0b0f19]/40 transition-all hover:-translate-y-1 hover:border-red-500/50 block p-5">
+      <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${gradients[color]}`}></div>
+      <div className="w-10 h-10 rounded-xl bg-[#050811] border border-slate-700 flex items-center justify-center text-slate-400 group-hover:text-white mb-3 shadow-inner">
+        {icon}
+      </div>
+      <h3 className="font-bold text-base mb-1.5 text-white group-hover:text-red-400 transition-colors">{title}</h3>
+      <p className="text-xs text-slate-500 mb-4">{desc}</p>
+      <div className="flex items-center gap-1.5 text-red-400 text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-wider">
+        Start Drill <ArrowRight className="w-3.5 h-3.5" />
+      </div>
+    </Link>
   );
 }
