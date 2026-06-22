@@ -1,52 +1,12 @@
 import DividedAttentionClient from './DividedAttentionClient';
 
 export const metadata = {
-  title: 'Divided Attention - Dual Task Drill | SkillDrills',
-  description: 'Train multitasking with dual task drill. Track moving balls while matching even numbers in 60-second challenge. No sign-up.',
-  keywords: [
-    'divided attention drill', 'dual task training', 'multitasking drill online',
-    'cognitive training free', 'attention splitting test', 'visual tracking practice',
-    'number matching game', 'cognitive flexibility training', 'attention span drill',
-    'brain training game free', 'multitasking test online', 'divided focus practice',
-    'dual task cognitive test', 'attention training free', 'multitasking skills test',
-    'cognitive assessment free', 'divided attention test', 'dual processing drill',
-    'simultaneous task training', 'cognitive multitasking', 'attention control drill',
-    'visual attention training', 'cognitive performance test', 'brain multitasking',
-    'skilldrills divided attention', 'skilldrills cognitive drill', 'free brain training',
-    'online cognitive exercise', 'attention management training', 'task switching practice',
-    'cognitive load training', 'executive function drill', 'mental flexibility test',
-    'free attention test', 'browser brain training', 'no download cognitive drill',
-  ],
-  openGraph: {
-    title: 'Divided Attention - Dual Task Drill | SkillDrills',
-    description: 'Train multitasking with dual task drill. Track moving balls while matching even numbers in 60-second challenge. No sign-up.',
-    type: 'article',
-    url: 'https://skilldrills.online/drills/cognitive/attention/divided-attention',
-    siteName: 'SkillDrills',
-    locale: 'en_US',
-    images: [{
-      url: 'https://skilldrills.online/icons/icon-512x512.png',
-      width: 512,
-      height: 512,
-      alt: 'Divided Attention Drill',
-    }],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Divided Attention - Dual Task Drill | SkillDrills',
-    description: 'Train multitasking with dual task drill. Track moving balls while matching even numbers in 60-second challenge. No sign-up.',
-    images: ['https://skilldrills.online/icons/icon-512x512.png'],
-  },
-  robots: { index: true, follow: true },
-  alternates: {
-    canonical: 'https://skilldrills.online/drills/cognitive/attention/divided-attention',
-  },
+  // your metadata
 };
 
 export default function DividedAttentionPage() {
   return (
     <>
-
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -54,10 +14,29 @@ export default function DividedAttentionPage() {
             "@context": "https://schema.org",
             "@type": "BreadcrumbList",
             "itemListElement": [
-              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://skilldrills.online" },
-              { "@type": "ListItem", "position": 2, "name": "Cognitive Drills", "item": "https://skilldrills.online/drills/cognitive" },
-              { "@type": "ListItem", "position": 3, "name": "Attention", "item": "https://skilldrills.online/drills/cognitive/attention" },
-              { "@type": "ListItem", "position": 4, "name": "Divided Attention" }
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "https://skilldrills.online"
+              },
+              {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Cognitive Drills",
+                "item": "https://skilldrills.online/drills/cognitive"
+              },
+              {
+                "@type": "ListItem",
+                "position": 3,
+                "name": "Attention",
+                "item": "https://skilldrills.online/drills/cognitive/attention"
+              },
+              {
+                "@type": "ListItem",
+                "position": 4,
+                "name": "Divided Attention Test"
+              }
             ]
           })
         }}
@@ -69,14 +48,23 @@ export default function DividedAttentionPage() {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "WebApplication",
-            "name": "Divided Attention Drill",
+            "name": "Divided Attention Test",
             "url": "https://skilldrills.online/drills/cognitive/attention/divided-attention",
-            "description": "Free dual task drill combining visual tracking and number matching. 60-second challenge with 5 lives, combo streaks, and dual scoring.",
+            "description":
+              "Free divided attention test combining visual tracking and number recognition for multitasking, focus, cognitive flexibility, and attention control training.",
             "applicationCategory": "EducationalApplication",
             "operatingSystem": "All",
-            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-            "author": { "@type": "Organization", "name": "SkillDrills" },
-            "isAccessibleForFree": true
+            "isAccessibleForFree": true,
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "USD"
+            },
+            "author": {
+              "@type": "Organization",
+              "name": "SkillDrills",
+              "url": "https://skilldrills.online"
+            }
           })
         }}
       />
@@ -90,34 +78,38 @@ export default function DividedAttentionPage() {
             "mainEntity": [
               {
                 "@type": "Question",
-                "name": "What is the Divided Attention Drill?",
+                "name": "What is a divided attention test?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "A free dual task exercise where you click moving balls while monitoring a number stream for even numbers. 60-second challenge with 5 lives and combo streaks."
+                  "text":
+                    "A divided attention test measures how effectively a person can perform multiple cognitive tasks simultaneously while maintaining speed and accuracy."
                 }
               },
               {
                 "@type": "Question",
-                "name": "How does dual task training improve cognitive skills?",
+                "name": "How does dual task training improve attention?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Forces your brain to split attention between visual tracking and number recognition. Strengthens neural pathways for better real-world multitasking."
+                  "text":
+                    "Dual task training forces the brain to process multiple streams of information at the same time, improving multitasking, focus, attention control, and cognitive flexibility."
                 }
               },
               {
                 "@type": "Question",
-                "name": "Who benefits from this drill?",
+                "name": "Can divided attention be improved?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Gamers, professionals handling multiple tasks, students taking notes while listening, and anyone wanting better multitasking skills."
+                  "text":
+                    "Yes. Regular divided attention exercises can improve multitasking ability, visual attention, task switching, and processing speed."
                 }
               },
               {
                 "@type": "Question",
-                "name": "Do I need to sign up?",
+                "name": "Is this divided attention drill free?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "No registration required. This divided attention drill is completely free and works instantly in your browser."
+                  "text":
+                    "Yes. The SkillDrills Divided Attention Test is completely free and requires no sign up or download."
                 }
               }
             ]

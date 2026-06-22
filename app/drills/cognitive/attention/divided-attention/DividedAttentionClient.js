@@ -7,8 +7,8 @@ import {
   Volume2, VolumeX, Maximize2, Minimize2, Eye,
   BarChart3, Info, Layers, Circle, Hash, RefreshCw,
   Users, Share2, XCircle, TrendingUp,
-  GraduationCap, Lightbulb, Brain, Keyboard, RotateCcw,
-  ChevronRight, ArrowRight, Play, Calculator, Code2, LogOut, Search
+  GraduationCap, Lightbulb, Brain, RotateCcw,
+  ChevronRight, ArrowRight, Play, LogOut, Search, Flame
 } from 'lucide-react';
 import useGameEngine from '../../../../../lib/useGameEngine';
 
@@ -34,7 +34,7 @@ class AudioSynthesizer {
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
       osc.type = 'sine'; 
-      osc.frequency.setValueAtTime(880, this.ctx.currentTime); // A5 for higher pop
+      osc.frequency.setValueAtTime(880, this.ctx.currentTime); 
       osc.frequency.exponentialRampToValueAtTime(1760, this.ctx.currentTime + 0.1);
       gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.15);
@@ -61,6 +61,25 @@ class AudioSynthesizer {
       osc.stop(this.ctx.currentTime + 0.15);
     } catch(e) {}
   }
+
+  playComboAlert() {
+    if (!this.enabled || !this.ctx) return;
+    try {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'triangle'; 
+      osc.frequency.setValueAtTime(440, this.ctx.currentTime);
+      osc.frequency.setValueAtTime(554.37, this.ctx.currentTime + 0.1);
+      osc.frequency.setValueAtTime(659.25, this.ctx.currentTime + 0.2);
+      osc.frequency.setValueAtTime(880, this.ctx.currentTime + 0.3);
+      gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.5);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start();
+      osc.stop(this.ctx.currentTime + 0.5);
+    } catch(e) {}
+  }
   
   setEnabled(status) {
     this.enabled = status;
@@ -72,22 +91,21 @@ const audioSynth = typeof window !== 'undefined' ? new AudioSynthesizer() : null
 // ============================================================
 // LOCAL STORAGE
 // ============================================================
-const STORAGE_KEY = 'skilldrills_divided_attention_v4';
+const STORAGE_KEY = 'skilldrills_divided_attention_v5';
 
 const getSavedData = () => {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { bestScore: 0 };
-    const data = JSON.parse(raw);
-    return { bestScore: Math.max(0, parseInt(data.bestScore) || 0) };
+    if (!raw) return { bestScore: 0, highestCombo: 0, highestLevel: 1, totalSessions: 0, totalVisualHits: 0, totalNumberMatches: 0, totalActions: 0 };
+    return JSON.parse(raw);
   } catch (e) {
-    return { bestScore: 0 };
+    return { bestScore: 0, highestCombo: 0, highestLevel: 1, totalSessions: 0, totalVisualHits: 0, totalNumberMatches: 0, totalActions: 0 };
   }
 };
 
 const saveData = (data) => {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ bestScore: data.bestScore }));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   } catch (e) {}
 };
 
@@ -103,8 +121,6 @@ export default function DividedAttentionClient() {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [loading, setLoading] = useState(true);
   const [isClient, setIsClient] = useState(false);
-  const [playerNameInput, setPlayerNameInput] = useState('');
-  const [showNameInput, setShowNameInput] = useState(false);
   const [localFeedback, setLocalFeedback] = useState({ id: 0, text: '', type: 'success', visible: false });
 
   // === Game State (Visual Sync) ===
@@ -116,30 +132,46 @@ export default function DividedAttentionClient() {
   const [numberHits, setNumberHits] = useState(0);
   const [mistakes, setMistakes] = useState(0);
   
+  const [visualAttempts, setVisualAttempts] = useState(0);
+  const [numberAttempts, setNumberAttempts] = useState(0);
+  
+  const [combo, setCombo] = useState(0);
+  const [highestCombo, setHighestCombo] = useState(0);
+  const [currentLevel, setCurrentLevel] = useState(1);
+  const [highestLevelReached, setHighestLevelReached] = useState(1);
+
   const [currentTarget, setCurrentTarget] = useState(null);
   const [currentNumber, setCurrentNumber] = useState(null);
-  const [currentSpeedLvl, setCurrentSpeedLvl] = useState(1);
   const [ballScaleUI, setBallScaleUI] = useState(1);
 
-  // === Custom Decoupled Timer ===
   const [localTimeRemaining, setLocalTimeRemaining] = useState(60.0);
-  const [isTimeUp, setIsTimeUp] = useState(false);
   const [forceStart, setForceStart] = useState(false);
+  
+  // Overall Stats
+  const [sessionStats, setSessionStats] = useState(null);
 
-  // === Absolute Truth Refs ===
+  // === Absolute Truth Refs (Decoupled to fix "Play Again" bug) ===
   const mountedRef = useRef(false);
   const gameContainerRef = useRef(null);
+  const gameActiveRef = useRef(false); // Replaces dependency on engine.gameState for inner loop
   
   const scoreRef = useRef(0);
   const visualHitsRef = useRef(0);
   const numberHitsRef = useRef(0);
+  const visualAttemptsRef = useRef(0);
+  const numberAttemptsRef = useRef(0);
   const mistakesRef = useRef(0);
+  
+  const comboRef = useRef(0);
+  const highestComboRef = useRef(0);
+  const levelRef = useRef(1);
+  const highestLevelRef = useRef(1);
+  
   const localTimeRef = useRef(60.0);
-  const difficultyProgressRef = useRef(0);
 
   // Adaptive Scaling Refs
   const ballSpeedRef = useRef(1800);
-  const numSpeedRef = useRef(1600);
+  const numSpeedRef = useRef(2000);
   const ballScaleRef = useRef(1.0);
   
   const currentTargetIdRef = useRef(null);
@@ -151,16 +183,18 @@ export default function DividedAttentionClient() {
   const timerIntervalRef = useRef(null);
   const feedbackTimerRef = useRef(null);
   
-  const gameStateRef = useRef('start');
-
   // Sync state for UI rendering
   const syncToUI = useCallback(() => {
     setScore(scoreRef.current);
     setVisualHits(visualHitsRef.current);
     setNumberHits(numberHitsRef.current);
+    setVisualAttempts(visualAttemptsRef.current);
+    setNumberAttempts(numberAttemptsRef.current);
     setMistakes(mistakesRef.current);
-    
-    setCurrentSpeedLvl(Math.floor(difficultyProgressRef.current / 5) + 1);
+    setCombo(comboRef.current);
+    setHighestCombo(highestComboRef.current);
+    setCurrentLevel(levelRef.current);
+    setHighestLevelReached(highestLevelRef.current);
     setBallScaleUI(ballScaleRef.current);
   }, []);
 
@@ -169,17 +203,15 @@ export default function DividedAttentionClient() {
     category: 'cognitive',
     drillId: 'divided-attention',
     drillName: 'Divided Attention',
-    totalGameTime: 9999, // Custom timer overrides
+    totalGameTime: 9999, 
     lives: 9999, 
     infiniteLives: true, 
     sharePath: 'drills/cognitive/attention/divided-attention',
   });
-
   const engineRef = useRef(engine);
 
   useEffect(() => {
     engineRef.current = engine;
-    gameStateRef.current = engine.gameState;
     if (engine.gameState === 'playing') {
       setIsNewBest(false);
     }
@@ -192,8 +224,6 @@ export default function DividedAttentionClient() {
     try {
       const savedData = getSavedData();
       if (savedData.bestScore) setBestScore(savedData.bestScore);
-      const name = localStorage.getItem('skilldrills_player_name');
-      if (name) setPlayerNameInput(name);
     } catch (e) {}
     setTimeout(() => { if (mountedRef.current) setLoading(false); }, 200);
 
@@ -242,27 +272,25 @@ export default function DividedAttentionClient() {
     };
   }, []);
 
-  // Game End Logic (Save Score)
-  useEffect(() => {
-    if (engine.gameState === 'ended' || isTimeUp) {
-      const finalScore = scoreRef.current;
-      if (finalScore > bestScore && finalScore > 0) {
-        setIsNewBest(true);
-        setBestScore(finalScore);
-        saveData({ bestScore: finalScore });
-      }
-      syncToUI();
-      if (ballTimerRef.current) clearTimeout(ballTimerRef.current);
-      if (numTimerRef.current) clearTimeout(numTimerRef.current);
+  const saveStatsLocally = useCallback(() => {
+    const finalScore = scoreRef.current;
+    if (finalScore > bestScore && finalScore > 0) {
+      setIsNewBest(true);
+      setBestScore(finalScore);
     }
-  }, [engine.gameState, isTimeUp, bestScore, syncToUI]);
-
-  // === UI Handlers ===
-  const savePlayerName = useCallback(() => {
-    const name = playerNameInput.trim() || 'Anonymous Player';
-    try { localStorage.setItem('skilldrills_player_name', name); } catch (e) {}
-    setShowNameInput(false);
-  }, [playerNameInput]);
+    
+    const stats = getSavedData();
+    stats.bestScore = Math.max(stats.bestScore, finalScore);
+    stats.highestCombo = Math.max(stats.highestCombo, highestComboRef.current);
+    stats.highestLevel = Math.max(stats.highestLevel, highestLevelRef.current);
+    stats.totalSessions += 1;
+    stats.totalVisualHits += visualHitsRef.current;
+    stats.totalNumberMatches += numberHitsRef.current;
+    stats.totalActions += (visualAttemptsRef.current + numberAttemptsRef.current);
+    
+    saveData(stats);
+    setSessionStats(stats);
+  }, [bestScore]);
 
   const toggleFullscreen = useCallback(async () => {
     try {
@@ -279,55 +307,51 @@ export default function DividedAttentionClient() {
     }, 600);
   }, []);
 
-  const handleExit = useCallback(async () => {
-    if (isFullscreen) {
-      try { await document.exitFullscreen(); } catch (e) {}
-    }
-    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
-    if (ballTimerRef.current) clearTimeout(ballTimerRef.current);
-    if (numTimerRef.current) clearTimeout(numTimerRef.current);
-    
-    if (engineRef.current && engineRef.current.endGame) {
-        engineRef.current.endGame();
-    }
-    setForceStart(true);
-    setIsTimeUp(false);
-    
-    localTimeRef.current = 60.0;
-    setLocalTimeRemaining(60.0);
-    scoreRef.current = 0;
-    setScore(0);
-    visualHitsRef.current = 0;
-    setVisualHits(0);
-    numberHitsRef.current = 0;
-    setNumberHits(0);
-    mistakesRef.current = 0;
-    setMistakes(0);
-    difficultyProgressRef.current = 0;
-  }, [isFullscreen]);
-
   // === DYNAMIC DIFFICULTY SCALING ===
   const updateDifficulty = useCallback(() => {
-    const progress = Math.min(1, difficultyProgressRef.current / 100); 
+    const totalHits = visualHitsRef.current + numberHitsRef.current;
+    const newLevel = Math.floor(totalHits / 10) + 1;
     
-    ballSpeedRef.current = Math.max(500, 1800 - (progress * 1300));
-    numSpeedRef.current = Math.max(500, 1600 - (progress * 1100));
-    ballScaleRef.current = Math.max(0.5, 1 - (progress * 0.5)); 
-  }, []);
+    if (newLevel > levelRef.current) {
+      triggerFeedback(`⚡ LEVEL UP: ${newLevel}!`, 'success');
+      if (audioSynth) audioSynth.playComboAlert();
+    }
+    
+    levelRef.current = newLevel;
+    highestLevelRef.current = Math.max(highestLevelRef.current, newLevel);
+    
+    const progress = Math.min(1, (newLevel - 1) / 15); // Caps around level 16
+    
+    ballSpeedRef.current = Math.max(700, 1800 - (progress * 1100));
+    numSpeedRef.current = Math.max(800, 2000 - (progress * 1200));
+    ballScaleRef.current = Math.max(0.6, 1.0 - (progress * 0.4)); 
+  }, [triggerFeedback]);
 
   // === CORE MECHANICS ===
   const applyPenalty = useCallback((reason) => {
+    if (!gameActiveRef.current) return;
     if (audioSynth) audioSynth.playSoftThud();
     
+    // Break Combo
+    if (comboRef.current > 0) {
+      triggerFeedback(`Combo Broken!`, 'error');
+    } else {
+      triggerFeedback(`Penalty! -3 PTS | -1.5s`, 'error');
+    }
+    
+    comboRef.current = 0;
     scoreRef.current = Math.max(0, scoreRef.current - 3);
     mistakesRef.current += 1;
     localTimeRef.current -= 1.5;
-    difficultyProgressRef.current = Math.max(0, difficultyProgressRef.current - 1);
+    
+    if (reason === 'missed_target') visualAttemptsRef.current += 1;
+    if (['missed_even', 'wrong_match', 'double_click'].includes(reason)) numberAttemptsRef.current += 1;
     
     if (localTimeRef.current <= 0) {
       localTimeRef.current = 0;
       setLocalTimeRemaining(0);
-      setIsTimeUp(true);
+      gameActiveRef.current = false;
+      saveStatsLocally();
       if (typeof engineRef.current?.endGame === 'function') {
         engineRef.current.endGame();
       }
@@ -335,30 +359,49 @@ export default function DividedAttentionClient() {
     }
     
     setLocalTimeRemaining(localTimeRef.current);
-    updateDifficulty();
     syncToUI();
-    triggerFeedback(`Penalty! -3 PTS | -1.5s`, 'error');
-  }, [syncToUI, triggerFeedback, updateDifficulty]);
+  }, [syncToUI, triggerFeedback, saveStatsLocally]);
 
   const applyReward = useCallback((type) => {
-    if (audioSynth) audioSynth.playSoothingPop();
+    if (!gameActiveRef.current) return;
     
-    scoreRef.current += 5;
-    if (type === 'visual') visualHitsRef.current += 1;
-    else numberHitsRef.current += 1;
+    comboRef.current += 1;
+    highestComboRef.current = Math.max(highestComboRef.current, comboRef.current);
+    
+    let bonus = 0;
+    if (comboRef.current > 0 && comboRef.current % 5 === 0) {
+      if (comboRef.current === 5) bonus = 5;
+      else if (comboRef.current === 10) bonus = 15;
+      else if (comboRef.current === 15) bonus = 30;
+      else bonus = 50;
+      
+      triggerFeedback(`🔥 ${comboRef.current} COMBO! +${bonus} Bonus`, 'success');
+      if (audioSynth) audioSynth.playComboAlert();
+    } else {
+      triggerFeedback(`Target! +5 PTS | +2s`, 'success');
+      if (audioSynth) audioSynth.playSoothingPop();
+    }
+    
+    scoreRef.current += (5 + bonus);
+    
+    if (type === 'visual') {
+      visualHitsRef.current += 1;
+      visualAttemptsRef.current += 1;
+    } else {
+      numberHitsRef.current += 1;
+      numberAttemptsRef.current += 1;
+    }
 
-    localTimeRef.current = Math.min(60.0, localTimeRef.current + 3.0);
+    localTimeRef.current = Math.min(60.0, localTimeRef.current + 2.0);
     setLocalTimeRemaining(localTimeRef.current);
-    difficultyProgressRef.current += 1;
 
     updateDifficulty();
     syncToUI();
-    triggerFeedback(`Target! +5 PTS | +3s`, 'success');
   }, [syncToUI, triggerFeedback, updateDifficulty]);
 
   const spawnNewBall = useCallback(() => {
     if (ballTimerRef.current) clearTimeout(ballTimerRef.current);
-    if (gameStateRef.current !== 'playing' || isTimeUp) return;
+    if (!gameActiveRef.current) return;
 
     const id = Date.now() + Math.random();
     currentTargetIdRef.current = id;
@@ -370,16 +413,16 @@ export default function DividedAttentionClient() {
     });
 
     ballTimerRef.current = setTimeout(() => {
-      if (gameStateRef.current === 'playing' && mountedRef.current && !isTimeUp) {
-        applyPenalty('timeout');
+      if (gameActiveRef.current && mountedRef.current) {
+        applyPenalty('missed_target');
         spawnNewBall(); 
       }
     }, ballSpeedRef.current);
-  }, [isTimeUp, applyPenalty]);
+  }, [applyPenalty]);
 
   const spawnNewNumber = useCallback(() => {
     if (numTimerRef.current) clearTimeout(numTimerRef.current);
-    if (gameStateRef.current !== 'playing' || isTimeUp) return;
+    if (!gameActiveRef.current) return;
 
     const prevNum = currentNumberRef.current;
     if (prevNum !== null && prevNum % 2 === 0 && !wasMatchedRef.current) {
@@ -396,11 +439,11 @@ export default function DividedAttentionClient() {
     setCurrentNumber(newNum);
 
     numTimerRef.current = setTimeout(() => {
-      if (gameStateRef.current === 'playing' && mountedRef.current && !isTimeUp) {
+      if (gameActiveRef.current && mountedRef.current) {
         spawnNewNumber();
       }
     }, numSpeedRef.current);
-  }, [isTimeUp, applyPenalty]);
+  }, [applyPenalty]);
 
   // === INTERACTION HANDLERS ===
   const handleVisualClick = useCallback((id, e) => {
@@ -410,7 +453,7 @@ export default function DividedAttentionClient() {
       if (e.target.setPointerCapture) e.target.setPointerCapture(e.pointerId);
     }
 
-    if (gameStateRef.current !== 'playing' || isTimeUp) return;
+    if (!gameActiveRef.current) return;
     if (currentTargetIdRef.current !== id) return;
 
     currentTargetIdRef.current = null;
@@ -418,7 +461,7 @@ export default function DividedAttentionClient() {
 
     applyReward('visual');
     spawnNewBall();
-  }, [isTimeUp, spawnNewBall, applyReward]);
+  }, [spawnNewBall, applyReward]);
 
   const handleNumberCheck = useCallback((e) => {
     if (e) {
@@ -427,7 +470,7 @@ export default function DividedAttentionClient() {
       if (e.target.setPointerCapture) e.target.setPointerCapture(e.pointerId);
     }
 
-    if (gameStateRef.current !== 'playing' || isTimeUp) return;
+    if (!gameActiveRef.current) return;
     
     const num = currentNumberRef.current;
     if (num === null) return;
@@ -444,35 +487,66 @@ export default function DividedAttentionClient() {
       wasMatchedRef.current = true; 
       applyPenalty('wrong_match');
     }
-  }, [isTimeUp, applyPenalty, applyReward]);
+  }, [applyPenalty, applyReward]);
 
-  // Handle background clicks
   const handleBackgroundClick = useCallback((e) => {
-    if (gameStateRef.current !== 'playing' || isTimeUp) return;
-  }, [isTimeUp]);
+    if (!gameActiveRef.current) return;
+  }, []);
+
+  // Exit Game
+  const handleExit = useCallback(async () => {
+    if (isFullscreen) {
+      try { await document.exitFullscreen(); } catch (e) {}
+    }
+    gameActiveRef.current = false;
+    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    if (ballTimerRef.current) clearTimeout(ballTimerRef.current);
+    if (numTimerRef.current) clearTimeout(numTimerRef.current);
+    
+    if (engineRef.current && engineRef.current.endGame) {
+        engineRef.current.endGame();
+    }
+    setForceStart(true);
+    
+    localTimeRef.current = 60.0;
+    setLocalTimeRemaining(60.0);
+    scoreRef.current = 0;
+    comboRef.current = 0;
+    visualHitsRef.current = 0;
+    numberHitsRef.current = 0;
+    mistakesRef.current = 0;
+    levelRef.current = 1;
+    syncToUI();
+  }, [isFullscreen, syncToUI]);
 
   // Start sequence
   const handleStartGame = useCallback(async () => {
     if (audioSynth) audioSynth.init(); 
     
+    // 1. Force Stop Everything First
+    gameActiveRef.current = false;
     if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
     if (ballTimerRef.current) clearTimeout(ballTimerRef.current);
     if (numTimerRef.current) clearTimeout(numTimerRef.current);
 
-    setIsTimeUp(false);
     setForceStart(false);
     
+    // 2. Reset All Refs
     localTimeRef.current = 60.0;
     setLocalTimeRemaining(60.0);
-    
     scoreRef.current = 0;
     visualHitsRef.current = 0;
     numberHitsRef.current = 0;
+    visualAttemptsRef.current = 0;
+    numberAttemptsRef.current = 0;
     mistakesRef.current = 0;
-    difficultyProgressRef.current = 0;
+    comboRef.current = 0;
+    highestComboRef.current = 0;
+    levelRef.current = 1;
+    highestLevelRef.current = 1;
     
     ballSpeedRef.current = 1800;
-    numSpeedRef.current = 1600;
+    numSpeedRef.current = 2000;
     ballScaleRef.current = 1.0;
     
     currentNumberRef.current = null;
@@ -484,22 +558,30 @@ export default function DividedAttentionClient() {
     setCurrentTarget(null);
     setLocalFeedback({ id: 0, text: '', type: 'success', visible: false });
     
+    // 3. UI Fullscreen
     try {
       if (!document.fullscreenElement && gameContainerRef.current) {
         await gameContainerRef.current.requestFullscreen();
       }
     } catch (err) {}
 
+    // 4. Activate Engine
     engineRef.current.startGame();
+    gameActiveRef.current = true;
     
-    // Precise 100ms decoupled timer for float tracking
+    // 5. Start Precise Timer
     timerIntervalRef.current = setInterval(() => {
+      if (!gameActiveRef.current) {
+        clearInterval(timerIntervalRef.current);
+        return;
+      }
       localTimeRef.current -= 0.1;
       if (localTimeRef.current <= 0) {
         localTimeRef.current = 0;
         setLocalTimeRemaining(0);
+        gameActiveRef.current = false;
         clearInterval(timerIntervalRef.current);
-        setIsTimeUp(true); 
+        saveStatsLocally();
         if (typeof engineRef.current?.endGame === 'function') {
           engineRef.current.endGame();
         }
@@ -508,18 +590,19 @@ export default function DividedAttentionClient() {
       }
     }, 100);
 
+    // 6. Start Loops
     setTimeout(() => {
-      if (gameStateRef.current === 'playing') {
+      if (gameActiveRef.current) {
         spawnNewBall();
         spawnNewNumber();
       }
     }, 300);
-  }, [syncToUI, spawnNewBall, spawnNewNumber]);
+  }, [syncToUI, spawnNewBall, spawnNewNumber, saveStatsLocally]);
 
   const shareDrillLink = useCallback(() => {
     const url = 'https://skilldrills.online/drills/cognitive/attention/divided-attention';
     if (navigator.share) {
-      navigator.share({ title: 'Divided Attention Drill', text: 'Hardcore cognitive dual-tasking drill! Can you survive?', url }).catch(() => {});
+      navigator.share({ title: 'Divided Attention Drill', text: 'Hardcore dual-tasking cognitive test. Measure your executive function limits!', url }).catch(() => {});
     } else {
       navigator.clipboard.writeText(url).then(() => alert('Link copied!')).catch(() => prompt('Copy:', url));
     }
@@ -527,19 +610,23 @@ export default function DividedAttentionClient() {
 
   if (loading || !isClient) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-black">
+      <div className="min-h-screen flex items-center justify-center bg-[#050505]">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4 shadow-[0_0_20px_rgba(59,130,246,0.5)]"></div>
-          <p className="text-gray-400 font-medium tracking-widest uppercase text-sm animate-pulse">Loading Dual-Task...</p>
+          <p className="text-gray-400 font-medium tracking-widest uppercase text-sm animate-pulse">Loading Dual-Task Engine...</p>
         </div>
       </div>
     );
   }
 
-  const totalActions = visualHits + numberHits + mistakes;
-  const accuracyPercentage = totalActions > 0 ? Math.round(((visualHits + numberHits) / totalActions) * 100) : 100;
+  // Calculate Accuracies
+  const totalActions = visualAttempts + numberAttempts;
+  const overallAcc = totalActions > 0 ? Math.round(((visualHits + numberHits) / totalActions) * 100) : 100;
+  const visAcc = visualAttempts > 0 ? Math.round((visualHits / visualAttempts) * 100) : 100;
+  const numAcc = numberAttempts > 0 ? Math.round((numberHits / numberAttempts) * 100) : 100;
+
   const strokeDasharray = 100;
-  const strokeDashoffset = strokeDasharray - accuracyPercentage;
+  const strokeDashoffset = strokeDasharray - overallAcc;
 
   return (
     <div className="min-h-screen select-none bg-[#050505] text-white selection:bg-transparent font-sans" style={{ WebkitTapHighlightColor: 'transparent' }}>
@@ -555,7 +642,7 @@ export default function DividedAttentionClient() {
               <li className="text-gray-600"><ChevronRight className="w-4 h-4" /></li>
               <li className="text-gray-500 hover:text-gray-300 transition-colors">Attention</li>
               <li className="text-gray-600"><ChevronRight className="w-4 h-4" /></li>
-              <li className="text-blue-400 font-medium">Divided Attention</li>
+              <li className="text-blue-400 font-medium">Divided Attention Test</li>
             </ol>
           </nav>
         )}
@@ -569,14 +656,13 @@ export default function DividedAttentionClient() {
               </div>
               <div>
                 <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Divided Attention</h1>
-                <p className="text-sm text-gray-400 mt-1 font-medium">Dual-Task Speed Sprints • Target Acquisition</p>
+                <p className="text-sm text-gray-400 mt-1 font-medium">Dual-Task Training • Cognitive Flexibility</p>
               </div>
             </div>
             
             <div className="flex gap-2 flex-wrap">
-
-              {engine.gameState === 'playing' && !isTimeUp && (
-                <button onClick={() => { if(engineRef.current) engineRef.current.endGame(); handleStartGame(); }} className="p-2.5 rounded-lg border border-gray-700 bg-gray-900 text-gray-400 hover:text-white hover:border-gray-500 transition-all active:scale-95" title="Reset">
+              {engine.gameState === 'playing' && (
+                <button onClick={(e) => { e.stopPropagation(); handleStartGame(); }} className="p-2.5 rounded-lg border border-gray-700 bg-gray-900 text-gray-400 hover:text-white hover:border-gray-500 transition-all active:scale-95" title="Reset">
                   <RefreshCw className="w-5 h-5" />
                 </button>
               )}
@@ -590,22 +676,12 @@ export default function DividedAttentionClient() {
           </div>
         )}
 
-        {showNameInput && !isFullscreen && (
-          <div className="mb-6 p-4 rounded-xl border border-gray-700 bg-gray-900 shadow-xl animate-in fade-in slide-in-from-top-2">
-            <div className="flex items-center gap-3">
-              <input type="text" value={playerNameInput} onChange={e => setPlayerNameInput(e.target.value)} placeholder="Enter your display name" maxLength={20}
-                className="flex-1 px-4 py-2.5 rounded-lg border border-gray-600 bg-black text-white placeholder-gray-500 text-sm focus:outline-none focus:border-blue-500 transition-colors"
-                onKeyDown={e => e.key === 'Enter' && savePlayerName()} />
-              <button onClick={savePlayerName} className="px-5 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-500 transition-colors shadow-lg shadow-blue-600/20">Save</button>
-            </div>
-          </div>
-        )}
-
         {/* Dynamic Mobile-Optimized Stats Bar */}
-        <div className="grid grid-cols-4 sm:grid-cols-4 lg:grid-cols-7 gap-1.5 sm:gap-3 mb-2 h-auto py-1">
+        <div className="grid grid-cols-4 sm:grid-cols-4 lg:grid-cols-8 gap-1.5 sm:gap-3 mb-2 h-auto py-1">
           <StatCard icon={<Target className="text-blue-400" />} value={score} label="Score" />
           <StatCard icon={<Timer className={localTimeRemaining <= 10 ? 'text-red-400 animate-pulse' : 'text-green-400'} />} value={localTimeRemaining.toFixed(1)} label="Time" unit="s" />
-          <StatCard icon={<Zap className="text-indigo-400" />} value={`Lv.${currentSpeedLvl}`} label="Speed" />
+          <StatCard icon={<TrendingUp className="text-indigo-400" />} value={`Lv.${currentLevel}`} label="Level" />
+          <StatCard icon={<Flame className={combo >= 5 ? "text-orange-500 animate-pulse" : "text-orange-300"} />} value={combo} label="Combo" />
           <StatCard icon={<Circle className="text-cyan-400" />} value={visualHits} label="Targets" />
           <StatCard icon={<Hash className="text-purple-400" />} value={numberHits} label="Numbers" />
           <StatCard icon={<XCircle className="text-red-400" />} value={mistakes} label="Errors" />
@@ -623,22 +699,22 @@ export default function DividedAttentionClient() {
 
         {/* Game Container: Adaptive Flex Layout */}
         <div ref={gameContainerRef} 
-          onContextMenu={(e) => { if(engine.gameState === 'playing' && !isTimeUp) e.preventDefault(); }}
+          onContextMenu={(e) => { if(gameActiveRef.current) e.preventDefault(); }}
           className={`relative overflow-hidden flex flex-col sm:flex-row transition-all duration-100 ${
             isFullscreen 
               ? 'fixed inset-0 z-50 w-[100vw] h-[100vh] bg-[#050505]' 
               : 'rounded-2xl border border-gray-700 bg-[#050505] shadow-[0_0_40px_rgba(0,0,0,0.5)] min-h-[60vh] md:min-h-[500px] md:aspect-video'
           }`}
           style={{ 
-            touchAction: (engine.gameState === 'playing' && !isTimeUp) ? 'none' : 'auto', 
-            overscrollBehavior: (engine.gameState === 'playing' && !isTimeUp) ? 'none' : 'auto'
+            touchAction: gameActiveRef.current ? 'none' : 'auto', 
+            overscrollBehavior: gameActiveRef.current ? 'none' : 'auto'
           }}>
           
           {/* Subtle grid lines for depth */}
           <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)', backgroundSize: '50px 50px' }} />
 
           {/* Time Progress Bar */}
-          {engine.gameState === 'playing' && !isTimeUp && (
+          {gameActiveRef.current && (
             <div className="absolute top-0 left-0 right-0 h-1.5 bg-gray-900 z-[60] pointer-events-none">
               <div 
                 className={`h-full transition-all duration-100 ease-linear ${localTimeRemaining <= 10 ? 'bg-red-500 animate-pulse' : 'bg-blue-500'}`}
@@ -648,7 +724,7 @@ export default function DividedAttentionClient() {
           )}
 
           {/* Internal Mobile Rotation Enforcer */}
-          {showRotateWarning && engine.gameState !== 'playing' && (
+          {showRotateWarning && !gameActiveRef.current && (
             <div className="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-black/95 text-center p-6 backdrop-blur-sm">
               <div className="animate-bounce mb-6 text-blue-500">
                 <RotateCcw className="w-16 h-16 mx-auto" />
@@ -659,16 +735,25 @@ export default function DividedAttentionClient() {
           )}
 
           {/* In-Game Controls (Fullscreen) */}
-          {isFullscreen && engine.gameState === 'playing' && !isTimeUp && (
+          {isFullscreen && gameActiveRef.current && (
             <div className="absolute top-4 right-4 z-[60] flex gap-2">
-              <button onPointerDown={e => e.stopPropagation()} onClick={(e) => { e.stopPropagation(); if(engineRef.current) engineRef.current.endGame(); handleStartGame(); }} className="p-3 bg-black/60 border border-gray-600 rounded-xl text-white hover:bg-gray-800 transition-colors"><RefreshCw className="w-5 h-5" /></button>
+              <button onPointerDown={e => e.stopPropagation()} onClick={(e) => { e.stopPropagation(); handleStartGame(); }} className="p-3 bg-black/60 border border-gray-600 rounded-xl text-white hover:bg-gray-800 transition-colors"><RefreshCw className="w-5 h-5" /></button>
               <button onPointerDown={e => e.stopPropagation()} onClick={(e) => { e.stopPropagation(); setSoundEnabled(v => !v); }} className="p-3 bg-black/60 border border-gray-600 rounded-xl text-white hover:bg-gray-800 transition-colors">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button>
               <button onPointerDown={e => e.stopPropagation()} onClick={(e) => { e.stopPropagation(); toggleFullscreen(); }} className="p-3 bg-black/60 border border-gray-600 rounded-xl text-white hover:bg-gray-800 transition-colors"><Minimize2 className="w-5 h-5" /></button>
             </div>
           )}
 
+          {/* Combo Multiplier UI Float */}
+          {gameActiveRef.current && combo >= 5 && (
+            <div className="absolute top-4 left-4 z-[60] pointer-events-none animate-in slide-in-from-left-4 fade-in">
+              <div className="bg-orange-500/20 border border-orange-500 text-orange-400 px-4 py-1.5 rounded-full font-black flex items-center gap-2 shadow-[0_0_15px_rgba(249,115,22,0.4)]">
+                <Flame className="w-4 h-4 fill-orange-500" /> {combo}x COMBO
+              </div>
+            </div>
+          )}
+
           {/* Phase 2: Game Area */}
-          {engine.gameState === 'playing' && !isTimeUp && (
+          {gameActiveRef.current && (
             <>
               {/* Target Area (Takes available space) */}
               <div className="relative flex-1 bg-transparent overflow-hidden" onPointerDown={handleBackgroundClick}>
@@ -693,13 +778,11 @@ export default function DividedAttentionClient() {
               {/* Number Panel (Bottom on Mobile, Right on Desktop) */}
               <div className="w-full sm:w-64 h-[120px] sm:h-full flex-shrink-0 bg-gray-950/95 backdrop-blur-md border-t sm:border-t-0 sm:border-l border-gray-800 z-30 shadow-[-10px_0_30px_rgba(0,0,0,0.5)] flex flex-row sm:flex-col items-center justify-between sm:justify-center p-3 sm:p-6 sm:space-y-8">
                 
-                {/* Desktop Title */}
                 <div className="hidden sm:block text-center pointer-events-none">
                   <h3 className="text-xl sm:text-2xl font-black text-white tracking-wide uppercase">Match</h3>
                   <h3 className="text-lg sm:text-xl font-bold text-blue-400 tracking-widest animate-pulse">EVEN</h3>
                 </div>
                 
-                {/* Number Display */}
                 <div className="relative flex items-center justify-center w-24 h-24 sm:w-40 sm:h-40 text-5xl sm:text-7xl font-black rounded-2xl bg-black border border-blue-500/30 text-white pointer-events-none overflow-hidden shadow-[inset_0_0_20px_rgba(0,0,0,1)] ml-4 sm:ml-0">
                   {currentNumber !== null ? (
                     <span key={currentNumber} className="animate-in slide-in-from-bottom-2 fade-in zoom-in-90 duration-150 block">
@@ -712,7 +795,6 @@ export default function DividedAttentionClient() {
                   )}
                 </div>
                 
-                {/* Action Button */}
                 <div className="flex flex-col items-center mr-4 sm:mr-0 sm:w-full w-32">
                   <button 
                     onPointerDown={handleNumberCheck} 
@@ -726,7 +808,7 @@ export default function DividedAttentionClient() {
           )}
 
           {/* Start Screen */}
-          {(engine.gameState === 'start' || forceStart) && !showRotateWarning && (
+          {(!gameActiveRef.current && (engine.gameState === 'start' || forceStart)) && !showRotateWarning && (
             <div className="absolute inset-0 flex items-center justify-center z-40 bg-black/90 backdrop-blur-sm overflow-y-auto" onPointerDown={e => e.stopPropagation()}>
               <div className="rounded-3xl p-6 sm:p-8 text-center max-w-sm w-full mx-4 border border-gray-700 bg-gray-900 shadow-2xl max-h-[95vh] overflow-y-auto my-auto">
                 {!isMobileLandscape && (
@@ -735,7 +817,7 @@ export default function DividedAttentionClient() {
                   </div>
                 )}
                 <h2 className="text-xl sm:text-3xl font-black mb-2 pointer-events-none tracking-tight">Divided Attention</h2>
-                <p className="text-sm sm:text-base mb-8 text-gray-400 leading-relaxed pointer-events-none">Endless dual-task tracking challenge. Tap the balls while matching the correct numbers.</p>
+                <p className="text-sm sm:text-base mb-8 text-gray-400 leading-relaxed pointer-events-none">Intense dual-task training. Tap moving targets while matching EVEN numbers. Maintain high accuracy to survive.</p>
                 
                 <button 
                   onPointerDown={e => e.stopPropagation()} 
@@ -748,10 +830,10 @@ export default function DividedAttentionClient() {
             </div>
           )}
 
-          {/* Custom End Screen */}
-          {(engine.gameState === 'ended' || isTimeUp) && !forceStart && (
+          {/* End Screen */}
+          {(!gameActiveRef.current && (engine.gameState === 'ended' || localTimeRemaining <= 0)) && !forceStart && (
             <div className="absolute inset-0 flex items-center justify-center z-[70] bg-black/95 pointer-events-auto animate-in fade-in duration-300 overflow-y-auto px-4 py-6" onPointerDown={e => e.stopPropagation()}>
-              <div className="rounded-3xl max-w-md w-full shadow-2xl border border-gray-800 bg-gray-950 flex flex-col max-h-[95vh] overflow-y-auto my-auto">
+              <div className="rounded-3xl max-w-[500px] w-full shadow-2xl border border-gray-800 bg-gray-950 flex flex-col max-h-[95vh] overflow-y-auto my-auto">
                 
                 <div className="bg-gradient-to-br from-blue-900/40 to-indigo-900/40 p-4 sm:p-6 border-b border-gray-800 relative overflow-hidden pointer-events-none shrink-0 rounded-t-3xl">
                   <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-blue-500/20 rounded-full blur-3xl"></div>
@@ -763,16 +845,16 @@ export default function DividedAttentionClient() {
                       </div>
                     )}
                     <h2 className="text-2xl sm:text-3xl font-black text-white mb-1 tracking-tight">Mission Complete</h2>
-                    <p className="text-blue-400 font-medium text-xs sm:text-sm">Divided Attention • Speed Lvl {currentSpeedLvl}</p>
+                    <p className="text-blue-400 font-medium text-xs sm:text-sm">Divided Attention • Maximum Level: {highestLevelReached}</p>
                   </div>
                 </div>
 
                 <div className="p-4 sm:p-6 pointer-events-none shrink-0">
-                  <div className="flex justify-between items-center mb-4 sm:mb-6">
+                  <div className="flex justify-between items-center mb-6">
                     <div className="flex flex-col">
                       <span className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Final Score</span>
                       <div className="flex items-end gap-1">
-                        <span className="text-4xl sm:text-6xl font-black text-white leading-none tracking-tighter">{score}</span>
+                        <span className="text-5xl sm:text-6xl font-black text-white leading-none tracking-tighter">{score}</span>
                         <span className="text-sm sm:text-lg text-gray-500 font-bold mb-1">PTS</span>
                       </div>
                     </div>
@@ -781,31 +863,29 @@ export default function DividedAttentionClient() {
                       <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
                         <path className="text-gray-800" strokeWidth="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                         <path 
-                          className={`${accuracyPercentage >= 80 ? 'text-green-500' : accuracyPercentage >= 50 ? 'text-yellow-500' : 'text-red-500'} transition-all duration-1000 ease-out`} 
+                          className={`${overallAcc >= 80 ? 'text-green-500' : overallAcc >= 50 ? 'text-yellow-500' : 'text-red-500'} transition-all duration-1000 ease-out`} 
                           strokeWidth="3" strokeDasharray={`${strokeDasharray}`} strokeDashoffset={`${strokeDashoffset}`} strokeLinecap="round" stroke="currentColor" fill="none" 
                           d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" 
                         />
                       </svg>
                       <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <span className={`text-base sm:text-xl font-black ${accuracyPercentage >= 80 ? 'text-green-400' : accuracyPercentage >= 50 ? 'text-yellow-400' : 'text-red-400'}`}>{accuracyPercentage}%</span>
+                        <span className={`text-base sm:text-xl font-black ${overallAcc >= 80 ? 'text-green-400' : overallAcc >= 50 ? 'text-yellow-400' : 'text-red-400'}`}>{overallAcc}%</span>
                         <span className="text-[7px] sm:text-[8px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">Accuracy</span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-2 sm:gap-3">
-                    <div className="bg-gray-900/50 rounded-xl p-2 text-center border border-gray-800">
-                      <div className="text-gray-400 text-[9px] sm:text-[10px] uppercase font-bold tracking-wider mb-1">Target Hits</div>
-                      <div className="text-base sm:text-xl font-black text-cyan-400">{visualHits}</div>
-                    </div>
-                    <div className="bg-gray-900/50 rounded-xl p-2 text-center border border-gray-800">
-                      <div className="text-gray-400 text-[9px] sm:text-[10px] uppercase font-bold tracking-wider mb-1">Num Match</div>
-                      <div className="text-base sm:text-xl font-black text-indigo-400">{numberHits}</div>
-                    </div>
-                    <div className="bg-gray-900/50 rounded-xl p-2 text-center border border-gray-800">
-                      <div className="text-gray-400 text-[9px] sm:text-[10px] uppercase font-bold tracking-wider mb-1">Errors</div>
-                      <div className="text-base sm:text-xl font-black text-red-400">{mistakes}</div>
-                    </div>
+                  {/* High Density Stats Grid */}
+                  <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-3">
+                    <EndStat label="Visual Acc" value={`${visAcc}%`} color="cyan" />
+                    <EndStat label="Number Acc" value={`${numAcc}%`} color="indigo" />
+                    <EndStat label="Highest Combo" value={`${highestCombo}x`} color="orange" />
+                  </div>
+                  <div className="grid grid-cols-4 gap-2 sm:gap-3">
+                    <EndStat label="Visual Hits" value={visualHits} color="white" />
+                    <EndStat label="Num Hits" value={numberHits} color="white" />
+                    <EndStat label="Errors" value={mistakes} color="red" />
+                    <EndStat label="Best Score" value={bestScore} color="yellow" />
                   </div>
                 </div>
 
@@ -835,11 +915,13 @@ export default function DividedAttentionClient() {
               </div>
               <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-5">
-                  <RuleItem color="green" text="Correct Target" highlight="+5 PTS | +3s" result="Increases Difficulty" />
+                  <RuleItem color="green" text="Correct Action" highlight="+5 PTS | +2s" result="Increases Level" />
+                  <RuleItem color="orange" text="Combo System" highlight="Bonus PTS" result="Every 5 Hits" />
                   <RuleItem color="blue" text="Tap Even Numbers" highlight="0, 2, 4, 6, 8" result="Matches earn rewards" />
                 </div>
                 <div className="space-y-5">
-                  <RuleItem color="red" text="Wrong / Miss" highlight="-3 PTS | -1.5s" result="Decreases Difficulty" />
+                  <RuleItem color="red" text="Wrong / Miss" highlight="-3 PTS | -1.5s" result="Breaks Combo" />
+                  <RuleItem color="cyan" text="Level Scaling" highlight="Speed & Size" result="Every 10 Hits" />
                   <RuleItem color="purple" text="Time Limit Capped" highlight="Max 60 Seconds" result="Endless Survival" />
                 </div>
               </div>
@@ -853,12 +935,12 @@ export default function DividedAttentionClient() {
             <div className="rounded-2xl border border-gray-800 overflow-hidden bg-gray-900 shadow-xl">
               <div className="px-6 py-5 border-b border-gray-800 bg-black/40 flex items-center gap-3">
                 <GraduationCap className="w-5 h-5 text-blue-400" />
-                <h2 className="font-bold text-white text-lg tracking-wide">About Divided Attention</h2>
+                <h2 className="font-bold text-white text-lg tracking-wide">About Divided Attention Test</h2>
               </div>
               
               <div className="p-6 sm:p-8">
                 <p className="text-sm leading-relaxed mb-6 text-gray-300">
-                  This advanced cognitive drill tests <strong className="text-white font-semibold">parallel processing</strong> and <strong className="text-white font-semibold">dual-tasking capability</strong> under extreme time constraints. By forcing you to actively engage with rapid visual target acquisition while simultaneously calculating numeric parity, it builds the mental framework required to effectively split focus without suffering cognitive degradation.
+                  This advanced cognitive drill serves as an intense <strong className="text-white font-semibold">Divided Attention Test</strong>, pushing your parallel processing and dual task training capabilities to the limit. By forcing you to actively engage with rapid visual target acquisition while simultaneously calculating numeric parity, it builds the mental framework required for superior <strong className="text-white font-semibold">Cognitive Flexibility</strong> and multitasking training without suffering cognitive degradation.
                 </p>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
@@ -867,21 +949,21 @@ export default function DividedAttentionClient() {
                       <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center"><Users className="w-4 h-4 text-white" /></div>
                       <h3 className="text-sm font-bold text-white tracking-tight">Who It's For</h3>
                     </div>
-                    <p className="text-xs leading-relaxed text-gray-400">Competitive gamers managing maps and crosshairs, professionals juggling fast-paced data streams, and individuals looking to enhance real-world multitasking proficiency under stress.</p>
+                    <p className="text-xs leading-relaxed text-gray-400">Competitive gamers managing maps, professionals juggling fast-paced data streams, and individuals looking for rigorous executive function training to enhance real-world attention control under stress.</p>
                   </div>
                   <div className="p-5 rounded-xl border border-gray-800 bg-black/40">
                     <div className="flex items-center gap-3 mb-3">
                       <div className="w-8 h-8 rounded-lg bg-green-600 flex items-center justify-center"><TrendingUp className="w-4 h-4 text-white" /></div>
                       <h3 className="text-sm font-bold text-white tracking-tight">Skills Improved</h3>
                     </div>
-                    <p className="text-xs leading-relaxed text-gray-400">Divided attention, rapid target acquisition, parallel numerical processing, cognitive flexibility, and extreme decision-making speed.</p>
+                    <p className="text-xs leading-relaxed text-gray-400">Divided attention, rapid target acquisition, parallel numerical processing, cognitive flexibility, and high-stakes attention training.</p>
                   </div>
                   <div className="p-5 rounded-xl border border-gray-800 bg-black/40">
                     <div className="flex items-center gap-3 mb-3">
                       <div className="w-8 h-8 rounded-lg bg-purple-600 flex items-center justify-center"><BarChart3 className="w-4 h-4 text-white" /></div>
                       <h3 className="text-sm font-bold text-white tracking-tight">What You'll Track</h3>
                     </div>
-                    <p className="text-xs leading-relaxed text-gray-400">Net Score, accuracy percentage, target/number hit rates, errors committed, and your absolute peak processing boundary.</p>
+                    <p className="text-xs leading-relaxed text-gray-400">Net Score, visual vs numeric accuracy percentages, peak combo multipliers, and your absolute maximum cognitive performance level limit.</p>
                   </div>
                 </div>
                 
@@ -893,7 +975,7 @@ export default function DividedAttentionClient() {
                   <ul className="text-sm leading-relaxed space-y-3 pl-2 text-gray-400">
                     <li><strong className="text-gray-200">Peripheral Anchoring:</strong> Avoid hyper-focusing exclusively on the numbers or the visual field. Relax your eyes centrally and use peripheral vision to track the moving spheres while your core focus evaluates the numbers.</li>
                     <li><strong className="text-gray-200">Rhythm Maintenance:</strong> The stimuli spawn on independent intervals. Establish a mental cadence to parse information streams without freezing when both trigger simultaneously.</li>
-                    <li><strong className="text-gray-200">Survival Mechanics:</strong> You must maintain accuracy to add time (+3s) and score (+5 PTS) back to your clock. Misses actively drain the clock (-1.5s). The max time ceiling is clamped at 60 seconds.</li>
+                    <li><strong className="text-gray-200">Survival & Combos:</strong> You must maintain accuracy to add time (+2s) and score (+5 PTS) back to your clock. Build combos (5, 10, 15, 20+) to unlock massive score bonuses. Misses drain the clock (-1.5s) and break combos instantly.</li>
                   </ul>
                 </div>
 
@@ -905,12 +987,12 @@ export default function DividedAttentionClient() {
                   </div>
                   <div className="space-y-5">
                     <div>
-                      <h4 className="text-sm font-bold text-gray-200 tracking-tight">How does the difficulty adapt?</h4>
-                      <p className="text-xs text-gray-400 mt-1.5 leading-relaxed">The engine tracks your precision sequentially. Each successful interaction forces the spawn timers to compress and shrinks the target geometry. If you commit an error or allow a timeout, the difficulty immediately reduces, giving you breathing room to re-stabilize.</p>
+                      <h4 className="text-sm font-bold text-gray-200 tracking-tight">How does the difficulty scaling work?</h4>
+                      <p className="text-xs text-gray-400 mt-1.5 leading-relaxed">The engine tracks your successful actions. Every 10 combined hits increases your Level. Higher levels force the spawn timers to compress and shrink the target geometry, significantly amplifying the dual task training pressure.</p>
                     </div>
                     <div>
                       <h4 className="text-sm font-bold text-gray-200 tracking-tight">Why am I losing time when I don't click anything?</h4>
-                      <p className="text-xs text-gray-400 mt-1.5 leading-relaxed">This is an active survival drill. Failing to engage with an even number or allowing a visual target to despawn untouched counts as an omission error, triggering a penalty (-3 Points and -1.5 Seconds).</p>
+                      <p className="text-xs text-gray-400 mt-1.5 leading-relaxed">This is an active survival drill for attention control. Failing to engage with an even number before it changes, or allowing a visual target to despawn untouched, counts as an omission error. This triggers a penalty (-3 Points, -1.5 Seconds, and breaks your combo).</p>
                     </div>
                   </div>
                 </div>
@@ -1041,6 +1123,23 @@ function StatCard({ icon, value, label, unit = '' }) {
   );
 }
 
+function EndStat({ label, value, color }) {
+  const colors = {
+    cyan: 'text-cyan-400',
+    indigo: 'text-indigo-400',
+    orange: 'text-orange-400',
+    white: 'text-white',
+    red: 'text-red-400',
+    yellow: 'text-yellow-400'
+  };
+  return (
+    <div className="bg-gray-900/50 rounded-xl p-2 sm:p-3 text-center border border-gray-800">
+      <div className="text-gray-400 text-[9px] sm:text-[10px] uppercase font-bold tracking-wider mb-1">{label}</div>
+      <div className={`text-base sm:text-xl font-black ${colors[color] || 'text-white'}`}>{value}</div>
+    </div>
+  );
+}
+
 function RuleItem({ color, text, highlight = '', result }) {
   const colorMap = { 
     blue: 'bg-blue-600 text-blue-300 border-blue-500', 
@@ -1048,7 +1147,8 @@ function RuleItem({ color, text, highlight = '', result }) {
     purple: 'bg-purple-600 text-purple-300 border-purple-500', 
     green: 'bg-green-600 text-green-300 border-green-500', 
     red: 'bg-red-600 text-red-300 border-red-500',
-    yellow: 'bg-yellow-600 text-yellow-300 border-yellow-500'
+    yellow: 'bg-yellow-600 text-yellow-300 border-yellow-500',
+    orange: 'bg-orange-600 text-orange-300 border-orange-500'
   };
   const colors = colorMap[color] || 'bg-slate-600 text-slate-300 border-slate-500';
   const [bg, txt, border] = colors.split(' ');

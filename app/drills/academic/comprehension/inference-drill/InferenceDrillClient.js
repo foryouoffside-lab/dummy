@@ -8,7 +8,7 @@ import {
   Scale, CheckCircle2, XCircle, Trophy,
   Brain, ChevronRight, BarChart3, Info, RefreshCw,
   Share2, GraduationCap, TrendingUp, ArrowRight, 
-  Hash, Play, Target, LogOut, Lightbulb
+  Play, Target, LogOut, Lightbulb
 } from 'lucide-react';
 
 // ============================================================
@@ -101,7 +101,7 @@ export default function InferenceDrillClient() {
   const [score, setScore] = useState(0);
   const [bestScore, setBestScore] = useState(0);
   const [combo, setCombo] = useState(0);
-  const [difficultyLevel, setDifficultyLevel] = useState(1);
+  const [difficultyLevel, setDifficultyLevel] = useState(1); // 1 = Easy, 2 = Medium, 3 = Hard
   const [completedQuestions, setCompletedQuestions] = useState(new Set());
   const [currentQuestion, setCurrentQuestion] = useState(null);
   const [selectedIdx, setSelectedIdx] = useState(null);
@@ -116,7 +116,7 @@ export default function InferenceDrillClient() {
   const [feedback, setFeedback] = useState('');
   const [feedbackType, setFeedbackType] = useState('');
 
-  const STORAGE_BEST_KEY = 'inferenceDrill_bestScore_v3';
+  const STORAGE_BEST_KEY = 'inferenceDrill_bestScore_v4';
 
   // === Refs ===
   const timerRef = useRef(null);
@@ -127,19 +127,20 @@ export default function InferenceDrillClient() {
   const questionIdxMapRef = useRef(new Map());
   const mountedRef = useRef(false);
 
+  // Categorized Difficulty Drill Set
   const DRILL_SET = useMemo(() => [
-    { id: 1, category: 'Logical Flaw', stimulus: "The city's new bike lane initiative has failed. Since the lanes were installed last year, the number of reported bicycle accidents has increased by 15%. Therefore, the bike lanes have made cycling more dangerous.", question: "Which of the following, if true, most seriously weakens the argument?", options: ["The cost of maintaining bike lanes is higher than originally estimated.", "The number of total cyclists in the city increased by 50% since the lanes were installed.", "Many motorists have complained about the reduction in car lanes.", "The city also increased the number of traffic police during the same period."], correct: 1, rational: "Rate vs. Raw Number flaw. A 50% increase in cyclists with only 15% more accidents means the accident rate per cyclist actually decreased." },
-    { id: 2, category: 'Necessary Assumption', stimulus: "Corporate profits are at an all-time high. To ensure long-term economic stability, the government must increase the corporate tax rate immediately.", question: "The argument above relies on which of the following assumptions?", options: ["Higher taxes always lead to increased government spending efficiency.", "Corporate profits are the primary cause of current economic instability.", "Current high profits will not naturally diminish without government intervention.", "Increased tax revenue is a necessary component of economic stability."], correct: 3, rational: "The conclusion requires that tax revenue is necessary for economic stability. Without this assumption, the argument collapses." },
-    { id: 3, category: 'Causal Flaw', stimulus: "Students who eat breakfast regularly score higher on standardized tests than those who skip breakfast. Therefore, eating breakfast causes improved academic performance.", question: "Which of the following most weakens the causal claim?", options: ["Some students who skip breakfast still score very well on tests.", "Students who eat breakfast also tend to have more stable home environments and better sleep habits.", "Breakfast is considered the most important meal of the day by nutritionists.", "Schools that serve breakfast report higher attendance rates."], correct: 1, rational: "Correlation does not equal causation. The stable home environment could be the actual cause of both eating breakfast and higher test scores." },
-    { id: 4, category: 'Paradox Resolution', stimulus: "Despite a significant increase in the city's police budget and number of officers, the reported crime rate has remained unchanged for three consecutive years.", question: "Which of the following, if true, best resolves the apparent paradox?", options: ["The city's population has decreased by 15% over the same period.", "More citizens are now reporting crimes that previously went unreported.", "The police department has invested heavily in new technology.", "Neighboring cities have seen crime rates decrease."], correct: 1, rational: "Increased reporting creates the appearance of stable crime rates even as actual crime decreases. The budget increase may be working, but reporting bias masks the effect." },
-    { id: 5, category: 'Strengthen', stimulus: "A new drug has been shown to reduce blood pressure in 85% of patients during clinical trials. The manufacturer claims this drug will significantly reduce heart disease rates nationwide.", question: "Which of the following, if true, most strengthens the manufacturer's claim?", options: ["The drug is affordable and covered by most insurance plans.", "High blood pressure is the leading risk factor for heart disease.", "The clinical trials included patients from diverse demographic backgrounds.", "Competing drugs only show 70% effectiveness."], correct: 1, rational: "If high blood pressure is the leading cause of heart disease, then reducing it would logically lead to reduced heart disease rates." },
-    { id: 6, category: 'Inference', stimulus: "Archaeologists discovered pottery fragments at a site dating to 3000 BCE. The pottery contains residue of fermented grains and shows signs of having been sealed with wax.", question: "Which of the following can be most reasonably inferred from the evidence?", options: ["The civilization had developed advanced agricultural techniques.", "The inhabitants intentionally produced and stored alcoholic beverages.", "Trade networks existed between this and neighboring civilizations.", "The pottery was used exclusively for religious ceremonies."], correct: 1, rational: "Fermented grains plus sealed containers strongly suggest intentional production and storage of alcohol. This is a direct inference from the evidence presented." },
-    { id: 7, category: 'Flawed Analogy', stimulus: "Learning to code is just like learning a foreign language. Therefore, the best way to teach coding is through immersive conversation practice, just as we teach Spanish or French.", question: "The argument is most vulnerable to criticism because:", options: ["Coding languages are less complex than natural languages.", "Computers cannot engage in true conversation like humans can.", "The purpose of coding is fundamentally different from communication.", "Both foreign languages and coding require memorization."], correct: 1, rational: "The analogy fails because natural language learning relies on interactive feedback from another conscious being. Code execution is deterministic and lacks the fluid adaptability of human conversation." },
-    { id: 8, category: 'Method of Reasoning', stimulus: "Critic: 'Your proposal to reduce traffic by adding tolls is regressive. It disproportionately burdens low-income commuters.' Mayor: 'While tolls may affect some, the revenue will fund free public transportation passes for low-income residents.'", question: "The Mayor responds to the critic by:", options: ["Conceding the critic's point but providing additional context.", "Rejecting the premise that tolls are regressive.", "Offering a mitigation strategy that addresses the stated concern.", "Shifting the discussion to unrelated benefits of the proposal."], correct: 2, rational: "The Mayor doesn't deny the regressive effect but offers a compensatory measure (free passes) that mitigates the harm to low-income residents." },
-    { id: 9, category: 'Sufficient Assumption', stimulus: "If the museum receives the grant, it will expand the modern art wing. The modern art wing will only be expanded if the museum receives the grant.", question: "Which of the following must be true based on the statements above?", options: ["The museum will expand the modern art wing.", "The museum will not receive the grant.", "Expansion of the modern art wing depends entirely on receiving the grant.", "The modern art wing needs expansion."], correct: 2, rational: "The second sentence establishes that receiving the grant is a necessary condition for expansion. Expansion cannot happen without it." },
-    { id: 10, category: 'Evaluate the Argument', stimulus: "A company reports that employee productivity increased 20% after implementing a four-day workweek. The CEO claims the shorter week causes higher productivity.", question: "Which of the following would be most useful to evaluate the CEO's claim?", options: ["Whether the company hired new employees during this period.", "Whether employees are working longer hours on the four days they do work.", "Whether the company's competitors have similar policies.", "Whether employee satisfaction surveys show improved morale."], correct: 1, rational: "If employees compressed 40 hours into 4 days, productivity per hour hasn't changed - just scheduling. This is crucial for evaluating the causal claim." },
-    { id: 11, category: 'Parallel Reasoning', stimulus: "All successful entrepreneurs are risk-takers. Some risk-takers are not successful. Therefore, some successful people are not entrepreneurs.", question: "Which of the following exhibits flawed reasoning most similar to the argument above?", options: ["All dogs are mammals. Some mammals are not pets. Therefore, some dogs are not pets.", "All roses are flowers. Some flowers are red. Therefore, some roses are red.", "All birds can fly. Some flying creatures are not birds. Therefore, some birds cannot fly.", "All metals conduct electricity. Copper conducts electricity. Therefore, copper is a metal."], correct: 0, rational: "The original argument commits a logical error by concluding 'some successful people are not entrepreneurs' from premises about risk-takers. Option A makes a similar invalid inference." },
-    { id: 12, category: 'Main Point', stimulus: "While electric vehicles produce zero tailpipe emissions, their overall environmental impact depends heavily on how the electricity is generated. In regions where coal powers the grid, EVs may produce more carbon emissions over their lifecycle than efficient gasoline vehicles. However, as renewable energy expands, EVs become increasingly beneficial. The transition to electric transportation should therefore be paired with aggressive grid decarbonization.", question: "The main point of the passage is:", options: ["Electric vehicles are worse for the environment than gasoline cars.", "The environmental benefit of EVs depends on the electricity source.", "Renewable energy is more important than electric vehicles.", "Coal-powered electricity is the primary environmental threat."], correct: 1, rational: "The passage's central thesis is that EV environmental impact is contingent on the energy grid, and the two transitions must happen together." }
+    { id: 1, difficulty: 'Medium', category: 'Logical Flaw', stimulus: "The city's new bike lane initiative has failed. Since the lanes were installed last year, the number of reported bicycle accidents has increased by 15%. Therefore, the bike lanes have made cycling more dangerous.", question: "Which of the following, if true, most seriously weakens the argument?", options: ["The cost of maintaining bike lanes is higher than originally estimated.", "The number of total cyclists in the city increased by 50% since the lanes were installed.", "Many motorists have complained about the reduction in car lanes.", "The city also increased the number of traffic police during the same period."], correct: 1, rational: "Rate vs. Raw Number flaw. A 50% increase in cyclists with only 15% more accidents means the accident rate per cyclist actually decreased." },
+    { id: 2, difficulty: 'Hard', category: 'Necessary Assumption', stimulus: "Corporate profits are at an all-time high. To ensure long-term economic stability, the government must increase the corporate tax rate immediately.", question: "The argument above relies on which of the following assumptions?", options: ["Higher taxes always lead to increased government spending efficiency.", "Corporate profits are the primary cause of current economic instability.", "Current high profits will not naturally diminish without government intervention.", "Increased tax revenue is a necessary component of economic stability."], correct: 3, rational: "The conclusion requires that tax revenue is necessary for economic stability. Without this assumption, the argument collapses." },
+    { id: 3, difficulty: 'Easy', category: 'Causal Flaw', stimulus: "Students who eat breakfast regularly score higher on standardized tests than those who skip breakfast. Therefore, eating breakfast causes improved academic performance.", question: "Which of the following most weakens the causal claim?", options: ["Some students who skip breakfast still score very well on tests.", "Students who eat breakfast also tend to have more stable home environments and better sleep habits.", "Breakfast is considered the most important meal of the day by nutritionists.", "Schools that serve breakfast report higher attendance rates."], correct: 1, rational: "Correlation does not equal causation. The stable home environment could be the actual cause of both eating breakfast and higher test scores." },
+    { id: 4, difficulty: 'Medium', category: 'Paradox Resolution', stimulus: "Despite a significant increase in the city's police budget and number of officers, the reported crime rate has remained unchanged for three consecutive years.", question: "Which of the following, if true, best resolves the apparent paradox?", options: ["The city's population has decreased by 15% over the same period.", "More citizens are now reporting crimes that previously went unreported.", "The police department has invested heavily in new technology.", "Neighboring cities have seen crime rates decrease."], correct: 1, rational: "Increased reporting creates the appearance of stable crime rates even as actual crime decreases. The budget increase may be working, but reporting bias masks the effect." },
+    { id: 5, difficulty: 'Easy', category: 'Strengthen', stimulus: "A new drug has been shown to reduce blood pressure in 85% of patients during clinical trials. The manufacturer claims this drug will significantly reduce heart disease rates nationwide.", question: "Which of the following, if true, most strengthens the manufacturer's claim?", options: ["The drug is affordable and covered by most insurance plans.", "High blood pressure is the leading risk factor for heart disease.", "The clinical trials included patients from diverse demographic backgrounds.", "Competing drugs only show 70% effectiveness."], correct: 1, rational: "If high blood pressure is the leading cause of heart disease, then reducing it would logically lead to reduced heart disease rates." },
+    { id: 6, difficulty: 'Medium', category: 'Inference', stimulus: "Archaeologists discovered pottery fragments at a site dating to 3000 BCE. The pottery contains residue of fermented grains and shows signs of having been sealed with wax.", question: "Which of the following can be most reasonably inferred from the evidence?", options: ["The civilization had developed advanced agricultural techniques.", "The inhabitants intentionally produced and stored alcoholic beverages.", "Trade networks existed between this and neighboring civilizations.", "The pottery was used exclusively for religious ceremonies."], correct: 1, rational: "Fermented grains plus sealed containers strongly suggest intentional production and storage of alcohol. This is a direct inference from the evidence presented." },
+    { id: 7, difficulty: 'Easy', category: 'Flawed Analogy', stimulus: "Learning to code is just like learning a foreign language. Therefore, the best way to teach coding is through immersive conversation practice, just as we teach Spanish or French.", question: "The argument is most vulnerable to criticism because:", options: ["Coding languages are less complex than natural languages.", "Computers cannot engage in true conversation like humans can.", "The purpose of coding is fundamentally different from communication.", "Both foreign languages and coding require memorization."], correct: 1, rational: "The analogy fails because natural language learning relies on interactive feedback from another conscious being. Code execution is deterministic and lacks the fluid adaptability of human conversation." },
+    { id: 8, difficulty: 'Medium', category: 'Method of Reasoning', stimulus: "Critic: 'Your proposal to reduce traffic by adding tolls is regressive. It disproportionately burdens low-income commuters.' Mayor: 'While tolls may affect some, the revenue will fund free public transportation passes for low-income residents.'", question: "The Mayor responds to the critic by:", options: ["Conceding the critic's point but providing additional context.", "Rejecting the premise that tolls are regressive.", "Offering a mitigation strategy that addresses the stated concern.", "Shifting the discussion to unrelated benefits of the proposal."], correct: 2, rational: "The Mayor doesn't deny the regressive effect but offers a compensatory measure (free passes) that mitigates the harm to low-income residents." },
+    { id: 9, difficulty: 'Hard', category: 'Sufficient Assumption', stimulus: "If the museum receives the grant, it will expand the modern art wing. The modern art wing will only be expanded if the museum receives the grant.", question: "Which of the following must be true based on the statements above?", options: ["The museum will expand the modern art wing.", "The museum will not receive the grant.", "Expansion of the modern art wing depends entirely on receiving the grant.", "The modern art wing needs expansion."], correct: 2, rational: "The second sentence establishes that receiving the grant is a necessary condition for expansion. Expansion cannot happen without it." },
+    { id: 10, difficulty: 'Hard', category: 'Evaluate the Argument', stimulus: "A company reports that employee productivity increased 20% after implementing a four-day workweek. The CEO claims the shorter week causes higher productivity.", question: "Which of the following would be most useful to evaluate the CEO's claim?", options: ["Whether the company hired new employees during this period.", "Whether employees are working longer hours on the four days they do work.", "Whether the company's competitors have similar policies.", "Whether employee satisfaction surveys show improved morale."], correct: 1, rational: "If employees compressed 40 hours into 4 days, productivity per hour hasn't changed - just scheduling. This is crucial for evaluating the causal claim." },
+    { id: 11, difficulty: 'Hard', category: 'Parallel Reasoning', stimulus: "All successful entrepreneurs are risk-takers. Some risk-takers are not successful. Therefore, some successful people are not entrepreneurs.", question: "Which of the following exhibits flawed reasoning most similar to the argument above?", options: ["All dogs are mammals. Some mammals are not pets. Therefore, some dogs are not pets.", "All roses are flowers. Some flowers are red. Therefore, some roses are red.", "All birds can fly. Some flying creatures are not birds. Therefore, some birds cannot fly.", "All metals conduct electricity. Copper conducts electricity. Therefore, copper is a metal."], correct: 0, rational: "The original argument commits a logical error by concluding 'some successful people are not entrepreneurs' from premises about risk-takers. Option A makes a similar invalid inference." },
+    { id: 12, difficulty: 'Easy', category: 'Main Point', stimulus: "While electric vehicles produce zero tailpipe emissions, their overall environmental impact depends heavily on how the electricity is generated. In regions where coal powers the grid, EVs may produce more carbon emissions over their lifecycle than efficient gasoline vehicles. However, as renewable energy expands, EVs become increasingly beneficial. The transition to electric transportation should therefore be paired with aggressive grid decarbonization.", question: "The main point of the passage is:", options: ["Electric vehicles are worse for the environment than gasoline cars.", "The environmental benefit of EVs depends on the electricity source.", "Renewable energy is more important than electric vehicles.", "Coal-powered electricity is the primary environmental threat."], correct: 1, rational: "The passage's central thesis is that EV environmental impact is contingent on the energy grid, and the two transitions must happen together." }
   ], []);
 
   useEffect(() => { 
@@ -216,34 +217,55 @@ export default function InferenceDrillClient() {
     return DRILL_SET.filter((_, idx) => !completedQuestions.has(idx)); 
   }, [completedQuestions, DRILL_SET]);
 
-  const loadNewQuestion = useCallback(() => { 
-    const available = getAvailableQuestions(); 
-    if (available.length === 0) { 
-      setGameState('complete'); 
-      return; 
-    } 
-    const randomQuestion = available[Math.floor(Math.random() * available.length)]; 
-    setCurrentQuestion(randomQuestion); 
-    setSelectedIdx(null); 
-    setShowRationale(false); 
-  }, [getAvailableQuestions]);
-
   const handleGameOver = useCallback(() => {
     if (timerRef.current) clearInterval(timerRef.current);
+    
+    setGameState(prev => {
+      // Prevent overwriting 'complete' with 'gameOver' if they hit 0s on the finish screen
+      if (prev === 'complete') return 'complete'; 
+      return 'gameOver';
+    });
+
     const endScore = scoreRef.current;
     if (endScore > bestScore && endScore > 0) {
       setIsNewBest(true);
       setBestScore(endScore);
       try { localStorage.setItem(STORAGE_BEST_KEY, endScore.toString()); } catch (e) {}
     }
-    setGameState('gameOver');
   }, [bestScore]);
+
+  const loadNewQuestion = useCallback(() => { 
+    const available = getAvailableQuestions(); 
+    if (available.length === 0) { 
+      if (timerRef.current) clearInterval(timerRef.current);
+      setGameState('complete');
+      handleGameOver();
+      return; 
+    } 
+    
+    // Map numerical level to difficulty string
+    const targetDiff = difficultyLevel === 1 ? 'Easy' : difficultyLevel === 2 ? 'Medium' : 'Hard';
+    
+    // Filter for target difficulty
+    let questionPool = available.filter(q => q.difficulty === targetDiff);
+
+    // Fallback if we ran out of questions in that specific tier
+    if (questionPool.length === 0) {
+      questionPool = available;
+    }
+
+    const randomQuestion = questionPool[Math.floor(Math.random() * questionPool.length)]; 
+    setCurrentQuestion(randomQuestion); 
+    setSelectedIdx(null); 
+    setShowRationale(false); 
+  }, [getAvailableQuestions, difficultyLevel, handleGameOver]);
 
   // Decoupled Precision Timer
   useEffect(() => {
     if (gameState === 'playing') {
       timerRef.current = setInterval(() => {
-        localTimeRef.current -= 0.1;
+        // Fix floating point math drift
+        localTimeRef.current = Number((localTimeRef.current - 0.1).toFixed(1));
         
         if (localTimeRef.current <= 0) {
           localTimeRef.current = 0;
@@ -283,7 +305,11 @@ export default function InferenceDrillClient() {
     setIsNewBest(false);
     
     setTimeout(() => {
-      const randomQuestion = DRILL_SET[Math.floor(Math.random() * DRILL_SET.length)];
+      // Start with Easy question based on logic
+      const targetDiff = 'Easy';
+      const available = DRILL_SET;
+      const pool = available.filter(q => q.difficulty === targetDiff);
+      const randomQuestion = pool[Math.floor(Math.random() * pool.length)];
       setCurrentQuestion(randomQuestion);
     }, 50);
   }, [DRILL_SET]);
@@ -317,14 +343,8 @@ export default function InferenceDrillClient() {
   const nextQuestion = useCallback(() => {
     setFeedback('');
     setFeedbackType('');
-    const available = getAvailableQuestions();
-    if (available.length === 0) {
-      setGameState('complete');
-      handleGameOver();
-    } else {
-      loadNewQuestion();
-    }
-  }, [getAvailableQuestions, loadNewQuestion, handleGameOver]);
+    loadNewQuestion();
+  }, [loadNewQuestion]);
 
   const handleSubmit = useCallback((index) => {
     if (showRationale || !currentQuestion || gameState !== 'playing') return;
@@ -335,24 +355,33 @@ export default function InferenceDrillClient() {
     setTotalAttempted(prev => prev + 1);
     
     if (isCorrect) {
-      // Correct Answer: +15 Score, +10 Seconds, Increase Difficulty
-      scoreRef.current += 15;
+      const diff = currentQuestion.difficulty;
+      let pointsGained = 0;
+      let timeGained = 0;
+
+      if (diff === 'Easy') { pointsGained = 10; timeGained = 3.0; }
+      else if (diff === 'Medium') { pointsGained = 15; timeGained = 2.0; }
+      else { pointsGained = 20; timeGained = 1.0; }
+
+      // Update Score & Time
+      scoreRef.current += pointsGained;
       setScore(scoreRef.current);
       
-      localTimeRef.current = Math.min(60.0, localTimeRef.current + 10.0);
+      localTimeRef.current = Math.min(60.0, localTimeRef.current + timeGained);
       setLocalTimeRemaining(localTimeRef.current);
       
-      setDifficultyLevel(prev => Math.min(10, prev + 1));
+      // Increase Difficulty Tier (Max 3)
+      setDifficultyLevel(prev => Math.min(3, prev + 1));
       setTotalCorrect(prev => prev + 1);
       
       setCombo(prev => {
         const nc = prev + 1;
         if (nc > 0 && nc % 3 === 0) {
           if (audioSynth) audioSynth.playCombo();
-          showFeedbackMsg(`🔥 ${nc}x Combo! +15 PTS | +10s`, 'success');
+          showFeedbackMsg(`🔥 ${nc}x Combo! +${pointsGained} PTS | +${timeGained}s`, 'success');
         } else {
           if (audioSynth) audioSynth.playCorrect();
-          showFeedbackMsg(`✓ CORRECT! +15 PTS | +10s`, 'success');
+          showFeedbackMsg(`✓ CORRECT! +${pointsGained} PTS | +${timeGained}s`, 'success');
         }
         return nc;
       });
@@ -366,20 +395,21 @@ export default function InferenceDrillClient() {
         });
       }
     } else {
-      // Wrong Answer: -7 Score, -5 Seconds, Decrease Difficulty
+      // Wrong Answer Penalties: -5 Score, -3 Seconds
       setCombo(0);
       setWrongAnswers(prev => prev + 1);
       
-      scoreRef.current = Math.max(0, scoreRef.current - 7);
+      scoreRef.current = Math.max(0, scoreRef.current - 5);
       setScore(scoreRef.current);
       
-      localTimeRef.current = Math.max(0, localTimeRef.current - 5.0);
+      localTimeRef.current = Math.max(0, localTimeRef.current - 3.0);
       setLocalTimeRemaining(localTimeRef.current);
       
+      // Decrease Difficulty Tier (Floor 1)
       setDifficultyLevel(prev => Math.max(1, prev - 1));
       
       if (audioSynth) audioSynth.playWrong();
-      showFeedbackMsg(`✗ INCORRECT! -7 PTS | -5s`, 'error');
+      showFeedbackMsg(`✗ INCORRECT! -5 PTS | -3s`, 'error');
       
       if (localTimeRef.current <= 0) {
         handleGameOver();
@@ -422,6 +452,9 @@ export default function InferenceDrillClient() {
   const strokeDasharray = 100;
   const strokeDashoffset = strokeDasharray - getAccuracy();
 
+  // Helper for displaying current difficulty tier name
+  const difficultyName = difficultyLevel === 1 ? 'Easy' : difficultyLevel === 2 ? 'Medium' : 'Hard';
+
   return (
     <div className="min-h-screen select-none bg-[#0a0a0a] text-white font-sans" style={{ WebkitTapHighlightColor: 'transparent' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -446,8 +479,8 @@ export default function InferenceDrillClient() {
               <Scale className="w-7 h-7 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Inference Analytics</h1>
-              <p className="text-sm text-gray-400 mt-1 font-medium">Critical Reasoning • Time Attack • Adaptive Scaling</p>
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Critical Reasoning Practice Test</h1>
+              <p className="text-sm text-gray-400 mt-1 font-medium">Logical Reasoning Questions • Inference Practice • LSAT & GMAT Preparation</p>
             </div>
           </div>
           
@@ -470,7 +503,7 @@ export default function InferenceDrillClient() {
         <div className="grid grid-cols-4 sm:grid-cols-4 lg:grid-cols-8 gap-1.5 sm:gap-3 mb-2 h-auto py-1">
           <StatCard icon={<Target className="text-blue-400" />} value={score} label="Score" />
           <StatCard icon={<Timer className={localTimeRemaining <= 10 ? 'text-red-400 animate-pulse' : 'text-green-400'} />} value={localTimeRemaining.toFixed(1)} label="Time" unit="s" />
-          <StatCard icon={<TrendingUp className="text-orange-400" />} value={`Lvl ${difficultyLevel}`} label="Difficulty" />
+          <StatCard icon={<TrendingUp className={difficultyLevel === 3 ? "text-orange-400" : difficultyLevel === 2 ? "text-yellow-400" : "text-green-400"} />} value={difficultyName} label="Tier" />
           <StatCard icon={<Zap className="text-yellow-400" />} value={combo} label="Streak" />
           <StatCard icon={<CheckCircle2 className="text-emerald-400" />} value={totalCorrect} label="Correct" />
           <StatCard icon={<XCircle className="text-red-400" />} value={wrongAnswers} label="Misses" />
@@ -548,9 +581,9 @@ export default function InferenceDrillClient() {
               <div className="w-full max-w-3xl my-auto py-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
                 <div className="flex flex-wrap justify-between items-center gap-2 mb-4">
                   <span className="px-3 py-1 rounded-full text-xs font-bold bg-blue-900/30 text-blue-400 border border-blue-500/20">{currentQuestion.category}</span>
-                  {difficultyLevel > 1 && (
-                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-purple-900/30 text-purple-400 border border-purple-500/20">Level {difficultyLevel}</span>
-                  )}
+                  <span className={`px-3 py-1 rounded-full text-xs font-bold border ${currentQuestion.difficulty === 'Easy' ? 'bg-green-900/30 text-green-400 border-green-500/20' : currentQuestion.difficulty === 'Medium' ? 'bg-yellow-900/30 text-yellow-400 border-yellow-500/20' : 'bg-orange-900/30 text-orange-400 border-orange-500/20'}`}>
+                    Tier: {currentQuestion.difficulty}
+                  </span>
                 </div>
                 
                 <blockquote className="mb-6 p-4 sm:p-6 rounded-xl border-l-4 border-blue-500 italic text-sm sm:text-base bg-gray-800/80 text-gray-200 shadow-inner">
@@ -654,7 +687,7 @@ export default function InferenceDrillClient() {
                     <div className="grid grid-cols-3 gap-2 sm:gap-3">
                       <EndStat label="Correct" value={totalCorrect} color="emerald" />
                       <EndStat label="Wrong" value={wrongAnswers} color="red" />
-                      <EndStat label="Max Lvl" value={difficultyLevel} color="purple" />
+                      <EndStat label="Max Tier" value={difficultyName} color="purple" />
                       <EndStat label="Max Streak" value={`${combo}x`} color="orange" />
                       <EndStat label="Done" value={`${completedQuestions.size}/12`} color="blue" />
                       <EndStat label="Best" value={bestScore} color="yellow" />
@@ -687,12 +720,14 @@ export default function InferenceDrillClient() {
               </div>
               <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-5">
-                  <RuleItem color="green" text="Correct Analysis" highlight="+15 PTS | +10s" result="Increases Difficulty" />
-                  <RuleItem color="red" text="Wrong Answer" highlight="-7 PTS | -5s" result="Decreases Difficulty" />
+                  <RuleItem color="green" text="Easy Question" highlight="+10 PTS | +3s" result="Correct" />
+                  <RuleItem color="yellow" text="Medium Question" highlight="+15 PTS | +2s" result="Correct" />
+                  <RuleItem color="orange" text="Hard Question" highlight="+20 PTS | +1s" result="Correct" />
                 </div>
                 <div className="space-y-5">
-                  <RuleItem color="orange" text="Time Limit Capped" highlight="Max 60 Seconds" result="Survival Mode" />
+                  <RuleItem color="red" text="Wrong Answer" highlight="-5 PTS | -3s" result="Penalty" />
                   <RuleItem color="cyan" text="Combo Multiplier" highlight="Every 3rd Answer" result="Boosts Output" />
+                  <RuleItem color="purple" text="Time Limit Capped" highlight="Max 60 Seconds" result="Survival Mode" />
                 </div>
               </div>
             </div>
@@ -705,12 +740,12 @@ export default function InferenceDrillClient() {
             <div className="rounded-2xl border border-gray-800 overflow-hidden bg-gray-900 shadow-xl">
               <div className="px-6 py-5 border-b border-gray-800 bg-black/40 flex items-center gap-3">
                 <GraduationCap className="w-5 h-5 text-blue-400" />
-                <h2 className="font-bold text-white text-lg tracking-wide">About Inference Analytics</h2>
+                <h2 className="font-bold text-white text-lg tracking-wide">About This Critical Reasoning Practice Test</h2>
               </div>
               
               <div className="p-6 sm:p-8">
                 <p className="text-sm leading-relaxed mb-6 text-gray-300">
-                  This highly adaptive Inference Drill forces rapid synthesis of textual information. By binding complex logical deduction to a strict survival timer, you map the cognitive pathways required to isolate logical flaws, identify core assumptions, and process dense arguments efficiently. Perfect for exam preparation and advanced cognitive conditioning.
+                  This highly adaptive Inference Drill forces rapid synthesis of textual information. By binding complex logical deduction to a strict survival timer, you map the cognitive pathways required to isolate logical flaws, identify core assumptions, and process dense arguments efficiently. Adapts dynamically to your performance levels.
                 </p>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
@@ -728,7 +763,7 @@ export default function InferenceDrillClient() {
                   <ul className="text-sm leading-relaxed space-y-3 pl-2 text-gray-400">
                     <li><strong className="text-gray-200">Isolate the Core:</strong> Don't get bogged down in peripheral details. Quickly identify the argument's primary premise and the final conclusion.</li>
                     <li><strong className="text-gray-200">Pre-phrase the Answer:</strong> Before reading the multiple-choice options, try to anticipate the logical flaw, necessary assumption, or direct inference in your head.</li>
-                    <li><strong className="text-gray-200">Survival Mechanics:</strong> You must consistently answer correctly to add time (+10s) and score (+15 PTS) to your clock. Wrong answers actively drain your time (-5s). The maximum time ceiling is 60 seconds.</li>
+                    <li><strong className="text-gray-200">Survival Mechanics:</strong> Consistent accuracy moves you to higher tiers where questions yield more points but fewer fallback seconds. Wrong answers heavily drain your time clock (-3s).</li>
                     <li><strong className="text-gray-200">Review Rationales:</strong> Take a moment to read the rationale after answering, even if you got it right. Understanding the logical structure is the key to leveling up your analytical skills.</li>
                   </ul>
                 </div>
@@ -740,8 +775,8 @@ export default function InferenceDrillClient() {
                     <h3 className="text-sm font-bold text-white uppercase tracking-wider">Frequently Asked Questions</h3>
                   </div>
                   <div className="space-y-5">
-                    <FAQItem question="Why does the timer deduct seconds for incorrect answers?" answer="This simulates high-stakes testing environments where incorrect assumptions cost valuable time. The -5s penalty forces you to balance speed with careful deduction, rather than blindly guessing." />
-                    <FAQItem question="How does the difficulty scaling work?" answer="Answering correctly increases your operational 'Level' and adds +10 seconds back to your clock (capped at 60s). Incorrect answers reduce your level and deduct 5 seconds, actively adjusting the pressure based on your current cognitive performance." />
+                    <FAQItem question="Why does the timer deduct seconds for incorrect answers?" answer="This simulates high-stakes testing environments where incorrect assumptions cost valuable time. The -3s penalty forces you to balance speed with careful deduction, rather than blindly guessing." />
+                    <FAQItem question="How does the dynamic difficulty scaling work?" answer="Answering correctly increases your operational 'Tier' (Easy, Medium, Hard). Harder questions offer higher point multipliers but less buffer time. Incorrect answers drop your tier down to give you space to recover." />
                     <FAQItem question="What constitutes a complete session?" answer="A complete session consists of analyzing all 12 unique logical paradigms without allowing the clock to hit zero. This proves mastery over multiple reasoning types (e.g., Causal Flaws, Paradox Resolution) in a single run." />
                   </div>
                 </div>
@@ -912,7 +947,8 @@ function RuleItem({ color, text, highlight = '', result }) {
     red: 'bg-red-600 text-red-300 border-red-500', 
     orange: 'bg-orange-600 text-orange-300 border-orange-500',
     green: 'bg-green-600 text-green-300 border-green-500',
-    yellow: 'bg-yellow-600 text-yellow-300 border-yellow-500'
+    yellow: 'bg-yellow-600 text-yellow-300 border-yellow-500',
+    purple: 'bg-purple-600 text-purple-300 border-purple-500'
   };
   const colors = colorMap[color] || 'bg-slate-600 text-slate-300 border-slate-500';
   const [bg, txt, border] = colors.split(' ');

@@ -1,65 +1,251 @@
-import InferenceDrillClient from './InferenceDrillClient';
+﻿import InferenceDrillClient from './InferenceDrillClient';
 
 export const metadata = {
-  title: 'Inference Drill - Critical Reasoning | SkillDrills',
-  description: 'Master critical reasoning with 12 passages. Practice logical flaws, causal analysis, inference, and argument evaluation. LSAT & GMAT style. No sign-up.',
+  title: 'Critical Reasoning Practice Test - LSAT & GMAT Logic Questions | SkillDrills',
+  description:
+    'Practice critical reasoning with logical flaws, assumptions, argument evaluation, causal reasoning, inference questions, and LSAT-style logic problems. Free online critical thinking test with explanations.',
   keywords: [
-    'inference drill', 'inference practice', 'inference test', 'critical reasoning drill',
-    'logical reasoning practice', 'reading comprehension drill',
-    'LSAT logical reasoning practice', 'GMAT critical reasoning practice',
-    'GRE verbal reasoning practice', 'CLAT logical reasoning',
-    'logical flaws practice', 'causal reasoning exercises', 'argument analysis practice',
-    'paradox resolution drill', 'flawed analogy practice', 'method of reasoning',
-    'sufficient assumption practice', 'necessary assumption practice',
-    'parallel reasoning questions', 'main point identification',
-    'critical thinking exercises online', 'analytical reasoning practice free',
-    'verbal reasoning test free', 'comprehension skills training',
-    'how to improve logical reasoning', 'improve critical thinking skills',
-    'practice inference questions online', 'free reasoning test online',
-    'logical reasoning questions with answers', 'critical reasoning questions and explanations',
-    'skilldrills inference', 'skilldrills critical reasoning',
-    'online inference drill free', 'best critical reasoning practice',
-    'free LSAT practice online', 'free GMAT verbal practice',
-    'logical reasoning for competitive exams', 'SSC reasoning practice',
-    'UPSC logical reasoning', 'CAT logical reasoning',
-    'free reading comprehension test', 'inference based questions',
-    'statement and assumption practice', 'cause and effect reasoning',
-    'verbal ability test', 'english comprehension practice',
-    'aptitude test reasoning', 'analytical ability test',
-    'free online reasoning quiz', 'daily reasoning practice',
+    'critical reasoning practice',
+    'logical reasoning questions',
+    'logical reasoning practice test',
+    'critical thinking exercises',
+    'critical reasoning questions and answers',
+    'logical inference questions',
+    'argument analysis practice',
+    'LSAT logical reasoning practice',
+    'GMAT critical reasoning practice',
+    'GRE verbal reasoning practice',
+    'logical reasoning test online',
+    'critical thinking test',
+    'logical fallacies practice',
+    'cause and effect reasoning questions',
+    'necessary assumption questions',
+    'sufficient assumption questions',
+    'strengthen weaken argument questions',
+    'parallel reasoning questions',
+    'main point questions',
+    'reading comprehension inference questions',
+    'argument evaluation practice',
+    'analytical reasoning questions',
+    'logical deduction exercises',
+    'free logical reasoning test',
+    'free critical reasoning practice',
+    'online reasoning questions',
+    'reasoning aptitude test',
+    'critical thinking skills practice',
+    'logical analysis exercises',
+    'verbal reasoning practice',
+    'critical reasoning drill',
+    'logical reasoning drill',
+    'LSAT practice questions',
+    'GMAT verbal reasoning',
+    'critical thinking games',
+    'argument evaluation questions',
+    'logical flaw questions',
+    'inference practice test',
+    'reading comprehension reasoning',
+    'analytical thinking exercises',
+    'free aptitude reasoning test',
+    'competitive exam reasoning practice',
+    'UPSC reasoning questions',
+    'CAT logical reasoning',
+    'CLAT critical reasoning',
+    'SSC reasoning practice',
+    'reasoning questions with answers',
+    'critical reasoning online test',
+    'best logical reasoning practice'
   ],
+
   openGraph: {
-    title: 'Inference Drill - Critical Reasoning | SkillDrills',
-    description: '12 unique critical reasoning passages with detailed rationales. LSAT & GMAT style. Free, no sign-up.',
-    type: 'article',
+    title: 'Critical Reasoning Practice Test - LSAT & GMAT Logic Questions',
+    description:
+      'Train logical reasoning, argument analysis, assumptions, logical flaws, inference, and critical thinking with interactive LSAT and GMAT style questions.',
     url: 'https://skilldrills.online/drills/academic/comprehension/inference-drill',
     siteName: 'SkillDrills',
     locale: 'en_US',
-    images: [{
-      url: 'https://skilldrills.online/icons/icon-512x512.png',
-      width: 512,
-      height: 512,
-      alt: 'Inference Analytics Drill - Critical Reasoning Practice',
-    }],
+    type: 'website',
+    images: [
+      {
+        url: 'https://skilldrills.online/icons/icon-512x512.png',
+        width: 512,
+        height: 512,
+        alt: 'Critical Reasoning Practice Test'
+      }
+    ]
   },
+
   twitter: {
     card: 'summary_large_image',
-    title: 'Inference Drill - Critical Reasoning | SkillDrills',
-    description: 'Master critical reasoning with 12 passages and detailed rationales. Free, no sign-up.',
-    images: ['https://skilldrills.online/icons/icon-512x512.png'],
+    title: 'Critical Reasoning Practice Test - Free Online Reasoning Drill',
+    description:
+      'Improve logical reasoning, argument evaluation, assumptions, and critical thinking skills with free interactive practice questions.',
+    images: ['https://skilldrills.online/icons/icon-512x512.png']
   },
-  robots: { index: true, follow: true },
+
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+      'max-video-preview': -1
+    }
+  },
+
   alternates: {
-    canonical: 'https://skilldrills.online/drills/academic/comprehension/inference-drill',
-  },
+    canonical:
+      'https://skilldrills.online/drills/academic/comprehension/inference-drill'
+  }
 };
 
 export default function InferenceDrillPage() {
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [ { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://skilldrills.online" }, { "@type": "ListItem", "position": 2, "name": "Academic Drills", "item": "https://skilldrills.online/drills/academic" }, { "@type": "ListItem", "position": 3, "name": "Comprehension", "item": "https://skilldrills.online/drills/academic/comprehension" }, { "@type": "ListItem", "position": 4, "name": "Inference Drill" } ] }) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "WebApplication", "name": "Inference Drill", "url": "https://skilldrills.online/drills/academic/comprehension/inference-drill", "description": "Free interactive inference drill with 12 unique critical reasoning passages covering logical flaws, causal analysis, paradox resolution, and argument evaluation. LSAT & GMAT style timed 60-second challenge with detailed answer rationales.", "applicationCategory": "EducationalApplication", "operatingSystem": "All", "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }, "author": { "@type": "Organization", "name": "SkillDrills", "url": "https://skilldrills.online" }, "isAccessibleForFree": true }) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [ { "@type": "Question", "name": "What is the Inference Drill?", "acceptedAnswer": { "@type": "Answer", "text": "A free interactive critical reasoning exercise with 12 unique passages covering logical flaws, causal analysis, paradox resolution, and argument evaluation. Each question includes detailed answer rationales." } }, { "@type": "Question", "name": "Is this drill helpful for LSAT and GMAT preparation?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. The drill mirrors logical reasoning sections found on LSAT, GMAT, GRE, and CLAT. Question types including logical flaws, necessary assumptions, and parallel reasoning directly correspond to these exams." } }, { "@type": "Question", "name": "How is the inference drill scored?", "acceptedAnswer": { "@type": "Answer", "text": "Each correct answer earns +1 point. Wrong answers incur -1 point (score never goes below zero). Every 3 consecutive correct answers trigger a combo. Best score saves locally in your browser." } }, { "@type": "Question", "name": "Is registration required?", "acceptedAnswer": { "@type": "Answer", "text": "No registration, no sign-up, and no login required. The inference drill is completely free and works instantly in your browser. Just visit and start practicing." } } ] }) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            itemListElement: [
+              {
+                '@type': 'ListItem',
+                position: 1,
+                name: 'Home',
+                item: 'https://skilldrills.online'
+              },
+              {
+                '@type': 'ListItem',
+                position: 2,
+                name: 'Academic Drills',
+                item: 'https://skilldrills.online/drills/academic'
+              },
+              {
+                '@type': 'ListItem',
+                position: 3,
+                name: 'Comprehension',
+                item: 'https://skilldrills.online/drills/academic/comprehension'
+              },
+              {
+                '@type': 'ListItem',
+                position: 4,
+                name: 'Critical Reasoning Practice Test',
+                item: 'https://skilldrills.online/drills/academic/comprehension/inference-drill'
+              }
+            ]
+          })
+        }}
+      />
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'WebApplication',
+            name: 'Critical Reasoning Practice Test',
+            applicationCategory: 'EducationalApplication',
+            operatingSystem: 'All',
+            url: 'https://skilldrills.online/drills/academic/comprehension/inference-drill',
+            description:
+              'Free critical reasoning practice test featuring logical flaws, assumptions, inference questions, causal reasoning, argument evaluation, parallel reasoning, and LSAT-style logical reasoning exercises.',
+            isAccessibleForFree: true,
+            offers: {
+              '@type': 'Offer',
+              price: '0',
+              priceCurrency: 'USD'
+            },
+            author: {
+              '@type': 'Organization',
+              name: 'SkillDrills',
+              url: 'https://skilldrills.online'
+            }
+          })
+        }}
+      />
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'FAQPage',
+            mainEntity: [
+              {
+                '@type': 'Question',
+                name: 'What is critical reasoning practice?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'Critical reasoning practice develops the ability to evaluate arguments, identify assumptions, detect logical flaws, draw valid conclusions, and analyze evidence.'
+                }
+              },
+              {
+                '@type': 'Question',
+                name: 'Is this drill useful for LSAT and GMAT preparation?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'Yes. The drill includes logical flaws, assumptions, strengthen and weaken arguments, inference questions, and parallel reasoning similar to LSAT, GMAT, GRE, CLAT, CAT, and aptitude exams.'
+                }
+              },
+              {
+                '@type': 'Question',
+                name: 'How can I improve critical reasoning skills?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'Consistent practice with logical reasoning questions, argument evaluation, assumptions, causal reasoning, and inference exercises improves critical thinking and analytical reasoning skills.'
+                }
+              },
+              {
+                '@type': 'Question',
+                name: 'What exams use critical reasoning questions?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'Critical reasoning questions commonly appear in LSAT, GMAT, GRE, CAT, CLAT, UPSC aptitude sections, SSC exams, and corporate aptitude assessments.'
+                }
+              },
+              {
+                '@type': 'Question',
+                name: 'What is the difference between logical reasoning and critical reasoning?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'Logical reasoning focuses on deductions and formal logic structures, while critical reasoning evaluates assumptions, evidence, arguments, conclusions, and reasoning quality.'
+                }
+              },
+              {
+                '@type': 'Question',
+                name: 'Is the critical reasoning practice test free?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'Yes. SkillDrills provides this critical reasoning practice test completely free with no sign-up, registration, or downloads required.'
+                }
+              }
+            ]
+          })
+        }}
+      />
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'WebPage',
+            name: 'Critical Reasoning Practice Test',
+            description:
+              'Free online logical reasoning and critical thinking practice test with explanations.',
+            url: 'https://skilldrills.online/drills/academic/comprehension/inference-drill',
+            inLanguage: 'en',
+            isPartOf: {
+              '@type': 'WebSite',
+              name: 'SkillDrills',
+              url: 'https://skilldrills.online'
+            }
+          })
+        }}
+      />
+
       <InferenceDrillClient />
     </>
   );

@@ -3,16 +3,17 @@
 
 export const dynamic = 'force-dynamic';
 
-const INDEXNOW_KEY = 'c8f7a3b2e1d4f5a6b7c8d9e0f1a2b3c4';
+const INDEXNOW_KEY = process.env.INDEXNOW_KEY || 'c8f7a3b2e1d4f5a6b7c8d9e0f1a2b3c4';
 const BASE_URL = 'https://skilldrills.online';
 
 // ============================================
 // GET - Key verification & status check
 // ============================================
 export async function GET(request) {
-  const { searchParams } = new URL(request.url);
-  const key = searchParams.get('key');
-  
+  if (!INDEXNOW_KEY) {
+    return new Response('IndexNow key not configured', { status: 500 });
+  }
+
   // Return the key file for verification
   return new Response(INDEXNOW_KEY, {
     status: 200,
@@ -33,11 +34,11 @@ export async function POST(request) {
     const body = await request.json();
     const { urls, key } = body;
 
-    // Validate API key
-    if (key && key !== INDEXNOW_KEY) {
+    // Validate API key (key is REQUIRED)
+    if (!key || key !== INDEXNOW_KEY) {
       return Response.json({ 
-        error: 'Invalid API key',
-        message: 'Use the correct IndexNow key or omit the key parameter'
+        error: 'Invalid or missing API key',
+        message: 'Provide a valid IndexNow key in the request body'
       }, { status: 401 });
     }
 

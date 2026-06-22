@@ -9,11 +9,11 @@ const BASE_URL = 'https://skilldrills.online';
 // ============================================
 const categoryPages = [
   { path: '/', priority: 1.0, changefreq: 'daily' },
+  { path: '/drills', priority: 0.9, changefreq: 'weekly' },
   { path: '/drills/academic', priority: 0.9, changefreq: 'weekly' },
   { path: '/drills/cognitive', priority: 0.9, changefreq: 'weekly' },
   { path: '/drills/fps', priority: 1.0, changefreq: 'weekly' },
   { path: '/drills/memory', priority: 0.85, changefreq: 'weekly' },
-  { path: '/drills/mental-fitness', priority: 0.8, changefreq: 'monthly' },
   { path: '/drills/motor', priority: 0.9, changefreq: 'weekly' },
   { path: '/drills/physical', priority: 0.9, changefreq: 'weekly' },
   { path: '/drills/visual', priority: 0.85, changefreq: 'weekly' },
@@ -26,12 +26,9 @@ const categoryPages = [
 const drillRoutes = [
   // ==================== ACADEMIC DRILLS ====================
   { path: '/drills/academic/comprehension/inference-drill', category: 'Academic > Comprehension', priority: 0.9 },
-  { path: '/drills/academic/comprehension/listening-comprehension', category: 'Academic > Comprehension', priority: 0.9 },
   { path: '/drills/academic/comprehension/reading-comprehension', category: 'Academic > Comprehension', priority: 0.9 },
   { path: '/drills/academic/math-speed/Math-Reaction', category: 'Academic > Math Speed', priority: 0.9 },
-  { path: '/drills/academic/math-speed/arithmetic-race', category: 'Academic > Math Speed', priority: 0.9 },
   { path: '/drills/academic/math-speed/mental-math', category: 'Academic > Math Speed', priority: 0.9 },
-  { path: '/drills/academic/math-speed/multiplication-tables', category: 'Academic > Math Speed', priority: 0.9 },
   { path: '/drills/academic/reading-speed/peripheral-reader', category: 'Academic > Reading Speed', priority: 0.9 },
   { path: '/drills/academic/reading-speed/rsvp-reader', category: 'Academic > Reading Speed', priority: 0.9 },
   { path: '/drills/academic/reading-speed/speed-reader', category: 'Academic > Reading Speed', priority: 0.9 },
@@ -44,15 +41,12 @@ const drillRoutes = [
   { path: '/drills/cognitive/attention/sustained-attention', category: 'Cognitive > Attention', priority: 0.85 },
   { path: '/drills/cognitive/focus/concentration-grid', category: 'Cognitive > Focus', priority: 0.85 },
   { path: '/drills/cognitive/focus/distraction-fighter', category: 'Cognitive > Focus', priority: 0.85 },
-  { path: '/drills/cognitive/focus/focus-timer', category: 'Cognitive > Focus', priority: 0.85 },
   { path: '/drills/cognitive/memory/card-matching', category: 'Cognitive > Memory', priority: 0.85 },
   { path: '/drills/cognitive/memory/memory-sequence', category: 'Cognitive > Memory', priority: 0.85 },
-  { path: '/drills/cognitive/memory/number-recall', category: 'Cognitive > Memory', priority: 0.85 },
   { path: '/drills/cognitive/memory/pattern-recognition', category: 'Cognitive > Memory', priority: 0.85 },
   { path: '/drills/cognitive/problem-solving/logic-puzzles', category: 'Cognitive > Problem Solving', priority: 0.85 },
   { path: '/drills/cognitive/problem-solving/sudoku', category: 'Cognitive > Problem Solving', priority: 0.85 },
   { path: '/drills/cognitive/problem-solving/tower-of-hanoi', category: 'Cognitive > Problem Solving', priority: 0.85 },
-  { path: '/drills/cognitive/processing-speed/quick-math', category: 'Cognitive > Processing Speed', priority: 0.85 },
   { path: '/drills/cognitive/processing-speed/reaction-time', category: 'Cognitive > Processing Speed', priority: 0.85 },
   { path: '/drills/cognitive/processing-speed/symbol-matching', category: 'Cognitive > Processing Speed', priority: 0.85 },
 
@@ -60,8 +54,10 @@ const drillRoutes = [
   { path: '/drills/fps/180-degree-awareness', category: 'FPS Training', priority: 1.0 },
   { path: '/drills/fps/angle-hold-trainer', category: 'FPS Training', priority: 1.0 },
   { path: '/drills/fps/flick-shot-training', category: 'FPS Training', priority: 1.0 },
+  { path: '/drills/fps/flow-state', category: 'FPS Training', priority: 1.0 },
   { path: '/drills/fps/instant-response', category: 'FPS Training', priority: 1.0 },
   { path: '/drills/fps/pro-smooth-pursuit', category: 'FPS Training', priority: 1.0 },
+  { path: '/drills/fps/reactive-sphere-tracking', category: 'FPS Training', priority: 1.0 },
   { path: '/drills/fps/recoil-control', category: 'FPS Training', priority: 1.0 },
   { path: '/drills/fps/strafe-tracking', category: 'FPS Training', priority: 1.0 },
   { path: '/drills/fps/target-acquisition', category: 'FPS Training', priority: 1.0 },
@@ -80,24 +76,16 @@ const drillRoutes = [
   { path: '/drills/memory/associative-memory/sound-pattern', category: 'Memory Training > Associative Memory', priority: 0.85 },
   { path: '/drills/memory/long-term-memory/image-association', category: 'Memory Training > Long Term Memory', priority: 0.85 },
   { path: '/drills/memory/long-term-memory/paired-associates', category: 'Memory Training > Long Term Memory', priority: 0.85 },
-  { path: '/drills/memory/long-term-memory/story-recall', category: 'Memory Training > Long Term Memory', priority: 0.85 },
   { path: '/drills/memory/short-term-memory/color-sequence', category: 'Memory Training > Short Term Memory', priority: 0.85 },
   { path: '/drills/memory/short-term-memory/digit-span', category: 'Memory Training > Short Term Memory', priority: 0.85 },
   { path: '/drills/memory/short-term-memory/word-recall', category: 'Memory Training > Short Term Memory', priority: 0.85 },
   { path: '/drills/memory/spatial-memory/grid-memorization', category: 'Memory Training > Spatial Memory', priority: 0.85 },
   { path: '/drills/memory/spatial-memory/object-location', category: 'Memory Training > Spatial Memory', priority: 0.85 },
   { path: '/drills/memory/spatial-memory/path-tracing', category: 'Memory Training > Spatial Memory', priority: 0.85 },
-  { path: '/drills/memory/working-memory/mental-arithmetic', category: 'Memory Training > Working Memory', priority: 0.85 },
   { path: '/drills/memory/working-memory/n-back', category: 'Memory Training > Working Memory', priority: 0.85 },
   { path: '/drills/memory/working-memory/sentence-span', category: 'Memory Training > Working Memory', priority: 0.85 },
 
-  // ==================== MENTAL FITNESS DRILLS ====================
-  { path: '/drills/mental-fitness/breathing-exercises/4-7-8', category: 'Mental Fitness > Breathing Exercises', priority: 0.8 },
-  { path: '/drills/mental-fitness/breathing-exercises/box-breathing', category: 'Mental Fitness > Breathing Exercises', priority: 0.8 },
-  { path: '/drills/mental-fitness/breathing-exercises/wim-hof', category: 'Mental Fitness > Breathing Exercises', priority: 0.8 },
-  { path: '/drills/mental-fitness/stress-control/biofeedback', category: 'Mental Fitness > Stress Control', priority: 0.8 },
-  { path: '/drills/mental-fitness/stress-control/calm-under-pressure', category: 'Mental Fitness > Stress Control', priority: 0.8 },
-  { path: '/drills/mental-fitness/stress-control/stress-inoculation', category: 'Mental Fitness > Stress Control', priority: 0.8 },
+
 
   // ==================== MOTOR SKILLS DRILLS ====================
   { path: '/drills/motor/hand-eye-coordination/aim-trainer', category: 'Motor Skills > Hand Eye Coordination', priority: 0.9 },
@@ -127,7 +115,6 @@ const drillRoutes = [
   { path: '/drills/physical/reflex-training/reaction-chain', category: 'Physical Training > Reflex Training', priority: 0.9 },
 
   { path: '/drills/cognitive/attention/concentration-stamina', category: 'Cognitive > Attention', priority: 0.85 },
-  { path: '/drills/visual/tracking-accuracy/flow-state', category: 'Cognitive > Attention', priority: 0.85 },
   { path: '/drills/cognitive/attention/multi-tasking', category: 'Cognitive > Attention', priority: 0.85 },
   { path: '/drills/cognitive/attention/switch-cost', category: 'Cognitive > Attention', priority: 0.85 },
   { path: '/drills/cognitive/problem-solving/priority-sorting', category: 'Cognitive > Problem Solving', priority: 0.85 },
@@ -212,18 +199,16 @@ export default async function sitemap() {
 // ============================================
 
 /*
-  TOTAL URLS: 160
-  ├── Category Pages: 11
+  TOTAL URLS: 121
+  ├── Category Pages: 10
   │   ├── Priority 1.0: Homepage, FPS Hub
-  │   ├── Priority 0.9: Academic, Cognitive
-  │   ├── Priority 0.85: Memory, Motor, Visual, Visual Tracking
-  │   └── Priority 0.75-0.8: Mental Fitness, Physical
+  │   ├── Priority 0.9: Drills Hub, Academic, Cognitive, Motor, Physical
+  │   └── Priority 0.85: Memory, Visual, Visual Tracking
   │
-  └── Drill Pages: 149
-      ├── Priority 1.0: FPS Drills (28)
-      ├── Priority 0.9: Academic Drills (12)
-      ├── Priority 0.85: Cognitive (16), Memory (15), Motor (12), Cognitive Extended, Visual (14), Visual Tracking (25)
-      └── Priority 0.75-0.8: Mental Fitness (6), Physical (11)
+  └── Drill Pages: 111
+      ├── Priority 1.0: FPS Drills (13)
+      ├── Priority 0.9: Academic Drills (8)
+      ├── Priority 0.85: Cognitive (15), Memory (13), Motor (12), Physical (11), Visual (14), Visual Tracking (25)
 */
 
 // ============================================
