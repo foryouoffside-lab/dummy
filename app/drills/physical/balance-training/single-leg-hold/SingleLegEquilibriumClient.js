@@ -328,7 +328,8 @@ export default function SingleLegEquilibriumClient() {
           e.penaltyAccumulator += dt; 
           if (e.penaltyAccumulator >= 1.0) { 
             const pn = Math.floor(e.penaltyAccumulator); 
-            e.score = Math.max(0, e.score - pn); 
+            // e.score = Math.max(0, e.score - pn); // Removed negative score
+            e.timeLeft -= pn * 2.0; // Standardized time penalty 
             e.mistakes += pn; 
             e.penaltyAccumulator -= pn; 
             if (audioSynth) audioSynth.playSound('penalty'); 

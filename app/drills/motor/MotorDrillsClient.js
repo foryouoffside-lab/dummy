@@ -3,61 +3,12 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { 
-  ArrowLeft, Clock, Zap, Star, Play, Hand, Target, 
-  MousePointer, Timer, Move, Gauge, Activity, 
-  GitBranch, Crosshair, Droplets, Sparkles, Home, ChevronRight, Cpu,
-  AlertTriangle, Monitor, AlertCircle, MessageSquare, Lightbulb
+  Clock, Play, Hand, MousePointer, Timer, 
+  Gauge, Activity, Crosshair, Sparkles, Home, 
+  ChevronRight, Cpu
 } from 'lucide-react';
 
 export default function MotorDrillsClient() {
-  const [showRotateWarning, setShowRotateWarning] = useState(false);
-  const [warningMessage, setWarningMessage] = useState("Rotate Your Device");
-
-  // Notice Modal State - Default false to prevent hydration mismatch
-  const [showBetaNotice, setShowBetaNotice] = useState(false);
-
-  useEffect(() => {
-    // Session Storage Check for Beta Notice
-    const noticeShown = sessionStorage.getItem('motor_beta_notice_shown');
-    if (!noticeShown) {
-      setShowBetaNotice(true);
-    }
-
-    const checkSize = () => {
-      if (typeof window === 'undefined') return;
-      const ua = navigator.userAgent || '';
-      const isMobile = /Mobi|Android|iPhone|iPad|iPod|Windows Phone/i.test(ua) || 
-                       (navigator.maxTouchPoints > 0 && 
-                        window.screen && Math.max(window.screen.width, window.screen.height) < 1024);
-      if (!isMobile) {
-        setShowRotateWarning(false);
-        return;
-      }
-      const isPortrait = window.innerHeight > window.innerWidth;
-      if (isPortrait) {
-        if (window.innerWidth < 768) {
-          setShowRotateWarning(true);
-          setWarningMessage("Rotate Your Device");
-          return;
-        }
-      } else {
-        if (window.innerHeight < 320) {
-          setShowRotateWarning(true);
-          setWarningMessage("Screen height too small. Try entering Fullscreen mode.");
-          return;
-        }
-      }
-      setShowRotateWarning(false);
-    };
-    checkSize();
-    window.addEventListener('resize', checkSize);
-    window.addEventListener('orientationchange', checkSize);
-    return () => {
-      window.removeEventListener('resize', checkSize);
-      window.removeEventListener('orientationchange', checkSize);
-    };
-  }, []);
-
   const [isClient, setIsClient] = useState(false);
 
   // Click Calibrator State
@@ -148,11 +99,6 @@ export default function MotorDrillsClient() {
     };
   }, [isClient]);
 
-  const handleDismissNotice = () => {
-    sessionStorage.setItem('motor_beta_notice_shown', 'true');
-    setShowBetaNotice(false);
-  };
-
   const startCalibrator = () => {
     try {
       if (typeof window !== 'undefined' && !document.fullscreenElement) {
@@ -213,7 +159,8 @@ export default function MotorDrillsClient() {
       drills: [
         { name: 'Aim Trainer', folderName: 'aim-trainer', difficulty: 'Hard', duration: '60s', description: 'Dynamic targets that shrink with streak and lives system' },
         { name: 'Click Accuracy', folderName: 'click-accuracy', difficulty: 'Medium', duration: '60s', description: 'Single teleporting target with shrinking size on streak' },
-        { name: 'Drag and Drop', folderName: 'drag-and-drop', difficulty: 'Easy', duration: '60s', description: 'Drag ball into ring within 3s with teleporting positions' }
+        { name: 'Drag and Drop', folderName: 'drag-and-drop', difficulty: 'Easy', duration: '60s', description: 'Drag ball into ring within 3s with teleporting positions' },
+        { name: 'Precision Flick Shot', folderName: 'precision-flick-shot', difficulty: 'Hard', duration: '45s', description: 'Shrinking aperture flick targets to train visual acquisition and motor centering' }
       ]
     },
     { 
@@ -227,6 +174,7 @@ export default function MotorDrillsClient() {
       drills: [
         { name: 'Finger Sequencing', folderName: 'finger-sequencing', difficulty: 'Medium', duration: '60s', description: 'Click 3 nodes from largest to smallest with 2s timer' },
         { name: 'Gesture Speed', folderName: 'gesture-speed', difficulty: 'Medium', duration: '60s', description: 'Flick to gate within 350ms then return to center' },
+        { name: 'Keyboard Recognition', folderName: 'keyboard-recognition', difficulty: 'Hard', duration: '60s', description: 'Professional keyboard speed trainer and custom keybind simulator' },
         { name: 'Rapid Tapping', folderName: 'rapid-tapping', difficulty: 'Easy', duration: 'Untimed', description: 'Endless survival clicking with escalating difficulty' }
       ]
     },
@@ -255,7 +203,7 @@ export default function MotorDrillsClient() {
       drills: [
         { name: 'Stopwatch Click', folderName: 'stopwatch-click', difficulty: 'Hard', duration: '60s', description: 'Click at exact memorized target time (1-8 seconds)' },
         { name: 'Synchronization', folderName: 'synchronization', difficulty: 'Expert', duration: '60s', description: 'Click when converging bars align at center line' },
-        { name: 'Time Estimation', folderName: 'time-estimation', difficulty: 'Medium', duration: '60s', description: 'Estimate elapsed time without visual cues and click to lock' }
+        { name: 'Velocity Matcher', folderName: 'velocity-matcher', difficulty: 'Medium', duration: '45s', description: 'Concentric orbital synchronization trainer to build triggering rhythm and velocity estimation' }
       ]
     }
   ];
@@ -309,70 +257,6 @@ export default function MotorDrillsClient() {
       {/* Background patterns */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-900/10 via-slate-950 to-slate-950 pointer-events-none z-0" />
       
-      {/* BETA / DESKTOP REQUIREMENT MODAL (Session-based) */}
-      {showBetaNotice && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
-          <div className="bg-[#0b101e] border border-emerald-500/40 rounded-2xl p-6 sm:p-8 max-w-lg w-full shadow-[0_0_40px_rgba(16,185,129,0.2)] relative overflow-hidden animate-in fade-in zoom-in duration-300 max-h-[90vh] overflow-y-auto">
-            <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-emerald-500 via-cyan-500 to-emerald-500"></div>
-            
-            <h2 className="text-xl sm:text-2xl font-black text-white mb-5 flex items-center gap-3 font-mono tracking-tight uppercase">
-              <AlertTriangle className="text-emerald-500 w-7 h-7 shrink-0" />
-              Notice / Beta Phase
-            </h2>
-            
-            <div className="space-y-4 text-sm text-slate-300 mb-8">
-              <div className="flex items-start gap-3 bg-blue-500/10 border border-blue-500/20 p-3 rounded-xl">
-                <Monitor className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" />
-                <p><strong>Desktop/Laptop Only:</strong> These drills require raw keyboard and mouse inputs. They do not work well on mobile devices. Please use a PC for the proper experience.</p>
-              </div>
-
-              <div className="flex items-start gap-3 bg-red-500/10 border border-red-500/20 p-3 rounded-xl">
-                <AlertCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
-                <p><strong>Testing Phase:</strong> The platform is currently in testing. Due to lack of extensive testing facilities, you might encounter some timing issues or bugs.</p>
-              </div>
-
-              <div className="flex items-start gap-3 bg-emerald-500/10 border border-emerald-500/20 p-3 rounded-xl">
-                <MessageSquare className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
-                <p><strong>We Need Your Feedback:</strong> Sorry if you encounter any issues! Please cooperate and inform me via Instagram or Facebook (links in the footer below). Your feedback is vital.</p>
-              </div>
-
-              <div className="flex items-start gap-3 bg-purple-500/10 border border-purple-500/20 p-3 rounded-xl">
-                <Lightbulb className="w-5 h-5 text-purple-400 shrink-0 mt-0.5" />
-                <p><strong>Request a Specific Drill:</strong> Want a custom drill? If there is a specific physical or reflex drill you'd like to see added, reach out to me on social media through the footer!</p>
-              </div>
-            </div>
-            
-            <button 
-              onClick={handleDismissNotice}
-              className="w-full py-3.5 bg-gradient-to-r from-emerald-600 to-cyan-600 hover:brightness-110 text-white font-black rounded-xl transition-all shadow-lg active:scale-95 uppercase tracking-widest text-sm"
-            >
-              I Understand, Let's Train
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Mobile Rotate Device Warning Overlay */}
-      {showRotateWarning && (
-        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-gray-950/95 text-center p-6" aria-hidden="true">
-          <div className="animate-bounce mb-4 text-blue-500">
-            <svg className="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-            </svg>
-          </div>
-          <h3 className="text-lg font-bold text-white mb-2">{warningMessage}</h3>
-          <p className="text-sm text-gray-400 mb-6">Please use landscape orientation or fullscreen mode for the best training experience.</p>
-          <Link href="/drills/motor">
-            <button className="px-5 py-2.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-350 hover:text-white font-bold rounded-lg text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
-              Go Back
-            </button>
-          </Link>
-        </div>
-      )}
-
       <canvas style={{ touchAction: 'none' }} ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none z-0 opacity-40" />
       <div className="absolute inset-0 bg-[linear-gradient(rgba(18,24,38,0.45)_1px,_transparent_1px),_linear-gradient(90deg,_rgba(18,24,38,0.45)_1px,_transparent_1px)] bg-[size:32px_32px] pointer-events-none z-0" />
 

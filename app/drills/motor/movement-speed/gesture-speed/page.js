@@ -1,28 +1,32 @@
 import GestureSpeedClient from './GestureSpeedClient';
 
 export const metadata = {
-  title: 'Flick Training Online - Free Gesture Speed Drill | SkillDrills',
-  description: 'Free flick training online. Flick to click gates within 350ms then return to center — the best flick shot training and gesture speed drill for FPS players. No sign-up required.',
+  title: "Gesture Speed Test - Mouse Gesture Speed Trainer | SkillDrills",
+  description: "Test and improve your cursor swipe velocity and reaction speed with our free Gesture Speed Test. Train mouse gesture control and mouse speed online.",
   keywords: [
-    'flick training', 'flick training online', 'free flick training',
-    'flick shot training', 'flick shot practice', 'flick aim training',
-    'gesture speed drill', 'mouse gesture game', 'gesture speed test',
-    'flick and return drill', 'rapid mouse movement game', 'mouse speed drill',
-    'mouse flick test', 'mouse speed test', 'click speed game',
-    'FPS flick training', 'FPS aim training', 'Valorant flick training',
-    'CS2 flick shot practice', 'Apex flick training', 'esports mouse speed',
-    'hand eye coordination game', 'hand eye coordination training', 'reaction speed game',
-    'reflex training online', 'motor speed training', 'movement speed drill',
-    'vector recoil training', 'gate clicking game', 'rapid flick drill',
-    'mouse reaction game', 'fast mouse movement test', 'precision flick game',
-    'skilldrills flick training', 'skilldrills motor drills', 'free mouse speed game',
-    'browser flick game', 'no download flick training', 'instant motor speed game',
-    'flick accuracy training', 'gesture precision drill', 'rapid movement control',
+    "gesture speed test",
+    "mouse gesture speed trainer",
+    "swipe gesture speed test",
+    "mouse gesture game",
+    "mouse gesture training",
+    "improve mouse control",
+    "hand eye coordination game",
+    "mouse speed test",
+    "mouse speed game",
+    "mouse accuracy test",
+    "mouse precision training",
+    "fps aim trainer",
+    "aim trainer online",
+    "free aim trainer",
+    "browser aim trainer",
+    "gesture speed test online",
+    "mouse acceleration test",
+    "mouse dexterity game"
   ],
   openGraph: {
-    title: 'Flick Training Online - Free Gesture Speed Drill | SkillDrills',
-    description: 'Free flick training online. Flick to click gates within 350ms — best flick shot training and gesture speed drill for FPS. No sign-up.',
-    type: 'article',
+    title: "Gesture Speed Test - Mouse Gesture Speed Trainer | SkillDrills",
+    description: "Test and improve your cursor swipe velocity and reaction speed with our free Gesture Speed Test. Train mouse gesture control and mouse speed online.",
+    type: 'website',
     url: 'https://skilldrills.online/drills/motor/movement-speed/gesture-speed',
     siteName: 'SkillDrills',
     locale: 'en_US',
@@ -30,13 +34,13 @@ export const metadata = {
       url: 'https://skilldrills.online/icons/icon-512x512.png',
       width: 512,
       height: 512,
-      alt: 'Flick Training Online - Gesture Speed Drill',
+      alt: 'Gesture Speed Test - Mouse Gesture Speed Trainer',
     }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Flick Training Online - Free Gesture Speed Drill | SkillDrills',
-    description: 'Free flick training. Click gates within 350ms. Best flick shot training for FPS gamers. No sign-up.',
+    title: "Gesture Speed Test - Mouse Gesture Speed Trainer | SkillDrills",
+    description: "Test and improve your cursor swipe velocity and reaction speed with our free Gesture Speed Test. Train mouse gesture control and mouse speed online.",
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -46,83 +50,130 @@ export const metadata = {
 };
 
 export default function GestureSpeedPage() {
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://skilldrills.online" },
+      { "@type": "ListItem", "position": 2, "name": "Motor Training", "item": "https://skilldrills.online/drills/motor" },
+      { "@type": "ListItem", "position": 3, "name": "Movement Speed", "item": "https://skilldrills.online/drills/motor/movement-speed" },
+      { "@type": "ListItem", "position": 4, "name": "Gesture Speed Test", "item": "https://skilldrills.online/drills/motor/movement-speed/gesture-speed" }
+    ]
+  };
+
+  const softwareSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Gesture Speed Test - Mouse Gesture Speed Trainer",
+    "url": "https://skilldrills.online/drills/motor/movement-speed/gesture-speed",
+    "description": "Free online gesture speed test and mouse speed trainer. Hover center to spawn gates, swipe or flick to activate them, and return to center to build massive speed combos.",
+    "applicationCategory": "GameApplication",
+    "operatingSystem": "All",
+    "browserRequirements": "Requires a modern web browser with JavaScript and Pointer Lock API support.",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "author": { "@type": "Organization", "name": "SkillDrills" },
+    "isAccessibleForFree": true,
+    "learningResourceType": "Educational Game",
+    "teaches": "Mouse precision, gesture speed, reflex speed, stopping power, flick aim accuracy."
+  };
+
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is a gesture speed test?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "A gesture speed test is a specialized motor skill exercise where users practice rapidly moving their mouse from a resting point to a target and immediately returning. It measures your physical hand gesture velocity and cursor acceleration."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does gesture training improve mouse control?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "It forces you to execute the 'swipe-and-return' mechanic. By swiping to a target, clicking, and instantly returning to the center point, you build the stopping power and muscle memory necessary for high-precision cursor control."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do professional gamers train gesture speed?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Professional gamers use browser-based mouse speed tests and gesture trainers to isolate their wrist and arm movements. They perform thousands of repetitive swipes under aggressive time limits to train their nervous system to act automatically."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is this gesture speed test free?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, our Gesture Speed Test is 100% free. There are no downloads, no subscriptions, and no sign-ups required to access the full training platform."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does it improve hand-eye coordination?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, it is a highly effective hand-eye coordination game. You must visually process the location of the outer gate and translate that into an exact physical mouse swipe within fractions of a second."
+        }
+      }
+    ]
+  };
+
+  const howToSchema = {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "How to Train Gesture Speed",
+    "description": "Step-by-step instructions to train gesture velocity and rapid recentering accuracy.",
+    "step": [
+      {
+        "@type": "HowToStep",
+        "name": "Spawn the active gate",
+        "text": "Click Start. Place your cursor inside the center hub circle to activate the tracking grid and spawn a gate."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Swipe quickly to target",
+        "text": "Make a rapid, clean mouse swipe directly through the spawned target gate. Execute a click if required by the drill settings."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Recenter cursor immediately",
+        "text": "Instantly decelerate your cursor and pull it back to the center hub zone to reset the sequence and build your speed combo."
+      }
+    ]
+  };
+
   return (
     <>
+      {/* Breadcrumb Schema */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "BreadcrumbList",
-            "itemListElement": [
-              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://skilldrills.online" },
-              { "@type": "ListItem", "position": 2, "name": "Motor Training", "item": "https://skilldrills.online/drills/motor" },
-              { "@type": "ListItem", "position": 3, "name": "Movement Speed", "item": "https://skilldrills.online/drills/motor/movement-speed" },
-              { "@type": "ListItem", "position": 4, "name": "Flick Training Online - Gesture Speed Drill" }
-            ]
-          })
-        }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
+
+      {/* SoftwareApplication Schema */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "WebApplication",
-            "name": "Flick Training Online - Free Gesture Speed Drill",
-            "url": "https://skilldrills.online/drills/motor/movement-speed/gesture-speed",
-            "description": "Free flick training online and gesture speed drill. Hover center to spawn a gate, flick to click it within 350ms, return to center. +1pt per complete cycle. Best FPS flick shot training game available.",
-            "applicationCategory": "GameApplication",
-            "operatingSystem": "All",
-            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-            "author": { "@type": "Organization", "name": "SkillDrills" },
-            "isAccessibleForFree": true
-          })
-        }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }}
       />
+
+      {/* FAQPage Schema */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "FAQPage",
-            "mainEntity": [
-              {
-                "@type": "Question",
-                "name": "What is this flick training game?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "A free flick training online and gesture speed drill. Hover center to spawn a gate, flick to click it within 350ms, then return to center for +1pt. Best free FPS flick shot training game available in browser."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "How does the 350ms timer work in this flick training drill?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "A timer ring around the gate depletes within 350ms. Green above ~100ms remaining, red below. Direction arrow from center shows where to flick. CLICK indicator appears when hovering gate."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "Which FPS games does this flick training improve?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "This flick training drill directly improves flick shot speed and accuracy for Valorant, CS2, Overwatch 2, Apex Legends, and Rainbow Six Siege. The 350ms gate trains the exact reaction window needed for competitive play."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "Do I need to sign up for this flick training game?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "No registration required. This free flick training online works instantly in your browser — no downloads needed."
-                }
-              }
-            ]
-          })
-        }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
+
+      {/* HowTo Schema */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
+      />
+
       <GestureSpeedClient />
     </>
   );

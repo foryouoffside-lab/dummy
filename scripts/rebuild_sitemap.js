@@ -9,7 +9,7 @@ function walkDir(dir, fileList = []) {
     const fullPath = path.join(dir, file);
     if (fs.statSync(fullPath).isDirectory()) {
       walkDir(fullPath, fileList);
-    } else if (file === 'page.js') {
+    } else if (file === 'page.js' || file === 'page.tsx') {
       fileList.push(fullPath);
     }
   }
@@ -25,19 +25,22 @@ allPages.forEach(filePath => {
   const relativePath = path.relative(drillsDir, filePath);
   const parts = relativePath.split(path.sep);
   
-  // Exclude category hubs if they just have a page.js, although we will add them manually
-  if (parts.length === 1 && parts[0] === 'page.js') {
-    // This is /drills/page.js
+  // Exclude category hubs if they just have a page.js or page.tsx, although we will add them manually
+  const pageFile = parts[parts.length - 1];
+  const isPageFile = pageFile === 'page.js' || pageFile === 'page.tsx';
+
+  if (parts.length === 1 && isPageFile) {
+    // This is /drills/page.js or page.tsx
     categoryPages.add('/drills');
     return;
   }
-  if (parts.length === 2 && parts[1] === 'page.js') {
-    // This is /drills/category/page.js
+  if (parts.length === 2 && isPageFile) {
+    // This is /drills/category/page.js or page.tsx
     categoryPages.add(`/drills/${parts[0]}`);
     return;
   }
   
-  if (parts[parts.length - 1] === 'page.js') {
+  if (isPageFile) {
     const route = `/drills/${parts.slice(0, -1).join('/')}`.replace(/\\/g, '/');
     const category = parts[0];
     

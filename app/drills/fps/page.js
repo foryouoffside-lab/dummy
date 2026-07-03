@@ -55,7 +55,7 @@ export default function FPSHubPage() {
           { "@type": "WebApplication", "name": "Flick Shot Training - FPS Aim Trainer", "url": "https://skilldrills.online/drills/fps/flick-shot-training" },
           { "@type": "WebApplication", "name": "Reaction Time Test FPS - Raw Reflex Drill", "url": "https://skilldrills.online/drills/fps/instant-response" },
           { "@type": "WebApplication", "name": "Tracking Aim Trainer - Smooth Pursuit Drill", "url": "https://skilldrills.online/drills/fps/pro-smooth-pursuit" },
-          
+          { "@type": "WebApplication", "name": "Anti-Zigzag Movement Trainer - FPS Aim Training", "url": "https://skilldrills.online/drills/fps/anti-zigzag-movement-trainer" },
           { "@type": "WebApplication", "name": "Recoil Control Training - CS2 & Valorant Spray", "url": "https://skilldrills.online/drills/fps/recoil-control" },
           { "@type": "WebApplication", "name": "Strafe Tracking Aim - Movement Tracking Drill", "url": "https://skilldrills.online/drills/fps/strafe-tracking" },
           { "@type": "WebApplication", "name": "Target Acquisition Training - Priority Aim Drill", "url": "https://skilldrills.online/drills/fps/target-acquisition" },

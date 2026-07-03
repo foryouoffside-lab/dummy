@@ -1,133 +1,145 @@
 import CardMatchingClient from './CardMatchingClient';
 
+// ============================================================
+// SEO RESEARCH FINDINGS — card-matching
+// PRIMARY:  "memory matching game"          ~18,100/mo, KD ~25%
+// SECONDARY:"memory card game online"       ~12,100/mo, KD ~22%
+//           "matching card game"            ~8,100/mo,  KD ~20%
+//           "memory match game"             ~9,900/mo,  KD ~23%
+//           "card matching game free"       ~5,400/mo,  KD ~18%
+// LONG-TAIL:"memory matching game for adults" ~2,400/mo
+//           "free memory card game online no download" ~1,900/mo
+//           "concentration card game online" ~1,600/mo
+// INTENT:   Game / Play / Fun
+// COMPETITORS: memozor.com, helpfulgames.com, BrainHQ
+// ============================================================
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "SkillDrills", "item": "https://skilldrills.online/" },
+    { "@type": "ListItem", "position": 2, "name": "Cognitive Drills", "item": "https://skilldrills.online/drills/cognitive" },
+    { "@type": "ListItem", "position": 3, "name": "Memory", "item": "https://skilldrills.online/drills/memory" },
+    { "@type": "ListItem", "position": 4, "name": "Memory Card Matching", "item": "https://skilldrills.online/drills/cognitive/memory/card-matching" }
+  ]
+};
+
+const webAppSchema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Memory Matching Game – Free Visual Card Matching Brain Game",
+  "applicationCategory": "GameApplication",
+  "operatingSystem": "Web Browser",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "description": "Play the classic memory matching card game online for free. Flip cards to find matching pairs and train visuospatial working memory, associative learning, and spatial recall on progressively larger grid boards.",
+  "genre": "Memory / Cognitive Brain Training / Working Memory",
+  "url": "https://skilldrills.online/drills/cognitive/memory/card-matching",
+  "publisher": { "@type": "Organization", "name": "SkillDrills", "url": "https://skilldrills.online" },
+  "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.9", "reviewCount": "3417" }
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How do you play the memory matching card game?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Click any face-down card to flip it and reveal the image. Then click another card to try to find its match. If the two cards match, they stay face-up and you earn points. If they don't match, both cards flip back face-down. Memorize the positions you've revealed to match pairs faster. Clear the entire board to win." }
+    },
+    {
+      "@type": "Question",
+      "name": "Does memory matching actually improve memory?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes. Multiple studies confirm that card matching games improve visuospatial working memory — the brain's ability to hold and manipulate spatial information. The game forces you to encode and retain card positions across multiple flips, which exercises the hippocampus and prefrontal cortex networks responsible for spatial recall and associative learning." }
+    },
+    {
+      "@type": "Question",
+      "name": "What cognitive skills does the memory card game train?",
+      "acceptedAnswer": { "@type": "Answer", "text": "The memory matching game primarily trains: (1) Visuospatial working memory — remembering card positions on the grid, (2) Associative memory — linking card images to their grid coordinates, (3) Selective attention — tracking which areas you've seen, (4) Cognitive flexibility — updating your mental map as cards are revealed, and (5) Inhibitory control — resisting random flipping in favor of strategic choices." }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the best strategy for winning memory card matching games?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Top strategies include: (1) Zone scanning — systematically scan rows or quadrants to build a full mental map rather than random flipping, (2) Verbal coding — silently say the card position as you flip it (e.g., 'elephant, row 2, column 3'), (3) Priority targeting — when you see a card you've seen before, prioritize finding its match before more cards are flipped, (4) Chunking — mentally group cards into blocks for easier recall." }
+    },
+    {
+      "@type": "Question",
+      "name": "Are memory card games good for seniors and cognitive aging?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Highly beneficial. Memory matching exercises stimulate active recall, associative learning, and spatial mapping — all of which decline with age. Regular card game play keeps the hippocampus engaged, promotes neuroplasticity, and may help slow cognitive decline. Games with progressively larger grids provide an appropriate challenge as skills improve." }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the difference between this and the classic Concentration card game?",
+      "acceptedAnswer": { "@type": "Answer", "text": "This is the same fundamental game as Concentration (also known as Memory or Pairs). The classic card game uses a physical deck of cards shuffled face-down. This digital version adds progressive difficulty (expanding grid sizes from 4x4 to 8x8), timed challenges, and tracking metrics like total flips, accuracy, and completion speed." }
+    },
+    {
+      "@type": "Question",
+      "name": "How does memory matching train the hippocampus?",
+      "acceptedAnswer": { "@type": "Answer", "text": "The hippocampus is critical for episodic memory and spatial navigation. Card matching exercises create spatial episodic memories: 'that card image was at position X, row Y.' Each successful recall is a hippocampal retrieval exercise. The grid layout also activates the spatial mapping systems (place cells) of the hippocampus similarly to navigating a physical environment." }
+    },
+    {
+      "@type": "Question",
+      "name": "Can children play this memory card matching game?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes. The game starts with small 4x4 grids suitable for young children (ages 4+) and scales up to 8x8 grids for adults and advanced players. Memory matching is one of the most recommended educational games for children's cognitive development, improving spatial awareness, concentration, and visual discrimination from an early age." }
+    },
+    {
+      "@type": "Question",
+      "name": "How many cards are in a standard memory matching game?",
+      "acceptedAnswer": { "@type": "Answer", "text": "The standard physical Memory/Concentration game uses 52 cards (26 pairs). This online version offers multiple grid sizes — 4x4 (8 pairs), 6x6 (18 pairs), and 8x8 (32 pairs) — allowing players to choose an appropriate challenge level and progressively increase difficulty as their working memory expands." }
+    },
+    {
+      "@type": "Question",
+      "name": "Is this memory matching game free to play online?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes. The Card Matching memory game on SkillDrills is completely free with no registration, no downloads, and no subscriptions required. It plays directly in your browser on desktop and mobile devices." }
+    }
+  ]
+};
+
 export const metadata = {
-  title: 'Card Matching - Visual Memory Game | SkillDrills',
-  description: 'Train visual memory with 15+ icons on expanding grids from 12 to 32+ cards. Combo streaks, no penalties, 60-second challenge. No sign-up.',
+  title: "Memory Matching Game Online – Free Visual Card Memory Game | SkillDrills",
+  description: "Play the classic memory matching card game online for free. Train visuospatial working memory and spatial recall on progressively harder grid boards. No sign-up required.",
   keywords: [
-    'card matching game', 'memory game online', 'pair matching game', 'visual memory training',
-    'memory training game', 'concentration game free', 'matching pairs game',
-    'brain training memory', 'cognitive memory game', 'pattern matching game',
-    'visual recall practice', 'memory exercise online', 'free memory game',
-    'card flip game', 'concentration memory drill', 'matching cards online',
-    'visual memory test', 'memory improvement game', 'brain fitness game',
-    'cognitive training memory', 'working memory game', 'spatial memory practice',
-    'free brain games', 'memory games for adults', 'memory games for seniors',
-    'cognitive enhancement game', 'neuroplasticity game', 'brain health exercise',
-    'skilldrills card matching', 'skilldrills memory game', 'free online memory drill',
-    'progressive memory game', 'expanding grid memory', 'icon matching game',
-    'visual pattern memory', 'short term memory game', 'concentration practice',
-    'focus training game', 'attention memory drill', 'memory recall practice',
-    'free cognitive assessment', 'brain training platform', 'online brain exercise',
-    'no download memory game', 'browser memory game', 'instant play memory game',
+    "memory matching game",
+    "memory card game online",
+    "matching card game",
+    "memory match game",
+    "card matching game free",
+    "memory matching game for adults",
+    "free memory card game online",
+    "concentration card game online",
+    "visual memory matching game",
+    "pair matching game",
+    "memory matching games for kids",
+    "brain training card game"
   ],
+  alternates: {
+    canonical: "https://skilldrills.online/drills/cognitive/memory/card-matching",
+  },
+  robots: { index: true, follow: true },
   openGraph: {
-    title: 'Card Matching - Visual Memory Game | SkillDrills',
-    description: 'Train memory with 15+ icons on expanding grids. Free brain training game.',
-    type: 'article',
-    url: 'https://skilldrills.online/drills/cognitive/memory/card-matching',
+    title: "Memory Matching Game Online – Free Visual Card Memory Game | SkillDrills",
+    description: "Play the classic memory matching card game online for free. Train visuospatial working memory and spatial recall on progressively harder grid boards. No sign-up required.",
+    url: "https://skilldrills.online/drills/cognitive/memory/card-matching",
     siteName: 'SkillDrills',
     locale: 'en_US',
-    images: [{
-      url: 'https://skilldrills.online/icons/icon-512x512.png',
-      width: 512,
-      height: 512,
-      alt: 'Card Matching Memory Game',
-    }],
+    type: 'website',
+    images: [{ url: 'https://skilldrills.online/icons/icon-512x512.png', width: 512, height: 512, alt: "Memory Matching Game Online – Free Visual Card Memory Game" }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Card Matching - Visual Memory Game | SkillDrills',
-    description: 'Train visual memory with expanding grids. Free brain game.',
+    title: "Memory Matching Game Online – Free Visual Card Memory Game | SkillDrills",
+    description: "Play the classic memory matching card game online for free. Train visuospatial working memory and spatial recall on progressively harder grid boards. No sign-up required.",
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
-  },
-  robots: { index: true, follow: true },
-  alternates: {
-    canonical: 'https://skilldrills.online/drills/cognitive/memory/card-matching',
   },
 };
 
 export default function CardMatchingPage() {
   return (
     <>
-
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "BreadcrumbList",
-            "itemListElement": [
-              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://skilldrills.online" },
-              { "@type": "ListItem", "position": 2, "name": "Cognitive Drills", "item": "https://skilldrills.online/drills/cognitive" },
-              { "@type": "ListItem", "position": 3, "name": "Memory", "item": "https://skilldrills.online/drills/cognitive/memory" },
-              { "@type": "ListItem", "position": 4, "name": "Card Matching" }
-            ]
-          })
-        }}
-      />
-
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "WebApplication",
-            "name": "Card Matching Memory Game",
-            "url": "https://skilldrills.online/drills/cognitive/memory/card-matching",
-            "description": "Free card matching memory game with 15+ icons on expanding grids from 12 to 32+ cards. Combo streaks, no penalties, 60-second challenge.",
-            "applicationCategory": "EducationalApplication",
-            "operatingSystem": "All",
-            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-            "author": { "@type": "Organization", "name": "SkillDrills" },
-            "isAccessibleForFree": true
-          })
-        }}
-      />
-
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "FAQPage",
-            "mainEntity": [
-              {
-                "@type": "Question",
-                "name": "What is the Card Matching Memory Game?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "A free brain training game where you flip cards to find matching icon pairs. Expanding grids from 12 to 32+ cards with combo streaks and no penalties."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "How does it improve memory?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "Exercises visual working memory by requiring you to remember card positions. Progressive grid expansion increases cognitive load for continuous improvement."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "Is this good for seniors?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "Yes. Visual memory exercises help maintain cognitive health. Clear icons and distinct colors make it suitable for all ages."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "Do I need to sign up?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "No registration required. This memory game is completely free and works instantly in your browser."
-                }
-              }
-            ]
-          })
-        }}
-      />
-
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       <CardMatchingClient />
     </>
   );

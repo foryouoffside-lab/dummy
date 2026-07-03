@@ -859,8 +859,8 @@ export default function NBackClient() {
                   <h3 className="text-white font-bold mb-3 uppercase tracking-wider">More Sectors</h3>
                   <ul className="space-y-2">
                     <li><Link href="/drills/academic" className="hover:text-cyan-400 transition-colors">Academic (12)</Link></li>
-                    <li><Link href="/drills/productivity" className="hover:text-cyan-400 transition-colors">Productivity (10)</Link></li>
-                    <li><Link href="/drills/mental-fitness" className="hover:text-cyan-400 transition-colors">Mental Fitness (6)</Link></li>
+                    <li><Link href="/drills/cognitive" className="hover:text-cyan-400 transition-colors">Productivity (10)</Link></li>
+                    <li><Link href="/drills/visual-tracking" className="hover:text-cyan-400 transition-colors">Tracking (25 drills)</Link></li>
                     <li><Link href="/drills/physical" className="hover:text-cyan-400 transition-colors">Physical (11)</Link></li>
                   </ul>
                 </div>

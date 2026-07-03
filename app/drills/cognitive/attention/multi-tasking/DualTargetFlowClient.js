@@ -898,7 +898,7 @@ export default function DualTargetFlowClient() {
                   <h3 className={`font-bold mb-4 text-sm tracking-wide ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>More Sections</h3>
                   <ul className="space-y-3 text-sm">
                     <li><Link href="/drills/academic" className="hover:text-blue-500 transition-colors">Academic (12 drills)</Link></li>
-                    <li><Link href="/drills/mental-fitness" className="hover:text-blue-500 transition-colors">Mental Fitness (6 drills)</Link></li>
+                    <li><Link href="/drills/visual-tracking" className="hover:text-blue-500 transition-colors">Tracking (25 drills)</Link></li>
                     <li><Link href="/drills/physical" className="hover:text-blue-500 transition-colors">Physical (11 drills)</Link></li>
                   </ul>
                 </div>

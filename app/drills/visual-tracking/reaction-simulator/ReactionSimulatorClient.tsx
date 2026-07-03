@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState, useRef, useCallback } from 'react';
 import Link from 'next/link';
@@ -13,7 +13,6 @@ export default function ReactionSimulatorClient() {
   const [showRotateWarning, setShowRotateWarning] = useState(false);
   const [warningMessage, setWarningMessage] = useState("Rotate Your Device");
   const hasBypassedWarningRef = useRef(false);
-  const [isMobileLandscape, setIsMobileLandscape] = useState(false);
 
   // Viewport Orientation Check for Mobile
   useEffect(() => {
@@ -47,27 +46,6 @@ export default function ReactionSimulatorClient() {
     return () => {
       window.removeEventListener('resize', checkSize);
       window.removeEventListener('orientationchange', checkSize);
-    };
-  }, []);
-
-  // Mobile Landscape Full-Viewport Detection
-  useEffect(() => {
-    const checkLandscape = () => {
-      if (typeof window === 'undefined') return;
-      const ua = navigator.userAgent || '';
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
-      if (isMobile && window.innerWidth > window.innerHeight && window.innerWidth >= 480) {
-        setIsMobileLandscape(true);
-      } else {
-        setIsMobileLandscape(false);
-      }
-    };
-    checkLandscape();
-    window.addEventListener('resize', checkLandscape);
-    window.addEventListener('orientationchange', () => setTimeout(checkLandscape, 100));
-    return () => {
-      window.removeEventListener('resize', checkLandscape);
-      window.removeEventListener('orientationchange', checkLandscape);
     };
   }, []);
 
@@ -434,8 +412,7 @@ export default function ReactionSimulatorClient() {
     { name: 'Emerald Green', value: '#10b981' },
     { name: 'Neon Blue', value: '#3b82f6' },
     { name: 'Pure White', value: '#ffffff' },
-    { name: 'Laser Orange', value: '#f97316' },
-    { name: 'High-Vis Yellow', value: '#eab308' }
+    { name: 'Laser Orange', value: '#f97316' }
   ];
 
   if (loading || !isClient) {
@@ -453,10 +430,10 @@ export default function ReactionSimulatorClient() {
     <div className="min-h-screen bg-[#030712] text-slate-100 font-sans selection:bg-red-500/30">
       <div className="absolute inset-0 bg-gradient-to-b from-blue-955/5 via-transparent to-black/30 pointer-events-none z-0" />
 
-      <div className={`${isFullscreen || isMobileLandscape ? 'w-full h-screen p-0 m-0' : 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6'} relative z-10`}>
+      <div className={`${isFullscreen ? 'w-full h-screen p-0 m-0' : 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6'} relative z-10`}>
         
         {/* Navigation Breadcrumbs */}
-        {!isFullscreen && !isMobileLandscape && (
+        {!isFullscreen && (
           <nav aria-label="Breadcrumb" className="mb-5">
             <ol className="flex items-center gap-2 text-[10px] text-slate-550 uppercase tracking-widest font-mono">
               <li><Link href="/" className="hover:text-red-400 transition-colors">Home</Link></li>
@@ -471,7 +448,7 @@ export default function ReactionSimulatorClient() {
         )}
 
         {/* Drill Header */}
-        {!isFullscreen && !isMobileLandscape && (
+        {!isFullscreen && (
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6 border-b border-slate-900 pb-5">
             <div className="flex items-center gap-3.5">
               <div className="p-3 bg-red-950/30 border border-red-500/20 text-red-500 rounded-xl shadow-lg shadow-red-950/20">
@@ -482,7 +459,7 @@ export default function ReactionSimulatorClient() {
                   Saccadic Reaction Simulator
                 </h1>
                 <p className="text-xs text-slate-400 tracking-wider mt-0.5">
-                  Visual Gaze Calibration � Intermediate Sector
+                  Visual Gaze Calibration • Intermediate Sector
                 </p>
               </div>
             </div>
@@ -521,7 +498,7 @@ export default function ReactionSimulatorClient() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
           
           {/* Settings Sidebar */}
-          {!isFullscreen && !isMobileLandscape && (
+          {!isFullscreen && (
             <div className="lg:col-span-1 bg-[#0b0f19]/80 border border-slate-900/90 rounded-2xl p-5 backdrop-blur-md shadow-xl flex flex-col justify-between">
               <div>
                 <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest border-b border-slate-850 pb-2 mb-4 flex items-center gap-1.5 font-mono">
@@ -538,14 +515,14 @@ export default function ReactionSimulatorClient() {
                   <input 
                     type="range" 
                     min="0.1" 
-                    max="7.0" 
+                    max="5.0" 
                     step="0.1"
                     value={speedMultiplier} 
                     onChange={(e) => setSpeedMultiplier(parseFloat(e.target.value))} 
                     className="w-full h-1 bg-slate-900 rounded-lg appearance-none cursor-pointer accent-red-500 focus:outline-none mb-3" 
                   />
-                  <div className="grid grid-cols-6 gap-1">
-                    {[0.5, 1.0, 2.0, 3.0, 5.0, 7.0].map((sm) => (
+                  <div className="grid grid-cols-5 gap-1">
+                    {[0.5, 1.0, 2.0, 3.0, 5.0].map((sm) => (
                       <button
                         key={sm}
                         onClick={() => setSpeedMultiplier(sm)}
@@ -660,7 +637,7 @@ export default function ReactionSimulatorClient() {
           <div className={`${isFullscreen ? 'col-span-4' : 'lg:col-span-3'} flex flex-col`}>
             
             {/* Viewport HUD */}
-            {!isFullscreen && !isMobileLandscape && (
+            {!isFullscreen && (
               <div className="flex justify-between items-center mb-3 text-xs font-mono">
                 <div className="flex items-center gap-1 bg-[#0b0f19]/60 border border-slate-900 rounded-lg px-3 py-1.5">
                   <Activity className="w-3.5 h-3.5 text-red-500" />
@@ -679,17 +656,15 @@ export default function ReactionSimulatorClient() {
             {/* Interactive Viewport Area */}
             <div 
               ref={containerRef} 
-              className={
+              className={`relative ${
                 isFullscreen 
                   ? 'fixed inset-0 z-50 bg-[#020306] flex items-center justify-center' 
-                  : isMobileLandscape
-                  ? 'fixed inset-0 z-40 bg-[#020306] flex items-center justify-center'
-                  : 'relative w-full aspect-video min-h-[380px] lg:min-h-[440px] bg-[#020306] border border-slate-900 rounded-2xl flex items-center justify-center shadow-2xl'
-              }
+                  : 'w-full aspect-video min-h-[380px] lg:min-h-[440px] bg-[#020306] border border-slate-900 rounded-2xl flex items-center justify-center shadow-2xl'
+              }`}
               style={{ overflow: 'hidden' }}
             >
               {/* Orientation Warnings (Inside Drill Box) */}
-              {showRotateWarning && !isMobileLandscape && (
+              {showRotateWarning && (
                 <div className="absolute inset-0 z-50 bg-[#05070e]/95 flex flex-col items-center justify-center p-6 text-center select-none">
                   <div className="animate-bounce mb-4 text-red-500">
                     <svg className="w-12 h-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -776,7 +751,7 @@ export default function ReactionSimulatorClient() {
             </div>
 
             {/* Bottom status tip */}
-            {!isFullscreen && !isMobileLandscape && (
+            {!isFullscreen && (
               <div className="mt-3 text-center text-[10px] text-slate-550 flex items-center justify-center gap-2 font-mono">
                 <Info className="w-3.5 h-3.5 text-slate-550" />
                 <span>Drill is non-interactive. Keep your eyes centered on the target to condition foveal stability.</span>
@@ -786,7 +761,7 @@ export default function ReactionSimulatorClient() {
         </div>
 
         {/* About Section */}
-        {!isFullscreen && !isMobileLandscape && (
+        {!isFullscreen && (
           <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 border-t border-slate-900 pt-8">
             <div className="md:col-span-2 bg-[#0b0f19]/40 border border-slate-900 p-6 rounded-2xl flex flex-col justify-between">
               <div>
@@ -822,7 +797,7 @@ export default function ReactionSimulatorClient() {
         )}
 
         {/* Related Drills Section */}
-        {!isFullscreen && !isMobileLandscape && (
+        {!isFullscreen && (
           <section className="mt-8 border-t border-slate-900 pt-8" aria-label="Related training drills">
             <div className="flex items-center gap-2 mb-6">
               <div className="w-1 h-6 rounded-full bg-gradient-to-b from-red-500 to-orange-600"></div>
@@ -898,7 +873,7 @@ export default function ReactionSimulatorClient() {
         )}
 
         {/* Footer */}
-        {!isFullscreen && !isMobileLandscape && (
+        {!isFullscreen && (
           <footer className="mt-16 border-t border-slate-900 bg-[#05070e]/40 text-slate-550 rounded-2xl py-10 px-6" role="contentinfo">
             <div className="max-w-7xl mx-auto">
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8 mb-8 font-mono text-xs text-left">
@@ -908,7 +883,7 @@ export default function ReactionSimulatorClient() {
                     <li><Link href="/drills/visual/visual-recognition/difference-spotter" className="hover:text-red-400 transition-colors">Difference Spotter</Link></li>
                     <li><Link href="/drills/visual/tracking-accuracy/moving-target" className="hover:text-red-400 transition-colors">Kinetic Intercept</Link></li>
                     <li><Link href="/drills/visual/tracking-accuracy/multiple-targets" className="hover:text-red-400 transition-colors">Ghost-Link Tracking</Link></li>
-                    <li><Link href="/drills/visual" className="text-red-500 hover:text-red-400 transition-colors font-bold">All 14 Visual Drills ?</Link></li>
+                    <li><Link href="/drills/visual" className="text-red-500 hover:text-red-400 transition-colors font-bold">All 14 Visual Drills →</Link></li>
                   </ul>
                 </div>
                 <div>
@@ -917,7 +892,7 @@ export default function ReactionSimulatorClient() {
                     <li><Link href="/drills/memory/working-memory/n-back" className="hover:text-red-400 transition-colors">3-Back Training</Link></li>
                     <li><Link href="/drills/memory/short-term-memory/color-sequence" className="hover:text-red-400 transition-colors">Color Sequence</Link></li>
                     <li><Link href="/drills/memory/spatial-memory/path-tracing" className="hover:text-red-400 transition-colors">Path Tracing</Link></li>
-                    <li><Link href="/drills/memory" className="text-red-500 hover:text-red-400 transition-colors font-bold">All 15 Memory Drills ?</Link></li>
+                    <li><Link href="/drills/memory" className="text-red-500 hover:text-red-400 transition-colors font-bold">All 15 Memory Drills →</Link></li>
                   </ul>
                 </div>
                 <div>
@@ -926,7 +901,7 @@ export default function ReactionSimulatorClient() {
                     <li><Link href="/drills/fps/flick-shot-training" className="hover:text-red-400 transition-colors">Flick Shot Trainer</Link></li>
                     <li><Link href="/drills/fps/reactive-sphere-tracking" className="hover:text-red-400 transition-colors">Reactive Tracking</Link></li>
                     <li><Link href="/drills/fps/target-acquisition" className="hover:text-red-400 transition-colors">Target Acquisition</Link></li>
-                    <li><Link href="/drills/fps" className="text-red-500 hover:text-red-400 transition-colors font-bold">All 21 FPS Drills ?</Link></li>
+                    <li><Link href="/drills/fps" className="text-red-500 hover:text-red-400 transition-colors font-bold">All 21 FPS Drills →</Link></li>
                   </ul>
                 </div>
                 <div>
@@ -934,7 +909,7 @@ export default function ReactionSimulatorClient() {
                   <ul className="space-y-2">
                     <li><Link href="/drills/cognitive/memory/card-matching" className="hover:text-red-400 transition-colors">Memory Games</Link></li>
                     <li><Link href="/drills/cognitive/attention/divided-attention" className="hover:text-red-400 transition-colors">Attention Drills</Link></li>
-                    <li><Link href="/drills/cognitive" className="text-red-500 hover:text-red-400 transition-colors font-bold">All 16 Cognitive Drills ?</Link></li>
+                    <li><Link href="/drills/cognitive" className="text-red-500 hover:text-red-400 transition-colors font-bold">All 16 Cognitive Drills →</Link></li>
                   </ul>
                 </div>
                 <div>

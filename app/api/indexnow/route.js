@@ -46,7 +46,7 @@ export async function POST(request) {
     if (!urls || !Array.isArray(urls) || urls.length === 0) {
       return Response.json({ 
         error: 'URLs array required',
-        example: { urls: ['/drills/fps/flick-shot-training', '/drills/cognitive/memory/n-back'] }
+        example: { urls: ['/drills/fps/flick-shot-training', '/drills/memory/working-memory/n-back'] }
       }, { status: 400 });
     }
 

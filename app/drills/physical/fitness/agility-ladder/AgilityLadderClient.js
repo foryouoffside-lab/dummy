@@ -302,8 +302,8 @@ export default function AgilityLadderClient() {
     
     e.missedLadders++;
     e.totalAttempts++;
-    e.score = Math.max(0, e.score - 2); // Penalty: -2 PTS
-    e.timeLeft -= 2.0; // Penalty: -2.0s Time
+    // e.score = Math.max(0, e.score - 2); // Removed negative score
+    e.timeLeft -= 3.0; // Standardized time penalty
     
     e.streak = 0;
     e.screenShake = 15;
@@ -605,7 +605,7 @@ export default function AgilityLadderClient() {
 
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div className="flex items-center gap-4">
-                <div className="p-3 bg-gradient-to-br from-gray-600 to-slate-700 rounded-xl shadow-[0_0_20px_rgba(71,85,105,0.3)]">
+                <div className="p-3 bg-gradient-to-br from-rose-500 to-red-600 rounded-xl shadow-[0_0_20px_rgba(71,85,105,0.3)]">
                   <Grid className="w-7 h-7 text-white" />
                 </div>
                 <div>
@@ -629,7 +629,7 @@ export default function AgilityLadderClient() {
         {/* Live HUD Stats */}
         {!isFullscreen && (
           <div className="grid grid-cols-4 lg:grid-cols-7 gap-2 mb-2">
-            <StatCard icon={<Target className="text-emerald-400" />} value={score} label="Score" />
+            <StatCard icon={<Target className="text-rose-400" />} value={score} label="Score" />
             <StatCard icon={<Timer className={timeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-teal-400'} />} value={Math.max(0, timeLeft).toFixed(1)} label="Time" unit="s" />
             <StatCard icon={<Grid className="text-gray-400" />} value={laddersCompleted} label="Ladders Cleared" />
             <StatCard icon={<BarChart3 className="text-purple-400" />} value={`${accuracy}%`} label="Accuracy" />
@@ -679,7 +679,7 @@ export default function AgilityLadderClient() {
               }}
             >
               <div className="text-center animate-pulse pointer-events-none">
-                <AlertCircle className="w-12 h-12 text-gray-500 mx-auto mb-4" />
+                <AlertCircle className="w-12 h-12 text-rose-500 mx-auto mb-4" />
                 <h2 className="text-3xl font-black text-white tracking-widest uppercase mb-2">Game Paused</h2>
                 <p className="text-gray-300 font-medium">Click anywhere on the screen to lock cursor and resume.</p>
               </div>
@@ -697,12 +697,12 @@ export default function AgilityLadderClient() {
           {gameState === 'start' && (
             <div className="absolute inset-0 flex items-center justify-center z-50 bg-black/70 backdrop-blur-md p-4 overflow-y-auto">
               <div className="rounded-3xl p-8 text-center max-w-lg w-full border border-gray-700 bg-gray-900 shadow-2xl my-auto">
-                <div className="w-16 h-16 bg-gradient-to-br from-gray-600 to-slate-700 rounded-2xl mx-auto flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(71,85,105,0.3)]">
+                <div className="w-16 h-16 bg-gradient-to-br from-rose-500 to-red-600 rounded-2xl mx-auto flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(244,63,94,0.3)]">
                   <Grid className="w-8 h-8 text-white" />
                 </div>
                 <h2 className="text-3xl font-black mb-3 tracking-tight text-white uppercase">Agility Ladder</h2>
                 <p className="text-sm mb-6 text-gray-400 leading-relaxed">
-                  Raw input motor sequencing. Navigate the scrolling ladder by hitting the rungs strictly in a <span className="font-bold text-white">Left &rarr; Right &rarr; Left &rarr; Right</span> sequence. Missing even one rung in the sequence actively drains your clock and penalizes your score.
+                  Raw input motor sequencing. Navigate the scrolling ladder by hitting the rungs strictly in a <span className="font-bold text-white">Left &rarr; Right &rarr; Left &rarr; Right</span> sequence. Missing even one rung in the sequence actively drains your clock. There are NO point deductions.
                 </p>
 
                 {/* Configuration Panel */}
@@ -710,15 +710,15 @@ export default function AgilityLadderClient() {
                   <div>
                     <div className="flex justify-between items-center mb-2">
                       <label className="text-xs text-gray-400 font-bold uppercase tracking-wider flex items-center gap-2">
-                        <Crosshair className="w-4 h-4 text-emerald-500"/> Universal Sens
+                        <Crosshair className="w-4 h-4 text-rose-500"/> Universal Sens
                       </label>
-                      <span className="text-emerald-400 font-mono text-sm font-bold">{universalSens.toFixed(2)}x</span>
+                      <span className="text-rose-400 font-mono text-sm font-bold">{universalSens.toFixed(2)}x</span>
                     </div>
                     <input 
                       type="range" min="0.1" max="3.0" step="0.05" 
                       value={universalSens} 
                       onChange={(e) => setUniversalSens(parseFloat(e.target.value))} 
-                      className="w-full h-1.5 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-emerald-500" 
+                      className="w-full h-1.5 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-rose-500" 
                     />
                     <div className="text-[10px] text-gray-500 mt-1.5 text-right">Approx: {cmPer360} cm/360</div>
                   </div>
@@ -726,7 +726,7 @@ export default function AgilityLadderClient() {
                 
                 <button 
                   onClick={startGame}
-                  className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl font-black text-lg hover:brightness-110 transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-[0_0_20px_rgba(16,185,129,0.3)]"
+                  className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-rose-600 to-red-600 text-white rounded-xl font-black text-lg hover:brightness-110 transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-[0_0_20px_rgba(244,63,94,0.3)]"
                 >
                   <Play className="w-6 h-6 fill-white" /> BEGIN SEQUENCING DRILL
                 </button>
@@ -793,7 +793,7 @@ export default function AgilityLadderClient() {
                           </li>
                           <li className="flex justify-between items-center bg-gray-900/50 p-2 rounded border border-gray-800">
                             <span className="text-gray-400">Max Survival Streak:</span>
-                            <span className="font-bold text-emerald-400">{analytics.maxStreak}</span>
+                            <span className="font-bold text-rose-400">{analytics.maxStreak}</span>
                           </li>
                         </ul>
                       </div>
@@ -803,7 +803,7 @@ export default function AgilityLadderClient() {
                           <p className="font-bold text-white uppercase text-[10px] tracking-wider font-mono mb-2">Prescribed Advice:</p>
                           <p className="text-gray-400 leading-relaxed font-sans">
                             {analytics.missedLadders > 5 ? (
-                              <span className="text-red-300">You are rushing the sequence. A missed rung deducts points and chunks time off your clock. Focus on building a steady Left/Right rhythm rather than rapid flicks. Let the scrolling ladder come to you.</span>
+                              <span className="text-red-300">You are rushing the sequence. A missed rung chunks time off your clock (no point deductions). Focus on building a steady Left/Right rhythm rather than rapid flicks. Let the scrolling ladder come to you.</span>
                             ) : analytics.peakSpeed < 300 ? (
                               <span className="text-yellow-300">Your sequencing accuracy is decent, but you are not clearing the ladders fast enough to scale the engine into the highest difficulty thresholds.</span>
                             ) : (
@@ -818,7 +818,7 @@ export default function AgilityLadderClient() {
 
                   {/* Actions */}
                   <div className="flex gap-3">
-                    <button onClick={startGame} className="flex-1 py-4 bg-emerald-600 text-white rounded-xl font-black tracking-wide hover:bg-emerald-500 transition-all active:scale-95 flex items-center justify-center gap-2 shadow-lg">
+                    <button onClick={startGame} className="flex-1 py-4 bg-rose-600 text-white rounded-xl font-black tracking-wide hover:bg-rose-500 transition-all active:scale-95 flex items-center justify-center gap-2 shadow-lg">
                       <RefreshCw className="w-5 h-5" /> TRAIN AGAIN
                     </button>
                     <button onClick={() => { if (typeof window !== "undefined") { if (navigator.share) { navigator.share({ title: document.title, url: window.location.href }).catch(() => {}); } else { navigator.clipboard.writeText(window.location.href).then(() => alert("Link copied! Share it with your friends.")).catch(() => {}); } } }} className="px-6 py-4 bg-gray-800 text-white rounded-xl font-bold hover:bg-gray-700 transition-all border border-gray-700 flex items-center gap-2 active:scale-95" title="Share this drill"><Share2 className="w-4 h-4 text-sky-400" /><span className="text-sm">Share</span></button>
@@ -847,7 +847,7 @@ export default function AgilityLadderClient() {
                   <RuleItem num="2" color="indigo" text="Speed Increases" highlight="Endless scaling" result="With each cleared ladder" />
                 </div>
                 <div className="space-y-5">
-                  <RuleItem num="3" color="red" text="Missed Rung" result="-2 PTS | -2.0s Time" />
+                  <RuleItem num="3" color="red" text="Missed Rung" result="-3.0s Time Penalty" />
                   <RuleItem num="4" color="purple" text="Strict Sequencing" highlight="Desktop Exclusive" result="1:1 Raw Mouse Input" />
                 </div>
               </div>
@@ -904,11 +904,11 @@ export default function AgilityLadderClient() {
                     <ol className="space-y-3 list-decimal pl-5">
                       <li>Click <strong>Begin Drill</strong> to lock your mouse inside the game.</li>
                       <li>Wait for the ladders to scroll upward toward the center guide line.</li>
-                      <li>Physically move your mouse to hit the glowing green rung boxes in a strict <span className="font-bold text-emerald-400">Left &rarr; Right &rarr; Left &rarr; Right</span> sequence.</li>
+                      <li>Physically move your mouse to hit the glowing green rung boxes in a strict <span className="font-bold text-rose-400">Left &rarr; Right &rarr; Left &rarr; Right</span> sequence.</li>
                     </ol>
                     <ul className="space-y-3">
                       <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-green-500" /> <span className="text-white font-bold">Valid Sequence:</span> Hitting all 4 rungs grants a +5 PTS / +5.0s clear bonus.</li>
-                      <li className="flex items-center gap-2"><XCircle className="w-4 h-4 text-red-500" /> <span className="text-white font-bold">Missed Sequence:</span> Letting the ladder fall before hitting all 4 rungs deducts -2 PTS and -2.0s Time.</li>
+                      <li className="flex items-center gap-2"><XCircle className="w-4 h-4 text-red-500" /> <span className="text-white font-bold">Missed Sequence:</span> Letting the ladder fall before hitting all 4 rungs subtracts -3.0s from your clock. There are NO point deductions.</li>
                     </ul>
                   </div>
                 </div>
@@ -921,8 +921,8 @@ export default function AgilityLadderClient() {
                   </div>
                   <div className="space-y-4">
                     <div>
-                      <h4 className="text-sm font-bold text-gray-200">Why does my score go down?</h4>
-                      <p className="text-xs text-gray-400 mt-1">Unlike standard aim trainers, this drill actively punishes bad accuracy. Missing a rung in the sequence triggers a penalty, violently draining your points and your master clock. You must rely on rhythm and accuracy to survive.</p>
+                      <h4 className="text-sm font-bold text-gray-200">Why does my clock drain?</h4>
+                      <p className="text-xs text-gray-400 mt-1">Unlike standard aim trainers, this drill actively punishes bad accuracy. Missing a rung in the sequence triggers a penalty, violently draining your master clock (no point deductions). You must rely on rhythm and accuracy to survive.</p>
                     </div>
                     <div>
                       <h4 className="text-sm font-bold text-gray-200">Why is it moving so fast?</h4>

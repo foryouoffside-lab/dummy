@@ -853,8 +853,8 @@ export default function SudokuClient() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <RelatedCard href="/drills/cognitive/memory/card-matching" title="Card Matching" desc="Find hidden matching pairs under pressure." color="rose" icon={<Grid3X3 className="w-4 h-4" />} />
               <RelatedCard href="/drills/cognitive/attention/selective-attention" title="Selective Attention" desc="Focus on relevant info while ignoring distractions." color="cyan" icon={<Eye className="w-4 h-4" />} />
-              <RelatedCard href="/drills/memory/spatial-memory/memory-sequence" title="Memory Sequence" desc="Memorize progressive visual pattern sequences." color="purple" icon={<Target className="w-4 h-4" />} />
-              <RelatedCard href="/drills/cognitive/problem-solving/mental-math" title="Mental Math Speed" desc="Calculate equations rapidly against the clock." color="blue" icon={<Zap className="w-4 h-4" />} />
+              <RelatedCard href="/drills/cognitive/memory/memory-sequence" title="Memory Sequence" desc="Memorize progressive visual pattern sequences." color="purple" icon={<Target className="w-4 h-4" />} />
+              <RelatedCard href="/drills/academic/math-speed/mental-math" title="Mental Math Speed" desc="Calculate equations rapidly against the clock." color="blue" icon={<Zap className="w-4 h-4" />} />
             </div>
           </section>
         )}

@@ -855,7 +855,7 @@ export default function MathReactionClient() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <RelatedCard href="/drills/academic/math-speed/mental-math" title="Mental Math" desc="Advanced mental calculation speed tests without parity aids." color="indigo" icon={<Calculator className="w-4 h-4" />} />
               <RelatedCard href="/drills/cognitive/processing-speed/symbol-matching" title="Symbol Matching" desc="Train rapid cognitive flexibility using complex Greek symbols." color="violet" icon={<Compass className="w-4 h-4" />} />
-              <RelatedCard href="/drills/cognitive/attention/elite-neuro-switch" title="Elite Neuro-Switch" desc="Enhance target isolation while ignoring visual distractors." color="red" icon={<Brain className="w-4 h-4" />} />
+              <RelatedCard href="/drills/cognitive/processing-speed/reaction-time" title="Elite Neuro-Switch" desc="Enhance target isolation while ignoring visual distractors." color="red" icon={<Brain className="w-4 h-4" />} />
               <RelatedCard href="/drills/academic/writing-speed/typing-test" title="Typing Speed Test" desc="Assess and improve fundamental Words Per Minute execution." color="rose" icon={<Keyboard className="w-4 h-4" />} />
             </div>
           </section>
@@ -905,7 +905,7 @@ export default function MathReactionClient() {
                   <ul className="space-y-3 text-sm">
                     <li><Link href="/drills/memory" className="hover:text-white transition-colors">Memory (15 drills)</Link></li>
                     <li><Link href="/drills/cognitive" className="hover:text-white transition-colors">Cognitive</Link></li>
-                    <li><Link href="/drills/mental-fitness" className="hover:text-white transition-colors">Mental Fitness (6 drills)</Link></li>
+                    <li><Link href="/drills/visual-tracking" className="hover:text-white transition-colors">Tracking (25 drills)</Link></li>
                     <li><Link href="/drills/physical" className="hover:text-white transition-colors">Physical (11 drills)</Link></li>
                   </ul>
                 </div>

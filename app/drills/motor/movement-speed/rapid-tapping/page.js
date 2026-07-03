@@ -1,28 +1,31 @@
 import RapidTappingClient from './RapidTappingClient';
 
 export const metadata = {
-  title: 'Click Speed Test - Free Rapid Tapping & CPS Test | SkillDrills',
-  description: 'Free click speed test online. Tap rapidly to keep a shrinking ball alive — the best CPS test and click endurance drill. Difficulty scales every 3 seconds. No sign-up required.',
+  title: "CPS Test - Click Speed Test Online | SkillDrills",
+  description: "Test and improve your clicks per second with our free CPS Test. Practice jitter clicking, butterfly clicking, and rapid tapping speed online.",
   keywords: [
-    'click speed test', 'free click speed test', 'online click speed test',
-    'cps test', 'cps test online', 'clicks per second test',
-    'click speed game', 'clicking speed test', 'click rate test',
-    'rapid tapping test', 'tapping speed test', 'tap speed test',
-    'mouse click speed', 'fast clicking test', 'click endurance test',
-    'rapid clicking game', 'clicking endurance drill', 'tapping survival game',
-    'click per second game', 'mouse spam test', 'clicking challenge',
-    'FPS clicking practice', 'gaming click speed', 'MOBA clicking training',
-    'Minecraft clicking speed', 'PvP click test', 'competitive clicking',
-    'hand eye coordination click', 'reflex clicking game', 'motor speed training',
-    'tapping stamina training', 'perpetual clicking game', 'endless click game',
-    'skilldrills tapping', 'skilldrills click speed', 'free clicking drill',
-    'browser click test', 'no download cps test', 'instant clicking game',
-    'click fatigue training', 'mouse endurance test', 'rapid fire clicking',
+    "cps test",
+    "click speed test",
+    "clicks per second test",
+    "click speed game",
+    "click speed trainer",
+    "cps trainer",
+    "free click speed test",
+    "online cps test",
+    "mouse click speed test",
+    "fast clicking test",
+    "rapid tapping test",
+    "finger tapping speed test",
+    "click endurance test",
+    "minecraft cps",
+    "butterfly clicking",
+    "jitter clicking",
+    "drag clicking practice"
   ],
   openGraph: {
-    title: 'Click Speed Test - Free Rapid Tapping & CPS Test | SkillDrills',
-    description: 'Free click speed test. Tap rapidly to keep a ball alive — best CPS test and clicking endurance drill. Scales every 3 seconds. No sign-up.',
-    type: 'article',
+    title: "CPS Test - Click Speed Test Online | SkillDrills",
+    description: "Test and improve your clicks per second with our free CPS Test. Practice jitter clicking, butterfly clicking, and rapid tapping speed online.",
+    type: 'website',
     url: 'https://skilldrills.online/drills/motor/movement-speed/rapid-tapping',
     siteName: 'SkillDrills',
     locale: 'en_US',
@@ -30,13 +33,13 @@ export const metadata = {
       url: 'https://skilldrills.online/icons/icon-512x512.png',
       width: 512,
       height: 512,
-      alt: 'Click Speed Test - CPS Test Online',
+      alt: 'CPS Test - Click Speed Test Online',
     }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Click Speed Test - Free Rapid Tapping & CPS Test | SkillDrills',
-    description: 'Free click speed test and CPS test. Keep the shrinking ball alive. Best clicking endurance drill. No sign-up.',
+    title: "CPS Test - Click Speed Test Online | SkillDrills",
+    description: "Test and improve your clicks per second with our free CPS Test. Practice jitter clicking, butterfly clicking, and rapid tapping speed online.",
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -46,83 +49,154 @@ export const metadata = {
 };
 
 export default function RapidTappingPage() {
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://skilldrills.online" },
+      { "@type": "ListItem", "position": 2, "name": "Motor Training", "item": "https://skilldrills.online/drills/motor" },
+      { "@type": "ListItem", "position": 3, "name": "Movement Speed", "item": "https://skilldrills.online/drills/motor/movement-speed" },
+      { "@type": "ListItem", "position": 4, "name": "Click Speed Test", "item": "https://skilldrills.online/drills/motor/movement-speed/rapid-tapping" }
+    ]
+  };
+
+  const softwareSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "CPS Test - Click Speed Test Online",
+    "url": "https://skilldrills.online/drills/motor/movement-speed/rapid-tapping",
+    "description": "A free click speed test and CPS trainer. Survive by expanding a shrinking ball through rapid tapping. Difficulty scales dynamically based on score.",
+    "applicationCategory": "GameApplication",
+    "operatingSystem": "All",
+    "browserRequirements": "Requires a modern web browser with JavaScript support.",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "author": { "@type": "Organization", "name": "SkillDrills" },
+    "isAccessibleForFree": true,
+    "learningResourceType": "Educational Game",
+    "teaches": "Clicks Per Second (CPS), Mouse Control, Finger Dexterity, Clicking Endurance, Jitter Clicking Technique"
+  };
+
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is a Click Speed Test?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "A click speed test is a browser-based game that measures your CPS (Clicks Per Second). It tests how fast you can click your mouse button within a specific timeframe or survival condition, evaluating your finger speed and motor endurance."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is a good CPS?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "An average CPS is around 5 to 7 clicks per second. A 'good' or competitive CPS is typically between 8 and 10. Elite gamers using techniques like jitter clicking or butterfly clicking can achieve 12 to 15+ CPS."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does CPS matter in Minecraft?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, CPS is highly critical in Minecraft PvP. A higher click speed allows you to land more hits, deal more knockback, and trap your opponent in combos, making rapid tapping skills essential for competitive servers."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does CPS matter in FPS games like Valorant or CS2?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "In tactical FPS games, raw CPS is less important than clicking accuracy and mouse control. However, having high finger agility helps with rapid semi-automatic firing (bursting) without tensing your hand and disrupting your aim."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is jitter clicking?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Jitter clicking is a technique where you tense the muscles in your forearm and wrist to create a rapid vibration (jitter) in your finger, allowing you to click the mouse much faster than normal tapping."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is butterfly clicking?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Butterfly clicking involves alternating clicks between your index and middle fingers on the same mouse button. It is a highly effective way to double your CPS, especially in games like Minecraft."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I improve my click speed and endurance?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "You can improve your click speed by routinely practicing with a CPS test, learning advanced techniques like jitter or butterfly clicking, and doing click endurance games to build forearm stamina and neuromuscular adaptation."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is this drill free?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, the SkillDrills Click Speed Test is 100% free forever. It runs directly in your browser with zero downloads, no subscriptions, and no sign-up required."
+        }
+      }
+    ]
+  };
+
+  const howToSchema = {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "How to Train Clicks Per Second (CPS)",
+    "description": "Step-by-step instructions to train mouse click speed and finger clicking endurance.",
+    "step": [
+      {
+        "@type": "HowToStep",
+        "name": "Initiate click testing session",
+        "text": "Press Start. A target circle will render on the canvas. The countdown timer begins."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Click target rapidly",
+        "text": "Use jitter clicking or butterfly clicking techniques to tap the mouse button on the target. Tap fast enough to prevent the target ball from shrinking completely."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Review CPS score",
+        "text": "Analyze your average clicks per second (CPS) and peak click frequency to identify forearm fatigue thresholds."
+      }
+    ]
+  };
+
   return (
     <>
+      {/* Breadcrumb Schema */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "BreadcrumbList",
-            "itemListElement": [
-              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://skilldrills.online" },
-              { "@type": "ListItem", "position": 2, "name": "Motor Training", "item": "https://skilldrills.online/drills/motor" },
-              { "@type": "ListItem", "position": 3, "name": "Movement Speed", "item": "https://skilldrills.online/drills/motor/movement-speed" },
-              { "@type": "ListItem", "position": 4, "name": "Click Speed Test - Rapid Tapping" }
-            ]
-          })
-        }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
+
+      {/* SoftwareApplication Schema */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "WebApplication",
-            "name": "Click Speed Test - Free Rapid Tapping & CPS Test",
-            "url": "https://skilldrills.online/drills/motor/movement-speed/rapid-tapping",
-            "description": "Free click speed test and CPS test. Endless survival clicking: tap to keep the shrinking ball alive. 10 clicks = 1 point. Difficulty increases 12% every 3 seconds. Best click endurance drill online.",
-            "applicationCategory": "GameApplication",
-            "operatingSystem": "All",
-            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-            "author": { "@type": "Organization", "name": "SkillDrills" },
-            "isAccessibleForFree": true
-          })
-        }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }}
       />
+
+      {/* FAQPage Schema */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "FAQPage",
-            "mainEntity": [
-              {
-                "@type": "Question",
-                "name": "What is this click speed test?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "A free click speed test and CPS test game. Tap rapidly to keep a shrinking ball alive. Each click expands it 10px. Ball shrinks at increasing rate. 10 clicks = 1 point. Survive as long as possible in this endless click speed challenge."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "How does difficulty increase in this CPS test?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "Shrink rate in this click speed test increases 12% every 3 seconds. Longer survival requires faster clicking. Maximum ball size is 140px. The longer you survive, the higher your clicks per second (CPS) must be."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "Is this click speed test good for gaming?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "Yes. This CPS test and rapid tapping drill improves click speed and mouse endurance for FPS games (Valorant, CS2), MOBA games, and Minecraft PvP where fast clicking gives a competitive advantage."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "Do I need to sign up for this click speed test?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "No registration required. This free click speed test and CPS test works instantly in your browser — no downloads needed."
-                }
-              }
-            ]
-          })
-        }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
+
+      {/* HowTo Schema */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
+      />
+
       <RapidTappingClient />
     </>
   );

@@ -1,28 +1,28 @@
 import TracingClient from './TracingClient';
 
 export const metadata = {
-  title: 'Mouse Tracing Game - Free Wave Tracking Precision Drill | SkillDrills',
-  description: 'Free mouse tracing game online. Follow a dynamic red wave filament with your cursor — the best mouse tracking game for precision control and smooth movement training. Auto-pauses off-wave. No sign-up.',
+  title: "Mouse Tracking Test - Smooth Aim Trainer | SkillDrills",
+  description: "Improve your tracking aim, mouse precision, and hand-eye coordination with our free online mouse tracking test. Follow the wave and survive.",
   keywords: [
-    'mouse tracing game', 'mouse tracing game online', 'free mouse tracing game',
-    'wave tracing game', 'cursor tracing game', 'mouse tracking game',
-    'mouse tracking exercise', 'cursor tracking drill', 'tracking game online',
-    'smooth mouse movement', 'smooth cursor game', 'flow state training game',
-    'mouse precision training', 'mouse precision game', 'cursor control game',
-    'hand eye coordination game', 'hand eye coordination training', 'hand eye coordination drill',
-    'fine motor control game', 'fine motor skills game', 'motor precision training',
-    'wave following game', 'filament tracking drill', 'dynamic wave game',
-    'aim smoothing game', 'mouse smoothing drill', 'tracking accuracy game',
-    'FPS tracking training', 'gaming mouse tracking', 'aim trainer tracking',
-    'smooth pursuit training', 'visual motor game', 'motor control exercise',
-    'auto pause tracing', 'no penalty tracing', 'flow meter game',
-    'skilldrills tracing', 'skilldrills motor drill', 'free precision training online',
-    'browser tracing game', 'no download tracking game', 'instant mouse tracking',
+    "mouse tracking test",
+    "mouse tracking speed",
+    "mouse tracking trainer",
+    "aim tracking trainer",
+    "mouse accuracy test",
+    "precision tracing test",
+    "fine motor precision",
+    "mouse control practice",
+    "hand eye coordination game",
+    "fps tracking trainer",
+    "cursor tracking game",
+    "mouse tracing game",
+    "aim trainer online",
+    "smooth mouse movement"
   ],
   openGraph: {
-    title: 'Mouse Tracing Game - Free Wave Tracking Precision Drill | SkillDrills',
-    description: 'Free mouse tracing game. Follow a dynamic red wave filament — best mouse tracking game for precision and smooth movement. Auto-pauses off-wave. No sign-up.',
-    type: 'article',
+    title: "Mouse Tracking Test - Smooth Aim Trainer | SkillDrills",
+    description: "Improve your tracking aim, mouse precision, and hand-eye coordination with our free online mouse tracking test. Follow the wave and survive.",
+    type: 'website',
     url: 'https://skilldrills.online/drills/motor/precision-control/tracing',
     siteName: 'SkillDrills',
     locale: 'en_US',
@@ -30,13 +30,13 @@ export const metadata = {
       url: 'https://skilldrills.online/icons/icon-512x512.png',
       width: 512,
       height: 512,
-      alt: 'Mouse Tracing Game - Wave Tracking Drill',
+      alt: 'Mouse Tracking Test - Smooth Aim Trainer',
     }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Mouse Tracing Game - Free Wave Tracking Precision Drill | SkillDrills',
-    description: 'Free mouse tracing game. Follow a dynamic wave filament. Best mouse tracking game for smooth precision. No sign-up.',
+    title: "Mouse Tracking Test - Smooth Aim Trainer | SkillDrills",
+    description: "Improve your tracking aim, mouse precision, and hand-eye coordination with our free online mouse tracking test. Follow the wave and survive.",
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -46,83 +46,162 @@ export const metadata = {
 };
 
 export default function TracingPage() {
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://skilldrills.online" },
+      { "@type": "ListItem", "position": 2, "name": "Motor Training", "item": "https://skilldrills.online/drills/motor" },
+      { "@type": "ListItem", "position": 3, "name": "Precision Control", "item": "https://skilldrills.online/drills/motor/precision-control" },
+      { "@type": "ListItem", "position": 4, "name": "Mouse Tracking Test", "item": "https://skilldrills.online/drills/motor/precision-control/tracing" }
+    ]
+  };
+
+  const softwareSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Mouse Tracking Test - Free Aim Tracking Trainer",
+    "url": "https://skilldrills.online/drills/motor/precision-control/tracing",
+    "description": "Free mouse tracking test and smooth aim trainer. Follow a dynamically shifting wave with your cursor to build elite mouse precision and continuous tracking aim. Endless survival difficulty scaling.",
+    "applicationCategory": "GameApplication",
+    "operatingSystem": "All",
+    "browserRequirements": "Requires a modern web browser with JavaScript and Pointer Lock API support.",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "author": { "@type": "Organization", "name": "SkillDrills" },
+    "isAccessibleForFree": true,
+    "learningResourceType": "Educational Game",
+    "teaches": "Mouse Tracking, Smooth Aim, Tracking Accuracy, Hand Steadiness, Continuous Cursor Control, Hand-Eye Coordination"
+  };
+
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is the Mouse Tracking Test?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The Mouse Tracking Test is an endless survival game that acts as an aim tracking trainer. You must keep your cursor locked onto a continuously moving, highly dynamic wave path to score points and stay alive."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does this improve my tracking aim?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Tracking a highly erratic moving target trains your forearm and wrist to make continuous, smooth adjustments without jittering, directly mimicking the tracking mechanics required in competitive FPS games."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does mouse tracking speed affect this test?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Your system's mouse tracking speed (sensitivity) determines how much physical movement is needed to follow the wave. A lower tracking speed (lower sensitivity) allows for more precise micro-adjustments, whereas a higher speed requires extreme hand control to avoid slipping off the path."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How can I change my mouse tracking speed on Mac and Windows?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "On Windows: Go to Settings > Bluetooth & Devices > Mouse, and adjust the 'Mouse Pointer Speed' slider. On macOS: Go to System Settings > Mouse, and adjust the 'Tracking Speed' slider. We recommend turning off 'Enhance Pointer Precision' (acceleration) to maintain consistency while practicing."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What happens if I slip off the wave?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Falling off the path is penalized severely. Your combo multiplier instantly resets to 1x, your screen shakes, and you lose 3.0 seconds off your survival clock. However, your score never decreases."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does the difficulty increase?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Every time you score enough points to Level Up, the game scales. The wave scrolls faster, the curves become sharper and more volatile, and your hit-tolerance ring shrinks, requiring pixel-perfect tracking at high levels."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is Adrenaline Mode?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "When your survival timer drops below 15 seconds, the game triggers Adrenaline Mode. The screen begins to pulse red, heartbeat audio plays, and the pressure is maximized to simulate a clutch gaming scenario."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is this a good warmup for FPS games like Valorant, Overwatch, or Apex Legends?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, it is specifically designed for high-TTK (Time to Kill) shooters like Apex Legends and Overwatch, where continuous smooth tracking is the most important mechanical skill."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is this Mouse Tracking Trainer free?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, it is 100% free forever. It runs directly in your browser with zero downloads, no subscriptions, and zero latency."
+        }
+      }
+    ]
+  };
+
+  const howToSchema = {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "How to Train Mouse Tracking Accuracy",
+    "description": "Step-by-step instructions to calibrate mouse tracking speed and train continuous tracking aim.",
+    "step": [
+      {
+        "@type": "HowToStep",
+        "name": "Calibrate mouse sensitivity settings",
+        "text": "Before starting the test, adjust your operating system's tracking speed and disable pointer acceleration to ensure 1:1 sensor replication."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Start the aim tracking test",
+        "text": "Press Start. Lock pointer focus to center on the canvas to activate continuous path tracking."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Maintain continuous lock-on",
+        "text": "Trace the dynamic scrolling wave smoothly. Keep your cursor within the center ring of the target boundary to build score multiplier combos."
+      }
+    ]
+  };
+
   return (
     <>
+      {/* Breadcrumb Schema */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "BreadcrumbList",
-            "itemListElement": [
-              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://skilldrills.online" },
-              { "@type": "ListItem", "position": 2, "name": "Motor Training", "item": "https://skilldrills.online/drills/motor" },
-              { "@type": "ListItem", "position": 3, "name": "Precision Control", "item": "https://skilldrills.online/drills/motor/precision-control" },
-              { "@type": "ListItem", "position": 4, "name": "Mouse Tracing Game - Wave Tracking Drill" }
-            ]
-          })
-        }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
+
+      {/* SoftwareApplication Schema */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "WebApplication",
-            "name": "Mouse Tracing Game - Free Wave Tracking Precision Drill",
-            "url": "https://skilldrills.online/drills/motor/precision-control/tracing",
-            "description": "Free mouse tracing game and wave tracking precision drill. Follow a dynamic red filament with 45px tolerance. Auto-pauses off-wave, resumes on return. Two modes: Pulse and Harmonic. Best mouse tracking game for smooth movement training.",
-            "applicationCategory": "GameApplication",
-            "operatingSystem": "All",
-            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-            "author": { "@type": "Organization", "name": "SkillDrills" },
-            "isAccessibleForFree": true
-          })
-        }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }}
       />
+
+      {/* FAQPage Schema */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "FAQPage",
-            "mainEntity": [
-              {
-                "@type": "Question",
-                "name": "What is this mouse tracing game?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "A free mouse tracing game and wave tracking precision drill. Follow a dynamic red filament with 45px tolerance. Wave auto-pauses when you leave, resumes on return. Two modes: Pulse and Harmonic. Best free mouse tracking game for smooth movement training."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "What happens when I leave the wave in this tracing game?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "The wave auto-pauses and stops scrolling. The flow meter decreases while off-wave. Return to the red filament to automatically resume. No penalties — this mouse tracing game focuses on positive smooth movement training."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "What are the two waveform modes in this mouse tracking game?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "Pulse mode: complex harmonic wave with varying amplitude — harder and less predictable. Harmonic mode: smooth sine wave — more rhythmic and flowable. Alternates every 6 seconds for varied mouse tracing practice."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "Do I need to sign up for this mouse tracing game?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "No registration required. This free mouse tracing game and wave tracking drill works instantly in your browser — no downloads needed."
-                }
-              }
-            ]
-          })
-        }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
+
+      {/* HowTo Schema */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
+      />
+
       <TracingClient />
     </>
   );

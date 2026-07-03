@@ -868,8 +868,8 @@ export default function KineticInterceptClient() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <RelatedCard href="/drills/visual/reaction-speed/light-reaction" title="Light Reaction" desc="Test pure visual reaction speed to color changes." color="blue" icon={<Zap className="w-4 h-4" />} />
               <RelatedCard href="/drills/fps/flick-shot-training" title="Pro Flick Trainer" desc="Raw input aim training for competitive FPS mapping." color="green" icon={<Crosshair className="w-4 h-4" />} />
-              <RelatedCard href="/drills/visual/tracking-accuracy/multiple-objects" title="Multi-Target Pursuit" desc="Track and engage multiple dynamic objects." color="orange" icon={<Layers className="w-4 h-4" />} />
-              <RelatedCard href="/drills/visual/reaction-speed/go-no-go" title="Chroma-Sync Lab" desc="Response impulse inhibition and control." color="purple" icon={<Target className="w-4 h-4" />} />
+              <RelatedCard href="/drills/visual/tracking-accuracy/multiple-targets" title="Multi-Target Pursuit" desc="Track and engage multiple dynamic objects." color="orange" icon={<Layers className="w-4 h-4" />} />
+              <RelatedCard href="/drills/visual/reaction-speed/go/no-go" title="Chroma-Sync Lab" desc="Response impulse inhibition and control." color="purple" icon={<Target className="w-4 h-4" />} />
             </div>
           </section>
         )}

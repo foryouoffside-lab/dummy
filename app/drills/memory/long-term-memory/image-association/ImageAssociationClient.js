@@ -1007,8 +1007,8 @@ export default function ImageAssociationClient() {
                   <h3 className="text-white font-bold mb-3 uppercase tracking-wider">More Sectors</h3>
                   <ul className="space-y-2">
                     <li><Link href="/drills/visual" className="hover:text-fuchsia-400 transition-colors">Visual (14 drills)</Link></li>
-                    <li><Link href="/drills/productivity" className="hover:text-fuchsia-400 transition-colors">Productivity (10 drills)</Link></li>
-                    <li><Link href="/drills/mental-fitness" className="hover:text-fuchsia-400 transition-colors">Mental Fitness (6 drills)</Link></li>
+                    <li><Link href="/drills/cognitive" className="hover:text-fuchsia-400 transition-colors">Productivity (10 drills)</Link></li>
+                    <li><Link href="/drills/visual-tracking" className="hover:text-fuchsia-400 transition-colors">Tracking (25 drills)</Link></li>
                     <li><Link href="/drills/physical" className="hover:text-fuchsia-400 transition-colors">Physical (11 drills)</Link></li>
                   </ul>
                 </div>

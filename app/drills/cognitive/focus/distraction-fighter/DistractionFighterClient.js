@@ -875,7 +875,7 @@ export default function DistractionFighterClient() {
               </h2>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <RelatedCard href="/drills/cognitive/attention/elite-neuro-switch" title="Elite Neuro-Switch" desc="Click RED targets while ignoring BLUE distractors." color="red" icon={<Brain className="w-4 h-4" />} />
+              <RelatedCard href="/drills/cognitive/processing-speed/reaction-time" title="Elite Neuro-Switch" desc="Click RED targets while ignoring BLUE distractors." color="red" icon={<Brain className="w-4 h-4" />} />
               <RelatedCard href="/drills/cognitive/attention/divided-attention" title="Divided Attention" desc="Focus on relevant information while ignoring noise." color="blue" icon={<Layers className="w-4 h-4" />} />
               <RelatedCard href="/drills/cognitive/focus/concentration-grid" title="Concentration Grid" desc="Search grids linearly under intense time pressure." color="purple" icon={<Search className="w-4 h-4" />} />
               <RelatedCard href="/drills/cognitive/processing-speed/reaction-time" title="Reaction Time" desc="Raw millisecond visual reaction testing." color="orange" icon={<Zap className="w-4 h-4" />} />
@@ -926,7 +926,7 @@ export default function DistractionFighterClient() {
                   <h3 className="text-white font-bold mb-3 uppercase tracking-wider">More Sectors</h3>
                   <ul className="space-y-2">
                     <li><Link href="/drills/academic" className="hover:text-rose-400 transition-colors">Academic (12)</Link></li>
-                    <li><Link href="/drills/mental-fitness" className="hover:text-rose-400 transition-colors">Mental Fitness (6)</Link></li>
+                    <li><Link href="/drills/visual-tracking" className="hover:text-rose-400 transition-colors">Tracking (25 drills)</Link></li>
                     <li><Link href="/drills/physical" className="hover:text-rose-400 transition-colors">Physical (11)</Link></li>
                   </ul>
                 </div>

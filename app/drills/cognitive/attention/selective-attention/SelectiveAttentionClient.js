@@ -931,7 +931,7 @@ export default function SelectiveAttentionClient() {
                   <h3 className="text-white font-bold mb-4 text-sm tracking-wide">More Sections</h3>
                   <ul className="space-y-3 text-sm">
                     <li><Link href="/drills/memory" className="hover:text-white transition-colors">Memory Drills</Link></li>
-                    <li><Link href="/drills/mental-fitness" className="hover:text-white transition-colors">Mental Fitness</Link></li>
+                    <li><Link href="/drills/visual-tracking" className="hover:text-white transition-colors">Mental Fitness</Link></li>
                     <li><Link href="/drills/physical" className="hover:text-white transition-colors">Physical Drills</Link></li>
                   </ul>
                 </div>

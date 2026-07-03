@@ -1,15 +1,16 @@
 ﻿'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
+import Head from 'next/head';
 
 import { 
   Activity, AlertCircle, ArrowRight, BarChart3, ChevronRight, 
   Clock, Crosshair, Eye, GraduationCap, Info, Lightbulb, 
-  Maximize2, Minimize2, Play, RefreshCw, Star, Target, 
+  Maximize2, Minimize2, Play, RefreshCw, Target, 
   Timer, TrendingUp, Trophy, Volume2, VolumeX, Zap, 
-  Share2, Code2, Calculator, CheckCircle2, Shield, Users,
-  XCircle
+  Users, CheckCircle2, XCircle, Shield, Award, Sparkles, Flame,
+  Share2, Copy, Brain, Sliders
 } from 'lucide-react';
 
 // ============================================================
@@ -27,19 +28,22 @@ class AudioSynthesizer {
     }
   }
 
-  // Updated: Smooth melodic sound effect (A5 to C#6 chord sweep)
-  playSuccess() {
+  playSuccess(combo = 0) {
     if (!this.enabled || !this.ctx) return;
     try {
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
       osc.type = 'sine';
-      osc.frequency.setValueAtTime(880, this.ctx.currentTime); 
-      osc.frequency.setValueAtTime(1108.73, this.ctx.currentTime + 0.05); 
+      const baseFreq = 880;
+      const freqPitch = Math.min(1200, baseFreq + (combo * 15)); 
+      osc.frequency.setValueAtTime(freqPitch, this.ctx.currentTime); 
+      osc.frequency.setValueAtTime(freqPitch * 1.25, this.ctx.currentTime + 0.05); 
       gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.2);
-      osc.connect(gain); gain.connect(this.ctx.destination);
-      osc.start(); osc.stop(this.ctx.currentTime + 0.2);
+      osc.connect(gain); 
+      gain.connect(this.ctx.destination);
+      osc.start(); 
+      osc.stop(this.ctx.currentTime + 0.2);
     } catch(e) {}
   }
 
@@ -57,18 +61,28 @@ class AudioSynthesizer {
     } catch(e) {}
   }
 
-  playSpawn() {
+  playSpawnStereo(panValue = 0) {
     if (!this.enabled || !this.ctx) return;
     try {
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
+      const panNode = this.ctx.createStereoPanner ? this.ctx.createStereoPanner() : null;
       osc.type = 'sine';
-      osc.frequency.setValueAtTime(440, this.ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(600, this.ctx.currentTime + 0.05);
-      gain.gain.setValueAtTime(0.03, this.ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.05);
-      osc.connect(gain); gain.connect(this.ctx.destination);
-      osc.start(); osc.stop(this.ctx.currentTime + 0.05);
+      osc.frequency.setValueAtTime(550, this.ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(700, this.ctx.currentTime + 0.08);
+      gain.gain.setValueAtTime(0.06, this.ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.08);
+      if (panNode) {
+        panNode.pan.setValueAtTime(panValue, this.ctx.currentTime);
+        osc.connect(gain);
+        gain.connect(panNode);
+        panNode.connect(this.ctx.destination);
+      } else {
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+      }
+      osc.start();
+      osc.stop(this.ctx.currentTime + 0.08);
     } catch(e) {}
   }
 
@@ -78,81 +92,74 @@ class AudioSynthesizer {
 }
 
 const audioSynth = typeof window !== 'undefined' ? new AudioSynthesizer() : null;
+const DRILL_DURATION = 60; // 60 seconds strict
 
-const DRILL_DURATION = 60; // Strict 60 seconds
+// ============================================================
+// RANK CALCULATION & SUGGESTIONS
+// ============================================================
+const calculateRank = (level, accuracy, rt) => {
+  if (level >= 7 && accuracy >= 90 && rt <= 400 && rt > 0) return { rank: 'S+', color: 'text-fuchsia-400' };
+  if (level >= 5 && accuracy >= 85 && rt <= 450 && rt > 0) return { rank: 'S', color: 'text-yellow-400' };
+  if (level >= 4 && accuracy >= 80 && rt <= 500 && rt > 0) return { rank: 'A', color: 'text-green-400' };
+  if (level >= 3 && accuracy >= 70) return { rank: 'B', color: 'text-blue-400' };
+  if (level >= 2 && accuracy >= 60) return { rank: 'C', color: 'text-indigo-400' };
+  return { rank: 'D', color: 'text-slate-400' };
+};
+
+const getSuggestion = (rank, timeouts, missed) => {
+  if (rank === 'S+' || rank === 'S') return "Elite spatial mapping. Your flick speed is perfect. Challenge yourself by bumping Universal Sens up by 0.05x to break your comfort zone.";
+  if (timeouts > missed) return "You are timing out on targets too often. Trust your instincts and pull the trigger earlier when flicking to the extreme edges.";
+  if (missed > 5) return "Your accuracy is bleeding time. Don't sacrifice precision for speed. Ensure your crosshair fully stops on the target before clicking.";
+  return "Solid baseline. Keep playing to push your difficulty level higher. The targets will require faster reaction times as you progress past Level 3.";
+};
 
 // ============================================================
 // MAIN COMPONENT
 // ============================================================
 export default function AwarenessDrillClient() {
-  // === UI & Viewport State ===
-  const [gameState, setGameState] = useState('start'); // 'start', 'playing', 'gameOver'
+  const [gameState, setGameState] = useState('start'); 
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [pointerLocked, setPointerLocked] = useState(false);
-  
-  // === Settings State ===
   const [universalSens, setUniversalSens] = useState(1.0);
 
-  // === Gameplay State ===
-  const [score, setScore] = useState(0);
+  // HUD State
+  const [uiScore, setUiScore] = useState(0);
+  const [uiLevel, setUiLevel] = useState(1);
+  const [uiCombo, setUiCombo] = useState(0);
+  const [uiTimeLeft, setUiTimeLeft] = useState(DRILL_DURATION);
   const [bestScore, setBestScore] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(DRILL_DURATION);
   const [isNewBest, setIsNewBest] = useState(false);
-  const [flashBg, setFlashBg] = useState(null);
 
-  // Analytics State
   const [analytics, setAnalytics] = useState({
-    accuracy: 100,
-    successfulHits: 0,
-    missedClicks: 0,
-    timeouts: 0,
-    avgReactionTime: 0,
-    maxCombo: 0
+    accuracy: 100, successfulHits: 0, missedClicks: 0, timeouts: 0, 
+    avgReactionTime: 0, maxCombo: 0, finalLevel: 1, rankData: null
   });
 
-  // === High-performance Mutable Refs ===
+  // DOM Refs
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
   const animationRef = useRef(null);
-  const timerRef = useRef(null);
   const pageRef = useRef(null);
-  
-  // === Game Logic Engine Refs ===
+  const progressBarRef = useRef(null); 
+  const lastTimeRef = useRef(DRILL_DURATION); 
+
+  // Engine State
   const engine = useRef({
     crosshair: { x: 0, y: 0, initialized: false },
-    target: { active: false, x: 0, y: 0, radius: 24, age: 0, spawnTime: 0 },
-    
-    // Adaptive Difficulty Mechanics
-    ttl: 850, // Time to live (shrinks aggressively)
-    radius: 24, // Target size (shrinks aggressively)
-    
-    score: 0,
-    timeLeft: DRILL_DURATION,
-    nextSpawnTime: 0,
-    lastSpawnSide: null, // Alternates 180 degrees
-    
-    // Telemetry & VFX
-    successfulHits: 0,
-    missedClicks: 0,
-    timeouts: 0,
-    combo: 0,
-    maxCombo: 0,
-    reactionTimes: [],
-    totalActions: 0,
-    particles: [],
-    hitMarkers: [],
-    screenShake: 0
+    target: { active: false, x: 0, y: 0, radius: 30, age: 0, spawnTime: 0, ttl: 1200 },
+    score: 0, level: 1, combo: 0, timeLeft: DRILL_DURATION, nextSpawnTime: 0,
+    successfulHits: 0, missedClicks: 0, timeouts: 0, maxCombo: 0, reactionTimes: [], totalActions: 0,
+    particles: [], hitMarkers: [], screenShake: 0, flash: { color: null, alpha: 0 }
   });
 
   const cmPer360 = (30 / universalSens).toFixed(1);
 
-  // === Initialization & Local Storage ===
   useEffect(() => {
     try {
       const savedSens = localStorage.getItem('awareness180_sens');
       if (savedSens) setUniversalSens(parseFloat(savedSens));
-      const savedBest = localStorage.getItem('awareness180_bestScore');
+      const savedBest = localStorage.getItem('awareness180_bestScore2'); 
       if (savedBest) setBestScore(parseInt(savedBest, 10));
     } catch (e) {}
   }, []);
@@ -164,64 +171,80 @@ export default function AwarenessDrillClient() {
     if (audioSynth) audioSynth.setEnabled(soundEnabled);
   }, [universalSens, gameState, soundEnabled]);
 
-  // === Core Game Management ===
+  // Core Game Management
   const endGame = useCallback(() => {
     setGameState('gameOver');
     if (document.pointerLockElement) document.exitPointerLock();
     
     const e = engine.current;
-    
     const finalAccuracy = e.totalActions > 0 ? Math.round((e.successfulHits / e.totalActions) * 100) : 0;
     const avgRt = e.reactionTimes.length > 0 
       ? Math.round(e.reactionTimes.reduce((a, b) => a + b, 0) / e.reactionTimes.length) 
       : 0;
 
+    const rank = calculateRank(e.level, finalAccuracy, avgRt);
+
     setAnalytics({
-      accuracy: finalAccuracy,
-      successfulHits: e.successfulHits,
-      missedClicks: e.missedClicks,
-      timeouts: e.timeouts,
-      avgReactionTime: avgRt,
-      maxCombo: e.maxCombo
+      accuracy: finalAccuracy, successfulHits: e.successfulHits, missedClicks: e.missedClicks,
+      timeouts: e.timeouts, avgReactionTime: avgRt, maxCombo: e.maxCombo, finalLevel: e.level, rankData: rank
     });
+
+    setUiScore(e.score);
 
     setBestScore(prev => {
       if (e.score > prev) {
         setIsNewBest(true);
-        try { localStorage.setItem('awareness180_bestScore', e.score.toString()); } catch(err){}
+        try { localStorage.setItem('awareness180_bestScore2', e.score.toString()); } catch(err){}
         return e.score;
       }
       return prev;
     });
   }, []);
 
-  const spawnTarget = useCallback((time, width, height) => {
-    const e = engine.current;
-    // Alternate 180 degrees
-    let side;
-    if (e.lastSpawnSide === null) {
-      side = Math.random() > 0.5 ? 0.08 : 0.92;
-    } else {
-      side = e.lastSpawnSide === 0.08 ? 0.92 : 0.08;
-    }
-    e.lastSpawnSide = side;
+  const getLevelConfig = (level) => {
+    const baseRadius = 30, minRadius = 8;
+    const baseTtl = 1200, minTtl = 350;
+    return {
+      radius: Math.max(minRadius, baseRadius - (level - 1) * 3),
+      ttl: Math.max(minTtl, baseTtl - (level - 1) * 100),
+      spawnDelayMin: Math.max(200, 800 - (level - 1) * 80),
+      spawnDelayMax: Math.max(300, 1000 - (level - 1) * 100),
+      edgeProb: Math.min(0.9, 0.2 + (level - 1) * 0.1) 
+    };
+  };
 
+  const spawnTarget = useCallback((time, width, height, currentLevel) => {
+    const e = engine.current;
+    const config = getLevelConfig(currentLevel);
+    const isExtremeEdge = Math.random() < config.edgeProb;
+    const isLeft = Math.random() > 0.5;
+    
+    let xMin, xMax;
+    if (isExtremeEdge) {
+      xMin = isLeft ? 0.05 : 0.85;
+      xMax = isLeft ? 0.15 : 0.95;
+    } else {
+      xMin = isLeft ? 0.15 : 0.55;
+      xMax = isLeft ? 0.45 : 0.85;
+    }
+
+    const targetX = width * (xMin + Math.random() * (xMax - xMin));
+    const targetY = height * (0.15 + Math.random() * 0.7);
+    const depthScale = 0.6 + Math.random() * 0.4;
+    
     e.target = {
-      active: true,
-      x: width * side,
-      y: height * (0.2 + Math.random() * 0.6), // Random height
-      radius: e.radius,
-      age: 0,
-      spawnTime: time
+      active: true, x: targetX, y: targetY, radius: config.radius * depthScale,
+      age: 0, spawnTime: time, ttl: config.ttl 
     };
 
-    if (audioSynth) audioSynth.playSpawn();
+    const panValue = (targetX - width / 2) / (width / 2);
+    if (audioSynth) audioSynth.playSpawnStereo(panValue);
   }, []);
 
   const createExplosion = (x, y, color) => {
-    for (let i = 0; i < 12; i++) {
+    for (let i = 0; i < 15; i++) {
       const angle = Math.random() * Math.PI * 2;
-      const speed = Math.random() * 4 + 1;
+      const speed = Math.random() * 5 + 1;
       engine.current.particles.push({ x, y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, life: 1.0, color });
     }
   };
@@ -234,22 +257,22 @@ export default function AwarenessDrillClient() {
     if (audioSynth) audioSynth.init(); 
 
     setIsNewBest(false);
-    setScore(0);
-    setAnalytics({ accuracy: 100, successfulHits: 0, missedClicks: 0, timeouts: 0, avgReactionTime: 0, maxCombo: 0 });
-    setTimeLeft(DRILL_DURATION);
+    setUiScore(0);
+    setUiLevel(1);
+    setUiCombo(0);
+    setUiTimeLeft(DRILL_DURATION);
+    lastTimeRef.current = DRILL_DURATION;
+    
+    setAnalytics({ accuracy: 100, successfulHits: 0, missedClicks: 0, timeouts: 0, avgReactionTime: 0, maxCombo: 0, finalLevel: 1, rankData: null });
     setGameState('playing');
     
     engine.current = {
       crosshair: { ...engine.current.crosshair },
-      target: { active: false, x: 0, y: 0, radius: 24, age: 0, spawnTime: 0 },
-      ttl: 850, // Reset Difficulty
-      radius: 24, 
-      score: 0,
-      timeLeft: DRILL_DURATION,
+      target: { active: false, x: 0, y: 0, radius: 30, age: 0, spawnTime: 0, ttl: 1200 },
+      score: 0, level: 1, combo: 0, timeLeft: DRILL_DURATION,
       nextSpawnTime: performance.now() + 600,
-      lastSpawnSide: null,
-      successfulHits: 0, missedClicks: 0, timeouts: 0, combo: 0, maxCombo: 0, reactionTimes: [], totalActions: 0,
-      particles: [], hitMarkers: [], screenShake: 0
+      successfulHits: 0, missedClicks: 0, timeouts: 0, maxCombo: 0, reactionTimes: [], totalActions: 0,
+      particles: [], hitMarkers: [], screenShake: 0, flash: { color: null, alpha: 0 }
     };
 
     try {
@@ -265,24 +288,7 @@ export default function AwarenessDrillClient() {
     }, 150);
   }, []);
 
-  // === Strict Timer Management ===
-  useEffect(() => {
-    if (gameState === 'playing' && pointerLocked) {
-      timerRef.current = setInterval(() => {
-        engine.current.timeLeft -= 1;
-        setTimeLeft(engine.current.timeLeft);
-        if (engine.current.timeLeft <= 0) {
-          clearInterval(timerRef.current);
-          endGame();
-        }
-      }, 1000);
-    } else {
-      clearInterval(timerRef.current);
-    }
-    return () => clearInterval(timerRef.current);
-  }, [gameState, pointerLocked, endGame]);
-
-  // === Raw Mouse Input & Firing Listeners ===
+  // Event Listeners for Input
   useEffect(() => {
     const handlePointerLockChange = () => setPointerLocked(document.pointerLockElement === canvasRef.current);
     document.addEventListener('pointerlockchange', handlePointerLockChange);
@@ -305,67 +311,60 @@ export default function AwarenessDrillClient() {
         if (!pointerLocked && canvasRef.current) {
           canvasRef.current.requestPointerLock();
         } else if (pointerLocked) {
-          // SHOOT LOGIC
+          
           const eRef = engine.current;
           eRef.totalActions++;
 
           if (!eRef.target.active) {
-            // Pre-fire / Miss penalty
             eRef.missedClicks++;
-            eRef.score = Math.max(0, eRef.score - 2); // -2 Score Penalty
-            eRef.timeLeft -= 1; // -1s Time Penalty
+            eRef.timeLeft = Math.max(0, eRef.timeLeft - 1);
             eRef.combo = 0;
-            eRef.screenShake = 12;
-            
-            setScore(eRef.score);
+            eRef.screenShake = 5;
+            eRef.flash = { color: '239, 68, 68', alpha: 0.2 }; 
+            setUiCombo(0);
             if (audioSynth) audioSynth.playFail();
-            setFlashBg('red');
-            setTimeout(() => setFlashBg(null), 100);
           } else {
             const ch = eRef.crosshair;
             const t = eRef.target;
             const dist = Math.hypot(ch.x - t.x, ch.y - t.y);
             
-            if (dist <= t.radius + 12) { // Hitbox forgiveness
-              // Hit!
+            if (dist <= t.radius + 12) { 
               eRef.successfulHits++;
               eRef.combo++;
               if (eRef.combo > eRef.maxCombo) eRef.maxCombo = eRef.combo;
               eRef.reactionTimes.push(t.age);
               
-              eRef.score += 5; // +5 Score
-              eRef.timeLeft += 2; // +2s Time
-              setScore(eRef.score);
-              if (audioSynth) audioSynth.playSuccess();
+              let multiplier = 1.0;
+              if (eRef.combo >= 20) multiplier = 2.0;
+              else if (eRef.combo >= 15) multiplier = 1.5;
+              else if (eRef.combo >= 10) multiplier = 1.25;
+              else if (eRef.combo >= 5) multiplier = 1.1;
+
+              eRef.score += Math.round(100 * multiplier);
+              eRef.timeLeft = Math.min(60, eRef.timeLeft + 1); 
+              eRef.level = Math.floor(eRef.score / 1000) + 1; 
               
-              // Aggressive Difficulty Scaling
-              eRef.ttl = Math.max(250, eRef.ttl - 15); // Shave 15ms off TTL
-              eRef.radius = Math.max(6, eRef.radius - 0.4); // Shave 0.4px off radius
-              
+              setUiScore(eRef.score);
+              setUiCombo(eRef.combo);
+              setUiLevel(eRef.level);
+
+              if (audioSynth) audioSynth.playSuccess(eRef.combo);
               createExplosion(t.x, t.y, '#00ff88');
               createHitMarker(ch.x, ch.y);
-
               eRef.target.active = false;
-              eRef.nextSpawnTime = performance.now() + (350 + Math.random() * 400); // 350-750ms delay
+              
+              const config = getLevelConfig(eRef.level);
+              eRef.nextSpawnTime = performance.now() + (config.spawnDelayMin + Math.random() * (config.spawnDelayMax - config.spawnDelayMin));
               
             } else {
-              // Miss
               eRef.missedClicks++;
-              eRef.score = Math.max(0, eRef.score - 2); // -2 Score Penalty
-              eRef.timeLeft -= 1; // -1s Time Penalty
+              eRef.timeLeft = Math.max(0, eRef.timeLeft - 1); 
               eRef.combo = 0;
-              eRef.screenShake = 12;
-              
-              // Forgiveness on miss
-              eRef.ttl = Math.min(850, eRef.ttl + 40);
-              eRef.radius = Math.min(24, eRef.radius + 1);
-
-              setScore(eRef.score);
+              eRef.screenShake = 8;
+              eRef.flash = { color: '239, 68, 68', alpha: 0.3 };
+              setUiCombo(0);
               if (audioSynth) audioSynth.playFail();
               createExplosion(ch.x, ch.y, '#ef4444');
-              
-              setFlashBg('red');
-              setTimeout(() => setFlashBg(null), 100);
             }
           }
         }
@@ -394,7 +393,7 @@ export default function AwarenessDrillClient() {
     return () => document.removeEventListener('fullscreenchange', fsListener);
   }, []);
 
-  // === Render & Physics Loop (Delta Time) ===
+  // Main Render & Physics Loop
   useEffect(() => {
     const cvs = canvasRef.current; 
     const container = containerRef.current;
@@ -416,7 +415,6 @@ export default function AwarenessDrillClient() {
       }
     });
     resizeObserver.observe(container);
-
     let lastTime = performance.now();
 
     const loop = (time) => {
@@ -427,44 +425,57 @@ export default function AwarenessDrillClient() {
 
       if (gameState === 'playing' && pointerLocked) {
         
-        // Target Spawning & Aging
+        // Exact Zero-Stop Timer logic
+        if (e.timeLeft > 0) {
+          e.timeLeft -= dt;
+        }
+
+        // Hard interrupt if time hits zero
+        if (e.timeLeft <= 0) {
+          e.timeLeft = 0;
+          setUiTimeLeft(0);
+          if (progressBarRef.current) progressBarRef.current.style.width = '0%';
+          endGame();
+          return; 
+        }
+
+        if (progressBarRef.current) {
+            progressBarRef.current.style.width = `${(e.timeLeft / DRILL_DURATION) * 100}%`;
+            progressBarRef.current.className = `h-full ${e.timeLeft <= 10 ? 'bg-red-500 animate-pulse' : 'bg-green-500'}`;
+        }
+
+        const intTime = Math.ceil(e.timeLeft);
+        if (intTime !== lastTimeRef.current) {
+            setUiTimeLeft(intTime);
+            lastTimeRef.current = intTime;
+        }
+
         if (!e.target.active && time >= e.nextSpawnTime) {
-          spawnTarget(time, cvs.width, cvs.height);
+          spawnTarget(time, cvs.width, cvs.height, e.level);
         }
 
         if (e.target.active) {
           e.target.age += deltaTimeMs;
 
-          if (e.target.age >= e.ttl) {
-            // Timeout Penalty
+          if (e.target.age >= e.target.ttl) {
             e.target.active = false;
             e.timeouts++;
             e.totalActions++;
-            e.score = Math.max(0, e.score - 2); // -2 Score Penalty
-            e.timeLeft -= 1; // -1s Time Penalty
+            e.timeLeft = Math.max(0, e.timeLeft - 2); 
             e.combo = 0;
-            e.screenShake = 15;
-            
-            // Forgiveness
-            e.ttl = Math.min(850, e.ttl + 50);
-            e.radius = Math.min(24, e.radius + 1.5);
-            
-            setScore(e.score);
+            e.screenShake = 12;
+            e.flash = { color: '239, 68, 68', alpha: 0.4 };
+            setUiCombo(0);
             if (audioSynth) audioSynth.playFail();
             createExplosion(e.target.x, e.target.y, '#ef4444');
-            
-            setFlashBg('red');
-            setTimeout(() => setFlashBg(null), 100);
-
-            e.nextSpawnTime = time + (400 + Math.random() * 600);
+            const config = getLevelConfig(e.level);
+            e.nextSpawnTime = time + (config.spawnDelayMin + Math.random() * (config.spawnDelayMax - config.spawnDelayMin));
           }
         }
       }
 
-      // --- RENDERING PHASE ---
       ctx.save();
       
-      // Screen Shake
       if (e.screenShake > 0) {
         const sx = (Math.random() - 0.5) * e.screenShake;
         const sy = (Math.random() - 0.5) * e.screenShake;
@@ -476,7 +487,12 @@ export default function AwarenessDrillClient() {
       ctx.fillStyle = '#05060b';
       ctx.fillRect(0, 0, cvs.width, cvs.height);
 
-      // Grid
+      if (e.flash.alpha > 0) {
+        ctx.fillStyle = `rgba(${e.flash.color}, ${e.flash.alpha})`;
+        ctx.fillRect(0, 0, cvs.width, cvs.height);
+        e.flash.alpha -= dt * 2.0; 
+      }
+
       ctx.strokeStyle = 'rgba(0, 255, 136, 0.04)';
       ctx.lineWidth = 1;
       const cx = cvs.width / 2, cy = cvs.height / 2;
@@ -487,33 +503,25 @@ export default function AwarenessDrillClient() {
       }
       ctx.stroke();
 
-      // Side spawn indicators
-      ctx.fillStyle = 'rgba(0, 255, 136, 0.02)';
-      ctx.fillRect(0, 0, cvs.width * 0.12, cvs.height);
-      ctx.fillRect(cvs.width * 0.88, 0, cvs.width * 0.12, cvs.height);
-
-      // Draw Target
       if (e.target.active && (gameState === 'playing' || gameState === 'start')) {
         const t = e.target;
-        const lifePercent = 1 - (t.age / e.ttl);
+        const lifePercent = 1 - (t.age / t.ttl);
         
-        ctx.shadowBlur = 15;
-        ctx.shadowColor = '#00ff88';
+        ctx.shadowBlur = 15 + (e.level * 2); 
+        ctx.shadowColor = e.combo >= 10 ? '#38bdf8' : '#00ff88'; 
         ctx.fillStyle = '#05060b';
         ctx.beginPath(); ctx.arc(t.x, t.y, t.radius, 0, Math.PI * 2); ctx.fill();
         ctx.shadowBlur = 0;
 
-        ctx.fillStyle = '#00ff88';
+        ctx.fillStyle = e.combo >= 10 ? '#38bdf8' : '#00ff88';
         ctx.beginPath(); ctx.arc(t.x, t.y, t.radius * 0.35, 0, Math.PI * 2); ctx.fill();
 
-        // Shrinking Timer Ring
-        const ringColor = lifePercent > 0.5 ? '#00ff88' : (lifePercent > 0.25 ? '#eab308' : '#ef4444');
+        const ringColor = lifePercent > 0.5 ? (e.combo >= 10 ? '#38bdf8' : '#00ff88') : (lifePercent > 0.25 ? '#eab308' : '#ef4444');
         ctx.strokeStyle = ringColor;
         ctx.lineWidth = 2.5;
         ctx.beginPath(); ctx.arc(t.x, t.y, t.radius + 4 + (Math.max(0, lifePercent) * 12), 0, Math.PI * 2); ctx.stroke();
       }
 
-      // Render Particles
       for (let i = e.particles.length - 1; i >= 0; i--) {
         const p = e.particles[i];
         p.x += p.vx; p.y += p.vy; p.life -= dt * 2.5;
@@ -521,7 +529,6 @@ export default function AwarenessDrillClient() {
         ctx.globalAlpha = p.life; ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, 3, 3);
       }
 
-      // Render Hit Markers
       ctx.lineWidth = 2;
       for (let i = e.hitMarkers.length - 1; i >= 0; i--) {
         const hm = e.hitMarkers[i];
@@ -536,7 +543,6 @@ export default function AwarenessDrillClient() {
       }
       ctx.globalAlpha = 1.0;
 
-      // Draw Crosshair
       const ch = e.crosshair;
       if (ch.initialized && (gameState === 'playing' || gameState === 'start')) {
         const activeColor = pointerLocked ? '#00ff88' : '#eab308';
@@ -559,7 +565,9 @@ export default function AwarenessDrillClient() {
       }
 
       ctx.restore();
-      animationRef.current = requestAnimationFrame(loop);
+      if (gameState !== 'gameOver') {
+         animationRef.current = requestAnimationFrame(loop);
+      }
     };
 
     animationRef.current = requestAnimationFrame(loop);
@@ -570,20 +578,86 @@ export default function AwarenessDrillClient() {
     };
   }, [gameState, pointerLocked, spawnTarget, endGame]);
 
-  const shareDrillLink = useCallback(() => {
-    const url = typeof window !== 'undefined' ? window.location.href : '';
-    if (navigator.share) {
-      navigator.share({ title: '180° Awareness Pro', url }).catch(() => {});
-    } else {
-      navigator.clipboard.writeText(url).then(() => alert('Link copied!'));
+  const shareScore = useCallback(async () => {
+    const text = `🎯 I scored ${uiScore} PTS (Level ${analytics.finalLevel}) on 180° Awareness Pro! Average reaction: ${analytics.avgReactionTime}ms. Practice your spatial mapping at skilldrills.online!`;
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      try {
+        await navigator.share({ title: 'My Reflex Score', text, url: 'https://skilldrills.online/drills/fps' });
+      } catch (e) {}
+    } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+      alert('Score card copied to clipboard!');
     }
-  }, []);
+  }, [uiScore, analytics]);
+
+  const schemaData = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://skilldrills.online/" },
+          { "@type": "ListItem", "position": 2, "name": "FPS Drills", "item": "https://skilldrills.online/drills/fps" },
+          { "@type": "ListItem", "position": 3, "name": "180° Awareness Pro" }
+        ]
+      },
+      {
+        "@type": "WebApplication",
+        "name": "FPS Awareness Trainer – 180° Peripheral Vision Drill",
+        "applicationCategory": "GameApplication",
+        "operatingSystem": "Any",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+      },
+      {
+        "@type": "SoftwareApplication",
+        "name": "FPS Awareness Trainer",
+        "applicationCategory": "GameApplication",
+        "operatingSystem": "Web",
+        "description": "Improve your peripheral vision and 180° target acquisition speed for competitive FPS gaming."
+      },
+      {
+        "@type": "HowTo",
+        "name": "How to use the FPS Awareness Trainer",
+        "step": [
+          { "@type": "HowToStep", "text": "Adjust your Universal Sens multiplier to match your game." },
+          { "@type": "HowToStep", "text": "Click 'Begin Tactical Drill' to lock your mouse and enter fullscreen." },
+          { "@type": "HowToStep", "text": "Listen for audio panning and flick 180 degrees to destroy spawning targets." },
+          { "@type": "HowToStep", "text": "Maintain high accuracy to build combos and increase your survival time." }
+        ]
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          { "@type": "Question", "name": "What is FPS awareness training?", "acceptedAnswer": { "@type": "Answer", "text": "FPS awareness training involves specific drills designed to improve your ability to detect, process, and react to peripheral visual information and unexpected threats in a 3D gaming environment." } },
+          { "@type": "Question", "name": "How do professional FPS players improve awareness?", "acceptedAnswer": { "@type": "Answer", "text": "Pros utilize a mix of VOD reviews, dedicated aim trainers with wide field-of-view scenarios, and 180-degree flick drills to build unconscious competence in spatial mapping." } },
+          { "@type": "Question", "name": "Can awareness drills improve reaction time?", "acceptedAnswer": { "@type": "Answer", "text": "Yes, by repeatedly exposing the brain to peripheral stimuli, visual processing speed increases, reducing the cognitive load required to react to flanking enemies." } },
+          { "@type": "Question", "name": "Does peripheral vision training help in FPS games?", "acceptedAnswer": { "@type": "Answer", "text": "Absolutely. Strong peripheral vision allows you to notice subtle movements or pixel changes at the edge of your screen without taking your crosshair off your primary angle." } },
+          { "@type": "Question", "name": "How do I stop getting flanked in FPS games?", "acceptedAnswer": { "@type": "Answer", "text": "Improving spatial audio processing and training high-speed 180-degree turnaround flicks will allow you to quickly neutralize flankers before they secure the kill." } },
+          { "@type": "Question", "name": "What is situational awareness in gaming?", "acceptedAnswer": { "@type": "Answer", "text": "Situational awareness is the holistic understanding of game state, audio cues, minimap information, and peripheral visual data to anticipate enemy actions." } },
+          { "@type": "Question", "name": "Can awareness training improve Valorant performance?", "acceptedAnswer": { "@type": "Answer", "text": "Yes, in games like Valorant, quick target acquisition and reacting to utility or flashes off-screen is critical. 180-degree training helps optimize those exact mechanics." } },
+          { "@type": "Question", "name": "Can awareness drills help in CS2?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Counter-Strike requires immense focus. Being able to flick to an unexpected target on the edge of your monitor can win critical clutch rounds." } },
+          { "@type": "Question", "name": "How often should I train awareness?", "acceptedAnswer": { "@type": "Answer", "text": "For optimal results, implement 10-15 minutes of awareness and wide-flick training into your daily warmup routine before queuing competitive matches." } },
+          { "@type": "Question", "name": "What games benefit from awareness training?", "acceptedAnswer": { "@type": "Answer", "text": "Fast-paced shooters like Apex Legends, Overwatch 2, Call of Duty, CS2, and Valorant benefit heavily from enhanced spatial awareness." } },
+          { "@type": "Question", "name": "Is this awareness trainer free?", "acceptedAnswer": { "@type": "Answer", "text": "Yes, this drill is completely free and runs directly in your browser with 1:1 hardware raw input." } },
+          { "@type": "Question", "name": "What skills does this drill improve?", "acceptedAnswer": { "@type": "Answer", "text": "It targets peripheral detection, audio-spatial translation, saccadic eye movement, and large-angle mouse flick consistency." } },
+          { "@type": "Question", "name": "Does this drill improve target acquisition speed?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. By forcing you to acquire shrinking targets across a wide horizontal plane under time pressure, your acquisition speed will naturally increase." } },
+          { "@type": "Question", "name": "How can I improve peripheral vision for gaming?", "acceptedAnswer": { "@type": "Answer", "text": "Use an ultra-wide field of view (FOV) in-game when possible, and play drills that force you to keep your eyes centered while reacting to edge-of-screen spawns." } },
+          { "@type": "Question", "name": "Is this useful for esports players?", "acceptedAnswer": { "@type": "Answer", "text": "Yes, many professional esports organizations utilize specialized cognitive and visual-spatial training tools similar to this to maintain peak mechanical performance." } }
+        ]
+      }
+    ]
+  };
 
   return (
     <div ref={pageRef} className="min-h-screen select-none bg-[#050508] text-white">
+      <Head>
+        <title>FPS Awareness Trainer – 180° Peripheral Vision Drill</title>
+        <meta name="description" content="Improve peripheral vision, situational awareness, and 180° flick speed with this professional FPS awareness training drill." />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }} />
+      </Head>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
-        {/* Header (Hidden in Fullscreen) */}
         {!isFullscreen && (
           <div className="mb-6">
             <nav className="mb-4">
@@ -602,8 +676,8 @@ export default function AwarenessDrillClient() {
                   <Target className="w-7 h-7 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">180° Awareness Pro</h1>
-                  <p className="text-sm text-gray-400 mt-1 font-medium">Desktop Exclusive • Endless Time-Attack</p>
+                  <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">FPS Awareness Trainer – 180° Peripheral Vision Drill</h1>
+                  <p className="text-sm text-gray-400 mt-1 font-medium">Desktop Exclusive • Endless Level Progression</p>
                 </div>
               </div>
               
@@ -619,47 +693,70 @@ export default function AwarenessDrillClient() {
           </div>
         )}
 
-        {/* Live HUD Stats */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 lg:grid-cols-4 gap-2 mb-2">
-            <StatCard icon={<Target className="text-green-400" />} value={score} label="Score / Reflex PTS" />
-            <StatCard icon={<Timer className={timeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-green-400'} />} value={timeLeft} label="Time" unit="s" />
+          <div className="grid grid-cols-5 gap-2 mb-2">
+            <StatCard icon={<Trophy className="text-yellow-400" />} value={uiScore} label="Score" />
+            <StatCard icon={<TrendingUp className="text-fuchsia-400" />} value={`Lv. ${uiLevel}`} label="Level" />
+            <StatCard 
+              icon={<Flame className={uiCombo >= 10 ? "text-orange-500 animate-pulse" : "text-gray-500"} />} 
+              value={uiCombo} 
+              label="Combo" 
+              highlight={uiCombo >= 10}
+            />
+            <StatCard icon={<Timer className={uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-green-400'} />} value={uiTimeLeft} label="Time" unit="s" />
             <StatCard icon={<Info className="text-blue-400" />} value={`${universalSens.toFixed(2)}x`} label="Sens" />
-            <StatCard icon={<Trophy className="text-yellow-500" />} value={bestScore} label="Best Score" />
           </div>
         )}
 
-        {/* Engine Container */}
         <div 
           ref={containerRef} 
-          className={`relative overflow-hidden transition-colors outline-none ${
-            isFullscreen ? 'w-full h-full' : 'w-full aspect-video min-h-[500px] rounded-2xl border border-gray-700 shadow-2xl'
+          className={`relative overflow-hidden transition-colors outline-none bg-[#05060b] ${
+            isFullscreen ? 'w-full h-full' : 'w-full aspect-video min-h-[500px] rounded-2xl border border-gray-800 shadow-2xl'
           }`}
-          style={{ backgroundColor: flashBg === 'red' ? '#450a0a' : flashBg === 'green' ? '#064e3b' : '#05060b' }}
         >
-          {/* Progress Bar */}
           {gameState === 'playing' && (
             <div className="absolute top-0 left-0 right-0 h-1.5 bg-gray-900 z-[60]">
-              <div 
-                className={`h-full transition-all duration-1000 ease-linear ${timeLeft <= 10 ? 'bg-red-500 animate-pulse' : 'bg-green-500'}`}
-                style={{ width: `${Math.min(100, (timeLeft / DRILL_DURATION) * 100)}%` }} 
-              />
+              <div ref={progressBarRef} className="h-full bg-green-500" style={{ width: '100%' }} />
             </div>
           )}
 
-          {/* Fullscreen Overlay Controls */}
           {isFullscreen && gameState === 'playing' && (
-            <div className="absolute top-4 right-4 z-[60] flex gap-2">
-              <button onClick={() => setSoundEnabled(v => !v)} className="p-3 bg-black/60 border border-gray-600 rounded-xl text-white hover:bg-gray-800 transition-colors">
-                {soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
-              </button>
-              <button onClick={toggleFullscreen} className="p-3 bg-black/60 border border-gray-600 rounded-xl text-white hover:bg-gray-800 transition-colors">
-                <Minimize2 className="w-5 h-5" />
-              </button>
-            </div>
+            <>
+              <div className="absolute top-6 left-6 z-[60] flex flex-col gap-2 pointer-events-none">
+                <div className="bg-black/40 backdrop-blur border border-gray-800 px-4 py-2 rounded-xl flex items-center gap-4">
+                  <div className="text-center">
+                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Score</p>
+                    <p className="text-2xl font-black text-white leading-none">{uiScore}</p>
+                  </div>
+                  <div className="w-px h-8 bg-gray-800"></div>
+                  <div className="text-center">
+                    <p className="text-[10px] text-fuchsia-400 font-bold uppercase tracking-widest">Level</p>
+                    <p className="text-2xl font-black text-fuchsia-400 leading-none">{uiLevel}</p>
+                  </div>
+                </div>
+                
+                {uiCombo > 1 && (
+                  <div className="bg-black/40 backdrop-blur border border-orange-500/30 px-4 py-2 rounded-xl flex items-center gap-3 animate-in fade-in slide-in-from-left-4">
+                    <Flame className="w-5 h-5 text-orange-500" />
+                    <div>
+                      <p className="text-[10px] text-orange-400 font-bold uppercase tracking-widest">Combo</p>
+                      <p className="text-xl font-black text-white leading-none">{uiCombo}x</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="absolute top-4 right-4 z-[60] flex gap-2">
+                <button onClick={() => setSoundEnabled(v => !v)} className="p-3 bg-black/60 border border-gray-600 rounded-xl text-white hover:bg-gray-800 transition-colors">
+                  {soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
+                </button>
+                <button onClick={toggleFullscreen} className="p-3 bg-black/60 border border-gray-600 rounded-xl text-white hover:bg-gray-800 transition-colors">
+                  <Minimize2 className="w-5 h-5" />
+                </button>
+              </div>
+            </>
           )}
 
-          {/* Paused Overlay */}
           {gameState === 'playing' && !pointerLocked && (
             <div 
               className="absolute inset-0 z-40 bg-black/60 backdrop-blur-sm flex items-center justify-center cursor-pointer"
@@ -676,254 +773,245 @@ export default function AwarenessDrillClient() {
             </div>
           )}
 
-          {/* Core Canvas */}
           <canvas 
             ref={canvasRef} 
             onClick={() => { if (gameState === 'playing' && !pointerLocked) canvasRef.current?.requestPointerLock(); }}
             className={`block absolute top-0 left-0 w-full h-full touch-none z-10 ${gameState === 'playing' ? 'cursor-none' : ''}`} 
           />
 
-          {/* START SCREEN */}
+          {/* NORMAL FONT START SCREEN */}
           {gameState === 'start' && (
-            <div className="absolute inset-0 flex items-center justify-center z-50 bg-black/70 backdrop-blur-md p-4 overflow-y-auto">
-              <div className="rounded-3xl p-8 text-center max-w-lg w-full border border-gray-700 bg-gray-900 shadow-2xl my-auto">
-                <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl mx-auto flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(34,197,94,0.3)]">
-                  <Target className="w-8 h-8 text-white" />
-                </div>
-                <h2 className="text-3xl font-black mb-3 tracking-tight text-white uppercase">180° Awareness Pro</h2>
-                <p className="text-sm mb-6 text-gray-400 leading-relaxed">
-                  Targets will alternatingly spawn on the far left and right edges. Snap 180° instantly. Successful hits scale the difficulty up rapidly. Misses/Timeouts penalize time and score.
+            <div className="absolute inset-0 bg-[#05070e]/98 flex flex-col items-center justify-center p-6 z-30 select-none overflow-y-auto max-h-[100vh] backdrop-blur-sm">
+              <div className="max-w-md w-full text-center">
+                <h2 className="text-xl font-black text-white uppercase tracking-wider mb-1">
+                  180° Awareness Pro
+                </h2>
+                <p className="text-xs text-slate-500 uppercase tracking-widest mb-6">
+                  Hardware Raw Input • Endless Progression
                 </p>
 
-                {/* Configuration Panel */}
-                <div className="mb-8 p-5 bg-black/50 rounded-xl border border-gray-800 text-left space-y-5">
-                  <div>
-                    <div className="flex justify-between items-center mb-2">
-                      <label className="text-xs text-gray-400 font-bold uppercase tracking-wider flex items-center gap-2">
-                        <Crosshair className="w-4 h-4 text-green-500"/> Universal Sens
-                      </label>
-                      <span className="text-green-400 font-mono text-sm font-bold">{universalSens.toFixed(2)}x</span>
-                    </div>
-                    <input 
-                      type="range" min="0.1" max="3.0" step="0.05" 
-                      value={universalSens} 
-                      onChange={(e) => setUniversalSens(parseFloat(e.target.value))} 
-                      className="w-full h-1.5 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-green-500" 
-                    />
-                    <div className="text-[10px] text-gray-500 mt-1.5 text-right">Approx: {cmPer360} cm/360</div>
+                <div className="grid grid-cols-2 gap-3 mb-6 text-left">
+                  <div className="bg-slate-900/60 border border-slate-800 p-3 rounded-xl">
+                    <span className="text-[8px] text-slate-500 block uppercase font-bold">Objective</span>
+                    <span className="text-sm font-black text-white">Hit Targets</span>
+                  </div>
+                  <div className="bg-slate-900/60 border border-slate-800 p-3 rounded-xl">
+                    <span className="text-[8px] text-slate-500 block uppercase font-bold">Reward</span>
+                    <span className="text-sm font-black text-green-400">+100 PTS & +1s</span>
+                  </div>
+                  <div className="bg-slate-900/60 border border-slate-800 p-3 rounded-xl">
+                    <span className="text-[8px] text-slate-500 block uppercase font-bold">Penalty</span>
+                    <span className="text-sm font-black text-red-400">-2s Timeout</span>
+                  </div>
+                  <div className="bg-slate-900/60 border border-slate-800 p-3 rounded-xl">
+                    <span className="text-[8px] text-slate-500 block uppercase font-bold">Mechanic</span>
+                    <span className="text-sm font-black text-blue-400">180° Spawns</span>
                   </div>
                 </div>
-                
-                <button 
-                  onClick={startGame}
-                  className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl font-black text-lg hover:brightness-110 transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-[0_0_20px_rgba(34,197,94,0.3)]"
-                >
-                  <Play className="w-6 h-6 fill-white" /> BEGIN TACTICAL DRILL
-                </button>
+
+                <div className="bg-[#0b0f19] border border-slate-850 p-4 rounded-xl mb-6 text-left text-xs text-slate-400">
+                  <div className="flex items-center gap-1.5 text-[10px] font-bold text-white uppercase mb-3">
+                    <Sliders className="w-3.5 h-3.5 text-blue-500" /> Universal Sens
+                  </div>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-green-400 font-mono text-sm font-bold">{universalSens.toFixed(2)}x</span>
+                    <span className="text-[10px] text-slate-500">Approx: {cmPer360} cm/360</span>
+                  </div>
+                  <input 
+                    type="range" min="0.1" max="3.0" step="0.05" 
+                    value={universalSens} 
+                    onChange={(e) => setUniversalSens(parseFloat(e.target.value))} 
+                    className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-500" 
+                  />
+                </div>
+
+                <div className="flex gap-2">
+                  <button
+                    onClick={startGame}
+                    className="flex-1 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg uppercase tracking-widest transition-all duration-200 active:scale-95"
+                  >
+                    <Play className="w-3.5 h-3.5 fill-white" />
+                    Begin Tactical Drill
+                  </button>
+                </div>
               </div>
             </div>
           )}
 
-          {/* GAME OVER DASHBOARD */}
-          {gameState === 'gameOver' && (
-            <div className="absolute inset-0 flex items-center justify-center z-50 bg-black/90 backdrop-blur-md p-4 animate-in fade-in duration-300 overflow-y-auto">
-              <div className="rounded-3xl max-w-2xl w-full shadow-2xl border border-gray-800 bg-gray-950 overflow-hidden my-auto">
-                <div className="bg-gradient-to-br from-green-900/40 to-emerald-900/40 p-6 border-b border-gray-800 text-center relative">
-                  {isNewBest && (
-                    <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-yellow-500 text-black text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-[0_0_15px_rgba(234,179,8,0.5)]">
-                      ⭐ New Personal Best
-                    </div>
-                  )}
-                  <h2 className="text-2xl font-black text-white tracking-tight mt-4">Awareness Analysis Complete</h2>
-                  <p className="text-green-400 font-medium text-sm mt-1">Endless Time Attack Mode</p>
+          {/* NORMAL FONT GAME OVER SCREEN */}
+          {gameState === 'gameOver' && analytics.rankData && (
+            <div className="absolute inset-0 bg-[#05070e]/98 flex flex-col items-center justify-center p-6 z-30 select-none overflow-y-auto max-h-[100vh] backdrop-blur-sm">
+              <div className="max-w-md w-full text-center">
+                {isNewBest && (
+                  <div className="inline-block bg-yellow-500 text-black text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-3 shadow-[0_0_15px_rgba(234,179,8,0.5)] animate-bounce">
+                    ⭐ NEW PERSONAL BEST!
+                  </div>
+                )}
+                
+                <h2 className="text-xl font-black text-white uppercase tracking-wider mb-1">
+                  Drill Complete
+                </h2>
+                <p className="text-xs text-slate-500 uppercase tracking-widest mb-6">
+                  Peak difficulty reached: Level {analytics.finalLevel}
+                </p>
+
+                <div className="grid grid-cols-3 gap-3 mb-6 text-left">
+                  <div className="bg-slate-900/60 border border-slate-800 p-3 rounded-xl">
+                    <span className="text-[8px] text-slate-500 block uppercase font-bold">Final Score</span>
+                    <span className="text-lg font-black text-white">{uiScore}</span>
+                  </div>
+                  <div className="bg-slate-900/60 border border-slate-800 p-3 rounded-xl">
+                    <span className="text-[8px] text-slate-500 block uppercase font-bold">Accuracy</span>
+                    <span className="text-lg font-black text-white">{analytics.accuracy}%</span>
+                  </div>
+                  <div className="bg-slate-900/60 border border-slate-800 p-3 rounded-xl">
+                    <span className="text-[8px] text-slate-500 block uppercase font-bold">Avg Reaction</span>
+                    <span className="text-lg font-black text-white">{analytics.avgReactionTime}ms</span>
+                  </div>
+                  
+                  <div className="bg-slate-900/60 border border-slate-800 p-3 rounded-xl">
+                    <span className="text-[8px] text-slate-500 block uppercase font-bold">Max Combo</span>
+                    <span className="text-lg font-black text-white">{analytics.maxCombo}x</span>
+                  </div>
+                  <div className="bg-slate-900/60 border border-slate-800 p-3 rounded-xl">
+                    <span className="text-[8px] text-slate-500 block uppercase font-bold">Total Hits</span>
+                    <span className="text-lg font-black text-white">{analytics.successfulHits}</span>
+                  </div>
+                  <div className="bg-slate-900/60 border border-slate-800 p-3 rounded-xl">
+                    <span className="text-[8px] text-slate-500 block uppercase font-bold">Assigned Rank</span>
+                    <span className={`text-lg font-black ${analytics.rankData.color}`}>
+                      Rank {analytics.rankData.rank}
+                    </span>
+                  </div>
                 </div>
 
-                <div className="p-6">
-                  {/* Top Stats */}
-                  <div className="flex flex-col sm:flex-row gap-4 mb-6">
-                    <div className="flex-1 bg-gray-900 rounded-2xl p-4 border border-gray-800 flex justify-between items-center">
-                      <div>
-                        <span className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1 block">Final Score</span>
-                        <div className="flex items-end gap-1">
-                          <span className="text-4xl font-black text-white leading-none">{score}</span>
-                          <span className="text-xs text-gray-500 font-bold mb-1">PTS</span>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <span className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1 block">Hit Accuracy</span>
-                        <span className={`text-3xl font-black ${analytics.accuracy >= 80 ? 'text-green-400' : analytics.accuracy >= 50 ? 'text-yellow-400' : 'text-red-400'}`}>
-                          {analytics.accuracy}%
-                        </span>
-                      </div>
-                    </div>
+                <div className="bg-[#0b0f19] border border-slate-850 p-4 rounded-xl mb-6 text-left text-xs text-slate-400">
+                  <div className="flex items-center gap-1.5 text-[10px] font-bold text-white uppercase mb-1">
+                    <Sparkles className="w-3.5 h-3.5 text-yellow-500" /> Improvement Suggestion:
                   </div>
+                  <p className="leading-relaxed">
+                    {getSuggestion(analytics.rankData.rank, analytics.timeouts, analytics.missedClicks)}
+                  </p>
+                </div>
 
-                  {/* Reaction Diagnostics Block */}
-                  <div className="bg-[#0a0a0a] border border-green-900/50 rounded-xl p-5 mb-6 text-left shadow-inner">
-                    <h3 className="text-xs font-bold text-green-400 font-mono uppercase tracking-widest border-b border-green-900/50 pb-2 mb-4 flex items-center gap-2">
-                      <Timer className="w-4 h-4 text-green-400" />
-                      FLICK TELEMETRY DIAGNOSTICS
-                    </h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-xs leading-relaxed text-gray-300">
-                      
-                      <div className="space-y-3 sm:border-r border-gray-800 sm:pr-6">
-                        <p className="font-bold text-white uppercase text-[10px] tracking-wider font-mono">Performance Log:</p>
-                        <ul className="space-y-2">
-                          <li className="flex justify-between items-center bg-gray-900/50 p-2 rounded border border-gray-800">
-                            <span className="text-gray-400">Avg Reaction Time:</span>
-                            <span className={`font-bold ${analytics.avgReactionTime > 400 ? 'text-red-400' : 'text-green-400'}`}>{analytics.avgReactionTime} ms</span>
-                          </li>
-                          <li className="flex justify-between items-center bg-gray-900/50 p-2 rounded border border-gray-800">
-                            <span className="text-gray-400">Successful 180° Hits:</span>
-                            <span className="font-bold text-blue-400">{analytics.successfulHits}</span>
-                          </li>
-                          <li className="flex justify-between items-center bg-gray-900/50 p-2 rounded border border-gray-800">
-                            <span className="text-gray-400">Missed Flicks:</span>
-                            <span className="font-bold text-red-500">{analytics.missedClicks}</span>
-                          </li>
-                          <li className="flex justify-between items-center bg-gray-900/50 p-2 rounded border border-gray-800">
-                            <span className="text-gray-400">Max Combo Streak:</span>
-                            <span className="font-bold text-yellow-500">{analytics.maxCombo}</span>
-                          </li>
-                        </ul>
-                      </div>
-
-                      <div className="space-y-3 flex flex-col justify-between">
-                        <div>
-                          <p className="font-bold text-white uppercase text-[10px] tracking-wider font-mono mb-2">Prescribed Advice:</p>
-                          <p className="text-gray-400 leading-relaxed font-sans">
-                            {analytics.missedClicks > analytics.successfulHits ? (
-                              <span className="text-yellow-300">You are over-flicking. Do not sacrifice accuracy for speed. Ensure your crosshair completely stops on the target before clicking. Check your Universal Sens multiplier.</span>
-                            ) : analytics.timeouts > 3 ? (
-                              <span className="text-red-300">The drill dynamically speeds up as you hit targets. You are struggling to complete the 180° swipe in time. Use your whole arm for the macro-flick.</span>
-                            ) : (
-                              <span className="text-green-300">Excellent spatial awareness and flick control! You are maintaining high accuracy despite the aggressive difficulty scaling. Keep pushing your limits.</span>
-                            )}
-                          </p>
-                        </div>
-                      </div>
-
-                    </div>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex gap-3">
-                    <button onClick={startGame} className="flex-1 py-4 bg-green-600 text-white rounded-xl font-black tracking-wide hover:bg-green-500 transition-all active:scale-95 flex items-center justify-center gap-2 shadow-lg">
-                      <RefreshCw className="w-5 h-5" /> TRAIN AGAIN
-                    </button>
-                    {isFullscreen && (
-                       <button onClick={toggleFullscreen} className="px-6 py-4 bg-gray-800 text-white rounded-xl font-bold hover:bg-gray-700 transition-all border border-gray-700">
-                         Exit
-                       </button>
-                    )}
-                  </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={startGame}
+                    className="flex-1 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg uppercase tracking-widest transition-all duration-200 active:scale-95"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5" />
+                    Run another trial
+                  </button>
+                  <button
+                    onClick={shareScore}
+                    className="p-3 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded-xl transition-colors active:scale-95"
+                    title="Share Score"
+                  >
+                    <Share2 className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
             </div>
           )}
         </div>
 
-        {/* DRILL INSTRUCTIONS & SCORING */}
+        {/* Info Cards (Visible outside Fullscreen) */}
         {!isFullscreen && (
           <section className="mt-10">
             <div className="rounded-2xl border border-gray-800 overflow-hidden bg-gray-900 shadow-2xl pointer-events-none">
               <div className="px-6 py-5 border-b border-gray-800 bg-black/40 flex items-center gap-3">
-                <Info className="w-5 h-5 text-green-400" /><h2 className="font-bold text-white text-lg tracking-wide">Drill Instructions & Scoring</h2>
+                <Info className="w-5 h-5 text-fuchsia-400" /><h2 className="font-bold text-white text-lg tracking-wide">Progression & Scoring Rules</h2>
               </div>
               <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-5">
-                  <RuleItem num="1" color="green" text="Hit 180° Target" highlight="+5 PTS | +2.0s Time" result="Target speeds & shrinks" />
-                  <RuleItem num="2" color="indigo" text="Dynamic Scaling" highlight="Endless difficulty" result="Spawn rate & size scale up" />
+                  <RuleItem num="1" color="green" text="Successful Hit" highlight="+100 PTS | +1s Time" result="Builds combo & score" />
+                  <RuleItem num="2" color="orange" text="Combo System" highlight="Up to 2.0x Multiplier" result="Resets on miss/timeout" />
                 </div>
                 <div className="space-y-5">
-                  <RuleItem num="3" color="red" text="Miss / Timeout" highlight="-2 PTS | -1.0s Time" result="Accuracy matters most" />
-                  <RuleItem num="4" color="purple" text="Strict Tracking" highlight="Desktop Exclusive" result="1:1 Raw Mouse Input" />
+                  <RuleItem num="3" color="fuchsia" text="Level Progression" highlight="Every 1000 PTS" result="Difficulty naturally scales" />
+                  <RuleItem num="4" color="red" text="Timeouts & Misses" highlight="-2s Time | -1s Time" result="No point deduction" />
                 </div>
               </div>
             </div>
           </section>
         )}
 
-        {/* ABOUT THIS DRILL SECTION */}
+        {/* Articles & SEO Blocks */}
         {!isFullscreen && (
-          <section className="mt-12" aria-label="About this drill">
+          <article className="mt-12 text-gray-300">
             <div className="rounded-2xl border border-gray-800 overflow-hidden bg-gray-900 shadow-xl">
               <div className="px-6 py-5 border-b border-gray-800 bg-black/40 flex items-center gap-3">
                 <GraduationCap className="w-5 h-5 text-green-400" />
-                <h2 className="font-bold text-white text-lg tracking-wide">About 180° Awareness Pro</h2>
+                <h2 className="font-bold text-white text-lg tracking-wide">About the FPS Awareness Trainer</h2>
               </div>
-              <div className="p-8">
-                <p className="text-sm leading-relaxed mb-6 text-gray-300">
-                  This 180° awareness drill is engineered to refine tactical mechanical reflexes, saccadic coordination, and vast-span spatial mouse accuracy. By using 1:1 hardware raw input via the browser's Pointer Lock API, it bypasses operating system cursor acceleration to build consistent, objective physical muscle memory essential for competitive FPS mechanics.
-                </p>
+              
+              <div className="p-8 space-y-8">
+                <section>
+                  <h3 className="text-xl font-bold text-white mb-3 flex items-center gap-2">
+                    <Eye className="w-5 h-5 text-blue-400" /> What Is FPS Awareness Training?
+                  </h3>
+                  <p className="text-sm leading-relaxed mb-4">
+                    <strong>FPS Awareness Training</strong> isolates and exercises your ability to process visual information outside of your immediate focal point. Unlike standard aim trainers that prioritize raw tracking or micro-corrections, an <strong>awareness drill</strong> challenges your spatial coordinate sweeps, forcing you to detect targets, translate auditory cues, and execute rapid 180-degree turnarounds seamlessly.
+                  </p>
+                  <p className="text-sm leading-relaxed">
+                    By consistently performing <strong>situational awareness training</strong>, players map their physical mouse pad space to the game engine's virtual space, enabling accurate blind flicks and rapid threat responses.
+                  </p>
+                </section>
 
-                {/* Grid Section */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
-                  <div className="p-5 rounded-xl border border-gray-800 bg-black/40">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 py-4 border-y border-gray-800/50">
+                  <div className="p-5 rounded-xl border border-gray-800 bg-black/40 hover:bg-gray-800/50 transition-colors">
                     <div className="flex items-center gap-3 mb-3">
                       <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center"><Users className="w-4 h-4 text-white" /></div>
-                      <h3 className="text-sm font-bold text-white">Who It's For</h3>
+                      <h4 className="text-sm font-bold text-white">Who Should Use This?</h4>
                     </div>
-                    <p className="text-xs leading-relaxed text-gray-400">Esports athletes, competitive FPS gamers, and players looking to build consistent, acceleration-free vast-flick motor memory.</p>
+                    <p className="text-xs leading-relaxed text-gray-400">Esports athletes, entry fraggers, and players struggling with getting flanked. Ideal for <strong>Valorant awareness training</strong> and CS2 warmup routines.</p>
                   </div>
-                  <div className="p-5 rounded-xl border border-gray-800 bg-black/40">
+                  <div className="p-5 rounded-xl border border-gray-800 bg-black/40 hover:bg-gray-800/50 transition-colors">
                     <div className="flex items-center gap-3 mb-3">
-                      <div className="w-8 h-8 rounded-lg bg-green-600 flex items-center justify-center"><TrendingUp className="w-4 h-4 text-white" /></div>
-                      <h3 className="text-sm font-bold text-white">Skills Improved</h3>
+                      <div className="w-8 h-8 rounded-lg bg-fuchsia-600 flex items-center justify-center"><TrendingUp className="w-4 h-4 text-white" /></div>
+                      <h4 className="text-sm font-bold text-white">Benefits of 180° Drills</h4>
                     </div>
-                    <p className="text-xs leading-relaxed text-gray-400">Motor reflex speed, vast spatial coordinate sweeps, deceleration mechanics, and foveal target tracking limits.</p>
+                    <p className="text-xs leading-relaxed text-gray-400">Accelerates <strong>target detection training</strong> and standardizes muscle memory for huge saccadic eye movements. Reduces panic when shot from behind.</p>
                   </div>
-                  <div className="p-5 rounded-xl border border-gray-800 bg-black/40">
+                  <div className="p-5 rounded-xl border border-gray-800 bg-black/40 hover:bg-gray-800/50 transition-colors">
                     <div className="flex items-center gap-3 mb-3">
-                      <div className="w-8 h-8 rounded-lg bg-purple-600 flex items-center justify-center"><BarChart3 className="w-4 h-4 text-white" /></div>
-                      <h3 className="text-sm font-bold text-white">What You'll Track</h3>
+                      <div className="w-8 h-8 rounded-lg bg-orange-600 flex items-center justify-center"><Zap className="w-4 h-4 text-white" /></div>
+                      <h4 className="text-sm font-bold text-white">Reaction Time Training</h4>
                     </div>
-                    <p className="text-xs leading-relaxed text-gray-400">Net Time-Attack Score, Hit Accuracy %, Fastest Reflex Frame (ms), and performance telemetry.</p>
+                    <p className="text-xs leading-relaxed text-gray-400">By penalizing target timeouts rather than misses, the drill conditions you to react to stimuli immediately, lowering your baseline mechanical hesitation.</p>
                   </div>
                 </div>
+              </div>
 
-                {/* How to Play & Scoring */}
-                <div className="mb-8 bg-[#0b0f19]/40 border border-gray-800 rounded-xl p-6">
-                  <h3 className="text-base font-bold text-white uppercase tracking-wider mb-4 flex items-center gap-2">
-                    <Target className="w-5 h-5 text-green-500" /> How to Play & Mechanics
-                  </h3>
-                  <div className="grid sm:grid-cols-2 gap-6 text-sm text-gray-300">
-                    <ol className="space-y-3 list-decimal pl-5">
-                      <li>Adjust your <strong>Sens</strong> to match your main game.</li>
-                      <li>Click <strong>Begin Drill</strong>. The screen will automatically go fullscreen and lock your mouse.</li>
-                      <li>Targets will spawn alternately on the extreme left and right borders of your screen. 180° Flick and shoot.</li>
-                    </ol>
-                    <ul className="space-y-3">
-                      <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-green-500" /> <span className="text-white font-bold">Valid Hits:</span> Hitting targets grants +5 PTS and +2.0s to your total survival clock.</li>
-                      <li className="flex items-center gap-2"><TrendingUp className="w-4 h-4 text-purple-400" /> <span className="text-white font-bold">Aggressive Scaling:</span> Difficulty continuously scales. Target size and lifespan rapidly shrink.</li>
-                      <li className="flex items-center gap-2"><XCircle className="w-4 h-4 text-red-500" /> <span className="text-white font-bold">Misses & Timeouts:</span> Pre-firing or missing deducts -2 PTS and immediately subtracts -1.0s from your clock.</li>
-                    </ul>
-                  </div>
+              <div className="bg-[#0b0f19] border-t border-gray-800 p-8">
+                <div className="flex items-center gap-3 mb-6">
+                  <Lightbulb className="w-6 h-6 text-yellow-400" />
+                  <h3 className="text-xl font-bold text-white">Frequently Asked Questions</h3>
                 </div>
-
-                {/* FAQ Section */}
-                <div className="p-5 rounded-xl border border-gray-800 bg-black/40">
-                  <div className="flex items-center gap-3 mb-4">
-                    <Lightbulb className="w-5 h-5 text-yellow-400" />
-                    <h3 className="text-sm font-bold text-white uppercase tracking-wider">Frequently Asked Questions</h3>
-                  </div>
-                  <div className="space-y-4">
-                    <div>
-                      <h4 className="text-sm font-bold text-gray-200">Why does my timer drop so fast?</h4>
-                      <p className="text-xs text-gray-400 mt-1">Unlike standard aim trainers, this drill actively punishes bad accuracy. Missing a shot, pre-firing, or letting the target timeout pulls time directly off your clock. You must hit targets to earn time back and survive.</p>
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-bold text-gray-200">How should I move my mouse?</h4>
-                      <p className="text-xs text-gray-400 mt-1">For massive 180° sweeps like this, you should use your arm to perform the macro-flick (getting the crosshair to the general area), and then immediately transition to using your wrist/fingertips to micro-adjust onto the exact target radius.</p>
-                    </div>
-                  </div>
+                
+                {/* 15 FAQ ITEMS RESTORED FULLY */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <FAQItem q="1. What is FPS awareness training?" a="FPS awareness training involves specific drills designed to improve your ability to detect, process, and react to peripheral visual information and unexpected threats in a 3D gaming environment." />
+                  <FAQItem q="2. How do professional FPS players improve awareness?" a="Pros utilize a mix of VOD reviews, dedicated aim trainers with wide field-of-view scenarios, and 180-degree flick drills to build unconscious competence in spatial mapping." />
+                  <FAQItem q="3. Can awareness drills improve reaction time?" a="Yes, by repeatedly exposing the brain to peripheral stimuli, visual processing speed increases, reducing the cognitive load required to react to flanking enemies." />
+                  <FAQItem q="4. Does peripheral vision training help in FPS games?" a="Absolutely. Strong peripheral vision allows you to notice subtle movements or pixel changes at the edge of your screen without taking your crosshair off your primary angle." />
+                  <FAQItem q="5. How do I stop getting flanked in FPS games?" a="Improving spatial audio processing and training high-speed 180-degree turnaround flicks will allow you to quickly neutralize flankers before they secure the kill." />
+                  <FAQItem q="6. What is situational awareness in gaming?" a="Situational awareness is the holistic understanding of game state, audio cues, minimap information, and peripheral visual data to anticipate enemy actions." />
+                  <FAQItem q="7. Can awareness training improve Valorant performance?" a="Yes, in games like Valorant, quick target acquisition and reacting to utility or flashes off-screen is critical. 180-degree training helps optimize those exact mechanics." />
+                  <FAQItem q="8. Can awareness drills help in CS2?" a="Yes. Counter-Strike requires immense focus. Being able to flick to an unexpected target on the edge of your monitor can win critical clutch rounds." />
+                  <FAQItem q="9. How often should I train awareness?" a="For optimal results, implement 10-15 minutes of awareness and wide-flick training into your daily warmup routine before queuing competitive matches." />
+                  <FAQItem q="10. What games benefit from awareness training?" a="Fast-paced shooters like Apex Legends, Overwatch 2, Call of Duty, CS2, and Valorant benefit heavily from enhanced spatial awareness." />
+                  <FAQItem q="11. Is this awareness trainer free?" a="Yes, this drill is completely free and runs directly in your browser with 1:1 hardware raw input." />
+                  <FAQItem q="12. What skills does this drill improve?" a="It targets peripheral detection, audio-spatial translation, saccadic eye movement, and large-angle mouse flick consistency." />
+                  <FAQItem q="13. Does this drill improve target acquisition speed?" a="Yes. By forcing you to acquire shrinking targets across a wide horizontal plane under time pressure, your acquisition speed will naturally increase." />
+                  <FAQItem q="14. How can I improve peripheral vision for gaming?" a="Use an ultra-wide field of view (FOV) in-game when possible, and play drills that force you to keep your eyes centered while reacting to edge-of-screen spawns." />
+                  <FAQItem q="15. Is this useful for esports players?" a="Yes, many professional esports organizations utilize specialized cognitive and visual-spatial training tools similar to this to maintain peak mechanical performance." />
                 </div>
               </div>
             </div>
-          </section>
+          </article>
         )}
 
-        {/* RELATED DRILLS SECTION */}
         {!isFullscreen && (
           <section className="mt-14" aria-label="Explore related aim and response drills">
             <div className="flex items-center gap-2 mb-4">
@@ -936,14 +1024,14 @@ export default function AwarenessDrillClient() {
               <RelatedCard href="/drills/fps/flick-shot-training" title="Pro Flick Trainer" desc="Snap to targets in time-attack mode." color="blue" icon={<Crosshair className="w-4 h-4" />} />
               <RelatedCard href="/drills/motor/hand-eye-coordination/aim-trainer" title="Aim Trainer Elite" desc="Hone spatial coordinate click speed." color="green" icon={<Target className="w-4 h-4" />} />
               <RelatedCard href="/drills/fps/recoil-control" title="Recoil Control" desc="Calibrate pulling pattern compensation." color="red" icon={<Activity className="w-4 h-4" />} />
-              <RelatedCard href="/drills/fps/micro-flicks" title="Micro Flicks" desc="Optimize tight-angle crosshair corrections." color="orange" icon={<Zap className="w-4 h-4" />} />
+              <RelatedCard href="/drills/fps/micro-correction-precision" title="Micro Flicks" desc="Optimize tight-angle crosshair corrections." color="orange" icon={<Zap className="w-4 h-4" />} />
             </div>
           </section>
         )}
 
-        {/* FOOTER SECTION */}
+        {/* Footer */}
         {!isFullscreen && (
-          <footer className="mt-12 bg-slate-950/40 border border-slate-900 text-slate-500 rounded-xl py-10 px-6 font-mono text-[10px]" role="contentinfo">
+          <footer className="mt-12 bg-[#05060b] border border-gray-800 text-gray-500 rounded-xl py-10 px-6 font-mono text-[10px]" role="contentinfo">
             <div className="max-w-7xl mx-auto">
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8 mb-8">
                 <div>
@@ -951,7 +1039,7 @@ export default function AwarenessDrillClient() {
                   <ul className="space-y-2">
                     <li><Link href="/drills/motor/hand-eye-coordination/aim-trainer" className="hover:text-green-400 transition-colors">Aim Trainer Elite</Link></li>
                     <li><Link href="/drills/fps/flick-shot-training" className="hover:text-green-400 transition-colors">Flick Shot Trainer</Link></li>
-                    <li><Link href="/drills/fps" className="text-green-450 hover:text-green-400 transition-colors font-bold">All FPS Drills →</Link></li>
+                    <li><Link href="/drills/fps" className="text-green-500 hover:text-green-400 transition-colors font-bold">All FPS Drills →</Link></li>
                   </ul>
                 </div>
                 <div>
@@ -959,7 +1047,7 @@ export default function AwarenessDrillClient() {
                   <ul className="space-y-2">
                     <li><Link href="/drills/memory/working-memory/n-back" className="hover:text-green-400 transition-colors">3-Back Training</Link></li>
                     <li><Link href="/drills/memory/short-term-memory/color-sequence" className="hover:text-green-400 transition-colors">Color Sequence</Link></li>
-                    <li><Link href="/drills/memory" className="text-green-450 hover:text-green-400 transition-colors font-bold">All Memory Drills →</Link></li>
+                    <li><Link href="/drills/memory" className="text-green-500 hover:text-green-400 transition-colors font-bold">All Memory Drills →</Link></li>
                   </ul>
                 </div>
                 <div>
@@ -967,7 +1055,7 @@ export default function AwarenessDrillClient() {
                   <ul className="space-y-2">
                     <li><Link href="/drills/cognitive/memory/card-matching" className="hover:text-green-400 transition-colors">Memory Games</Link></li>
                     <li><Link href="/drills/cognitive/attention/divided-attention" className="hover:text-green-400 transition-colors">Attention Drills</Link></li>
-                    <li><Link href="/drills/cognitive" className="text-green-450 hover:text-green-400 transition-colors font-bold">All Cognitive Drills →</Link></li>
+                    <li><Link href="/drills/cognitive" className="text-green-500 hover:text-green-400 transition-colors font-bold">All Cognitive Drills →</Link></li>
                   </ul>
                 </div>
                 <div>
@@ -975,69 +1063,67 @@ export default function AwarenessDrillClient() {
                   <ul className="space-y-2">
                     <li><Link href="/drills/academic/writing-speed/typing-test" className="hover:text-green-400 transition-colors">Typing Speed Test</Link></li>
                     <li><Link href="/drills/academic/math-speed/mental-math" className="hover:text-green-400 transition-colors">Mental Math</Link></li>
-                    <li><Link href="/drills/academic" className="text-green-450 hover:text-green-400 transition-colors font-bold">All Academic Drills →</Link></li>
+                    <li><Link href="/drills/academic" className="text-green-500 hover:text-green-400 transition-colors font-bold">All Academic Drills →</Link></li>
                   </ul>
                 </div>
                 <div>
                   <h3 className="text-white font-bold mb-3 uppercase tracking-wider">More Sectors</h3>
                   <ul className="space-y-2">
-                    <li><Link href="/drills/visual" className="hover:text-green-400 transition-colors">Visual (14)</Link></li>
-                                        
-                    <li><Link href="/drills/physical" className="hover:text-green-400 transition-colors">Physical (11)</Link></li>
+                    <li><Link href="/drills/visual" className="hover:text-green-400 transition-colors">Visual</Link></li>
+                    <li><Link href="/drills/physical" className="hover:text-green-400 transition-colors">Physical</Link></li>
                   </ul>
                 </div>
               </div>
               
-              <div className="border-t border-slate-900 pt-8 text-center">
+              <div className="border-t border-gray-800 pt-8 text-center">
                 <div className="flex items-center justify-center gap-2 mb-4">
-                  <div className="w-6 h-6 bg-gradient-to-br from-green-500/25 to-blue-500/25 border border-green-500/30 rounded-lg flex items-center justify-center">
-                    <Crosshair className="w-3.5 h-3.5 text-green-400" />
+                  <div className="w-6 h-6 bg-gradient-to-br from-green-500/20 to-blue-500/20 border border-green-500/30 rounded-lg flex items-center justify-center">
+                    <Target className="w-3.5 h-3.5 text-green-400" />
                   </div>
                   <span className="text-white font-black tracking-widest text-xs uppercase">SkillDrills</span>
                 </div>
-                <p className="text-[9px] mb-2">&copy; 2026 SkillDrills. All rights reserved.</p>
+                <p className="text-[9px] mb-2">&copy; {new Date().getFullYear()} SkillDrills. All rights reserved.</p>
                 <p className="text-[9px] max-w-2xl mx-auto leading-relaxed mb-6">
                   Open-source telemetry training platform using hardware pointer lock. Free forever. No downloads required.
                 </p>
-                <div className="flex items-center justify-center gap-3 flex-wrap">
+                
+                <div className="flex items-center justify-center gap-4 flex-wrap mt-6">
                   <a href="https://youtube.com/@skilldrills.online" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="YouTube">
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
                   </a>
                   <a href="https://www.facebook.com/profile.php?id=61590093843779" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="Facebook">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
                   </a>
-                  <a href="https://x.com/skilldrillss" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="X / Twitter">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.747l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                  <a href="https://x.com/skilldrillss" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="Twitter / X">
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
                   </a>
                   <a href="https://www.instagram.com/skilldrills.online/?__pwa=1" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="Instagram">
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
                   </a>
                   <a href="https://pinterest.com/skilldrills" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="Pinterest">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738a.36.36 0 0 1 .083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.632-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/></svg>
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.372 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738a.36.36 0 0 1 .083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.632-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12 0-6.628-5.373-12-12-12z"/></svg>
                   </a>
                 </div>
               </div>
             </div>
           </footer>
         )}
-
       </div>
     </div>
   );
 }
 
 // === Subcomponents ===
-
-function StatCard({ icon, value, label, unit = '' }) {
+function StatCard({ icon, value, label, unit = '', highlight = false }) {
   return (
-    <div className="group rounded-xl border border-slate-900 bg-slate-950/40 p-2 text-center flex flex-col justify-center h-full transition-all duration-300 hover:scale-[1.03] hover:border-slate-800">
+    <div className={`group rounded-xl border ${highlight ? 'border-orange-500/50 bg-orange-500/5' : 'border-gray-800 bg-gray-900/50'} p-2 text-center flex flex-col justify-center h-full transition-all duration-300 hover:scale-[1.03] hover:border-gray-700`}>
       <div className="mb-1 flex justify-center transition-transform duration-300 group-hover:scale-110">
         {icon}
       </div>
-      <p className="text-xs sm:text-sm font-extrabold tracking-tight truncate text-white">
-        {value} <span className="text-[10px] font-semibold text-slate-400">{unit}</span>
+      <p className="text-xs sm:text-base font-black tracking-tight truncate text-white">
+        {value} <span className="text-[10px] font-semibold text-gray-500">{unit}</span>
       </p>
-      <p className="text-[9px] font-mono font-bold uppercase tracking-wider text-slate-500 truncate">{label}</p>
+      <p className="text-[9px] font-mono font-bold uppercase tracking-wider text-gray-500 truncate">{label}</p>
     </div>
   );
 }
@@ -1045,21 +1131,19 @@ function StatCard({ icon, value, label, unit = '' }) {
 function RuleItem({ num, color, text, highlight = '', result }) {
   const colorMap = { 
     blue: 'bg-blue-600 text-blue-300 border-blue-500', 
-    indigo: 'bg-indigo-600 text-indigo-300 border-indigo-500', 
+    fuchsia: 'bg-fuchsia-600 text-fuchsia-300 border-fuchsia-500', 
     red: 'bg-red-600 text-red-300 border-red-500', 
     orange: 'bg-orange-600 text-orange-300 border-orange-500',
-    purple: 'bg-purple-600 text-purple-300 border-purple-500',
-    cyan: 'bg-cyan-600 text-cyan-300 border-cyan-500',
     green: 'bg-green-600 text-green-300 border-green-500' 
   };
-  const colors = colorMap[color] || 'bg-slate-600 text-slate-300 border-slate-500';
+  const colors = colorMap[color] || 'bg-gray-600 text-gray-300 border-gray-500';
   const [bg, txt, border] = colors.split(' ');
   
   return (
-    <div className="flex items-center gap-4 bg-[#0b0f19]/40 p-4 rounded-xl border border-slate-800 shadow-sm">
+    <div className="flex items-center gap-4 bg-[#0b0f19]/40 p-4 rounded-xl border border-gray-800 shadow-sm">
       <div className={`w-8 h-8 rounded-xl ${bg} border border-t-white/20 flex items-center justify-center text-white text-base font-black shadow-lg flex-shrink-0`}>{num}</div>
       <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-        <p className="text-sm font-medium text-slate-300">
+        <p className="text-sm font-medium text-gray-300">
           {text}{highlight && <span className={`font-black ${txt}`}> {highlight}</span>}
         </p>
         <div className={`text-xs font-black px-3 py-1.5 rounded-lg bg-[#050811] border ${border} ${txt} whitespace-nowrap shadow-inner tracking-wide text-center sm:text-left`}>
@@ -1075,23 +1159,28 @@ function RelatedCard({ href, title, desc, color, icon }) {
     blue: 'from-blue-500 to-indigo-500',
     orange: 'from-orange-500 to-amber-500',
     red: 'from-red-500 to-rose-500',
-    purple: 'from-purple-500 to-violet-500',
     green: 'from-green-500 to-emerald-500',
-    cyan: 'from-cyan-500 to-blue-500',
-    indigo: 'from-indigo-500 to-purple-500',
-    rose: 'from-rose-500 to-pink-500'
   };
   return (
-    <Link href={href} className="group relative overflow-hidden rounded-2xl border border-slate-800 bg-[#0b0f19]/40 transition-all hover:-translate-y-1 hover:border-green-500/50 block p-5">
+    <Link href={href} className="group relative overflow-hidden rounded-2xl border border-gray-800 bg-[#0b0f19]/40 transition-all hover:-translate-y-1 hover:border-gray-600 block p-5">
       <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${gradients[color]}`}></div>
-      <div className="w-10 h-10 rounded-xl bg-[#050811] border border-slate-700 flex items-center justify-center text-slate-400 group-hover:text-white mb-3 shadow-inner">
+      <div className="w-10 h-10 rounded-xl bg-[#050811] border border-gray-700 flex items-center justify-center text-gray-400 group-hover:text-white mb-3 shadow-inner transition-colors">
         {icon}
       </div>
-      <h3 className="font-bold text-base mb-1.5 text-white group-hover:text-green-400 transition-colors">{title}</h3>
-      <p className="text-xs text-slate-500 mb-4">{desc}</p>
+      <h3 className="font-bold text-base mb-1.5 text-white transition-colors">{title}</h3>
+      <p className="text-xs text-gray-500 mb-4">{desc}</p>
       <div className="flex items-center gap-1.5 text-green-400 text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-wider">
         Start Drill <ArrowRight className="w-3.5 h-3.5" />
       </div>
     </Link>
+  );
+}
+
+function FAQItem({ q, a }) {
+  return (
+    <div className="bg-[#05060b] border border-gray-800 rounded-xl p-5 hover:border-gray-700 transition-colors">
+      <h4 className="text-sm font-bold text-gray-200 mb-2">{q}</h4>
+      <p className="text-xs text-gray-400 leading-relaxed">{a}</p>
+    </div>
   );
 }

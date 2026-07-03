@@ -4,12 +4,12 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 
 import { 
-  Activity, AlertCircle, ArrowRight, BarChart3, Calculator, 
-  CheckCircle2, CheckCircle, XCircle, ChevronRight, Clock, 
-  Code2, Crosshair, Eye, GraduationCap, Home, Info, Keyboard, 
-  Lightbulb, Maximize2, Minimize2, Play, RefreshCw, Star, 
-  Target, Timer, TrendingUp, Trophy, Users, Volume2, VolumeX, 
-  Zap, Share2, Brain 
+  Activity, AlertCircle, ArrowRight, BarChart3, CheckCircle2, 
+  CheckCircle, XCircle, ChevronRight, Clock, Crosshair, Eye, 
+  GraduationCap, Info, Keyboard, Lightbulb, Maximize2, Minimize2, 
+  Play, RefreshCw, Star, Target, Timer, TrendingUp, Trophy, 
+  Users, Volume2, VolumeX, Zap, Share2, Brain, Sparkles, Award, Sliders,
+  Flame
 } from 'lucide-react';
 
 // ============================================================
@@ -33,14 +33,14 @@ class AudioSynthesizer {
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
       osc.type = 'sine'; 
-      osc.frequency.setValueAtTime(880, this.ctx.currentTime); 
-      osc.frequency.exponentialRampToValueAtTime(440, this.ctx.currentTime + 0.15);
-      gain.gain.setValueAtTime(0.3, this.ctx.currentTime); 
-      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.15);
+      osc.frequency.setValueAtTime(800, this.ctx.currentTime); 
+      osc.frequency.exponentialRampToValueAtTime(400, this.ctx.currentTime + 0.1);
+      gain.gain.setValueAtTime(0.15, this.ctx.currentTime); 
+      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.1);
       osc.connect(gain);
       gain.connect(this.ctx.destination);
       osc.start();
-      osc.stop(this.ctx.currentTime + 0.15);
+      osc.stop(this.ctx.currentTime + 0.1);
     } catch(e) {}
   }
 
@@ -50,13 +50,46 @@ class AudioSynthesizer {
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
       osc.type = 'triangle'; 
-      osc.frequency.setValueAtTime(150, this.ctx.currentTime);
-      gain.gain.setValueAtTime(0.3, this.ctx.currentTime); 
-      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.2);
+      osc.frequency.setValueAtTime(120, this.ctx.currentTime);
+      gain.gain.setValueAtTime(0.2, this.ctx.currentTime); 
+      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.15);
       osc.connect(gain);
       gain.connect(this.ctx.destination);
       osc.start();
-      osc.stop(this.ctx.currentTime + 0.2);
+      osc.stop(this.ctx.currentTime + 0.15);
+    } catch(e) {}
+  }
+
+  playHitBeep() {
+    if (!this.enabled || !this.ctx) return;
+    try {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(650, this.ctx.currentTime);
+      gain.gain.setValueAtTime(0.04, this.ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.05);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start();
+      osc.stop(this.ctx.currentTime + 0.05);
+    } catch(e) {}
+  }
+
+  playDestroy() {
+    if (!this.enabled || !this.ctx) return;
+    try {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(440, this.ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(180, this.ctx.currentTime + 0.25);
+      gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.25);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start();
+      osc.stop(this.ctx.currentTime + 0.25);
     } catch(e) {}
   }
   
@@ -67,8 +100,32 @@ class AudioSynthesizer {
 
 const audioSynth = typeof window !== 'undefined' ? new AudioSynthesizer() : null;
 
-const DRILL_DURATION = 60; // Strict 60 seconds
-const GRAVITY_CONSTANT = 800; // Gravity pull
+const DRILL_DURATION = 60; // Strict 60-second budget
+
+// ============================================================
+// RANK CALCULATION & SKILL ASSESSMENT
+// ============================================================
+const calculateRank = (level, accuracy, avgRt) => {
+  if (level >= 5 && accuracy >= 60 && avgRt <= 400 && avgRt > 0) return { rank: 'S+', color: 'text-fuchsia-400' };
+  if (level >= 4 && accuracy >= 50 && avgRt <= 500 && avgRt > 0) return { rank: 'S', color: 'text-yellow-400' };
+  if (level >= 3 && accuracy >= 40) return { rank: 'A', color: 'text-green-400' };
+  if (level >= 2 && accuracy >= 35) return { rank: 'B', color: 'text-blue-400' };
+  if (level >= 1 && accuracy >= 30) return { rank: 'C', color: 'text-indigo-400' };
+  return { rank: 'D', color: 'text-slate-400' };
+};
+
+const getSuggestion = (rank, score, accuracy, timeouts) => {
+  if (rank === 'S+' || rank === 'S') {
+    return "Phenomenal performance! You have superb y-axis precision and tracking consistency. Practice keeping your crosshair centered on the target to handle Level 5 double-launches even more efficiently.";
+  }
+  if (timeouts > 3) {
+    return "You are letting too many targets fall completely off the screen. Focus on tracking the targets near the apex of their parabolic arcs, where their vertical velocity drops to zero and they become easiest to hit.";
+  }
+  if (accuracy < 45) {
+    return "Your tracking accuracy is a bit low, meaning your mouse adjustments are likely too jittery. Try lowering your Universal Sensitivity slightly to maintain smoother control during vertical translations.";
+  }
+  return "Solid effort! Work on reading the parabolic arc early, predicting the path, and maintaining a steady tracking alignment to scale up your combos and unlock higher score multipliers.";
+};
 
 // ============================================================
 // MAIN COMPONENT
@@ -83,49 +140,54 @@ export default function VerticalAirTrackClient() {
   // === Settings State ===
   const [universalSens, setUniversalSens] = useState(1.0);
 
-  // === Gameplay State ===
-  const [score, setScore] = useState(0);
+  // === Live HUD Variables ===
+  const [uiScore, setUiScore] = useState(0);
+  const [uiLevel, setUiLevel] = useState(1);
+  const [uiCombo, setUiCombo] = useState(0);
+  const [uiTimeLeft, setUiTimeLeft] = useState(DRILL_DURATION);
   const [bestScore, setBestScore] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(DRILL_DURATION);
   const [isNewBest, setIsNewBest] = useState(false);
   const [flashBg, setFlashBg] = useState(null);
-
-  // Analytics State
+  
+  // === Analytics State ===
   const [analytics, setAnalytics] = useState({
     accuracy: 100,
-    hits: 0,
-    misses: 0,
-    timeouts: 0,
-    speedLevel: 1
+    hits: 0, // Targets destroyed
+    misses: 0, // Off-target ticks while firing
+    timeouts: 0, // Targets dropped
+    avgReactionTime: 0,
+    bestReactionTime: 0,
+    maxCombo: 0,
+    finalLevel: 1,
+    rankData: null
   });
 
   // === High-performance Mutable Refs ===
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
   const animationRef = useRef(null);
-  const timerRef = useRef(null);
   const pageRef = useRef(null);
-  
-  // === Game Logic Engine Refs ===
+  const progressBarRef = useRef(null);
+  const lastTimeRef = useRef(DRILL_DURATION);
+
+  // === Game Logic Engine Ref ===
   const engine = useRef({
     crosshair: { x: 0, y: 0, initialized: false },
-    target: { active: false, x: 0, y: 0, vx: 0, vy: 0, radius: 35 },
-    
-    // Adaptive Difficulty Mechanics
-    launchPower: 650, // Initial upward velocity
-    targetRadius: 35, // Initial size
-    
+    targets: [], // Array of target objects
     score: 0,
+    level: 1,
+    combo: 0,
+    maxCombo: 0,
     timeLeft: DRILL_DURATION,
-    
-    // Telemetry & VFX
-    hits: 0,
-    misses: 0,
-    timeouts: 0,
-    totalActions: 0,
+    successfulHits: 0, // Targets destroyed
+    timeouts: 0, // Targets dropped
+    totalTicks: 0, // Total shot ticks fired
+    onTargetTicks: 0, // Total hit ticks fired
+    isFiring: false, // Is player holding down left click?
+    reactionTimes: [], // Array of reaction time differences in ms
     particles: [],
-    hitMarkers: [],
-    screenShake: 0
+    screenShake: 0,
+    lastShotTime: 0
   });
 
   const cmPer360 = (30 / universalSens).toFixed(1);
@@ -153,15 +215,30 @@ export default function VerticalAirTrackClient() {
     if (document.pointerLockElement) document.exitPointerLock();
     
     const e = engine.current;
-    const finalAccuracy = e.totalActions > 0 ? Math.round((e.hits / e.totalActions) * 100) : 0;
+    
+    // Calculate final tracking accuracy
+    const finalAccuracy = e.totalTicks > 0 ? Math.round((e.onTargetTicks / e.totalTicks) * 100) : 100;
+    
+    // Calculate reaction times
+    const validRts = e.reactionTimes.filter(t => t > 0);
+    const avgRt = validRts.length > 0 ? Math.round(validRts.reduce((a, b) => a + b, 0) / validRts.length) : 0;
+    const bestRt = validRts.length > 0 ? Math.round(Math.min(...validRts)) : 0;
+
+    const rank = calculateRank(e.level, finalAccuracy, avgRt);
 
     setAnalytics({
       accuracy: finalAccuracy,
-      hits: e.hits,
-      misses: e.misses,
+      hits: e.successfulHits,
+      misses: e.totalTicks - e.onTargetTicks,
       timeouts: e.timeouts,
-      speedLevel: Math.floor(e.hits / 10) + 1
+      avgReactionTime: avgRt,
+      bestReactionTime: bestRt,
+      maxCombo: e.maxCombo,
+      finalLevel: e.level,
+      rankData: rank
     });
+
+    setUiScore(e.score);
 
     setBestScore(prev => {
       if (e.score > prev) {
@@ -173,55 +250,114 @@ export default function VerticalAirTrackClient() {
     });
   }, []);
 
-  const spawnTarget = useCallback((width, height) => {
-    const e = engine.current;
-    const power = e.launchPower;
+  const spawnTarget = useCallback((width, height, level) => {
+    // Determine target size, gravity, and launch speeds based on Level
+    const radius = Math.max(16, 35 - (level - 1) * 3.5); // Level 1 = 35px, Level 5 = 21px, Level 6+ = 16px
+    const gravity = 720 + (level - 1) * 55; // Level 1 = 720, Level 5 = 940
+    const power = 650 + (level - 1) * 40; // Launch upward power
     
-    e.target = {
-      active: true,
-      x: width * (0.2 + Math.random() * 0.6), // Middle 60% of screen horizontally
-      y: height + 20, // Spawn just below bottom edge
-      vx: (Math.random() - 0.5) * (power * 0.4), // Horizontal drift
-      vy: -(power + (Math.random() * 150)), // Blast upward
-      radius: e.targetRadius
+    // Spawn horizontally within the middle 60% of screen width
+    const x = width * (0.2 + Math.random() * 0.6);
+    const y = height + radius + 15;
+    
+    // Upward launch and horizontal drift
+    const vx = (Math.random() - 0.5) * (power * 0.45);
+    const vy = -(power + Math.random() * 120);
+
+    return {
+      id: Math.random(),
+      x,
+      y,
+      vx,
+      vy,
+      radius,
+      maxHp: 100,
+      hp: 100,
+      gravity,
+      color: '#ef4444',
+      spawnTime: performance.now(),
+      firstHitTime: null,
+      hasBeenHit: false,
+      nextEvasionTime: performance.now() + 900 + Math.random() * 700,
+      bounceCount: 0
     };
   }, []);
 
   const createExplosion = (x, y, color) => {
-    for (let i = 0; i < 12; i++) {
+    for (let i = 0; i < 15; i++) {
       const angle = Math.random() * Math.PI * 2;
-      const speed = Math.random() * 4 + 1;
-      engine.current.particles.push({ x, y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, life: 1.0, color });
+      const speed = Math.random() * 5 + 1.5;
+      engine.current.particles.push({ 
+        x, 
+        y, 
+        vx: Math.cos(angle) * speed, 
+        vy: Math.sin(angle) * speed, 
+        life: 1.0, 
+        color 
+      });
     }
   };
 
-  const createHitMarker = (x, y) => {
-    engine.current.hitMarkers.push({ x, y, life: 1.0 });
+  const createSparks = (x, y) => {
+    for (let i = 0; i < 3; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = Math.random() * 3 + 1;
+      engine.current.particles.push({ 
+        x, 
+        y, 
+        vx: Math.cos(angle) * speed, 
+        vy: Math.sin(angle) * speed - 1, 
+        life: 0.7, 
+        color: '#38bdf8' 
+      });
+    }
   };
 
   const startGame = useCallback(async () => {
     if (audioSynth) audioSynth.init(); 
 
     setIsNewBest(false);
-    setScore(0);
-    setAnalytics({ accuracy: 100, hits: 0, misses: 0, timeouts: 0, speedLevel: 1 });
-    setTimeLeft(DRILL_DURATION);
+    setUiScore(0);
+    setUiLevel(1);
+    setUiCombo(0);
+    setUiTimeLeft(DRILL_DURATION);
+    lastTimeRef.current = DRILL_DURATION;
+    
+    setAnalytics({
+      accuracy: 100,
+      hits: 0,
+      misses: 0,
+      timeouts: 0,
+      avgReactionTime: 0,
+      bestReactionTime: 0,
+      maxCombo: 0,
+      finalLevel: 1,
+      rankData: null
+    });
     setGameState('playing');
     
     engine.current = {
       crosshair: { ...engine.current.crosshair },
-      target: { active: false, x: 0, y: 0, vx: 0, vy: 0, radius: 35 },
-      launchPower: 650, 
-      targetRadius: 35, 
+      targets: [],
       score: 0,
+      level: 1,
+      combo: 0,
+      maxCombo: 0,
       timeLeft: DRILL_DURATION,
-      hits: 0, misses: 0, timeouts: 0, totalActions: 0,
-      particles: [], hitMarkers: [], screenShake: 0
+      successfulHits: 0,
+      timeouts: 0,
+      totalTicks: 0,
+      onTargetTicks: 0,
+      isFiring: false,
+      reactionTimes: [],
+      particles: [],
+      screenShake: 0,
+      lastShotTime: 0
     };
 
     try {
       if (containerRef.current && !document.fullscreenElement) {
-        await containerRef.current.requestFullscreen();
+        await containerRef.current.requestFullscreen().catch(()=>{});
       }
     } catch(e) {}
 
@@ -230,29 +366,13 @@ export default function VerticalAirTrackClient() {
         canvasRef.current.requestPointerLock().catch(()=>{});
       }
       if (canvasRef.current) {
-        spawnTarget(canvasRef.current.width, canvasRef.current.height);
+        const cvs = canvasRef.current;
+        engine.current.targets = [spawnTarget(cvs.width, cvs.height, 1)];
       }
     }, 150);
   }, [spawnTarget]);
 
-  // === Strict Timer Management ===
-  useEffect(() => {
-    if (gameState === 'playing' && pointerLocked) {
-      timerRef.current = setInterval(() => {
-        engine.current.timeLeft -= 1;
-        setTimeLeft(engine.current.timeLeft);
-        if (engine.current.timeLeft <= 0) {
-          clearInterval(timerRef.current);
-          endGame();
-        }
-      }, 1000);
-    } else {
-      clearInterval(timerRef.current);
-    }
-    return () => clearInterval(timerRef.current);
-  }, [gameState, pointerLocked, endGame]);
-
-  // === Raw Mouse Input & Firing Listeners ===
+  // === Raw Mouse Input & Pointer Lock Listeners ===
   useEffect(() => {
     const handlePointerLockChange = () => setPointerLocked(document.pointerLockElement === canvasRef.current);
     document.addEventListener('pointerlockchange', handlePointerLockChange);
@@ -273,78 +393,28 @@ export default function VerticalAirTrackClient() {
       if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
       if (gameState === 'playing') {
         if (!pointerLocked && canvasRef.current) {
-          canvasRef.current.requestPointerLock();
+          canvasRef.current.requestPointerLock().catch(()=>{});
         } else if (pointerLocked) {
-          
-          // SHOOT LOGIC
-          const eRef = engine.current;
-          eRef.totalActions++;
-          
-          const ch = eRef.crosshair;
-          const t = eRef.target;
-
-          if (t.active) {
-            const dist = Math.hypot(ch.x - t.x, ch.y - t.y);
-            
-            if (dist <= t.radius + 6) { // Hitbox forgiveness buffer
-              // Hit!
-              eRef.hits++;
-              eRef.score += 2;
-              eRef.timeLeft += 1; // +1s Time bonus
-              
-              // Adaptive Difficulty Scaling
-              eRef.launchPower = Math.min(1000, eRef.launchPower + 15); // Shoots higher/faster
-              eRef.targetRadius = Math.max(12, eRef.targetRadius - 0.5); // Shrinks target
-              
-              if (audioSynth) audioSynth.playPop();
-              createExplosion(t.x, t.y, '#00ff88');
-              createHitMarker(ch.x, ch.y);
-
-              eRef.target.active = false;
-              setScore(eRef.score);
-              setTimeLeft(eRef.timeLeft);
-              
-              // Respawn instantly
-              if (canvasRef.current) {
-                spawnTarget(canvasRef.current.width, canvasRef.current.height);
-              }
-              
-            } else {
-              // Miss
-              eRef.misses++;
-              eRef.score = Math.max(0, eRef.score - 1);
-              eRef.timeLeft -= 1;
-              eRef.screenShake = 10;
-              
-              // Forgiveness on miss
-              eRef.launchPower = Math.max(650, eRef.launchPower - 30);
-              eRef.targetRadius = Math.min(35, eRef.targetRadius + 1);
-
-              setScore(eRef.score);
-              setTimeLeft(eRef.timeLeft);
-              if (audioSynth) audioSynth.playThud();
-              
-              setFlashBg('red');
-              setTimeout(() => setFlashBg(null), 100);
-            }
-          } else {
-             // Clicked while no target active (rare but possible during respawn frames)
-             eRef.misses++;
-             eRef.score = Math.max(0, eRef.score - 1);
-             setScore(eRef.score);
-             if (audioSynth) audioSynth.playThud();
-          }
+          engine.current.isFiring = true;
         }
+      }
+    };
+
+    const handleMouseUp = () => {
+      if (gameState === 'playing' && pointerLocked) {
+        engine.current.isFiring = false;
       }
     };
 
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mousedown', handleMouseDown);
+    document.addEventListener('mouseup', handleMouseUp);
     return () => {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mousedown', handleMouseDown);
+      document.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [gameState, pointerLocked, universalSens, spawnTarget]);
+  }, [gameState, pointerLocked, universalSens]);
 
   const toggleFullscreen = useCallback(async () => {
     if (!document.fullscreenElement) {
@@ -359,6 +429,18 @@ export default function VerticalAirTrackClient() {
     document.addEventListener('fullscreenchange', fsListener);
     return () => document.removeEventListener('fullscreenchange', fsListener);
   }, []);
+
+  // Keyboard controls for game start
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (gameState === 'start' && (e.key === ' ' || e.key === 'Enter')) {
+        e.preventDefault();
+        startGame();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [gameState, startGame]);
 
   // === Render & Physics Loop (Delta Time) ===
   useEffect(() => {
@@ -393,45 +475,177 @@ export default function VerticalAirTrackClient() {
 
       if (gameState === 'playing' && pointerLocked) {
         
-        // Target Physics (Parabolic Arc)
-        if (e.target.active) {
-          const t = e.target;
+        // Exact Zero-Stop Timer logic
+        if (e.timeLeft > 0) {
+          e.timeLeft -= dt;
+        }
+
+        // Hard interrupt if time hits zero
+        if (e.timeLeft <= 0) {
+          e.timeLeft = 0;
+          setUiTimeLeft(0);
+          if (progressBarRef.current) progressBarRef.current.style.width = '0%';
+          endGame();
+          return; 
+        }
+
+        if (progressBarRef.current) {
+          progressBarRef.current.style.width = `${(e.timeLeft / DRILL_DURATION) * 100}%`;
+          progressBarRef.current.className = `h-full ${e.timeLeft <= 10 ? 'bg-red-500 animate-pulse' : 'bg-red-600'}`;
+        }
+
+        const intTime = Math.ceil(e.timeLeft);
+        if (intTime !== lastTimeRef.current) {
+          setUiTimeLeft(intTime);
+          lastTimeRef.current = intTime;
+        }
+
+        // Level calculated directly from score: Level = floor(score / 1000) + 1
+        const calculatedLevel = Math.floor(e.score / 1000) + 1;
+        if (calculatedLevel !== e.level) {
+          e.level = calculatedLevel;
+          setUiLevel(e.level);
+        }
+
+        // Adjust target count: 1 target for levels 1-4, 2 targets for levels 5+
+        const requiredTargets = e.level >= 5 ? 2 : 1;
+        while (e.targets.length < requiredTargets) {
+          e.targets.push(spawnTarget(cvs.width, cvs.height, e.level));
+        }
+
+        // Physics Updates
+        for (let i = e.targets.length - 1; i >= 0; i--) {
+          const t = e.targets[i];
           
           t.x += t.vx * dt;
           t.y += t.vy * dt;
-          t.vy += GRAVITY_CONSTANT * dt; // Apply gravity
+          t.vy += t.gravity * dt; // Apply gravity force
 
-          // Bounce off side walls
-          if (t.x - t.radius < 0 || t.x + t.radius > cvs.width) {
-            t.vx *= -1;
-          }
-
-          // Fell below screen (Timeout)
-          if (t.y > cvs.height + t.radius) {
-            t.active = false;
-            e.timeouts++;
-            e.totalActions++;
-            e.score = Math.max(0, e.score - 1);
-            e.timeLeft -= 1;
-            e.screenShake = 15;
-            
-            // Forgiveness
-            e.launchPower = Math.max(650, e.launchPower - 40);
-            e.targetRadius = Math.min(35, e.targetRadius + 1.5);
-            
-            setScore(e.score);
-            setTimeLeft(e.timeLeft);
+          // Bounce off left/right side boundaries
+          if (t.x - t.radius < 0) {
+            t.x = t.radius;
+            t.vx = -t.vx * 0.85;
+            createExplosion(t.x, t.y, '#ef4444');
             if (audioSynth) audioSynth.playThud();
-            
-            setFlashBg('red');
-            setTimeout(() => setFlashBg(null), 100);
-
-            // Respawn instantly
-            spawnTarget(cvs.width, cvs.height);
+          } else if (t.x + t.radius > cvs.width) {
+            t.x = cvs.width - t.radius;
+            t.vx = -t.vx * 0.85;
+            createExplosion(t.x, t.y, '#ef4444');
+            if (audioSynth) audioSynth.playThud();
           }
-        } else if (!e.target.active && e.totalActions === 0) {
-            // Failsafe spawn if no target
-            spawnTarget(cvs.width, cvs.height);
+
+          // Unpredictable Evasions (when target is high in the air and rising)
+          if (time >= t.nextEvasionTime && t.y < cvs.height * 0.7 && t.vy < 100) {
+            const rand = Math.random();
+            if (rand < 0.35) {
+              // Double Jump: upward burst
+              t.vy = -350 - Math.random() * 120;
+              createExplosion(t.x, t.y, '#38bdf8'); // cyan particles
+              if (audioSynth) audioSynth.playPop();
+            } else if (rand < 0.70) {
+              // Air Dash: sudden horizontal push
+              t.vx = (Math.random() > 0.5 ? 1 : -1) * (350 + Math.random() * 150);
+              createExplosion(t.x, t.y, '#c084fc'); // purple particles
+              if (audioSynth) audioSynth.playPop();
+            } else if (rand < 0.90) {
+              // Gravity Drop: sudden downward push
+              t.vy = 400;
+              createExplosion(t.x, t.y, '#f87171'); // light red particles
+              if (audioSynth) audioSynth.playThud();
+            }
+            // Schedule next evasion
+            t.nextEvasionTime = time + 1000 + Math.random() * 800;
+          }
+
+          // Target dropped past bottom boundary (Timeout)
+          if (t.y > cvs.height + t.radius + 20) {
+            e.timeouts++;
+            e.combo = 0; // Combo resets on Timeout
+            setUiCombo(0);
+            e.targets.splice(i, 1);
+            continue;
+          }
+        }
+
+        // Shooting damage & hit registry
+        if (e.isFiring) {
+          e.totalTicks++;
+          const ch = e.crosshair;
+          
+          // Find if crosshair matches any active target
+          let hitTarget = null;
+          for (let i = 0; i < e.targets.length; i++) {
+            const t = e.targets[i];
+            const dist = Math.hypot(ch.x - t.x, ch.y - t.y);
+            if (dist <= t.radius) {
+              hitTarget = t;
+              break;
+            }
+          }
+
+          if (hitTarget) {
+            e.onTargetTicks++;
+            
+            // Record reaction time on first target interaction
+            if (!hitTarget.hasBeenHit) {
+              hitTarget.firstHitTime = performance.now();
+              const rt = hitTarget.firstHitTime - hitTarget.spawnTime;
+              e.reactionTimes.push(rt);
+              hitTarget.hasBeenHit = true;
+            }
+
+            // Inflict tracking damage over time
+            hitTarget.hp -= dt * 250; // Deals damage based on delta time (250 HP/s, so takes 0.4s to kill)
+            createSparks(ch.x, ch.y);
+            
+            if (time - e.lastShotTime > 75) {
+              if (audioSynth) audioSynth.playHitBeep();
+              e.lastShotTime = time;
+            }
+
+            // Target Eliminated (Target Hit)
+            if (hitTarget.hp <= 0) {
+              e.successfulHits++;
+              
+              // 1. Base Score
+              const baseScore = 100;
+              
+              // 2. Airborne Height Precision Bonus
+              const yNorm = (cvs.height - hitTarget.y) / cvs.height;
+              let heightBonus = 0;
+              if (yNorm >= 0.75) {
+                heightBonus = 75;
+              } else if (yNorm >= 0.50) {
+                heightBonus = 50;
+              } else if (yNorm >= 0.25) {
+                heightBonus = 25;
+              }
+              
+              // 3. Combo Multiplier
+              e.combo++;
+              if (e.combo > e.maxCombo) e.maxCombo = e.combo;
+              
+              let multiplier = 1.0;
+              if (e.combo >= 20) multiplier = 2.0;
+              else if (e.combo >= 15) multiplier = 1.5;
+              else if (e.combo >= 10) multiplier = 1.25;
+              else if (e.combo >= 5) multiplier = 1.1;
+
+              // Calculate final score gained
+              const gained = Math.round((baseScore + heightBonus) * multiplier);
+              e.score += gained;
+              
+              setUiScore(e.score);
+              setUiCombo(e.combo);
+
+              // Play destruction sounds and explosions
+              if (audioSynth) audioSynth.playDestroy();
+              createExplosion(hitTarget.x, hitTarget.y, '#00ff88'); // green explosion
+              
+              // Remove target
+              e.targets = e.targets.filter(t => t.id !== hitTarget.id);
+            }
+          }
         }
       }
 
@@ -450,49 +664,97 @@ export default function VerticalAirTrackClient() {
       ctx.fillStyle = '#050508';
       ctx.fillRect(0, 0, cvs.width, cvs.height);
 
-      // Environment Grid
-      ctx.strokeStyle = 'rgba(239, 68, 68, 0.03)';
+      // Environment Grid lines
+      ctx.strokeStyle = 'rgba(239, 68, 68, 0.025)';
       ctx.lineWidth = 1; 
-      for(let i = 0; i < cvs.width; i+= 50) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, cvs.height); ctx.stroke(); }
-      for(let j = 0; j < cvs.height; j+= 50) { ctx.beginPath(); ctx.moveTo(0, j); ctx.lineTo(cvs.width, j); ctx.stroke(); }
+      for(let i = 0; i < cvs.width; i += 50) { 
+        ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, cvs.height); ctx.stroke(); 
+      }
+      for(let j = 0; j < cvs.height; j += 50) { 
+        ctx.beginPath(); ctx.moveTo(0, j); ctx.lineTo(cvs.width, j); ctx.stroke(); 
+      }
 
-      // Draw Target
-      if (e.target.active && (gameState === 'playing' || gameState === 'start')) {
-        const t = e.target;
+      // Render Targets
+      if (gameState === 'playing' || gameState === 'start') {
+        const ch = e.crosshair;
+        e.targets.forEach(t => {
+          const isHovered = Math.hypot(ch.x - t.x, ch.y - t.y) <= t.radius;
+          
+          // Glow effect around targets
+          ctx.shadowBlur = 15;
+          ctx.shadowColor = isHovered ? '#00ff88' : '#ef4444';
+          ctx.fillStyle = isHovered ? 'rgba(0, 255, 136, 0.35)' : 'rgba(239, 68, 68, 0.35)';
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 1.5;
+
+          ctx.beginPath(); 
+          ctx.arc(t.x, t.y, t.radius, 0, Math.PI * 2); 
+          ctx.fill(); 
+          ctx.stroke();
+          
+          // Outer target rings
+          ctx.shadowBlur = 0;
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+          ctx.beginPath(); 
+          ctx.arc(t.x, t.y, t.radius * 0.5, 0, Math.PI * 2); 
+          ctx.stroke();
+
+          // Health Bar Overlay
+          const hbW = t.radius * 1.6;
+          const hbH = 4;
+          const hbX = t.x - hbW / 2;
+          const hbY = t.y - t.radius - 12;
+
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+          ctx.fillRect(hbX, hbY, hbW, hbH);
+
+          const hpPct = Math.max(0, t.hp / t.maxHp);
+          ctx.fillStyle = isHovered ? '#00ff88' : '#ef4444';
+          ctx.fillRect(hbX, hbY, hbW * hpPct, hbH);
+        });
+      }
+
+      // Draw Laser Beam when firing
+      if (e.isFiring && gameState === 'playing' && pointerLocked) {
+        const ch = e.crosshair;
         
-        ctx.shadowBlur = 15;
-        ctx.shadowColor = '#ef4444';
-        ctx.fillStyle = 'rgba(239, 68, 68, 0.4)';
+        let isHitting = false;
+        e.targets.forEach(t => {
+          if (Math.hypot(ch.x - t.x, ch.y - t.y) <= t.radius) {
+            isHitting = true;
+          }
+        });
+
+        // 1. Draw glowing outer beam
+        ctx.beginPath();
+        ctx.moveTo(cvs.width / 2, cvs.height);
+        ctx.lineTo(ch.x, ch.y);
+        ctx.strokeStyle = isHitting ? 'rgba(0, 255, 136, 0.4)' : 'rgba(239, 68, 68, 0.3)';
+        ctx.lineWidth = 6;
+        ctx.stroke();
+
+        // 2. Draw white core beam
+        ctx.beginPath();
+        ctx.moveTo(cvs.width / 2, cvs.height);
+        ctx.lineTo(ch.x, ch.y);
         ctx.strokeStyle = '#ffffff';
         ctx.lineWidth = 1.5;
-
-        ctx.beginPath(); ctx.arc(t.x, t.y, t.radius, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-        
-        ctx.shadowBlur = 0;
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
-        ctx.beginPath(); ctx.arc(t.x, t.y, t.radius * 0.5, 0, Math.PI * 2); ctx.stroke();
+        ctx.stroke();
       }
 
-      // Render Particles
+      // Render Explosion & Spark Particles
       for (let i = e.particles.length - 1; i >= 0; i--) {
         const p = e.particles[i];
-        p.x += p.vx; p.y += p.vy; p.life -= dt * 2.5;
-        if (p.life <= 0) { e.particles.splice(i, 1); continue; }
-        ctx.globalAlpha = p.life; ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, 3, 3);
-      }
-      
-      // Render Hit Markers
-      ctx.lineWidth = 2;
-      for (let i = e.hitMarkers.length - 1; i >= 0; i--) {
-        const hm = e.hitMarkers[i];
-        hm.life -= dt * 4.0;
-        if (hm.life <= 0) { e.hitMarkers.splice(i, 1); continue; }
-        ctx.globalAlpha = hm.life; ctx.strokeStyle = '#ffffff';
-        const s = 6 + (1 - hm.life) * 8;
-        ctx.beginPath();
-        ctx.moveTo(hm.x - s, hm.y - s); ctx.lineTo(hm.x + s, hm.y + s);
-        ctx.moveTo(hm.x + s, hm.y - s); ctx.lineTo(hm.x - s, hm.y + s);
-        ctx.stroke();
+        p.x += p.vx; 
+        p.y += p.vy; 
+        p.life -= dt * 2.2;
+        if (p.life <= 0) { 
+          e.particles.splice(i, 1); 
+          continue; 
+        }
+        ctx.globalAlpha = p.life; 
+        ctx.fillStyle = p.color; 
+        ctx.fillRect(p.x, p.y, 3, 3);
       }
       ctx.globalAlpha = 1.0;
 
@@ -504,7 +766,9 @@ export default function VerticalAirTrackClient() {
         ctx.fillStyle = activeColor;
         
         ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.arc(ch.x, ch.y, 16, 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath(); 
+        ctx.arc(ch.x, ch.y, 16, 0, Math.PI * 2); 
+        ctx.stroke();
 
         ctx.lineWidth = 1.5;
         const gap = 6;
@@ -515,7 +779,9 @@ export default function VerticalAirTrackClient() {
         ctx.moveTo(ch.x + 16, ch.y); ctx.lineTo(ch.x + gap, ch.y);
         ctx.stroke();
         
-        ctx.beginPath(); ctx.arc(ch.x, ch.y, 2, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); 
+        ctx.arc(ch.x, ch.y, 2, 0, Math.PI * 2); 
+        ctx.fill();
       }
 
       ctx.restore();
@@ -528,14 +794,14 @@ export default function VerticalAirTrackClient() {
       cancelAnimationFrame(animationRef.current);
       resizeObserver.disconnect();
     };
-  }, [gameState, pointerLocked, spawnTarget]);
+  }, [gameState, pointerLocked, spawnTarget, endGame]);
 
   const shareDrillLink = useCallback(() => {
     const url = typeof window !== 'undefined' ? window.location.href : '';
     if (navigator.share) {
-      navigator.share({ title: 'Vertical Air-Track', url }).catch(() => {});
+      navigator.share({ title: 'Vertical Aim Trainer', url }).catch(() => {});
     } else {
-      navigator.clipboard.writeText(url).then(() => alert('Link copied!'));
+      navigator.clipboard.writeText(url).then(() => alert('Link copied to clipboard!'));
     }
   }, []);
 
@@ -552,7 +818,7 @@ export default function VerticalAirTrackClient() {
                 <li><ChevronRight className="w-4 h-4 text-gray-600" /></li>
                 <li><Link href="/drills/fps" className="hover:text-gray-300">FPS</Link></li>
                 <li><ChevronRight className="w-4 h-4 text-gray-600" /></li>
-                <li className="text-red-400 font-medium">Vertical Air-Track</li>
+                <li className="text-red-400 font-medium">Vertical Air Track</li>
               </ol>
             </nav>
 
@@ -562,8 +828,8 @@ export default function VerticalAirTrackClient() {
                   <Target className="w-7 h-7 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Vertical Air-Track</h1>
-                  <p className="text-sm text-gray-400 mt-1 font-medium">Desktop Exclusive • Endless Parabolic Arcs</p>
+                  <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Vertical Aim Trainer – Air Tracking & Aerial Aim Practice</h1>
+                  <p className="text-sm text-gray-400 mt-1 font-medium">Desktop Exclusive • Vertical Air Track Branding</p>
                 </div>
               </div>
               
@@ -581,11 +847,17 @@ export default function VerticalAirTrackClient() {
 
         {/* Live HUD Stats */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 lg:grid-cols-4 gap-2 mb-2">
-            <StatCard icon={<Target className="text-red-400" />} value={score} label="Score" />
-            <StatCard icon={<Timer className={timeLeft <= 10 ? 'text-orange-400 animate-pulse' : 'text-red-400'} />} value={timeLeft} label="Time" unit="s" />
+          <div className="grid grid-cols-5 gap-2 mb-2">
+            <StatCard icon={<Trophy className="text-yellow-400" />} value={uiScore} label="Score" />
+            <StatCard icon={<TrendingUp className="text-fuchsia-400" />} value={`Lv. ${uiLevel}`} label="Level" />
+            <StatCard 
+              icon={<Flame className={uiCombo >= 10 ? "text-orange-500 animate-pulse" : "text-gray-500"} />} 
+              value={uiCombo} 
+              label="Combo" 
+              highlight={uiCombo >= 10}
+            />
+            <StatCard icon={<Timer className={uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-green-400'} />} value={uiTimeLeft} label="Time" unit="s" />
             <StatCard icon={<Info className="text-blue-400" />} value={`${universalSens.toFixed(2)}x`} label="Sens" />
-            <StatCard icon={<Trophy className="text-yellow-500" />} value={bestScore} label="Best Score" />
           </div>
         )}
 
@@ -593,45 +865,72 @@ export default function VerticalAirTrackClient() {
         <div 
           ref={containerRef} 
           className={`relative overflow-hidden transition-colors outline-none ${
-            isFullscreen ? 'w-full h-full' : 'w-full aspect-video min-h-[500px] rounded-2xl border border-gray-700 shadow-2xl'
+            isFullscreen ? 'w-full h-full' : 'w-full aspect-video min-h-[500px] rounded-2xl border border-gray-800 shadow-2xl'
           }`}
-          style={{ backgroundColor: flashBg === 'red' ? '#450a0a' : '#05060b' }}
+          style={{ backgroundColor: '#05060b' }}
         >
           {/* Progress Bar */}
           {gameState === 'playing' && (
-            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gray-900 z-[60]">
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gray-955 z-[60]">
               <div 
-                className={`h-full transition-all duration-1000 ease-linear ${timeLeft <= 10 ? 'bg-orange-500 animate-pulse' : 'bg-red-600'}`}
-                style={{ width: `${Math.min(100, (timeLeft / DRILL_DURATION) * 100)}%` }} 
+                ref={progressBarRef}
+                className="h-full bg-red-600 transition-all duration-100 ease-linear"
+                style={{ width: '100%' }} 
               />
             </div>
           )}
 
           {/* Fullscreen Overlay Controls */}
           {isFullscreen && gameState === 'playing' && (
-            <div className="absolute top-4 right-4 z-[60] flex gap-2">
-              <button onClick={() => setSoundEnabled(v => !v)} className="p-3 bg-black/60 border border-gray-600 rounded-xl text-white hover:bg-gray-800 transition-colors">
-                {soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
-              </button>
-              <button onClick={toggleFullscreen} className="p-3 bg-black/60 border border-gray-600 rounded-xl text-white hover:bg-gray-800 transition-colors">
-                <Minimize2 className="w-5 h-5" />
-              </button>
-            </div>
+            <>
+              <div className="absolute top-6 left-6 z-[60] flex flex-col gap-2 pointer-events-none">
+                <div className="bg-black/40 backdrop-blur border border-gray-800 px-4 py-2 rounded-xl flex items-center gap-4">
+                  <div className="text-center">
+                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Score</p>
+                    <p className="text-2xl font-black text-white leading-none">{uiScore}</p>
+                  </div>
+                  <div className="w-px h-8 bg-gray-800"></div>
+                  <div className="text-center">
+                    <p className="text-[10px] text-fuchsia-400 font-bold uppercase tracking-widest">Level</p>
+                    <p className="text-2xl font-black text-fuchsia-400 leading-none">{uiLevel}</p>
+                  </div>
+                </div>
+                
+                {uiCombo > 1 && (
+                  <div className="bg-black/40 backdrop-blur border border-orange-500/30 px-4 py-2 rounded-xl flex items-center gap-3 animate-in fade-in slide-in-from-left-4">
+                    <Flame className="w-5 h-5 text-orange-500" />
+                    <div>
+                      <p className="text-[10px] text-orange-400 font-bold uppercase tracking-widest">Combo</p>
+                      <p className="text-xl font-black text-white leading-none">{uiCombo}x</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="absolute top-4 right-4 z-[60] flex gap-2">
+                <button onClick={() => setSoundEnabled(v => !v)} className="p-3 bg-black/60 border border-gray-700 rounded-xl text-white hover:bg-gray-800 transition-colors">
+                  {soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
+                </button>
+                <button onClick={toggleFullscreen} className="p-3 bg-black/60 border border-gray-700 rounded-xl text-white hover:bg-gray-800 transition-colors">
+                  <Minimize2 className="w-5 h-5" />
+                </button>
+              </div>
+            </>
           )}
 
           {/* Paused Overlay */}
           {gameState === 'playing' && !pointerLocked && (
             <div 
-              className="absolute inset-0 z-40 bg-black/60 backdrop-blur-sm flex items-center justify-center cursor-pointer"
+              className="absolute inset-0 z-40 bg-black/75 backdrop-blur-sm flex items-center justify-center cursor-pointer"
               onClick={(e) => { 
                 e.stopPropagation(); 
-                if (canvasRef.current) canvasRef.current.requestPointerLock(); 
+                if (canvasRef.current) canvasRef.current.requestPointerLock().catch(()=>{}); 
               }}
             >
               <div className="text-center animate-pulse pointer-events-none">
                 <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
                 <h2 className="text-3xl font-black text-white tracking-widest uppercase mb-2">Game Paused</h2>
-                <p className="text-gray-300 font-medium">Click anywhere on the screen to lock cursor and resume.</p>
+                <p className="text-gray-300 font-medium text-sm">Click anywhere inside the box to lock cursor and resume tracking.</p>
               </div>
             </div>
           )}
@@ -639,140 +938,154 @@ export default function VerticalAirTrackClient() {
           {/* Core Canvas */}
           <canvas 
             ref={canvasRef} 
-            onClick={() => { if (gameState === 'playing' && !pointerLocked) canvasRef.current?.requestPointerLock(); }}
+            onClick={() => { if (gameState === 'playing' && !pointerLocked) canvasRef.current?.requestPointerLock().catch(()=>{}); }}
             className={`block absolute top-0 left-0 w-full h-full touch-none z-10 ${gameState === 'playing' ? 'cursor-none' : ''}`} 
           />
 
           {/* START SCREEN */}
           {gameState === 'start' && (
-            <div className="absolute inset-0 flex items-center justify-center z-50 bg-black/70 backdrop-blur-md p-4 overflow-y-auto">
-              <div className="rounded-3xl p-8 text-center max-w-lg w-full border border-gray-700 bg-gray-900 shadow-2xl my-auto">
-                <div className="w-16 h-16 bg-gradient-to-br from-red-500 to-orange-600 rounded-2xl mx-auto flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(239,68,68,0.3)]">
-                  <Target className="w-8 h-8 text-white" />
-                </div>
-                <h2 className="text-3xl font-black mb-3 tracking-tight text-white uppercase">Vertical Air-Track</h2>
-                <p className="text-sm mb-6 text-gray-400 leading-relaxed">
-                  Targets launch from the bottom and fall back down in parabolic arcs. Track and hit them mid-air. Speed scales up on successful hits.
+            <div className="absolute inset-0 bg-[#05070e]/98 flex flex-col items-center justify-center p-6 z-30 select-none overflow-y-auto max-h-[100vh] backdrop-blur-sm">
+              <div className="max-w-md w-full text-center">
+                <h2 className="text-xl font-black text-white uppercase tracking-wider mb-1">
+                  Vertical Air Track
+                </h2>
+                <p className="text-xs text-slate-500 uppercase tracking-widest mb-6">
+                  Hardware Raw Input • Parabolic Air Tracking
                 </p>
 
-                {/* Configuration Panel */}
-                <div className="mb-8 p-5 bg-black/50 rounded-xl border border-gray-800 text-left space-y-5">
-                  <div>
-                    <div className="flex justify-between items-center mb-2">
-                      <label className="text-xs text-gray-400 font-bold uppercase tracking-wider flex items-center gap-2">
-                        <Crosshair className="w-4 h-4 text-red-500"/> Universal Sens
-                      </label>
-                      <span className="text-red-400 font-mono text-sm font-bold">{universalSens.toFixed(2)}x</span>
-                    </div>
-                    <input 
-                      type="range" min="0.1" max="3.0" step="0.05" 
-                      value={universalSens} 
-                      onChange={(e) => setUniversalSens(parseFloat(e.target.value))} 
-                      className="w-full h-1.5 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-red-500" 
-                    />
-                    <div className="text-[10px] text-gray-500 mt-1.5 text-right">Approx: {cmPer360} cm/360</div>
+                <div className="grid grid-cols-2 gap-3 mb-6 text-left">
+                  <div className="bg-slate-900/60 border border-slate-800 p-3 rounded-xl">
+                    <span className="text-[8px] text-slate-500 block uppercase font-bold">Objective</span>
+                    <span className="text-sm font-black text-white">Track Airborne Targets</span>
+                  </div>
+                  <div className="bg-slate-900/60 border border-slate-800 p-3 rounded-xl">
+                    <span className="text-[8px] text-slate-500 block uppercase font-bold">Reward</span>
+                    <span className="text-sm font-black text-green-400">+100 PTS & Height Bonus</span>
+                  </div>
+                  <div className="bg-slate-900/60 border border-slate-800 p-3 rounded-xl">
+                    <span className="text-[8px] text-slate-500 block uppercase font-bold">Penalty</span>
+                    <span className="text-sm font-black text-red-400">0 Score Penalty</span>
+                  </div>
+                  <div className="bg-slate-900/60 border border-slate-800 p-3 rounded-xl">
+                    <span className="text-[8px] text-slate-500 block uppercase font-bold">Mechanic</span>
+                    <span className="text-sm font-black text-blue-400">Popcorn Trajectories</span>
                   </div>
                 </div>
-                
-                <button 
-                  onClick={startGame}
-                  className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-red-600 to-orange-600 text-white rounded-xl font-black text-lg hover:brightness-110 transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-[0_0_20px_rgba(239,68,68,0.3)]"
-                >
-                  <Play className="w-6 h-6 fill-white" /> BEGIN TACTICAL DRILL
-                </button>
+
+                <div className="bg-[#0b0f19] border border-slate-850 p-4 rounded-xl mb-6 text-left text-xs text-slate-400">
+                  <div className="flex items-center gap-1.5 text-[10px] font-bold text-white uppercase mb-3">
+                    <Sliders className="w-3.5 h-3.5 text-red-500" /> Universal Sens
+                  </div>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-red-400 font-mono text-sm font-bold">{universalSens.toFixed(2)}x</span>
+                    <span className="text-[10px] text-slate-500">Approx: {cmPer360} cm/360</span>
+                  </div>
+                  <input 
+                    type="range" min="0.1" max="3.0" step="0.05" 
+                    value={universalSens} 
+                    onChange={(e) => setUniversalSens(parseFloat(e.target.value))} 
+                    className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-red-500" 
+                  />
+                </div>
+
+                <div className="flex gap-2">
+                  <button
+                    onClick={startGame}
+                    className="flex-1 py-3 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg uppercase tracking-widest transition-all duration-200 active:scale-95"
+                  >
+                    <Play className="w-3.5 h-3.5 fill-white" />
+                    Begin Tactical Drill
+                  </button>
+                </div>
               </div>
             </div>
           )}
 
-          {/* GAME OVER DASHBOARD */}
-          {gameState === 'gameOver' && (
-            <div className="absolute inset-0 flex items-center justify-center z-50 bg-black/90 backdrop-blur-md p-4 animate-in fade-in duration-300 overflow-y-auto">
-              <div className="rounded-3xl max-w-2xl w-full shadow-2xl border border-gray-800 bg-gray-950 overflow-hidden my-auto">
-                <div className="bg-gradient-to-br from-red-900/40 to-orange-900/40 p-6 border-b border-gray-800 text-center relative">
-                  {isNewBest && (
-                    <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-yellow-500 text-black text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-[0_0_15px_rgba(234,179,8,0.5)]">
-                      ⭐ New Personal Best
-                    </div>
-                  )}
-                  <h2 className="text-2xl font-black text-white tracking-tight mt-4">Tracking Analysis Complete</h2>
-                  <p className="text-red-400 font-medium text-sm mt-1">Speed Level Reached: {analytics.speedLevel}</p>
+          {/* GAME OVER SCREEN */}
+          {gameState === 'gameOver' && analytics.rankData && (
+            <div className="absolute inset-0 bg-[#05070e]/98 flex flex-col items-center justify-center p-6 z-30 select-none overflow-y-auto max-h-[100vh] backdrop-blur-sm">
+              <div className="max-w-md w-full text-center">
+                {isNewBest && (
+                  <div className="inline-block bg-yellow-500 text-black text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-3 shadow-[0_0_15px_rgba(234,179,8,0.5)] animate-bounce">
+                    ⭐ NEW PERSONAL BEST!
+                  </div>
+                )}
+                
+                <h2 className="text-xl font-black text-white uppercase tracking-wider mb-1">
+                  Drill Complete
+                </h2>
+                <p className="text-xs text-slate-500 uppercase tracking-widest mb-6">
+                  Peak difficulty reached: Level {analytics.finalLevel}
+                </p>
+
+                <div className="grid grid-cols-3 gap-2 mb-6 text-left">
+                  <div className="bg-slate-900/60 border border-slate-800 p-3 rounded-xl">
+                    <span className="text-[8px] text-slate-500 block uppercase font-bold font-mono">Final Score</span>
+                    <span className="text-lg font-black text-white">{uiScore}</span>
+                  </div>
+                  <div className="bg-slate-900/60 border border-slate-800 p-3 rounded-xl">
+                    <span className="text-[8px] text-slate-500 block uppercase font-bold font-mono">Accuracy</span>
+                    <span className="text-lg font-black text-white">{analytics.accuracy}%</span>
+                  </div>
+                  <div className="bg-slate-900/60 border border-slate-800 p-3 rounded-xl">
+                    <span className="text-[8px] text-slate-500 block uppercase font-bold font-mono">Avg Reaction</span>
+                    <span className="text-lg font-black text-white">{analytics.avgReactionTime}ms</span>
+                  </div>
+                  
+                  <div className="bg-slate-900/60 border border-slate-800 p-3 rounded-xl">
+                    <span className="text-[8px] text-slate-500 block uppercase font-bold font-mono">Best Streak</span>
+                    <span className="text-lg font-black text-white">{analytics.maxCombo}x</span>
+                  </div>
+                  <div className="bg-slate-900/60 border border-slate-800 p-3 rounded-xl">
+                    <span className="text-[8px] text-slate-500 block uppercase font-bold font-mono">Targets Hit</span>
+                    <span className="text-lg font-black text-white">{analytics.hits}</span>
+                  </div>
+                  <div className="bg-slate-900/60 border border-slate-800 p-3 rounded-xl">
+                    <span className="text-[8px] text-slate-500 block uppercase font-bold font-mono">Assigned Rank</span>
+                    <span className={`text-lg font-black ${analytics.rankData.color}`}>
+                      Rank {analytics.rankData.rank}
+                    </span>
+                  </div>
+
+                  <div className="bg-slate-900/60 border border-slate-800 p-3 rounded-xl">
+                    <span className="text-[8px] text-slate-500 block uppercase font-bold font-mono">Best Reaction</span>
+                    <span className="text-lg font-black text-white">{analytics.bestReactionTime}ms</span>
+                  </div>
+                  <div className="bg-slate-900/60 border border-slate-800 p-3 rounded-xl">
+                    <span className="text-[8px] text-slate-500 block uppercase font-bold font-mono">Dropped</span>
+                    <span className="text-lg font-black text-white">{analytics.timeouts}</span>
+                  </div>
+                  <div className="bg-slate-900/60 border border-slate-800 p-3 rounded-xl">
+                    <span className="text-[8px] text-slate-500 block uppercase font-bold font-mono">Missed Ticks</span>
+                    <span className="text-lg font-black text-red-500">{analytics.misses}</span>
+                  </div>
                 </div>
 
-                <div className="p-6">
-                  {/* Top Stats */}
-                  <div className="flex flex-col sm:flex-row gap-4 mb-6">
-                    <div className="flex-1 bg-gray-900 rounded-2xl p-4 border border-gray-800 flex justify-between items-center">
-                      <div>
-                        <span className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1 block">Final Score</span>
-                        <div className="flex items-end gap-1">
-                          <span className="text-4xl font-black text-white leading-none">{score}</span>
-                          <span className="text-xs text-gray-500 font-bold mb-1">PTS</span>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <span className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1 block">Hit Accuracy</span>
-                        <span className={`text-3xl font-black ${analytics.accuracy >= 80 ? 'text-green-400' : analytics.accuracy >= 50 ? 'text-yellow-400' : 'text-red-400'}`}>
-                          {analytics.accuracy}%
-                        </span>
-                      </div>
-                    </div>
+                {/* Diagnostics block */}
+                <div className="bg-[#0b0f19] border border-slate-855 p-4 rounded-xl mb-6 text-left text-xs text-slate-400">
+                  <div className="flex items-center gap-1.5 text-[10px] font-bold text-white uppercase mb-1">
+                    <Sparkles className="w-3.5 h-3.5 text-yellow-500" /> Improvement Suggestion:
                   </div>
+                  <p className="leading-relaxed">
+                    {getSuggestion(analytics.rankData.rank, uiScore, analytics.accuracy, analytics.timeouts)}
+                  </p>
+                </div>
 
-                  {/* Reaction Diagnostics Block */}
-                  <div className="bg-[#0a0a0a] border border-red-900/50 rounded-xl p-5 mb-6 text-left shadow-inner">
-                    <h3 className="text-xs font-bold text-red-400 font-mono uppercase tracking-widest border-b border-red-900/50 pb-2 mb-4 flex items-center gap-2">
-                      <BarChart3 className="w-4 h-4 text-red-400" />
-                      VERTICAL TELEMETRY DIAGNOSTICS
-                    </h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-xs leading-relaxed text-gray-300">
-                      
-                      <div className="space-y-3 sm:border-r border-gray-800 sm:pr-6">
-                        <p className="font-bold text-white uppercase text-[10px] tracking-wider font-mono">Performance Log:</p>
-                        <ul className="space-y-2">
-                          <li className="flex justify-between items-center bg-gray-900/50 p-2 rounded border border-gray-800">
-                            <span className="text-gray-400">Total Targets Hit:</span>
-                            <span className="font-bold text-blue-400">{analytics.hits}</span>
-                          </li>
-                          <li className="flex justify-between items-center bg-gray-900/50 p-2 rounded border border-gray-800">
-                            <span className="text-gray-400">Missed Canvas:</span>
-                            <span className="font-bold text-red-500">{analytics.misses}</span>
-                          </li>
-                          <li className="flex justify-between items-center bg-gray-900/50 p-2 rounded border border-gray-800">
-                            <span className="text-gray-400">Dropped Targets:</span>
-                            <span className="font-bold text-yellow-500">{analytics.timeouts}</span>
-                          </li>
-                        </ul>
-                      </div>
-
-                      <div className="space-y-3 flex flex-col justify-between">
-                        <div>
-                          <p className="font-bold text-white uppercase text-[10px] tracking-wider font-mono mb-2">Prescribed Advice:</p>
-                          <p className="text-gray-400 leading-relaxed font-sans">
-                            {analytics.timeouts > 3 ? (
-                              <span className="text-yellow-300">You are letting targets fall completely off the screen. Try to hit them at the apex of their arc when their vertical velocity momentarily hits zero.</span>
-                            ) : analytics.misses > 5 ? (
-                              <span className="text-red-300">You are shooting erratically. A missed click deducts -1 Point and -1s Time. Focus on tracking the arc smoothly before clicking.</span>
-                            ) : (
-                              <span className="text-green-300">Excellent vertical tracking and click timing! You are handling the high-velocity arcs beautifully.</span>
-                            )}
-                          </p>
-                        </div>
-                      </div>
-
-                    </div>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex gap-3">
-                    <button onClick={startGame} className="flex-1 py-4 bg-red-600 text-white rounded-xl font-black tracking-wide hover:bg-red-500 transition-all active:scale-95 flex items-center justify-center gap-2 shadow-lg">
-                      <RefreshCw className="w-5 h-5" /> TRAIN AGAIN
-                    </button>
-                    {isFullscreen && (
-                       <button onClick={toggleFullscreen} className="px-6 py-4 bg-gray-800 text-white rounded-xl font-bold hover:bg-gray-700 transition-all border border-gray-700">
-                         Exit
-                       </button>
-                    )}
-                  </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={startGame}
+                    className="flex-1 py-3 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg uppercase tracking-widest transition-all duration-200 active:scale-95"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5" />
+                    Run another trial
+                  </button>
+                  <button
+                    onClick={shareDrillLink}
+                    className="p-3 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded-xl transition-colors active:scale-95"
+                    title="Share Score"
+                  >
+                    <Share2 className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
             </div>
@@ -782,101 +1095,114 @@ export default function VerticalAirTrackClient() {
         {/* DRILL INSTRUCTIONS & SCORING SECTION */}
         {!isFullscreen && (
           <section className="mt-10">
-            <div className="rounded-2xl border border-gray-800 overflow-hidden bg-gray-900 shadow-2xl pointer-events-none">
+            <div className="rounded-2xl border border-gray-800 overflow-hidden bg-gray-900/60 shadow-2xl pointer-events-none">
               <div className="px-6 py-5 border-b border-gray-800 bg-black/40 flex items-center gap-3">
-                <Info className="w-5 h-5 text-red-400" /><h2 className="font-bold text-white text-lg tracking-wide">Drill Instructions & Scoring</h2>
+                <Info className="w-5 h-5 text-red-400" /><h2 className="font-bold text-white text-lg tracking-wide">Drill Instructions & Scoring Rules</h2>
               </div>
               <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-5">
-                  <RuleItem num="1" color="green" text="Hit Target" highlight="+2 PTS & +1s Time" result="Target respawns instantly" />
-                  <RuleItem num="2" color="orange" text="Gravity Physics" highlight="Parabolic Arc" result="Predict the falling path" />
+                  <RuleItem num="1" color="green" text="Target Hit" highlight="+100 PTS Base" result="Destroy target by tracking" />
+                  <RuleItem num="2" color="blue" text="Precision Height Bonus" highlight="Up to +75 PTS" result="Hit targets at peak height" />
                 </div>
                 <div className="space-y-5">
-                  <RuleItem num="3" color="red" text="Miss Penalty" highlight="-1 PTS & -1s Time" result="Clicking empty space" />
-                  <RuleItem num="4" color="yellow" text="Target Drop" highlight="-1 PTS & -1s Time" result="Letting a target fall out of bounds" />
+                  <RuleItem num="3" color="orange" text="Tracking Streak Multiplier" highlight="Up to 2.0x Combo" result="Builds up every consecutive hit" />
+                  <RuleItem num="4" color="red" text="Timeouts & Misses" highlight="0 Score Penalty" result="Combo resets only on Timeout" />
                 </div>
               </div>
             </div>
           </section>
         )}
 
-        {/* ABOUT THIS DRILL SECTION */}
+        {/* ABOUT & FAQ SECTION */}
         {!isFullscreen && (
-          <section className="mt-12" aria-label="About this drill">
+          <article className="mt-12 text-gray-300">
             <div className="rounded-2xl border border-gray-800 overflow-hidden bg-gray-900 shadow-xl">
               <div className="px-6 py-5 border-b border-gray-800 bg-black/40 flex items-center gap-3">
                 <GraduationCap className="w-5 h-5 text-red-400" />
-                <h2 className="font-bold text-white text-lg tracking-wide">About Vertical Air-Track</h2>
+                <h2 className="font-bold text-white text-lg tracking-wide">About the Vertical Aim Trainer</h2>
               </div>
-              <div className="p-8">
-                <p className="text-sm leading-relaxed mb-6 text-gray-300">
-                  This Vertical Air-Track drill is a hardcore mechanical motor task designed to train dynamic vertical tracking and fast-reaction clicking. The engine simulates a parabolic gravity arc, forcing you to predict where the target will be as it rises, hits its apex, and accelerates downward.
-                </p>
-
-                {/* Grid Section */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
-                  <div className="p-5 rounded-xl border border-gray-800 bg-black/40">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center"><Users className="w-4 h-4 text-white" /></div>
-                      <h3 className="text-sm font-bold text-white">Who It's For</h3>
-                    </div>
-                    <p className="text-xs leading-relaxed text-gray-400">Esports athletes and competitive FPS gamers looking to perfect their vertical aiming, specifically for games with high verticality like Apex Legends or Overwatch.</p>
-                  </div>
-                  <div className="p-5 rounded-xl border border-gray-800 bg-black/40">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-8 h-8 rounded-lg bg-green-600 flex items-center justify-center"><TrendingUp className="w-4 h-4 text-white" /></div>
-                      <h3 className="text-sm font-bold text-white">Skills Improved</h3>
-                    </div>
-                    <p className="text-xs leading-relaxed text-gray-400">Vertical tracking, parabolic path prediction, micro-correction speed, and click timing during vertical mouse translation.</p>
-                  </div>
-                  <div className="p-5 rounded-xl border border-gray-800 bg-black/40">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-8 h-8 rounded-lg bg-purple-600 flex items-center justify-center"><BarChart3 className="w-4 h-4 text-white" /></div>
-                      <h3 className="text-sm font-bold text-white">What You'll Track</h3>
-                    </div>
-                    <p className="text-xs leading-relaxed text-gray-400">Net Score, accuracy percentage, total hits, misses, timeouts, and your maximum dynamic speed level reached.</p>
-                  </div>
-                </div>
-
-                {/* Integrated How to Play & Scoring */}
-                <div className="mb-8 bg-[#0b0f19]/40 border border-gray-800 rounded-xl p-6">
-                  <h3 className="text-base font-bold text-white uppercase tracking-wider mb-4 flex items-center gap-2">
-                    <Target className="w-5 h-5 text-red-500" /> How to Play
+              
+              <div className="p-8 space-y-8">
+                <section>
+                  <h3 className="text-lg font-bold text-white mb-3 flex items-center gap-2">
+                    <Crosshair className="w-5 h-5 text-red-400" /> What Is Vertical Aim Training?
                   </h3>
-                  <div className="grid sm:grid-cols-2 gap-6 text-sm text-gray-300">
-                    <ol className="space-y-3 list-decimal pl-5">
-                      <li>Adjust your <strong>Sens</strong> to match your main game.</li>
-                      <li>Click <strong>Begin Drill</strong>. The screen will automatically go fullscreen and lock your mouse.</li>
-                      <li>Shoot the targets out of the air before they hit the ground.</li>
-                    </ol>
-                    <ul className="space-y-3">
-                      <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-green-500" /> <span className="text-white font-bold">Hit Target:</span> Grants +2 PTS and +1s to your total clock.</li>
-                      <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-purple-400" /> <span className="text-white font-bold">Adaptive Scaling:</span> Targets become smaller and faster as you succeed.</li>
-                      <li className="flex items-center gap-2"><XCircle className="w-4 h-4 text-red-500" /> <span className="text-white font-bold">Misses & Drops:</span> Deduct -1 PTS and immediately subtract -1s from your clock.</li>
-                    </ul>
+                  <p className="text-sm leading-relaxed mb-4">
+                    <strong>Vertical Aim Training</strong> is a mechanical motor coordination drill focused entirely on the y-axis. Unlike traditional aim drills that emphasize horizontal movements (x-axis), a vertical trainer isolates the muscles in your arm, wrist, and fingers required to translate your mouse up and down cleanly. In games featuring vertical map layouts or mobility abilities, having precise vertical tracking and airborne target prediction makes the difference between winning and losing fights.
+                  </p>
+                </section>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 py-4 border-y border-gray-800/50">
+                  <div className="p-5 rounded-xl border border-gray-800 bg-black/40 hover:bg-gray-800/50 transition-colors">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-8 h-8 rounded-lg bg-red-600 flex items-center justify-center">
+                        <Users className="w-4 h-4 text-white" />
+                      </div>
+                      <h4 className="text-sm font-bold text-white">Who Is This For?</h4>
+                    </div>
+                    <p className="text-xs leading-relaxed text-gray-400">FPS players looking to counter jumping, flying, or grappling opponents in fast-paced mobility shooters such as <strong>Apex Legends</strong>, <strong>Overwatch 2</strong>, and <strong>The Finals</strong>.</p>
+                  </div>
+                  <div className="p-5 rounded-xl border border-gray-800 bg-black/40 hover:bg-gray-800/50 transition-colors">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-8 h-8 rounded-lg bg-orange-600 flex items-center justify-center">
+                        <TrendingUp className="w-4 h-4 text-white" />
+                      </div>
+                      <h4 className="text-sm font-bold text-white">Skills Trained</h4>
+                    </div>
+                    <p className="text-xs leading-relaxed text-gray-400">Vertical aim control, air tracking, popcorn tracking, arc reading, y-axis alignment correction, and airborne movement prediction.</p>
+                  </div>
+                  <div className="p-5 rounded-xl border border-gray-800 bg-black/40 hover:bg-gray-800/50 transition-colors">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center">
+                        <Zap className="w-4 h-4 text-white" />
+                      </div>
+                      <h4 className="text-sm font-bold text-white">Why It Is Harder</h4>
+                    </div>
+                    <p className="text-xs leading-relaxed text-gray-400">Human physiology naturally adapts to horizontal arm swings. Vertical translation triggers unique muscle groups, requiring focused practice to build muscle memory.</p>
                   </div>
                 </div>
 
-                {/* FAQ Section */}
-                <div className="p-5 rounded-xl border border-gray-800 bg-black/40">
-                  <div className="flex items-center gap-3 mb-4">
-                    <Lightbulb className="w-5 h-5 text-yellow-400" />
-                    <h3 className="text-sm font-bold text-white uppercase tracking-wider">Frequently Asked Questions</h3>
-                  </div>
-                  <div className="space-y-4">
-                    <div>
-                      <h4 className="text-sm font-bold text-gray-200">Why does my timer drop so fast?</h4>
-                      <p className="text-xs text-gray-400 mt-1">Unlike standard aim trainers, this drill actively punishes bad accuracy. Missing a shot or letting a target drop pulls time directly off your clock. You must hit targets to earn time back.</p>
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-bold text-gray-200">How should I approach this?</h4>
-                      <p className="text-xs text-gray-400 mt-1">The easiest time to hit a falling target is at the very top of its arc (the apex) when its vertical velocity briefly hits zero. Try to time your shots for this exact window.</p>
-                    </div>
-                  </div>
+                <section>
+                  <h3 className="text-base font-bold text-white mb-3">How To Improve Vertical Tracking</h3>
+                  <p className="text-sm leading-relaxed mb-4">
+                    To build optimal vertical control, avoid tensing your wrist. Maintain a relaxed grip and sweep your entire forearm for large y-axis adjustments while using your fingers for micro-corrections near the apex of the arc. The target slows down as it approaches the peak height of its parabolic trajectory before gravity pulls it back down. Targeting during this brief zero-velocity window helps secure easy eliminations and build your combo streak.
+                  </p>
+                </section>
+
+                <section>
+                  <h3 className="text-base font-bold text-white mb-3">How Professional Apex Players Train Air Tracking</h3>
+                  <p className="text-sm leading-relaxed mb-4">
+                    In Apex Legends, heroes frequently launch off Octane pads, traverse gravity cannons, or float in Horizon lifts. Top professional players practice tracking targets in smooth arcs. They use air tracking trainers to isolate gravity-affected trajectories, standardizing their target leading and smoothing out crosshair stutter.
+                  </p>
+                </section>
+              </div>
+
+              <div className="bg-[#0b0f19] border-t border-gray-800 p-8">
+                <div className="flex items-center gap-3 mb-6">
+                  <Lightbulb className="w-6 h-6 text-yellow-400" />
+                  <h3 className="text-xl font-bold text-white">Frequently Asked Questions</h3>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <FAQItem q="1. What is vertical aim training?" a="Vertical aim training is a method of practicing your vertical mouse control (the y-axis) by tracking targets moving along vertical or parabolic trajectories." />
+                  <FAQItem q="2. How do I improve vertical tracking?" a="You can improve vertical tracking by practicing with a vertical aim trainer regularly, focusing on tracking targets at different heights and speeds, and learning to predict parabolic movement arcs." />
+                  <FAQItem q="3. Why is vertical aim harder than horizontal aim?" a="Vertical aim is harder because most competitive games feature predominantly horizontal movement, causing players to under-develop their vertical muscle memory and y-axis arm/wrist translation." />
+                  <FAQItem q="4. How do professional Apex players train air tracking?" a="Professional Apex Legends players use dedicated air tracking drills to simulate enemies flying through the air via gravity cannons, launch pads, or abilities like Horizon's Gravity Lift or Valkyrie's jetpack." />
+                  <FAQItem q="5. How do Overwatch players improve aerial tracking?" a="Overwatch players practice tracking high-mobility heroes like Pharah, Echo, Mercy, or Winston during leaps. Using vertical aim trainers helps them smooth out their y-axis tracking adjustments." />
+                  <FAQItem q="6. What is popcorn tracking?" a="Popcorn tracking is a specific FPS training scenario where targets are launched upward from the bottom of the screen in high, bouncing parabolic arcs, resembling popcorn kernels popping." />
+                  <FAQItem q="7. Does this drill improve vertical aim?" a="Yes, this vertical air track trainer specifically isolates and trains y-axis micro-adjustments, arc prediction, and vertical mouse speed control." />
+                  <FAQItem q="8. Does this help Apex Legends?" a="Yes, training vertical tracking helps you track targets using zip lines, jump pads, Horizon lifts, Octane pads, and airborne movement techniques." />
+                  <FAQItem q="9. Does this help Overwatch 2?" a="Yes, it is highly beneficial for tracking jumping or airborne heroes such as Genji, Winston, Pharah, Echo, Doomfist, and Mercy." />
+                  <FAQItem q="10. Does this help Halo Infinite?" a="Yes, it helps you track players launching off gravity lifts, using grapples, or jumping during firefights." />
+                  <FAQItem q="11. Does this help Titanfall 2?" a="Yes, Titanfall 2 features extreme verticality, wall-running, and double jumping, which require excellent vertical tracking skills to counter." />
+                  <FAQItem q="12. How often should I train vertical aim?" a="We recommend training vertical aim for 10-15 minutes per day as part of your warm-up routine to build consistent muscle memory on the y-axis." />
+                  <FAQItem q="13. Is this drill free?" a="Yes, this Vertical Aim Trainer is 100% free, open-source, and runs directly in your web browser with zero ads or downloads." />
+                  <FAQItem q="14. What skills does this drill improve?" a="This drill trains vertical tracking, air tracking, parabolic arc prediction, y-axis mouse control, visual processing speed, and tracking consistency." />
+                  <FAQItem q="15. Can vertical aim training improve tracking consistency?" a="Yes, isolating vertical aim training smooths out jittery vertical movements, making your overall mouse tracking more consistent across both axes." />
                 </div>
               </div>
             </div>
-          </section>
+          </article>
         )}
 
         {/* RELATED DRILLS SECTION */}
@@ -885,13 +1211,13 @@ export default function VerticalAirTrackClient() {
             <div className="flex items-center gap-2 mb-4">
               <div className="w-1 h-5 rounded-full bg-red-500"></div>
               <h2 className="text-xs font-bold text-white uppercase tracking-widest font-mono">
-                Explore Related FPS Drills
+                Explore FPS Drills
               </h2>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <RelatedCard href="/drills/motor/hand-eye-coordination/aim-trainer" title="Aim Trainer Elite" desc="Dynamic shrinking bullseye survival." color="green" icon={<Target className="w-4 h-4" />} />
               <RelatedCard href="/drills/fps/flick-shot-training" title="Pro Flick Trainer" desc="Snap to targets in time-attack mode." color="blue" icon={<Crosshair className="w-4 h-4" />} />
-              <RelatedCard href="/drills/fps/180-degree-awareness" title="180° Awareness" desc="Alternate snapping opposite horizons." color="orange" icon={<Zap className="w-4 h-4" />} />
+              <RelatedCard href="/drills/fps/reactive-sphere-tracking" title="Reactive Sphere" desc="Micro-tracking direction shifts." color="green" icon={<Target className="w-4 h-4" />} />
+              <RelatedCard href="/drills/fps/anti-strafe-jitter-duel" title="Anti-Strafe Jitter" desc="Flick & track reactive ADAD strafe targets." color="orange" icon={<Target className="w-4 h-4" />} />
               <RelatedCard href="/drills/fps/recoil-control" title="Recoil Control" desc="Calibrate pulling pattern compensation." color="red" icon={<Activity className="w-4 h-4" />} />
             </div>
           </section>
@@ -899,65 +1225,64 @@ export default function VerticalAirTrackClient() {
 
         {/* FOOTER SECTION */}
         {!isFullscreen && (
-          <footer className="mt-12 bg-slate-950/40 border border-slate-900 text-slate-500 rounded-xl py-10 px-6 font-mono text-[10px]" role="contentinfo">
-            <div className="max-w-7xl mx-auto">
+          <footer className="mt-12 bg-[#05060b] border border-gray-800 text-gray-500 rounded-xl py-10 px-6 font-mono text-[10px]" role="contentinfo">
+            <div className="max-w-7xl mx-auto font-mono text-left">
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8 mb-8">
                 <div>
-                  <h3 className="text-white font-bold mb-3 uppercase tracking-wider">Motor & FPS</h3>
+                  <h3 className="text-white font-bold mb-3 uppercase tracking-wider text-xs">Motor & FPS</h3>
                   <ul className="space-y-2">
                     <li><Link href="/drills/motor/hand-eye-coordination/aim-trainer" className="hover:text-red-400 transition-colors">Aim Trainer Elite</Link></li>
                     <li><Link href="/drills/fps/flick-shot-training" className="hover:text-red-400 transition-colors">Flick Shot Trainer</Link></li>
-                    <li><Link href="/drills/fps" className="text-red-450 hover:text-red-400 transition-colors font-bold">All FPS Drills →</Link></li>
+                    <li><Link href="/drills/fps" className="text-red-400 hover:text-red-300 transition-colors font-bold">All FPS Drills →</Link></li>
                   </ul>
                 </div>
                 <div>
-                  <h3 className="text-white font-bold mb-3 uppercase tracking-wider">Memory</h3>
+                  <h3 className="text-white font-bold mb-3 uppercase tracking-wider text-xs">Memory</h3>
                   <ul className="space-y-2">
                     <li><Link href="/drills/memory/working-memory/n-back" className="hover:text-red-400 transition-colors">3-Back Training</Link></li>
                     <li><Link href="/drills/memory/short-term-memory/color-sequence" className="hover:text-red-400 transition-colors">Color Sequence</Link></li>
-                    <li><Link href="/drills/memory" className="text-red-450 hover:text-red-400 transition-colors font-bold">All Memory Drills →</Link></li>
+                    <li><Link href="/drills/memory" className="text-red-400 hover:text-red-300 transition-colors font-bold">All Memory Drills →</Link></li>
                   </ul>
                 </div>
                 <div>
-                  <h3 className="text-white font-bold mb-3 uppercase tracking-wider">Cognitive</h3>
+                  <h3 className="text-white font-bold mb-3 uppercase tracking-wider text-xs">Cognitive</h3>
                   <ul className="space-y-2">
                     <li><Link href="/drills/cognitive/memory/card-matching" className="hover:text-red-400 transition-colors">Memory Games</Link></li>
                     <li><Link href="/drills/cognitive/attention/divided-attention" className="hover:text-red-400 transition-colors">Attention Drills</Link></li>
-                    <li><Link href="/drills/cognitive" className="text-red-450 hover:text-red-400 transition-colors font-bold">All Cognitive Drills →</Link></li>
+                    <li><Link href="/drills/cognitive" className="text-red-400 hover:text-red-300 transition-colors font-bold">All Cognitive Drills →</Link></li>
                   </ul>
                 </div>
                 <div>
-                  <h3 className="text-white font-bold mb-3 uppercase tracking-wider">Academic</h3>
+                  <h3 className="text-white font-bold mb-3 uppercase tracking-wider text-xs">Academic</h3>
                   <ul className="space-y-2">
                     <li><Link href="/drills/academic/writing-speed/typing-test" className="hover:text-red-400 transition-colors">Typing Speed Test</Link></li>
                     <li><Link href="/drills/academic/math-speed/mental-math" className="hover:text-red-400 transition-colors">Mental Math</Link></li>
-                    <li><Link href="/drills/academic" className="text-red-450 hover:text-red-400 transition-colors font-bold">All Academic Drills →</Link></li>
+                    <li><Link href="/drills/academic" className="text-red-400 hover:text-red-300 transition-colors font-bold">All Academic Drills →</Link></li>
                   </ul>
                 </div>
                 <div>
-                  <h3 className="text-white font-bold mb-3 uppercase tracking-wider">More Sectors</h3>
+                  <h3 className="text-white font-bold mb-3 uppercase tracking-wider text-xs">More Sectors</h3>
                   <ul className="space-y-2">
-                    <li><Link href="/drills/visual" className="hover:text-red-400 transition-colors">Visual (14)</Link></li>
-                                        
-                    <li><Link href="/drills/physical" className="hover:text-red-400 transition-colors">Physical (11)</Link></li>
+                    <li><Link href="/drills/visual" className="hover:text-red-400 transition-colors">Visual</Link></li>
+                    <li><Link href="/drills/physical" className="hover:text-red-400 transition-colors">Physical</Link></li>
                   </ul>
                 </div>
               </div>
               
-              <div className="border-t border-slate-900 pt-8 text-center">
+              <div className="border-t border-slate-900 pt-8 text-center font-mono">
                 <div className="flex items-center justify-center gap-2 mb-4">
-                  <div className="w-6 h-6 bg-gradient-to-br from-red-500/25 to-orange-500/25 border border-red-500/30 rounded-lg flex items-center justify-center">
+                  <div className="w-6 h-6 bg-gradient-to-br from-red-500/25 to-orange-500/25 border border-red-500/30 rounded-lg flex items-center justify-center animate-pulse">
                     <Crosshair className="w-3.5 h-3.5 text-red-400" />
                   </div>
                   <span className="text-white font-black tracking-widest text-xs uppercase">SkillDrills</span>
                 </div>
-                <p className="text-[9px] mb-2">&copy; 2026 SkillDrills. All rights reserved.</p>
+                <p className="text-[9px] mb-2">&copy; {new Date().getFullYear()} SkillDrills. All rights reserved.</p>
                 <p className="text-[9px] max-w-2xl mx-auto leading-relaxed mb-6">
                   Open-source telemetry training platform using hardware pointer lock. Free forever. No downloads required.
                 </p>
                 <div className="flex items-center justify-center gap-3 flex-wrap">
                   <a href="https://youtube.com/@skilldrills.online" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="YouTube">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93 .502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
                   </a>
                   <a href="https://www.facebook.com/profile.php?id=61590093843779" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="Facebook">
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
@@ -984,16 +1309,18 @@ export default function VerticalAirTrackClient() {
 
 // === Subcomponents ===
 
-function StatCard({ icon, value, label, unit = '' }) {
+function StatCard({ icon, value, label, unit = '', highlight = false }) {
   return (
-    <div className="group rounded-xl border border-slate-900 bg-slate-950/40 p-2 text-center flex flex-col justify-center h-full transition-all duration-300 hover:scale-[1.03] hover:border-slate-800">
+    <div className={`group rounded-xl border ${
+      highlight ? 'border-red-500/50 bg-red-500/5 shadow-[inset_0_0_12px_rgba(239,68,68,0.05)]' : 'border-gray-800 bg-gray-900/50'
+    } p-2.5 text-center flex flex-col justify-center h-full transition-all duration-300 hover:scale-[1.03] hover:border-gray-700`}>
       <div className="mb-1 flex justify-center transition-transform duration-300 group-hover:scale-110">
         {icon}
       </div>
-      <p className="text-xs sm:text-sm font-extrabold tracking-tight truncate text-white">
-        {value} <span className="text-[10px] font-semibold text-slate-400">{unit}</span>
+      <p className="text-xs sm:text-base font-black tracking-tight truncate text-white">
+        {value} <span className="text-[10px] font-semibold text-gray-500">{unit}</span>
       </p>
-      <p className="text-[9px] font-mono font-bold uppercase tracking-wider text-slate-500 truncate">{label}</p>
+      <p className="text-[9px] font-mono font-bold uppercase tracking-wider text-gray-500 truncate">{label}</p>
     </div>
   );
 }
@@ -1001,23 +1328,18 @@ function StatCard({ icon, value, label, unit = '' }) {
 function RuleItem({ num, color, text, highlight = '', result }) {
   const colorMap = { 
     blue: 'bg-blue-600 text-blue-300 border-blue-500', 
-    indigo: 'bg-indigo-600 text-indigo-300 border-indigo-500', 
-    gray: 'bg-gray-600 text-gray-300 border-gray-500', 
-    green: 'bg-green-600 text-green-300 border-green-500',
-    red: 'bg-red-600 text-red-300 border-red-500',
+    red: 'bg-red-600 text-red-300 border-red-500', 
     orange: 'bg-orange-600 text-orange-300 border-orange-500',
-    yellow: 'bg-yellow-600 text-yellow-300 border-yellow-500',
-    purple: 'bg-purple-600 text-purple-300 border-purple-500',
-    cyan: 'bg-cyan-600 text-cyan-300 border-cyan-500'
+    green: 'bg-green-600 text-green-300 border-green-500' 
   };
-  const colors = colorMap[color] || 'bg-slate-600 text-slate-300 border-slate-500';
+  const colors = colorMap[color] || 'bg-gray-600 text-gray-300 border-gray-500';
   const [bg, txt, border] = colors.split(' ');
   
   return (
-    <div className="flex items-center gap-4 bg-[#0b0f19]/40 p-4 rounded-xl border border-slate-800 shadow-sm">
+    <div className="flex items-center gap-4 bg-[#0b0f19]/40 p-4 rounded-xl border border-gray-800 shadow-sm">
       <div className={`w-8 h-8 rounded-xl ${bg} border border-t-white/20 flex items-center justify-center text-white text-base font-black shadow-lg flex-shrink-0`}>{num}</div>
       <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-        <p className="text-sm font-medium text-slate-300">
+        <p className="text-sm font-medium text-gray-300">
           {text}{highlight && <span className={`font-black ${txt}`}> {highlight}</span>}
         </p>
         <div className={`text-xs font-black px-3 py-1.5 rounded-lg bg-[#050811] border ${border} ${txt} whitespace-nowrap shadow-inner tracking-wide text-center sm:text-left`}>
@@ -1033,23 +1355,28 @@ function RelatedCard({ href, title, desc, color, icon }) {
     blue: 'from-blue-500 to-indigo-500',
     orange: 'from-orange-500 to-amber-500',
     red: 'from-red-500 to-rose-500',
-    purple: 'from-purple-500 to-violet-500',
     green: 'from-green-500 to-emerald-500',
-    cyan: 'from-cyan-500 to-blue-500',
-    indigo: 'from-indigo-500 to-purple-500',
-    rose: 'from-rose-500 to-pink-500'
   };
   return (
-    <Link href={href} className="group relative overflow-hidden rounded-2xl border border-slate-800 bg-[#0b0f19]/40 transition-all hover:-translate-y-1 hover:border-red-500/50 block p-5">
+    <Link href={href} className="group relative overflow-hidden rounded-2xl border border-gray-800 bg-[#0b0f19]/40 transition-all hover:-translate-y-1 hover:border-red-500/50 block p-5">
       <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${gradients[color]}`}></div>
-      <div className="w-10 h-10 rounded-xl bg-[#050811] border border-slate-700 flex items-center justify-center text-slate-400 group-hover:text-white mb-3 shadow-inner">
+      <div className="w-10 h-10 rounded-xl bg-[#050811] border border-gray-700 flex items-center justify-center text-gray-400 group-hover:text-white mb-3 shadow-inner transition-colors">
         {icon}
       </div>
       <h3 className="font-bold text-base mb-1.5 text-white group-hover:text-red-400 transition-colors">{title}</h3>
-      <p className="text-xs text-slate-500 mb-4">{desc}</p>
+      <p className="text-xs text-gray-500 mb-4">{desc}</p>
       <div className="flex items-center gap-1.5 text-red-400 text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-wider">
         Start Drill <ArrowRight className="w-3.5 h-3.5" />
       </div>
     </Link>
+  );
+}
+
+function FAQItem({ q, a }) {
+  return (
+    <div className="bg-[#05060b] border border-gray-800 rounded-xl p-5 hover:border-gray-700 transition-colors">
+      <h4 className="text-sm font-bold text-gray-200 mb-2">{q}</h4>
+      <p className="text-xs text-gray-400 leading-relaxed">{a}</p>
+    </div>
   );
 }

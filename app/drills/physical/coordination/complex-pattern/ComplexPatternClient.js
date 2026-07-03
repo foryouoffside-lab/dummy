@@ -1,15 +1,15 @@
 ﻿'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 
 import { 
   Activity, AlertCircle, ArrowRight, BarChart3, ChevronRight, 
-  Clock, Crosshair, Eye, GraduationCap, Info, Lightbulb, 
-  Maximize2, Minimize2, Play, RefreshCw, Star, Target, 
+  Clock, Crosshair, Eye, Flame, GraduationCap, Info, Lightbulb, 
+  Maximize2, Minimize2, Play, RefreshCw, Sparkles, Star, Target,
   Timer, TrendingUp, Trophy, Volume2, VolumeX, Zap, 
   Share2, Code2, Calculator, CheckCircle2, Shield, Users,
-  GitBranch, Heart, XCircle, PenTool
+  GitBranch, Heart, XCircle, Edit3
 } from 'lucide-react';
 
 // ============================================================
@@ -40,7 +40,8 @@ class AudioSynthesizer {
       const freqMap = { 
         success: 880, 
         fail: 250, 
-        streak: 1046.5
+        streak: 1046.5,
+        levelup: 1200
       };
       
       osc.type = type === 'fail' ? 'sawtooth' : 'sine';
@@ -52,7 +53,7 @@ class AudioSynthesizer {
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
         osc.start(now); osc.stop(now + 0.3);
       } else {
-        gain.gain.setValueAtTime(type === 'streak' ? 0.12 : 0.08, now);
+        gain.gain.setValueAtTime(type === 'streak' || type === 'levelup' ? 0.12 : 0.08, now);
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
         osc.start(now); osc.stop(now + 0.15);
       }
@@ -65,7 +66,6 @@ class AudioSynthesizer {
 }
 
 const audioSynth = typeof window !== 'undefined' ? new AudioSynthesizer() : null;
-
 const DRILL_DURATION = 60; // Strict 60 seconds
 
 // ============================================================
@@ -90,7 +90,8 @@ export default function ComplexPatternClient() {
   
   // Real-time HUD State
   const [streak, setStreak] = useState(0);
-  const [currentComplexity, setCurrentComplexity] = useState(3);
+  const [currentLevel, setCurrentLevel] = useState(1);
+  const [comboMultiplier, setComboMultiplier] = useState(1.0);
   const [phase, setPhase] = useState('memorize'); // 'memorize' -> 'draw' -> 'result'
 
   // Analytics State
@@ -99,14 +100,15 @@ export default function ComplexPatternClient() {
     patternsCompleted: 0,
     misses: 0,
     maxStreak: 0,
-    peakComplexity: 3
+    peakLevel: 1,
+    rankData: { rank: 'Bronze', color: 'text-slate-500' },
+    coachAdvice: ''
   });
 
   // === High-performance Mutable Refs ===
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
   const animationRef = useRef(null);
-  const timerRef = useRef(null);
   const pageRef = useRef(null);
   
   // === Game Logic Engine Refs ===
@@ -118,13 +120,19 @@ export default function ComplexPatternClient() {
     score: 0,
     streak: 0,
     bestStreak: 0,
+    level: 1,
+    
+    // Level Parameters
+    numNodes: 3,
+    memorizeTime: 2.0,
+    requiredAccuracy: 60,
     
     // Pattern Logic
     targetPattern: [],
     userDrawing: [],
     isDrawing: false,
-    complexityValue: 3.0,
     phaseTimer: 0,
+    flashState: 0, // Used for the double-flash mechanic at higher levels
     
     // Telemetry
     patternsCompleted: 0,
@@ -157,22 +165,39 @@ export default function ComplexPatternClient() {
     if (audioSynth) audioSynth.setEnabled(soundEnabled);
   }, [universalSens, gameState, soundEnabled]);
 
-  // === Core Game Management ===
+  // === End Game & Ingest Analytics ===
   const endGame = useCallback(() => {
     setGameState('gameOver');
     isActiveRef.current = false;
     if (document.pointerLockElement) document.exitPointerLock();
     
     const e = engine.current;
-
     const finalAvgAcc = e.totalAttempts > 0 ? Math.round(e.totalAccuracySum / e.totalAttempts) : 0;
+
+    let rank = 'Bronze'; let rankColor = 'text-slate-500';
+    if (e.score >= 5000 && finalAvgAcc >= 90) { rank = 'Master'; rankColor = 'text-fuchsia-400'; }
+    else if (e.score >= 3000 && finalAvgAcc >= 82) { rank = 'Diamond'; rankColor = 'text-cyan-400'; }
+    else if (e.score >= 1500 && finalAvgAcc >= 75) { rank = 'Platinum'; rankColor = 'text-indigo-400'; }
+    else if (e.score >= 800 && finalAvgAcc >= 65) { rank = 'Gold'; rankColor = 'text-yellow-400'; }
+    else if (e.score >= 300) { rank = 'Silver'; rankColor = 'text-gray-300'; }
+
+    let advice = 'Excellent spatial working memory! You maintained incredible shape replication despite the extreme node density and vanishing flash timers. Keep pushing your limits.';
+    if (e.misses > 5) {
+      advice = 'You are struggling to visualize the vector geometry once the pattern vanishes. Focus purely on memorizing the sharp angles and general flow direction rather than exact pixel coordinates.';
+    } else if (e.level < 4) {
+      advice = 'Your tracing accuracy is decent, but you are not progressing through the levels fast enough. Try executing your drawing faster so you can fit more patterns into the 60 seconds.';
+    } else if (finalAvgAcc < 75) {
+      advice = 'You are surviving the lower levels, but your shape similarity is dragging you down. Be sure to return directly to the magenta exit node, as endpoints account for a significant portion of your similarity score.';
+    }
 
     setAnalytics({
       avgAccuracy: finalAvgAcc,
       patternsCompleted: e.patternsCompleted,
       misses: e.misses,
       maxStreak: e.bestStreak,
-      peakComplexity: Math.floor(e.complexityValue)
+      peakLevel: e.level,
+      rankData: { rank, color: rankColor },
+      coachAdvice: advice
     });
 
     setBestScore(prev => {
@@ -187,49 +212,100 @@ export default function ComplexPatternClient() {
 
   const generatePattern = useCallback((width, height) => { 
     const e = engine.current;
-    const numWaypoints = Math.min(8, Math.max(1, Math.floor(e.complexityValue) - 1)); 
+    const count = e.numNodes;
     const pattern = []; 
-    const padding = 100; 
+    const padding = 120; 
     
-    // Start Point
-    pattern.push({ 
-      x: padding + Math.random() * (width - padding * 2), 
-      y: padding + Math.random() * (height - padding * 2), 
-      type: 'start'
-    }); 
-    
-    // Waypoints
-    for (let i = 0; i < numWaypoints; i++) { 
-      pattern.push({ 
-        x: padding + Math.random() * (width - padding * 2), 
-        y: padding + Math.random() * (height - padding * 2), 
-        type: 'waypoint'
-      }); 
-    } 
-    
-    // End Point
-    pattern.push({ 
-      x: padding + Math.random() * (width - padding * 2), 
-      y: padding + Math.random() * (height - padding * 2), 
-      type: 'end'
-    }); 
+    // Level constraints for harder geometric patterns
+    const isSpiral = e.level >= 4 && Math.random() > 0.7;
+    const isZigZag = e.level >= 3 && Math.random() > 0.7 && !isSpiral;
+
+    if (isSpiral) {
+      // Generate a spiral path
+      const cx = width / 2;
+      const cy = height / 2;
+      let angle = Math.random() * Math.PI * 2;
+      let radius = 40;
+      for(let i=0; i<count+2; i++) {
+        pattern.push({
+          x: cx + Math.cos(angle) * radius,
+          y: cy + Math.sin(angle) * radius,
+          type: i === 0 ? 'start' : (i === count+1 ? 'end' : 'waypoint')
+        });
+        angle += (Math.PI / 2) + 0.2; // Tight turns
+        radius += 35;
+      }
+    } else if (isZigZag) {
+      // Generate a sharp zig-zag across the screen
+      const startX = padding + Math.random() * (width * 0.2);
+      const startY = padding + Math.random() * (height - padding * 2);
+      const endX = width - padding - Math.random() * (width * 0.2);
+      const stepX = (endX - startX) / (count + 1);
+      
+      let currentY = startY;
+      let currentX = startX;
+      
+      for(let i=0; i<count+2; i++) {
+        pattern.push({
+          x: currentX,
+          y: currentY,
+          type: i === 0 ? 'start' : (i === count+1 ? 'end' : 'waypoint')
+        });
+        currentX += stepX;
+        // Flip Y aggressively
+        currentY = currentY > height/2 ? padding + Math.random() * 100 : height - padding - Math.random() * 100;
+      }
+    } else {
+      // Standard random dense cluster
+      pattern.push({ x: padding + Math.random() * (width - padding * 2), y: padding + Math.random() * (height - padding * 2), type: 'start' }); 
+      for (let i = 0; i < count; i++) { 
+        pattern.push({ x: padding + Math.random() * (width - padding * 2), y: padding + Math.random() * (height - padding * 2), type: 'waypoint' }); 
+      } 
+      pattern.push({ x: padding + Math.random() * (width - padding * 2), y: padding + Math.random() * (height - padding * 2), type: 'end' }); 
+    }
+
+    // Advanced Level 6+ Pattern Rotation
+    if (e.level >= 6 && Math.random() > 0.5) {
+      const cx = width / 2; const cy = height / 2;
+      const angle = (Math.PI / 4) * Math.floor(1 + Math.random() * 7); // Random 45 deg intervals
+      pattern.forEach(p => {
+        const dx = p.x - cx; const dy = p.y - cy;
+        p.x = cx + dx * Math.cos(angle) - dy * Math.sin(angle);
+        p.y = cy + dx * Math.sin(angle) + dy * Math.cos(angle);
+        // Clamp back inside bounds if rotated out
+        p.x = Math.max(50, Math.min(width - 50, p.x));
+        p.y = Math.max(50, Math.min(height - 50, p.y));
+      });
+    }
     
     e.targetPattern = pattern; 
   }, []);
 
   const startNewPattern = useCallback((cvs) => { 
     const e = engine.current;
+    
+    // Set level parameters based on level map
+    const lvl = e.level;
+    e.numNodes = Math.min(12, 2 + lvl);
+    e.memorizeTime = Math.max(1.2, 2.1 - (lvl * 0.1));
+    e.requiredAccuracy = Math.min(90, 58 + (lvl * 2));
+    
     generatePattern(cvs.width, cvs.height); 
+    
     setPhase('memorize'); 
-    e.phaseTimer = 2.0; // 2 seconds to memorize
+    e.phaseTimer = e.memorizeTime; 
+    e.flashState = 0; // Reset flash state
     e.userDrawing = []; 
     e.isDrawing = false; 
   }, [generatePattern]);
 
   const calculatePathSimilarity = useCallback(() => { 
     const e = engine.current;
-    if (e.targetPattern.length === 0 || e.userDrawing.length < 2) return { accurate: false, similarity: 0 }; 
+    if (e.targetPattern.length === 0 || e.userDrawing.length < 2) {
+        return { accurate: false, similarity: 0, startDist: 999, endDist: 999 }; 
+    }
     
+    // 1. Resample path to get evenly spaced points (100 points each)
     const resamplePath = (path, numPoints) => { 
       if (path.length < 2) return path; 
       let tl = 0; 
@@ -239,11 +315,10 @@ export default function ComplexPatternClient() {
         sl.push(d); 
         tl += d; 
       } 
-      const r = []; 
+      const r = [{ x: path[0].x, y: path[0].y }]; 
       const ss = tl / (numPoints - 1); 
-      let al = 0; 
-      let si = 0; 
-      r.push({ x: path[0].x, y: path[0].y }); 
+      let al = 0, si = 0; 
+       
       for (let i = 1; i < numPoints - 1; i++) { 
         const td = i * ss; 
         while (al + sl[si] < td && si < sl.length - 1) { 
@@ -261,60 +336,53 @@ export default function ComplexPatternClient() {
       return r; 
     }; 
     
-    const normalizePath = (path) => { 
-      let cx = 0, cy = 0; 
-      path.forEach(p => { cx += p.x; cy += p.y; }); 
-      cx /= path.length; 
-      cy /= path.length; 
-      const c = path.map(p => ({ x: p.x - cx, y: p.y - cy })); 
-      let md = 0; 
-      c.forEach(p => { 
-        const d = Math.hypot(p.x, p.y); 
-        if (d > md) md = d; 
-      }); 
-      if (md > 0) return c.map(p => ({ x: p.x / md, y: p.y / md })); 
-      return c; 
-    }; 
-    
     const tr = resamplePath(e.targetPattern, 100); 
     const dr = resamplePath(e.userDrawing, 100); 
-    const tn = normalizePath(tr); 
-    const dn = normalizePath(dr); 
     
-    let tpd = 0; 
-    for (let i = 0; i < tn.length; i++) { 
-      tpd += Math.hypot(tn[i].x - dn[i].x, tn[i].y - dn[i].y); 
-    } 
-    const apd = tpd / tn.length; 
+    // 2. Bidirectional Nearest Point Comparison (Absolute Screen Space)
+    // Step A: Calculate how far the user's line deviated from the target
+    let userToTargetSum = 0;
+    for (let i = 0; i < dr.length; i++) {
+      let minDist = Infinity;
+      for (let j = 0; j < tr.length; j++) {
+        const d = Math.hypot(dr[i].x - tr[j].x, dr[i].y - tr[j].y);
+        if (d < minDist) minDist = d;
+      }
+      userToTargetSum += minDist;
+    }
+    const avgDev = userToTargetSum / dr.length;
+
+    // Step B: Calculate how much of the target line the user actually covered
+    let targetToUserSum = 0;
+    for (let i = 0; i < tr.length; i++) {
+      let minDist = Infinity;
+      for (let j = 0; j < dr.length; j++) {
+        const d = Math.hypot(tr[i].x - dr[j].x, tr[i].y - dr[j].y);
+        if (d < minDist) minDist = d;
+      }
+      targetToUserSum += minDist;
+    }
+    const avgCoverage = targetToUserSum / tr.length;
     
-    const getAngles = (path) => { 
-      const a = []; 
-      for (let i = 1; i < path.length; i++) { 
-        a.push(Math.atan2(path[i].y - path[i-1].y, path[i].x - path[i-1].x)); 
-      } 
-      return a; 
-    }; 
-    const ta = getAngles(tr); 
-    const da = getAngles(dr); 
+    // Overall absolute pixel error
+    const overallAvgError = (avgDev + avgCoverage) / 2;
     
-    let tad = 0; 
-    const mc = Math.min(ta.length, da.length); 
-    for (let i = 0; i < mc; i++) { 
-      let d = Math.abs(ta[i] - da[i]); 
-      if (d > Math.PI) d = 2 * Math.PI - d; 
-      tad += d; 
-    } 
-    const aad = tad / mc; 
+    // Convert error to a 0-100 score (0px error = 100%, 100px error = 0%)
+    let sim = Math.max(0, 100 - overallAvgError);
     
+    // 3. Strict Endpoint Checks
     const sd = Math.hypot(e.targetPattern[0].x - e.userDrawing[0].x, e.targetPattern[0].y - e.userDrawing[0].y); 
-    const ed = Math.hypot(e.targetPattern[e.targetPattern.length - 1].x - e.userDrawing[e.userDrawing.length - 1].x, e.targetPattern[e.targetPattern.length - 1].y - e.userDrawing[e.userDrawing.length - 1].y); 
+    const ed = Math.hypot(
+        e.targetPattern[e.targetPattern.length - 1].x - e.userDrawing[e.userDrawing.length - 1].x, 
+        e.targetPattern[e.targetPattern.length - 1].y - e.userDrawing[e.userDrawing.length - 1].y
+    ); 
     
-    const ps = Math.max(0, 100 - (apd * 100)); 
-    const as = Math.max(0, 100 - (aad * (100 / Math.PI))); 
-    const sep = (sd > 30 ? 10 : 0) + (ed > 30 ? 10 : 0); 
-    const sim = Math.max(0, Math.min(100, (ps * 0.6) + (as * 0.3) + (100 - sep) * 0.1)); 
-    
-    const acc = sim >= 60 && sd < 50 && ed < 50; 
+    // Require them to start and end within 45 pixels of the exact nodes
+    if (sd > 45 || ed > 45) {
+        sim *= 0.5; // Heavily penalize the score if they don't hit the cyan/magenta ends
+    }
+
+    const acc = sim >= e.requiredAccuracy && sd <= 45 && ed <= 45; 
     return { accurate: acc, similarity: sim, startDist: sd, endDist: ed }; 
   }, []);
 
@@ -327,18 +395,38 @@ export default function ComplexPatternClient() {
 
     if (result.accurate) { 
       e.patternsCompleted++;
-      e.score += 10; // +10 PTS
-      e.timeLeft += 5.0; // +5.0s Time Bonus
+      
+      // Accuracy Bonus Logic
+      let basePoints = 10;
+      if (result.similarity >= 95) basePoints += 50;
+      else if (result.similarity >= 90) basePoints += 30;
+      else if (result.similarity >= 80) basePoints += 20;
+      else if (result.similarity >= 70) basePoints += 15;
+      else basePoints += 10;
+
+      // Combo Multiplier
+      let multi = 1.0;
+      if (e.streak >= 4) multi = 3.0;
+      else if (e.streak === 3) multi = 2.0;
+      else if (e.streak === 2) multi = 1.5;
+      else if (e.streak === 1) multi = 1.2;
+
+      const finalPoints = Math.floor(basePoints * multi);
+      e.score += finalPoints; 
       
       e.streak++;
       if (e.streak > e.bestStreak) e.bestStreak = e.streak;
       
-      // Adaptive Difficulty: Increase nodes
-      e.complexityValue = Math.min(9, e.complexityValue + 0.5); 
-      
-      if (audioSynth) {
-        if (e.streak % 3 === 0) audioSynth.playSound('streak');
-        else audioSynth.playSound('success');
+      // Level Up Check
+      const newLevel = Math.floor(e.score / 100) + 1;
+      if (newLevel > e.level) {
+        e.level = newLevel;
+        if (audioSynth) audioSynth.playSound('levelup');
+      } else {
+        if (audioSynth) {
+          if (e.streak % 3 === 0) audioSynth.playSound('streak');
+          else audioSynth.playSound('success');
+        }
       }
       
       setFlashBg('green');
@@ -346,11 +434,8 @@ export default function ComplexPatternClient() {
 
     } else { 
       e.misses++;
-      e.score = Math.max(0, e.score - 5); // -5 PTS Penalty
-      e.timeLeft -= 2.0; // -2.0s Time Penalty
-      
+      // No time deduction, strictly positive reinforcement
       e.streak = 0; 
-      e.complexityValue = Math.max(2, e.complexityValue - 0.5); 
       
       e.screenShake = 15;
       if (audioSynth) audioSynth.playSound('fail');
@@ -359,9 +444,17 @@ export default function ComplexPatternClient() {
       setTimeout(() => setFlashBg(null), 100);
     } 
     
+    // Set UI State
+    let uiMulti = 1.0;
+    if (e.streak >= 4) uiMulti = 3.0;
+    else if (e.streak === 3) uiMulti = 2.0;
+    else if (e.streak === 2) uiMulti = 1.5;
+    else if (e.streak === 1) uiMulti = 1.2;
+
     setScore(e.score);
     setStreak(e.streak);
-    setCurrentComplexity(Math.floor(e.complexityValue));
+    setCurrentLevel(e.level);
+    setComboMultiplier(uiMulti);
 
     setPhase('result'); 
     e.phaseTimer = 1.0; // Show result for 1 second before next pattern
@@ -373,7 +466,8 @@ export default function ComplexPatternClient() {
     setIsNewBest(false);
     setScore(0);
     setStreak(0);
-    setCurrentComplexity(3);
+    setCurrentLevel(1);
+    setComboMultiplier(1.0);
     setPhase('memorize');
     setGameState('playing');
     
@@ -381,14 +475,17 @@ export default function ComplexPatternClient() {
     e.score = 0;
     e.streak = 0;
     e.bestStreak = 0;
-    e.connections = 0;
+    e.level = 1;
     e.misses = 0;
     e.totalAttempts = 0;
     e.totalFrames = 0;
     e.totalAccuracySum = 0;
     e.patternsCompleted = 0;
     
-    e.complexityValue = 3.0;
+    e.numNodes = 3;
+    e.memorizeTime = 2.0;
+    e.requiredAccuracy = 60;
+    
     e.phaseTimer = 2.0;
     e.targetPattern = [];
     e.userDrawing = [];
@@ -435,8 +532,8 @@ export default function ComplexPatternClient() {
       eRef.crosshair.x = Math.max(0, Math.min(cvs.width, eRef.crosshair.x + dx));
       eRef.crosshair.y = Math.max(0, Math.min(cvs.height, eRef.crosshair.y + dy));
       
-      // Store drawing path if in draw phase
-      if (phase === 'draw' && eRef.isDrawing && eRef.totalFrames % 2 === 0) { // Throttle path points slightly
+      // Invisible drawing mode at Level 8+
+      if (phase === 'draw' && eRef.isDrawing && eRef.totalFrames % 2 === 0) { 
         eRef.userDrawing.push({ x: eRef.crosshair.x, y: eRef.crosshair.y });
       }
     };
@@ -455,7 +552,7 @@ export default function ComplexPatternClient() {
         const eRef = engine.current;
         if (eRef.isDrawing) {
           eRef.isDrawing = false;
-          if (eRef.userDrawing.length > 5) { // Ensure they actually drew something
+          if (eRef.userDrawing.length > 5) { 
             submitDrawing(canvasRef.current);
           }
         }
@@ -518,7 +615,7 @@ export default function ComplexPatternClient() {
 
       if (gameState === 'playing' && pointerLocked && isActiveRef.current) {
         
-        // Exact Delta-Time Clock processing
+        // Strict 60s processing
         e.timeLeft -= dt;
         if (e.timeLeft <= 0) {
           e.timeLeft = 0;
@@ -535,6 +632,16 @@ export default function ComplexPatternClient() {
           } else if (phase === 'result') {
             startNewPattern(cvs);
           }
+        } else if (phase === 'memorize' && e.level >= 5) {
+          // Double flash logic for Level 5+
+          // Timer counts down from e.memorizeTime
+          const half = e.memorizeTime / 2;
+          if (e.phaseTimer > half + 0.3) e.flashState = 1; // Show
+          else if (e.phaseTimer > half) e.flashState = 0; // Hide
+          else if (e.phaseTimer > 0.3) e.flashState = 1; // Show
+          else e.flashState = 0; // Hide
+        } else {
+          e.flashState = 1; // Standard levels always show during memorize
         }
 
         // Throttle UI Sync
@@ -558,7 +665,7 @@ export default function ComplexPatternClient() {
       ctx.fillRect(0, 0, cvs.width, cvs.height);
 
       // Environment Grid
-      ctx.strokeStyle = 'rgba(6, 182, 212, 0.04)'; // Cyan tint
+      ctx.strokeStyle = 'rgba(16, 185, 129, 0.04)'; // Cyan tint
       ctx.lineWidth = 1; 
       for(let i = 0; i < cvs.width; i+= 50) { 
         ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, cvs.height); ctx.stroke(); 
@@ -567,29 +674,31 @@ export default function ComplexPatternClient() {
 
       if (gameState === 'playing' || gameState === 'start') {
         
-        // Phase: Memorize (Show everything)
+        // Phase: Memorize
         if (phase === 'memorize' && e.targetPattern.length > 0) { 
-          // Draw Path Lines
-          ctx.beginPath(); 
-          ctx.moveTo(e.targetPattern[0].x, e.targetPattern[0].y); 
-          for (let i = 1; i < e.targetPattern.length; i++) {
-            ctx.lineTo(e.targetPattern[i].x, e.targetPattern[i].y); 
-          }
-          ctx.strokeStyle = "rgba(16, 185, 129, 0.5)"; // Dim emerald
-          ctx.lineWidth = 4; 
-          ctx.stroke(); 
-          
-          // Draw Nodes
-          e.targetPattern.forEach(p => { 
+          if (e.flashState === 1) { // Apply flash mechanic
+            // Draw Path Lines
             ctx.beginPath(); 
-            ctx.arc(p.x, p.y, p.type === 'start' || p.type === 'end' ? 12 : 8, 0, Math.PI * 2); 
+            ctx.moveTo(e.targetPattern[0].x, e.targetPattern[0].y); 
+            for (let i = 1; i < e.targetPattern.length; i++) {
+              ctx.lineTo(e.targetPattern[i].x, e.targetPattern[i].y); 
+            }
+            ctx.strokeStyle = "rgba(16, 185, 129, 0.6)"; 
+            ctx.lineWidth = 4; 
+            ctx.stroke(); 
             
-            if (p.type === 'start') ctx.fillStyle = "#06b6d4"; // Cyan
-            else if (p.type === 'end') ctx.fillStyle = "#d946ef"; // Magenta
-            else ctx.fillStyle = "#10b981"; // Emerald waypoints
-            
-            ctx.fill(); 
-          }); 
+            // Draw Nodes
+            e.targetPattern.forEach(p => { 
+              ctx.beginPath(); 
+              ctx.arc(p.x, p.y, p.type === 'start' || p.type === 'end' ? 12 : 8, 0, Math.PI * 2); 
+              
+              if (p.type === 'start') ctx.fillStyle = "#10b981"; // Cyan
+              else if (p.type === 'end') ctx.fillStyle = "#d946ef"; // Magenta
+              else ctx.fillStyle = "#10b981"; // Emerald waypoints
+              
+              ctx.fill(); 
+            }); 
+          }
 
           // Countdown indicator
           ctx.fillStyle = "#ffffff";
@@ -598,16 +707,15 @@ export default function ComplexPatternClient() {
           ctx.fillText(`MEMORIZE: ${Math.max(0, e.phaseTimer).toFixed(1)}s`, cvs.width / 2, 50);
         } 
         
-        // Phase: Draw (Hide waypoints and path, only show Start/End)
+        // Phase: Draw
         else if (phase === 'draw') { 
-          
           if (e.targetPattern.length > 0) {
             const sp = e.targetPattern.find(p => p.type === 'start'); 
             const ep = e.targetPattern.find(p => p.type === 'end'); 
             
             if (sp) { 
               ctx.beginPath(); ctx.arc(sp.x, sp.y, 12, 0, Math.PI * 2); 
-              ctx.fillStyle = "#06b6d4"; ctx.fill(); 
+              ctx.fillStyle = "#10b981"; ctx.fill(); 
             } 
             if (ep) { 
               ctx.beginPath(); ctx.arc(ep.x, ep.y, 12, 0, Math.PI * 2); 
@@ -615,8 +723,8 @@ export default function ComplexPatternClient() {
             } 
           }
 
-          // Draw User's Current Line
-          if (e.userDrawing.length > 1) { 
+          // Draw User's Current Line (Invisible at Level 8+)
+          if (e.userDrawing.length > 1 && e.level < 8) { 
             ctx.beginPath(); 
             ctx.moveTo(e.userDrawing[0].x, e.userDrawing[0].y); 
             for (let i = 1; i < e.userDrawing.length; i++) {
@@ -630,10 +738,10 @@ export default function ComplexPatternClient() {
           ctx.fillStyle = "#f59e0b";
           ctx.font = "bold 24px monospace";
           ctx.textAlign = "center";
-          ctx.fillText("HOLD CLICK AND DRAW", cvs.width / 2, 50);
+          ctx.fillText(e.level >= 8 ? "BLIND DRAW ACTIVE" : "HOLD CLICK AND DRAW", cvs.width / 2, 50);
         } 
         
-        // Phase: Result (Show both to compare)
+        // Phase: Result
         else if (phase === 'result') { 
           // Show Original Pattern
           if (e.targetPattern.length > 0) { 
@@ -671,7 +779,7 @@ export default function ComplexPatternClient() {
       // Draw Crosshair
       const ch = e.crosshair;
       if (ch.initialized && (gameState === 'playing' || gameState === 'start')) {
-        const activeColor = pointerLocked ? (e.isDrawing ? '#f59e0b' : '#06b6d4') : '#ef4444';
+        const activeColor = pointerLocked ? (e.isDrawing ? '#f59e0b' : '#10b981') : '#ef4444';
         ctx.strokeStyle = activeColor;
         ctx.fillStyle = activeColor;
         
@@ -702,20 +810,23 @@ export default function ComplexPatternClient() {
     };
   }, [gameState, pointerLocked, phase, startNewPattern, endGame]);
 
-  const shareDrillLink = useCallback(() => {
-    const url = typeof window !== 'undefined' ? window.location.href : '';
-    if (navigator.share) {
-      navigator.share({ title: 'Complex Pattern Elite', url }).catch(() => {});
-    } else {
-      navigator.clipboard.writeText(url).then(() => alert('Link copied!'));
+  const shareScore = useCallback(async () => {
+    const text = `🎯 I reached Level ${currentLevel} and scored ${score} PTS on the Pattern Memory Game! Avg Accuracy: ${analytics.avgAccuracy}%. Test your visual memory at skilldrills.online!`;
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      try {
+        await navigator.share({ title: 'My Memory Score', text, url: 'https://skilldrills.online/drills/physical/coordination/complex-pattern' });
+      } catch (e) {}
+    } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+      alert('Score card copied to clipboard!');
     }
-  }, []);
+  }, [score, currentLevel, analytics]);
 
   return (
     <div ref={pageRef} className="min-h-screen select-none bg-[#050508] text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
-        {/* Header (Hidden in Fullscreen) */}
+        {/* Header */}
         {!isFullscreen && (
           <div className="mb-6">
             <nav className="mb-4">
@@ -724,18 +835,18 @@ export default function ComplexPatternClient() {
                 <li><ChevronRight className="w-4 h-4 text-gray-600" /></li>
                 <li><Link href="/drills/physical" className="hover:text-gray-300">Physical</Link></li>
                 <li><ChevronRight className="w-4 h-4 text-gray-600" /></li>
-                <li className="text-cyan-400 font-medium">Complex Pattern Elite</li>
+                <li className="text-emerald-400 font-medium">Pattern Memory Game</li>
               </ol>
             </nav>
 
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div className="flex items-center gap-4">
-                <div className="p-3 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl shadow-[0_0_20px_rgba(6,182,212,0.3)]">
-                  <GitBranch className="w-7 h-7 text-white" />
+                <div className="p-3 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl shadow-[0_0_20px_rgba(16, 185, 129, 0.3)]">
+                  <Edit3 className="w-7 h-7 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Complex Pattern Elite</h1>
-                  <p className="text-sm text-gray-400 mt-1 font-medium">Desktop Exclusive • Spatial Memory Tracing</p>
+                  <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Pattern Memory Game</h1>
+                  <p className="text-sm text-gray-400 mt-1 font-medium">Desktop Exclusive • Visual & Spatial Memory</p>
                 </div>
               </div>
               
@@ -753,30 +864,31 @@ export default function ComplexPatternClient() {
 
         {/* Live HUD Stats */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 lg:grid-cols-6 gap-2 mb-2">
-            <StatCard icon={<Target className="text-cyan-400" />} value={score} label="Score" />
-            <StatCard icon={<Timer className={timeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-emerald-400'} />} value={Math.max(0, timeLeft).toFixed(1)} label="Time" unit="s" />
-            <StatCard icon={<GitBranch className="text-blue-400" />} value={currentComplexity} label="Complexity" />
-            <StatCard icon={<Zap className="text-yellow-400" />} value={streak} label="Current Streak" />
+          <div className="grid grid-cols-4 lg:grid-cols-7 gap-2 mb-2">
+            <StatCard icon={<Trophy className="text-emerald-400" />} value={score} label="Score" />
+            <StatCard icon={<Timer className={timeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-teal-400'} />} value={Math.max(0, timeLeft).toFixed(1)} label="Time" unit="s" />
+            <StatCard icon={<GitBranch className="text-indigo-400" />} value={`Lv. ${currentLevel}`} label="Level" />
+            <StatCard icon={<Flame className="text-orange-400" />} value={`${comboMultiplier}x`} label="Combo" />
+            <StatCard icon={<Zap className="text-yellow-400" />} value={streak} label="Streak" />
             <StatCard icon={<Info className="text-gray-400" />} value={`${universalSens.toFixed(2)}x`} label="Sens" />
-            <StatCard icon={<Trophy className="text-yellow-500" />} value={bestScore} label="Best Score" />
+            <StatCard icon={<Star className="text-yellow-500" />} value={bestScore} label="Best Score" />
           </div>
         )}
 
         {/* Engine Container */}
         <div 
           ref={containerRef} 
-          className={`relative overflow-hidden transition-colors outline-none ${
-            isFullscreen ? 'w-full h-full' : 'w-full aspect-video min-h-[500px] rounded-2xl border border-gray-700 shadow-2xl'
+          className={`relative overflow-hidden transition-colors outline-none bg-[#05060b] ${
+            isFullscreen ? 'w-full h-full' : 'w-full aspect-video min-h-[500px] rounded-2xl border border-gray-800 shadow-2xl'
           }`}
           style={{ backgroundColor: flashBg === 'red' ? '#450a0a' : flashBg === 'green' ? '#064e3b' : '#05060b' }}
         >
-          {/* Progress Bar */}
+          {/* Progress Bar (Strict 60s) */}
           {gameState === 'playing' && (
             <div className="absolute top-0 left-0 right-0 h-1.5 bg-gray-900 z-[60]">
               <div 
-                className={`h-full transition-all duration-1000 ease-linear ${timeLeft <= 10 ? 'bg-red-500 animate-pulse' : 'bg-cyan-500'}`}
-                style={{ width: `${Math.min(100, (timeLeft / DRILL_DURATION) * 100)}%` }} 
+                className={`h-full transition-all duration-100 ease-linear ${timeLeft <= 10 ? 'bg-red-500 animate-pulse' : 'bg-emerald-500'}`}
+                style={{ width: `${(timeLeft / DRILL_DURATION) * 100}%` }} 
               />
             </div>
           )}
@@ -803,7 +915,7 @@ export default function ComplexPatternClient() {
               }}
             >
               <div className="text-center animate-pulse pointer-events-none">
-                <AlertCircle className="w-12 h-12 text-cyan-500 mx-auto mb-4" />
+                <AlertCircle className="w-12 h-12 text-emerald-500 mx-auto mb-4" />
                 <h2 className="text-3xl font-black text-white tracking-widest uppercase mb-2">Game Paused</h2>
                 <p className="text-gray-300 font-medium">Click anywhere on the screen to lock cursor and resume.</p>
               </div>
@@ -819,160 +931,167 @@ export default function ComplexPatternClient() {
 
           {/* START SCREEN */}
           {gameState === 'start' && (
-            <div className="absolute inset-0 flex items-center justify-center z-50 bg-black/70 backdrop-blur-md p-4 overflow-y-auto">
-              <div className="rounded-3xl p-8 text-center max-w-lg w-full border border-gray-700 bg-gray-900 shadow-2xl my-auto">
-                <div className="w-16 h-16 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-2xl mx-auto flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(6,182,212,0.3)]">
-                  <GitBranch className="w-8 h-8 text-white" />
-                </div>
-                <h2 className="text-3xl font-black mb-3 tracking-tight text-white uppercase">Complex Pattern Elite</h2>
-                <p className="text-sm mb-6 text-gray-400 leading-relaxed">
-                  Raw input spatial memory training. Memorize the pattern path during the 2-second flash. When the path vanishes, hold your click and redraw the exact shape from the <span className="font-bold text-cyan-400">Cyan Start</span> to the <span className="font-bold text-fuchsia-400">Magenta End</span>.
+            <div className="absolute inset-0 bg-[#05070e]/98 flex flex-col items-center justify-center p-6 z-30 select-none overflow-y-auto max-h-[100vh] backdrop-blur-sm">
+              <div className="max-w-md w-full text-center">
+                <h2 className="text-xl font-black text-white uppercase tracking-wider mb-1">
+                  Pattern Memory Game
+                </h2>
+                <p className="text-xs text-slate-500 uppercase tracking-widest mb-6">
+                  Working Memory • 60-Second Drill
                 </p>
 
-                {/* Configuration Panel */}
-                <div className="mb-8 p-5 bg-black/50 rounded-xl border border-gray-800 text-left space-y-5">
-                  <div>
-                    <div className="flex justify-between items-center mb-2">
-                      <label className="text-xs text-gray-400 font-bold uppercase tracking-wider flex items-center gap-2">
-                        <Crosshair className="w-4 h-4 text-cyan-500"/> Universal Sens
-                      </label>
-                      <span className="text-cyan-400 font-mono text-sm font-bold">{universalSens.toFixed(2)}x</span>
-                    </div>
-                    <input 
-                      type="range" min="0.1" max="3.0" step="0.05" 
-                      value={universalSens} 
-                      onChange={(e) => setUniversalSens(parseFloat(e.target.value))} 
-                      className="w-full h-1.5 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-cyan-500" 
-                    />
-                    <div className="text-[10px] text-gray-500 mt-1.5 text-right">Approx: {cmPer360} cm/360</div>
+                <div className="grid grid-cols-2 gap-3 mb-6 text-left">
+                  <div className="bg-slate-900/60 border border-slate-800 p-3 rounded-xl">
+                    <span className="text-[8px] text-slate-500 block uppercase font-bold">Objective</span>
+                    <span className="text-sm font-black text-white">Draw from Memory</span>
+                  </div>
+                  <div className="bg-slate-900/60 border border-slate-800 p-3 rounded-xl">
+                    <span className="text-[8px] text-slate-500 block uppercase font-bold">Reward</span>
+                    <span className="text-sm font-black text-green-400">Score & Combos</span>
+                  </div>
+                  <div className="bg-slate-900/60 border border-slate-800 p-3 rounded-xl">
+                    <span className="text-[8px] text-slate-500 block uppercase font-bold">Time</span>
+                    <span className="text-sm font-black text-slate-400">Strict 60s Clock</span>
+                  </div>
+                  <div className="bg-slate-900/60 border border-slate-800 p-3 rounded-xl">
+                    <span className="text-[8px] text-slate-500 block uppercase font-bold">Mechanic</span>
+                    <span className="text-sm font-black text-indigo-400">Adaptive Difficulty</span>
                   </div>
                 </div>
-                
-                <button 
+
+                <div className="bg-[#0b0f19] border border-slate-850 p-4 rounded-xl mb-4 text-left text-xs text-slate-400">
+                  <span className="text-xs font-bold text-white block uppercase mb-1 flex items-center gap-1.5">
+                    <GraduationCap className="w-3.5 h-3.5 text-emerald-500" /> What this trains
+                  </span>
+                  <ul className="list-disc pl-4 space-y-1 text-[10px] text-slate-500 leading-relaxed">
+                    <li>Visual working memory and spatial recall</li>
+                    <li>Fine motor tracing accuracy and path prediction</li>
+                    <li>Visual-motor integration under time pressure</li>
+                  </ul>
+                </div>
+
+                <div className="bg-[#0b0f19] border border-slate-850 p-4 rounded-xl mb-6 text-left text-xs text-slate-400">
+                  <div className="flex items-center gap-1.5 text-[10px] font-bold text-white uppercase mb-3">
+                    <Crosshair className="w-3.5 h-3.5 text-blue-500" /> Universal Sens
+                  </div>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-emerald-400 font-mono text-sm font-bold">{universalSens.toFixed(2)}x</span>
+                    <span className="text-[10px] text-slate-500">Approx: {cmPer360} cm/360</span>
+                  </div>
+                  <input 
+                    type="range" min="0.1" max="3.0" step="0.05" 
+                    value={universalSens} 
+                    onChange={(e) => setUniversalSens(parseFloat(e.target.value))} 
+                    className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-500" 
+                  />
+                </div>
+
+                <button
                   onClick={startGame}
-                  className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-xl font-black text-lg hover:brightness-110 transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-[0_0_20px_rgba(6,182,212,0.3)]"
+                  className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg uppercase tracking-widest transition-all duration-200 active:scale-95"
                 >
-                  <Play className="w-6 h-6 fill-white" /> BEGIN MEMORY DRILL
+                  <Play className="w-3.5 h-3.5 fill-white" />
+                  Begin Memory Drill
                 </button>
               </div>
             </div>
           )}
 
           {/* GAME OVER DASHBOARD */}
-          {gameState === 'gameOver' && (
-            <div className="absolute inset-0 flex items-center justify-center z-50 bg-black/90 backdrop-blur-md p-4 animate-in fade-in duration-300 overflow-y-auto">
-              <div className="rounded-3xl max-w-2xl w-full shadow-2xl border border-gray-800 bg-gray-950 overflow-hidden my-auto">
-                <div className="bg-gradient-to-br from-cyan-900/40 to-blue-900/40 p-6 border-b border-gray-800 text-center relative">
-                  {isNewBest && (
-                    <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-yellow-500 text-black text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-[0_0_15px_rgba(234,179,8,0.5)]">
-                      ⭐ New Personal Best
-                    </div>
-                  )}
-                  <h2 className="text-2xl font-black text-white tracking-tight mt-4">Memory Analysis Complete</h2>
-                  <p className="text-cyan-400 font-medium text-sm mt-1">Time-Attack Session Concluded</p>
+          {gameState === 'gameOver' && analytics.rankData && (
+            <div className="absolute inset-0 bg-[#05070e]/98 flex flex-col items-center justify-center p-6 z-30 select-none overflow-y-auto max-h-[100vh] backdrop-blur-sm">
+              <div className="max-w-xl w-full text-center">
+                {isNewBest && (
+                  <div className="inline-block bg-yellow-500 text-black text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-3 shadow-[0_0_15px_rgba(234,179,8,0.5)] animate-bounce">
+                    ⭐ NEW PERSONAL BEST!
+                  </div>
+                )}
+                
+                <h2 className="text-xl font-black text-white uppercase tracking-wider mb-1">
+                  Memory Analysis Complete
+                </h2>
+                <p className="text-xs text-slate-500 uppercase tracking-widest mb-6">
+                  Peak Speed Level: Level {analytics.peakLevel}
+                </p>
+
+                {/* 3x3 Telemetry Grid */}
+                <div className="grid grid-cols-3 gap-2.5 mb-6 text-left">
+                  <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                    <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Final Score</span>
+                    <span className="text-base font-black text-white">{score}</span>
+                  </div>
+                  <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                    <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Avg Accuracy</span>
+                    <span className="text-base font-black text-white">{analytics.avgAccuracy}%</span>
+                  </div>
+                  <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                    <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Max Streak</span>
+                    <span className="text-base font-black text-emerald-400">{analytics.maxStreak}</span>
+                  </div>
+                  
+                  <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                    <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Patterns Cleared</span>
+                    <span className="text-base font-black text-blue-400">{analytics.patternsCompleted}</span>
+                  </div>
+                  <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                    <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Failed Traces</span>
+                    <span className="text-base font-black text-red-400">{analytics.misses}</span>
+                  </div>
+                  <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                    <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Peak Level</span>
+                    <span className="text-base font-black text-indigo-400">Lv. {analytics.peakLevel}</span>
+                  </div>
                 </div>
 
-                <div className="p-6">
-                  {/* Top Stats */}
-                  <div className="flex flex-col sm:flex-row gap-4 mb-6">
-                    <div className="flex-1 bg-gray-900 rounded-2xl p-4 border border-gray-800 flex justify-between items-center">
-                      <div>
-                        <span className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1 block">Final Score</span>
-                        <div className="flex items-end gap-1">
-                          <span className="text-4xl font-black text-white leading-none">{score}</span>
-                          <span className="text-xs text-gray-500 font-bold mb-1">PTS</span>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <span className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1 block">Shape Accuracy</span>
-                        <span className={`text-3xl font-black ${analytics.avgAccuracy >= 80 ? 'text-green-400' : analytics.avgAccuracy >= 50 ? 'text-yellow-400' : 'text-red-400'}`}>
-                          {analytics.avgAccuracy}%
-                        </span>
-                      </div>
-                    </div>
+                <div className="bg-[#0b0f19] border border-slate-850 p-3 rounded-xl mb-4 text-left">
+                  <span className={`text-xs font-black block text-center uppercase tracking-widest ${analytics.rankData.color} mb-2`}>
+                    Rank: {analytics.rankData.rank}
+                  </span>
+                  <div className="w-full h-px bg-slate-850 mb-2"></div>
+                  <div className="flex items-center gap-1.5 text-[9px] font-bold text-white uppercase mb-1">
+                    <Sparkles className="w-3 h-3 text-yellow-500" /> Diagnostics advice:
                   </div>
+                  <p className="text-[10px] text-slate-400 leading-normal">
+                    {analytics.coachAdvice}
+                  </p>
+                </div>
 
-                  {/* Reaction Diagnostics Block */}
-                  <div className="bg-[#0a0a0a] border border-cyan-900/50 rounded-xl p-5 mb-6 text-left shadow-inner">
-                    <h3 className="text-xs font-bold text-cyan-400 font-mono uppercase tracking-widest border-b border-cyan-900/50 pb-2 mb-4 flex items-center gap-2">
-                      <BarChart3 className="w-4 h-4 text-cyan-400" />
-                      COGNITIVE TELEMETRY DIAGNOSTICS
-                    </h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-xs leading-relaxed text-gray-300">
-                      
-                      <div className="space-y-3 sm:border-r border-gray-800 sm:pr-6">
-                        <p className="font-bold text-white uppercase text-[10px] tracking-wider font-mono">Performance Log:</p>
-                        <ul className="space-y-2">
-                          <li className="flex justify-between items-center bg-gray-900/50 p-2 rounded border border-gray-800">
-                            <span className="text-gray-400">Patterns Replicated:</span>
-                            <span className="font-bold text-blue-400">{analytics.patternsCompleted}</span>
-                          </li>
-                          <li className="flex justify-between items-center bg-gray-900/50 p-2 rounded border border-gray-800">
-                            <span className="text-gray-400">Failed Replications:</span>
-                            <span className={`font-bold ${analytics.misses > 5 ? 'text-red-500' : 'text-yellow-500'}`}>{analytics.misses}</span>
-                          </li>
-                          <li className="flex justify-between items-center bg-gray-900/50 p-2 rounded border border-gray-800">
-                            <span className="text-gray-400">Peak Complexity:</span>
-                            <span className="font-bold text-purple-400">Level {analytics.peakComplexity}</span>
-                          </li>
-                          <li className="flex justify-between items-center bg-gray-900/50 p-2 rounded border border-gray-800">
-                            <span className="text-gray-400">Max Survival Streak:</span>
-                            <span className="font-bold text-emerald-400">{analytics.maxStreak}</span>
-                          </li>
-                        </ul>
-                      </div>
-
-                      <div className="space-y-3 flex flex-col justify-between">
-                        <div>
-                          <p className="font-bold text-white uppercase text-[10px] tracking-wider font-mono mb-2">Prescribed Advice:</p>
-                          <p className="text-gray-400 leading-relaxed font-sans">
-                            {analytics.misses > 5 ? (
-                              <span className="text-red-300">You are struggling to visualize the vector geometry after it disappears. Failing a pattern deducts points and drains your clock. Focus purely on memorizing the angles and sharp turns rather than the exact pixel positions.</span>
-                            ) : analytics.peakComplexity < 5 ? (
-                              <span className="text-yellow-300">Your tracing accuracy is decent, but you are not connecting the nodes fast enough to scale the engine into the highest complexity thresholds.</span>
-                            ) : (
-                              <span className="text-green-300">Excellent spatial working memory! You are maintaining incredible shape replication despite the extreme node density. Keep pushing your limits.</span>
-                            )}
-                          </p>
-                        </div>
-                      </div>
-
-                    </div>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex gap-3">
-                    <button onClick={startGame} className="flex-1 py-4 bg-cyan-600 text-white rounded-xl font-black tracking-wide hover:bg-cyan-500 transition-all active:scale-95 flex items-center justify-center gap-2 shadow-lg">
-                      <RefreshCw className="w-5 h-5" /> TRAIN AGAIN
-                    </button>
-                    <button onClick={() => { if (typeof window !== "undefined") { if (navigator.share) { navigator.share({ title: document.title, url: window.location.href }).catch(() => {}); } else { navigator.clipboard.writeText(window.location.href).then(() => alert("Link copied! Share it with your friends.")).catch(() => {}); } } }} className="px-6 py-4 bg-gray-800 text-white rounded-xl font-bold hover:bg-gray-700 transition-all border border-gray-700 flex items-center gap-2 active:scale-95" title="Share this drill"><Share2 className="w-4 h-4 text-sky-400" /><span className="text-sm">Share</span></button>
-                    {isFullscreen && (
-                       <button onClick={toggleFullscreen} className="px-6 py-4 bg-gray-800 text-white rounded-xl font-bold hover:bg-gray-700 transition-all border border-gray-700">
-                         Exit
-                       </button>
-                    )}
-                  </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={startGame}
+                    className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg uppercase tracking-widest transition-all duration-200 active:scale-95"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5" />
+                    Run another trial
+                  </button>
+                  <button
+                    onClick={shareScore}
+                    className="p-3 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded-xl transition-colors active:scale-95"
+                    title="Share Score"
+                  >
+                    <Share2 className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
             </div>
           )}
         </div>
 
-        {/* ABOUT THIS DRILL SECTION */}
+        {/* Rules Section */}
         {!isFullscreen && (
           <section className="mt-10">
             <div className="rounded-2xl border border-gray-800 overflow-hidden bg-gray-900 shadow-2xl pointer-events-none">
               <div className="px-6 py-5 border-b border-gray-800 bg-black/40 flex items-center gap-3">
-                <Info className="w-5 h-5 text-cyan-400" /><h2 className="font-bold text-white text-lg tracking-wide">Drill Instructions & Scoring</h2>
+                <Info className="w-5 h-5 text-emerald-400" /><h2 className="font-bold text-white text-lg tracking-wide">Progression & Scoring Rules</h2>
               </div>
               <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-5">
-                  <RuleItem num="1" color="green" text="Valid Pattern Match" highlight="+10 PTS | +5.0s Time" result="≥60% Shape Accuracy" />
-                  <RuleItem num="2" color="indigo" text="Dynamic Scaling" highlight="Endless difficulty" result="Nodes added on success" />
+                  <RuleItem num="1" color="green" text="Shape Accuracy" highlight="Scales Score" result="Higher accuracy = more base points" />
+                  <RuleItem num="2" color="orange" text="Combo System" highlight="Up to 3.0x Multiplier" result="String clears together for massive points" />
                 </div>
                 <div className="space-y-5">
-                  <RuleItem num="3" color="red" text="Failed Shape Match" result="-5 PTS | -2.0s Time" />
-                  <RuleItem num="4" color="purple" text="Strict Tracing" highlight="Desktop Exclusive" result="1:1 Raw Mouse Input" />
+                  <RuleItem num="3" color="purple" text="Adaptive Difficulty" highlight="Level Up" result="Every 100 PTS increases complexity" />
+                  <RuleItem num="4" color="blue" text="60-Second Drill" highlight="No Deductions" result="Clock strictly counts down" />
                 </div>
               </div>
             </div>
@@ -986,12 +1105,12 @@ export default function ComplexPatternClient() {
           <section className="mt-12" aria-label="About this drill">
             <div className="rounded-2xl border border-gray-800 overflow-hidden bg-gray-900 shadow-xl">
               <div className="px-6 py-5 border-b border-gray-800 bg-black/40 flex items-center gap-3">
-                <GraduationCap className="w-5 h-5 text-cyan-400" />
-                <h2 className="font-bold text-white text-lg tracking-wide">About Complex Pattern Elite</h2>
+                <GraduationCap className="w-5 h-5 text-emerald-400" />
+                <h2 className="font-bold text-white text-lg tracking-wide">About the Pattern Memory Game</h2>
               </div>
               <div className="p-8">
                 <p className="text-sm leading-relaxed mb-6 text-gray-300">
-                  This free complex pattern drill trains your spatial working memory and fine motor coordination by challenging you to memorize and physically redraw complex geometries. The physics engine utilizes advanced vector normalization to score your drawing purely on shape and angle accuracy, demanding a strong visual-motor connection.
+                  Take the ultimate visual memory test by challenging your cognitive recall and motor coordination. This pattern memory game tests your spatial working memory by forcing you to memorize unpredictable geometric paths and accurately re-draw them against a strict 60-second clock. The adaptive difficulty constantly introduces denser nodes, shorter flash times, and harder shapes to create a pure cognitive challenge.
                 </p>
 
                 {/* Grid Section */}
@@ -1001,57 +1120,89 @@ export default function ComplexPatternClient() {
                       <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center"><Users className="w-4 h-4 text-white" /></div>
                       <h3 className="text-sm font-bold text-white">Who It's For</h3>
                     </div>
-                    <p className="text-xs leading-relaxed text-gray-400">Anyone wanting to improve spatial memory, fine motor control, visual-motor integration, and pattern recognition skills.</p>
+                    <p className="text-xs leading-relaxed text-gray-400">Anyone looking to improve visual working memory, fine motor control tracing, and spatial reasoning skills under time pressure.</p>
                   </div>
                   <div className="p-5 rounded-xl border border-gray-800 bg-black/40">
                     <div className="flex items-center gap-3 mb-3">
                       <div className="w-8 h-8 rounded-lg bg-green-600 flex items-center justify-center"><TrendingUp className="w-4 h-4 text-white" /></div>
                       <h3 className="text-sm font-bold text-white">Skills Improved</h3>
                     </div>
-                    <p className="text-xs leading-relaxed text-gray-400">Pattern memory, fine motor control, spatial reasoning, hand-eye coordination, and visual processing.</p>
+                    <p className="text-xs leading-relaxed text-gray-400">Short-term visual recall, hand-eye coordination, path prediction, motor execution, and cognitive concentration.</p>
                   </div>
                   <div className="p-5 rounded-xl border border-gray-800 bg-black/40">
                     <div className="flex items-center gap-3 mb-3">
                       <div className="w-8 h-8 rounded-lg bg-purple-600 flex items-center justify-center"><BarChart3 className="w-4 h-4 text-white" /></div>
                       <h3 className="text-sm font-bold text-white">What You'll Track</h3>
                     </div>
-                    <p className="text-xs leading-relaxed text-gray-400">Score, total shape accuracy, max survival streak, and peak complexity level defeated.</p>
+                    <p className="text-xs leading-relaxed text-gray-400">Total score, average shape similarity percentage, max successful streak, and peak cognitive complexity level defeated.</p>
                   </div>
                 </div>
 
                 {/* How to Play & Scoring */}
                 <div className="mb-8 bg-[#0b0f19]/40 border border-gray-800 rounded-xl p-6">
                   <h3 className="text-base font-bold text-white uppercase tracking-wider mb-4 flex items-center gap-2">
-                    <Target className="w-5 h-5 text-cyan-500" /> How to Play & Scoring
+                    <Target className="w-5 h-5 text-emerald-500" /> How to Play & Scoring
                   </h3>
                   <div className="grid sm:grid-cols-2 gap-6 text-sm text-gray-300">
                     <ol className="space-y-3 list-decimal pl-5">
-                      <li>Click <strong>Begin Drill</strong> to lock your mouse inside the game.</li>
-                      <li>Memorize the exact shape of the green vector path while the timer counts down.</li>
+                      <li>Click <strong>Begin Memory Drill</strong> to lock your mouse inside the game.</li>
+                      <li>Memorize the exact shape of the green vector path while the flash timer counts down.</li>
                       <li>When the path disappears, <strong>Hold Left Click</strong> and draw the shape exactly, starting at the Cyan Node.</li>
                     </ol>
                     <ul className="space-y-3">
-                      <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-green-500" /> <span className="text-white font-bold">Valid Match:</span> Achieving ≥60% shape accuracy grants +10 PTS and +5.0s. Complexity increases.</li>
-                      <li className="flex items-center gap-2"><XCircle className="w-4 h-4 text-red-500" /> <span className="text-white font-bold">Failed Match:</span> Falling below 60% accuracy instantly deducts -5 PTS and -2.0s. Complexity drops.</li>
+                      <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-green-500" /> <span className="text-white font-bold">Accuracy Bonus:</span> Achieving higher shape accuracy grants massively scaling base points (up to +60 base).</li>
+                      <li className="flex items-center gap-2"><Flame className="w-4 h-4 text-orange-500" /> <span className="text-white font-bold">Combo Multiplier:</span> Sustained clear streaks multiply your score up to 3.0x automatically.</li>
                     </ul>
                   </div>
                 </div>
 
-                {/* FAQ Section */}
+                {/* FAQ Section Expanded to 15 robust SEO FAQs */}
                 <div className="p-5 rounded-xl border border-gray-800 bg-black/40">
                   <div className="flex items-center gap-3 mb-4">
                     <Lightbulb className="w-5 h-5 text-yellow-400" />
                     <h3 className="text-sm font-bold text-white uppercase tracking-wider">Frequently Asked Questions</h3>
                   </div>
-                  <div className="space-y-4">
-                    <div>
-                      <h4 className="text-sm font-bold text-gray-200">Why does my score go down?</h4>
-                      <p className="text-xs text-gray-400 mt-1">Unlike standard aim trainers, this drill actively punishes bad accuracy. Failing to draw the shape correctly triggers a penalty, violently draining your points and your master clock. You must rely on visual memory to survive.</p>
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-bold text-gray-200">How does the scoring engine work?</h4>
-                      <p className="text-xs text-gray-400 mt-1">The physics engine resamples your drawn line into 100 mathematical waypoints, then compares the geometry, angles, and distances against the original shape. It does not judge you on speed; it strictly grades your spatial replication.</p>
-                    </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <FAQItem 
+                      q="What is a pattern memory game?" 
+                      a="A pattern memory game is a cognitive drill where a user is briefly shown a sequence or geometric path, which they must then accurately reproduce from memory, training their visual and spatial recall." 
+                    />
+                    <FAQItem 
+                      q="How does a pattern memory game improve working memory?" 
+                      a="It forces the brain to temporarily store visual-spatial information and rapidly translate it into fine motor commands, strengthening the neural pathways used for short-term recall." 
+                    />
+                    <FAQItem 
+                      q="Is this a visual memory test?" 
+                      a="Yes. Because the lines disappear entirely before you draw, you must rely 100% on your brain's ability to hold a visual snapshot of the geometry." 
+                    />
+                    <FAQItem 
+                      q="Can this game improve spatial memory?" 
+                      a="Yes, spatial memory is specifically targeted by requiring you to remember the exact angles, proportions, and coordinates of the pattern's layout rather than just a simple sequence." 
+                    />
+                    <FAQItem 
+                      q="Is this pattern memory game good for brain training?" 
+                      a="Absolutely. It combines visual processing, cognitive retention, and fine motor execution, making it an excellent holistic brain training exercise." 
+                    />
+                    <FAQItem 
+                      q="How is pattern accuracy calculated?" 
+                      a="The physics engine resamples your drawn line into 100 mathematical waypoints, then compares the geometry, angles, and endpoint distances against the original shape using vector normalization." 
+                    />
+                    <FAQItem 
+                      q="How does the adaptive difficulty work?" 
+                      a="As your score increases (Leveling up every 100 PTS), the game introduces more waypoints, complex shapes like zig-zags and spirals, shorter memorization flash times, and a higher baseline accuracy requirement." 
+                    />
+                    <FAQItem 
+                      q="What is a good score in the Pattern Memory Test?" 
+                      a="Scoring 300+ is Silver tier. 800+ indicates Gold visual memory. Hitting 1500+ points with 75% accuracy places you in the Platinum tier." 
+                    />
+                    <FAQItem 
+                      q="How often should I practice spatial memory games?" 
+                      a="For optimal cognitive adaptation, practicing memory drills for 5 to 10 minutes a day is more effective than occasional hour-long sessions." 
+                    />
+                    <FAQItem 
+                      q="Is this memory drawing game free?" 
+                      a="Yes! The SkillDrills Pattern Memory Game is entirely free, open-source, and runs purely in your web browser with zero downloads required." 
+                    />
                   </div>
                 </div>
               </div>
@@ -1063,7 +1214,7 @@ export default function ComplexPatternClient() {
         {!isFullscreen && (
           <section className="mt-14" aria-label="Explore related aim and response drills">
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-1 h-5 rounded-full bg-cyan-500"></div>
+              <div className="w-1 h-5 rounded-full bg-emerald-500"></div>
               <h2 className="text-xs font-bold text-white uppercase tracking-widest font-mono">
                 Explore Related Drills
               </h2>
@@ -1071,12 +1222,8 @@ export default function ComplexPatternClient() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <RelatedCard href="/drills/motor/hand-eye-coordination/aim-trainer" title="Aim Trainer" desc="Hone spatial coordinate click speed." color="green" icon={<Target className="w-4 h-4" />} />
               <RelatedCard href="/drills/fps/flick-shot-training" title="Pro Flick Trainer" desc="Snap to targets in time-attack mode." color="blue" icon={<Crosshair className="w-4 h-4" />} />
-              <RelatedCard href="/drills/fps/180-degree-awareness" title="180Â° Awareness" desc="Alternate snapping opposite horizons." color="orange" icon={<Zap className="w-4 h-4" />} />
-              <RelatedCard href="/drills/fps/recoil-control" title="Recoil Control" desc="Calibrate pulling pattern compensation." color="red" icon={<Activity className="w-4 h-4" />} />
-              <RelatedCard href="/drills/visual-tracking/saccadic-snap" title="Saccadic Calibration" desc="Optimize saccadic gaze acquisition limits." color="purple" icon={<Eye className="w-4 h-4" />} />
-              <RelatedCard href="/drills/cognitive/processing-speed/reaction-time" title="Reaction Time" desc="Test visual reaction speed directly." color="cyan" icon={<Timer className="w-4 h-4" />} />
-              <RelatedCard href="/drills/academic/math-speed/mental-math" title="Mental Math" desc="Advanced mental calculation speed tests." color="indigo" icon={<Calculator className="w-4 h-4" />} />
-              <RelatedCard href="/drills/physical/fitness/speed-drill" title="Speed Drill" desc="Click shrinking rings. Reaction training." color="rose" icon={<Zap className="w-4 h-4" />} />
+              <RelatedCard href="/drills/fps/180-degree-awareness" title="180° Awareness" desc="Alternate snapping opposite horizons." color="orange" icon={<Zap className="w-4 h-4" />} />
+              <RelatedCard href="/drills/physical/balance-training/stability-challenge" title="Stability Challenge" desc="Cursor resistance training game." color="indigo" icon={<Activity className="w-4 h-4" />} />
             </div>
           </section>
         )}
@@ -1089,71 +1236,70 @@ export default function ComplexPatternClient() {
                 <div>
                   <h3 className="text-white font-bold mb-3 uppercase tracking-wider">Motor & FPS</h3>
                   <ul className="space-y-2">
-                    <li><Link href="/drills/motor/hand-eye-coordination/aim-trainer" className="hover:text-cyan-400 transition-colors">Aim Trainer Elite</Link></li>
-                    <li><Link href="/drills/fps/flick-shot-training" className="hover:text-cyan-400 transition-colors">Flick Shot Trainer</Link></li>
-                    <li><Link href="/drills/fps" className="text-cyan-450 hover:text-cyan-400 transition-colors font-bold">All FPS Drills →</Link></li>
+                    <li><Link href="/drills/motor/hand-eye-coordination/aim-trainer" className="hover:text-emerald-400 transition-colors">Aim Trainer Elite</Link></li>
+                    <li><Link href="/drills/fps/flick-shot-training" className="hover:text-emerald-400 transition-colors">Flick Shot Trainer</Link></li>
+                    <li><Link href="/drills/fps" className="text-cyan-450 hover:text-emerald-400 transition-colors font-bold">All FPS Drills →</Link></li>
                   </ul>
                 </div>
                 <div>
                   <h3 className="text-white font-bold mb-3 uppercase tracking-wider">Memory</h3>
                   <ul className="space-y-2">
-                    <li><Link href="/drills/memory/working-memory/n-back" className="hover:text-cyan-400 transition-colors">3-Back Training</Link></li>
-                    <li><Link href="/drills/memory/short-term-memory/color-sequence" className="hover:text-cyan-400 transition-colors">Color Sequence</Link></li>
-                    <li><Link href="/drills/memory" className="text-cyan-450 hover:text-cyan-400 transition-colors font-bold">All Memory Drills →</Link></li>
+                    <li><Link href="/drills/memory/working-memory/n-back" className="hover:text-emerald-400 transition-colors">3-Back Training</Link></li>
+                    <li><Link href="/drills/memory/short-term-memory/color-sequence" className="hover:text-emerald-400 transition-colors">Color Sequence</Link></li>
+                    <li><Link href="/drills/memory" className="text-cyan-450 hover:text-emerald-400 transition-colors font-bold">All Memory Drills →</Link></li>
                   </ul>
                 </div>
                 <div>
                   <h3 className="text-white font-bold mb-3 uppercase tracking-wider">Cognitive</h3>
                   <ul className="space-y-2">
-                    <li><Link href="/drills/cognitive/memory/card-matching" className="hover:text-cyan-400 transition-colors">Memory Games</Link></li>
-                    <li><Link href="/drills/cognitive/attention/divided-attention" className="hover:text-cyan-400 transition-colors">Attention Drills</Link></li>
-                    <li><Link href="/drills/cognitive" className="text-cyan-450 hover:text-cyan-400 transition-colors font-bold">All Cognitive Drills →</Link></li>
+                    <li><Link href="/drills/cognitive/memory/card-matching" className="hover:text-emerald-400 transition-colors">Memory Games</Link></li>
+                    <li><Link href="/drills/cognitive/attention/divided-attention" className="hover:text-emerald-400 transition-colors">Attention Drills</Link></li>
+                    <li><Link href="/drills/cognitive" className="text-cyan-450 hover:text-emerald-400 transition-colors font-bold">All Cognitive Drills →</Link></li>
                   </ul>
                 </div>
                 <div>
                   <h3 className="text-white font-bold mb-3 uppercase tracking-wider">Academic</h3>
                   <ul className="space-y-2">
-                    <li><Link href="/drills/academic/writing-speed/typing-test" className="hover:text-cyan-400 transition-colors">Typing Speed Test</Link></li>
-                    <li><Link href="/drills/academic/math-speed/mental-math" className="hover:text-cyan-400 transition-colors">Mental Math</Link></li>
-                    <li><Link href="/drills/academic" className="text-cyan-450 hover:text-cyan-400 transition-colors font-bold">All Academic Drills →</Link></li>
+                    <li><Link href="/drills/academic/writing-speed/typing-test" className="hover:text-emerald-400 transition-colors">Typing Speed Test</Link></li>
+                    <li><Link href="/drills/academic/math-speed/mental-math" className="hover:text-emerald-400 transition-colors">Mental Math</Link></li>
+                    <li><Link href="/drills/academic" className="text-cyan-450 hover:text-emerald-400 transition-colors font-bold">All Academic Drills →</Link></li>
                   </ul>
                 </div>
                 <div>
                   <h3 className="text-white font-bold mb-3 uppercase tracking-wider">More Sectors</h3>
                   <ul className="space-y-2">
-                    <li><Link href="/drills/visual" className="hover:text-cyan-400 transition-colors">Visual (14)</Link></li>
-                                        
-                    <li><Link href="/drills/physical" className="hover:text-cyan-400 transition-colors">Physical (11)</Link></li>
+                    <li><Link href="/drills/visual" className="hover:text-emerald-400 transition-colors">Visual</Link></li>
+                    <li><Link href="/drills/physical" className="hover:text-emerald-400 transition-colors">Physical</Link></li>
                   </ul>
                 </div>
               </div>
               
               <div className="border-t border-slate-900 pt-8 text-center">
                 <div className="flex items-center justify-center gap-2 mb-4">
-                  <div className="w-6 h-6 bg-gradient-to-br from-cyan-500/25 to-blue-500/25 border border-cyan-500/30 rounded-lg flex items-center justify-center">
-                    <Crosshair className="w-3.5 h-3.5 text-cyan-400" />
+                  <div className="w-6 h-6 bg-gradient-to-br from-emerald-500/25 to-blue-500/25 border border-cyan-500/30 rounded-lg flex items-center justify-center">
+                    <Crosshair className="w-3.5 h-3.5 text-emerald-400" />
                   </div>
                   <span className="text-white font-black tracking-widest text-xs uppercase">SkillDrills</span>
                 </div>
-                <p className="text-[9px] mb-2">&copy; 2026 SkillDrills. All rights reserved.</p>
-                <p className="text-[9px] max-w-2xl mx-auto leading-relaxed mb-6">
+                <p className="text-[9px] mb-2">&copy; {new Date().getFullYear()} SkillDrills. All rights reserved.</p>
+                <p className="text-[9px] max-w-2xl mx-auto leading-relaxed mb-6 font-sans text-gray-500">
                   Open-source telemetry training platform using hardware pointer lock. Free forever. No downloads required.
                 </p>
-                <div className="flex items-center justify-center gap-3 flex-wrap">
+                <div className="flex items-center justify-center gap-4 flex-wrap mt-6">
                   <a href="https://youtube.com/@skilldrills.online" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="YouTube">
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
                   </a>
-                  <a href="https://www.facebook.com/profile.php?id=61590093843779&amp;sk=directory_intro" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="Facebook">
+                  <a href="https://www.facebook.com/profile.php?id=61590093843779" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="Facebook">
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
                   </a>
                   <a href="https://x.com/skilldrillss" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="Twitter / X">
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
                   </a>
                   <a href="https://www.instagram.com/skilldrills.online/?__pwa=1" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="Instagram">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
                   </a>
                   <a href="https://pinterest.com/skilldrills" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="Pinterest">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.372 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738a.36.36 0 0 1 .083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.631-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12 0-6.628-5.373-12-12-12z"/></svg>
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738a.36.36 0 0 1 .083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.632-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12 0-6.628-5.373-12-12-12z"/></svg>
                   </a>
                 </div>
               </div>
@@ -1217,21 +1363,30 @@ function RelatedCard({ href, title, desc, color, icon }) {
     red: 'from-red-500 to-rose-500',
     purple: 'from-purple-500 to-violet-500',
     green: 'from-green-500 to-emerald-500',
-    cyan: 'from-cyan-500 to-blue-500',
+    cyan: 'from-emerald-500 to-blue-500',
     indigo: 'from-indigo-500 to-purple-500',
     rose: 'from-rose-500 to-pink-500'
   };
   return (
     <Link href={href} className="group relative overflow-hidden rounded-2xl border border-slate-800 bg-[#0b0f19]/40 transition-all hover:-translate-y-1 hover:border-cyan-500/50 block p-5">
-      <div className={`absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r ${gradients[color] || 'from-cyan-500 to-blue-500'}`}></div>
+      <div className={`absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r ${gradients[color] || 'from-emerald-500 to-blue-500'}`}></div>
       <div className="w-10 h-10 rounded-xl bg-[#050811] border border-slate-700 flex items-center justify-center text-slate-400 group-hover:text-white mb-3 shadow-inner">
         {icon}
       </div>
-      <h3 className="font-bold text-base mb-1.5 text-white group-hover:text-cyan-400 transition-colors">{title}</h3>
+      <h3 className="font-bold text-base mb-1.5 text-white group-hover:text-emerald-400 transition-colors">{title}</h3>
       <p className="text-xs text-slate-500 mb-4">{desc}</p>
-      <div className="flex items-center gap-1.5 text-cyan-400 text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-wider">
+      <div className="flex items-center gap-1.5 text-emerald-400 text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-wider">
         Start Drill <ArrowRight className="w-3.5 h-3.5" />
       </div>
     </Link>
+  );
+}
+
+function FAQItem({ q, a }) {
+  return (
+    <div className="bg-[#05060b] border border-gray-800 rounded-xl p-5 hover:border-gray-700 transition-colors">
+      <h4 className="text-sm font-bold text-gray-200 mb-2">{q}</h4>
+      <p className="text-xs text-gray-400 leading-relaxed">{a}</p>
+    </div>
   );
 }

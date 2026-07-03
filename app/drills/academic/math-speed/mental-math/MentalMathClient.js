@@ -1007,9 +1007,9 @@ export default function MentalMathClient() {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <RelatedCard href="/drills/academic/math-speed/Math-Reaction" title="Math Reaction" desc="ODD/EVEN parity recognition with adaptive speed scaling." color="cyan" icon={<Zap className="w-4 h-4" />} />
-              <RelatedCard href="/drills/academic/math-speed/arithmetic-race" title="Arithmetic Race" desc="Speed math with combo system across 3 difficulty tiers." color="blue" icon={<Calculator className="w-4 h-4" />} />
-              <RelatedCard href="/drills/academic/math-speed/multiplication-tables" title="Multiplication Tables" desc="Master times tables up to 20×20 with high-friction focus." color="purple" icon={<Hash className="w-4 h-4" />} />
-              <RelatedCard href="/drills/cognitive/processing-speed/quick-math" title="Quick Math" desc="Rapid fire mental arithmetic practice for competitive exams." color="emerald" icon={<Brain className="w-4 h-4" />} />
+              <RelatedCard href="/drills/academic/math-speed/Math-Reaction" title="Arithmetic Race" desc="Speed math with combo system across 3 difficulty tiers." color="blue" icon={<Calculator className="w-4 h-4" />} />
+              <RelatedCard href="/drills/academic/math-speed/Math-Reaction" title="Multiplication Tables" desc="Master times tables up to 20×20 with high-friction focus." color="purple" icon={<Hash className="w-4 h-4" />} />
+              <RelatedCard href="/drills/academic/math-speed/mental-math" title="Quick Math" desc="Rapid fire mental arithmetic practice for competitive exams." color="emerald" icon={<Brain className="w-4 h-4" />} />
             </div>
           </section>
         )}
@@ -1058,7 +1058,7 @@ export default function MentalMathClient() {
                   <ul className="space-y-3 text-sm">
                     <li><Link href="/drills/memory" className="hover:text-white transition-colors">Memory (15 drills)</Link></li>
                     <li><Link href="/drills/cognitive" className="hover:text-white transition-colors">Cognitive</Link></li>
-                    <li><Link href="/drills/mental-fitness" className="hover:text-white transition-colors">Mental Fitness (6 drills)</Link></li>
+                    <li><Link href="/drills/visual-tracking" className="hover:text-white transition-colors">Tracking (25 drills)</Link></li>
                     <li><Link href="/drills/physical" className="hover:text-white transition-colors">Physical (11 drills)</Link></li>
                   </ul>
                 </div>

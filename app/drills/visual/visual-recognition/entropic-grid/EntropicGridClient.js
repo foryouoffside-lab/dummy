@@ -945,7 +945,7 @@ export default function EntropicGridClient() {
               <RelatedCard href="/drills/visual/visual-recognition/visual-search" title="Visual Search" desc="Conjunctive search for hidden items." color="blue" icon={<Search className="w-4 h-4" />} />
               <RelatedCard href="/drills/visual/visual-recognition/difference-spotter" title="Difference Spotter" desc="Spot the change after a visual blink." color="cyan" icon={<Eye className="w-4 h-4" />} />
               <RelatedCard href="/drills/visual/visual-recognition/rapid-object-id" title="Neural Shape ID" desc="Train rapid shape recognition." color="purple" icon={<Brain className="w-4 h-4" />} />
-              <RelatedCard href="/drills/visual/tracking-accuracy/kinetic-intercept" title="Kinetic Intercept" desc="Train moving target tracking speed." color="orange" icon={<Crosshair className="w-4 h-4" />} />
+              <RelatedCard href="/drills/visual/tracking-accuracy/moving-target" title="Kinetic Intercept" desc="Train moving target tracking speed." color="orange" icon={<Crosshair className="w-4 h-4" />} />
             </div>
           </section>
         )}

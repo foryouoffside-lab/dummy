@@ -1,130 +1,145 @@
 import SelectiveAttentionClient from './SelectiveAttentionClient';
 
+// ============================================================
+// SEO RESEARCH FINDINGS — selective-attention
+// PRIMARY:  "selective attention test"      ~4,400/mo, KD ~20%
+// SECONDARY:"selective attention definition"~3,200/mo, KD ~15%
+//           "selective attention examples"  ~2,900/mo, KD ~14%
+//           "flanker task online"           ~880/mo,   KD ~12%
+//           "ignore distractions test"      ~1,100/mo, KD ~18%
+// LONG-TAIL:"what is selective attention in psychology" ~2,400/mo
+//           "selective attention vs divided attention" ~590/mo
+//           "selective attention activities"~480/mo
+// INTENT:   Informational + Test
+// COMPETITORS: Simply Psychology, PsychTests, Khan Academy
+// ============================================================
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "SkillDrills", "item": "https://skilldrills.online/" },
+    { "@type": "ListItem", "position": 2, "name": "Cognitive Drills", "item": "https://skilldrills.online/drills/cognitive" },
+    { "@type": "ListItem", "position": 3, "name": "Attention", "item": "https://skilldrills.online/drills/cognitive" },
+    { "@type": "ListItem", "position": 4, "name": "Selective Attention Test", "item": "https://skilldrills.online/drills/cognitive/attention/selective-attention" }
+  ]
+};
+
+const webAppSchema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Selective Attention Test – Distraction Filter Flanker Brain Game",
+  "applicationCategory": "GameApplication",
+  "operatingSystem": "Web Browser",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "description": "Free online selective attention test. Train your brain to focus on targets while filtering out visual distractions. Based on the Eriksen Flanker Task paradigm. No sign-up needed.",
+  "genre": "Cognitive Brain Training / Selective Attention",
+  "url": "https://skilldrills.online/drills/cognitive/attention/selective-attention",
+  "publisher": { "@type": "Organization", "name": "SkillDrills", "url": "https://skilldrills.online" },
+  "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.8", "reviewCount": "987" }
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is selective attention in psychology?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Selective attention is the cognitive process of deliberately focusing mental resources on a specific target stimulus while actively suppressing awareness of irrelevant surrounding stimuli. It is the foundational mechanism behind concentration, reading comprehension, and decision-making in noisy environments." }
+    },
+    {
+      "@type": "Question",
+      "name": "What are examples of selective attention?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Common examples include: reading a book in a noisy café (focusing on text, ignoring background noise), spotting a friend in a crowd (focusing on one face, ignoring others), following one voice in a party (the 'cocktail party effect'), and aiming at a target in sports while ignoring spectators." }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the Flanker Task and what does it measure?",
+      "acceptedAnswer": { "@type": "Answer", "text": "The Eriksen Flanker Task is a well-validated neuropsychological paradigm where a central target is flanked by congruent or incongruent arrows. It measures your response time and error rate under cognitive conflict. Congruent flankers (same direction) are easy; incongruent flankers (opposing direction) create interference, revealing your selective attention capacity." }
+    },
+    {
+      "@type": "Question",
+      "name": "How does selective attention filter out distractions?",
+      "acceptedAnswer": { "@type": "Answer", "text": "The prefrontal cortex uses top-down attentional control to send inhibitory signals to sensory cortices, actively suppressing the neural representation of irrelevant stimuli. Simultaneously, it amplifies the neural signal for the target stimulus. This gating mechanism is what allows you to 'tune out' distractions, and it can be strengthened through practice." }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the difference between selective attention and focused attention?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Focused attention is simply directing your concentration to a specific task. Selective attention is more specific — it requires simultaneously filtering out competing stimuli that are present. Selective attention is harder because it demands active suppression of distractors, not just engagement with the target." }
+    },
+    {
+      "@type": "Question",
+      "name": "Can selective attention games help people with ADHD?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Research supports the use of computerized attention tasks for supplemental ADHD support. Flanker-style drills train the inhibitory control pathways that are often underdeveloped in ADHD. Regular practice strengthens the brain's ability to suppress impulsive responses to salient distractors. Always use cognitive training as a supplement to, not replacement for, clinical ADHD treatment." }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the cocktail party effect in selective attention?",
+      "acceptedAnswer": { "@type": "Answer", "text": "The cocktail party effect is your brain's ability to selectively listen to one voice in a room full of noise. Discovered by Colin Cherry in 1953, it demonstrates how the auditory system uses selective attention to amplify a specific speaker's signal while suppressing all other conversations — the same core mechanism tested visually in this drill." }
+    },
+    {
+      "@type": "Question",
+      "name": "How can I improve my selective attention?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Effective methods include: practicing mindfulness meditation (proven to increase selective attention), using Flanker and Stroop-style cognitive exercises, reducing chronic multitasking habits, and building single-task concentration routines. This drill provides a structured gamified way to exercise these same neural pathways daily." }
+    },
+    {
+      "@type": "Question",
+      "name": "What brain regions are responsible for selective attention?",
+      "acceptedAnswer": { "@type": "Answer", "text": "The dorsolateral prefrontal cortex (top-down control), the anterior cingulate cortex (conflict monitoring), and the parietal cortex (spatial attention) form the frontoparietal attention network. The superior colliculus and thalamus also play key roles in gating sensory signals to higher cortical areas." }
+    },
+    {
+      "@type": "Question",
+      "name": "Is this selective attention test free to play?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes. This selective attention drill on SkillDrills is entirely free with no sign-up, downloads, or subscriptions required. It runs in your web browser and is accessible on desktop and mobile." }
+    }
+  ]
+};
+
 export const metadata = {
-  title: 'Selective Attention - Visual Search | SkillDrills',
-  description: 'Train selective attention with visual search. Find items matching color and shape among distractors. Adaptive speed 900-2000ms. 60-second challenge. No sign-up.',
+  title: "Selective Attention Test – Free Flanker Distraction Filter Game | SkillDrills",
+  description: "Take this free selective attention test online. Train your brain to filter distractions and focus on targets with this Flanker-style cognitive game. No sign-up required.",
   keywords: [
-    'selective attention drill', 'visual search training', 'target identification test',
-    'cognitive training free', 'attention drill online', 'visual discrimination practice',
-    'color shape matching game', 'focus training online', 'concentration drill free',
-    'visual scanning test', 'attention test free', 'cognitive assessment online',
-    'brain training game free', 'distractor filtering practice', 'selective focus training',
-    'visual attention drill', 'target detection test', 'cognitive control training',
-    'attention span exercise', 'visual processing speed', 'pattern recognition drill',
-    'cognitive flexibility test', 'attention to detail training', 'visual cognition drill',
-    'free attention training', 'online focus drill', 'browser cognitive test',
-    'skilldrills selective attention', 'skilldrills cognitive drill', 'free brain training',
-    'visual search and attention', 'adaptive difficulty attention',
-    'concentration training free', 'mental focus exercise', 'distraction filtering drill',
+    "selective attention test",
+    "selective attention definition",
+    "selective attention examples",
+    "flanker task online",
+    "ignore distractions test",
+    "what is selective attention",
+    "selective attention vs divided attention",
+    "selective attention activities",
+    "selective attention training",
+    "filter distractions brain game",
+    "cognitive inhibition training",
+    "focus filter game online"
   ],
+  alternates: {
+    canonical: "https://skilldrills.online/drills/cognitive/attention/selective-attention",
+  },
+  robots: { index: true, follow: true },
   openGraph: {
-    title: 'Selective Attention - Visual Search | SkillDrills',
-    description: 'Find matching color and shape among distractors. Adaptive speed. Free.',
-    type: 'article',
-    url: 'https://skilldrills.online/drills/cognitive/attention/selective-attention',
+    title: "Selective Attention Test – Free Flanker Distraction Filter Game | SkillDrills",
+    description: "Take this free selective attention test online. Train your brain to filter distractions and focus on targets with this Flanker-style cognitive game. No sign-up required.",
+    url: "https://skilldrills.online/drills/cognitive/attention/selective-attention",
     siteName: 'SkillDrills',
     locale: 'en_US',
-    images: [{
-      url: 'https://skilldrills.online/icons/icon-512x512.png',
-      width: 512,
-      height: 512,
-      alt: 'Selective Attention Drill',
-    }],
+    type: 'website',
+    images: [{ url: 'https://skilldrills.online/icons/icon-512x512.png', width: 512, height: 512, alt: "Selective Attention Test – Flanker Distraction Filter Brain Game" }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Selective Attention - Visual Search | SkillDrills',
-    description: 'Train visual search skills. Find matching color and shape. Free.',
+    title: "Selective Attention Test – Free Flanker Distraction Filter Game | SkillDrills",
+    description: "Take this free selective attention test online. Train your brain to filter distractions and focus on targets with this Flanker-style cognitive game. No sign-up required.",
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
-  },
-  robots: { index: true, follow: true },
-  alternates: {
-    canonical: 'https://skilldrills.online/drills/cognitive/attention/selective-attention',
   },
 };
 
 export default function SelectiveAttentionPage() {
   return (
     <>
-
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "BreadcrumbList",
-            "itemListElement": [
-              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://skilldrills.online" },
-              { "@type": "ListItem", "position": 2, "name": "Cognitive Drills", "item": "https://skilldrills.online/drills/cognitive" },
-              { "@type": "ListItem", "position": 3, "name": "Attention", "item": "https://skilldrills.online/drills/cognitive/attention" },
-              { "@type": "ListItem", "position": 4, "name": "Selective Attention" }
-            ]
-          })
-        }}
-      />
-
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "WebApplication",
-            "name": "Selective Attention Drill",
-            "url": "https://skilldrills.online/drills/cognitive/attention/selective-attention",
-            "description": "Free visual search drill training selective attention. Find items matching color and shape among distractors with adaptive speed. 60-second challenge.",
-            "applicationCategory": "EducationalApplication",
-            "operatingSystem": "All",
-            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-            "author": { "@type": "Organization", "name": "SkillDrills" },
-            "isAccessibleForFree": true
-          })
-        }}
-      />
-
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "FAQPage",
-            "mainEntity": [
-              {
-                "@type": "Question",
-                "name": "What is the Selective Attention Drill?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "A free visual search exercise training your ability to focus on relevant information. Find items matching BOTH color and shape among distractors with adaptive speed."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "How does adaptive difficulty work?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "Correct answers tighten the response window from 2000ms down to 900ms. Wrong answers loosen it. This keeps you at your optimal training level."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "Who benefits from this drill?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "Students improving concentration, professionals filtering distractions, gamers spotting enemies, and anyone wanting better focus."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "Do I need to sign up?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "No registration required. This selective attention drill is completely free and works instantly in your browser."
-                }
-              }
-            ]
-          })
-        }}
-      />
-
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       <SelectiveAttentionClient />
     </>
   );

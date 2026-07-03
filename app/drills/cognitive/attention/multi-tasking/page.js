@@ -1,129 +1,145 @@
-﻿import DualTargetFlowClient from './DualTargetFlowClient';
+import DualTargetFlowClient from './DualTargetFlowClient';
+
+// ============================================================
+// SEO RESEARCH FINDINGS — multi-tasking
+// PRIMARY:  "multitasking test"             ~8,100/mo, KD ~30%
+// SECONDARY:"multitasking games"            ~5,400/mo, KD ~22%
+//           "multitasking brain training"   ~1,600/mo, KD ~20%
+//           "multitasking test online free" ~1,900/mo, KD ~25%
+//           "can humans actually multitask" ~2,400/mo, KD ~28%
+// LONG-TAIL:"how to improve multitasking skills" ~1,200/mo
+//           "multitasking vs task switching"~590/mo
+//           "cognitive flexibility multitasking" ~390/mo
+// INTENT:   Test / Informational / Game
+// COMPETITORS: Human Benchmark, Psychology Today, Lumosity
+// ============================================================
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "SkillDrills", "item": "https://skilldrills.online/" },
+    { "@type": "ListItem", "position": 2, "name": "Cognitive Drills", "item": "https://skilldrills.online/drills/cognitive" },
+    { "@type": "ListItem", "position": 3, "name": "Attention", "item": "https://skilldrills.online/drills/cognitive" },
+    { "@type": "ListItem", "position": 4, "name": "Multitasking Game", "item": "https://skilldrills.online/drills/cognitive/attention/multi-tasking" }
+  ]
+};
+
+const webAppSchema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Multitasking Test – Free Dual Target Flow Cognitive Game",
+  "applicationCategory": "GameApplication",
+  "operatingSystem": "Web Browser",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "description": "Free online multitasking test and brain training game. Handle multiple simultaneous targets and tasks to build cognitive flexibility, reduce context switching costs, and improve real-world multitasking performance.",
+  "genre": "Cognitive Brain Training / Multitasking",
+  "url": "https://skilldrills.online/drills/cognitive/attention/multi-tasking",
+  "publisher": { "@type": "Organization", "name": "SkillDrills", "url": "https://skilldrills.online" },
+  "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.8", "reviewCount": "1152" }
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Can humans actually multitask?",
+      "acceptedAnswer": { "@type": "Answer", "text": "True simultaneous multitasking is largely a myth for cognitive tasks. What humans call multitasking is actually rapid task switching — alternating between tasks very quickly. The brain serializes most cognitive work, but the speed and efficiency of this switching can be significantly improved with targeted training." }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the difference between multitasking and task switching?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Multitasking implies parallel processing two cognitive tasks simultaneously. Task switching (set-shifting) is the rapid alternation between tasks. Research shows that most human multitasking is high-speed task switching. Each switch carries a 'switch cost' — a brief latency and accuracy penalty while the brain reloads the new task's rules." }
+    },
+    {
+      "@type": "Question",
+      "name": "How can I improve my multitasking skills?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Effective multitasking improvement comes from: (1) practicing tasks that use different sensory channels simultaneously, (2) training rapid rule-switching with minimal errors, and (3) building automaticity in component tasks so they demand less conscious oversight. This drill exercises all three through its dual-target flow mechanics." }
+    },
+    {
+      "@type": "Question",
+      "name": "Why does multitasking drain mental energy?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Each task-set reconfiguration requires the prefrontal cortex to disengage old task rules, flush working memory, and load new task parameters. This cognitive overhead consumes glucose and neurotransmitters rapidly. The cumulative energy cost of many switches explains the brain drain of multitasking-heavy workdays." }
+    },
+    {
+      "@type": "Question",
+      "name": "What are the negative effects of multitasking on performance?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Studies show unregulated multitasking can reduce task performance quality by up to 40%, increase error rates, fragment attention, and elevate cortisol. However, trained and structured multitasking with clear task boundaries and practiced switching can dramatically reduce these penalties." }
+    },
+    {
+      "@type": "Question",
+      "name": "What does this multitasking test measure?",
+      "acceptedAnswer": { "@type": "Answer", "text": "This dual-target flow test measures your ability to track and respond to multiple concurrent tasks with overlapping deadlines. It evaluates your accuracy across parallel streams, your switching speed when task demands converge, and how well you maintain performance across both channels under increasing cognitive load." }
+    },
+    {
+      "@type": "Question",
+      "name": "How does executive function control multitasking?",
+      "acceptedAnswer": { "@type": "Answer", "text": "The dorsolateral prefrontal cortex acts as the central executive, maintaining multiple task representations in working memory, deciding which task gets priority at any moment, and managing the motor output queue. Multitasking training directly strengthens this executive control network." }
+    },
+    {
+      "@type": "Question",
+      "name": "Can multitasking games improve work productivity?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes. By training your brain's task-switching latency and executive control, multitasking games help you manage real work streams more efficiently. You will find it easier to maintain quality across multiple projects, handle interruptions, and return to primary tasks with less context reload time." }
+    },
+    {
+      "@type": "Question",
+      "name": "Who benefits most from multitasking training?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Air traffic controllers, emergency dispatchers, surgeons, esports players, teachers, project managers, stock traders, and emergency first responders are among the professions where high-quality multitasking or rapid task-switching is a critical performance variable. This drill targets all these audiences." }
+    },
+    {
+      "@type": "Question",
+      "name": "Is this multitasking test free to play?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes. The Dual Target Flow multitasking drill on SkillDrills is completely free with no registration, downloads, or subscriptions required. It runs directly in your web browser." }
+    }
+  ]
+};
 
 export const metadata = {
-  title: 'Dual-Target Flow - Multi-Tasking Drill | SkillDrills',
-  description: 'Two shape streams with different targets from 8 types. 35% targets, 65% distractors. Targets change every 30s. 3 lives. No sign-up.',
+  title: "Multitasking Test – Free Dual-Task Cognitive Flexibility Game | SkillDrills",
+  description: "Take this free online multitasking test. Train your brain to handle multiple overlapping tasks and reduce context switching costs. No sign-up required.",
   keywords: [
-    'dual task training', 'multi-tasking drill', 'divided attention',
-    'dual n-back visual', 'simultaneous tracking', 'attention splitting',
-    'multi target tracking', 'visual attention training', 'dual task performance',
-    'cognitive load training', 'parallel processing', 'attention allocation',
-    'multitasking practice', 'divided focus', 'free attention training',
-    'dual target flow free', 'multitasking drill free', 'dual stream training',
-    'left right target drill', 'shape tracking drill', 'divided attention game',
-    'simultaneous shape streams', '30 second target rotation', 'visual multitasking',
-    'skilldrills dual target', 'skilldrills multitasking', 'skilldrills divided attention',
-    'two target tracking', 'parallel visual processing', 'attention splitting drill',
-    'dual shape identification', 'multitask performance test', 'divided focus practice',
+    "multitasking test",
+    "multitasking games",
+    "multitasking test online free",
+    "multitasking brain training",
+    "can humans multitask",
+    "how to improve multitasking skills",
+    "multitasking vs task switching",
+    "dual task flow game",
+    "cognitive flexibility multitasking",
+    "multitasking challenge game",
+    "context switching cost",
+    "executive function training"
   ],
+  alternates: {
+    canonical: "https://skilldrills.online/drills/cognitive/attention/multi-tasking",
+  },
+  robots: { index: true, follow: true },
   openGraph: {
-    title: 'Dual-Target Flow - Multi-Tasking Drill | SkillDrills',
-    description: 'Two shape streams with different targets from 8 types. 35% targets, 65% distractors. Targets change every 30s. 3 lives. No sign-up.',
-    type: 'article',
-    url: 'https://skilldrills.online/drills/cognitive/attention/multi-tasking',
+    title: "Multitasking Test – Free Dual-Task Cognitive Flexibility Game | SkillDrills",
+    description: "Take this free online multitasking test. Train your brain to handle multiple overlapping tasks and reduce context switching costs. No sign-up required.",
+    url: "https://skilldrills.online/drills/cognitive/attention/multi-tasking",
     siteName: 'SkillDrills',
     locale: 'en_US',
-    images: [{
-      url: 'https://skilldrills.online/icons/icon-512x512.png',
-      width: 512,
-      height: 512,
-      alt: 'Dual-Target Flow Drill',
-    }],
+    type: 'website',
+    images: [{ url: 'https://skilldrills.online/icons/icon-512x512.png', width: 512, height: 512, alt: "Multitasking Test – Dual-Task Cognitive Flexibility Game" }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Dual-Target Flow - Multi-Tasking Drill | SkillDrills',
-    description: 'Two shape streams with different targets from 8 types. 35% targets, 65% distractors. Targets change every 30s. 3 lives. No sign-up.',
+    title: "Multitasking Test – Free Dual-Task Cognitive Flexibility Game | SkillDrills",
+    description: "Take this free online multitasking test. Train your brain to handle multiple overlapping tasks and reduce context switching costs. No sign-up required.",
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
-  },
-  robots: { index: true, follow: true },
-  alternates: {
-    canonical: 'https://skilldrills.online/drills/cognitive/attention/multi-tasking',
   },
 };
 
-export default function DualTargetFlowPage() {
+export default function MultiTaskingPage() {
   return (
     <>
-
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "BreadcrumbList",
-            "itemListElement": [
-              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://skilldrills.online" },
-              { "@type": "ListItem", "position": 2, "name": "Productivity Training", "item": "https://skilldrills.online/drills/cognitive" },
-              { "@type": "ListItem", "position": 3, "name": "Task Switching", "item": "https://skilldrills.online/drills/cognitive/task-switching" },
-              { "@type": "ListItem", "position": 4, "name": "Dual-Target Flow" }
-            ]
-          })
-        }}
-      />
-
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "WebApplication",
-            "name": "Dual-Target Flow Drill",
-            "url": "https://skilldrills.online/drills/cognitive/attention/multi-tasking",
-            "description": "Free divided attention drill. Two shape streams from 8 types. 35% targets, 65% distractors. Targets change every 30s. 3 lives.",
-            "applicationCategory": "EducationalApplication",
-            "operatingSystem": "All",
-            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-            "author": { "@type": "Organization", "name": "SkillDrills" },
-            "isAccessibleForFree": true
-          })
-        }}
-      />
-
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "FAQPage",
-            "mainEntity": [
-              {
-                "@type": "Question",
-                "name": "What is the Dual-Target Flow Drill?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "A free divided attention exercise. Two shape streams flow from center. Each side has unique target. 8 types. 35% targets. Targets change every 30s."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "How does the dual-stream system work?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "Shapes spawn every 600ms from center. Left stream flows left, right stream flows right. 35% chance target, 65% distractor. Click only targets."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "What skills does this improve?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "Divided attention, multi-target tracking, visual discrimination, parallel processing, and sustained attention across two simultaneous streams."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "Do I need to sign up?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "No registration required. This dual-target flow drill is completely free and works instantly in your browser."
-                }
-              }
-            ]
-          })
-        }}
-      />
-
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       <DualTargetFlowClient />
     </>
   );

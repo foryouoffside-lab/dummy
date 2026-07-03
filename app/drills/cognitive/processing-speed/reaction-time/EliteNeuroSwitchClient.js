@@ -147,7 +147,7 @@ export default function EliteNeuroSwitch() {
     totalGameTime: 9999, // Handled by our custom timer entirely
     lives: 9999, 
     infiniteLives: true, 
-    sharePath: 'drills/cognitive/attention/elite-neuro-switch',
+    sharePath: 'drills/cognitive/processing-speed/reaction-time',
   });
 
   const engineRef = useRef(engine);

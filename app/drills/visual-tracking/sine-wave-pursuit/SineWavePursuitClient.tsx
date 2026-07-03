@@ -4,7 +4,7 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { 
   Target, Clock, Award, Activity, Play, RefreshCw, 
-  Volume2, VolumeX, Maximize2, Minimize2, Eye, EyeOff,
+  Volume2, VolumeX, Maximize2, Minimize2, Eye, EyeOff, Sun, Moon,
   Trophy, Info, Check, ArrowRight, Sparkles, Sliders, 
   HelpCircle, Compass, ShieldAlert, Zap, Share2, Copy, Brain
 } from 'lucide-react';
@@ -72,6 +72,7 @@ export default function SineWavePursuitClient() {
   }, []);
 
   const [loading, setLoading] = useState(true);
+  const [dayMode, setDayMode] = useState(false);
   const [isClient, setIsClient] = useState(false);
   
   // ============ USER SETTINGS STATES ============
@@ -289,11 +290,11 @@ export default function SineWavePursuitClient() {
       const scaledDt = dt * speedMultiplier;
 
       // Clear background
-      ctx.fillStyle = '#05070f';
+      ctx.fillStyle = dayMode ? '#f8fafc' : '#05070f';
       ctx.fillRect(0, 0, W, H);
 
       // Render gridlines
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.015)';
+      ctx.strokeStyle = dayMode ? 'rgba(15, 23, 42, 0.06)' : 'rgba(255, 255, 255, 0.015)';
       ctx.lineWidth = 1;
       const gridSize = 40;
       for (let xPos = 0; xPos < W; xPos += gridSize) {
@@ -305,7 +306,7 @@ export default function SineWavePursuitClient() {
 
       // Draw visible Sine path
         ctx.beginPath();
-        ctx.strokeStyle = 'rgba(51, 65, 85, 0.4)';
+        ctx.strokeStyle = dayMode ? 'rgba(15, 23, 42, 0.15)' : 'rgba(51, 65, 85, 0.4)';
         ctx.lineWidth = 4;
         for (let i = W * 0.1; i < W * 0.9; i += 5) {
           const y = (H / 2) + Math.sin(i * 0.01) * (H * 0.2);
@@ -333,21 +334,21 @@ export default function SineWavePursuitClient() {
 
         // Render Target
         ctx.shadowColor = targetColor;
-        ctx.shadowBlur = glowEffect ? 18 : 0;
+        ctx.shadowBlur = (glowEffect && !dayMode) ? 18 : 0;
         ctx.fillStyle = targetColor;
         ctx.beginPath();
         ctx.arc(trackingState.current.x, targetY, targetSize, 0, Math.PI * 2);
         ctx.fill();
         ctx.shadowBlur = 0;
 
-        ctx.fillStyle = '#ffffff';
+        ctx.fillStyle = dayMode ? '#0f172a' : '#ffffff';
         ctx.beginPath();
         ctx.arc(trackingState.current.x, targetY, 3, 0, Math.PI * 2);
         ctx.fill();
 
       // Visual overlay scanlines
       if (scanlinesActive) {
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.012)';
+        ctx.fillStyle = dayMode ? 'rgba(0, 0, 0, 0.02)' : 'rgba(255, 255, 255, 0.012)';
         for (let i = 0; i < H; i += 4) {
           ctx.fillRect(0, i, W, 1.5);
         }
@@ -481,7 +482,7 @@ export default function SineWavePursuitClient() {
                   Sine-Wave Pursuit
                 </h1>
                 <p className="text-xs text-slate-400 tracking-wider mt-0.5">
-                  Visual Gaze Calibration � Intermediate Sector
+                  Visual Gaze Calibration  -  Intermediate Sector
                 </p>
               </div>
             </div>
@@ -503,7 +504,14 @@ export default function SineWavePursuitClient() {
               >
                 {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
               </button>
-              <button 
+                            <button 
+                onClick={() => setDayMode(!dayMode)}
+                className="p-2.5 rounded-lg border border-slate-800 bg-[#0b0f19] text-slate-400 hover:text-white hover:border-slate-700 transition-all active:scale-95"
+                title="Toggle Day Mode"
+              >
+                {dayMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              </button>
+<button 
                 onClick={toggleFullscreen}
                 className="p-2.5 rounded-lg border border-slate-800 bg-[#0b0f19] text-slate-400 hover:text-white hover:border-slate-700 transition-all active:scale-95"
                 title="Toggle Viewport Fullscreen"
@@ -718,16 +726,16 @@ export default function SineWavePursuitClient() {
               
               {/* Start Overlay Screen */}
               {gameState === 'start' && (
-                <div className="absolute inset-0 bg-[#05070e]/95 flex flex-col items-center justify-center p-6 z-30 select-none">
+                <div className={`absolute inset-0 flex flex-col items-center justify-center p-6 z-30 select-none ${dayMode ? 'bg-[#f1f5f9]/98 text-slate-800' : 'bg-[#05070e]/95 text-slate-100'}`}>
                   <div className="max-w-md text-center">
                     <div className="w-14 h-14 mx-auto mb-4 border border-red-500/25 bg-red-500/5 rounded-full flex items-center justify-center shadow-lg shadow-red-950/10">
                       <Eye className="w-6 h-6 text-red-500" />
                     </div>
                     
-                    <h2 className="text-lg font-black text-white uppercase tracking-wider mb-2 font-mono">
+                    <h2 className={`text-lg font-black uppercase tracking-wider mb-2 font-mono ${dayMode ? 'text-slate-900' : 'text-white'}`}>
                       Sine-Wave Pursuit
                     </h2>
-                    <p className="text-xs text-slate-400 leading-relaxed mb-6">
+                    <p className={`text-xs leading-relaxed mb-6 ${dayMode ? 'text-slate-650' : 'text-slate-400'}`}>
                       Track target oscillations along a horizontal sine wave guide line. Focus your eyes on the moving target. Do not use your head or mouse.
                     </p>
 
@@ -744,16 +752,16 @@ export default function SineWavePursuitClient() {
 
               {/* Game Over Screen */}
               {gameState === 'gameOver' && (
-                <div className="absolute inset-0 bg-[#05070e]/95 flex flex-col items-center justify-center p-6 z-30 select-none">
+                <div className={`absolute inset-0 flex flex-col items-center justify-center p-6 z-30 select-none ${dayMode ? 'bg-[#f1f5f9]/98 text-slate-800' : 'bg-[#05070e]/95 text-slate-100'}`}>
                   <div className="max-w-md text-center">
                     <div className="w-14 h-14 mx-auto mb-4 border border-green-500/20 bg-green-500/5 rounded-full flex items-center justify-center shadow-lg shadow-green-950/10">
                       <Check className="w-6 h-6 text-green-500" />
                     </div>
                     
-                    <h2 className="text-lg font-black text-white uppercase tracking-wider mb-2 font-mono">
+                    <h2 className={`text-lg font-black uppercase tracking-wider mb-2 font-mono ${dayMode ? 'text-slate-900' : 'text-white'}`}>
                       Gaze Calibration Complete
                     </h2>
-                    <p className="text-xs text-slate-400 leading-relaxed mb-6">
+                    <p className={`text-xs leading-relaxed mb-6 ${dayMode ? 'text-slate-650' : 'text-slate-400'}`}>
                       Your ocular muscles have successfully tracked the target across {speedMultiplier.toFixed(1)}x speed configuration. Gaze stabilization completed.
                     </p>
 

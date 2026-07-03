@@ -69,7 +69,7 @@ export default function GameEndScreen({
         <div className="text-center mb-2">
           <div className="flex items-center justify-center gap-1.5">
             <Timer className="w-5 h-5 text-orange-500" />
-            <h2 className={`text-lg font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Time's Up!</h2>
+            <h2 className={`text-lg font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Time&apos;s Up!</h2>
           </div>
           <p className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{drillName}</p>
         </div>

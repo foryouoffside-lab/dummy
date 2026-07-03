@@ -2,13 +2,14 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
+import Head from 'next/head';
 
 import { 
-  Activity, AlertCircle, ArrowRight, BarChart3, ChevronRight, 
-  Clock, Crosshair, Eye, GraduationCap, Info, Lightbulb, 
+  Activity, AlertCircle, ArrowRight, ChevronRight, 
+  Clock, Crosshair, GraduationCap, Info, Lightbulb, 
   Maximize2, Minimize2, Play, RefreshCw, Star, Target, 
-  Timer, TrendingUp, Trophy, Volume2, VolumeX, Zap, 
-  Share2, Code2, Calculator, CheckCircle2, Shield, Users, XCircle
+  TrendingUp, Trophy, Volume2, VolumeX, Zap, 
+  Share2, Shield, Users, Sparkles, Sliders, Flame, Timer
 } from 'lucide-react';
 
 // ============================================================
@@ -32,13 +33,13 @@ class AudioSynthesizer {
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
       osc.type = 'sine'; 
-      osc.frequency.setValueAtTime(1200, this.ctx.currentTime); // High pitch for RED
-      osc.frequency.exponentialRampToValueAtTime(600, this.ctx.currentTime + 0.1);
-      gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+      osc.frequency.setValueAtTime(1100, this.ctx.currentTime); 
+      osc.frequency.exponentialRampToValueAtTime(700, this.ctx.currentTime + 0.1);
+      gain.gain.setValueAtTime(0.18, this.ctx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.1);
       osc.connect(gain); gain.connect(this.ctx.destination);
       osc.start(); osc.stop(this.ctx.currentTime + 0.1);
-    } catch(e) {}
+    } catch {}
   }
 
   playStandard() {
@@ -47,13 +48,13 @@ class AudioSynthesizer {
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
       osc.type = 'sine'; 
-      osc.frequency.setValueAtTime(600, this.ctx.currentTime); // Mid pitch for BLUE
-      osc.frequency.exponentialRampToValueAtTime(300, this.ctx.currentTime + 0.1);
-      gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
+      osc.frequency.setValueAtTime(650, this.ctx.currentTime); 
+      osc.frequency.exponentialRampToValueAtTime(450, this.ctx.currentTime + 0.1);
+      gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.1);
       osc.connect(gain); gain.connect(this.ctx.destination);
       osc.start(); osc.stop(this.ctx.currentTime + 0.1);
-    } catch(e) {}
+    } catch {}
   }
 
   playThud() {
@@ -62,12 +63,12 @@ class AudioSynthesizer {
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
       osc.type = 'triangle'; 
-      osc.frequency.setValueAtTime(150, this.ctx.currentTime);
+      osc.frequency.setValueAtTime(140, this.ctx.currentTime);
       gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.15);
+      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.18);
       osc.connect(gain); gain.connect(this.ctx.destination);
-      osc.start(); osc.stop(this.ctx.currentTime + 0.15);
-    } catch(e) {}
+      osc.start(); osc.stop(this.ctx.currentTime + 0.18);
+    } catch {}
   }
 
   playBuzz() {
@@ -76,12 +77,12 @@ class AudioSynthesizer {
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
       osc.type = 'sawtooth'; 
-      osc.frequency.setValueAtTime(100, this.ctx.currentTime); // Harsh low pitch for YELLOW
-      gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.2);
+      osc.frequency.setValueAtTime(95, this.ctx.currentTime); 
+      gain.gain.setValueAtTime(0.22, this.ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.22);
       osc.connect(gain); gain.connect(this.ctx.destination);
-      osc.start(); osc.stop(this.ctx.currentTime + 0.2);
-    } catch(e) {}
+      osc.start(); osc.stop(this.ctx.currentTime + 0.22);
+    } catch {}
   }
 
   setEnabled(status) {
@@ -91,154 +92,160 @@ class AudioSynthesizer {
 
 const audioSynth = typeof window !== 'undefined' ? new AudioSynthesizer() : null;
 
-const DRILL_DURATION = 60; // Strict 60 seconds
+const DRILL_DURATION = 60; // Strict 60-second budget
 
 // ============================================================
-// MAIN COMPONENT
+// RANK CALCULATION & TELEMETRY
+// ============================================================
+const calculateRank = (score, accuracy) => {
+  if (score >= 4000 && accuracy >= 90) return { rank: 'S+', color: 'text-fuchsia-400' };
+  if (score >= 3000 && accuracy >= 85) return { rank: 'S', color: 'text-yellow-400' };
+  if (score >= 2000 && accuracy >= 80) return { rank: 'A', color: 'text-green-400' };
+  if (score >= 1000 && accuracy >= 70) return { rank: 'B', color: 'text-blue-400' };
+  if (score >= 500 && accuracy >= 60) return { rank: 'C', color: 'text-indigo-400' };
+  return { rank: 'D', color: 'text-slate-400' };
+};
+
+const getPrescribedAdvice = (friendlyFire, expiredReds, misses, wrongPriority) => {
+  if (friendlyFire > 2) {
+    return "Friendly fire errors detected. Shooting friendly Green targets costs -1.0 seconds. Take an extra microsecond to verify the target's color before pulling the trigger—impulse control is critical.";
+  }
+  if (expiredReds > 3) {
+    return "High Threat (Red) targets are expiring and draining your timer. Keep your eyes active, sweep the board, and prioritize Reds immediately to secure the +0.75s time bonus.";
+  }
+  if (wrongPriority > 3) {
+    return "Priority ordering errors. You shot Yellow targets while Red threats were active. Hitting Yellow when Red is present resets your decision combo. Always eliminate Red targets first.";
+  }
+  if (misses > 6) {
+    return "Visual accuracy is drifting. Clicking empty space drains -0.75 seconds. Ensure your crosshair has fully stopped over the target before firing to avoid wasting time.";
+  }
+  return "Excellent sorting speed and tactical prioritization! You processed visual clutter efficiently, ignored friendly targets, and cleared high-threat spawns with top efficiency.";
+};
+
+// ============================================================
+// MAIN CLIENT COMPONENT
 // ============================================================
 export default function TargetPrioritizationClient() {
-  // === UI & Viewport State ===
-  const [gameState, setGameState] = useState('start'); // 'start', 'playing', 'gameOver'
+  const [gameState, setGameState] = useState('start'); 
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [pointerLocked, setPointerLocked] = useState(false);
   
-  // === Settings State ===
   const [universalSens, setUniversalSens] = useState(1.0);
 
-  // === Gameplay State ===
-  const [score, setScore] = useState(0);
+  const [uiScore, setUiScore] = useState(0);
+  const [uiLevel, setUiLevel] = useState(1);
+  const [uiCombo, setUiCombo] = useState(0);
+  const [uiTimeLeft, setUiTimeLeft] = useState(DRILL_DURATION);
   const [bestScore, setBestScore] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(DRILL_DURATION);
   const [isNewBest, setIsNewBest] = useState(false);
   const [flashBg, setFlashBg] = useState(null);
 
-  // Analytics State
   const [analytics, setAnalytics] = useState({
-    accuracy: 100,
-    redHits: 0,
-    blueHits: 0,
-    decoyHits: 0,
-    missedClicks: 0,
-    timeouts: 0,
-    speedLevel: 1
+    accuracy: 100, threatRecognitionPct: 0, correctDecisions: 0, wrongDecisions: 0,
+    friendlyFireCount: 0, redHits: 0, yellowHits: 0, expiredReds: 0, expiredYellows: 0,
+    bestCombo: 0, finalLevel: 1, duration: 0, rankData: null
   });
 
-  // === High-performance Mutable Refs ===
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
   const animationRef = useRef(null);
-  const timerRef = useRef(null);
   const pageRef = useRef(null);
-  
-  // === Game Logic Engine Refs ===
+  const progressBarRef = useRef(null);
+  const lastTimeRef = useRef(DRILL_DURATION);
+
   const engine = useRef({
     crosshair: { x: 0, y: 0, initialized: false },
-    targets: [],
-    
-    // Adaptive Difficulty Mechanics
-    spawnRate: 900,
-    lifeSpan: 1500,
-    nextSpawnTime: 0,
-    
-    score: 0,
-    timeLeft: DRILL_DURATION,
-    
-    // Telemetry & VFX
-    redHits: 0,
-    blueHits: 0,
-    decoyHits: 0,
-    missedClicks: 0,
-    timeouts: 0,
-    totalActions: 0,
-    particles: [],
-    hitMarkers: [],
-    screenShake: 0
+    targets: [], 
+    score: 0, level: 1, combo: 0, maxCombo: 0, timeLeft: DRILL_DURATION, gameStartTime: 0,
+    redHits: 0, yellowHits: 0, friendlyFireCount: 0, missedClicks: 0, wrongPriorityClicks: 0,
+    expiredRedCount: 0, expiredYellowCount: 0, totalActions: 0, correctDecisions: 0, wrongDecisions: 0,
+    particles: [], hitMarkers: [], floatingTexts: [], screenShake: 0, nextSpawnTime: 0
   });
 
   const cmPer360 = (30 / universalSens).toFixed(1);
 
-  // === Initialization & Local Storage ===
   useEffect(() => {
     try {
       const savedSens = localStorage.getItem('targetPrioritization_sens');
       if (savedSens) setUniversalSens(parseFloat(savedSens));
       const savedBest = localStorage.getItem('targetPrioritization_bestScore');
       if (savedBest) setBestScore(parseInt(savedBest, 10));
-    } catch (e) {}
+    } catch {}
   }, []);
 
   useEffect(() => {
     if (gameState !== 'playing') {
-      try { localStorage.setItem('targetPrioritization_sens', universalSens.toString()); } catch (e) {}
+      try { localStorage.setItem('targetPrioritization_sens', universalSens.toString()); } catch {}
     }
     if (audioSynth) audioSynth.setEnabled(soundEnabled);
   }, [universalSens, gameState, soundEnabled]);
 
-  // === Core Game Management ===
   const endGame = useCallback(() => {
     setGameState('gameOver');
     if (document.pointerLockElement) document.exitPointerLock();
     
     const e = engine.current;
-    const totalValidHits = e.redHits + e.blueHits;
-    const finalAccuracy = e.totalActions > 0 ? Math.round((totalValidHits / e.totalActions) * 100) : 0;
+    const totalCorrectHits = e.redHits + e.yellowHits;
+    const finalAccuracy = e.totalActions > 0 ? Math.round((totalCorrectHits / e.totalActions) * 100) : 100;
+    const spawnedRedsCount = e.redHits + e.expiredRedCount;
+    const threatRecognition = spawnedRedsCount > 0 ? Math.round((e.redHits / spawnedRedsCount) * 100) : 100;
+
+    const rank = calculateRank(e.score, finalAccuracy);
+    const sessionDuration = Math.round((performance.now() - e.gameStartTime) / 1000);
 
     setAnalytics({
-      accuracy: finalAccuracy,
-      redHits: e.redHits,
-      blueHits: e.blueHits,
-      decoyHits: e.decoyHits,
-      missedClicks: e.missedClicks,
-      timeouts: e.timeouts,
-      speedLevel: Math.floor(totalValidHits / 15) + 1
+      accuracy: finalAccuracy, threatRecognitionPct: threatRecognition, correctDecisions: e.correctDecisions,
+      wrongDecisions: e.wrongDecisions, friendlyFireCount: e.friendlyFireCount, redHits: e.redHits,
+      yellowHits: e.yellowHits, expiredReds: e.expiredRedCount, expiredYellows: e.expiredYellowCount,
+      bestCombo: e.maxCombo, finalLevel: e.level, duration: Math.min(60, sessionDuration), rankData: rank
     });
 
+    setUiScore(e.score);
     setBestScore(prev => {
       if (e.score > prev) {
         setIsNewBest(true);
-        try { localStorage.setItem('targetPrioritization_bestScore', e.score.toString()); } catch(err){}
+        try { localStorage.setItem('targetPrioritization_bestScore', e.score.toString()); } catch {}
         return e.score;
       }
       return prev;
     });
   }, []);
 
-  const spawnTarget = useCallback((width, height) => {
-    const pad = 40;
+  const spawnTarget = useCallback((width, height, level) => {
+    const pad = 48;
     const rand = Math.random();
     
-    let type = 'blue';
-    let radius = 25;
+    let type = 'yellow';
+    let radius = 22;
     
-    if (rand < 0.25) {
-      type = 'red'; // Critical (25% chance)
-      radius = 18;
-    } else if (rand > 0.85) {
-      type = 'yellow'; // Decoy (15% chance)
-      radius = 22;
+    if (level === 1) {
+      if (rand < 0.35) { type = 'green'; radius = 24; }
+    } else if (level === 2) {
+      if (rand < 0.15) { type = 'red'; radius = 18; } 
+      else if (rand > 0.65) { type = 'green'; radius = 24; }
+    } else if (level === 3) {
+      if (rand < 0.25) { type = 'red'; radius = 18; } 
+      else if (rand > 0.65) { type = 'green'; radius = 24; }
+    } else if (level === 4) {
+      if (rand < 0.35) { type = 'red'; radius = 18; } 
+      else if (rand > 0.70) { type = 'green'; radius = 24; }
+    } else {
+      if (rand < 0.45) { type = 'red'; radius = 18; } 
+      else if (rand > 0.75) { type = 'green'; radius = 24; }
     }
 
-    // Give targets a slight random drift
-    const vx = (Math.random() - 0.5) * 60;
-    const vy = (Math.random() - 0.5) * 60;
+    const speedLimit = 40 + (level * 8);
+    const vx = (Math.random() - 0.5) * speedLimit;
+    const vy = (Math.random() - 0.5) * speedLimit;
 
-    return { 
-      id: Math.random().toString(36).substring(2, 11),
-      type,
-      x: pad + Math.random() * (width - pad * 2), 
-      y: pad + Math.random() * (height - pad * 2), 
-      vx,
-      vy,
-      radius,
-      age: 0
-    };
+    return { id: Math.random(), type, x: pad + Math.random() * (width - pad * 2), y: pad + Math.random() * (height - pad * 2), vx, vy, radius, age: 0 };
   }, []);
 
   const createExplosion = (x, y, color) => {
-    for (let i = 0; i < 12; i++) {
+    for (let i = 0; i < 15; i++) {
       const angle = Math.random() * Math.PI * 2;
-      const speed = Math.random() * 4 + 1;
+      const speed = Math.random() * 4.5 + 1.2;
       engine.current.particles.push({ x, y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, life: 1.0, color });
     }
   };
@@ -248,31 +255,35 @@ export default function TargetPrioritizationClient() {
   };
 
   const startGame = useCallback(async () => {
-    if (audioSynth) audioSynth.init(); 
+    if (audioSynth) audioSynth.init();
 
     setIsNewBest(false);
-    setScore(0);
-    setAnalytics({ accuracy: 100, redHits: 0, blueHits: 0, decoyHits: 0, missedClicks: 0, timeouts: 0, speedLevel: 1 });
-    setTimeLeft(DRILL_DURATION);
-    setGameState('playing');
+    setUiScore(0);
+    setUiLevel(1);
+    setUiCombo(0);
+    setUiTimeLeft(DRILL_DURATION);
+    lastTimeRef.current = DRILL_DURATION;
     
+    setAnalytics({
+      accuracy: 100, threatRecognitionPct: 0, correctDecisions: 0, wrongDecisions: 0,
+      friendlyFireCount: 0, redHits: 0, yellowHits: 0, expiredReds: 0, expiredYellows: 0,
+      bestCombo: 0, finalLevel: 1, duration: 0, rankData: null
+    });
+    setGameState('playing');
+
     engine.current = {
-      crosshair: { ...engine.current.crosshair },
-      targets: [],
-      spawnRate: 900, 
-      lifeSpan: 1500, 
-      score: 0,
-      timeLeft: DRILL_DURATION,
-      nextSpawnTime: performance.now() + 500,
-      redHits: 0, blueHits: 0, decoyHits: 0, missedClicks: 0, timeouts: 0, totalActions: 0,
-      particles: [], hitMarkers: [], screenShake: 0
+      crosshair: { ...engine.current.crosshair }, targets: [], score: 0, level: 1, combo: 0, maxCombo: 0,
+      timeLeft: DRILL_DURATION, gameStartTime: performance.now(), redHits: 0, yellowHits: 0, friendlyFireCount: 0,
+      missedClicks: 0, wrongPriorityClicks: 0, expiredRedCount: 0, expiredYellowCount: 0, totalActions: 0,
+      correctDecisions: 0, wrongDecisions: 0, particles: [], hitMarkers: [], floatingTexts: [], screenShake: 0,
+      nextSpawnTime: performance.now() + 400
     };
 
     try {
       if (containerRef.current && !document.fullscreenElement) {
-        await containerRef.current.requestFullscreen();
+        await containerRef.current.requestFullscreen().catch(()=>{});
       }
-    } catch(e) {}
+    } catch {}
 
     setTimeout(() => {
       if (canvasRef.current && !document.pointerLockElement) {
@@ -281,24 +292,6 @@ export default function TargetPrioritizationClient() {
     }, 150);
   }, []);
 
-  // === Strict Timer Management ===
-  useEffect(() => {
-    if (gameState === 'playing' && pointerLocked) {
-      timerRef.current = setInterval(() => {
-        engine.current.timeLeft -= 1;
-        setTimeLeft(engine.current.timeLeft);
-        if (engine.current.timeLeft <= 0) {
-          clearInterval(timerRef.current);
-          endGame();
-        }
-      }, 1000);
-    } else {
-      clearInterval(timerRef.current);
-    }
-    return () => clearInterval(timerRef.current);
-  }, [gameState, pointerLocked, endGame]);
-
-  // === Raw Mouse Input & Firing Listeners ===
   useEffect(() => {
     const handlePointerLockChange = () => setPointerLocked(document.pointerLockElement === canvasRef.current);
     document.addEventListener('pointerlockchange', handlePointerLockChange);
@@ -319,79 +312,109 @@ export default function TargetPrioritizationClient() {
       if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
       if (gameState === 'playing') {
         if (!pointerLocked && canvasRef.current) {
-          canvasRef.current.requestPointerLock();
+          canvasRef.current.requestPointerLock().catch(()=>{});
         } else if (pointerLocked) {
           
-          // SHOOT LOGIC
           const eRef = engine.current;
           eRef.totalActions++;
-          
           const ch = eRef.crosshair;
-          let hitAnyTarget = null;
+          let clickedTarget = null;
 
-          // Check collisions (Loop backward to click top visual layer first)
           for (let i = eRef.targets.length - 1; i >= 0; i--) {
             const t = eRef.targets[i];
-            
-            // Calculate current shrinking radius
-            const lifePercent = Math.max(0, 1 - (t.age / eRef.lifeSpan));
-            const activeRadius = t.radius * Math.max(0.5, lifePercent); // Shrinks to 50% size before dying
-            
-            if (Math.hypot(ch.x - t.x, ch.y - t.y) <= activeRadius + 5) {
-              hitAnyTarget = t;
-              eRef.targets.splice(i, 1); // Remove target
+            const dist = Math.hypot(ch.x - t.x, ch.y - t.y);
+            if (dist <= t.radius + 4) {
+              clickedTarget = t;
+              eRef.targets.splice(i, 1);
               break;
             }
           }
 
-          if (hitAnyTarget) {
-            if (hitAnyTarget.type === 'red') {
-              if (audioSynth) audioSynth.playCritical();
-              eRef.score += 3;
+          if (clickedTarget) {
+            createHitMarker(ch.x, ch.y);
+            const activeRedsOnScreen = eRef.targets.some(t => t.type === 'red');
+
+            if (clickedTarget.type === 'red') {
               eRef.redHits++;
-              eRef.timeLeft += 1; // Time bonus ONLY for Red
-              createExplosion(hitAnyTarget.x, hitAnyTarget.y, '#ef4444');
-            } else if (hitAnyTarget.type === 'blue') {
-              if (audioSynth) audioSynth.playStandard();
-              eRef.score += 1;
-              eRef.blueHits++;
-              createExplosion(hitAnyTarget.x, hitAnyTarget.y, '#3b82f6');
-            } else if (hitAnyTarget.type === 'yellow') {
-              if (audioSynth) audioSynth.playBuzz();
-              eRef.score = Math.max(0, eRef.score - 3);
-              eRef.decoyHits++;
-              eRef.timeLeft -= 2; // Decoy Penalty
+              eRef.correctDecisions++;
+              eRef.combo++;
+              if (eRef.combo > eRef.maxCombo) eRef.maxCombo = eRef.combo;
+              
+              let multiplier = 1.0;
+              if (eRef.combo >= 20) multiplier = 2.0;
+              else if (eRef.combo >= 15) multiplier = 1.5;
+              else if (eRef.combo >= 10) multiplier = 1.25;
+              else if (eRef.combo >= 5) multiplier = 1.1;
+
+              eRef.score += Math.round(100 * multiplier);
+              eRef.timeLeft = Math.min(60, eRef.timeLeft + 0.75); 
+
+              if (audioSynth) audioSynth.playCritical();
+              createExplosion(clickedTarget.x, clickedTarget.y, '#ef4444');
+
+            } else if (clickedTarget.type === 'yellow') {
+              if (activeRedsOnScreen) {
+                eRef.wrongPriorityClicks++;
+                eRef.wrongDecisions++;
+                eRef.combo = 0; 
+                eRef.score += 50; 
+                eRef.timeLeft = Math.min(60, eRef.timeLeft + 0.25); 
+
+                if (audioSynth) audioSynth.playBuzz();
+                createExplosion(clickedTarget.x, clickedTarget.y, '#eab308');
+                
+                setFlashBg('red');
+                setTimeout(() => setFlashBg(null), 100);
+
+              } else {
+                eRef.yellowHits++;
+                eRef.correctDecisions++;
+                eRef.combo++;
+                if (eRef.combo > eRef.maxCombo) eRef.maxCombo = eRef.combo;
+
+                let multiplier = 1.0;
+                if (eRef.combo >= 20) multiplier = 2.0;
+                else if (eRef.combo >= 15) multiplier = 1.5;
+                else if (eRef.combo >= 10) multiplier = 1.25;
+                else if (eRef.combo >= 5) multiplier = 1.1;
+
+                eRef.score += Math.round(50 * multiplier);
+                eRef.timeLeft = Math.min(60, eRef.timeLeft + 0.25); 
+
+                if (audioSynth) audioSynth.playStandard();
+                createExplosion(clickedTarget.x, clickedTarget.y, '#eab308');
+              }
+
+            } else if (clickedTarget.type === 'green') {
+              eRef.friendlyFireCount++;
+              eRef.wrongDecisions++;
+              eRef.combo = 0; 
+              eRef.timeLeft = Math.max(0, eRef.timeLeft - 1.0); // PENALTY REDUCED TO 1s
               eRef.screenShake = 15;
-              createExplosion(hitAnyTarget.x, hitAnyTarget.y, '#eab308');
+
+              if (audioSynth) audioSynth.playBuzz();
+              createExplosion(clickedTarget.x, clickedTarget.y, '#22c55e');
+
               setFlashBg('red');
               setTimeout(() => setFlashBg(null), 100);
             }
-            
-            // Adaptive Difficulty
-            const totalHits = eRef.redHits + eRef.blueHits;
-            const progress = Math.min(1, totalHits / 100);
-            eRef.spawnRate = 900 - (progress * 500); // Scales to 400ms
-            eRef.lifeSpan = 1500 - (progress * 800); // Scales to 700ms
 
-            createHitMarker(ch.x, ch.y);
-            setScore(eRef.score);
-            setTimeLeft(eRef.timeLeft);
+            setUiScore(eRef.score);
+            setUiCombo(eRef.combo);
+            setUiTimeLeft(Math.ceil(eRef.timeLeft));
 
           } else {
-            // MISS CANVAS
             eRef.missedClicks++;
-            eRef.score = Math.max(0, eRef.score - 1);
-            eRef.timeLeft -= 1; // -1s Penalty
-            eRef.screenShake = 8;
-            
-            // Forgiveness
-            eRef.spawnRate = Math.min(900, eRef.spawnRate + 20);
-            eRef.lifeSpan = Math.min(1500, eRef.lifeSpan + 40);
+            eRef.wrongDecisions++;
+            eRef.combo = 0; 
+            eRef.timeLeft = Math.max(0, eRef.timeLeft - 0.75); 
+            eRef.screenShake = 6;
 
             if (audioSynth) audioSynth.playThud();
-            setScore(eRef.score);
-            setTimeLeft(eRef.timeLeft);
-            
+            createExplosion(ch.x, ch.y, '#64748b'); 
+
+            setUiCombo(0);
+            setUiTimeLeft(Math.ceil(eRef.timeLeft));
             setFlashBg('red');
             setTimeout(() => setFlashBg(null), 100);
           }
@@ -415,15 +438,39 @@ export default function TargetPrioritizationClient() {
     }
   }, []);
 
+  const shareDrillLink = useCallback(async () => {
+    const text = `🎯 I scored ${uiScore} PTS (Level ${analytics.finalLevel}) on the Target Prioritization Trainer! Accuracy: ${analytics.accuracy}%, Best Combo: ${analytics.bestCombo}x. Practice your threat assessment at skilldrills.online!`;
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      try {
+        await navigator.share({ title: 'My Prioritization Score', text, url: 'https://skilldrills.online/drills/fps/target-prioritization' });
+      } catch {}
+    } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      try {
+        await navigator.clipboard.writeText(text);
+        alert('Score card copied to clipboard!');
+      } catch {}
+    }
+  }, [uiScore, analytics]);
+
   useEffect(() => {
     const fsListener = () => setIsFullscreen(!!document.fullscreenElement);
     document.addEventListener('fullscreenchange', fsListener);
     return () => document.removeEventListener('fullscreenchange', fsListener);
   }, []);
 
-  // === Render & Physics Loop (Delta Time) ===
   useEffect(() => {
-    const cvs = canvasRef.current; 
+    const handleKeyDown = (e) => {
+      if (gameState === 'start' && (e.key === ' ' || e.key === 'Enter')) {
+        e.preventDefault();
+        startGame();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [gameState, startGame]);
+
+  useEffect(() => {
+    const cvs = canvasRef.current;
     const container = containerRef.current;
     if (!cvs || !container) return;
     const ctx = cvs.getContext('2d', { alpha: false });
@@ -449,57 +496,108 @@ export default function TargetPrioritizationClient() {
     const loop = (time) => {
       const deltaTimeMs = time - lastTime;
       lastTime = time;
-      const dt = Math.min(deltaTimeMs / 1000, 0.1); 
+      const dt = Math.min(deltaTimeMs / 1000, 0.1);
       const e = engine.current;
 
       if (gameState === 'playing' && pointerLocked) {
         
-        // Target Spawning
-        if (time >= e.nextSpawnTime && e.targets.length < 8) {
-          e.targets.push(spawnTarget(cvs.width, cvs.height));
-          e.nextSpawnTime = time + e.spawnRate;
+        if (e.timeLeft > 0) {
+          e.timeLeft -= dt;
         }
 
-        // Target Physics & Aging
+        if (e.timeLeft <= 0) {
+          e.timeLeft = 0;
+          setUiTimeLeft(0);
+          if (progressBarRef.current) progressBarRef.current.style.width = '0%';
+          endGame();
+          return;
+        }
+
+        if (progressBarRef.current) {
+          progressBarRef.current.style.width = `${(e.timeLeft / DRILL_DURATION) * 100}%`;
+          progressBarRef.current.className = `h-full ${e.timeLeft <= 10 ? 'bg-red-500 animate-pulse' : 'bg-blue-600'}`;
+        }
+
+        const intTime = Math.ceil(e.timeLeft);
+        if (intTime !== lastTimeRef.current) {
+          setUiTimeLeft(intTime);
+          lastTimeRef.current = intTime;
+        }
+
+        const calculatedLevel = Math.floor(e.score / 1000) + 1;
+        if (calculatedLevel !== e.level) {
+          e.level = calculatedLevel;
+          setUiLevel(e.level);
+        }
+
+        const spawnDelay = Math.max(400, 1000 - (e.level - 1) * 110); 
+        const maxTargets = Math.min(9, 3 + e.level); 
+
+        if (time >= e.nextSpawnTime && e.targets.length < maxTargets) {
+          e.targets.push(spawnTarget(cvs.width, cvs.height, e.level));
+          e.nextSpawnTime = time + spawnDelay;
+        }
+
         for (let i = e.targets.length - 1; i >= 0; i--) {
           const t = e.targets[i];
           t.age += deltaTimeMs;
 
-          if (t.age >= e.lifeSpan) {
-            // Timeout Penalty (Only for Blue and Red, not Yellow Decoys)
-            if (t.type !== 'yellow') {
-              e.timeouts++;
-              e.totalActions++;
-              e.score = Math.max(0, e.score - 1);
-              e.timeLeft -= 1;
-              e.screenShake = 15;
-              
-              // Forgiveness
-              e.spawnRate = Math.min(900, e.spawnRate + 20);
-              e.lifeSpan = Math.min(1500, e.lifeSpan + 40);
-              
-              setScore(e.score);
-              setTimeLeft(e.timeLeft);
-              if (audioSynth) audioSynth.playThud();
-              setFlashBg('red');
-              setTimeout(() => setFlashBg(null), 100);
-            }
+          if (t.type === 'yellow' && t.age >= 1200) {
+            t.type = 'red';
+            t.age = 0; 
+            t.radius = 18;
+            if (audioSynth) audioSynth.playBuzz(); 
+          }
+
+          if (t.type === 'red' && t.age >= 1200) {
+            e.expiredRedCount++;
+            e.wrongDecisions++;
+            e.combo = 0; 
+            e.timeLeft = Math.max(0, e.timeLeft - 1.0); // PENALTY REDUCED TO 1s
+            e.screenShake = 14;
+
+            if (audioSynth) audioSynth.playThud();
+            createExplosion(t.x, t.y, '#ef4444');
+
+            e.targets.splice(i, 1);
+            setUiCombo(0);
+            setUiTimeLeft(Math.ceil(e.timeLeft));
+            setFlashBg('red');
+            setTimeout(() => setFlashBg(null), 100);
+            continue;
+          }
+
+          if (t.type === 'yellow' && t.age >= 1500 && e.level === 1) { 
+            e.expiredYellowCount++;
+            e.timeLeft = Math.max(0, e.timeLeft - 0.5); 
+            if (audioSynth) audioSynth.playThud();
+            e.targets.splice(i, 1);
+            setUiTimeLeft(Math.ceil(e.timeLeft));
+            continue;
+          }
+
+          if (t.type === 'green' && t.age >= 3000) {
             e.targets.splice(i, 1);
             continue;
           }
 
-          // Physics: slight drift & bounce
           t.x += t.vx * dt;
           t.y += t.vy * dt;
-          if (t.x - t.radius < 0 || t.x + t.radius > cvs.width) t.vx *= -1;
-          if (t.y - t.radius < 0 || t.y + t.radius > cvs.height) t.vy *= -1;
+          if (t.x - t.radius < 0) {
+            t.x = t.radius; t.vx = Math.abs(t.vx);
+          } else if (t.x + t.radius > cvs.width) {
+            t.x = cvs.width - t.radius; t.vx = -Math.abs(t.vx);
+          }
+          if (t.y - t.radius < 0) {
+            t.y = t.radius; t.vy = Math.abs(t.vy);
+          } else if (t.y + t.radius > cvs.height) {
+            t.y = cvs.height - t.radius; t.vy = -Math.abs(t.vy);
+          }
         }
       }
 
-      // --- RENDERING PHASE ---
       ctx.save();
-      
-      // Screen Shake
+
       if (e.screenShake > 0) {
         const sx = (Math.random() - 0.5) * e.screenShake;
         const sy = (Math.random() - 0.5) * e.screenShake;
@@ -511,18 +609,21 @@ export default function TargetPrioritizationClient() {
       ctx.fillStyle = '#050508';
       ctx.fillRect(0, 0, cvs.width, cvs.height);
 
-      // Environment Grid
-      ctx.strokeStyle = 'rgba(59, 130, 246, 0.03)';
-      ctx.lineWidth = 1; 
-      for(let i = 0; i < cvs.width; i+= 50) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, cvs.height); ctx.stroke(); }
-      for(let j = 0; j < cvs.height; j+= 50) { ctx.beginPath(); ctx.moveTo(0, j); ctx.lineTo(cvs.width, j); ctx.stroke(); }
+      ctx.strokeStyle = 'rgba(59, 130, 246, 0.025)';
+      ctx.lineWidth = 1;
+      for (let i = 0; i < cvs.width; i += 50) {
+        ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, cvs.height); ctx.stroke();
+      }
+      for (let j = 0; j < cvs.height; j += 50) {
+        ctx.beginPath(); ctx.moveTo(0, j); ctx.lineTo(cvs.width, j); ctx.stroke();
+      }
 
-      // Draw Targets
       if (gameState === 'playing' || gameState === 'start') {
         e.targets.forEach((t) => {
-          const lifePercent = 1 - (t.age / e.lifeSpan);
-          const opacity = Math.max(0.3, lifePercent);
-          const activeRadius = t.radius * Math.max(0.5, lifePercent); // Shrinks
+          const lifespan = t.type === 'green' ? 3000 : 1200;
+          const lifePct = Math.max(0, 1 - (t.age / lifespan));
+          const opacity = Math.max(0.35, lifePct);
+          const drawRadius = t.radius * Math.max(0.65, lifePct); 
 
           let colorStr, shadowColor;
           if (t.type === 'red') {
@@ -531,38 +632,43 @@ export default function TargetPrioritizationClient() {
           } else if (t.type === 'yellow') {
             colorStr = `rgba(234, 179, 8, ${opacity})`;
             shadowColor = '#eab308';
-          } else {
-            colorStr = `rgba(59, 130, 246, ${opacity})`;
-            shadowColor = '#3b82f6';
+          } else { 
+            colorStr = `rgba(34, 197, 94, ${opacity})`;
+            shadowColor = '#22c55e';
           }
 
-          ctx.shadowBlur = t.type === 'red' ? 20 : 10;
+          ctx.shadowBlur = t.type === 'red' ? 22 : 12;
           ctx.shadowColor = shadowColor;
-          
           ctx.fillStyle = colorStr;
+
           ctx.beginPath();
-          ctx.arc(t.x, t.y, activeRadius, 0, Math.PI * 2);
+          ctx.arc(t.x, t.y, drawRadius, 0, Math.PI * 2);
           ctx.fill();
+          
           ctx.shadowBlur = 0;
 
-          // Inner Ring
-          ctx.strokeStyle = `rgba(255, 255, 255, ${opacity * 0.5})`;
+          ctx.strokeStyle = `rgba(255, 255, 255, ${opacity * 0.45})`;
           ctx.lineWidth = 1.5;
           ctx.beginPath();
-          ctx.arc(t.x, t.y, activeRadius * 0.5, 0, Math.PI * 2);
+          ctx.arc(t.x, t.y, drawRadius * 0.5, 0, Math.PI * 2);
+          ctx.stroke();
+
+          ctx.strokeStyle = t.type === 'red' ? `rgba(239,68,68,${opacity*0.5})` : t.type === 'yellow' ? `rgba(234,179,8,${opacity*0.5})` : `rgba(34,197,94,${opacity*0.5})`;
+          ctx.lineWidth = 2.0;
+          ctx.beginPath();
+          ctx.arc(t.x, t.y, drawRadius + 4, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * lifePct);
           ctx.stroke();
         });
       }
 
-      // Render Particles
       for (let i = e.particles.length - 1; i >= 0; i--) {
         const p = e.particles[i];
-        p.x += p.vx; p.y += p.vy; p.life -= dt * 2.5;
+        p.x += p.vx; p.y += p.vy; p.life -= dt * 2.2;
         if (p.life <= 0) { e.particles.splice(i, 1); continue; }
         ctx.globalAlpha = p.life; ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, 3, 3);
       }
-      
-      // Render Hit Markers
+      ctx.globalAlpha = 1.0;
+
       ctx.lineWidth = 2;
       for (let i = e.hitMarkers.length - 1; i >= 0; i--) {
         const hm = e.hitMarkers[i];
@@ -577,10 +683,9 @@ export default function TargetPrioritizationClient() {
       }
       ctx.globalAlpha = 1.0;
 
-      // Draw Crosshair
       const ch = e.crosshair;
       if (ch.initialized && (gameState === 'playing' || gameState === 'start')) {
-        const activeColor = pointerLocked ? '#f59e0b' : '#3b82f6';
+        const activeColor = pointerLocked ? '#3b82f6' : '#f59e0b';
         ctx.strokeStyle = activeColor;
         ctx.fillStyle = activeColor;
         
@@ -609,22 +714,78 @@ export default function TargetPrioritizationClient() {
       cancelAnimationFrame(animationRef.current);
       resizeObserver.disconnect();
     };
-  }, [gameState, pointerLocked, spawnTarget]);
+  }, [gameState, pointerLocked, spawnTarget, endGame]);
 
-  const shareDrillLink = useCallback(() => {
-    const url = typeof window !== 'undefined' ? window.location.href : '';
-    if (navigator.share) {
-      navigator.share({ title: 'Target Prioritization', url }).catch(() => {});
-    } else {
-      navigator.clipboard.writeText(url).then(() => alert('Link copied!'));
-    }
-  }, []);
+  const schemaData = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://skilldrills.online/" },
+          { "@type": "ListItem", "position": 2, "name": "FPS Drills", "item": "https://skilldrills.online/drills/fps" },
+          { "@type": "ListItem", "position": 3, "name": "Target Prioritization Trainer" }
+        ]
+      },
+      {
+        "@type": "WebApplication",
+        "name": "Target Prioritization Trainer – Cognitive FPS Decision Making Drill",
+        "applicationCategory": "GameApplication",
+        "operatingSystem": "Any",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+      },
+      {
+        "@type": "SoftwareApplication",
+        "name": "Target Prioritization Trainer",
+        "applicationCategory": "GameApplication",
+        "operatingSystem": "Web",
+        "description": "Improve your threat assessment speed, visual filtering, distractor suppression, and impulse control for competitive FPS games."
+      },
+      {
+        "@type": "HowTo",
+        "name": "How to use the Target Prioritization Trainer",
+        "step": [
+          { "@type": "HowToStep", "text": "Adjust your Universal Sens to match your game." },
+          { "@type": "HowToStep", "text": "Click 'Begin Tactical Drill' to lock your mouse cursor and start." },
+          { "@type": "HowToStep", "text": "Prioritize and eliminate High-Threat (Red) targets immediately." },
+          { "@type": "HowToStep", "text": "Eliminate Medium-Threat (Yellow) targets before they escalate into Red threats." },
+          { "@type": "HowToStep", "text": "Avoid shooting Friendly (Green) targets to prevent time penalties." }
+        ]
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          { "@type": "Question", "name": "What is target prioritization in FPS games?", "acceptedAnswer": { "@type": "Answer", "text": "Target prioritization is the cognitive process of evaluating multiple enemies on screen and deciding which threat to shoot first based on proximity, weapon threat level, and role." } },
+          { "@type": "Question", "name": "How do professional FPS players choose targets?", "acceptedAnswer": { "@type": "Answer", "text": "Professional players assess threats instantaneously, prioritizing low-health enemies, immediate headshot threats, active duelists, and high-DPS opponents while ignoring non-threat distractors." } },
+          { "@type": "Question", "name": "Why do I shoot the wrong enemy under pressure?", "acceptedAnswer": { "@type": "Answer", "text": "Shooting the wrong enemy is often caused by panic firing or poor visual filtering. Under high adrenaline, the brain defaults to shooting the first movement it detects rather than sorting target threat levels." } },
+          { "@type": "Question", "name": "What is threat assessment training?", "acceptedAnswer": { "@type": "Answer", "text": "Threat assessment training uses cognitive drills to condition the brain to identify, rank, and eliminate targets in order of threat level (e.g., Red vs. Yellow) rather than raw visual proximity." } },
+          { "@type": "Question", "name": "How can I improve target selection?", "acceptedAnswer": { "@type": "Answer", "text": "You can improve target selection by training with cognitive aim tools that actively punish you for shooting decoys, helping you build impulse control and target confirmation habits." } },
+          { "@type": "Question", "name": "What is distractor suppression?", "acceptedAnswer": { "@type": "Answer", "text": "Distractor suppression is the ability to ignore moving visual elements, friendly teammates, or non-threatening details (like decoy targets) to maintain absolute focus on critical targets." } },
+          { "@type": "Question", "name": "Can this drill improve decision making?", "acceptedAnswer": { "@type": "Answer", "text": "Yes, this drill forces you to make split-second decisions under time pressure. Repeated practice builds the neural pathways required to make accurate tactical decisions in games." } },
+          { "@type": "Question", "name": "Does this help Valorant players?", "acceptedAnswer": { "@type": "Answer", "text": "Yes, Valorant features decoy abilities (like Yoru clones or flashes) and chaotic team fights. Target prioritization training helps you ignore decoys and target the actual threat." } },
+          { "@type": "Question", "name": "Does this help CS2 players?", "acceptedAnswer": { "@type": "Answer", "text": "Yes, CS2 requires high target discrimination, especially when holding angles or encountering multiple enemies pushing through choke points." } },
+          { "@type": "Question", "name": "Does this help Rainbow Six Siege players?", "acceptedAnswer": { "@type": "Answer", "text": "Yes, Siege features visual clutter, friendly teammates close to enemies, and decoy gadgets. Visual filtering is critical to prevent friendly fire and eliminate threats." } },
+          { "@type": "Question", "name": "How often should I train target prioritization?", "acceptedAnswer": { "@type": "Answer", "text": "We recommend practicing target selection for 10 minutes daily during your warm-up routine to build visual discipline and reduce panic-firing habits." } },
+          { "@type": "Question", "name": "Is this drill free?", "acceptedAnswer": { "@type": "Answer", "text": "Yes, this Target Prioritization Trainer is 100% free, open-source, and runs directly in your web browser with zero downloads required." } },
+          { "@type": "Question", "name": "What skills does this drill improve?", "acceptedAnswer": { "@type": "Answer", "text": "It trains threat assessment, visual filtering, distractor suppression, impulse control, tactical decision making, and target selection under intense cognitive pressure." } },
+          { "@type": "Question", "name": "Can cognitive training improve FPS performance?", "acceptedAnswer": { "@type": "Answer", "text": "Yes, mechanical aim is only half the battle. Cognitive training helps you make better decisions, ensuring that your physical aim is directed at the correct target." } },
+          { "@type": "Question", "name": "Why is target selection important in competitive shooters?", "acceptedAnswer": { "@type": "Answer", "text": "Even with perfect aim, shooting a friendly teammate or a low-threat target while a high-threat enemy is shooting at you will result in losing the engagement. Target selection ensures you eliminate the most critical threats first." } }
+        ]
+      }
+    ]
+  };
 
   return (
     <div ref={pageRef} className="min-h-screen select-none bg-[#050508] text-white">
+      <Head>
+        <title>Target Prioritization Trainer – Cognitive FPS Drill</title>
+        <meta name="description" content="Improve threat assessment speed, visual filtering, distractor suppression, and tactical decision making for competitive FPS games." />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }} />
+      </Head>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
-        {/* Header (Hidden in Fullscreen) */}
+        {/* Header Section */}
         {!isFullscreen && (
           <div className="mb-6">
             <nav className="mb-4">
@@ -640,11 +801,13 @@ export default function TargetPrioritizationClient() {
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div className="flex items-center gap-4">
                 <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl shadow-[0_0_20px_rgba(59,130,246,0.3)]">
-                  <Crosshair className="w-7 h-7 text-white" />
+                  <Target className="w-7 h-7 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Target Prioritization Swarm</h1>
-                  <p className="text-sm text-gray-400 mt-1 font-medium">Desktop Exclusive • Endless Time-Attack</p>
+                  <h1 className="text-2xl sm:text-3xl font-black tracking-tight uppercase">
+                    Target Prioritization Trainer
+                  </h1>
+                  <p className="text-xs text-gray-400 mt-1 font-medium uppercase tracking-widest">Cognitive Threat Sorting • Hardware Raw Input</p>
                 </div>
               </div>
               
@@ -662,310 +825,366 @@ export default function TargetPrioritizationClient() {
 
         {/* Live HUD Stats */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 lg:grid-cols-8 gap-2 mb-2">
-            <StatCard icon={<Target className="text-blue-400" />} value={score} label="Score" />
-            <StatCard icon={<Timer className={timeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-emerald-400'} />} value={timeLeft} label="Time" unit="s" />
-            <StatCard icon={<Target className="text-red-400" />} value={analytics.redHits || (gameState === 'playing' ? engine.current.redHits : 0)} label="Critical" />
-            <StatCard icon={<Target className="text-blue-400" />} value={analytics.blueHits || (gameState === 'playing' ? engine.current.blueHits : 0)} label="Standard" />
-            <StatCard icon={<AlertCircle className="text-yellow-400" />} value={analytics.decoyHits || (gameState === 'playing' ? engine.current.decoyHits : 0)} label="Decoy Hits" />
-            <StatCard icon={<XCircle className="text-red-400" />} value={(analytics.missedClicks + analytics.timeouts) || (gameState === 'playing' ? engine.current.missedClicks + engine.current.timeouts : 0)} label="Errors" />
-            <StatCard icon={<Info className="text-gray-400" />} value={`${universalSens.toFixed(2)}x`} label="Sens" />
-            <StatCard icon={<Trophy className="text-yellow-500" />} value={bestScore} label="Best Score" />
+          <div className="grid grid-cols-5 gap-2 mb-2">
+            <StatCard icon={<Trophy className="text-yellow-400" />} value={uiScore} label="Score" />
+            <StatCard icon={<TrendingUp className="text-blue-400" />} value={`Lv. ${uiLevel}`} label="Level" />
+            <StatCard 
+              icon={<Flame className={uiCombo >= 10 ? "text-orange-500 animate-pulse" : "text-gray-500"} />} 
+              value={uiCombo} 
+              label="Combo" 
+              highlight={uiCombo >= 10}
+            />
+            <StatCard icon={<Timer className={uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-green-400'} />} value={uiTimeLeft} label="Time" unit="s" />
+            <StatCard icon={<Info className="text-blue-400" />} value={`${universalSens.toFixed(2)}x`} label="Sens" />
           </div>
         )}
 
-        {/* Engine Container */}
+        {/* Canvas Engine Container */}
         <div 
           ref={containerRef} 
           className={`relative overflow-hidden transition-colors outline-none ${
-            isFullscreen ? 'w-full h-full' : 'w-full aspect-video min-h-[500px] rounded-2xl border border-gray-700 shadow-2xl'
+            isFullscreen ? 'w-full h-full' : 'w-full aspect-video min-h-[500px] rounded-2xl border border-gray-800 shadow-2xl'
           }`}
-          style={{ backgroundColor: flashBg === 'red' ? '#450a0a' : '#05060b' }}
+          style={{ backgroundColor: flashBg === 'red' ? '#3b0712' : '#05060b' }}
         >
-          {/* Progress Bar */}
+          {/* Top Progress bar */}
           {gameState === 'playing' && (
-            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gray-900 z-[60]">
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gray-950 z-[60]">
               <div 
-                className={`h-full transition-all duration-1000 ease-linear ${timeLeft <= 10 ? 'bg-red-500 animate-pulse' : 'bg-blue-500'}`}
-                style={{ width: `${Math.min(100, (timeLeft / DRILL_DURATION) * 100)}%` }} 
+                ref={progressBarRef}
+                className="h-full bg-blue-600 transition-all duration-100 ease-linear"
+                style={{ width: '100%' }} 
               />
             </div>
           )}
 
-          {/* Fullscreen Overlay Controls */}
+          {/* Fullscreen HUD */}
           {isFullscreen && gameState === 'playing' && (
-            <div className="absolute top-4 right-4 z-[60] flex gap-2">
-              <button onClick={() => setSoundEnabled(v => !v)} className="p-3 bg-black/60 border border-gray-600 rounded-xl text-white hover:bg-gray-800 transition-colors">
-                {soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
-              </button>
-              <button onClick={toggleFullscreen} className="p-3 bg-black/60 border border-gray-600 rounded-xl text-white hover:bg-gray-800 transition-colors">
-                <Minimize2 className="w-5 h-5" />
-              </button>
-            </div>
+            <>
+              <div className="absolute top-6 left-6 z-[60] flex flex-col gap-2 pointer-events-none">
+                <div className="bg-black/40 backdrop-blur border border-gray-800 px-4 py-2 rounded-xl flex items-center gap-4">
+                  <div className="text-center">
+                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Score</p>
+                    <p className="text-2xl font-black text-white leading-none">{uiScore}</p>
+                  </div>
+                  <div className="w-px h-8 bg-gray-800"></div>
+                  <div className="text-center">
+                    <p className="text-[10px] text-blue-400 font-bold uppercase tracking-widest">Level</p>
+                    <p className="text-2xl font-black text-blue-400 leading-none">{uiLevel}</p>
+                  </div>
+                </div>
+                
+                {uiCombo > 1 && (
+                  <div className="bg-black/40 backdrop-blur border border-orange-500/30 px-4 py-2 rounded-xl flex items-center gap-3 animate-in fade-in slide-in-from-left-4">
+                    <Flame className="w-5 h-5 text-orange-500" />
+                    <div>
+                      <p className="text-[10px] text-orange-400 font-bold uppercase tracking-widest">Combo</p>
+                      <p className="text-xl font-black text-white leading-none">{uiCombo}x</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="absolute top-4 right-4 z-[60] flex gap-2">
+                <button onClick={() => setSoundEnabled(v => !v)} className="p-3 bg-black/60 border border-gray-700 rounded-xl text-white hover:bg-gray-800 transition-colors">
+                  {soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
+                </button>
+                <button onClick={toggleFullscreen} className="p-3 bg-black/60 border border-gray-700 rounded-xl text-white hover:bg-gray-800 transition-colors">
+                  <Minimize2 className="w-5 h-5" />
+                </button>
+              </div>
+            </>
           )}
 
-          {/* Paused Overlay */}
+          {/* Paused lock overlay */}
           {gameState === 'playing' && !pointerLocked && (
             <div 
-              className="absolute inset-0 z-40 bg-black/60 backdrop-blur-sm flex items-center justify-center cursor-pointer"
+              className="absolute inset-0 z-40 bg-black/75 backdrop-blur-sm flex items-center justify-center cursor-pointer"
               onClick={(e) => { 
                 e.stopPropagation(); 
-                if (canvasRef.current) canvasRef.current.requestPointerLock(); 
+                if (canvasRef.current) canvasRef.current.requestPointerLock().catch(()=>{}); 
               }}
             >
               <div className="text-center animate-pulse pointer-events-none">
                 <AlertCircle className="w-12 h-12 text-blue-500 mx-auto mb-4" />
                 <h2 className="text-3xl font-black text-white tracking-widest uppercase mb-2">Game Paused</h2>
-                <p className="text-gray-300 font-medium">Click anywhere on the screen to lock cursor and resume.</p>
+                <p className="text-gray-300 font-medium text-sm">Click anywhere on the screen to lock cursor and resume decision sorting.</p>
               </div>
             </div>
           )}
 
-          {/* Core Canvas */}
+          {/* Canvas Component */}
           <canvas 
             ref={canvasRef} 
-            onClick={() => { if (gameState === 'playing' && !pointerLocked) canvasRef.current?.requestPointerLock(); }}
+            onClick={() => { if (gameState === 'playing' && !pointerLocked) canvasRef.current?.requestPointerLock().catch(()=>{}); }}
             className={`block absolute top-0 left-0 w-full h-full touch-none z-10 ${gameState === 'playing' ? 'cursor-none' : ''}`} 
           />
 
           {/* START SCREEN */}
           {gameState === 'start' && (
-            <div className="absolute inset-0 flex items-center justify-center z-50 bg-black/70 backdrop-blur-md p-4 overflow-y-auto">
-              <div className="rounded-3xl p-8 text-center max-w-lg w-full border border-gray-700 bg-gray-900 shadow-2xl my-auto">
-                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl mx-auto flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(59,130,246,0.3)]">
-                  <Target className="w-8 h-8 text-white" />
-                </div>
-                <h2 className="text-3xl font-black mb-3 tracking-tight text-white uppercase">Target Prioritization</h2>
-                <p className="text-sm mb-6 text-gray-400 leading-relaxed">
-                  Identify and shoot <strong>Red</strong> (+3) and <strong>Blue</strong> (+1) targets before they expire. Do not shoot moving <strong>Yellow</strong> (-3) decoys. Hitting targets extends your time.
+            <div className="absolute inset-0 bg-[#05070e]/98 flex flex-col items-center justify-center p-6 z-30 select-none overflow-y-auto max-h-[100vh] backdrop-blur-sm">
+              <div className="max-w-md w-full text-center animate-in fade-in zoom-in-95 duration-200">
+                <h2 className="text-xl font-black text-white uppercase tracking-wider mb-1">
+                  Target Prioritization
+                </h2>
+                <p className="text-xs text-slate-500 uppercase tracking-widest mb-6">
+                  Hardware Raw Input • Endless Progression
                 </p>
 
-                {/* Configuration Panel */}
-                <div className="mb-8 p-5 bg-black/50 rounded-xl border border-gray-800 text-left space-y-5">
-                  <div>
-                    <div className="flex justify-between items-center mb-2">
-                      <label className="text-xs text-gray-400 font-bold uppercase tracking-wider flex items-center gap-2">
-                        <Crosshair className="w-4 h-4 text-blue-500"/> Universal Sens
-                      </label>
-                      <span className="text-blue-400 font-mono text-sm font-bold">{universalSens.toFixed(2)}x</span>
-                    </div>
-                    <input 
-                      type="range" min="0.1" max="3.0" step="0.05" 
-                      value={universalSens} 
-                      onChange={(e) => setUniversalSens(parseFloat(e.target.value))} 
-                      className="w-full h-1.5 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-blue-500" 
-                    />
-                    <div className="text-[10px] text-gray-500 mt-1.5 text-right">Approx: {cmPer360} cm/360</div>
+                <div className="grid grid-cols-2 gap-3 mb-6 text-left">
+                  <div className="bg-slate-900/60 border border-slate-800 p-3 rounded-xl">
+                    <span className="text-[8px] text-slate-500 block uppercase font-bold">Objective</span>
+                    <span className="text-sm font-black text-white">Eliminate Threats</span>
+                  </div>
+                  <div className="bg-slate-900/60 border border-slate-800 p-3 rounded-xl">
+                    <span className="text-[8px] text-slate-500 block uppercase font-bold">Reward</span>
+                    <span className="text-sm font-black text-green-400">Reds +100 / Yellows +50</span>
+                  </div>
+                  <div className="bg-slate-900/60 border border-slate-800 p-3 rounded-xl">
+                    <span className="text-[8px] text-slate-500 block uppercase font-bold">Penalty</span>
+                    <span className="text-sm font-black text-red-400">Miss/Exp: -1.0s</span>
+                  </div>
+                  <div className="bg-slate-900/60 border border-slate-800 p-3 rounded-xl">
+                    <span className="text-[8px] text-slate-500 block uppercase font-bold">Mechanic</span>
+                    <span className="text-sm font-black text-blue-400">{"Yellow -> Red Escalation"}</span>
                   </div>
                 </div>
-                
-                <button 
-                  onClick={startGame}
-                  className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-black text-lg hover:brightness-110 transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-[0_0_20px_rgba(59,130,246,0.3)]"
-                >
-                  <Play className="w-6 h-6 fill-white" /> BEGIN TACTICAL DRILL
-                </button>
+
+                <div className="bg-[#0b0f19] border border-slate-850 p-4 rounded-xl mb-6 text-left text-xs text-slate-400">
+                  <div className="flex items-center gap-1.5 text-[10px] font-bold text-white uppercase mb-3">
+                    <Sliders className="w-3.5 h-3.5 text-blue-500" /> Universal Sens
+                  </div>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-green-400 font-mono text-sm font-bold">{universalSens.toFixed(2)}x</span>
+                    <span className="text-[10px] text-slate-500">Approx: {cmPer360} cm/360</span>
+                  </div>
+                  <input 
+                    type="range" min="0.1" max="3.0" step="0.05" 
+                    value={universalSens} 
+                    onChange={(e) => setUniversalSens(parseFloat(e.target.value))} 
+                    className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-500" 
+                  />
+                </div>
+
+                <div className="flex gap-2">
+                  <button
+                    onClick={startGame}
+                    className="flex-1 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg uppercase tracking-widest transition-all duration-200 active:scale-95"
+                  >
+                    <Play className="w-3.5 h-3.5 fill-white" />
+                    Begin Tactical Drill
+                  </button>
+                </div>
               </div>
             </div>
           )}
+          
+          {/* GAME OVER SCREEN */}
+          {gameState === 'gameOver' && analytics.rankData && (
+            <div className="absolute inset-0 bg-[#05070e]/98 flex flex-col items-center justify-center p-6 z-30 select-none overflow-y-auto max-h-[100vh] backdrop-blur-sm">
+              <div className="max-w-md w-full text-center animate-in fade-in zoom-in-95 duration-200">
+                {isNewBest && (
+                  <div className="inline-block bg-yellow-500 text-black text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-3 shadow-[0_0_15px_rgba(234,179,8,0.5)] animate-bounce">
+                    ⭐ NEW PERSONAL BEST!
+                  </div>
+                )}
+                
+                <h2 className="text-xl font-black text-white uppercase tracking-wider mb-1">
+                  Tactical Sorting Complete
+                </h2>
+                <p className="text-xs text-slate-500 uppercase tracking-widest mb-6">
+                  Peak difficulty reached: Level {analytics.finalLevel}
+                </p>
 
-          {/* GAME OVER DASHBOARD */}
-          {gameState === 'gameOver' && (
-            <div className="absolute inset-0 flex items-center justify-center z-50 bg-black/90 backdrop-blur-md p-4 animate-in fade-in duration-300 overflow-y-auto">
-              <div className="rounded-3xl max-w-2xl w-full shadow-2xl border border-gray-800 bg-gray-950 overflow-hidden my-auto">
-                <div className="bg-gradient-to-br from-blue-900/40 to-indigo-900/40 p-6 border-b border-gray-800 text-center relative">
-                  {isNewBest && (
-                    <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-yellow-500 text-black text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-[0_0_15px_rgba(234,179,8,0.5)]">
-                      ⭐ New Personal Best
-                    </div>
-                  )}
-                  <h2 className="text-2xl font-black text-white tracking-tight mt-4">Prioritization Analysis Complete</h2>
-                  <p className="text-blue-400 font-medium text-sm mt-1">Speed Level Reached: {analytics.speedLevel}</p>
+                <div className="grid grid-cols-3 gap-3 mb-6 text-left font-mono">
+                  <div className="bg-slate-900/60 border border-slate-800 p-3 rounded-xl">
+                    <span className="text-[8px] text-slate-500 block uppercase font-bold">Final Score</span>
+                    <span className="text-lg font-black text-white">{uiScore}</span>
+                  </div>
+                  <div className="bg-slate-900/60 border border-slate-800 p-3 rounded-xl">
+                    <span className="text-[8px] text-slate-500 block uppercase font-bold">Accuracy</span>
+                    <span className="text-lg font-black text-white">{analytics.accuracy}%</span>
+                  </div>
+                  <div className="bg-slate-900/60 border border-slate-800 p-3 rounded-xl">
+                    <span className="text-[8px] text-slate-500 block uppercase font-bold">Assigned Rank</span>
+                    <span className={`text-lg font-black ${analytics.rankData.color}`}>
+                      Rank {analytics.rankData.rank}
+                    </span>
+                  </div>
+                  
+                  <div className="bg-slate-900/60 border border-slate-800 p-3 rounded-xl">
+                    <span className="text-[8px] text-slate-500 block uppercase font-bold">Correct Dec.</span>
+                    <span className="text-lg font-black text-white">{analytics.correctDecisions}</span>
+                  </div>
+                  <div className="bg-slate-900/60 border border-slate-800 p-3 rounded-xl">
+                    <span className="text-[8px] text-slate-500 block uppercase font-bold">Errors Made</span>
+                    <span className="text-lg font-black text-white">{analytics.wrongDecisions}</span>
+                  </div>
+                  <div className="bg-slate-900/60 border border-slate-800 p-3 rounded-xl">
+                    <span className="text-[8px] text-slate-500 block uppercase font-bold">Best Combo</span>
+                    <span className="text-lg font-black text-white">{analytics.bestCombo}x</span>
+                  </div>
+
+                  <div className="bg-slate-900/60 border border-slate-800 p-3 rounded-xl">
+                    <span className="text-[8px] text-slate-500 block uppercase font-bold">Reds Hit/Exp</span>
+                    <span className="text-xs font-black text-white truncate block mt-1">
+                      {analytics.redHits} / <span className="text-red-400 font-bold">{analytics.expiredReds}</span>
+                    </span>
+                  </div>
+                  <div className="bg-slate-900/60 border border-slate-800 p-3 rounded-xl">
+                    <span className="text-[8px] text-slate-500 block uppercase font-bold">Yellows Hit/Exp</span>
+                    <span className="text-xs font-black text-white truncate block mt-1">
+                      {analytics.yellowHits} / <span className="text-yellow-400 font-bold">{analytics.expiredYellows}</span>
+                    </span>
+                  </div>
+                  <div className="bg-slate-900/60 border border-slate-800 p-3 rounded-xl">
+                    <span className="text-[8px] text-slate-500 block uppercase font-bold">Friendly Fire</span>
+                    <span className={`text-lg font-black ${analytics.friendlyFireCount > 0 ? 'text-red-400' : 'text-green-400'}`}>
+                      {analytics.friendlyFireCount}
+                    </span>
+                  </div>
                 </div>
 
-                <div className="p-6">
-                  {/* Top Stats */}
-                  <div className="flex flex-col sm:flex-row gap-4 mb-6">
-                    <div className="flex-1 bg-gray-900 rounded-2xl p-4 border border-gray-800 flex justify-between items-center">
-                      <div>
-                        <span className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1 block">Final Score</span>
-                        <div className="flex items-end gap-1">
-                          <span className="text-4xl font-black text-white leading-none">{score}</span>
-                          <span className="text-xs text-gray-500 font-bold mb-1">PTS</span>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <span className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1 block">Shot Accuracy</span>
-                        <span className={`text-3xl font-black ${analytics.accuracy >= 80 ? 'text-green-400' : analytics.accuracy >= 50 ? 'text-yellow-400' : 'text-red-400'}`}>
-                          {analytics.accuracy}%
-                        </span>
-                      </div>
-                    </div>
+                <div className="bg-[#0b0f19] border border-slate-850 p-4 rounded-xl mb-6 text-left text-xs text-slate-400">
+                  <div className="flex items-center gap-1.5 text-[10px] font-bold text-white uppercase mb-1">
+                    <Sparkles className="w-3.5 h-3.5 text-yellow-500" /> Improvement Suggestion:
                   </div>
+                  <p className="leading-relaxed">
+                    {getPrescribedAdvice(analytics.friendlyFireCount, analytics.expiredReds, analytics.wrongDecisions - analytics.friendlyFireCount - analytics.expiredReds, analytics.wrongDecisions)}
+                  </p>
+                </div>
 
-                  {/* Reaction Diagnostics Block */}
-                  <div className="bg-[#0a0a0a] border border-blue-900/50 rounded-xl p-5 mb-6 text-left shadow-inner">
-                    <h3 className="text-xs font-bold text-blue-400 font-mono uppercase tracking-widest border-b border-blue-900/50 pb-2 mb-4 flex items-center gap-2">
-                      <BarChart3 className="w-4 h-4 text-blue-400" />
-                      COGNITIVE TELEMETRY DIAGNOSTICS
-                    </h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-xs leading-relaxed text-gray-300">
-                      
-                      <div className="space-y-3 sm:border-r border-gray-800 sm:pr-6">
-                        <p className="font-bold text-white uppercase text-[10px] tracking-wider font-mono">Performance Log:</p>
-                        <ul className="space-y-2">
-                          <li className="flex justify-between items-center bg-gray-900/50 p-2 rounded border border-gray-800">
-                            <span className="text-gray-400">Critical Red Hits:</span>
-                            <span className="font-bold text-red-400">{analytics.redHits}</span>
-                          </li>
-                          <li className="flex justify-between items-center bg-gray-900/50 p-2 rounded border border-gray-800">
-                            <span className="text-gray-400">Standard Blue Hits:</span>
-                            <span className="font-bold text-blue-400">{analytics.blueHits}</span>
-                          </li>
-                          <li className="flex justify-between items-center bg-gray-900/50 p-2 rounded border border-gray-800">
-                            <span className="text-gray-400">Decoy Hits (Errors):</span>
-                            <span className={`font-bold ${analytics.decoyHits > 0 ? 'text-red-500' : 'text-green-500'}`}>{analytics.decoyHits}</span>
-                          </li>
-                          <li className="flex justify-between items-center bg-gray-900/50 p-2 rounded border border-gray-800">
-                            <span className="text-gray-400">Target Timeouts:</span>
-                            <span className="font-bold text-yellow-500">{analytics.timeouts}</span>
-                          </li>
-                        </ul>
-                      </div>
-
-                      <div className="space-y-3 flex flex-col justify-between">
-                        <div>
-                          <p className="font-bold text-white uppercase text-[10px] tracking-wider font-mono mb-2">Prescribed Advice:</p>
-                          <p className="text-gray-400 leading-relaxed font-sans">
-                            {analytics.decoyHits > 3 ? (
-                              <span className="text-red-300">You are shooting at movement instead of processing the target's color. A Decoy error costs -3 Points and -2 Seconds. Accuracy and cognitive sorting are far more important than raw speed.</span>
-                            ) : analytics.timeouts > 5 ? (
-                              <span className="text-yellow-300">You are filtering well but playing too passively, allowing too many targets to expire. Ensure your crosshair movements are direct and confident.</span>
-                            ) : (
-                              <span className="text-green-300">Excellent cognitive sorting and flick control! You are maintaining high accuracy despite the aggressive spawn scaling. Keep pushing your limits.</span>
-                            )}
-                          </p>
-                        </div>
-                      </div>
-
-                    </div>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex gap-3">
-                    <button onClick={startGame} className="flex-1 py-4 bg-blue-600 text-white rounded-xl font-black tracking-wide hover:bg-blue-500 transition-all active:scale-95 flex items-center justify-center gap-2 shadow-lg">
-                      <RefreshCw className="w-5 h-5" /> TRAIN AGAIN
-                    </button>
-                    {isFullscreen && (
-                       <button onClick={toggleFullscreen} className="px-6 py-4 bg-gray-800 text-white rounded-xl font-bold hover:bg-gray-700 transition-all border border-gray-700">
-                         Exit
-                       </button>
-                    )}
-                  </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={startGame}
+                    className="flex-1 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg uppercase tracking-widest transition-all duration-200 active:scale-95"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5" />
+                    Run another trial
+                  </button>
+                  <button
+                    onClick={shareDrillLink}
+                    className="p-3 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded-xl transition-colors active:scale-95"
+                    title="Share Score"
+                  >
+                    <Share2 className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
             </div>
           )}
         </div>
 
-        {/* DRILL INSTRUCTIONS & SCORING SECTION */}
+        {/* DRILL RULES SUMMARY */}
         {!isFullscreen && (
           <section className="mt-10">
-            <div className="rounded-2xl border border-gray-800 overflow-hidden bg-gray-900 shadow-2xl pointer-events-none">
+            <div className="rounded-2xl border border-gray-800 overflow-hidden bg-gray-900/60 shadow-2xl pointer-events-none">
               <div className="px-6 py-5 border-b border-gray-800 bg-black/40 flex items-center gap-3">
-                <Info className="w-5 h-5 text-blue-400" /><h2 className="font-bold text-white text-lg tracking-wide">Drill Instructions & Scoring</h2>
+                <Info className="w-5 h-5 text-blue-400" /><h2 className="font-bold text-white text-lg tracking-wide">Drill Instructions & Rules</h2>
               </div>
               <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-5">
-                  <RuleItem num="1" color="green" text="Primary Targets" highlight="Red (+3) & Blue (+1)" result="+1s Time (Red Only)" />
-                  <RuleItem num="2" color="yellow" text="Decoy Targets" highlight="Avoid Yellow" result="-3 PTS & -2s Time" />
+                  <RuleItem num="1" color="red" text="Primary Target" highlight="Red (+100 PTS)" result="Shoot first if active" />
+                  <RuleItem num="2" color="orange" text="Medium Target" highlight="Yellow (+50 PTS)" result="Evolves to Red after 1.2s" />
                 </div>
                 <div className="space-y-5">
-                  <RuleItem num="3" color="red" text="Misses / Timeouts" highlight="Errors Cost Time" result="-1 PTS & -1s Time" />
-                  <RuleItem num="4" color="purple" text="Adaptive Scaling" highlight="Difficulty increases" result="Speeds up on hits" />
+                  <RuleItem num="3" color="green" text="Friendly Unit" highlight="Green (0 PTS)" result="Drains -1.0s if clicked" />
+                  <RuleItem num="4" color="blue" text="Decision Combo" highlight="Up to 2.0x Multiplier" result="Resets on friendly/wrong/miss" />
                 </div>
               </div>
             </div>
           </section>
         )}
 
-        {/* ABOUT THIS DRILL SECTION */}
+        {/* EDUCATIONAL ABOUT SECTION */}
         {!isFullscreen && (
-          <section className="mt-12" aria-label="About this drill">
+          <article className="mt-12 text-gray-300">
             <div className="rounded-2xl border border-gray-800 overflow-hidden bg-gray-900 shadow-xl">
               <div className="px-6 py-5 border-b border-gray-800 bg-black/40 flex items-center gap-3">
                 <GraduationCap className="w-5 h-5 text-blue-400" />
-                <h2 className="font-bold text-white text-lg tracking-wide">About Target Prioritization Swarm</h2>
+                <h2 className="font-bold text-white text-lg tracking-wide">About Target Prioritization Training</h2>
               </div>
-              <div className="p-8">
-                <p className="text-sm leading-relaxed mb-6 text-gray-300">
-                  This target prioritization swarm drill is designed to refine tactical mechanical reflexes, hand-eye coordination, and complex filtering. By creating a harsh asymmetrical reward economy, players are forced to scan dense clusters of targets, identify the highest threat (Red), clear the standard threats (Blue), and suppress the instinct to shoot moving decoys (Yellow).
-                </p>
-
-                {/* Grid Section */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
-                  <div className="p-5 rounded-xl border border-gray-800 bg-black/40">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center"><Users className="w-4 h-4 text-white" /></div>
-                      <h3 className="text-sm font-bold text-white">Who It's For</h3>
-                    </div>
-                    <p className="text-xs leading-relaxed text-gray-400">Esports athletes, competitive FPS gamers, and players who struggle with "tunnel vision" during intense team fights in tactical shooters.</p>
-                  </div>
-                  <div className="p-5 rounded-xl border border-gray-800 bg-black/40">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-8 h-8 rounded-lg bg-green-600 flex items-center justify-center"><TrendingUp className="w-4 h-4 text-white" /></div>
-                      <h3 className="text-sm font-bold text-white">Skills Improved</h3>
-                    </div>
-                    <p className="text-xs leading-relaxed text-gray-400">Threat assessment speed, visual filtering, impulse control, and rapid aim transitions between multiple moving targets.</p>
-                  </div>
-                  <div className="p-5 rounded-xl border border-gray-800 bg-black/40">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-8 h-8 rounded-lg bg-purple-600 flex items-center justify-center"><BarChart3 className="w-4 h-4 text-white" /></div>
-                      <h3 className="text-sm font-bold text-white">What You'll Track</h3>
-                    </div>
-                    <p className="text-xs leading-relaxed text-gray-400">Net Score, accuracy percentage, target sorting efficiency (Red vs Blue vs Decoy hits), and maximum dynamic speed level reached.</p>
-                  </div>
-                </div>
-
-                {/* Integrated How to Play Block */}
-                <div className="mb-8 bg-[#0b0f19]/40 border border-gray-800 rounded-xl p-6">
-                  <h3 className="text-base font-bold text-white uppercase tracking-wider mb-4 flex items-center gap-2">
-                    <Target className="w-5 h-5 text-blue-500" /> How to Play
+              
+              <div className="p-8 space-y-8">
+                <section>
+                  <h3 className="text-xl font-bold text-white mb-3 flex items-center gap-2">
+                    <Crosshair className="w-5 h-5 text-blue-400" /> What Is Target Prioritization?
                   </h3>
-                  <div className="grid sm:grid-cols-2 gap-6 text-sm text-gray-300">
-                    <ol className="space-y-3 list-decimal pl-5">
-                      <li>Adjust your <strong>Sens</strong> to match your main game.</li>
-                      <li>Click <strong>Begin Drill</strong>. The screen will automatically go fullscreen and lock your mouse.</li>
-                      <li>Scan the swarm. Shoot Red targets (+3 PTS) and Blue targets (+1 PTS). DO NOT shoot Yellow targets.</li>
-                    </ol>
-                    <ul className="space-y-3">
-                      <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-green-500" /> <span className="text-white font-bold">Time Bonus:</span> Hitting Red targets adds +1s to your total clock.</li>
-                      <li className="flex items-center gap-2"><XCircle className="w-4 h-4 text-red-500" /> <span className="text-white font-bold">Decoy Penalty:</span> Hitting Yellow deducts -3 PTS and -2s.</li>
-                      <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-purple-400" /> <span className="text-white font-bold">Adaptive Scaling:</span> Targets spawn faster and expire quicker as you succeed.</li>
-                    </ul>
+                  <p className="text-sm leading-relaxed mb-4">
+                    <strong>Target Prioritization</strong> is the cognitive process of evaluating multiple enemies on screen and deciding which threat to shoot first based on proximity, weapon threat level, and role. In fast-paced competitive FPS games, entering a room or site often exposes you to multiple enemies. Choosing the correct target instantly prevents you from being eliminated before securing a return frag.
+                  </p>
+                </section>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 py-4 border-y border-gray-800/50">
+                  <div className="p-5 rounded-xl border border-gray-800 bg-black/40 hover:bg-gray-800/50 transition-colors">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-8 h-8 rounded-lg bg-blue-600/15 flex items-center justify-center border border-blue-500/20"><Users className="w-4 h-4 text-blue-400" /></div>
+                      <h4 className="text-sm font-bold text-white">Who Is This For?</h4>
+                    </div>
+                    <p className="text-xs leading-relaxed text-gray-400">Competitive tactical FPS players in games like <strong>Valorant</strong>, <strong>CS2</strong>, and <strong>Rainbow Six Siege</strong> who struggle with panic-firing under chaos.</p>
+                  </div>
+                  <div className="p-5 rounded-xl border border-gray-800 bg-black/40 hover:bg-gray-800/50 transition-colors">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-8 h-8 rounded-lg bg-green-600/15 flex items-center justify-center border border-green-500/20"><TrendingUp className="w-4 h-4 text-green-400" /></div>
+                      <h4 className="text-sm font-bold text-white">Skills Trained</h4>
+                    </div>
+                    <p className="text-xs leading-relaxed text-gray-400">Threat assessment speed, visual filtering, distractor suppression, impulse control, tactical decision making, and target selection.</p>
+                  </div>
+                  <div className="p-5 rounded-xl border border-gray-800 bg-black/40 hover:bg-gray-800/50 transition-colors">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-8 h-8 rounded-lg bg-yellow-600/15 flex items-center justify-center border border-yellow-500/20"><Zap className="w-4 h-4 text-yellow-400" /></div>
+                      <h4 className="text-sm font-bold text-white">Cognitive Overload</h4>
+                    </div>
+                    <p className="text-xs leading-relaxed text-gray-400">Difficulty levels increase the density and overlap of targets, forcing your brain to filter visual distractors and react correctly.</p>
                   </div>
                 </div>
 
-                {/* FAQ Section */}
-                <div className="p-5 rounded-xl border border-gray-800 bg-black/40">
-                  <div className="flex items-center gap-3 mb-4">
-                    <Lightbulb className="w-5 h-5 text-yellow-400" />
-                    <h3 className="text-sm font-bold text-white uppercase tracking-wider">Frequently Asked Questions</h3>
-                  </div>
-                  <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-sm text-gray-300 pt-4">
+                  <div className="space-y-6">
                     <div>
-                      <h4 className="text-sm font-bold text-gray-200">Why does my timer drop so fast?</h4>
-                      <p className="text-xs text-gray-400 mt-1">Unlike standard aim trainers, this drill actively punishes bad target selection. Hitting a yellow decoy or letting a target expire pulls time directly off your clock. You must hit Red targets to earn time back.</p>
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-bold text-gray-200">How should I approach this?</h4>
-                      <p className="text-xs text-gray-400 mt-1">Focus your eyes centrally and use your peripheral vision to track target colors before moving your crosshair. Avoid "panic shooting" at whatever moves first. Accuracy and filtering are far more important than raw speed.</p>
+                      <h3 className="font-bold text-white text-base">Why Players Shoot The Wrong Enemy</h3>
+                      <p className="text-xs text-gray-400 mt-2 leading-relaxed">
+                        Most incorrect target decisions stem from panic reactions and poor visual filtering. Under high adrenaline, the brain&apos;s default reflex is to flick to the first moving object it registers, ignoring teammate markers, gadgets, or threat hierarchy. Isolating and practicing distractor suppression conditions you to verify the target&apos;s color before pulling the trigger, building muscle memory for target validation.
+                      </p>
                     </div>
                   </div>
+                  <div className="space-y-6">
+                    <div>
+                      <h3 className="font-bold text-white text-base">How Professional FPS Players Prioritize Targets</h3>
+                      <p className="text-xs text-gray-400 mt-2 leading-relaxed">
+                        Elite tactical shooters scan visual fields using their peripheral vision while keeping their eyes focused centrally. They categorize targets into immediate threats (enemies looking directly at them or holding high-DPS angles) and secondary threats. Training visual discipline ensures that you ignore low-priority decoys and focus on the exact opponent firing at you.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-[#0b0f19] border-t border-gray-800 p-8">
+                <div className="flex items-center gap-3 mb-6">
+                  <Lightbulb className="w-6 h-6 text-yellow-400" />
+                  <h3 className="text-xl font-bold text-white">Frequently Asked Questions</h3>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <FAQItem q="1. What is target prioritization in FPS games?" a="Target prioritization is the cognitive process of evaluating multiple enemies on screen and deciding which threat to shoot first based on proximity, weapon threat level, and role." />
+                  <FAQItem q="2. How do professional FPS players choose targets?" a="Professional players assess threats instantaneously, prioritizing low-health enemies, immediate headshot threats, active duelists, and high-DPS opponents while ignoring non-threat distractors." />
+                  <FAQItem q="3. Why do I shoot the wrong enemy under pressure?" a="Shooting the wrong enemy is often caused by panic firing or poor visual filtering. Under high adrenaline, the brain defaults to shooting the first movement it detects rather than sorting target threat levels." />
+                  <FAQItem q="4. What is threat assessment training?" a="Threat assessment training uses cognitive drills to condition the brain to identify, rank, and eliminate targets in order of threat level (e.g., Red vs. Yellow) rather than raw visual proximity." />
+                  <FAQItem q="5. How can I improve target selection?" a="You can improve target selection by training with cognitive aim tools that actively punish you for shooting decoys, helping you build impulse control and target confirmation habits." />
+                  <FAQItem q="6. What is distractor suppression?" a="Distractor suppression is the ability to ignore moving visual elements, friendly teammates, or non-threatening details (like decoy targets) to maintain absolute focus on critical targets." />
+                  <FAQItem q="7. Can this drill improve decision making?" a="Yes, this drill forces you to make split-second decisions under time pressure. Repeated practice builds the neural pathways required to make accurate tactical decisions in games." />
+                  <FAQItem q="8. Does this help Valorant players?" a="Yes, Valorant features decoy abilities (like Yoru clones or flashes) and chaotic team fights. Target prioritization training helps you ignore decoys and target the actual threat." />
+                  <FAQItem q="9. Does this help CS2 players?" a="Yes, CS2 requires high target discrimination, especially when holding angles or encountering multiple enemies pushing through choke points." />
+                  <FAQItem q="10. Does this help Rainbow Six Siege players?" a="Yes, Siege features visual clutter, friendly teammates close to enemies, and decoy gadgets. Visual filtering is critical to prevent friendly fire and eliminate threats." />
+                  <FAQItem q="11. How often should I train target prioritization?" a="We recommend practicing target selection for 10 minutes daily during your warm-up routine to build visual discipline and reduce panic-firing habits." />
+                  <FAQItem q="12. Is this drill free?" a="Yes, this Target Prioritization Trainer is 100% free, open-source, and runs directly in your web browser with zero downloads required." />
+                  <FAQItem q="13. What skills does this drill improve?" a="It trains threat assessment, visual filtering, distractor suppression, impulse control, tactical decision making, and target selection under intense cognitive pressure." />
+                  <FAQItem q="14. Can cognitive training improve FPS performance?" a="Yes, mechanical aim is only half the battle. Cognitive training helps you make better decisions, ensuring that your physical aim is directed at the correct target." />
+                  <FAQItem q="15. Why is target selection important in competitive shooters?" a="Even with perfect aim, shooting a friendly teammate or a low-threat target while a high-threat enemy is shooting at you will result in losing the engagement. Target selection ensures you eliminate the most critical threats first." />
                 </div>
               </div>
             </div>
-          </section>
+          </article>
         )}
 
         {/* RELATED DRILLS SECTION */}
@@ -978,10 +1197,10 @@ export default function TargetPrioritizationClient() {
               </h2>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <RelatedCard href="/drills/motor/hand-eye-coordination/aim-trainer" title="Aim Trainer Elite" desc="Dynamic shrinking bullseye survival." color="green" icon={<Target className="w-4 h-4" />} />
-              <RelatedCard href="/drills/fps/flick-shot-training" title="Pro Flick Trainer" desc="Snap to targets in time-attack mode." color="blue" icon={<Crosshair className="w-4 h-4" />} />
-              <RelatedCard href="/drills/fps/180-degree-awareness" title="180° Awareness" desc="Alternate snapping opposite horizons." color="orange" icon={<Zap className="w-4 h-4" />} />
-              <RelatedCard href="/drills/fps/recoil-control" title="Recoil Control" desc="Calibrate pulling pattern compensation." color="red" icon={<Activity className="w-4 h-4" />} />
+              <RelatedCard href="/drills/fps/180-degree-awareness" title="180° Awareness Pro" desc="Peripheral target acquisition response drills." color="orange" icon={<Zap className="w-4 h-4" />} />
+              <RelatedCard href="/drills/fps/flick-shot-training" title="Pro Flick Trainer" desc="Snap to targets in time-attack mode." color="blue" icon={<Star className="w-4 h-4" />} />
+              <RelatedCard href="/drills/fps/reactive-sphere-tracking" title="Reactive Sphere Tracking" desc="Continuous tracking path micro corrections." color="blue" icon={<Target className="w-4 h-4" />} />
+              <RelatedCard href="/drills/fps/micro-correction-precision" title="Micro Flicks" desc="Optimize tight-angle crosshair corrections." color="orange" icon={<Zap className="w-4 h-4" />} />
             </div>
           </section>
         )}
@@ -989,83 +1208,81 @@ export default function TargetPrioritizationClient() {
         {/* FOOTER SECTION */}
         {!isFullscreen && (
           <footer className="mt-12 bg-slate-950/40 border border-slate-900 text-slate-500 rounded-xl py-10 px-6 font-mono text-[10px]" role="contentinfo">
-            <div className="max-w-7xl mx-auto">
+            <div className="max-w-7xl mx-auto font-mono text-left">
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8 mb-8">
                 <div>
-                  <h3 className="text-white font-bold mb-3 uppercase tracking-wider">Motor & FPS</h3>
+                  <h3 className="text-white font-bold mb-3 uppercase tracking-wider text-xs">Motor & FPS</h3>
                   <ul className="space-y-2">
                     <li><Link href="/drills/motor/hand-eye-coordination/aim-trainer" className="hover:text-blue-400 transition-colors">Aim Trainer Elite</Link></li>
                     <li><Link href="/drills/fps/flick-shot-training" className="hover:text-blue-400 transition-colors">Flick Shot Trainer</Link></li>
-                    <li><Link href="/drills/fps" className="text-blue-450 hover:text-blue-400 transition-colors font-bold">All FPS Drills →</Link></li>
+                    <li><Link href="/drills/fps" className="text-blue-400 hover:text-blue-300 transition-colors font-bold">All FPS Drills →</Link></li>
                   </ul>
                 </div>
                 <div>
-                  <h3 className="text-white font-bold mb-3 uppercase tracking-wider">Memory</h3>
+                  <h3 className="text-white font-bold mb-3 uppercase tracking-wider text-xs">Memory</h3>
                   <ul className="space-y-2">
                     <li><Link href="/drills/memory/working-memory/n-back" className="hover:text-blue-400 transition-colors">3-Back Training</Link></li>
                     <li><Link href="/drills/memory/short-term-memory/color-sequence" className="hover:text-blue-400 transition-colors">Color Sequence</Link></li>
-                    <li><Link href="/drills/memory" className="text-blue-450 hover:text-blue-400 transition-colors font-bold">All Memory Drills →</Link></li>
+                    <li><Link href="/drills/memory" className="text-blue-400 hover:text-blue-300 transition-colors font-bold">All Memory Drills →</Link></li>
                   </ul>
                 </div>
                 <div>
-                  <h3 className="text-white font-bold mb-3 uppercase tracking-wider">Cognitive</h3>
+                  <h3 className="text-white font-bold mb-3 uppercase tracking-wider text-xs">Cognitive</h3>
                   <ul className="space-y-2">
                     <li><Link href="/drills/cognitive/memory/card-matching" className="hover:text-blue-400 transition-colors">Memory Games</Link></li>
                     <li><Link href="/drills/cognitive/attention/divided-attention" className="hover:text-blue-400 transition-colors">Attention Drills</Link></li>
-                    <li><Link href="/drills/cognitive" className="text-blue-450 hover:text-blue-400 transition-colors font-bold">All Cognitive Drills →</Link></li>
+                    <li><Link href="/drills/cognitive" className="text-blue-400 hover:text-blue-300 transition-colors font-bold">All Cognitive Drills →</Link></li>
                   </ul>
                 </div>
                 <div>
-                  <h3 className="text-white font-bold mb-3 uppercase tracking-wider">Academic</h3>
+                  <h3 className="text-white font-bold mb-3 uppercase tracking-wider text-xs">Academic</h3>
                   <ul className="space-y-2">
                     <li><Link href="/drills/academic/writing-speed/typing-test" className="hover:text-blue-400 transition-colors">Typing Speed Test</Link></li>
                     <li><Link href="/drills/academic/math-speed/mental-math" className="hover:text-blue-400 transition-colors">Mental Math</Link></li>
-                    <li><Link href="/drills/academic" className="text-blue-450 hover:text-blue-400 transition-colors font-bold">All Academic Drills →</Link></li>
+                    <li><Link href="/drills/academic" className="text-red-400 hover:text-red-300 transition-colors font-bold">All Academic Drills →</Link></li>
                   </ul>
                 </div>
                 <div>
-                  <h3 className="text-white font-bold mb-3 uppercase tracking-wider">More Sectors</h3>
+                  <h3 className="text-white font-bold mb-3 uppercase tracking-wider text-xs">More Sectors</h3>
                   <ul className="space-y-2">
-                    <li><Link href="/drills/visual" className="hover:text-blue-400 transition-colors">Visual (14)</Link></li>
-                                        
-                    <li><Link href="/drills/physical" className="hover:text-blue-400 transition-colors">Physical (11)</Link></li>
+                    <li><Link href="/drills/visual" className="hover:text-blue-400 transition-colors">Visual</Link></li>
+                    <li><Link href="/drills/physical" className="hover:text-blue-400 transition-colors">Physical</Link></li>
                   </ul>
                 </div>
               </div>
               
-              <div className="border-t border-slate-900 pt-8 text-center">
+              <div className="border-t border-slate-900 pt-8 text-center font-mono">
                 <div className="flex items-center justify-center gap-2 mb-4">
                   <div className="w-6 h-6 bg-gradient-to-br from-blue-500/25 to-indigo-500/25 border border-blue-500/30 rounded-lg flex items-center justify-center">
                     <Crosshair className="w-3.5 h-3.5 text-blue-400" />
                   </div>
                   <span className="text-white font-black tracking-widest text-xs uppercase">SkillDrills</span>
                 </div>
-                <p className="text-[9px] mb-2">&copy; 2026 SkillDrills. All rights reserved.</p>
-                <p className="text-[9px] max-w-2xl mx-auto leading-relaxed mb-6">
+                <p className="text-[9px] mb-2">&copy; {new Date().getFullYear()} SkillDrills. All rights reserved.</p>
+                <p className="text-[9px] max-w-2xl mx-auto leading-relaxed mb-6 text-slate-650">
                   Open-source telemetry training platform using hardware pointer lock. Free forever. No downloads required.
                 </p>
                 <div className="flex items-center justify-center gap-3 flex-wrap">
-                  <a href="https://youtube.com/@skilldrills.online" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="YouTube">
+                  <a href="https://youtube.com/@skilldrills.online" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-805 shadow-md" title="YouTube">
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
                   </a>
-                  <a href="https://www.facebook.com/profile.php?id=61590093843779" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="Facebook">
+                  <a href="https://www.facebook.com/profile.php?id=61590093843779" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-805 shadow-md" title="Facebook">
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
                   </a>
-                  <a href="https://x.com/skilldrillss" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="X / Twitter">
+                  <a href="https://x.com/skilldrillss" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-805 shadow-md" title="X / Twitter">
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.747l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
                   </a>
-                  <a href="https://www.instagram.com/skilldrills.online/?__pwa=1" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="Instagram">
+                  <a href="https://www.instagram.com/skilldrills.online/?__pwa=1" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-805 shadow-md" title="Instagram">
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
                   </a>
-                  <a href="https://pinterest.com/skilldrills" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="Pinterest">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738a.36.36 0 0 1 .083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.632-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/></svg>
+                  <a href="https://pinterest.com/skilldrills" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-855 shadow-md" title="Pinterest">
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.372 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738a.36.36 0 0 1 .083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.632-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12 0-6.628-5.373-12-12-12z"/></svg>
                   </a>
                 </div>
               </div>
             </div>
           </footer>
         )}
-
       </div>
     </div>
   );
@@ -1073,16 +1290,18 @@ export default function TargetPrioritizationClient() {
 
 // === Subcomponents ===
 
-function StatCard({ icon, value, label, unit = '' }) {
+function StatCard({ icon, value, label, unit = '', highlight = false }) {
   return (
-    <div className="group rounded-xl border border-slate-900 bg-slate-950/40 p-2 text-center flex flex-col justify-center h-full transition-all duration-300 hover:scale-[1.03] hover:border-slate-800">
+    <div className={`group rounded-xl border ${
+      highlight ? 'border-blue-500/30 bg-blue-500/5 shadow-[inset_0_0_12px_rgba(59,130,246,0.05)]' : 'border-gray-800 bg-gray-900/50'
+    } p-2.5 text-center flex flex-col justify-center h-full transition-all duration-300 hover:scale-[1.03] hover:border-gray-700`}>
       <div className="mb-1 flex justify-center transition-transform duration-300 group-hover:scale-110">
         {icon}
       </div>
-      <p className="text-xs sm:text-sm font-extrabold tracking-tight truncate text-white">
-        {value} <span className="text-[10px] font-semibold text-slate-400">{unit}</span>
+      <p className="text-sm sm:text-base font-black tracking-tight truncate text-white">
+        {value} <span className="text-[10px] font-semibold text-gray-500">{unit}</span>
       </p>
-      <p className="text-[9px] font-mono font-bold uppercase tracking-wider text-slate-500 truncate">{label}</p>
+      <p className="text-[9px] font-mono font-bold uppercase tracking-wider text-gray-500 truncate">{label}</p>
     </div>
   );
 }
@@ -1090,22 +1309,18 @@ function StatCard({ icon, value, label, unit = '' }) {
 function RuleItem({ num, color, text, highlight = '', result }) {
   const colorMap = { 
     blue: 'bg-blue-600 text-blue-300 border-blue-500', 
-    indigo: 'bg-indigo-600 text-indigo-300 border-indigo-500', 
-    gray: 'bg-gray-600 text-gray-300 border-gray-500', 
-    green: 'bg-green-600 text-green-300 border-green-500',
-    red: 'bg-red-600 text-red-300 border-red-500',
+    red: 'bg-red-600 text-red-300 border-red-500', 
     orange: 'bg-orange-600 text-orange-300 border-orange-500',
-    yellow: 'bg-yellow-600 text-yellow-300 border-yellow-500',
-    purple: 'bg-purple-600 text-purple-300 border-purple-500'
+    green: 'bg-green-600 text-green-300 border-green-500' 
   };
-  const colors = colorMap[color] || 'bg-slate-600 text-slate-300 border-slate-500';
+  const colors = colorMap[color] || 'bg-gray-600 text-gray-300 border-gray-500';
   const [bg, txt, border] = colors.split(' ');
   
   return (
     <div className="flex items-center gap-4 bg-[#0b0f19]/40 p-4 rounded-xl border border-slate-800 shadow-sm">
       <div className={`w-8 h-8 rounded-xl ${bg} border border-t-white/20 flex items-center justify-center text-white text-base font-black shadow-lg flex-shrink-0`}>{num}</div>
       <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-        <p className="text-sm font-medium text-slate-300">
+        <p className="text-sm font-medium text-gray-300">
           {text}{highlight && <span className={`font-black ${txt}`}> {highlight}</span>}
         </p>
         <div className={`text-xs font-black px-3 py-1.5 rounded-lg bg-[#050811] border ${border} ${txt} whitespace-nowrap shadow-inner tracking-wide text-center sm:text-left`}>
@@ -1121,23 +1336,28 @@ function RelatedCard({ href, title, desc, color, icon }) {
     blue: 'from-blue-500 to-indigo-500',
     orange: 'from-orange-500 to-amber-500',
     red: 'from-red-500 to-rose-500',
-    purple: 'from-purple-500 to-violet-500',
     green: 'from-green-500 to-emerald-500',
-    cyan: 'from-cyan-500 to-blue-500',
-    indigo: 'from-indigo-500 to-purple-500',
-    rose: 'from-rose-500 to-pink-500'
   };
   return (
-    <Link href={href} className="group relative overflow-hidden rounded-2xl border border-slate-800 bg-[#0b0f19]/40 transition-all hover:-translate-y-1 hover:border-blue-500/50 block p-5">
+    <Link href={href} className="group relative overflow-hidden rounded-2xl border border-gray-800 bg-[#0b0f19]/30 transition-all hover:-translate-y-1 hover:border-blue-500/50 block p-5">
       <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${gradients[color]}`}></div>
-      <div className="w-10 h-10 rounded-xl bg-[#050811] border border-slate-700 flex items-center justify-center text-slate-400 group-hover:text-white mb-3 shadow-inner">
+      <div className="w-10 h-10 rounded-xl bg-[#050811] border border-gray-700 flex items-center justify-center text-gray-400 group-hover:text-white mb-3 shadow-inner transition-colors">
         {icon}
       </div>
-      <h3 className="font-bold text-base mb-1.5 text-white group-hover:text-blue-400 transition-colors">{title}</h3>
-      <p className="text-xs text-slate-500 mb-4">{desc}</p>
-      <div className="flex items-center gap-1.5 text-blue-400 text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-wider">
+      <h3 className="font-bold text-sm mb-1 text-white group-hover:text-blue-400 transition-colors">{title}</h3>
+      <p className="text-[11px] text-gray-500 leading-normal mb-3 line-clamp-2">{desc}</p>
+      <div className="flex items-center gap-1.5 text-blue-400 text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-widest">
         Start Drill <ArrowRight className="w-3.5 h-3.5" />
       </div>
     </Link>
+  );
+}
+
+function FAQItem({ q, a }) {
+  return (
+    <div className="bg-[#05060b] border border-gray-800 rounded-xl p-5 hover:border-gray-700 transition-colors">
+      <h4 className="text-sm font-bold text-gray-200 mb-2">{q}</h4>
+      <p className="text-xs text-gray-400 leading-relaxed">{a}</p>
+    </div>
   );
 }

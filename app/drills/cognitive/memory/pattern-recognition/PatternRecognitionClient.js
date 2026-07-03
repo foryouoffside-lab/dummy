@@ -563,7 +563,7 @@ export default function PatternRecognitionClient() {
               <li className={`${isDarkMode ? 'text-gray-600' : 'text-gray-400'}`} aria-hidden="true"><ChevronRight className="w-4 h-4" /></li>
               <li><Link href="/drills/cognitive" className={`hover:underline transition-colors ${isDarkMode ? 'text-gray-500 hover:text-gray-300' : 'text-gray-600 hover:text-gray-900'}`}>Cognitive</Link></li>
               <li className={`${isDarkMode ? 'text-gray-600' : 'text-gray-400'}`} aria-hidden="true"><ChevronRight className="w-4 h-4" /></li>
-              <li><Link href="/drills/cognitive/problem-solving" className={`hover:underline transition-colors ${isDarkMode ? 'text-gray-500 hover:text-gray-300' : 'text-gray-600 hover:text-gray-900'}`}>Problem Solving</Link></li>
+              <li><Link href="/drills/cognitive" className={`hover:underline transition-colors ${isDarkMode ? 'text-gray-500 hover:text-gray-300' : 'text-gray-600 hover:text-gray-900'}`}>Problem Solving</Link></li>
               <li className={`${isDarkMode ? 'text-gray-600' : 'text-gray-400'}`} aria-hidden="true"><ChevronRight className="w-4 h-4" /></li>
               <li className={`font-medium ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`} aria-current="page">Pattern Recognition</li>
             </ol>
@@ -976,7 +976,7 @@ export default function PatternRecognitionClient() {
                     <h3 className="text-white font-bold mb-3 uppercase tracking-wider">More Sectors</h3>
                     <ul className="space-y-2">
                       <li><Link href="/drills/academic" className="hover:text-blue-400 transition-colors">Academic (12)</Link></li>
-                      <li><Link href="/drills/mental-fitness" className="hover:text-blue-400 transition-colors">Mental Fitness (6)</Link></li>
+                      <li><Link href="/drills/visual-tracking" className="hover:text-blue-400 transition-colors">Tracking (25 drills)</Link></li>
                       <li><Link href="/drills/physical" className="hover:text-blue-400 transition-colors">Physical (11)</Link></li>
                     </ul>
                   </div>

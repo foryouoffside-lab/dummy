@@ -799,7 +799,7 @@ export default function InferenceDrillClient() {
               <RelatedCard href="/drills/academic/comprehension/reading-comprehension" title="Reading Comprehension" desc="Extensive passages with adaptive quizzing." color="emerald" icon={<BookOpen className="w-4 h-4" />} />
               <RelatedCard href="/drills/cognitive/problem-solving/logic-puzzles" title="Logic Puzzles" desc="Deductive reasoning under strict time limits." color="purple" icon={<Brain className="w-4 h-4" />} />
               <RelatedCard href="/drills/academic/writing-speed/typing-test" title="Typing Speed Test" desc="WPM assessment across rigorous difficulty thresholds." color="rose" icon={<Award className="w-4 h-4" />} />
-              <RelatedCard href="/drills/productivity/focus-endurance/deep-work" title="Deep Work Timer" desc="Structured sessions for maximum cognitive output." color="red" icon={<Timer className="w-4 h-4" />} />
+              <RelatedCard href="/drills/cognitive/focus/distraction-fighter" title="Distraction Fighter" desc="Train focus endurance by ignoring dynamic audio/visual distractors." color="red" icon={<Timer className="w-4 h-4" />} />
             </div>
           </section>
         )}
@@ -845,7 +845,7 @@ export default function InferenceDrillClient() {
                   <h3 className="text-white font-bold mb-3 uppercase tracking-wider">More Sectors</h3>
                   <ul className="space-y-2">
                     <li><Link href="/drills/memory" className="hover:text-blue-400 transition-colors">Memory (15)</Link></li>
-                    <li><Link href="/drills/mental-fitness" className="hover:text-blue-400 transition-colors">Mental Fitness (6)</Link></li>
+                    <li><Link href="/drills/visual-tracking" className="hover:text-blue-400 transition-colors">Tracking (25 drills)</Link></li>
                     <li><Link href="/drills/physical" className="hover:text-blue-400 transition-colors">Physical (11)</Link></li>
                   </ul>
                 </div>

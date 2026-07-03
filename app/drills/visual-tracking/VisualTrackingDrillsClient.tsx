@@ -37,25 +37,58 @@ export default function VisualTrackingDrillsClient() {
 
   const trackingDrills = [
     { 
-      id: 1, 
-      name: 'Slow-Precision Tracking', 
-      folderName: 'slow-precision-tracking', 
+      id: 18, 
+      name: 'Constant Slow Pursuit', 
+      folderName: 'constant-slow-pursuit', 
       category: 'Visual Tracking', 
       subcategory: 'visual-tracking', 
       difficulty: 'Beginner', 
       duration: '60s', 
-      description: 'Deliberate horizontal plane pursuit with discrete vertical level transitions. Recalibrate smooth eye movements and vertical saccades.', 
+      description: 'Condition foveal pursuit along a continuous, visible Lissajous curve at low velocity.', 
       enabled: true 
     },
     { 
-      id: 2, 
-      name: 'Predictive Pursuit', 
-      folderName: 'predictive-pursuit', 
+      id: 23, 
+      name: 'Sine-Wave Pursuit', 
+      folderName: 'sine-wave-pursuit', 
       category: 'Visual Tracking', 
       subcategory: 'visual-tracking', 
-      difficulty: 'Advanced', 
+      difficulty: 'Beginner', 
       duration: '60s', 
-      description: 'Interpolate path trajectory of a moving cyan shadow and execute ballistic gaze shifts to capture solidified targets.', 
+      description: 'Track target oscillations along a horizontal sine wave guide line.', 
+      enabled: true 
+    },
+    { 
+      id: 24, 
+      name: 'Triangular Pursuit', 
+      folderName: 'triangular-pursuit', 
+      category: 'Visual Tracking', 
+      subcategory: 'visual-tracking', 
+      difficulty: 'Beginner', 
+      duration: '60s', 
+      description: 'Track target transitions along a visible triangular guide vector.', 
+      enabled: true 
+    },
+    { 
+      id: 28, 
+      name: 'Zig-Zag Path Pursuit', 
+      folderName: 'zig-zag-path-pursuit', 
+      category: 'Visual Tracking', 
+      subcategory: 'visual-tracking', 
+      difficulty: 'Beginner', 
+      duration: '60s', 
+      description: 'Track target movements along a visible multi-segment zig-zag guide path.', 
+      enabled: true 
+    },
+    { 
+      id: 22, 
+      name: 'Infinity Pursuit', 
+      folderName: 'infinity-pursuit', 
+      category: 'Visual Tracking', 
+      subcategory: 'visual-tracking', 
+      difficulty: 'Beginner', 
+      duration: '60s', 
+      description: 'Track a target moving along a visible figure-8 Lemniscate path at a fluid pace.', 
       enabled: true 
     },
     { 
@@ -67,6 +100,50 @@ export default function VisualTrackingDrillsClient() {
       difficulty: 'Intermediate', 
       duration: '60s', 
       description: 'Track a bouncing target that undergoes randomized shifts in speed and direction.', 
+      enabled: true 
+    },
+    { 
+      id: 25, 
+      name: 'Staircase Step', 
+      folderName: 'staircase-step', 
+      category: 'Visual Tracking', 
+      subcategory: 'visual-tracking', 
+      difficulty: 'Intermediate', 
+      duration: '60s', 
+      description: 'Track stepped trajectories combining horizontal slides with rapid vertical snaps.', 
+      enabled: true 
+    },
+    { 
+      id: 12, 
+      name: 'Ghosting Suppress Pursuit', 
+      folderName: 'ghosting-suppress-pursuit', 
+      category: 'Visual Tracking', 
+      subcategory: 'visual-tracking', 
+      difficulty: 'Intermediate', 
+      duration: '60s', 
+      description: 'Suppress lag indicators and trail overlays to isolate target tracking.', 
+      enabled: true 
+    },
+    { 
+      id: 29, 
+      name: 'Split-Screen Tracking', 
+      folderName: 'split-screen-tracking', 
+      category: 'Visual Tracking', 
+      subcategory: 'visual-tracking', 
+      difficulty: 'Intermediate', 
+      duration: '60s', 
+      description: 'Condition divided attention by tracking two targets moving along vertical and horizontal planes.', 
+      enabled: true 
+    },
+    { 
+      id: 2, 
+      name: 'Predictive Pursuit', 
+      folderName: 'predictive-pursuit', 
+      category: 'Visual Tracking', 
+      subcategory: 'visual-tracking', 
+      difficulty: 'Intermediate', 
+      duration: '60s', 
+      description: 'Interpolate path trajectory of a moving cyan shadow and execute ballistic gaze shifts to capture solidified targets.', 
       enabled: true 
     },
     { 
@@ -89,17 +166,6 @@ export default function VisualTrackingDrillsClient() {
       difficulty: 'Advanced', 
       duration: '60s', 
       description: 'Fixate on center crosshairs while detecting transient targets spawning in your peripheral view.', 
-      enabled: true 
-    },
-    { 
-      id: 12, 
-      name: 'Ghosting Suppress Pursuit', 
-      folderName: 'ghosting-suppress-pursuit', 
-      category: 'Visual Tracking', 
-      subcategory: 'visual-tracking', 
-      difficulty: 'Advanced', 
-      duration: '60s', 
-      description: 'Suppress lag indicators and trail overlays to isolate target tracking.', 
       enabled: true 
     },
     { 
@@ -134,187 +200,55 @@ export default function VisualTrackingDrillsClient() {
       duration: '60s', 
       description: 'Overclock tracking responses against rapid directional changes at constant speed scales.', 
       enabled: true 
-    },
-    { 
-      id: 18, 
-      name: 'Constant Slow Pursuit', 
-      folderName: 'constant-slow-pursuit', 
-      category: 'Visual Tracking', 
-      subcategory: 'visual-tracking', 
-      difficulty: 'Beginner', 
-      duration: '60s', 
-      description: 'Condition foveal pursuit along a continuous, visible Lissajous curve at low velocity.', 
-      enabled: true 
-    },
-    { 
-      id: 21, 
-      name: 'Circular Pursuit', 
-      folderName: 'circular-pursuit', 
-      category: 'Visual Tracking', 
-      subcategory: 'visual-tracking', 
-      difficulty: 'Beginner', 
-      duration: '60s', 
-      description: 'Condition foveal pursuit along a continuous, visible circular orbit at a stable pace.', 
-      enabled: true 
-    },
-    { 
-      id: 22, 
-      name: 'Infinity Pursuit', 
-      folderName: 'infinity-pursuit', 
-      category: 'Visual Tracking', 
-      subcategory: 'visual-tracking', 
-      difficulty: 'Intermediate', 
-      duration: '60s', 
-      description: 'Track a target moving along a visible figure-8 Lemniscate path at a fluid pace.', 
-      enabled: true 
-    },
-    { 
-      id: 23, 
-      name: 'Sine-Wave Pursuit', 
-      folderName: 'sine-wave-pursuit', 
-      category: 'Visual Tracking', 
-      subcategory: 'visual-tracking', 
-      difficulty: 'Intermediate', 
-      duration: '60s', 
-      description: 'Track target oscillations along a horizontal sine wave guide line.', 
-      enabled: true 
-    },
-    { 
-      id: 24, 
-      name: 'Triangular Pursuit', 
-      folderName: 'triangular-pursuit', 
-      category: 'Visual Tracking', 
-      subcategory: 'visual-tracking', 
-      difficulty: 'Intermediate', 
-      duration: '60s', 
-      description: 'Track target transitions along a visible triangular guide vector.', 
-      enabled: true 
-    },
-    { 
-      id: 25, 
-      name: 'Staircase Step', 
-      folderName: 'staircase-step', 
-      category: 'Visual Tracking', 
-      subcategory: 'visual-tracking', 
-      difficulty: 'Intermediate', 
-      duration: '60s', 
-      description: 'Track stepped trajectories combining horizontal slides with rapid vertical snaps.', 
-      enabled: true 
-    },
-    { 
-      id: 28, 
-      name: 'Zig-Zag Path Pursuit', 
-      folderName: 'zig-zag-path-pursuit', 
-      category: 'Visual Tracking', 
-      subcategory: 'visual-tracking', 
-      difficulty: 'Intermediate', 
-      duration: '60s', 
-      description: 'Track target movements along a visible multi-segment zig-zag guide path.', 
-      enabled: true 
-    },
-    { 
-      id: 29, 
-      name: 'Split-Screen Tracking', 
-      folderName: 'split-screen-tracking', 
-      category: 'Visual Tracking', 
-      subcategory: 'visual-tracking', 
-      difficulty: 'Advanced', 
-      duration: '60s', 
-      description: 'Condition divided attention by tracking two targets moving along vertical and horizontal planes.', 
-      enabled: true 
     }
   ];
 
-  const reactiveDrills = [
-    { 
-      id: 3, 
-      name: 'Saccadic Gallery', 
-      folderName: 'saccadic-gallery', 
-      category: 'Visual Tracking', 
-      subcategory: 'visual-tracking', 
-      difficulty: 'Intermediate', 
-      duration: '60s', 
-      description: 'Sequence-based ballistic eye shifts. Track glowing targets flashing in a zig-zag gallery pattern.', 
-      enabled: true 
-    },
-    { 
-      id: 4, 
-      name: 'Saccadic Reaction Simulator', 
-      folderName: 'reaction-simulator', 
-      category: 'Visual Tracking', 
-      subcategory: 'visual-tracking', 
-      difficulty: 'Intermediate', 
-      duration: '60s', 
-      description: 'Track falling targets along parallel lanes to calibrate vertical reaction limits.', 
-      enabled: true 
-    },
-    { 
-      id: 5, 
-      name: 'Focus Snap Calibration', 
-      folderName: 'saccadic-snap', 
-      category: 'Visual Tracking', 
-      subcategory: 'visual-tracking', 
-      difficulty: 'Beginner', 
-      duration: '60s', 
-      description: 'Calibrate focus acquisition with target points snapping randomly across the viewport.', 
-      enabled: true 
-    },
-    { 
-      id: 16, 
-      name: 'Reactive Strafe Pursuit', 
-      folderName: 'reactive-strafe-pursuit', 
-      category: 'Visual Tracking', 
-      subcategory: 'visual-tracking', 
-      difficulty: 'Advanced', 
-      duration: '60s', 
-      description: 'Stabilize horizontal gaze pursuit against erratic, human-like target strafes.', 
-      enabled: true 
-    },
-    { 
-      id: 19, 
-      name: 'Barrier Sequence Pursuit', 
-      folderName: 'barrier-sequence-pursuit', 
-      category: 'Visual Tracking', 
-      subcategory: 'visual-tracking', 
-      difficulty: 'Advanced', 
-      duration: '60s', 
-      description: 'Acquire and track targets flashing behind sequential barrier gates at 4 corners.', 
-      enabled: true 
-    },
-    { 
-      id: 20, 
-      name: 'Market Doors Pursuit', 
-      folderName: 'market-doors-pursuit', 
-      category: 'Visual Tracking', 
-      subcategory: 'visual-tracking', 
-      difficulty: 'Advanced', 
-      duration: '60s', 
-      description: 'Train horizontal saccadic sweeps as targets flash behind 5 centered doors.', 
-      enabled: true 
-    },
-    { 
-      id: 26, 
-      name: 'Slide Dash Acceleration', 
-      folderName: 'slide-dash-acceleration', 
-      category: 'Visual Tracking', 
-      subcategory: 'visual-tracking', 
-      difficulty: 'Advanced', 
-      duration: '60s', 
-      description: 'Track target slides that undergo sudden high-speed burst dash accelerations.', 
-      enabled: true 
-    },
-    { 
-      id: 27, 
-      name: 'Stop and Go Dash', 
-      folderName: 'stop-and-go-dash', 
-      category: 'Visual Tracking', 
-      subcategory: 'visual-tracking', 
-      difficulty: 'Advanced', 
-      duration: '60s', 
-      description: 'Track a target that rests in position and executes rapid ease-out dashes to random locations.', 
-      enabled: true 
-    }
-  ];
+  const beginnerDrills = trackingDrills.filter(d => d.difficulty === 'Beginner');
+  const intermediateDrills = trackingDrills.filter(d => d.difficulty === 'Intermediate');
+  const advancedDrills = trackingDrills.filter(d => d.difficulty === 'Advanced');
+
+  const renderDrillCard = (drill: any) => {
+    const drillPath = `/drills/visual-tracking/${drill.folderName}`;
+    return (
+      <Link
+        key={drill.id}
+        href={drillPath}
+        className="group relative bg-slate-950/80 border border-slate-900 hover:border-cyan-500/40 rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1 shadow-[0_0_15px_rgba(6,182,212,0.05)] hover:shadow-[0_0_20px_rgba(6,182,212,0.15)] focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
+      >
+        <div className="p-6">
+          {/* Card Header */}
+          <div className="flex items-center justify-between mb-4">
+            <div className="p-2.5 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 group-hover:scale-110 transition-transform">
+              <Target className="w-5 h-5" />
+            </div>
+            <span className={`px-2.5 py-0.5 text-[9px] font-mono font-bold rounded-full border uppercase tracking-wider ${getDifficultyStyles(drill.difficulty)}`}>
+              {drill.difficulty}
+            </span>
+          </div>
+
+          {/* Drill details */}
+          <h3 className="text-base font-bold text-slate-100 group-hover:text-cyan-400 transition-colors mb-2 font-mono uppercase tracking-wide">
+            {drill.name}
+          </h3>
+          
+          <p className="text-xs text-slate-400 leading-relaxed min-h-[48px] mb-6">
+            {drill.description}
+          </p>
+
+          <div className="flex items-center justify-between border-t border-slate-900/60 pt-4 text-[10px] font-mono text-slate-500">
+            <span className="flex items-center gap-1.5 uppercase font-bold text-cyan-400 bg-cyan-500/5 border border-cyan-500/10 px-2 py-0.5 rounded">
+              <Clock className="w-3.5 h-3.5" />
+              {drill.duration}
+            </span>
+            <span className="flex items-center gap-1 group-hover:text-cyan-400 transition-colors uppercase font-bold text-[10px]">
+              LOAD ENGINE
+              <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </span>
+          </div>
+        </div>
+      </Link>
+    );
+  };
 
   const getDifficultyStyles = (difficulty: string) => {
     switch(difficulty) {
@@ -453,7 +387,7 @@ export default function VisualTrackingDrillsClient() {
                   Visual Tracking Systems
                 </h1>
                 <p className="text-slate-400 mt-2 text-sm sm:text-base max-w-2xl leading-relaxed">
-                  Optimize smooth ocular pursuit, velocity prediction models, and gaze stability limits with 25 professional tracking and reactive training simulators.
+                  Optimize smooth ocular pursuit, velocity prediction models, and gaze stability limits with 15 professional tracking simulators.
                 </p>
               </div>
             </div>
@@ -461,7 +395,7 @@ export default function VisualTrackingDrillsClient() {
             <div className="grid grid-cols-2 gap-3 w-full md:w-auto font-mono text-xs">
               <div className="p-3 bg-slate-950/60 rounded-xl border border-slate-800 text-center">
                 <p className="text-slate-500 uppercase tracking-widest">DRILL_CAPACITY</p>
-                <p className="text-xl font-bold text-cyan-400 mt-1">25</p>
+                <p className="text-xl font-bold text-cyan-400 mt-1">15</p>
               </div>
               <div className="p-3 bg-slate-950/60 rounded-xl border border-slate-800 text-center">
                 <p className="text-slate-500 uppercase tracking-widest">SECTOR_SYSTEM</p>
@@ -614,139 +548,77 @@ export default function VisualTrackingDrillsClient() {
         </div>
 
         {/* ============ TRACKING DRILLS SECTION ============ */}
-        <div className="space-y-12">
+        <div className="space-y-16">
+          
+          {/* Section 1: Beginner */}
           <div className="relative">
-            {/* Tracking Drills Header */}
             <div className="flex items-center justify-between mb-6 border-b border-slate-900 pb-3">
               <div className="flex items-center gap-3">
-                <div className="w-1 h-6 rounded-full bg-gradient-to-b from-cyan-500 to-blue-600" />
-                <Eye className="w-5 h-5 text-cyan-400" />
+                <div className="w-1 h-6 rounded-full bg-emerald-500" />
+                <Eye className="w-5 h-5 text-emerald-450" />
                 <h2 className="text-lg font-bold text-white tracking-wide font-mono uppercase text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400">
-                  Tracking Drills
+                  Beginner Tracking Drills
                 </h2>
-                <span className="px-2 py-0.5 text-[10px] font-mono rounded bg-slate-900 border border-slate-800 text-slate-400 font-bold">
-                  17 DRILLS
+                <span className="px-2 py-0.5 text-[10px] font-mono rounded bg-slate-900 border border-slate-800 text-emerald-450 font-bold">
+                  {beginnerDrills.length} DRILLS
                 </span>
               </div>
-              <span className="text-[10px] font-mono hidden sm:inline-block tracking-widest text-cyan-400">
-                SECTOR // SMOOTH_PURSUIT
+              <span className="text-[10px] font-mono hidden sm:inline-block tracking-widest text-emerald-450 font-bold">
+                STEADY_STATE // FOUNDATION
               </span>
             </div>
-
-            {/* Tracking Drills Grid Cards */}
+            
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
-              {trackingDrills.map((drill) => {
-                const drillPath = `/drills/visual-tracking/${drill.folderName}`;
-                
-                return (
-                  <Link
-                    key={drill.id}
-                    href={drillPath}
-                    className="group relative bg-slate-950/80 border border-slate-900 hover:border-cyan-500/40 rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1 shadow-[0_0_15px_rgba(6,182,212,0.05)] hover:shadow-[0_0_20px_rgba(6,182,212,0.15)] focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
-                  >
-                    <div className="p-6">
-                      {/* Card Header */}
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="p-2.5 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 group-hover:scale-110 transition-transform">
-                          <Target className="w-5 h-5" />
-                        </div>
-                        <span className={`px-2.5 py-0.5 text-[9px] font-mono font-bold rounded-full border uppercase tracking-wider ${getDifficultyStyles(drill.difficulty)}`}>
-                          {drill.difficulty}
-                        </span>
-                      </div>
-
-                      {/* Drill details */}
-                      <h3 className="text-base font-bold text-slate-100 group-hover:text-cyan-400 transition-colors mb-2 font-mono uppercase tracking-wide">
-                        {drill.name}
-                      </h3>
-                      
-                      <p className="text-xs text-slate-400 leading-relaxed min-h-[48px] mb-6">
-                        {drill.description}
-                      </p>
-
-                      <div className="flex items-center justify-between border-t border-slate-900/60 pt-4 text-[10px] font-mono text-slate-500">
-                        <span className="flex items-center gap-1.5 uppercase font-bold text-cyan-400 bg-cyan-500/5 border border-cyan-500/10 px-2 py-0.5 rounded">
-                          <Clock className="w-3.5 h-3.5" />
-                          {drill.duration}
-                        </span>
-                        <span className="flex items-center gap-1 group-hover:text-cyan-400 transition-colors uppercase font-bold text-[10px]">
-                          LOAD ENGINE
-                          <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                        </span>
-                      </div>
-                    </div>
-                  </Link>
-                );
-              })}
+              {beginnerDrills.map((drill) => renderDrillCard(drill))}
             </div>
           </div>
 
-          {/* ============ REACTIVE DRILLS SECTION ============ */}
+          {/* Section 2: Intermediate */}
           <div className="relative">
-            {/* Reactive Drills Header */}
             <div className="flex items-center justify-between mb-6 border-b border-slate-900 pb-3">
               <div className="flex items-center gap-3">
-                <div className="w-1 h-6 rounded-full bg-gradient-to-b from-amber-500 to-orange-600" />
-                <Zap className="w-5 h-5 text-amber-400" />
+                <div className="w-1 h-6 rounded-full bg-amber-500" />
+                <Eye className="w-5 h-5 text-amber-450" />
                 <h2 className="text-lg font-bold text-white tracking-wide font-mono uppercase text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400">
-                  Reactive Drills
+                  Intermediate Tracking Drills
                 </h2>
-                <span className="px-2 py-0.5 text-[10px] font-mono rounded bg-slate-900 border border-slate-800 text-slate-400 font-bold">
-                  8 DRILLS
+                <span className="px-2 py-0.5 text-[10px] font-mono rounded bg-slate-900 border border-slate-800 text-amber-450 font-bold">
+                  {intermediateDrills.length} DRILLS
                 </span>
               </div>
-              <span className="text-[10px] font-mono hidden sm:inline-block tracking-widest text-amber-400">
-                SECTOR // SACCADIC_REACTIVE
+              <span className="text-[10px] font-mono hidden sm:inline-block tracking-widest text-amber-450 font-bold">
+                DYNAMIC_VECTORS // ADAPTATION
               </span>
             </div>
-
-            {/* Reactive Drills Grid Cards */}
+            
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
-              {reactiveDrills.map((drill) => {
-                const drillPath = `/drills/visual-tracking/${drill.folderName}`;
-                
-                return (
-                  <Link
-                    key={drill.id}
-                    href={drillPath}
-                    className="group relative bg-slate-950/80 border border-slate-900 hover:border-amber-500/40 rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1 shadow-[0_0_15px_rgba(245,158,11,0.05)] hover:shadow-[0_0_20px_rgba(245,158,11,0.15)] focus:outline-none focus:ring-1 focus:ring-amber-500/50"
-                  >
-                    <div className="p-6">
-                      {/* Card Header */}
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="p-2.5 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20 group-hover:scale-110 transition-transform">
-                          <Zap className="w-5 h-5" />
-                        </div>
-                        <span className={`px-2.5 py-0.5 text-[9px] font-mono font-bold rounded-full border uppercase tracking-wider ${getDifficultyStyles(drill.difficulty)}`}>
-                          {drill.difficulty}
-                        </span>
-                      </div>
-
-                      {/* Drill details */}
-                      <h3 className="text-base font-bold text-slate-100 group-hover:text-amber-400 transition-colors mb-2 font-mono uppercase tracking-wide">
-                        {drill.name}
-                      </h3>
-                      
-                      <p className="text-xs text-slate-400 leading-relaxed min-h-[48px] mb-6">
-                        {drill.description}
-                      </p>
-
-                      <div className="flex items-center justify-between border-t border-slate-900/60 pt-4 text-[10px] font-mono text-slate-500">
-                        <span className="flex items-center gap-1.5 uppercase font-bold text-amber-400 bg-amber-500/5 border border-amber-500/10 px-2 py-0.5 rounded">
-                          <Clock className="w-3.5 h-3.5" />
-                          {drill.duration}
-                        </span>
-                        <span className="flex items-center gap-1 group-hover:text-amber-400 transition-colors uppercase font-bold text-[10px]">
-                          LOAD ENGINE
-                          <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                        </span>
-                      </div>
-                    </div>
-                  </Link>
-                );
-              })}
+              {intermediateDrills.map((drill) => renderDrillCard(drill))}
             </div>
           </div>
+
+          {/* Section 3: Advanced */}
+          <div className="relative">
+            <div className="flex items-center justify-between mb-6 border-b border-slate-900 pb-3">
+              <div className="flex items-center gap-3">
+                <div className="w-1 h-6 rounded-full bg-orange-500" />
+                <Eye className="w-5 h-5 text-orange-455" />
+                <h2 className="text-lg font-bold text-white tracking-wide font-mono uppercase text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400">
+                  Advanced Tracking Drills
+                </h2>
+                <span className="px-2 py-0.5 text-[10px] font-mono rounded bg-slate-900 border border-slate-800 text-orange-455 font-bold">
+                  {advancedDrills.length} DRILLS
+                </span>
+              </div>
+              <span className="text-[10px] font-mono hidden sm:inline-block tracking-widest text-orange-455 font-bold">
+                CHAOTIC_FLUX // OVERCLOCK
+              </span>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
+              {advancedDrills.map((drill) => renderDrillCard(drill))}
+            </div>
+          </div>
+
         </div>
 
         {/* Back Link */}

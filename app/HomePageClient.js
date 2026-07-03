@@ -17,7 +17,7 @@ const categories = [
     href: '/drills/fps', 
     gradient: 'from-red-500 via-rose-500 to-orange-500',
     iconBg: 'bg-gradient-to-br from-red-500 to-orange-500',
-    drills: '12 drills',
+    drills: '16 drills',
     featured: true 
   },
   { 
@@ -27,7 +27,7 @@ const categories = [
     href: '/drills/cognitive', 
     gradient: 'from-blue-500 via-indigo-500 to-violet-500',
     iconBg: 'bg-gradient-to-br from-blue-500 to-indigo-500',
-    drills: '20 drills' 
+    drills: '18 drills' 
   },
   { 
     name: 'Visual', 
@@ -36,7 +36,7 @@ const categories = [
     href: '/drills/visual', 
     gradient: 'from-purple-500 via-violet-500 to-pink-500',
     iconBg: 'bg-gradient-to-br from-purple-500 to-pink-500',
-    drills: '15 drills' 
+    drills: '14 drills' 
   },
   { 
     name: 'Visual Tracking', 
@@ -45,7 +45,7 @@ const categories = [
     href: '/drills/visual-tracking', 
     gradient: 'from-cyan-500 via-blue-500 to-indigo-500',
     iconBg: 'bg-gradient-to-br from-cyan-500 to-blue-500',
-    drills: '25 drills' 
+    drills: '15 drills' 
   },
   { 
     name: 'Academic', 
@@ -72,7 +72,7 @@ const categories = [
     href: '/drills/motor', 
     gradient: 'from-orange-500 via-amber-500 to-yellow-500',
     iconBg: 'bg-gradient-to-br from-orange-500 to-amber-500',
-    drills: '12 drills' 
+    drills: '14 drills' 
   },
   { 
     name: 'Physical', 
@@ -81,7 +81,7 @@ const categories = [
     href: '/drills/physical', 
     gradient: 'from-rose-500 via-red-500 to-orange-500',
     iconBg: 'bg-gradient-to-br from-rose-500 to-red-500',
-    drills: '11 drills' 
+    drills: '14 drills' 
   },
 ];
 
@@ -117,7 +117,7 @@ const features = [
   { 
     icon: Target, 
     title: 'Focused Training', 
-    description: 'Target specific skill areas with 115+ specialized drills across 8 categories', 
+    description: 'Target specific skill areas with 120 specialized drills across 9 categories', 
     gradient: 'from-emerald-400 to-green-500',
     bgGradient: 'from-emerald-50 to-green-50'
   },
@@ -248,7 +248,7 @@ export default function HomePageClient() {
       try {
         await navigator.share({
           title: 'SkillDrills - Free FPS Aim Trainer & Brain Training',
-          text: '115+ free drills for FPS gaming, cognitive skills, visual tracking, and mental fitness. No sign-up!',
+          text: '120 free drills for FPS gaming, cognitive skills, visual tracking, and mental fitness. No sign-up!',
           url: 'https://skilldrills.online',
         });
       } catch (error) {
@@ -299,7 +299,7 @@ export default function HomePageClient() {
               onClick={handleDismissNotice}
               className="w-full py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:brightness-110 text-white font-black rounded-xl transition-all shadow-lg active:scale-95 uppercase tracking-widest text-sm"
             >
-              I Understand, Let's Train
+              I Understand, Let&apos;s Train
             </button>
           </div>
         </div>
@@ -344,7 +344,7 @@ export default function HomePageClient() {
       <section className="sr-only" aria-label="Platform description">
         <h2>SkillDrills - Free Brain Training and FPS Aim Trainer Platform</h2>
         <p>
-          SkillDrills is a completely free online training platform offering 115+ interactive drills across 9 categories. 
+          SkillDrills is a completely free online training platform offering 120 interactive drills across 9 categories. 
           FPS aim training for Valorant, CS2, Overwatch, Apex Legends and all competitive shooters. 
           Cognitive brain training including memory games, attention exercises, focus training and problem-solving puzzles. 
           Academic skills practice with typing tests, speed reading, mental math drills and reading comprehension.
@@ -372,7 +372,7 @@ export default function HomePageClient() {
             </h1>
             
             <p className="text-lg sm:text-xl text-gray-400 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
-              Elevate your visual processing, mechanical aim, and working memory. Leverage 115+ scientific, zero-latency training drills. No installations. No credit cards.
+              Elevate your visual processing, mechanical aim, and working memory. Leverage 120 scientific, zero-latency training drills. No installations. No credit cards.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
@@ -395,7 +395,7 @@ export default function HomePageClient() {
             {/* Quick Metrics */}
             <div className="grid grid-cols-3 gap-6 max-w-xl mx-auto lg:mx-0 pt-8 border-t border-white/5">
               <div className="text-left">
-                <p className="text-3xl font-black text-white tracking-tight">115+</p>
+                <p className="text-3xl font-black text-white tracking-tight">120</p>
                 <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mt-1">Free Drills</p>
               </div>
               <div className="text-left">
@@ -678,7 +678,7 @@ export default function HomePageClient() {
                 <li><Link href="/drills/fps/flick-shot-training" className="hover:text-white transition-colors">Flick Shot Trainer</Link></li>
                 <li><Link href="/drills/fps/target-acquisition" className="hover:text-white transition-colors">Target Acquisition</Link></li>
                
-                <li><Link href="/drills/fps" className="text-blue-400 hover:text-blue-300 transition-colors font-semibold">All 12 FPS Drills →</Link></li>
+                <li><Link href="/drills/fps" className="text-blue-400 hover:text-blue-300 transition-colors font-semibold">All 16 FPS Drills →</Link></li>
               </ul>
             </div>
             <div>
@@ -687,7 +687,7 @@ export default function HomePageClient() {
                 <li><Link href="/drills/cognitive/memory/card-matching" className="hover:text-white transition-colors">Memory Games</Link></li>
                 <li><Link href="/drills/cognitive/attention/divided-attention" className="hover:text-white transition-colors">Attention Drills</Link></li>
                 <li><Link href="/drills/cognitive/problem-solving/logic-puzzles" className="hover:text-white transition-colors">Logic Puzzles</Link></li>
-                <li><Link href="/drills/cognitive" className="text-blue-400 hover:text-blue-300 transition-colors font-semibold">All 20 Cognitive Drills →</Link></li>
+                <li><Link href="/drills/cognitive" className="text-blue-400 hover:text-blue-300 transition-colors font-semibold">All 18 Cognitive Drills →</Link></li>
               </ul>
             </div>
             <div>
@@ -713,8 +713,8 @@ export default function HomePageClient() {
               <ul className="space-y-2.5 text-sm text-gray-400">
                 <li><Link href="/drills/memory" className="hover:text-white transition-colors">Memory (13 drills)</Link></li>
                 <li><Link href="/drills/cognitive" className="hover:text-white transition-colors">Cognitive</Link></li>
-                <li><Link href="/drills/physical" className="hover:text-white transition-colors">Physical (11 drills)</Link></li>
-                <li><Link href="/drills/visual-tracking" className="hover:text-white transition-colors">Tracking (25 drills)</Link></li>
+                <li><Link href="/drills/physical" className="hover:text-white transition-colors">Physical (14 drills)</Link></li>
+                <li><Link href="/drills/visual-tracking" className="hover:text-white transition-colors">Tracking (15 drills)</Link></li>
               </ul>
             </div>
           </div>
@@ -728,7 +728,7 @@ export default function HomePageClient() {
             </div>
             <p className="text-sm text-gray-500 mb-3">&copy; 2026 SkillDrills. Elite Performance Training.</p>
             <p className="text-xs text-gray-600 max-w-2xl mx-auto leading-relaxed mb-8">
-              SkillDrills is a free high-performance training platform with 115+ interactive drills across 9 categories including FPS aim training, cognitive brain games, memory exercises, typing speed tests, mental math, speed reading, visual tracking, hand-eye coordination, and cognitive training tools. No registration required. Start training instantly at skilldrills.online.
+              SkillDrills is a free high-performance training platform with 120 interactive drills across 9 categories including FPS aim training, cognitive brain games, memory exercises, typing speed tests, mental math, speed reading, visual tracking, hand-eye coordination, and cognitive training tools. No registration required. Start training instantly at skilldrills.online.
             </p>
             <div className="flex items-center justify-center gap-6 flex-wrap">
               <button onClick={sharePage} className="text-gray-500 hover:text-white transition-colors" title="Share SkillDrills" aria-label="Share SkillDrills with friends">
