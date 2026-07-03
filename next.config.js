@@ -138,7 +138,6 @@ const nextConfig = {
   
   output: 'standalone',
   outputFileTracingRoot: __dirname,
-  distDir: '.next-build',
 };
 
 module.exports = nextConfig;
