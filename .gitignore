@@ -4,6 +4,7 @@ node_modules/
 
 # Build outputs
 .next/
+.next-build/
 out/
 build/
 dist/
@@ -26,32 +27,27 @@ pids
 *.seed
 *.pid.lock
 
-# Coverage directory
+# Coverage
 coverage/
 
-# TypeScript cache
+# TypeScript
 *.tsbuildinfo
 
-# Optional npm cache
+# npm
 .npm
 
-# ESLint cache
+# ESLint
 .eslintcache
 
-# Next.js build output
-.next
-.next-build/
-
 # Vercel
-.vercel
+.vercel/
 
-# IDE files
+# IDE
 .vscode/
 .idea/
 *.swp
 *.swo
 
-# OS files
+# OS
 .DS_Store
 Thumbs.db
-.vercel
