@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
@@ -8,9 +8,11 @@ import {
   BarChart3, Info, Layers, Circle, Hash, RefreshCw,
   Users, Share2, XCircle, TrendingUp,
   GraduationCap, Lightbulb, Brain, RotateCcw,
-  ChevronRight, ArrowRight, Play, LogOut, Search, Flame
+  ChevronRight, ArrowRight, Play, LogOut, Search, Flame,
+  Sparkles
 } from 'lucide-react';
 import useGameEngine from '../../../../../lib/useGameEngine';
+import PlayAgainButton from "../../../../../components/PlayAgainButton";
 
 // ============================================================
 // ZERO-LATENCY AUDIO SYNTHESIZER
@@ -309,8 +311,7 @@ export default function DividedAttentionClient() {
 
   // === DYNAMIC DIFFICULTY SCALING ===
   const updateDifficulty = useCallback(() => {
-    const totalHits = visualHitsRef.current + numberHitsRef.current;
-    const newLevel = Math.floor(totalHits / 10) + 1;
+    const newLevel = Math.floor(scoreRef.current / 50) + 1;
     
     if (newLevel > levelRef.current) {
       triggerFeedback(`⚡ LEVEL UP: ${newLevel}!`, 'success');
@@ -336,11 +337,10 @@ export default function DividedAttentionClient() {
     if (comboRef.current > 0) {
       triggerFeedback(`Combo Broken!`, 'error');
     } else {
-      triggerFeedback(`Penalty! -3 PTS | -1.5s`, 'error');
+      triggerFeedback(`Penalty! -1.5s`, 'error');
     }
     
     comboRef.current = 0;
-    scoreRef.current = Math.max(0, scoreRef.current - 3);
     mistakesRef.current += 1;
     localTimeRef.current -= 1.5;
     
@@ -599,14 +599,31 @@ export default function DividedAttentionClient() {
     }, 300);
   }, [syncToUI, spawnNewBall, spawnNewNumber, saveStatsLocally]);
 
-  const shareDrillLink = useCallback(() => {
-    const url = 'https://skilldrills.online/drills/cognitive/attention/divided-attention';
-    if (navigator.share) {
-      navigator.share({ title: 'Divided Attention Drill', text: 'Hardcore dual-tasking cognitive test. Measure your executive function limits!', url }).catch(() => {});
-    } else {
-      navigator.clipboard.writeText(url).then(() => alert('Link copied!')).catch(() => prompt('Copy:', url));
+  const shareScore = useCallback(() => {
+    const totalActions = visualAttempts + numberAttempts;
+    const finalAcc = totalActions > 0 ? Math.round(((visualHits + numberHits) / totalActions) * 100) : 100;
+    
+    let finalRank = 'Bronze';
+    if (score >= 600 && finalAcc >= 90) finalRank = 'Grandmaster';
+    else if (score >= 450 && finalAcc >= 82) finalRank = 'Master';
+    else if (score >= 350 && finalAcc >= 75) finalRank = 'Diamond';
+    else if (score >= 200 && finalAcc >= 65) finalRank = 'Platinum';
+    else if (score >= 100 && finalAcc >= 55) finalRank = 'Gold';
+    else if (score >= 50) finalRank = 'Silver';
+
+    const text = `🧠 I scored ${score} PTS with ${finalAcc}% accuracy on the Divided Attention Test! Rank: ${finalRank}. Train your split focus: https://skilldrills.online/drills/cognitive/attention/divided-attention`;
+    
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      navigator.share({
+        title: 'My SkillDrills Cognitive Score',
+        text: text,
+        url: 'https://skilldrills.online/drills/cognitive/attention/divided-attention'
+      }).catch(() => {});
+    } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+      alert('Score card copied to clipboard!');
     }
-  }, []);
+  }, [score, visualHits, numberHits, visualAttempts, numberAttempts]);
 
   if (loading || !isClient) {
     return (
@@ -624,6 +641,47 @@ export default function DividedAttentionClient() {
   const overallAcc = totalActions > 0 ? Math.round(((visualHits + numberHits) / totalActions) * 100) : 100;
   const visAcc = visualAttempts > 0 ? Math.round((visualHits / visualAttempts) * 100) : 100;
   const numAcc = numberAttempts > 0 ? Math.round((numberHits / numberAttempts) * 100) : 100;
+
+  // Calculate grade based on score and accuracy
+  let gradeLetter = 'F';
+  if (overallAcc >= 90 && score >= 500) gradeLetter = 'S';
+  else if (overallAcc >= 80 && score >= 350) gradeLetter = 'A';
+  else if (overallAcc >= 70 && score >= 200) gradeLetter = 'B';
+  else if (overallAcc >= 60 && score >= 100) gradeLetter = 'C';
+  else if (overallAcc >= 45 && score >= 50) gradeLetter = 'D';
+
+  let rankName = 'Bronze';
+  let rankColor = 'text-slate-500';
+  if (score >= 600 && overallAcc >= 90) {
+    rankName = 'Grandmaster';
+    rankColor = 'text-fuchsia-400 font-extrabold';
+  } else if (score >= 450 && overallAcc >= 82) {
+    rankName = 'Master';
+    rankColor = 'text-red-400 font-extrabold';
+  } else if (score >= 350 && overallAcc >= 75) {
+    rankName = 'Diamond';
+    rankColor = 'text-cyan-400 font-extrabold';
+  } else if (score >= 200 && overallAcc >= 65) {
+    rankName = 'Platinum';
+    rankColor = 'text-indigo-400 font-extrabold';
+  } else if (score >= 100 && overallAcc >= 55) {
+    rankName = 'Gold';
+    rankColor = 'text-yellow-400 font-extrabold';
+  } else if (score >= 50) {
+    rankName = 'Silver';
+    rankColor = 'text-gray-300 font-extrabold';
+  }
+
+  let diagnostics = "Outstanding divided attention! You effectively balanced spatial tracking and numeric processing.";
+  if (overallAcc < 60) {
+    diagnostics = "Low overall accuracy. Try to stabilize your visual focus; rushing clicks on targets or numbers leads to high penalty rates.";
+  } else if (visAcc < 50 && numAcc > 70) {
+    diagnostics = "Visual neglect detected. You are prioritizing the number panel over moving targets. Try to widen your peripheral vision.";
+  } else if (numAcc < 50 && visAcc > 70) {
+    diagnostics = "Numeric processing bottleneck. You are ignoring the number matching panel to focus on tracking. Practice splitting your focus evenly.";
+  } else if (highestCombo < 8 && score > 100) {
+    diagnostics = "Combo chain broken frequently. Avoid spam clicks. Maintain a steady pace to build combos for massive score multipliers.";
+  }
 
   const strokeDasharray = 100;
   const strokeDashoffset = strokeDasharray - overallAcc;
@@ -832,75 +890,81 @@ export default function DividedAttentionClient() {
 
           {/* End Screen */}
           {(!gameActiveRef.current && (engine.gameState === 'ended' || localTimeRemaining <= 0)) && !forceStart && (
-            <div className="absolute inset-0 flex items-center justify-center z-[70] bg-black/95 pointer-events-auto animate-in fade-in duration-300 overflow-y-auto px-4 py-6" onPointerDown={e => e.stopPropagation()}>
-              <div className="rounded-3xl max-w-[500px] w-full shadow-2xl border border-gray-800 bg-gray-950 flex flex-col max-h-[95vh] overflow-y-auto my-auto">
-                
-                <div className="bg-gradient-to-br from-blue-900/40 to-indigo-900/40 p-4 sm:p-6 border-b border-gray-800 relative overflow-hidden pointer-events-none shrink-0 rounded-t-3xl">
-                  <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-blue-500/20 rounded-full blur-3xl"></div>
-                  <div className="absolute bottom-0 left-0 -mb-4 -ml-4 w-32 h-32 bg-indigo-500/20 rounded-full blur-3xl"></div>
-                  <div className="relative z-10 flex flex-col items-center">
-                    {isNewBest && (
-                      <div className="bg-yellow-500 text-black text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-2 shadow-[0_0_15px_rgba(234,179,8,0.5)]">
-                        ⭐ New Personal Best
-                      </div>
-                    )}
-                    <h2 className="text-2xl sm:text-3xl font-black text-white mb-1 tracking-tight">Mission Complete</h2>
-                    <p className="text-blue-400 font-medium text-xs sm:text-sm">Divided Attention • Maximum Level: {highestLevelReached}</p>
-                  </div>
-                </div>
+            <div className="absolute inset-0 bg-[#05070e]/98 overflow-y-auto p-6 z-[70] select-none scrollbar-thin scroll-smooth backdrop-blur-sm" onPointerDown={e => e.stopPropagation()}>
+              <div className="min-h-full flex flex-col justify-center items-center py-4 w-full">
+                <div className="max-w-md w-full text-center">
+                  {isNewBest && (
+                    <div className="inline-block bg-yellow-500 text-black text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-3 shadow-[0_0_15px_rgba(234,179,8,0.5)] animate-bounce font-mono">
+                      ⭐ NEW PERSONAL BEST!
+                    </div>
+                  )}
+                  
+                  <h2 className="text-xl font-black text-white uppercase tracking-wider mb-1 font-mono">
+                    Drill Complete
+                  </h2>
+                  <p className="text-xs text-slate-550 uppercase tracking-widest mb-6 font-mono">
+                    Peak difficulty reached: Level {highestLevelReached}
+                  </p>
 
-                <div className="p-4 sm:p-6 pointer-events-none shrink-0">
-                  <div className="flex justify-between items-center mb-6">
-                    <div className="flex flex-col">
-                      <span className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Final Score</span>
-                      <div className="flex items-end gap-1">
-                        <span className="text-5xl sm:text-6xl font-black text-white leading-none tracking-tighter">{score}</span>
-                        <span className="text-sm sm:text-lg text-gray-500 font-bold mb-1">PTS</span>
-                      </div>
+                  <div className="grid grid-cols-3 gap-2.5 mb-6 text-left font-mono">
+                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Final Score</span>
+                      <span className="text-sm font-black text-white">{score} <span className="text-[8px] text-slate-400 font-normal">PTS</span></span>
+                    </div>
+                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Accuracy</span>
+                      <span className="text-sm font-black text-white">{overallAcc}%</span>
+                    </div>
+                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Highest Combo</span>
+                      <span className="text-sm font-black text-orange-400">{highestCombo}x</span>
                     </div>
                     
-                    <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center">
-                      <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
-                        <path className="text-gray-800" strokeWidth="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                        <path 
-                          className={`${overallAcc >= 80 ? 'text-green-500' : overallAcc >= 50 ? 'text-yellow-500' : 'text-red-500'} transition-all duration-1000 ease-out`} 
-                          strokeWidth="3" strokeDasharray={`${strokeDasharray}`} strokeDashoffset={`${strokeDashoffset}`} strokeLinecap="round" stroke="currentColor" fill="none" 
-                          d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" 
-                        />
-                      </svg>
-                      <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <span className={`text-base sm:text-xl font-black ${overallAcc >= 80 ? 'text-green-400' : overallAcc >= 50 ? 'text-yellow-400' : 'text-red-400'}`}>{overallAcc}%</span>
-                        <span className="text-[7px] sm:text-[8px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">Accuracy</span>
-                      </div>
+                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Visual Acc</span>
+                      <span className="text-sm font-black text-cyan-400">{visAcc}%</span>
+                    </div>
+                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Number Acc</span>
+                      <span className="text-sm font-black text-indigo-400">{numAcc}%</span>
+                    </div>
+                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Best Score</span>
+                      <span className="text-sm font-black text-yellow-400">{bestScore}</span>
                     </div>
                   </div>
 
-                  {/* High Density Stats Grid */}
-                  <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-3">
-                    <EndStat label="Visual Acc" value={`${visAcc}%`} color="cyan" />
-                    <EndStat label="Number Acc" value={`${numAcc}%`} color="indigo" />
-                    <EndStat label="Highest Combo" value={`${highestCombo}x`} color="orange" />
+                  <div className="bg-[#0b0f19] border border-slate-850 p-3 rounded-xl mb-4 text-left">
+                    <span className={`text-xs font-black block text-center uppercase tracking-widest ${rankColor} mb-2`}>
+                      Rank: {rankName}
+                    </span>
+                    <div className="w-full h-px bg-slate-850 mb-2"></div>
+                    <div className="flex items-center gap-1.5 text-[9px] font-bold text-white uppercase mb-1 font-mono">
+                      <Sparkles className="w-3 h-3 text-yellow-500" /> Diagnostics advice:
+                    </div>
+                    <p className="text-[10px] text-slate-400 leading-normal">
+                      {diagnostics}
+                    </p>
                   </div>
-                  <div className="grid grid-cols-4 gap-2 sm:gap-3">
-                    <EndStat label="Visual Hits" value={visualHits} color="white" />
-                    <EndStat label="Num Hits" value={numberHits} color="white" />
-                    <EndStat label="Errors" value={mistakes} color="red" />
-                    <EndStat label="Best Score" value={bestScore} color="yellow" />
-                  </div>
-                </div>
 
-                <div className="p-3 sm:p-5 bg-gray-900/50 border-t border-gray-800 flex gap-2 sm:gap-3 rounded-b-3xl shrink-0">
-                  <button onPointerDown={e => e.stopPropagation()} onClick={() => { handleStartGame(); }} className="flex-1 py-3 sm:py-4 bg-blue-600 text-white rounded-xl font-black tracking-wide hover:bg-blue-500 transition-all active:scale-95 flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(37,99,235,0.4)] text-sm sm:text-base">
-                    <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5" /> PLAY AGAIN
-                  </button>
-                  <button onPointerDown={e => e.stopPropagation()} onClick={shareDrillLink} className="px-4 sm:px-5 py-3 sm:py-4 bg-gray-800 text-white rounded-xl font-bold hover:bg-gray-700 transition-all active:scale-95 border border-gray-700 flex items-center justify-center" title="Share Drill">
-                    <Share2 className="w-4 h-4 sm:w-5 sm:h-5" />
-                  </button>
-                  <button onPointerDown={e => e.stopPropagation()} onClick={handleExit} className="px-4 sm:px-5 py-3 sm:py-4 bg-red-900/30 text-red-400 rounded-xl font-bold hover:bg-red-900/50 transition-all active:scale-95 border border-red-900/50 flex items-center justify-center" title="Exit Drill">
-                    <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
-                  </button>
+                  <div className="flex gap-2">
+                    <PlayAgainButton onClick={handleStartGame} colorTheme="blue" />
+                    <button
+                      onClick={shareScore}
+                      className="p-3 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded-xl transition-colors active:scale-95"
+                      title="Share Score"
+                    >
+                      <Share2 className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={handleExit}
+                      className="p-3 bg-red-900/30 border border-red-900/55 hover:bg-red-900/50 text-red-400 rounded-xl transition-colors active:scale-95 flex items-center justify-center"
+                      title="Exit Drill"
+                    >
+                      <LogOut className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
-                
               </div>
             </div>
           )}
@@ -920,8 +984,8 @@ export default function DividedAttentionClient() {
                   <RuleItem color="blue" text="Tap Even Numbers" highlight="0, 2, 4, 6, 8" result="Matches earn rewards" />
                 </div>
                 <div className="space-y-5">
-                  <RuleItem color="red" text="Wrong / Miss" highlight="-3 PTS | -1.5s" result="Breaks Combo" />
-                  <RuleItem color="cyan" text="Level Scaling" highlight="Speed & Size" result="Every 10 Hits" />
+                  <RuleItem color="red" text="Wrong / Miss" highlight="-1.5s Penalty" result="Breaks Combo" />
+                  <RuleItem color="cyan" text="Level Scaling" highlight="Speed & Size" result="Every 50 Points" />
                   <RuleItem color="purple" text="Time Limit Capped" highlight="Max 60 Seconds" result="Endless Survival" />
                 </div>
               </div>
@@ -988,11 +1052,11 @@ export default function DividedAttentionClient() {
                   <div className="space-y-5">
                     <div>
                       <h4 className="text-sm font-bold text-gray-200 tracking-tight">How does the difficulty scaling work?</h4>
-                      <p className="text-xs text-gray-400 mt-1.5 leading-relaxed">The engine tracks your successful actions. Every 10 combined hits increases your Level. Higher levels force the spawn timers to compress and shrink the target geometry, significantly amplifying the dual task training pressure.</p>
+                      <p className="text-xs text-gray-400 mt-1.5 leading-relaxed">The engine tracks your cumulative score. Every 50 points increases your Level. Higher levels force the spawn timers to compress and shrink the target geometry, significantly amplifying the dual task training pressure.</p>
                     </div>
                     <div>
                       <h4 className="text-sm font-bold text-gray-200 tracking-tight">Why am I losing time when I don't click anything?</h4>
-                      <p className="text-xs text-gray-400 mt-1.5 leading-relaxed">This is an active survival drill for attention control. Failing to engage with an even number before it changes, or allowing a visual target to despawn untouched, counts as an omission error. This triggers a penalty (-3 Points, -1.5 Seconds, and breaks your combo).</p>
+                      <p className="text-xs text-gray-400 mt-1.5 leading-relaxed">This is an active survival drill for attention control. Failing to engage with an even number before it changes, or allowing a visual target to despawn untouched, counts as an omission error. This triggers a penalty (-1.5 Seconds and breaks your combo).</p>
                     </div>
                   </div>
                 </div>

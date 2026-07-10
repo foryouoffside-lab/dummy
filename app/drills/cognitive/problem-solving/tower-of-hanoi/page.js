@@ -96,40 +96,63 @@ const faqSchema = {
   ]
 };
 
+const howToSchema = {
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "How to Play Tower of Hanoi Speed-Logic Drill",
+  "description": "Test and train your lookup planning and recursive subproblem logic by solving Hanoi towers.",
+  "step": [
+    {
+      "@type": "HowToStep",
+      "position": 1,
+      "name": "Select Source Peg",
+      "text": "Tap or click on the peg that has the top disk you wish to move."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 2,
+      "name": "Select Destination Peg",
+      "text": "Tap or click on the destination peg to move the highlighted disk. Remember: you cannot place a larger disk on top of a smaller disk."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 3,
+      "name": "Clear Tower to Advance",
+      "text": "Move the entire disk stack to the third peg to receive +20 PTS and +10 seconds, then advance to the next level."
+    }
+  ]
+};
+
 export const metadata = {
-  title: "Tower of Hanoi Online – Free Classic Recursive Disk Puzzle | SkillDrills",
-  description: "Play Tower of Hanoi online for free. Classic recursive disk stacking puzzle from 3 to 8 disks. Learn rules, strategies, and minimum moves. No sign-up needed.",
+  title: "Play Tower of Hanoi Online Free | Classic Disk Puzzle | SkillDrills",
+  description: "Play Tower of Hanoi online for free. Solve classic recursive disk stacking puzzles from 3 to 8 disks to train prefrontal executive planning skills.",
   keywords: [
-    "tower of hanoi",
     "tower of hanoi online",
-    "tower of hanoi game",
+    "play tower of hanoi free",
+    "tower of hanoi rule",
+    "hanoi puzzle solver",
+    "is tower of hanoi good for your brain",
     "how to solve tower of hanoi",
     "minimum moves tower of hanoi",
-    "tower of hanoi algorithm",
-    "tower of hanoi recursive",
-    "tower of hanoi rules",
-    "disk stacking puzzle",
-    "Lucas tower puzzle",
-    "tower of hanoi 3 disks",
-    "tower of hanoi 5 disks"
+    "tower of hanoi recursive"
   ],
   alternates: {
     canonical: "https://skilldrills.online/drills/cognitive/problem-solving/tower-of-hanoi",
   },
   robots: { index: true, follow: true },
   openGraph: {
-    title: "Tower of Hanoi Online – Free Classic Recursive Disk Puzzle | SkillDrills",
-    description: "Play Tower of Hanoi online for free. Classic recursive disk stacking puzzle from 3 to 8 disks. Learn rules, strategies, and minimum moves. No sign-up needed.",
+    title: "Play Tower of Hanoi Online Free | Classic Disk Puzzle | SkillDrills",
+    description: "Play Tower of Hanoi online for free. Solve classic recursive disk stacking puzzles from 3 to 8 disks to train prefrontal executive planning skills.",
     url: "https://skilldrills.online/drills/cognitive/problem-solving/tower-of-hanoi",
     siteName: 'SkillDrills',
     locale: 'en_US',
     type: 'website',
-    images: [{ url: 'https://skilldrills.online/icons/icon-512x512.png', width: 512, height: 512, alt: "Tower of Hanoi Online – Classic Recursive Disk Puzzle" }],
+    images: [{ url: 'https://skilldrills.online/icons/icon-512x512.png', width: 512, height: 512, alt: "Play Tower of Hanoi Online Free" }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Tower of Hanoi Online – Free Classic Recursive Disk Puzzle | SkillDrills",
-    description: "Play Tower of Hanoi online for free. Classic recursive disk stacking puzzle from 3 to 8 disks. Learn rules, strategies, and minimum moves. No sign-up needed.",
+    title: "Play Tower of Hanoi Online Free | Classic Disk Puzzle | SkillDrills",
+    description: "Play Tower of Hanoi online for free. Solve classic recursive disk stacking puzzles from 3 to 8 disks to train prefrontal executive planning skills.",
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
 };
@@ -140,6 +163,7 @@ export default function TowerOfHanoiPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }} />
       <TowerOfHanoiClient />
     </>
   );

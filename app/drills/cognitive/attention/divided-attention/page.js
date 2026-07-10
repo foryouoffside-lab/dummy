@@ -96,6 +96,39 @@ const faqSchema = {
   ]
 };
 
+const howToSchema = {
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "How to Take the Divided Attention Test",
+  "description": "Improve your split focus and multitasking limits with this dual-task cognitive assessment.",
+  "step": [
+    {
+      "@type": "HowToStep",
+      "position": 1,
+      "name": "Start the Trial",
+      "text": "Click or tap the 'START DRILL' button on the screen to initialize both the visual and numerical stimulus channels."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 2,
+      "name": "Track Moving Circles",
+      "text": "Keep your eyes on the left visual panel. Click or tap any expanding or changing target circles before they fade away."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 3,
+      "name": "Verify Even Numbers",
+      "text": "Simultaneously watch the right numeric panel. When a number shown is EVEN, click the MATCH button immediately."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 4,
+      "name": "Build High Combos",
+      "text": "Maintain your accuracy in both channels to build multipliers. Missing targets or matching incorrect numbers breaks your combo."
+    }
+  ]
+};
+
 export const metadata = {
   title: "Divided Attention Test – Free Dual-Task Split Focus Game | SkillDrills",
   description: "Test and train divided attention online. Track two visual stimulus streams simultaneously in this free dual-task split focus brain game. No sign-up required.",
@@ -111,7 +144,11 @@ export const metadata = {
     "simultaneous attention test",
     "cognitive multitasking test",
     "split focus brain training",
-    "dual visual target tracking"
+    "dual visual target tracking",
+    "how to improve divided attention skills",
+    "brain multitasking test",
+    "attention test online",
+    "free cognitive training online"
   ],
   alternates: {
     canonical: "https://skilldrills.online/drills/cognitive/attention/divided-attention",
@@ -140,6 +177,7 @@ export default function DividedAttentionPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }} />
       <DividedAttentionClient />
     </>
   );

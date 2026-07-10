@@ -96,18 +96,53 @@ const faqSchema = {
   ]
 };
 
+const howToSchema = {
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "How to Take the Sustained Attention Test",
+  "description": "Test and train your focus endurance and response consistency with this online Continuous Performance Test (CPT).",
+  "step": [
+    {
+      "@type": "HowToStep",
+      "position": 1,
+      "name": "Memorize Target Number",
+      "text": "At the start of the session, a single digit (0-9) is displayed. Memorize this target digit."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 2,
+      "name": "Observe Flashing Numbers",
+      "text": "Numbers will flash one by one on the screen in quick succession."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 3,
+      "name": "Tap Only on Target",
+      "text": "Tap the screen ONLY when the displayed number matches your target digit. Do not tap for any other numbers."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 4,
+      "name": "Maintain Concentration",
+      "text": "Practice staying alert. Attentional lapses (missing targets) or impulsive clicks (tapping non-targets) will drain your time remaining."
+    }
+  ]
+};
+
 export const metadata = {
-  title: "Sustained Attention Test – Free Continuous Performance Trainer | SkillDrills",
-  description: "Test your sustained attention and vigilance online. Free Continuous Performance Test (CPT) to measure attentional lapses and build focus endurance. No sign-up.",
+  title: "Free ADHD Test Online | Continuous Performance & Attention Span Test | SkillDrills",
+  description: "Measure your focus with our quick attention span test. Explore how a neuropsychological continuous performance test works and try free online focus exercises.",
   keywords: [
-    "sustained attention test",
     "continuous performance test",
-    "attention span test online",
     "ADHD attention test online",
-    "sustained attention training",
-    "what is sustained attention",
-    "continuous performance task online",
+    "sustained attention test",
+    "attention span test online",
+    "adhd test online",
+    "online adhd quiz",
+    "concentration exercises",
+    "focus exercises",
     "sustained attention vs selective attention",
+    "sustained attention training",
     "vigilance training games",
     "focus endurance game",
     "sustained concentration test",
@@ -118,8 +153,8 @@ export const metadata = {
   },
   robots: { index: true, follow: true },
   openGraph: {
-    title: "Sustained Attention Test – Free Continuous Performance Trainer | SkillDrills",
-    description: "Test your sustained attention and vigilance online. Free Continuous Performance Test (CPT) to measure attentional lapses and build focus endurance. No sign-up.",
+    title: "Free ADHD Test Online | Continuous Performance & Attention Span Test | SkillDrills",
+    description: "Measure your focus with our quick attention span test. Explore how a neuropsychological continuous performance test works and try free online focus exercises.",
     url: "https://skilldrills.online/drills/cognitive/attention/sustained-attention",
     siteName: 'SkillDrills',
     locale: 'en_US',
@@ -128,8 +163,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Sustained Attention Test – Free Continuous Performance Trainer | SkillDrills",
-    description: "Test your sustained attention and vigilance online. Free Continuous Performance Test (CPT) to measure attentional lapses and build focus endurance. No sign-up.",
+    title: "Free ADHD Test Online | Continuous Performance & Attention Span Test | SkillDrills",
+    description: "Measure your focus with our quick attention span test. Explore how a neuropsychological continuous performance test works and try free online focus exercises.",
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
 };
@@ -140,6 +175,7 @@ export default function SustainedAttentionPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }} />
       <SustainedAttentionClient />
     </>
   );

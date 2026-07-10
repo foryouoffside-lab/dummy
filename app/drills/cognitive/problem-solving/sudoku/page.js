@@ -96,40 +96,63 @@ const faqSchema = {
   ]
 };
 
+const howToSchema = {
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "How to Play Sudoku Speed-Logic Drill",
+  "description": "Test and train your speed-logic deduction using progressive Sudoku grid sizes.",
+  "step": [
+    {
+      "@type": "HowToStep",
+      "position": 1,
+      "name": "Select Empty Cell",
+      "text": "Tap or click on any empty cell in the Sudoku grid to highlight it."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 2,
+      "name": "Input Correct Number",
+      "text": "Select the correct digit from the number bar. Correct guesses fill the cell. Incorrect guesses deduct 2 seconds from the clock."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 3,
+      "name": "Clear Grid to Level Up",
+      "text": "Complete the entire grid to receive +20 PTS and +15 seconds, and advance to a larger grid size (up to 7x7)."
+    }
+  ]
+};
+
 export const metadata = {
-  title: "Sudoku Online Free – Play Classic Daily Sudoku Puzzles | SkillDrills",
-  description: "Play Sudoku online for free. Classic number grid logic puzzles from easy 4x4 to challenging 7x7 boards with hints and daily challenges. No sign-up required.",
+  title: "Play Sudoku Online Free | Daily Sudoku Puzzles | SkillDrills",
+  description: "Play classic progressive Sudoku puzzles online for free. Clean layout from 4x4 grids to expert 7x7 boards to train deductive reasoning skills.",
   keywords: [
     "sudoku online free",
     "play sudoku online",
-    "daily sudoku",
-    "sudoku puzzles",
-    "hard sudoku online",
+    "daily sudoku free",
+    "hard sudoku puzzles",
+    "sudoku training online",
     "is sudoku good for your brain",
-    "sudoku rules how to play",
     "sudoku tips for beginners",
-    "free sudoku game",
-    "sudoku brain training",
-    "classic sudoku board",
-    "sudoku solver online"
+    "sudoku rules how to play"
   ],
   alternates: {
     canonical: "https://skilldrills.online/drills/cognitive/problem-solving/sudoku",
   },
   robots: { index: true, follow: true },
   openGraph: {
-    title: "Sudoku Online Free – Play Classic Daily Sudoku Puzzles | SkillDrills",
-    description: "Play Sudoku online for free. Classic number grid logic puzzles from easy 4x4 to challenging 7x7 boards with hints and daily challenges. No sign-up required.",
+    title: "Play Sudoku Online Free | Daily Sudoku Puzzles | SkillDrills",
+    description: "Play classic progressive Sudoku puzzles online for free. Clean layout from 4x4 grids to expert 7x7 boards to train deductive reasoning skills.",
     url: "https://skilldrills.online/drills/cognitive/problem-solving/sudoku",
     siteName: 'SkillDrills',
     locale: 'en_US',
     type: 'website',
-    images: [{ url: 'https://skilldrills.online/icons/icon-512x512.png', width: 512, height: 512, alt: "Sudoku Online Free – Classic Daily Number Grid Puzzle" }],
+    images: [{ url: 'https://skilldrills.online/icons/icon-512x512.png', width: 512, height: 512, alt: "Play Sudoku Online Free" }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Sudoku Online Free – Play Classic Daily Sudoku Puzzles | SkillDrills",
-    description: "Play Sudoku online for free. Classic number grid logic puzzles from easy 4x4 to challenging 7x7 boards with hints and daily challenges. No sign-up required.",
+    title: "Play Sudoku Online Free | Daily Sudoku Puzzles | SkillDrills",
+    description: "Play classic progressive Sudoku puzzles online for free. Clean layout from 4x4 grids to expert 7x7 boards to train deductive reasoning skills.",
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
 };
@@ -140,6 +163,7 @@ export default function SudokuPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }} />
       <SudokuClient />
     </>
   );

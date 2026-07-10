@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useEffect, useState, useRef, useCallback, Component } from 'react';
 import Link from 'next/link';
@@ -7,9 +7,10 @@ import {
   Info, RefreshCw, RotateCcw, Smartphone, GraduationCap, Lightbulb, 
   TrendingUp, BarChart3, ArrowRight, Brain, Users, Gauge, AlertTriangle, 
   Star, Layers, Target, CheckCircle, XCircle, Play, Share2, ChevronRight,
-  Activity, LogOut, ScanEye
+  Activity, LogOut, ScanEye, Sparkles
 } from 'lucide-react';
 import useGameEngine from '../../../../../lib/useGameEngine';
+import PlayAgainButton from '../../../../../components/PlayAgainButton';
 import { getDifficultyLevel, recordGameScore, getLevelProgress, DIFFICULTY_LEVELS } from '../../../../../lib/difficultyManager';
 
 // ============================================================
@@ -187,13 +188,7 @@ export default function WideFieldClient() {
     return () => document.removeEventListener('fullscreenchange', fsHandler); 
   }, []);
 
-  // Custom Strict Economy Timer Loop
-  useEffect(() => {
-    if (engine.gameState !== 'playing') {
-      if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
-      return;
-    }
-    
+  const startTimer = useCallback(() => {
     if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
 
     timerIntervalRef.current = setInterval(() => {
@@ -202,7 +197,10 @@ export default function WideFieldClient() {
       if (localTimeRef.current <= 0) {
         localTimeRef.current = 0;
         setLocalTimeRemaining(0);
-        clearInterval(timerIntervalRef.current);
+        if (timerIntervalRef.current) {
+          clearInterval(timerIntervalRef.current);
+          timerIntervalRef.current = null;
+        }
         if (engineRef.current && typeof engineRef.current.endGame === 'function') {
           engineRef.current.endGame();
         }
@@ -210,9 +208,29 @@ export default function WideFieldClient() {
         setLocalTimeRemaining(localTimeRef.current);
       }
     }, 1000);
+  }, []);
+
+  // Custom Strict Economy Timer Loop
+  useEffect(() => {
+    if (engine.gameState !== 'playing') {
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current);
+        timerIntervalRef.current = null;
+      }
+      return;
+    }
     
-    return () => { if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); };
-  }, [engine.gameState]);
+    if (!timerIntervalRef.current) {
+      startTimer();
+    }
+    
+    return () => {
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current);
+        timerIntervalRef.current = null;
+      }
+    };
+  }, [engine.gameState, startTimer]);
 
   // Cleanup
   useEffect(() => {
@@ -254,6 +272,32 @@ export default function WideFieldClient() {
     }
   }, []);
 
+  const shareScore = useCallback(() => {
+    const totalRecalls = perfectRecalls + failedRecalls;
+    const finalAccuracy = totalRecalls > 0 ? Math.round((perfectRecalls / totalRecalls) * 100) : 100;
+    
+    let finalRank = 'Bronze';
+    if (customScoreRef.current >= 120 && finalAccuracy >= 90) finalRank = 'Grandmaster';
+    else if (customScoreRef.current >= 80 && finalAccuracy >= 80) finalRank = 'Master';
+    else if (customScoreRef.current >= 50 && finalAccuracy >= 70) finalRank = 'Diamond';
+    else if (customScoreRef.current >= 30 && finalAccuracy >= 60) finalRank = 'Platinum';
+    else if (customScoreRef.current >= 15 && finalAccuracy >= 50) finalRank = 'Gold';
+    else if (customScoreRef.current >= 5) finalRank = 'Silver';
+
+    const text = `👁️ I scored ${customScoreRef.current} PTS with ${finalAccuracy}% accuracy on the Wide Field Awareness Visual Field Drill! Reached Level ${localLevel}. Rank: ${finalRank}. Try it here: https://skilldrills.online/drills/visual/peripheral-vision/wide-field`;
+    
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      navigator.share({
+        title: 'My SkillDrills Visual Score',
+        text: text,
+        url: 'https://skilldrills.online/drills/visual/peripheral-vision/wide-field'
+      }).catch(() => {});
+    } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+      alert('Score card copied to clipboard!');
+    }
+  }, [localLevel, perfectRecalls, failedRecalls]);
+
   const triggerFeedback = useCallback((text, type = 'success') => {
     setLocalFeedback({ id: Date.now(), text, type, visible: true });
     if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
@@ -267,6 +311,10 @@ export default function WideFieldClient() {
     setCustomScore(prev => {
       const updated = Math.max(0, prev + scoreDelta);
       customScoreRef.current = updated;
+      if (engineRef.current && typeof engineRef.current.setScore === 'function') {
+        engineRef.current.setScore(updated);
+      }
+      setLocalLevel(Math.max(1, Math.min(6, Math.floor(updated / 30) + 1)));
       return updated;
     });
 
@@ -399,15 +447,13 @@ export default function WideFieldClient() {
     if (allCorrect) {
       setPerfectRecalls(prev => prev + 1);
       updateEconomy(10, 2); // +10 PTS, +2s
-      setLocalLevel(prev => Math.min(6, prev + 1));
       if (audioSynth) audioSynth.playPerfect();
-      triggerFeedback(`✓ PERFECT! +10 PTS | +2s | Diff ↑`, 'success');
+      triggerFeedback(`✓ PERFECT! +10 PTS | +2s`, 'success');
     } else {
       setFailedRecalls(prev => prev + 1);
-      updateEconomy(-5, -2); // -5 PTS, -2s
-      setLocalLevel(prev => Math.max(1, prev - 1));
+      updateEconomy(0, -2); // No PTS Penalty, -2s
       if (audioSynth) audioSynth.playFail();
-      triggerFeedback('✗ MISSED! -5 PTS | -2s | Diff ↓', 'error');
+      triggerFeedback('✗ MISSED! -2s', 'error');
     }
     
     recallCheckTimeoutRef.current = setTimeout(() => { closeRecallAndContinue(); }, 2500);
@@ -464,6 +510,11 @@ export default function WideFieldClient() {
     setLocalLevel(1);
     recallCountRef.current = 0;
     randomFlashThresholdRef.current = 3;
+    
+    setPerfectRecalls(0); setFailedRecalls(0);
+    setIsFlashing(false); setIsRecallMode(false); setRecallDescription('');
+    flashHistoryRef.current = []; isRecallActiveRef.current = false;
+    flashesSinceLastRecallRef.current = 0; recallPositionsRef.current = [];
 
     try { 
       if (!document.fullscreenElement && containerRef.current) {
@@ -474,19 +525,12 @@ export default function WideFieldClient() {
     if (engineRef.current && typeof engineRef.current.startGame === 'function') {
       engineRef.current.startGame();
     }
-  }, []);
 
-  useEffect(() => {
-    if (engine.gameState === 'playing') {
-      setPerfectRecalls(0); setFailedRecalls(0);
-      setIsFlashing(false); setIsRecallMode(false); setRecallDescription('');
-      flashHistoryRef.current = []; isRecallActiveRef.current = false;
-      flashesSinceLastRecallRef.current = 0; recallPositionsRef.current = [];
-      
-      triggerFeedback('Focus entirely on the center cross', 'success');
-      setTimeout(() => { flashCharacter(); }, 1200);
-    }
-  }, [engine.gameState, flashCharacter, triggerFeedback]);
+    triggerFeedback('Focus entirely on the center cross', 'success');
+    setTimeout(() => { flashCharacter(); }, 1200);
+    
+    startTimer();
+  }, [flashCharacter, triggerFeedback, startTimer]);
 
   if (loading || !isClient) { 
     return (
@@ -502,6 +546,45 @@ export default function WideFieldClient() {
   const totalRecalls = perfectRecalls + failedRecalls;
   const accuracyPercentage = totalRecalls > 0 ? Math.round((perfectRecalls / totalRecalls) * 100) : 100;
   const isNewBest = engine.gameState === 'ended' && customScore > engine.bestScore && customScore > 0;
+
+  // Calculate grade based on score and accuracy
+  let gradeLetter = 'F';
+  if (accuracyPercentage >= 90 && customScore >= 120) gradeLetter = 'S';
+  else if (accuracyPercentage >= 80 && customScore >= 80) gradeLetter = 'A';
+  else if (accuracyPercentage >= 70 && customScore >= 50) gradeLetter = 'B';
+  else if (accuracyPercentage >= 60 && customScore >= 30) gradeLetter = 'C';
+  else if (accuracyPercentage >= 50 && customScore >= 15) gradeLetter = 'D';
+
+  let rankName = 'Bronze';
+  let rankColor = 'text-slate-500';
+  if (customScore >= 120 && accuracyPercentage >= 90) {
+    rankName = 'Grandmaster';
+    rankColor = 'text-fuchsia-400 font-extrabold';
+  } else if (customScore >= 80 && accuracyPercentage >= 80) {
+    rankName = 'Master';
+    rankColor = 'text-red-400 font-extrabold';
+  } else if (customScore >= 50 && accuracyPercentage >= 70) {
+    rankName = 'Diamond';
+    rankColor = 'text-cyan-400 font-extrabold';
+  } else if (customScore >= 30 && accuracyPercentage >= 60) {
+    rankName = 'Platinum';
+    rankColor = 'text-indigo-400 font-extrabold';
+  } else if (customScore >= 15 && accuracyPercentage >= 50) {
+    rankName = 'Gold';
+    rankColor = 'text-yellow-400 font-extrabold';
+  } else if (customScore >= 5) {
+    rankName = 'Silver';
+    rankColor = 'text-gray-300 font-extrabold';
+  }
+
+  let diagnostics = "Outstanding visual field recognition! You effectively map and recall extreme peripheral characters.";
+  if (failedRecalls > 3) {
+    diagnostics = "High rate of missed corner sequences. Lock your foveal vision strictly on the center and do not move your eyes to look directly at the corner flashes.";
+  } else if (accuracyPercentage < 65) {
+    diagnostics = "Slips in peripheral character registration. Focus on accuracy; use the skip option if you miss a flash to protect remaining time.";
+  } else if (customScore < 40) {
+    diagnostics = "Train to keep the clock alive. A perfect recall gives you bonus seconds and helps build high scores.";
+  }
 
   return (
     <div className="min-h-screen select-none bg-black text-white selection:bg-transparent" style={{ WebkitTapHighlightColor: 'transparent' }}>
@@ -722,74 +805,85 @@ export default function WideFieldClient() {
 
             {/* Premium Mobile-Optimized End Screen */}
             {engine.gameState === 'ended' && (
-              <div className="absolute inset-0 flex items-center justify-center z-[70] bg-black/95 pointer-events-auto animate-in fade-in duration-300 p-4 overflow-y-auto">
-                <div className="rounded-3xl max-w-md w-full shadow-2xl border border-gray-800 bg-gray-950 flex flex-col max-h-[90vh] my-auto shrink-0">
-                  
-                  <div className="flex-1 overflow-y-auto">
-                    <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 p-5 sm:p-6 border-b border-gray-800 relative overflow-hidden pointer-events-none shrink-0">
-                      <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-purple-500/20 rounded-full blur-3xl"></div>
-                      <div className="absolute bottom-0 left-0 -mb-4 -ml-4 w-32 h-32 bg-pink-500/20 rounded-full blur-3xl"></div>
-                      <div className="relative z-10 flex flex-col items-center">
-                        {isNewBest && (
-                          <div className="bg-yellow-500 text-black text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-2 shadow-[0_0_15px_rgba(234,179,8,0.5)]">
-                            ⭐ New Personal Best
-                          </div>
-                        )}
-                        <h2 className="text-2xl sm:text-3xl font-black text-white mb-1 tracking-tight">Mission Complete</h2>
-                        <p className="text-purple-400 font-medium text-sm">Wide Field Awareness • Level {localLevel}</p>
+              <div className="absolute inset-0 bg-[#05070e]/98 overflow-y-auto p-6 z-[70] select-none scrollbar-thin scroll-smooth backdrop-blur-sm animate-in fade-in duration-300 pointer-events-auto">
+                <div className="min-h-full flex flex-col justify-center items-center py-4 w-full">
+                  <div className="max-w-md w-full text-center">
+                    {customScore > 0 && customScore >= (engine.bestScore || 0) && (
+                      <div className="inline-block bg-yellow-500 text-black text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-3 shadow-[0_0_15px_rgba(234,179,8,0.5)] animate-bounce font-mono">
+                        ⭐ NEW PERSONAL BEST!
+                      </div>
+                    )}
+                    
+                    <h2 className="text-xl font-black text-white uppercase tracking-wider mb-1 font-mono">
+                      Drill Complete
+                    </h2>
+                    <p className="text-xs text-slate-500 uppercase tracking-widest mb-6 font-mono">
+                      Level Reached: Level {localLevel}
+                    </p>
+
+                    <div className="grid grid-cols-3 gap-2.5 mb-6 text-left font-mono">
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Final Score</span>
+                        <span className="text-sm font-black text-white">{customScore} <span className="text-[8px] text-slate-400 font-normal">PTS</span></span>
+                      </div>
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Accuracy</span>
+                        <span className="text-sm font-black text-white">{accuracyPercentage}%</span>
+                      </div>
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Best Score</span>
+                        <span className="text-sm font-black text-yellow-400">{engine.bestScore || 0}</span>
+                      </div>
+                      
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Perfects</span>
+                        <span className="text-sm font-black text-emerald-400">{perfectRecalls}</span>
+                      </div>
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Missed</span>
+                        <span className="text-sm font-black text-red-400">{failedRecalls}</span>
+                      </div>
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold font-mono">Grade</span>
+                        <span className="text-sm font-black text-pink-400 font-mono">{gradeLetter}</span>
                       </div>
                     </div>
 
-                    <div className="p-5 sm:p-6 pointer-events-none shrink-0">
-                      <div className="flex justify-between items-center mb-6">
-                        <div className="flex flex-col">
-                          <span className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Final Score</span>
-                          <div className="flex items-end gap-1">
-                            <span className="text-5xl sm:text-6xl font-black text-white leading-none tracking-tighter">{customScore}</span>
-                            <span className="text-sm sm:text-lg text-gray-500 font-bold mb-1">PTS</span>
-                          </div>
-                        </div>
-                        
-                        <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center">
-                          <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
-                            <path className="text-gray-800" strokeWidth="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                            <path 
-                              className={`${accuracyPercentage >= 80 ? 'text-green-500' : accuracyPercentage >= 50 ? 'text-yellow-500' : 'text-red-500'} transition-all duration-1000 ease-out`} 
-                              strokeWidth="3" strokeDasharray="100" strokeDashoffset={100 - accuracyPercentage} strokeLinecap="round" stroke="currentColor" fill="none" 
-                              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" 
-                            />
-                          </svg>
-                          <div className="absolute inset-0 flex flex-col items-center justify-center">
-                            <span className={`text-lg sm:text-xl font-black ${accuracyPercentage >= 80 ? 'text-green-400' : accuracyPercentage >= 50 ? 'text-yellow-400' : 'text-red-400'}`}>{accuracyPercentage}%</span>
-                            <span className="text-[7px] sm:text-[8px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">Accuracy</span>
-                          </div>
-                        </div>
+                    <div className="bg-[#0b0f19] border border-slate-850 p-3 rounded-xl mb-4 text-left font-sans">
+                      <span className={`text-xs font-black block text-center uppercase tracking-widest ${rankColor} mb-2`}>
+                        Rank: {rankName}
+                      </span>
+                      <div className="w-full h-px bg-slate-850 mb-2"></div>
+                      <div className="flex items-center gap-1.5 text-[9px] font-bold text-white uppercase mb-1 font-mono">
+                        <Sparkles className="w-3 h-3 text-amber-500" /> Diagnostics advice:
                       </div>
-
-                      <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-2">
-                        <div className="bg-gray-900/50 rounded-xl p-2 sm:p-3 text-center border border-gray-800">
-                          <div className="text-gray-400 text-[9px] sm:text-[10px] uppercase font-bold tracking-wider mb-1">Perfect Sequences</div>
-                          <div className="text-lg sm:text-xl font-black text-green-400">{perfectRecalls}</div>
-                        </div>
-                        <div className="bg-gray-900/50 rounded-xl p-2 sm:p-3 text-center border border-gray-800">
-                          <div className="text-gray-400 text-[9px] sm:text-[10px] uppercase font-bold tracking-wider mb-1">Missed Sequences</div>
-                          <div className="text-lg sm:text-xl font-black text-red-400">{failedRecalls}</div>
-                        </div>
-                      </div>
+                      <p className="text-[10px] text-slate-400 leading-normal font-sans">
+                        {diagnostics}
+                      </p>
                     </div>
-                  </div>
 
-                  {/* Fixed Bottom Action Row */}
-                  <div className="p-3 sm:p-5 bg-gray-900/50 border-t border-gray-800 flex gap-2 sm:gap-3 shrink-0 rounded-b-3xl">
-                    <button onClick={() => { if(engineRef.current.endGame) engineRef.current.endGame(); handleStartGame(); }} className="flex-1 py-3 sm:py-4 bg-purple-600 text-white rounded-xl font-black tracking-wide hover:bg-purple-500 transition-all active:scale-95 flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(168,85,247,0.4)] text-sm sm:text-base">
-                      <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5" /> PLAY AGAIN
-                    </button>
-                    <button onClick={shareDrillLink} className="px-4 sm:px-5 py-3 sm:py-4 bg-gray-800 text-white rounded-xl font-bold hover:bg-gray-700 transition-all active:scale-95 border border-gray-700 flex items-center justify-center" title="Share Drill">
-                      <Share2 className="w-4 h-4 sm:w-5 sm:h-5" />
-                    </button>
-                    <button onClick={handleExitToStart} className="px-4 sm:px-5 py-3 sm:py-4 bg-red-900/30 text-red-400 rounded-xl font-bold hover:bg-red-900/50 transition-all active:scale-95 border border-red-900/50 flex items-center justify-center" title="Exit Drill">
-                      <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
-                    </button>
+                    <div className="flex gap-2">
+                      <PlayAgainButton
+                        onClick={() => { if(engineRef.current.endGame) engineRef.current.endGame(); handleStartGame(); }}
+                        colorTheme="purple"
+                      />
+                      <button
+                        onClick={shareScore}
+                        className="p-3 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded-xl transition-colors active:scale-95 flex items-center justify-center"
+                        title="Share Score"
+                      >
+                        <Share2 className="w-4 h-4" />
+                      </button>
+                      {isFullscreen && (
+                        <button
+                          onClick={handleExitToStart}
+                          className="p-3 bg-red-900/30 border border-red-900/55 hover:bg-red-900/50 text-red-400 rounded-xl transition-colors active:scale-95 flex items-center justify-center"
+                          title="Exit Drill"
+                        >
+                          <LogOut className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -806,12 +900,12 @@ export default function WideFieldClient() {
               </div>
               <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-5">
-                  <RuleItem num="1" color="green" text="Perfect Recall" highlight="+10 PTS | +2s" result="Increases Difficulty" />
-                  <RuleItem num="2" color="cyan" text="Dynamic Adjustments" highlight="Speed & Flash Count" result="Adaptive Environment" />
+                  <RuleItem num="1" color="green" text="Perfect Recall" highlight="+10 PTS | +2s" result="Progresses Score" />
+                  <RuleItem num="2" color="cyan" text="Difficulty Scaling" highlight="Based on Score" result="Increases Every 30 PTS" />
                 </div>
                 <div className="space-y-5">
-                  <RuleItem num="3" color="red" text="Missed Sequence" highlight="-5 PTS | -2s" result="Decreases Difficulty" />
-                  <RuleItem num="4" color="yellow" text="Timer Economy" highlight="Max 60s" result="Time Ends = Game Over" />
+                  <RuleItem num="3" color="red" text="Missed Sequence" highlight="0 PTS | -2s" result="Deducts Remaining Time" />
+                  <RuleItem num="4" color="yellow" text="Timer Economy" highlight="Max 60s" result="Time Ends = Trial Over" />
                 </div>
               </div>
             </div>
@@ -852,7 +946,7 @@ export default function WideFieldClient() {
                       <div className="w-8 h-8 rounded-lg bg-purple-600 flex items-center justify-center"><BarChart3 className="w-4 h-4 text-white" /></div>
                       <h3 className="text-sm font-bold text-white">Performance Metrics</h3>
                     </div>
-                    <p className="text-xs leading-relaxed text-gray-400">Total net score economy (+10/-5), physical clock management (+2s/-2s), accuracy ratio, total perfect sequences, misses, and sustained difficulty peak.</p>
+                    <p className="text-xs leading-relaxed text-gray-400">Total net score economy (+10/0), physical clock management (+2s/-2s), accuracy ratio, total perfect sequences, misses, and sustained difficulty peak.</p>
                   </div>
                 </div>
 
@@ -866,7 +960,7 @@ export default function WideFieldClient() {
                     <li><strong className="text-gray-200">Hold Focus:</strong> Lock your gaze strictly on the absolute center crosshair. If you move your eyes to look directly at the flashing characters, you break the cognitive constraint of the drill.</li>
                     <li><strong className="text-gray-200">Process the Sequence:</strong> Read and memorize the sequence of characters appearing in your periphery using your working memory.</li>
                     <li><strong className="text-gray-200">Identify the Prompt:</strong> When the recall screen appears, it will ask for specific characters from the sequence (e.g., "Type the last and 2nd last flash").</li>
-                    <li><strong className="text-gray-200">Manage Time:</strong> Perfect sequence entries add +2 seconds to your clock and +10 score. Any wrong inputs subtract -2 seconds and -5 score. Keep the timer alive up to the 60s hard limit.</li>
+                    <li><strong className="text-gray-200">Manage Time:</strong> Perfect sequence entries add +2 seconds to your clock and +10 score. Any wrong inputs subtract -2 seconds but do not penalize your score. Keep the timer alive up to the 60s hard limit.</li>
                   </ol>
                 </div>
 
@@ -883,7 +977,7 @@ export default function WideFieldClient() {
                     </div>
                     <div>
                       <h4 className="text-sm font-bold text-gray-200">How does the difficulty scale?</h4>
-                      <p className="text-xs text-gray-400 mt-1">Difficulty directly correlates to your input. A correct recall increases the internal difficulty level (speeding up flash rates and extending sequences). A wrong recall drops it down a tier, allowing you to recover.</p>
+                      <p className="text-xs text-gray-400 mt-1">Difficulty scales up dynamically based on your score. Every 30 points you score will advance you to the next difficulty tier, reducing the flash duration and introducing more complex query sequences.</p>
                     </div>
                     <div>
                       <h4 className="text-sm font-bold text-gray-200">Why is my time not going above 60s?</h4>

@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import Link from 'next/link';
@@ -8,9 +8,10 @@ import {
   Eye, Timer, Crosshair, Brain, Trophy, Info, Share2,
   GraduationCap, Lightbulb, TrendingUp, BarChart3, ArrowRight,
   RefreshCw, Smartphone, Award, XCircle,
-  AlertTriangle, Calculator, Code2, Users, LogOut, Check
+  AlertTriangle, Calculator, Code2, Users, LogOut, Check, Sparkles
 } from 'lucide-react';
 import useGameEngine from '../../../../../lib/useGameEngine';
+import PlayAgainButton from '../../../../../components/PlayAgainButton';
 
 // ==========================================
 // ERROR BOUNDARY
@@ -180,11 +181,17 @@ export default function AutoPursuitClient() {
 
   // === Time & Score Economic Modifiers ===
   const updateEconomy = useCallback((scoreDelta, timeDelta) => {
+    let finalScore = 0;
     setCustomScore(prev => {
       const updated = Math.max(0, prev + scoreDelta);
       customScoreRef.current = updated;
+      finalScore = updated;
       return updated;
     });
+
+    if (engineRef.current && typeof engineRef.current.setScore === 'function') {
+      engineRef.current.setScore(finalScore);
+    }
 
     // Clamp time strictly to 60s max and 0s min
     localTimeRef.current = Math.min(60, Math.max(0, localTimeRef.current + timeDelta));
@@ -371,6 +378,8 @@ export default function AutoPursuitClient() {
       const tr = targetRef.current;
       const ptr = pointerRef.current;
       
+      const currentRadius = Math.max(8, TARGET_RADIUS - (customScoreRef.current * 0.05));
+      
       tr.x += tr.vx;
       tr.y += tr.vy;
 
@@ -378,7 +387,8 @@ export default function AutoPursuitClient() {
         tr.vx += (Math.random() - 0.5) * 10;
         tr.vy += (Math.random() - 0.5) * 10;
         
-        const maxSpd = 6 + (streakRef.current * 0.5);
+        const baseSpeedFromScore = 6 + (customScoreRef.current * 0.1);
+        const maxSpd = baseSpeedFromScore + (streakRef.current * 0.5);
         const mag = Math.hypot(tr.vx, tr.vy);
         if (mag > maxSpd) {
           tr.vx = (tr.vx / mag) * maxSpd;
@@ -387,15 +397,15 @@ export default function AutoPursuitClient() {
         setTargetSpeed(Math.round(maxSpd));
       }
 
-      if (tr.x < TARGET_RADIUS || tr.x > cvs.width - TARGET_RADIUS) tr.vx *= -1;
-      if (tr.y < TARGET_RADIUS || tr.y > cvs.height - TARGET_RADIUS) tr.vy *= -1;
-      tr.x = Math.max(TARGET_RADIUS, Math.min(cvs.width - TARGET_RADIUS, tr.x));
-      tr.y = Math.max(TARGET_RADIUS, Math.min(cvs.height - TARGET_RADIUS, tr.y));
+      if (tr.x < currentRadius || tr.x > cvs.width - currentRadius) tr.vx *= -1;
+      if (tr.y < currentRadius || tr.y > cvs.height - currentRadius) tr.vy *= -1;
+      tr.x = Math.max(currentRadius, Math.min(cvs.width - currentRadius, tr.x));
+      tr.y = Math.max(currentRadius, Math.min(cvs.height - currentRadius, tr.y));
 
       // --- TRACKING LOGIC ---
       totalFramesRef.current++;
       const dist = Math.hypot(ptr.x - tr.x, ptr.y - tr.y);
-      const isTracked = dist < TARGET_RADIUS + 35; // Generous touch padding
+      const isTracked = dist < currentRadius + 35; // Generous touch padding
 
       if (isTracked) {
         hitFramesRef.current++;
@@ -424,9 +434,9 @@ export default function AutoPursuitClient() {
           setStreak(streakRef.current);
           setFailedTracking(prev => prev + 1);
           
-          updateEconomy(-3, -1);
+          updateEconomy(0, -1);
           playDrillSound('fail');
-          showFeedbackRef.current?.(`✗ LOST TARGET! -3 PTS | -1s`, 'error');
+          showFeedbackRef.current?.(`✗ LOST TARGET! -1s`, 'error');
         }
       }
 
@@ -443,7 +453,7 @@ export default function AutoPursuitClient() {
       for (let w = 0; w < cvs.width; w += 50) ctx.fillRect(w, 0, 1, cvs.height);
       for (let h = 0; h < cvs.height; h += 50) ctx.fillRect(0, h, cvs.width, 1);
 
-      const gradient = ctx.createRadialGradient(tr.x - TARGET_RADIUS*0.3, tr.y - TARGET_RADIUS*0.3, TARGET_RADIUS*0.1, tr.x, tr.y, TARGET_RADIUS);
+      const gradient = ctx.createRadialGradient(tr.x - currentRadius*0.3, tr.y - currentRadius*0.3, currentRadius*0.1, tr.x, tr.y, currentRadius);
       
       if (isTracked) {
         gradient.addColorStop(0, '#6EE7B7'); 
@@ -458,12 +468,12 @@ export default function AutoPursuitClient() {
       }
 
       ctx.beginPath();
-      ctx.arc(tr.x, tr.y, TARGET_RADIUS, 0, Math.PI * 2);
+      ctx.arc(tr.x, tr.y, currentRadius, 0, Math.PI * 2);
       ctx.fillStyle = gradient;
       ctx.fill();
 
       ctx.beginPath();
-      ctx.arc(tr.x, tr.y, TARGET_RADIUS * 0.4, 0, Math.PI * 2);
+      ctx.arc(tr.x, tr.y, currentRadius * 0.4, 0, Math.PI * 2);
       ctx.fillStyle = isTracked ? '#ffffff' : (isBoxDarkMode ? '#444' : '#eee');
       ctx.fill();
 
@@ -508,6 +518,29 @@ export default function AutoPursuitClient() {
     } else { try { await navigator.clipboard.writeText(url); alert('Link copied!'); } catch (e) {} }
   };
 
+  const shareScore = useCallback(() => {
+    let finalRank = 'Bronze';
+    if (customScoreRef.current >= 80 && accuracy >= 85) finalRank = 'Grandmaster';
+    else if (customScoreRef.current >= 65 && accuracy >= 75) finalRank = 'Master';
+    else if (customScoreRef.current >= 50 && accuracy >= 65) finalRank = 'Diamond';
+    else if (customScoreRef.current >= 35 && accuracy >= 55) finalRank = 'Platinum';
+    else if (customScoreRef.current >= 20 && accuracy >= 45) finalRank = 'Gold';
+    else if (customScoreRef.current >= 10) finalRank = 'Silver';
+
+    const text = `🎯 I scored ${customScoreRef.current} PTS with ${accuracy}% tracking accuracy on the Smooth Pursuit Tracker! Rank: ${finalRank}. Try it here: https://skilldrills.online/drills/visual/tracking-accuracy/pursuit-tracker`;
+    
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      navigator.share({
+        title: 'My SkillDrills Visual Score',
+        text: text,
+        url: 'https://skilldrills.online/drills/visual/tracking-accuracy/pursuit-tracker'
+      }).catch(() => {});
+    } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+      alert('Score card copied to clipboard!');
+    }
+  }, [accuracy]);
+
   if (loading || !isClient) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-black">
@@ -517,6 +550,44 @@ export default function AutoPursuitClient() {
         </div>
       </div>
     );
+  }
+
+  let gradeLetter = 'F';
+  if (accuracy >= 85 && customScore >= 80) gradeLetter = 'S';
+  else if (accuracy >= 75 && customScore >= 65) gradeLetter = 'A';
+  else if (accuracy >= 65 && customScore >= 50) gradeLetter = 'B';
+  else if (accuracy >= 55 && customScore >= 35) gradeLetter = 'C';
+  else if (accuracy >= 45 && customScore >= 20) gradeLetter = 'D';
+
+  let rankName = 'Bronze';
+  let rankColor = 'text-slate-500';
+  if (customScore >= 80 && accuracy >= 85) {
+    rankName = 'Grandmaster';
+    rankColor = 'text-fuchsia-400 font-extrabold';
+  } else if (customScore >= 65 && accuracy >= 75) {
+    rankName = 'Master';
+    rankColor = 'text-red-400 font-extrabold';
+  } else if (customScore >= 50 && accuracy >= 65) {
+    rankName = 'Diamond';
+    rankColor = 'text-cyan-400 font-extrabold';
+  } else if (customScore >= 35 && accuracy >= 55) {
+    rankName = 'Platinum';
+    rankColor = 'text-indigo-400 font-extrabold';
+  } else if (customScore >= 20 && accuracy >= 45) {
+    rankName = 'Gold';
+    rankColor = 'text-yellow-400 font-extrabold';
+  } else if (customScore >= 10) {
+    rankName = 'Silver';
+    rankColor = 'text-gray-300 font-extrabold';
+  }
+
+  let diagnostics = "Outstanding smooth pursuit tracking accuracy! Your motor alignment and velocity prediction are extremely precise.";
+  if (accuracy < 30) {
+    diagnostics = "Low visual pursuit accuracy. Minimize saccadic jerks and try to match the target's fluid momentum vectors.";
+  } else if (trackingPulses < 5) {
+    diagnostics = "Low tracking consistency. Focus on keeping the cursor centered inside the orb to build longer streaks and compound score.";
+  } else if (customScore < 30) {
+    diagnostics = "Boost score by tracking the target continuously during acceleration phases to earn more point pulses.";
   }
 
   return (
@@ -648,79 +719,88 @@ export default function AutoPursuitClient() {
 
             {/* Premium Custom Structural End Card Component */}
             {(engine.gameState === 'ended' || isTimeUp) && (
-              <div className="absolute inset-0 flex items-center justify-center z-[70] bg-black/95 pointer-events-auto animate-in fade-in duration-300 p-4 overflow-y-auto">
-                <div className="rounded-3xl max-w-md w-full shadow-2xl border border-gray-800 bg-gray-950 flex flex-col max-h-[90vh] my-auto shrink-0">
-                  
-                  <div className="flex-1 overflow-y-auto">
-                    <div className="bg-gradient-to-br from-green-900/40 to-emerald-900/40 p-5 sm:p-6 border-b border-gray-800 relative overflow-hidden pointer-events-none shrink-0">
-                      <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-green-500/20 rounded-full blur-3xl"></div>
-                      <div className="absolute bottom-0 left-0 -mb-4 -ml-4 w-32 h-32 bg-emerald-500/20 rounded-full blur-3xl"></div>
-                      <div className="relative z-10 flex flex-col items-center">
-                        {customScore > (engine.bestScore || 0) && customScore > 0 && (
-                          <div className="bg-yellow-500 text-black text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-2 shadow-[0_0_15px_rgba(234,179,8,0.5)]">
-                            ⭐ New Personal Best
-                          </div>
-                        )}
-                        <h2 className="text-2xl sm:text-3xl font-black text-white mb-1 tracking-tight">Mission Complete</h2>
-                        <p className="text-green-400 font-medium text-sm">Auto-Pursuit Lab</p>
+              <div className="absolute inset-0 bg-[#05070e]/98 overflow-y-auto p-6 z-[70] select-none scrollbar-thin scroll-smooth backdrop-blur-sm animate-in fade-in duration-300 pointer-events-auto">
+                <div className="min-h-full flex flex-col justify-center items-center py-4 w-full">
+                  <div className="max-w-md w-full text-center">
+                    {customScore > 0 && customScore >= (engine.bestScore || 0) && (
+                      <div className="inline-block bg-yellow-500 text-black text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-3 shadow-[0_0_15px_rgba(234,179,8,0.5)] animate-bounce font-mono">
+                        ⭐ NEW PERSONAL BEST!
+                      </div>
+                    )}
+                    
+                    <h2 className="text-xl font-black text-white uppercase tracking-wider mb-1 font-mono">
+                      Drill Complete
+                    </h2>
+                    <p className="text-xs text-slate-500 uppercase tracking-widest mb-6 font-mono">
+                      Auto-Pursuit Lab
+                    </p>
+
+                    <div className="grid grid-cols-3 gap-2.5 mb-6 text-left font-mono">
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Final Score</span>
+                        <span className="text-sm font-black text-white">{customScore} <span className="text-[8px] text-slate-400 font-normal">PTS</span></span>
+                      </div>
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Accuracy</span>
+                        <span className="text-sm font-black text-white">{accuracy}%</span>
+                      </div>
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Best Score</span>
+                        <span className="text-sm font-black text-green-400">{engine.bestScore || 0}</span>
+                      </div>
+                      
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Pulses</span>
+                        <span className="text-sm font-black text-emerald-400">{trackingPulses}</span>
+                      </div>
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Lost Tracking</span>
+                        <span className="text-sm font-black text-red-400">{failedTracking}</span>
+                      </div>
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold font-mono">Grade</span>
+                        <span className="text-sm font-black text-pink-400 font-mono">{gradeLetter}</span>
                       </div>
                     </div>
 
-                    <div className="p-5 sm:p-6 pointer-events-none shrink-0">
-                      <div className="flex justify-between items-center mb-6">
-                        <div className="flex flex-col">
-                          <span className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Final Score</span>
-                          <div className="flex items-end gap-1">
-                            <span className="text-5xl sm:text-6xl font-black text-white leading-none tracking-tighter">{customScore}</span>
-                            <span className="text-sm sm:text-lg text-gray-500 font-bold mb-1">PTS</span>
-                          </div>
-                        </div>
-                        
-                        <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center">
-                          <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
-                            <path className="text-gray-800" strokeWidth="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                            <path 
-                              className={`${accuracy >= 80 ? 'text-green-500' : accuracy >= 50 ? 'text-yellow-500' : 'text-red-500'} transition-all duration-1000 ease-out`} 
-                              strokeWidth="3" strokeDasharray="100" strokeDashoffset={100 - accuracy} strokeLinecap="round" stroke="currentColor" fill="none" 
-                              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" 
-                            />
-                          </svg>
-                          <div className="absolute inset-0 flex flex-col items-center justify-center">
-                            <span className={`text-lg sm:text-xl font-black ${accuracy >= 80 ? 'text-green-400' : accuracy >= 50 ? 'text-yellow-400' : 'text-red-400'}`}>{accuracy}%</span>
-                            <span className="text-[7px] sm:text-[8px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">Accuracy</span>
-                          </div>
-                        </div>
+                    <div className="bg-[#0b0f19] border border-slate-850 p-3 rounded-xl mb-4 text-left font-sans">
+                      <span className={`text-xs font-black block text-center uppercase tracking-widest ${rankColor} mb-2`}>
+                        Rank: {rankName}
+                      </span>
+                      <div className="w-full h-px bg-slate-850 mb-2"></div>
+                      <div className="flex items-center gap-1.5 text-[9px] font-bold text-white uppercase mb-1 font-mono">
+                        <Sparkles className="w-3 h-3 text-amber-500" /> Diagnostics advice:
                       </div>
+                      <p className="text-[10px] text-slate-400 leading-normal font-sans">
+                        {diagnostics}
+                      </p>
+                    </div>
 
-                      <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-2">
-                        <div className="bg-gray-900/50 rounded-xl p-2 sm:p-3 text-center border border-gray-800">
-                          <div className="text-gray-400 text-[9px] sm:text-[10px] uppercase font-bold tracking-wider mb-1">Pulses</div>
-                          <div className="text-lg sm:text-xl font-black text-green-400">{trackingPulses}</div>
-                        </div>
-                        <div className="bg-gray-900/50 rounded-xl p-2 sm:p-3 text-center border border-gray-800">
-                          <div className="text-gray-400 text-[9px] sm:text-[10px] uppercase font-bold tracking-wider mb-1">Lost Tracking</div>
-                          <div className="text-lg sm:text-xl font-black text-red-400">{failedTracking}</div>
-                        </div>
-                        <div className="bg-gray-900/50 rounded-xl p-2 sm:p-3 text-center border border-gray-800">
-                          <div className="text-gray-400 text-[9px] sm:text-[10px] uppercase font-bold tracking-wider mb-1">Max Speed</div>
-                          <div className="text-lg sm:text-xl font-black text-orange-400">{targetSpeed}</div>
-                        </div>
-                      </div>
+                    <div className="flex gap-2">
+                      <PlayAgainButton
+                        onClick={() => { if(engine.endGame) engine.endGame(); handleStartGame(); }}
+                        colorTheme="green"
+                      />
+                      <button
+                        onPointerDown={(e)=>e.stopPropagation()}
+                        onClick={shareScore}
+                        className="p-3 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded-xl transition-colors active:scale-95 flex items-center justify-center"
+                        title="Share Score"
+                      >
+                        <Share2 className="w-4 h-4" />
+                      </button>
+                      {isFullscreen && (
+                        <button
+                          onPointerDown={(e)=>e.stopPropagation()}
+                          onClick={handleExitToStart}
+                          className="p-3 bg-red-900/30 border border-red-900/55 hover:bg-red-900/50 text-red-400 rounded-xl transition-colors active:scale-95 flex items-center justify-center"
+                          title="Exit Drill"
+                        >
+                          <LogOut className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
                   </div>
-
-                  <div className="p-3 sm:p-5 bg-gray-900/50 border-t border-gray-800 flex gap-2 sm:gap-3 shrink-0 rounded-b-3xl">
-                    <button onPointerDown={(e)=>e.stopPropagation()} onClick={() => { if(engine.endGame) engine.endGame(); handleStartGame(); }} className="flex-1 py-3 sm:py-4 bg-green-600 text-white rounded-xl font-black tracking-wide hover:bg-green-500 transition-all active:scale-95 flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(34,197,94,0.4)] text-sm sm:text-base">
-                      <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5" /> PLAY AGAIN
-                    </button>
-                    <button onPointerDown={(e)=>e.stopPropagation()} onClick={sharePage} className="px-4 sm:px-5 py-3 sm:py-4 bg-gray-800 text-white rounded-xl font-bold hover:bg-gray-700 transition-all active:scale-95 border border-gray-700 flex items-center justify-center" title="Share Drill">
-                      <Share2 className="w-4 h-4 sm:w-5 sm:h-5" />
-                    </button>
-                    <button onPointerDown={(e)=>e.stopPropagation()} onClick={handleExitToStart} className="px-4 sm:px-5 py-3 sm:py-4 bg-red-900/30 text-red-400 rounded-xl font-bold hover:bg-red-900/50 transition-all active:scale-95 border border-red-900/50 flex items-center justify-center" title="Exit Drill">
-                      <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
-                    </button>
-                  </div>
-
                 </div>
               </div>
             )}
@@ -728,9 +808,6 @@ export default function AutoPursuitClient() {
           </div>
         </GameErrorBoundary>
 
-        {/* ========================================== */}
-        {/* DRILL RULES / INSTRUCTIONS                 */}
-        {/* ========================================== */}
         {!isFullscreen && (
           <section className="mt-10 pointer-events-none">
             <div className="rounded-2xl border border-gray-800 overflow-hidden bg-gray-900 shadow-2xl">
@@ -740,10 +817,10 @@ export default function AutoPursuitClient() {
               <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-5">
                   <RuleItem num="1" color="green" text="Sustained Tracking (1s) =" highlight="Maintain Cursor Contact" result={`+5 PTS | +2s Clock`} />
-                  <RuleItem num="2" color="blue" text="Velocity Scaling" highlight="Speed up on pulses" result="Adaptive Pacing System" />
+                  <RuleItem num="2" color="blue" text="Adaptive Difficulty" highlight="Speed and size scale on score" result="Adaptive Pacing System" />
                 </div>
                 <div className="space-y-5">
-                  <RuleItem num="3" color="red" text="Lost Tracking (>2s)" highlight="Break Contact" result="-3 PTS | -1s Clock" />
+                  <RuleItem num="3" color="red" text="Lost Tracking (>2s)" highlight="Break Contact" result="0 PTS | -1s Clock" />
                   <RuleItem num="4" color="orange" text="Time Rules" result="Max: 60s | End: 0s" />
                 </div>
               </div>
@@ -787,7 +864,7 @@ export default function AutoPursuitClient() {
                       <div className="w-8 h-8 rounded-lg bg-purple-600 flex items-center justify-center"><BarChart3 className="w-4 h-4 text-white" /></div>
                       <h3 className="text-sm font-bold text-white">What You'll Track</h3>
                     </div>
-                    <p className="text-xs leading-relaxed text-gray-400">Total net score, continuous 1-second tracking pulses, tracking error penalties, absolute time-on-target accuracy, and maximum velocity capped.</p>
+                    <p className="text-xs leading-relaxed text-gray-400">Total net score, continuous 1-second tracking pulses, tracking accuracy ratio, absolute time-on-target accuracy, and maximum velocity capped.</p>
                   </div>
                 </div>
 
@@ -801,7 +878,7 @@ export default function AutoPursuitClient() {
                     <li><strong className="text-gray-200">Follow the Orb:</strong> Keep your mouse cursor or finger touching the continuously moving orb. The orb glows bright green when actively tracked.</li>
                     <li><strong className="text-gray-200">Build Pulses:</strong> Every 1 uninterrupted second of perfect tracking triggers a pulse, awarding +5 points and +2 seconds.</li>
                     <li><strong className="text-gray-200">Anticipate Jitter:</strong> The target will periodically experience "jitter"—random, sudden velocity changes requiring instant micro-corrections.</li>
-                    <li><strong className="text-gray-200">Avoid Losing Contact:</strong> Breaking contact for more than 2 seconds penalizes your score (-3 points) and strips 1 second from the clock.</li>
+                    <li><strong className="text-gray-200">Avoid Losing Contact:</strong> Breaking contact for more than 2 seconds applies a time penalty (-1s) but does not reduce your score.</li>
                   </ol>
                 </div>
 
@@ -814,7 +891,7 @@ export default function AutoPursuitClient() {
                   <div className="space-y-4">
                     <div>
                       <h4 className="text-sm font-bold text-gray-200">How does the velocity scale?</h4>
-                      <p className="text-xs text-gray-400 mt-1">This uses adaptive difficulty. Generating successful tracking pulses demonstrates kinetic mastery, prompting the engine to increase the base movement velocity and jitter rate. Failing to track decreases the difficulty to help you recover.</p>
+                      <p className="text-xs text-gray-400 mt-1">This uses adaptive difficulty. Generating successful tracking pulses demonstrates kinetic mastery, prompting the engine to increase the base movement velocity and jitter rate. As your score increases, the target size also shrinks to raise the challenge level.</p>
                     </div>
                     <div>
                       <h4 className="text-sm font-bold text-gray-200">What constitutes a high-tier performance score?</h4>

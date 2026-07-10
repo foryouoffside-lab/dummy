@@ -96,40 +96,72 @@ const faqSchema = {
   ]
 };
 
+const howToSchema = {
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "How to Practice with Extreme Logic Puzzles Drill",
+  "description": "Test and train your analytical reasoning and deductive logic with progressively complex mathematical and logic puzzles.",
+  "step": [
+    {
+      "@type": "HowToStep",
+      "position": 1,
+      "name": "Analyze the Puzzle Question",
+      "text": "Read the displayed logic query (e.g. sequence equations, digital roots, clock modular logic, or combinatorics)."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 2,
+      "name": "Deduce the Answer",
+      "text": "Perform logic variables reasoning to calculate or identify the correct value."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 3,
+      "name": "Submit the Solution",
+      "text": "Type your answer in the numeric field and press Enter or Solve. Mistakes do not deduct points but deduct -5s from the timer."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 4,
+      "name": "Earn Points and Level Up",
+      "text": "Every correct answer yields +15 PTS. Your puzzle difficulty level scales up dynamically based on your score."
+    }
+  ]
+};
+
 export const metadata = {
-  title: "Logic Grid Puzzles Online – Free Deductive Reasoning Game | SkillDrills",
-  description: "Solve free logic grid puzzles online. Use deductive elimination to match clues to categories. Logic puzzles for adults and beginners with answers and hints. No sign-up.",
+  title: "Play Logic Puzzles Online Free | Deductive Reasoning Game | SkillDrills",
+  description: "Test your logic and deductive reasoning online for free. Solve algebra systems, digital roots, prime sequences, and cyclic logic to train your prefrontal cortex.",
   keywords: [
-    "logic puzzles",
-    "logic grid puzzles",
     "logic puzzles online",
-    "deductive reasoning puzzles",
+    "free logic grid puzzles",
+    "logic test online",
+    "analytical reasoning test",
+    "deductive reasoning test",
     "brain teasers logic",
-    "logic grid puzzles with answers",
+    "inductive reasoning puzzles",
+    "critical thinking games",
+    "logic grid puzzles",
     "logic puzzles for adults",
-    "daily logic puzzle free",
-    "logic elimination grid game",
-    "interactive logic puzzles",
-    "printable logic puzzles",
-    "critical thinking puzzles online"
+    "daily logic puzzle free"
   ],
   alternates: {
     canonical: "https://skilldrills.online/drills/cognitive/problem-solving/logic-puzzles",
   },
   robots: { index: true, follow: true },
   openGraph: {
-    title: "Logic Grid Puzzles Online – Free Deductive Reasoning Game | SkillDrills",
-    description: "Solve free logic grid puzzles online. Use deductive elimination to match clues to categories. Logic puzzles for adults and beginners with answers and hints. No sign-up.",
+    title: "Play Logic Puzzles Online Free | Deductive Reasoning Game | SkillDrills",
+    description: "Test your logic and deductive reasoning online for free. Solve algebra systems, digital roots, prime sequences, and cyclic logic to train your prefrontal cortex.",
     url: "https://skilldrills.online/drills/cognitive/problem-solving/logic-puzzles",
     siteName: 'SkillDrills',
     locale: 'en_US',
     type: 'website',
-    images: [{ url: 'https://skilldrills.online/icons/icon-512x512.png', width: 512, height: 512, alt: "Logic Grid Puzzles – Free Deductive Reasoning Game" }],
+    images: [{ url: 'https://skilldrills.online/icons/icon-512x512.png', width: 512, height: 512, alt: "Play Logic Puzzles Online Free" }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Logic Grid Puzzles Online – Free Deductive Reasoning Game | SkillDrills",
-    description: "Solve free logic grid puzzles online. Use deductive elimination to match clues to categories. Logic puzzles for adults and beginners with answers and hints. No sign-up.",
+    title: "Play Logic Puzzles Online Free | Deductive Reasoning Game | SkillDrills",
+    description: "Test your logic and deductive reasoning online for free. Solve algebra systems, digital roots, prime sequences, and cyclic logic to train your prefrontal cortex.",
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
 };
@@ -140,6 +172,7 @@ export default function LogicPuzzlesPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }} />
       <LogicPuzzlesClient />
     </>
   );

@@ -8,9 +8,10 @@ import {
   RefreshCw, RotateCcw, Smartphone, GraduationCap, Lightbulb, 
   TrendingUp, BarChart3, CheckCircle2, Star, ArrowRight, Share2, 
   Copy, Brain, AlertTriangle, Play, Settings, MousePointer2,
-  Users, Crosshair, Calculator, Code2, Layers, LogOut
+  Users, Crosshair, Calculator, Code2, Layers, LogOut, Sparkles
 } from 'lucide-react';
 import useGameEngine from '../../../../../lib/useGameEngine';
+import PlayAgainButton from '../../../../../components/PlayAgainButton';
 
 // ==========================================
 // ERROR BOUNDARY
@@ -59,16 +60,36 @@ export default function GhostLinkClient() {
   const [ballSpeed, setBallSpeed] = useState(5);
   const [totalBalls, setTotalBalls] = useState(8);
 
-  // === Game State ===
+  // === Game State (Synchronized with Refs for 60FPS loop) ===
   const [customScore, setCustomScore] = useState(0);
   const [localTimeRemaining, setLocalTimeRemaining] = useState(60);
   const [phase, setPhase] = useState("MEMORIZE"); 
-  const [selectedBalls, setSelectedBalls] = useState([]);
-  const [showResults, setShowResults] = useState(false);
-  const [correctCount, setCorrectCount] = useState(0);
   const [accuracy, setAccuracy] = useState(100);
 
-  // === Sync Refs ===
+  // Sync Bridges (Solves tearing during re-renders)
+  const [selectedBalls, setSelectedBalls] = useState([]);
+  const selectedBallsRef = useRef([]);
+  const handleSetSelectedBalls = useCallback((val) => {
+    const newVal = typeof val === 'function' ? val(selectedBallsRef.current) : val;
+    selectedBallsRef.current = newVal;
+    setSelectedBalls(newVal);
+  }, []);
+
+  const [showResults, setShowResults] = useState(false);
+  const showResultsRef = useRef(false);
+  const handleSetShowResults = useCallback((val) => {
+    showResultsRef.current = val;
+    setShowResults(val);
+  }, []);
+
+  const [correctCount, setCorrectCount] = useState(0);
+  const correctCountRef = useRef(0);
+  const handleSetCorrectCount = useCallback((val) => {
+    correctCountRef.current = val;
+    setCorrectCount(val);
+  }, []);
+
+  // === Standard Refs ===
   const customScoreRef = useRef(0);
   const localTimeRef = useRef(60);
 
@@ -90,7 +111,7 @@ export default function GhostLinkClient() {
   // Updated Rules Constants
   const TARGET_COUNT = 3;
   const HIT_POINTS = 20;
-  const MISS_PENALTY = 10;
+  const MISS_PENALTY = 0;
 
   // === Base Engine Hook ===
   const engine = useGameEngine({
@@ -104,89 +125,17 @@ export default function GhostLinkClient() {
   });
 
   const gameStateRef = useRef(engine.gameState);
-  const showFeedbackRef = useRef(engine.showFeedback);
   const engineRef = useRef(engine);
   const soundEnabledRef = useRef(soundEnabled);
   
   useEffect(() => { gameStateRef.current = engine.gameState; }, [engine.gameState]);
-  useEffect(() => { showFeedbackRef.current = engine.showFeedback; }, [engine.showFeedback]);
   useEffect(() => { engineRef.current = engine; }, [engine]);
   useEffect(() => { soundEnabledRef.current = soundEnabled; }, [soundEnabled]);
-  useEffect(() => { customScoreRef.current = customScore; }, [customScore]);
 
   useEffect(() => { 
     setIsClient(true); 
     const timer = setTimeout(() => setLoading(false), 100); 
     return () => clearTimeout(timer);
-  }, []);
-
-  // === Custom Clock Loop ===
-  useEffect(() => {
-    if (engine.gameState !== 'playing') {
-      if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
-      return;
-    }
-    
-    timerIntervalRef.current = setInterval(() => {
-      if (phaseRef.current === "TRACKING") {
-        setLocalTimeRemaining(prev => {
-          if (prev <= 1) {
-            clearInterval(timerIntervalRef.current);
-            // eslint-disable-next-line no-use-before-define
-            triggerIdentificationPhase();
-            return 0;
-          }
-          localTimeRef.current = prev - 1; 
-          return prev - 1;
-        });
-      }
-    }, 1000);
-    
-    return () => { if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); };
-  }, [engine.gameState, phase]);
-
-  // === Environment Guard ===
-  useEffect(() => {
-    const checkEnvironment = () => {
-      if (typeof window === 'undefined') return;
-      const ua = navigator.userAgent || '';
-      const isMob = /Mobi|Android|iPhone|iPad|iPod|Windows Phone/i.test(ua) || window.innerWidth < 768;
-
-      if (isMob && window.innerHeight > window.innerWidth) {
-        setShowRotateWarning(true);
-      } else {
-        setShowRotateWarning(false);
-      }
-    };
-    checkEnvironment();
-    window.addEventListener('resize', checkEnvironment);
-    window.addEventListener('orientationchange', checkEnvironment);
-    return () => { window.removeEventListener('resize', checkEnvironment); window.removeEventListener('orientationchange', checkEnvironment); };
-  }, []);
-
-  useEffect(() => { 
-    const handleFsChange = () => setIsFullscreen(!!document.fullscreenElement); 
-    document.addEventListener('fullscreenchange', handleFsChange); 
-    return () => document.removeEventListener('fullscreenchange', handleFsChange); 
-  }, []);
-
-  const cleanupAllTimers = useCallback(() => {
-    if (animationRef.current) { cancelAnimationFrame(animationRef.current); animationRef.current = null; }
-    if (timerIntervalRef.current) { clearInterval(timerIntervalRef.current); timerIntervalRef.current = null; }
-  }, []);
-
-  const toggleFullscreen = useCallback(async () => { 
-    try { 
-      if (!isFullscreen) { await containerRef.current?.requestFullscreen(); } 
-      else { if (document.fullscreenElement) await document.exitFullscreen(); } 
-    } catch (err) {} 
-  }, [isFullscreen]);
-
-  const handleExitToStart = useCallback(() => {
-    if (document.fullscreenElement) {
-      document.exitFullscreen().catch(() => {});
-    }
-    window.location.reload(); 
   }, []);
 
   // === Zero-Latency Synthesis Audio ===
@@ -238,27 +187,102 @@ export default function GhostLinkClient() {
     setPhase(newPhase);
   }, []);
 
+  const triggerIdentificationPhase = useCallback(() => {
+    setPhaseState("IDENTIFY");
+    isActiveRef.current = false;
+    playDrillSound('select');
+  }, [playDrillSound, setPhaseState]);
+
+  // === Custom Clock Loop ===
+  useEffect(() => {
+    if (engine.gameState !== 'playing') {
+      if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+      return;
+    }
+    
+    timerIntervalRef.current = setInterval(() => {
+      if (phaseRef.current === "TRACKING") {
+        setLocalTimeRemaining(prev => {
+          if (prev <= 1) {
+            clearInterval(timerIntervalRef.current);
+            triggerIdentificationPhase();
+            localTimeRef.current = 0;
+            return 0;
+          }
+          localTimeRef.current = prev - 1; 
+          return prev - 1;
+        });
+      }
+    }, 1000);
+    
+    return () => { if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); };
+  }, [engine.gameState, triggerIdentificationPhase]);
+
+  // === Environment Guard ===
+  useEffect(() => {
+    const checkEnvironment = () => {
+      if (typeof window === 'undefined') return;
+      const ua = navigator.userAgent || '';
+      const isMob = /Mobi|Android|iPhone|iPad|iPod|Windows Phone/i.test(ua) || window.innerWidth < 768;
+
+      if (isMob && window.innerHeight > window.innerWidth) {
+        setShowRotateWarning(true);
+      } else {
+        setShowRotateWarning(false);
+      }
+    };
+    checkEnvironment();
+    window.addEventListener('resize', checkEnvironment);
+    window.addEventListener('orientationchange', checkEnvironment);
+    return () => { window.removeEventListener('resize', checkEnvironment); window.removeEventListener('orientationchange', checkEnvironment); };
+  }, []);
+
+  useEffect(() => { 
+    const handleFsChange = () => setIsFullscreen(!!document.fullscreenElement); 
+    document.addEventListener('fullscreenchange', handleFsChange); 
+    return () => document.removeEventListener('fullscreenchange', handleFsChange); 
+  }, []);
+
+  const toggleFullscreen = useCallback(async () => { 
+    try { 
+      if (!isFullscreen) { await containerRef.current?.requestFullscreen(); } 
+      else { if (document.fullscreenElement) await document.exitFullscreen(); } 
+    } catch (err) {} 
+  }, [isFullscreen]);
+
+  const handleExitToStart = useCallback(() => {
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch(() => {});
+    }
+    window.location.reload(); 
+  }, []);
+
   // === Core Drill Mechanics ===
   const initDrillVariables = useCallback((w, h) => {
     ballsRef.current = [];
     targetIndicesRef.current = [];
-    setSelectedBalls([]);
-    setShowResults(false);
-    setCorrectCount(0);
+    handleSetSelectedBalls([]);
+    handleSetShowResults(false);
+    handleSetCorrectCount(0);
+    
     setCustomScore(0);
     customScoreRef.current = 0;
     
-    // Dynamic Size Optimization for Mobile Devices (Smaller for tracking)
+    // Scale difficulty based on high score
+    const bestSc = engineRef.current ? (engineRef.current.bestScore || 0) : 0;
+    const dynamicBallsCount = Math.min(13, totalBalls + Math.floor(bestSc / 30));
+
+    // Dynamic Size Optimization for Mobile Devices
     const currentRadius = w < 768 ? 12 : 22;
 
     const indices = [];
     while (indices.length < TARGET_COUNT) { 
-      const idx = Math.floor(Math.random() * totalBalls); 
+      const idx = Math.floor(Math.random() * dynamicBallsCount); 
       if (!indices.includes(idx)) indices.push(idx); 
     }
     targetIndicesRef.current = indices;
     
-    for (let i = 0; i < totalBalls; i++) { 
+    for (let i = 0; i < dynamicBallsCount; i++) { 
       const angle = Math.random() * Math.PI * 2; 
       ballsRef.current.push({ 
         x: currentRadius + Math.random() * (w - currentRadius * 2), 
@@ -273,35 +297,32 @@ export default function GhostLinkClient() {
     setPhaseState("MEMORIZE"); 
     memorizeTimerRef.current = 2.0;
     playDrillSound('memorize');
-  }, [playDrillSound, totalBalls, setPhaseState]);
-
-  const triggerIdentificationPhase = useCallback(() => {
-    setPhaseState("IDENTIFY");
-    isActiveRef.current = false;
-    playDrillSound('select');
-  }, [playDrillSound, setPhaseState]);
+  }, [playDrillSound, totalBalls, setPhaseState, handleSetSelectedBalls, handleSetShowResults, handleSetCorrectCount]);
 
   const calculateResults = useCallback(() => {
     let cCount = 0;
     let errors = 0;
     
-    selectedBalls.forEach(idx => {
+    selectedBallsRef.current.forEach(idx => {
       if (targetIndicesRef.current.includes(idx)) cCount++;
       else errors++;
     });
 
     const netScore = Math.max(0, (cCount * HIT_POINTS) - (errors * MISS_PENALTY));
     
-    setCorrectCount(cCount); 
+    handleSetCorrectCount(cCount); 
     setCustomScore(netScore); 
     customScoreRef.current = netScore;
     setAccuracy(Math.round((cCount / TARGET_COUNT) * 100));
-    setShowResults(true);
+    handleSetShowResults(true);
 
     if (netScore > 0) playDrillSound('bonus');
     else playDrillSound('fail');
 
     if (engineRef.current) {
+      if (typeof engineRef.current.setScore === 'function') {
+        engineRef.current.setScore(netScore);
+      }
       if (netScore > engineRef.current.bestScore) {
         try { localStorage.setItem('ghostLinkBestScore', netScore.toString()); } catch(e){}
       }
@@ -310,13 +331,12 @@ export default function GhostLinkClient() {
     setTimeout(() => { 
       if (engineRef.current && typeof engineRef.current.endGame === 'function') engineRef.current.endGame(); 
     }, 2500);
-  }, [selectedBalls, playDrillSound]);
+  }, [playDrillSound, handleSetCorrectCount, handleSetShowResults]);
 
-  // === Unified Input Pointer Handler (Fixes identification bugs across Mobile/Desktop) ===
+  // === Unified Input Pointer Handler ===
   const handleInputStrikes = useCallback((e) => {
-    // Ignore UI overlay clicks
     if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
-    if (gameStateRef.current !== 'playing' || phaseRef.current !== 'IDENTIFY' || showResults) return;
+    if (gameStateRef.current !== 'playing' || phaseRef.current !== 'IDENTIFY' || showResultsRef.current) return;
     
     e.stopPropagation();
 
@@ -327,8 +347,10 @@ export default function GhostLinkClient() {
     const clickX = (e.clientX - rect.left) * (cvs.width / rect.width);
     const clickY = (e.clientY - rect.top) * (cvs.height / rect.height);
 
+    const currentSelected = selectedBallsRef.current;
+
     // Check Confirm Button Click First
-    if (selectedBalls.length === TARGET_COUNT) {
+    if (currentSelected.length === TARGET_COUNT) {
       const bx = cvs.width / 2 - 80;
       const by = cvs.height - 80;
       if (clickX >= bx && clickX <= bx + 160 && clickY >= by && clickY <= by + 50) {
@@ -340,16 +362,16 @@ export default function GhostLinkClient() {
     // Check Ball Click (+20px padding prevents mobile fat-finger misses)
     ballsRef.current.forEach((b, i) => {
       if (Math.hypot(clickX - b.x, clickY - b.y) <= b.r + 20) {
-        if (selectedBalls.includes(i)) {
-          setSelectedBalls(prev => prev.filter(item => item !== i));
+        if (currentSelected.includes(i)) {
+          handleSetSelectedBalls(prev => prev.filter(item => item !== i));
           playDrillSound('deselect');
-        } else if (selectedBalls.length < TARGET_COUNT) {
-          setSelectedBalls(prev => [...prev, i]);
+        } else if (currentSelected.length < TARGET_COUNT) {
+          handleSetSelectedBalls(prev => [...prev, i]);
           playDrillSound('select');
         }
       }
     });
-  }, [phase, showResults, selectedBalls, calculateResults, playDrillSound]);
+  }, [calculateResults, playDrillSound, handleSetSelectedBalls]);
 
   // === Native Structural Render & Physics Loop ===
   useEffect(() => {
@@ -369,11 +391,12 @@ export default function GhostLinkClient() {
       cvs.style.width = `${w}px`;
       cvs.style.height = `${h}px`;
 
-      // Keep balls in-bounds if resizing mid-game
       if (hasInitializedRoundRef.current && ballsRef.current.length > 0) {
         ballsRef.current.forEach(b => {
           if (b.x > w - b.r) b.x = w - b.r;
+          if (b.x < b.r) b.x = b.r;
           if (b.y > h - b.r) b.y = h - b.r;
+          if (b.y < b.r) b.y = b.r;
         });
       }
 
@@ -407,7 +430,9 @@ export default function GhostLinkClient() {
         const balls = ballsRef.current;
         const w = cvs.width;
         const h = cvs.height;
-        const speedMultiplier = ballSpeed * 60 * dt; 
+        const bestSc = engineRef.current ? (engineRef.current.bestScore || 0) : 0;
+        const dynamicSpeed = Math.min(13, ballSpeed + (bestSc / 30));
+        const speedMultiplier = dynamicSpeed * 60 * dt; 
 
         // Move & Wall Bounce
         for (let i = 0; i < balls.length; i++) {
@@ -434,7 +459,7 @@ export default function GhostLinkClient() {
             let minDist = b1.r + b2.r;
 
             if (dist < minDist) {
-              // Separate to prevent sticking
+              if (dist === 0) { dx = 1; dist = 1; } // Safety against NaN coordinates
               let overlap = minDist - dist;
               let nx = dx / dist;
               let ny = dy / dist;
@@ -444,7 +469,6 @@ export default function GhostLinkClient() {
               b2.x += nx * (overlap / 2);
               b2.y += ny * (overlap / 2);
 
-              // Exchange velocity along normal vector
               let kx = b1.dx - b2.dx;
               let ky = b1.dy - b2.dy;
               let p = 2 * (nx * kx + ny * ky) / 2;
@@ -469,13 +493,13 @@ export default function GhostLinkClient() {
 
       // Draw Balls
       ballsRef.current.forEach((b, i) => {
-        const isSelected = selectedBalls.includes(i);
+        const isSelected = selectedBallsRef.current.includes(i);
         
         ctx.beginPath(); 
         ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
         
         if (phaseRef.current === "IDENTIFY") {
-          if (showResults) {
+          if (showResultsRef.current) {
             ctx.fillStyle = b.isTarget ? "#00ff88" : (isBoxDarkMode ? "#1f1f2e" : "#e2e8f0");
             ctx.shadowBlur = b.isTarget ? 30 : 0;
             ctx.shadowColor = b.isTarget ? "#00ff88" : "transparent";
@@ -489,7 +513,7 @@ export default function GhostLinkClient() {
           ctx.shadowBlur = b.isTarget ? 30 : 0;
           ctx.shadowColor = b.isTarget ? "#00ff88" : "transparent";
         } else {
-          // TRACKING PHASE (All hide)
+          // TRACKING PHASE
           ctx.fillStyle = isBoxDarkMode ? "#e2e8f0" : "#334155";
           ctx.shadowBlur = 0;
         }
@@ -501,7 +525,7 @@ export default function GhostLinkClient() {
         ctx.stroke();
 
         // Selection Checkmark
-        if (phaseRef.current === "IDENTIFY" && !showResults && isSelected) {
+        if (phaseRef.current === "IDENTIFY" && !showResultsRef.current && isSelected) {
           ctx.font = "bold 16px Arial";
           ctx.fillStyle = "#ffffff";
           ctx.textAlign = "center";
@@ -517,12 +541,12 @@ export default function GhostLinkClient() {
         ctx.textAlign = "center";
         ctx.textBaseline = "top";
         
-        if (showResults) {
-          ctx.fillText(`Target Acquired: ${correctCount}/${TARGET_COUNT}`, cvs.width / 2, 30);
+        if (showResultsRef.current) {
+          ctx.fillText(`Target Acquired: ${correctCountRef.current}/${TARGET_COUNT}`, cvs.width / 2, 30);
         } else {
-          ctx.fillText(`Identify the Targets (${selectedBalls.length}/${TARGET_COUNT})`, cvs.width / 2, 30);
+          ctx.fillText(`Identify the Targets (${selectedBallsRef.current.length}/${TARGET_COUNT})`, cvs.width / 2, 30);
           
-          if (selectedBalls.length === TARGET_COUNT) {
+          if (selectedBallsRef.current.length === TARGET_COUNT) {
             const bx = cvs.width / 2 - 80;
             const by = cvs.height - 80;
             
@@ -552,12 +576,13 @@ export default function GhostLinkClient() {
       window.removeEventListener('resize', scaleLayoutFrame);
       trackingObserver.disconnect();
     };
-  }, [engine.gameState, isBoxDarkMode, phase, showResults, selectedBalls, correctCount, ballSpeed, playDrillSound, totalBalls, setPhaseState]);
+  }, [engine.gameState, isBoxDarkMode, ballSpeed, totalBalls, playDrillSound, initDrillVariables, setPhaseState]); 
 
   // === Absolute Initializing Trigger ===
   const handleStartGame = useCallback(async () => {
     initAudio();
-    hasInitializedRoundRef.current = false;
+    
+    // Explicit sync-wipes fixes the Restart button not properly restarting the simulation
     setCustomScore(0);
     customScoreRef.current = 0;
     setLocalTimeRemaining(drillDuration);
@@ -565,6 +590,14 @@ export default function GhostLinkClient() {
 
     gameStateRef.current = 'playing';
     isActiveRef.current = true;
+
+    // Force exact variable initialization synchronously
+    if (containerRef.current && canvasRef.current) {
+      const w = containerRef.current.clientWidth;
+      const h = containerRef.current.clientHeight;
+      initDrillVariables(w, h);
+      hasInitializedRoundRef.current = true;
+    }
 
     // Auto-Fullscreen Trigger
     try {
@@ -574,14 +607,30 @@ export default function GhostLinkClient() {
     } catch (err) {}
 
     engine.startGame();
-  }, [engine, initAudio, drillDuration]);
+  }, [engine, initAudio, drillDuration, initDrillVariables]);
 
-  const sharePage = async () => {
-    const url = 'https://skilldrills.online/drills/visual/tracking-accuracy/multiple-targets';
-    if (navigator.share) {
-      try { await navigator.share({ title: 'Ghost-Link Drill', text: 'Train multi-object tracking memory!', url }); } catch (e) {}
-    } else { try { await navigator.clipboard.writeText(url); alert('Link copied to clipboard!'); } catch (e) {} }
-  };
+  const shareScore = useCallback(() => {
+    let finalRank = 'Bronze';
+    if (customScoreRef.current >= 60 && accuracy >= 90) finalRank = 'Grandmaster';
+    else if (customScoreRef.current >= 60 && accuracy >= 82) finalRank = 'Master';
+    else if (customScoreRef.current >= 40 && accuracy >= 75) finalRank = 'Diamond';
+    else if (customScoreRef.current >= 40 && accuracy >= 65) finalRank = 'Platinum';
+    else if (customScoreRef.current >= 20 && accuracy >= 55) finalRank = 'Gold';
+    else if (customScoreRef.current >= 20) finalRank = 'Silver';
+
+    const text = `🎯 I scored ${customScoreRef.current} PTS with ${accuracy}% accuracy on the Multiple Object Tracking test! Rank: ${finalRank}. Try it here: https://skilldrills.online/drills/visual/tracking-accuracy/multiple-targets`;
+    
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      navigator.share({
+        title: 'My SkillDrills Visual Score',
+        text: text,
+        url: 'https://skilldrills.online/drills/visual/tracking-accuracy/multiple-targets'
+      }).catch(() => {});
+    } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+      alert('Score card copied to clipboard!');
+    }
+  }, [accuracy]);
 
   if (loading || !isClient) {
     return (
@@ -592,6 +641,44 @@ export default function GhostLinkClient() {
         </div>
       </div>
     );
+  }
+
+  let gradeLetter = 'F';
+  if (accuracy >= 90 && customScore >= 60) gradeLetter = 'S';
+  else if (accuracy >= 80 && customScore >= 60) gradeLetter = 'A';
+  else if (accuracy >= 70 && customScore >= 40) gradeLetter = 'B';
+  else if (accuracy >= 60 && customScore >= 40) gradeLetter = 'C';
+  else if (accuracy >= 50 && customScore >= 20) gradeLetter = 'D';
+
+  let rankName = 'Bronze';
+  let rankColor = 'text-slate-500';
+  if (customScore >= 60 && accuracy >= 90) {
+    rankName = 'Grandmaster';
+    rankColor = 'text-fuchsia-400 font-extrabold';
+  } else if (customScore >= 60 && accuracy >= 82) {
+    rankName = 'Master';
+    rankColor = 'text-red-400 font-extrabold';
+  } else if (customScore >= 40 && accuracy >= 75) {
+    rankName = 'Diamond';
+    rankColor = 'text-cyan-400 font-extrabold';
+  } else if (customScore >= 40 && accuracy >= 65) {
+    rankName = 'Platinum';
+    rankColor = 'text-indigo-400 font-extrabold';
+  } else if (customScore >= 20 && accuracy >= 55) {
+    rankName = 'Gold';
+    rankColor = 'text-yellow-400 font-extrabold';
+  } else if (customScore >= 20) {
+    rankName = 'Silver';
+    rankColor = 'text-gray-300 font-extrabold';
+  }
+
+  let diagnostics = "Outstanding multiple object tracking capacity! Your visual attention spans smoothly across active vectors.";
+  if (correctCount < 2) {
+    diagnostics = "Low target identification accuracy. Anchor your gaze centrally and track target coordinates peripherally to avoid losing targets during collisions.";
+  } else if (accuracy < 60) {
+    diagnostics = "Low precision rates. Take your time during the identification phase to prevent false selections.";
+  } else if (customScore < 40) {
+    diagnostics = "Improve your score by tracking all 3 target indices successfully to earn the maximum 60-point bonus.";
   }
 
   return (
@@ -624,7 +711,6 @@ export default function GhostLinkClient() {
               </div>
             </div>
             <div className="flex gap-2 flex-shrink-0 flex-wrap">
-              
               {engine.gameState === 'playing' && <button onClick={() => { if(engine.endGame) engine.endGame(); handleStartGame(); }} className={`p-2.5 rounded-lg border transition-all active:scale-95 ${isDarkMode ? 'bg-gray-900 border-gray-700 text-gray-400 hover:text-white hover:border-gray-500' : 'bg-white border-gray-200 text-gray-700'}`} title="Reset"><RefreshCw className="w-5 h-5" /></button>}
               <button onClick={() => setIsDarkMode(!isDarkMode)} className={`p-2.5 rounded-lg border transition-all active:scale-95 ${isDarkMode ? 'bg-gray-900 border-gray-700 text-gray-400 hover:text-white hover:border-gray-500' : 'bg-white border-gray-200 text-gray-700'}`}>{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button>
               <button onClick={() => setIsBoxDarkMode(!isBoxDarkMode)} className={`p-2.5 rounded-lg border transition-all active:scale-95 ${isDarkMode ? 'bg-gray-900 border-gray-700 text-gray-400 hover:text-white hover:border-gray-500' : 'bg-white border-gray-200 text-gray-700'}`} title="Toggle inner canvas theme"><Eye className="w-5 h-5" /></button>
@@ -765,78 +851,90 @@ export default function GhostLinkClient() {
               </div>
             )}
 
-            {/* Premium Custom Structural End Card Component (Optimized for Mobile Visibility) */}
+            {/* Premium Custom Structural End Card Component */}
             {engine.gameState === 'ended' && (
-              <div className="absolute inset-0 flex items-center justify-center z-[70] bg-black/95 pointer-events-auto animate-in fade-in duration-300 p-4 overflow-y-auto">
-                <div className="rounded-3xl max-w-md w-full shadow-2xl border border-gray-800 bg-gray-950 flex flex-col max-h-[90vh] my-auto shrink-0">
-                  
-                  <div className="flex-1 overflow-y-auto">
-                    <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 p-5 sm:p-6 border-b border-gray-800 relative overflow-hidden pointer-events-none shrink-0">
-                      <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-purple-500/20 rounded-full blur-3xl"></div>
-                      <div className="absolute bottom-0 left-0 -mb-4 -ml-4 w-32 h-32 bg-pink-500/20 rounded-full blur-3xl"></div>
-                      <div className="relative z-10 flex flex-col items-center">
-                        {(customScore > parseInt(typeof window !== 'undefined' ? localStorage.getItem('ghostLinkBestScore')||'0' : '0')) && customScore > 0 && (
-                          <div className="bg-yellow-500 text-black text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-2 shadow-[0_0_15px_rgba(234,179,8,0.5)]">
-                            ⭐ New Personal Best
-                          </div>
-                        )}
-                        <h2 className="text-2xl sm:text-3xl font-black text-white mb-1 tracking-tight">Mission Complete</h2>
-                        <p className="text-purple-400 font-medium text-sm">Ghost-Link Lab • Score Metrices</p>
+              <div className="absolute inset-0 bg-[#05070e]/98 overflow-y-auto p-6 z-[70] select-none scrollbar-thin scroll-smooth backdrop-blur-sm animate-in fade-in duration-300 pointer-events-auto">
+                <div className="min-h-full flex flex-col justify-center items-center py-4 w-full">
+                  <div className="max-w-md w-full text-center">
+                    {customScore > 0 && customScore >= (engine.bestScore || 0) && (
+                      <div className="inline-block bg-yellow-500 text-black text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-3 shadow-[0_0_15px_rgba(234,179,8,0.5)] animate-bounce font-mono">
+                        ⭐ NEW PERSONAL BEST!
+                      </div>
+                    )}
+                    
+                    <h2 className="text-xl font-black text-white uppercase tracking-wider mb-1 font-mono">
+                      Drill Complete
+                    </h2>
+                    <p className="text-xs text-slate-500 uppercase tracking-widest mb-6 font-mono">
+                      Ghost-Link Lab
+                    </p>
+
+                    <div className="grid grid-cols-3 gap-2.5 mb-6 text-left font-mono">
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Final Score</span>
+                        <span className="text-sm font-black text-white">{customScore} <span className="text-[8px] text-slate-400 font-normal">PTS</span></span>
+                      </div>
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Accuracy</span>
+                        <span className="text-sm font-black text-white">{accuracy}%</span>
+                      </div>
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Best Score</span>
+                        <span className="text-sm font-black text-purple-400">{engine.bestScore || 0}</span>
+                      </div>
+                      
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Correct Links</span>
+                        <span className="text-sm font-black text-emerald-400">{correctCount}</span>
+                      </div>
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Errors</span>
+                        <span className="text-sm font-black text-red-400">{TARGET_COUNT - correctCount}</span>
+                      </div>
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold font-mono">Grade</span>
+                        <span className="text-sm font-black text-pink-400 font-mono">{gradeLetter}</span>
                       </div>
                     </div>
 
-                    <div className="p-5 sm:p-6 pointer-events-none shrink-0">
-                      <div className="flex justify-between items-center mb-6">
-                        <div className="flex flex-col">
-                          <span className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Final Score</span>
-                          <div className="flex items-end gap-1">
-                            <span className="text-5xl sm:text-6xl font-black text-white leading-none tracking-tighter">{customScore}</span>
-                            <span className="text-sm sm:text-lg text-gray-500 font-bold mb-1">PTS</span>
-                          </div>
-                        </div>
-                        
-                        <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center">
-                          <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
-                            <path className="text-gray-800" strokeWidth="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                            <path 
-                              className={`${accuracy >= 80 ? 'text-purple-500' : accuracy >= 50 ? 'text-pink-500' : 'text-red-500'} transition-all duration-1000 ease-out`} 
-                              strokeWidth="3" strokeDasharray="100" strokeDashoffset={100 - accuracy} strokeLinecap="round" stroke="currentColor" fill="none" 
-                              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" 
-                            />
-                          </svg>
-                          <div className="absolute inset-0 flex flex-col items-center justify-center">
-                            <span className={`text-lg sm:text-xl font-black ${accuracy >= 80 ? 'text-purple-400' : accuracy >= 50 ? 'text-pink-400' : 'text-red-400'}`}>{accuracy}%</span>
-                            <span className="text-[7px] sm:text-[8px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">Accuracy</span>
-                          </div>
-                        </div>
+                    <div className="bg-[#0b0f19] border border-slate-850 p-3 rounded-xl mb-4 text-left font-sans">
+                      <span className={`text-xs font-black block text-center uppercase tracking-widest ${rankColor} mb-2`}>
+                        Rank: {rankName}
+                      </span>
+                      <div className="w-full h-px bg-slate-850 mb-2"></div>
+                      <div className="flex items-center gap-1.5 text-[9px] font-bold text-white uppercase mb-1 font-mono">
+                        <Sparkles className="w-3 h-3 text-amber-500" /> Diagnostics advice:
                       </div>
+                      <p className="text-[10px] text-slate-400 leading-normal font-sans">
+                        {diagnostics}
+                      </p>
+                    </div>
 
-                      <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-2">
-                        <div className="bg-gray-900/50 rounded-xl p-3 text-center border border-gray-800">
-                          <div className="text-gray-400 text-[10px] sm:text-xs uppercase font-bold tracking-wider mb-1">Correct Links</div>
-                          <div className="text-xl sm:text-2xl font-black text-green-400">{correctCount}</div>
-                        </div>
-                        <div className="bg-gray-900/50 rounded-xl p-3 text-center border border-gray-800">
-                          <div className="text-gray-400 text-[10px] sm:text-xs uppercase font-bold tracking-wider mb-1">Errors</div>
-                          <div className="text-xl sm:text-2xl font-black text-red-400">{TARGET_COUNT - correctCount}</div>
-                        </div>
-                      </div>
+                    <div className="flex gap-2">
+                      <PlayAgainButton
+                        onClick={() => { if(engine.endGame) engine.endGame(); handleStartGame(); }}
+                        colorTheme="purple"
+                      />
+                      <button
+                        onPointerDown={(e)=>e.stopPropagation()}
+                        onClick={shareScore}
+                        className="p-3 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded-xl transition-colors active:scale-95 flex items-center justify-center"
+                        title="Share Score"
+                      >
+                        <Share2 className="w-4 h-4" />
+                      </button>
+                      {isFullscreen && (
+                        <button
+                          onPointerDown={(e)=>e.stopPropagation()}
+                          onClick={handleExitToStart}
+                          className="p-3 bg-red-900/30 border border-red-900/55 hover:bg-red-900/50 text-red-400 rounded-xl transition-colors active:scale-95 flex items-center justify-center"
+                          title="Exit Drill"
+                        >
+                          <LogOut className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
                   </div>
-
-                  {/* Fixed Bottom Action Row */}
-                  <div className="p-3 sm:p-5 bg-gray-900/50 border-t border-gray-800 flex gap-2 sm:gap-3 shrink-0 rounded-b-3xl">
-                    <button onPointerDown={(e)=>e.stopPropagation()} onClick={() => { if(engine.endGame) engine.endGame(); handleStartGame(); }} className="flex-1 py-3 sm:py-4 bg-purple-600 text-white rounded-xl font-black tracking-wide hover:bg-purple-500 transition-all active:scale-95 flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(168,85,247,0.4)] text-sm sm:text-base">
-                      <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5" /> PLAY AGAIN
-                    </button>
-                    <button onPointerDown={(e)=>e.stopPropagation()} onClick={sharePage} className="px-4 sm:px-5 py-3 sm:py-4 bg-gray-800 text-white rounded-xl font-bold hover:bg-gray-700 transition-all active:scale-95 border border-gray-700 flex items-center justify-center" title="Share Drill">
-                      <Share2 className="w-4 h-4 sm:w-5 sm:h-5" />
-                    </button>
-                    <button onPointerDown={(e)=>e.stopPropagation()} onClick={handleExitToStart} className="px-4 sm:px-5 py-3 sm:py-4 bg-red-900/30 text-red-400 rounded-xl font-bold hover:bg-red-900/50 transition-all active:scale-95 border border-red-900/50 flex items-center justify-center" title="Exit Drill">
-                      <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
-                    </button>
-                  </div>
-
                 </div>
               </div>
             )}
@@ -859,7 +957,7 @@ export default function GhostLinkClient() {
                   <RuleItem num="2" color="cyan" text="Dynamic Adjustments" highlight="Ball Count & Speed" result="Personalized Difficulty" />
                 </div>
                 <div className="space-y-5">
-                  <RuleItem num="3" color="red" text="False Identification" highlight="Clicking wrong ball" result="-10 PTS penalty" />
+                  <RuleItem num="3" color="red" text="False Identification" highlight="Clicking wrong ball" result="0 PTS penalty" />
                   <RuleItem num="4" color="blue" text="True 2D Collisions" highlight="Physics Deflections" result="Extreme Unpredictability" />
                 </div>
               </div>
@@ -903,7 +1001,7 @@ export default function GhostLinkClient() {
                       <div className="w-8 h-8 rounded-lg bg-pink-600 flex items-center justify-center"><BarChart3 className="w-4 h-4 text-white" /></div>
                       <h3 className="text-sm font-bold text-white">Performance Metrics</h3>
                     </div>
-                    <p className="text-xs leading-relaxed text-gray-400">Total net scores (+20/-10 economy), overall identification accuracy percentage, and peak progression through advanced speed and quantity configurations.</p>
+                    <p className="text-xs leading-relaxed text-gray-400">Total net scores (+20 points per hit), overall identification accuracy percentage, and peak progression through advanced speed and quantity configurations.</p>
                   </div>
                 </div>
 
@@ -930,7 +1028,7 @@ export default function GhostLinkClient() {
                   <div className="space-y-4">
                     <div>
                       <h4 className="text-sm font-bold text-gray-200">Can my score drop below zero?</h4>
-                      <p className="text-xs text-gray-400 mt-1">No. The internal engine strictly enforces a minimum score bound of 0 PTS. Scoring is weighted favorably (+20 points for a correct hit versus a -10 point penalty for errors).</p>
+                      <p className="text-xs text-gray-400 mt-1">No. The internal engine strictly enforces a minimum score bound of 0 PTS. Incorrect selections do not reduce your score; they simply result in 0 points for that pick.</p>
                     </div>
                     <div>
                       <h4 className="text-sm font-bold text-gray-200">How do the collisions work?</h4>

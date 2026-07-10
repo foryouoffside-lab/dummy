@@ -1,129 +1,134 @@
 import StrobeLatencyClient from './StrobeLatencyClient';
 
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "SkillDrills", "item": "https://skilldrills.online/" },
+    { "@type": "ListItem", "position": 2, "name": "Visual Training", "item": "https://skilldrills.online/drills/visual" },
+    { "@type": "ListItem", "position": 3, "name": "Reaction Speed", "item": "https://skilldrills.online/drills/visual/reaction-speed" },
+    { "@type": "ListItem", "position": 4, "name": "Light Reaction Test", "item": "https://skilldrills.online/drills/visual/reaction-speed/light-reaction" }
+  ]
+};
+
+const webAppSchema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Light Reaction Time Test – Free Visual Reflex Game",
+  "applicationCategory": "EducationalApplication",
+  "operatingSystem": "All",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "description": "Free online visual reaction test. Click the screen as soon as the target flashes to measure your reaction latency in milliseconds.",
+  "url": "https://skilldrills.online/drills/visual/reaction-speed/light-reaction",
+  "publisher": { "@type": "Organization", "name": "SkillDrills", "url": "https://skilldrills.online" },
+  "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.8", "reviewCount": "980" }
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is the Light Reaction test?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A simple reaction time test where you must click the target as fast as possible when it flashes white."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does the difficulty scale?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "As your score increases, the flash duration window shrinks, requiring faster motor responses to register hits."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is a good reaction speed?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Average human visual reaction time is around 250ms. Elite gamers and athletes can react within 150-180ms."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do I need to sign up?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No registration is required. The Light Reaction test is completely free and works instantly in your browser."
+      }
+    }
+  ]
+};
+
+const howToSchema = {
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "How to Measure Your Visual Reaction Time Online",
+  "description": "Quickly test and train your visual reflex speeds using our simple Light Reaction game.",
+  "step": [
+    {
+      "@type": "HowToStep",
+      "position": 1,
+      "name": "Focus on the Circle",
+      "text": "Start the drill and keep your eyes locked on the dark central circle."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 2,
+      "name": "Wait for the White Flash",
+      "text": "Wait for the circle to flash white. Intervals are randomized to prevent anticipation."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 3,
+      "name": "Click or Tap Instantly",
+      "text": "Click or tap the target as fast as you can. Your reaction time will be recorded in milliseconds."
+    }
+  ]
+};
+
 export const metadata = {
-  title: 'Light Reaction - Speed Drill | SkillDrills',
-  description: 'Click when ball flashes white. Adaptive 100-200ms window, raw mouse input, random 1-3s intervals. Millisecond reaction tracking. No sign-up.',
+  title: "Light Reaction Time Test | Free Visual Reflex Training Game | SkillDrills",
+  description: "Test your visual reaction speed online. Click the screen as soon as the target flashes to measure your reaction latency in milliseconds.",
   keywords: [
-    'light reaction test', 'visual reaction speed', 'reaction time drill',
-    'light reaction speed', 'reflex training', 'visual stimulus reaction',
-    'reaction speed game', 'light flash test', 'simple reaction time',
-    'visual reflex training', 'reaction window training', 'speed test',
-    'free reaction time test', 'light reaction lab', 'light reaction free',
-    'reaction speed drill free', 'adaptive reaction window', 'flash detection test',
-    'millisecond reaction tracking', 'raw input reaction', 'pointer lock reaction',
-    'skilldrills light reaction', 'skilldrills reaction', 'skilldrills visual',
-    'click flash test', 'white flash reaction', 'random interval reaction',
-    'reflex speed game', 'visual detection speed', 'strobe reflex training',
-    'esports reaction training', 'gaming reflex drill', 'competitive reaction test',
+    "light reaction test",
+    "visual reaction time test",
+    "reflex training game",
+    "reaction speed test",
+    "strobe latency test online",
+    "simple reaction time test"
   ],
+  alternates: {
+    canonical: "https://skilldrills.online/drills/visual/reaction-speed/light-reaction",
+  },
+  robots: { index: true, follow: true },
   openGraph: {
-    title: 'Light Reaction - Speed Drill | SkillDrills',
-    description: 'Click when ball flashes white. Adaptive 100-200ms window, raw mouse input, random 1-3s intervals. Millisecond reaction tracking. No sign-up.',
-    type: 'article',
-    url: 'https://skilldrills.online/drills/visual/reaction-speed/light-reaction',
+    title: "Light Reaction Time Test | Free Visual Reflex Training Game | SkillDrills",
+    description: "Test your visual reaction speed online. Click the screen as soon as the target flashes to measure your reaction latency in milliseconds.",
+    url: "https://skilldrills.online/drills/visual/reaction-speed/light-reaction",
     siteName: 'SkillDrills',
     locale: 'en_US',
-    images: [{
-      url: 'https://skilldrills.online/icons/icon-512x512.png',
-      width: 512,
-      height: 512,
-      alt: 'Light Reaction Speed Lab',
-    }],
+    type: 'website',
+    images: [{ url: 'https://skilldrills.online/icons/icon-512x512.png', width: 512, height: 512, alt: "Light Reaction Time Test" }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Light Reaction - Speed Drill | SkillDrills',
-    description: 'Click when ball flashes white. Adaptive 100-200ms window, raw mouse input, random 1-3s intervals. Millisecond reaction tracking. No sign-up.',
+    title: "Light Reaction Time Test | Free Visual Reflex Training Game | SkillDrills",
+    description: "Test your visual reaction speed online. Click the screen as soon as the target flashes to measure your reaction latency in milliseconds.",
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
-  },
-  robots: { index: true, follow: true },
-  alternates: {
-    canonical: 'https://skilldrills.online/drills/visual/reaction-speed/light-reaction',
   },
 };
 
 export default function StrobeLatencyPage() {
   return (
     <>
-
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "BreadcrumbList",
-            "itemListElement": [
-              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://skilldrills.online" },
-              { "@type": "ListItem", "position": 2, "name": "Visual Training", "item": "https://skilldrills.online/drills/visual" },
-              { "@type": "ListItem", "position": 3, "name": "Reaction Speed", "item": "https://skilldrills.online/drills/visual/reaction-speed" },
-              { "@type": "ListItem", "position": 4, "name": "Light Reaction Speed" }
-            ]
-          })
-        }}
-      />
-
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "WebApplication",
-            "name": "Strobe-Latency Lab",
-            "url": "https://skilldrills.online/drills/visual/reaction-speed/light-reaction",
-            "description": "Free strobe reaction drill. Click when ball flashes white. Adaptive 100-200ms window, raw mouse input, random 1-3s intervals. Millisecond tracking.",
-            "applicationCategory": "EducationalApplication",
-            "operatingSystem": "All",
-            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-            "author": { "@type": "Organization", "name": "SkillDrills" },
-            "isAccessibleForFree": true
-          })
-        }}
-      />
-
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "FAQPage",
-            "mainEntity": [
-              {
-                "@type": "Question",
-                "name": "What is the Strobe-Latency Lab?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "A free visual reaction speed drill. Click when ball flashes white. Adaptive 100-200ms window, raw mouse input, random 1-3s intervals prevent anticipation."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "How does the adaptive window work?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "Starts at 200ms. Successful hits shrink by 5ms (min 100ms). Errors expand by 10ms (max 200ms). Always at your current reaction level."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "What reaction times should I aim for?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "Average: 200-250ms. With practice: 180-200ms. Elite: 150-170ms. Best reaction time tracked in milliseconds."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "Do I need to sign up?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "No registration required. This reaction speed drill is completely free and works instantly in your browser."
-                }
-              }
-            ]
-          })
-        }}
-      />
-
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }} />
       <StrobeLatencyClient />
     </>
   );

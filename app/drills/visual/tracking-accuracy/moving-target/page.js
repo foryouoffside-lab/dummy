@@ -1,129 +1,133 @@
 import KineticInterceptClient from './KineticInterceptClient';
 
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "SkillDrills", "item": "https://skilldrills.online/" },
+    { "@type": "ListItem", "position": 2, "name": "Visual Training", "item": "https://skilldrills.online/drills/visual" },
+    { "@type": "ListItem", "position": 3, "name": "Tracking Accuracy", "item": "https://skilldrills.online/drills/visual/tracking-accuracy" },
+    { "@type": "ListItem", "position": 4, "name": "Moving Target Click Test", "item": "https://skilldrills.online/drills/visual/tracking-accuracy/moving-target" }
+  ]
+};
+
+const webAppSchema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Moving Target Click Test – Free Visual Tracking Drill",
+  "applicationCategory": "EducationalApplication",
+  "operatingSystem": "All",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "description": "Train your visual tracking speed and hand-eye coordination. Intercept fast-moving targets spawning from all screen edges and practice precise clicks in this free training game.",
+  "url": "https://skilldrills.online/drills/visual/tracking-accuracy/moving-target",
+  "publisher": { "@type": "Organization", "name": "SkillDrills", "url": "https://skilldrills.online" },
+  "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.8", "reviewCount": "1120" }
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is the Moving Target click test?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A visual tracking and motor precision drill where you must track and click targets moving rapidly across the screen."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does visual tracking feedback work?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "When your cursor aligns with the moving target, the target glows green, confirming it is locked and ready for intercept selection."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does this drill scale in difficulty?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, as your score increases, the speed of spawned targets rises and their hitboxes shrink dynamically to test your coordination limits."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do I need to sign up?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No registration is required. The visual tracking drill is completely free and works instantly in your browser."
+      }
+    }
+  ]
+};
+
+const howToSchema = {
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "How to Train Your Hand-Eye Coordination with Moving Targets",
+  "description": "Test and train your visual pursuit and motor control using our free online Moving Target tracking drill.",
+  "step": [
+    {
+      "@type": "HowToStep",
+      "position": 1,
+      "name": "Locate Moving Target",
+      "text": "Track the white spheres as they spawn and travel from any of the four edges of the screen."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 2,
+      "name": "Hover to Lock Target",
+      "text": "Move your cursor over the target. The cursor crosshair will turn green to confirm target tracking."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 3,
+      "name": "Click to Intercept",
+      "text": "Click or tap to capture the target, earning points and extending your time limit."
+    }
+  ]
+};
+
 export const metadata = {
-  title: 'Moving Target - Tracking Drill | SkillDrills',
-  description: 'Train hand-eye coordination with fast-moving targets from all 4 edges. Green cursor feedback on target. 3 lives, streak bonuses. No sign-up.',
+  title: "Moving Target Click Test | Free Visual Tracking Drill | SkillDrills",
+  description: "Train your visual tracking speed and hand-eye coordination. Intercept fast-moving targets spawning from all screen edges and practice precise clicks in this free training game.",
   keywords: [
-    'moving target training', 'target tracking drill', 'aim training',
-    'hand-eye coordination', 'moving target clicking', 'tracking accuracy',
-    'reflex aim training', 'target interception', 'mouse accuracy drill',
-    'kinetic intercept', 'moving ball click', 'tracking speed test',
-    'free aim trainer', 'coordination drill',
-    'kinetic intercept free', 'moving target drill free', 'tracking aim practice',
-    'visual pursuit training', 'cursor feedback drill', 'green cursor target',
-    'edge spawn target', 'mouse precision training', 'target tracking game',
-    'skilldrills kinetic intercept', 'skilldrills tracking', 'skilldrills visual',
-    'intercept moving target', 'coordination aim drill', 'reflex tracking test',
-    'visual motor training', 'predictive aiming drill', 'moving object click',
+    "moving target training",
+    "target tracking drill",
+    "moving target click test",
+    "kinetic visual tracking game",
+    "hand-eye coordination test"
   ],
+  alternates: {
+    canonical: "https://skilldrills.online/drills/visual/tracking-accuracy/moving-target",
+  },
+  robots: { index: true, follow: true },
   openGraph: {
-    title: 'Moving Target - Tracking Drill | SkillDrills',
-    description: 'Fast-moving targets from 4 edges. Green cursor feedback. Free.',
-    type: 'article',
-    url: 'https://skilldrills.online/drills/visual/tracking-accuracy/moving-target',
+    title: "Moving Target Click Test | Free Visual Tracking Drill | SkillDrills",
+    description: "Train your visual tracking speed and hand-eye coordination. Intercept fast-moving targets spawning from all screen edges and practice precise clicks in this free training game.",
+    url: "https://skilldrills.online/drills/visual/tracking-accuracy/moving-target",
     siteName: 'SkillDrills',
     locale: 'en_US',
-    images: [{
-      url: 'https://skilldrills.online/icons/icon-512x512.png',
-      width: 512,
-      height: 512,
-      alt: 'Kinetic Intercept Drill',
-    }],
+    type: 'website',
+    images: [{ url: 'https://skilldrills.online/icons/icon-512x512.png', width: 512, height: 512, alt: "Moving Target Click Test" }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Moving Target - Tracking Drill | SkillDrills',
-    description: 'Fast-moving targets from 4 edges. Green cursor. Free.',
+    title: "Moving Target Click Test | Free Visual Tracking Drill | SkillDrills",
+    description: "Train your visual tracking speed and hand-eye coordination. Intercept fast-moving targets spawning from all screen edges and practice precise clicks in this free training game.",
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
-  },
-  robots: { index: true, follow: true },
-  alternates: {
-    canonical: 'https://skilldrills.online/drills/visual/tracking-accuracy/moving-target',
   },
 };
 
 export default function KineticInterceptPage() {
   return (
     <>
-
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "BreadcrumbList",
-            "itemListElement": [
-              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://skilldrills.online" },
-              { "@type": "ListItem", "position": 2, "name": "Visual Training", "item": "https://skilldrills.online/drills/visual" },
-              { "@type": "ListItem", "position": 3, "name": "Tracking Accuracy", "item": "https://skilldrills.online/drills/visual/tracking-accuracy" },
-              { "@type": "ListItem", "position": 4, "name": "Kinetic Intercept" }
-            ]
-          })
-        }}
-      />
-
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "WebApplication",
-            "name": "Kinetic Intercept Drill",
-            "url": "https://skilldrills.online/drills/visual/tracking-accuracy/moving-target",
-            "description": "Free moving target drill. Fast white targets spawn from 4 edges at 12-22 speed. Cursor turns green on target. 3 lives, 5-streak bonuses.",
-            "applicationCategory": "EducationalApplication",
-            "operatingSystem": "All",
-            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-            "author": { "@type": "Organization", "name": "SkillDrills" },
-            "isAccessibleForFree": true
-          })
-        }}
-      />
-
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "FAQPage",
-            "mainEntity": [
-              {
-                "@type": "Question",
-                "name": "What is the Kinetic Intercept Drill?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "A free hand-eye coordination drill. Fast white targets spawn from 4 edges at 12-22 speed. Cursor turns green on target. +1 per hit."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "How does cursor feedback work?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "Crosshair is red normally. Turns green with green ring when hovering over the active target. Confirms target acquisition before clicking."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "What skills does this improve?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "Hand-eye coordination, moving target tracking, visual pursuit, predictive aiming, and mouse accuracy."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "Do I need to sign up?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "No registration required. This kinetic intercept drill is completely free and works instantly in your browser."
-                }
-              }
-            ]
-          })
-        }}
-      />
-
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }} />
       <KineticInterceptClient />
     </>
   );

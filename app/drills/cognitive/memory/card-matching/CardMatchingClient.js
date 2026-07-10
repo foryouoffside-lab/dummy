@@ -10,12 +10,13 @@ import {
   GraduationCap, Lightbulb, TrendingUp, Clock, ArrowRight,
   Award, CheckCircle, XCircle,
   ChevronRight, Play, Heart, Circle, Square, Triangle, 
-  Diamond, Hexagon, Activity, Grid3X3
+  Diamond, Hexagon, Activity, Grid3X3, Sparkles
 } from 'lucide-react';
 import useGameEngine from '../../../../../lib/useGameEngine';
+import PlayAgainButton from "../../../../../components/PlayAgainButton";
 
 // ============================================================
-// LEVEL & DIFFICULTY SYSTEM (Local & Crash-Proof)
+// LEVEL & DIFFICULTY SYSTEM
 // ============================================================
 const MAX_LEVEL = 20;
 
@@ -30,9 +31,13 @@ class AudioSynthesizer {
   
   init() {
     if (!this.ctx) {
-      this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+      try {
+        this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+        if (this.ctx.state === 'suspended') this.ctx.resume();
+      } catch (e) {
+        console.warn("AudioContext not supported or blocked.");
+      }
     }
-    if (this.ctx.state === 'suspended') this.ctx.resume();
   }
 
   playPop() {
@@ -124,7 +129,8 @@ export default function CardMatchingClient() {
   const [localFeedback, setLocalFeedback] = useState({ id: 0, text: '', type: 'success', visible: false });
 
   // === Game Flow State ===
-  const [localPhase, setLocalPhase] = useState('start'); // 'start', 'playing', 'ended'
+  const [localPhase, setLocalPhase] = useState('start'); 
+  const [gameKey, setGameKey] = useState(0); // <-- ADDED: Forces React to rebuild timers on restart
 
   // === Game State (Visual Sync) ===
   const [cards, setCards] = useState([]);
@@ -176,7 +182,7 @@ export default function CardMatchingClient() {
     setPenaltyCount(penaltyCountRef.current);
   }, []);
 
-  // === Game Engine (Stats Tracking Background) ===
+  // === Game Engine ===
   const engine = useGameEngine({
     category: 'cognitive',
     drillId: 'card-matching',
@@ -192,33 +198,45 @@ export default function CardMatchingClient() {
     engineRef.current = engine;
   }, [engine]);
 
-  // === Custom Precision Timer ===
+  // === BULLETPROOF HIGH-PRECISION TIMER ===
   useEffect(() => {
-    if (localPhase !== 'playing') {
-      if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
-      return;
-    }
-    
+    // 1. Clear any existing timers first to prevent duplicate ticks
     if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
 
+    if (localPhase !== 'playing') {
+      return;
+    }
+
+    let lastTick = Date.now();
+
+    // Runs every 100ms to perfectly catch delta-time jumps (fixes browser throttling bugs)
     timerIntervalRef.current = setInterval(() => {
-      localTimeRef.current -= 1;
-      setLocalTimeRemaining(localTimeRef.current);
+      const now = Date.now();
+      const deltaMs = now - lastTick;
       
-      if (localTimeRef.current <= 0) {
-        clearInterval(timerIntervalRef.current);
-        setIsTimeUp(true); 
-        setLocalPhase('ended');
-        if (typeof engineRef.current?.endGame === 'function') {
-          engineRef.current.endGame();
+      if (deltaMs >= 1000) {
+        const passedSeconds = Math.floor(deltaMs / 1000);
+        localTimeRef.current -= passedSeconds;
+        lastTick += passedSeconds * 1000;
+        
+        if (localTimeRef.current <= 0) {
+          localTimeRef.current = 0;
+          clearInterval(timerIntervalRef.current);
+          setIsTimeUp(true); 
+          setLocalPhase('ended');
+          if (typeof engineRef.current?.endGame === 'function') {
+            engineRef.current.endGame();
+          }
         }
+        
+        setLocalTimeRemaining(localTimeRef.current);
       }
-    }, 1000);
+    }, 100);
     
     return () => {
       if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
     };
-  }, [localPhase, isTimeUp]);
+  }, [localPhase, gameKey]); // <-- FIXED: Added gameKey so restart triggers this effect
 
   // Audio Sync
   useEffect(() => {
@@ -367,6 +385,13 @@ export default function CardMatchingClient() {
     syncToUI();
   }, [getCardIcons, syncToUI]);
 
+  // === DYNAMIC DIFFICULTY ===
+  const updateDifficulty = useCallback(() => {
+    const newLevel = Math.min(MAX_LEVEL, Math.floor(scoreRef.current / 40) + 1);
+    levelRef.current = newLevel;
+    setCurrentLevel(newLevel);
+  }, []);
+
   // Match Resolution
   const checkMatch = useCallback((idx1, idx2) => {
     const c1 = cardsRef.current[idx1];
@@ -388,8 +413,9 @@ export default function CardMatchingClient() {
         if (audioSynth) audioSynth.playLevelUp();
         
         scoreRef.current += 20;
-        localTimeRef.current = Math.min(60, localTimeRef.current + 15);
-        levelRef.current = Math.min(MAX_LEVEL, levelRef.current + 1);
+        localTimeRef.current += 15; // Uncapped infinite accumulation
+        
+        updateDifficulty();
         
         setLocalTimeRemaining(localTimeRef.current);
         triggerFeedback('✓ GRID CLEARED! +20 PTS | +15s', 'success');
@@ -414,14 +440,13 @@ export default function CardMatchingClient() {
         waitingRef.current = false;
       }, 600);
     }
-  }, [triggerFeedback, syncToUI, initGrid]);
+  }, [triggerFeedback, syncToUI, initGrid, updateDifficulty]);
 
   // === ZERO-LATENCY CELL CLICK ===
   const handleCardClick = useCallback((index, e) => {
     if (e) {
       e.stopPropagation();
       e.preventDefault();
-      if (e.target.setPointerCapture) e.target.setPointerCapture(e.pointerId);
     }
 
     if (localPhase !== 'playing' || isTimeUp) return;
@@ -432,7 +457,7 @@ export default function CardMatchingClient() {
 
     totalClicksRef.current += 1;
 
-    // >5 FLIP MEMORY PENALTY (-2 PTS | -1s | Decrease Diff)
+    // >5 FLIP MEMORY PENALTY (-1s)
     const currentFlips = (flipCountsRef.current[index] || 0) + 1;
     flipCountsRef.current[index] = currentFlips;
 
@@ -440,12 +465,11 @@ export default function CardMatchingClient() {
       if (audioSynth) audioSynth.playBuzz();
       penaltyCountRef.current += 1;
       
-      scoreRef.current = Math.max(0, scoreRef.current - 2); 
       localTimeRef.current -= 1;
-      levelRef.current = Math.max(1, levelRef.current - 1); 
+      updateDifficulty();
       
       setLocalTimeRemaining(localTimeRef.current);
-      triggerFeedback('✗ PENALTY! -2 PTS | -1s', 'error');
+      triggerFeedback('✗ PENALTY! -1s', 'error');
 
       if (localTimeRef.current <= 0) {
         setIsTimeUp(true);
@@ -465,13 +489,15 @@ export default function CardMatchingClient() {
     }
     
     syncToUI();
-  }, [localPhase, isTimeUp, checkMatch, triggerFeedback, syncToUI]);
+  }, [localPhase, isTimeUp, checkMatch, triggerFeedback, syncToUI, updateDifficulty]);
 
   // Core Game Start/Restart
   const handleStartGame = useCallback(async () => {
     if (audioSynth) audioSynth.init(); 
     
-    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    // FIXED: Removed the direct manual clearInterval here.
+    // Instead, we just tick gameKey, and the useEffect handles cleanup and re-creation automatically.
+    setGameKey(prev => prev + 1);
     
     setLocalPhase('playing');
     setIsTimeUp(false);
@@ -498,14 +524,74 @@ export default function CardMatchingClient() {
     } catch (err) {}
   }, [initGrid]);
 
-  const shareDrillLink = useCallback(() => {
-    const url = 'https://skilldrills.online/drills/cognitive/memory/card-matching';
-    if (navigator.share) {
-      navigator.share({ title: 'Card Matching Memory Drill', text: 'Test your spatial memory capacity!', url }).catch(() => {});
-    } else {
-      navigator.clipboard.writeText(url).then(() => alert('Link copied to clipboard!')).catch(() => prompt('Copy link:', url));
+  const shareScore = useCallback(() => {
+    const finalAccuracy = totalClicksRef.current > 0 ? Math.round(((correctMatchesRef.current * 2) / totalClicksRef.current) * 100) : 0;
+    
+    let finalRank = 'Bronze';
+    if (scoreRef.current >= 240 && finalAccuracy >= 90) finalRank = 'Grandmaster';
+    else if (scoreRef.current >= 180 && finalAccuracy >= 82) finalRank = 'Master';
+    else if (scoreRef.current >= 120 && finalAccuracy >= 75) finalRank = 'Diamond';
+    else if (scoreRef.current >= 80 && finalAccuracy >= 65) finalRank = 'Platinum';
+    else if (scoreRef.current >= 40 && finalAccuracy >= 55) finalRank = 'Gold';
+    else if (scoreRef.current >= 20) finalRank = 'Silver';
+
+    const text = `🧠 I scored ${scoreRef.current} PTS with ${finalAccuracy}% accuracy on the Card Matching Spatial Memory Drill! Reached Level ${levelRef.current}. Rank: ${finalRank}. Try it here: https://skilldrills.online/drills/cognitive/memory/card-matching`;
+    
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      navigator.share({
+        title: 'My SkillDrills Cognitive Score',
+        text: text,
+        url: 'https://skilldrills.online/drills/cognitive/memory/card-matching'
+      }).catch(() => {});
+    } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+      alert('Score card copied to clipboard!');
     }
   }, []);
+
+  const totalActions = totalClicks;
+  const accuracy = totalClicks > 0 ? Math.round(((correctMatches * 2) / totalClicks) * 100) : 0;
+  const strokeDasharray = 100;
+  const strokeDashoffset = strokeDasharray - accuracy;
+
+  // Calculate grade based on score and accuracy
+  let gradeLetter = 'F';
+  if (accuracy >= 85 && currentScore >= 180) gradeLetter = 'S';
+  else if (accuracy >= 75 && currentScore >= 120) gradeLetter = 'A';
+  else if (accuracy >= 65 && currentScore >= 80) gradeLetter = 'B';
+  else if (accuracy >= 55 && currentScore >= 40) gradeLetter = 'C';
+  else if (accuracy >= 45 && currentScore >= 20) gradeLetter = 'D';
+
+  let rankName = 'Bronze';
+  let rankColor = 'text-slate-500';
+  if (currentScore >= 240 && accuracy >= 90) {
+    rankName = 'Grandmaster';
+    rankColor = 'text-fuchsia-400 font-extrabold';
+  } else if (currentScore >= 180 && accuracy >= 82) {
+    rankName = 'Master';
+    rankColor = 'text-red-400 font-extrabold';
+  } else if (currentScore >= 120 && accuracy >= 75) {
+    rankName = 'Diamond';
+    rankColor = 'text-cyan-400 font-extrabold';
+  } else if (currentScore >= 80 && accuracy >= 65) {
+    rankName = 'Platinum';
+    rankColor = 'text-indigo-400 font-extrabold';
+  } else if (currentScore >= 40 && accuracy >= 55) {
+    rankName = 'Gold';
+    rankColor = 'text-yellow-400 font-extrabold';
+  } else if (currentScore >= 20) {
+    rankName = 'Silver';
+    rankColor = 'text-gray-300 font-extrabold';
+  }
+
+  let diagnostics = "Superb visual retention! Your brain created rapid, high-fidelity spatial maps of card coordinates.";
+  if (penaltyCount > 4) {
+    diagnostics = "High guessing rate. Try to use auditory anchoring (muttering the item name) to reduce memory interference.";
+  } else if (accuracy < 60) {
+    diagnostics = "Decaying short-term recall. Slow down slightly to establish stronger visual associations before flipping cards.";
+  } else if (currentScore < 60) {
+    diagnostics = "Try to group cards in small chunks (e.g. quadrants) to ease the cognitive load on your working memory.";
+  }
 
   if (loading || !isClient) {
     return (
@@ -517,10 +603,6 @@ export default function CardMatchingClient() {
       </div>
     );
   }
-
-  const accuracy = totalClicks > 0 ? Math.round(((correctMatches * 2) / totalClicks) * 100) : 0;
-  const strokeDasharray = 100;
-  const strokeDashoffset = strokeDasharray - accuracy;
 
   return (
     <div className="min-h-screen select-none bg-[#050505] text-white selection:bg-transparent font-sans" style={{ WebkitTapHighlightColor: 'transparent' }}>
@@ -692,75 +774,85 @@ export default function CardMatchingClient() {
             </div>
           )}
 
-          {/* END SCREEN (Scrollable) */}
+          {/* END SCREEN */}
           {(localPhase === 'ended' || isTimeUp) && (
-            <div className="absolute inset-0 flex items-center justify-center z-[70] bg-black/95 pointer-events-auto animate-in fade-in duration-300 overflow-y-auto px-4 py-6">
-              <div className="rounded-3xl max-w-md w-full shadow-2xl border border-gray-800 bg-gray-950 flex flex-col max-h-[95vh] overflow-y-auto my-auto">
-                
-                <div className="bg-gradient-to-br from-pink-900/40 to-rose-900/40 p-4 sm:p-6 border-b border-gray-800 relative overflow-hidden pointer-events-none shrink-0 rounded-t-3xl">
-                  <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-pink-500/20 rounded-full blur-3xl"></div>
-                  <div className="absolute bottom-0 left-0 -mb-4 -ml-4 w-32 h-32 bg-rose-500/20 rounded-full blur-3xl"></div>
-                  <div className="relative z-10 flex flex-col items-center">
-                    {isNewBest && (
-                      <div className="bg-yellow-500 text-black text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-2 shadow-[0_0_15px_rgba(234,179,8,0.5)]">
-                        ⭐ New Personal Best
-                      </div>
-                    )}
-                    <h2 className="text-2xl sm:text-3xl font-black text-white mb-1 tracking-tight">Time Expired</h2>
-                    <p className="text-pink-400 font-medium text-sm">Card Matching • Reached Level {currentLevel}</p>
-                  </div>
-                </div>
+            <div className="absolute inset-0 bg-[#05070e]/98 overflow-y-auto p-6 z-[70] select-none scrollbar-thin scroll-smooth backdrop-blur-sm" onPointerDown={e => e.stopPropagation()}>
+              <div className="min-h-full flex flex-col justify-center items-center py-4 w-full">
+                <div className="max-w-md w-full text-center">
+                  {currentScore > 0 && currentScore >= bestScore && (
+                    <div className="inline-block bg-yellow-500 text-black text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-3 shadow-[0_0_15px_rgba(234,179,8,0.5)] animate-bounce font-mono">
+                      ⭐ NEW PERSONAL BEST!
+                    </div>
+                  )}
+                  
+                  <h2 className="text-xl font-black text-white uppercase tracking-wider mb-1 font-mono">
+                    Drill Complete
+                  </h2>
+                  <p className="text-xs text-slate-500 uppercase tracking-widest mb-6 font-mono">
+                    Peak difficulty reached: Level {currentLevel}
+                  </p>
 
-                <div className="p-4 sm:p-6 pointer-events-none shrink-0">
-                  <div className="flex justify-between items-center mb-6">
-                    <div className="flex flex-col">
-                      <span className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Final Score</span>
-                      <div className="flex items-end gap-1">
-                        <span className="text-5xl sm:text-6xl font-black text-white leading-none tracking-tighter">{currentScore}</span>
-                        <span className="text-sm sm:text-lg text-gray-500 font-bold mb-1">PTS</span>
-                      </div>
+                  <div className="grid grid-cols-3 gap-2.5 mb-6 text-left font-mono">
+                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Final Score</span>
+                      <span className="text-sm font-black text-white">{currentScore} <span className="text-[8px] text-slate-400 font-normal">PTS</span></span>
+                    </div>
+                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Accuracy</span>
+                      <span className="text-sm font-black text-white">{accuracy}%</span>
+                    </div>
+                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Best Score</span>
+                      <span className="text-sm font-black text-yellow-400">{bestScore}</span>
                     </div>
                     
-                    <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center">
-                      <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
-                        <path className="text-gray-800" strokeWidth="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                        <path 
-                          className={`${accuracy >= 80 ? 'text-green-500' : accuracy >= 50 ? 'text-yellow-500' : 'text-red-500'} transition-all duration-1000 ease-out`} 
-                          strokeWidth="3" strokeDasharray={`${strokeDasharray}`} strokeDashoffset={`${strokeDashoffset}`} strokeLinecap="round" stroke="currentColor" fill="none" 
-                          d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" 
-                        />
-                      </svg>
-                      <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <span className={`text-lg sm:text-xl font-black ${accuracy >= 80 ? 'text-green-400' : accuracy >= 50 ? 'text-yellow-400' : 'text-red-400'}`}>{accuracy}%</span>
-                        <span className="text-[7px] sm:text-[8px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">Accuracy</span>
-                      </div>
+                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Pairs Matched</span>
+                      <span className="text-sm font-black text-pink-400">{correctMatches}</span>
+                    </div>
+                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Penalties</span>
+                      <span className="text-sm font-black text-red-400">{penaltyCount}</span>
+                    </div>
+                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Total Clicks</span>
+                      <span className="text-sm font-black text-blue-400">{totalClicks}</span>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-2">
-                    <div className="bg-gray-900/50 rounded-xl p-2 sm:p-3 text-center border border-gray-800">
-                      <div className="text-gray-400 text-[9px] sm:text-[10px] uppercase font-bold tracking-wider mb-1">Pairs Matched</div>
-                      <div className="text-lg sm:text-xl font-black text-pink-400">{correctMatches}</div>
+                  <div className="bg-[#0b0f19] border border-slate-850 p-3 rounded-xl mb-4 text-left">
+                    <span className={`text-xs font-black block text-center uppercase tracking-widest ${rankColor} mb-2`}>
+                      Rank: {rankName}
+                    </span>
+                    <div className="w-full h-px bg-slate-850 mb-2"></div>
+                    <div className="flex items-center gap-1.5 text-[9px] font-bold text-white uppercase mb-1 font-mono">
+                      <Sparkles className="w-3 h-3 text-yellow-500" /> Diagnostics advice:
                     </div>
-                    <div className="bg-gray-900/50 rounded-xl p-2 sm:p-3 text-center border border-gray-800">
-                      <div className="text-gray-400 text-[9px] sm:text-[10px] uppercase font-bold tracking-wider mb-1">Memory Penalties</div>
-                      <div className="text-lg sm:text-xl font-black text-red-400">{penaltyCount}</div>
-                    </div>
+                    <p className="text-[10px] text-slate-400 leading-normal">
+                      {diagnostics}
+                    </p>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <PlayAgainButton onClick={handleStartGame} colorTheme="rose" />
+                    <button
+                      onClick={shareScore}
+                      className="p-3 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded-xl transition-colors active:scale-95"
+                      title="Share Score"
+                    >
+                      <Share2 className="w-4 h-4" />
+                    </button>
+                    {isFullscreen && (
+                      <button
+                        onClick={handleExit}
+                        className="p-3 bg-red-900/30 border border-red-900/55 hover:bg-red-900/50 text-red-400 rounded-xl transition-colors active:scale-95 flex items-center justify-center"
+                        title="Exit Drill"
+                      >
+                        <LogOut className="w-4 h-4" />
+                      </button>
+                    )}
                   </div>
                 </div>
-
-                <div className="p-3 sm:p-5 bg-gray-900/50 border-t border-gray-800 flex gap-2 sm:gap-3 shrink-0 rounded-b-3xl">
-                  <button onClick={handleStartGame} className="flex-1 py-3 sm:py-4 bg-pink-600 text-white rounded-xl font-black tracking-wide hover:bg-pink-500 transition-all active:scale-95 flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(236,72,153,0.4)] text-sm sm:text-base">
-                    <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5" /> PLAY AGAIN
-                  </button>
-                  <button onClick={shareDrillLink} className="px-4 sm:px-5 py-3 sm:py-4 bg-gray-800 text-white rounded-xl font-bold hover:bg-gray-700 transition-all active:scale-95 border border-gray-700 flex items-center justify-center" title="Share Drill">
-                    <Share2 className="w-4 h-4 sm:w-5 sm:h-5" />
-                  </button>
-                  <button onClick={handleExit} className="px-4 sm:px-5 py-3 sm:py-4 bg-red-900/30 text-red-400 rounded-xl font-bold hover:bg-red-900/50 transition-all active:scale-95 border border-red-900/50 flex items-center justify-center" title="Exit Drill">
-                    <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
-                  </button>
-                </div>
-                
               </div>
             </div>
           )}
@@ -775,12 +867,12 @@ export default function CardMatchingClient() {
               </div>
               <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-5">
-                  <RuleItem num="1" color="indigo" text="Clear the Grid Flawlessly" highlight="+20 PTS | +15s" result="Increases Difficulty" />
-                  <RuleItem num="2" color="purple" text="Adaptive Grid Sizing" highlight="Scale up to 30 Cards" result="Scales on Performance" />
+                  <RuleItem num="1" color="indigo" text="Clear the Grid Flawlessly" highlight="+20 PTS | +15s" result="Increases Score" />
+                  <RuleItem num="2" color="purple" text="Adaptive Grid Sizing" highlight="Scale up to 30 Cards" result="Scales on Score" />
                 </div>
                 <div className="space-y-5">
-                  <RuleItem num="3" color="red" text="View identical card >5 times" highlight="-2 PTS | -1s" result="Decreases Difficulty" />
-                  <RuleItem num="4" color="green" text="Time Limit Capped" highlight="Max 60 Seconds" result="Endless Survival" />
+                  <RuleItem num="3" color="red" text="View identical card >5 times" highlight="No PTS Penalty | -1s" result="Reduces Timer" />
+                  <RuleItem num="4" color="green" text="Time Limit" highlight="Stack Bonus Time" result="Endless Survival" />
                 </div>
               </div>
             </div>
@@ -850,7 +942,7 @@ export default function CardMatchingClient() {
                     </div>
                     <div>
                       <h4 className="text-sm font-bold text-gray-200 tracking-tight">How do I extend my time?</h4>
-                      <p className="text-xs text-gray-400 mt-1.5 leading-relaxed">You begin with 60 seconds. Every time you perfectly match all cards and clear the entire grid, you are rewarded with 20 points and a massive 15-second time extension (which is strictly capped at the 60-second maximum).</p>
+                      <p className="text-xs text-gray-400 mt-1.5 leading-relaxed">You begin with 60 seconds. Every time you perfectly match all cards and clear the entire grid, you are rewarded with 20 points and a massive 15-second time extension. Your time can continuously stack higher as long as you keep winning!</p>
                     </div>
                   </div>
                 </div>

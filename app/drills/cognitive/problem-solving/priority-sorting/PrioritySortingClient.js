@@ -7,9 +7,11 @@ import {
   Eye, Volume2, VolumeX, Info, Activity, Target, Clock, Timer,
   Trophy, Zap, RefreshCw, GraduationCap, Lightbulb, TrendingUp, 
   BarChart3, CheckCircle2, Star, ArrowRight, Share2, Copy,
-  Brain, Lock, RotateCcw, XCircle, GitBranch, LogOut, ChevronRight, Play, Users 
+  Brain, Lock, RotateCcw, XCircle, GitBranch, LogOut, ChevronRight, 
+  Play, Users, Sparkles // Added Sparkles to resolve ReferenceError
 } from 'lucide-react';
 import useGameEngine from '../../../../../lib/useGameEngine';
+import PlayAgainButton from "../../../../../components/PlayAgainButton";
 
 // ============================================================
 // ZERO-LATENCY AUDIO SYNTHESIZER
@@ -198,12 +200,12 @@ export default function PrioritySortingClient() {
   }, []);
 
   const requestPointerLock = useCallback(async () => {
-    if (typeof window !== 'undefined' && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    if (typeof window !== 'undefined' && window.matchMedia('(hover: hover) and (pointer: fine)').matches && !isMobile) {
       if (canvasRef.current && document.pointerLockElement !== canvasRef.current) {
         try { await canvasRef.current.requestPointerLock(); } catch (e) {}
       }
     }
-  }, []);
+  }, [isMobile]);
 
   const toggleFullscreen = useCallback(async () => { 
     try { 
@@ -246,6 +248,13 @@ export default function PrioritySortingClient() {
     if (engineRef.current?.endGame) engineRef.current.endGame();
   }, [bestScore]);
 
+  // === DYNAMIC DIFFICULTY ===
+  const updateDifficulty = useCallback(() => {
+    const newLevel = Math.min(15, Math.floor(scoreRef.current / 50) + 1);
+    levelRef.current = newLevel;
+    setLevel(newLevel);
+  }, []);
+
   const applyHit = useCallback(() => {
     if (!isActiveRef.current) return;
     if (audioSynth) audioSynth.playHit();
@@ -255,9 +264,7 @@ export default function PrioritySortingClient() {
     timeRef.current = Math.min(60, timeRef.current + 2);
     hitsRef.current += 1;
     
-    // Scale Level based on hits instantly
-    levelRef.current = Math.min(15, Math.floor(hitsRef.current / 10) + 1);
-    setLevel(levelRef.current);
+    updateDifficulty();
     
     setScore(scoreRef.current);
     setTimeLeft(timeRef.current);
@@ -267,26 +274,23 @@ export default function PrioritySortingClient() {
     
     const total = hitsRef.current + missRef.current;
     if (total > 0) setAccuracy(Math.round((hitsRef.current / total) * 100));
-  }, [triggerFeedback]);
+  }, [triggerFeedback, updateDifficulty]);
 
   const applyPenalty = useCallback((reason) => {
     if (!isActiveRef.current) return;
     if (audioSynth) audioSynth.playMiss();
     
-    // Updated Penalty: -5 Score, -1 Second
-    scoreRef.current = Math.max(0, scoreRef.current - 5);
+    // Updated Penalty: -1 Second (No PTS Penalty)
     timeRef.current -= 1;
     missRef.current += 1;
     
-    // Drop level on penalty to recover slightly
-    levelRef.current = Math.max(1, levelRef.current - 1);
-    setLevel(levelRef.current);
+    updateDifficulty();
     
     setScore(scoreRef.current);
     setTimeLeft(Math.max(0, timeRef.current));
     setMisses(missRef.current);
     
-    triggerFeedback(`Penalty! ${reason} -5 PTS | -1s`, 'error');
+    triggerFeedback(`Penalty! ${reason} -1s`, 'error');
     
     const total = hitsRef.current + missRef.current;
     if (total > 0) setAccuracy(Math.round((hitsRef.current / total) * 100));
@@ -294,18 +298,18 @@ export default function PrioritySortingClient() {
     if (timeRef.current <= 0) {
       endGame();
     }
-  }, [triggerFeedback, endGame]);
+  }, [triggerFeedback, endGame, updateDifficulty]);
 
   // === Item Spawning Engine (Mobile Optimized Targets) ===
   class PriorityItem {
     constructor(forcedType, cvs, isMobileObj, lvl) {
       // Normal device-adaptive sizing - slightly smaller for mobile so they don't clog screen, but large enough to tap
-      const baseMobileRadius = 20; 
+      const baseMobileRadius = 24; 
       const baseDesktopRadius = 36;
       
       const startSize = isMobileObj ? baseMobileRadius : baseDesktopRadius;
       const sizeReduction = Math.min(isMobileObj ? 8 : 20, lvl * (isMobileObj ? 0.5 : 1.2)); 
-      this.baseSize = Math.max(isMobileObj ? 12 : 16, startSize - sizeReduction);
+      this.baseSize = Math.max(isMobileObj ? 14 : 16, startSize - sizeReduction);
 
       const padding = this.baseSize + 10;
       this.name = forcedType || colorNames.current[Math.floor(Math.random() * colorNames.current.length)];
@@ -433,7 +437,7 @@ export default function PrioritySortingClient() {
       for (let i = itemsRef.current.length - 1; i >= 0; i--) { 
         const item = itemsRef.current[i];
         // Dynamic hit detection based on item's current size, adding generous padding for touch
-        if (Math.hypot(clickX - item.x, clickY - item.y) < item.baseSize + (isMobile ? 20 : 15)) { 
+        if (Math.hypot(clickX - item.x, clickY - item.y) < item.baseSize + (isMobile ? 25 : 15)) { 
           hitIdx = i; 
           break; 
         } 
@@ -524,6 +528,7 @@ export default function PrioritySortingClient() {
       
       ctx.fillStyle = isBoxDarkMode ? "rgba(0,0,0,0.8)" : "rgba(255,255,255,0.8)";
       ctx.beginPath();
+      // Using standard drawing commands for max compatibility
       ctx.roundRect(cvs.width / 2 - 100, cvs.height / 2 - 45, 200, 90, 16);
       ctx.fill();
       ctx.strokeStyle = isBoxDarkMode ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)";
@@ -632,12 +637,77 @@ export default function PrioritySortingClient() {
     }
   }, []);
 
+  const shareScore = useCallback(() => {
+    const total = hitsRef.current + missRef.current;
+    const finalAccuracy = total > 0 ? Math.round((hitsRef.current / total) * 100) : 100;
+    
+    let finalRank = 'Bronze';
+    if (scoreRef.current >= 200 && finalAccuracy >= 90) finalRank = 'Grandmaster';
+    else if (scoreRef.current >= 150 && finalAccuracy >= 82) finalRank = 'Master';
+    else if (scoreRef.current >= 100 && finalAccuracy >= 75) finalRank = 'Diamond';
+    else if (scoreRef.current >= 60 && finalAccuracy >= 65) finalRank = 'Platinum';
+    else if (scoreRef.current >= 30 && finalAccuracy >= 55) finalRank = 'Gold';
+    else if (scoreRef.current >= 15) finalRank = 'Silver';
+
+    const text = `🧠 I scored ${scoreRef.current} PTS with ${finalAccuracy}% accuracy on the Priority Sorting Decision Making Drill! Reached Speed Level ${levelRef.current}. Rank: ${finalRank}. Try it here: https://skilldrills.online/drills/cognitive/problem-solving/priority-sorting`;
+    
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      navigator.share({
+        title: 'My SkillDrills Cognitive Score',
+        text: text,
+        url: 'https://skilldrills.online/drills/cognitive/problem-solving/priority-sorting'
+      }).catch(() => {});
+    } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+      alert('Score card copied to clipboard!');
+    }
+  }, []);
+
   // === RENDER ===
   if (loading || !isClient) return (
     <div className="min-h-screen flex items-center justify-center bg-[#050508]">
       <div className="w-16 h-16 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto" />
     </div>
   );
+
+  // Calculate grade based on score and accuracy
+  let gradeLetter = 'F';
+  if (accuracy >= 85 && score >= 150) gradeLetter = 'S';
+  else if (accuracy >= 75 && score >= 100) gradeLetter = 'A';
+  else if (accuracy >= 65 && score >= 60) gradeLetter = 'B';
+  else if (accuracy >= 55 && score >= 30) gradeLetter = 'C';
+  else if (accuracy >= 45 && score >= 15) gradeLetter = 'D';
+
+  let rankName = 'Bronze';
+  let rankColor = 'text-slate-500';
+  if (score >= 200 && accuracy >= 90) {
+    rankName = 'Grandmaster';
+    rankColor = 'text-fuchsia-400 font-extrabold';
+  } else if (score >= 150 && accuracy >= 82) {
+    rankName = 'Master';
+    rankColor = 'text-red-400 font-extrabold';
+  } else if (score >= 100 && accuracy >= 75) {
+    rankName = 'Diamond';
+    rankColor = 'text-cyan-400 font-extrabold';
+  } else if (score >= 60 && accuracy >= 65) {
+    rankName = 'Platinum';
+    rankColor = 'text-indigo-400 font-extrabold';
+  } else if (score >= 30 && accuracy >= 55) {
+    rankName = 'Gold';
+    rankColor = 'text-yellow-400 font-extrabold';
+  } else if (score >= 15) {
+    rankName = 'Silver';
+    rankColor = 'text-gray-300 font-extrabold';
+  }
+
+  let diagnostics = "Sensational selective triage capacity! Your brain filters out secondary distractor colors instantly while matching rules under high speed.";
+  if (misses > 4) {
+    diagnostics = "High distractor selection rate. Slow down and check the center target color instead of click-spamming near crosshairs.";
+  } else if (accuracy < 60) {
+    diagnostics = "Attentional slips detected. Maintain strict rule focus. Allow incorrect colored targets to fade away naturally.";
+  } else if (score < 50) {
+    diagnostics = "To improve, try to anticipate the next rule shift by keeping an eye on the center box's text color changes.";
+  }
 
   return (
     <div className={`min-h-screen select-none ${isDarkMode ? 'bg-[#050508] text-white' : 'bg-gray-50 text-gray-900'} transition-colors duration-300 font-sans`} style={{ WebkitTapHighlightColor: 'transparent', userSelect: 'none' }}>
@@ -750,8 +820,8 @@ export default function PrioritySortingClient() {
               </div>
             )}
 
-            {/* Fullscreen Minimize Overlay */}
-            {isFullscreen && gameState === 'playing' && (
+            {/* Fullscreen Minimize Overlay (HIDDEN ON MOBILE) */}
+            {isFullscreen && gameState === 'playing' && !isMobile && (
               <div className="absolute top-4 right-4 z-30 flex gap-3">
                 <button onClick={resetGame} className="p-3 bg-black/60 backdrop-blur-sm rounded-xl text-white hover:bg-black/70 transition-all border border-gray-600"><RotateCcw className="w-5 h-5" /></button>
                 <button onClick={() => setSoundEnabled(v => !v)} className="p-3 bg-black/60 backdrop-blur-sm rounded-xl text-white hover:bg-black/70 transition-all border border-gray-600">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button>
@@ -776,59 +846,86 @@ export default function PrioritySortingClient() {
               </div>
             )}
             
-            {/* Game Over Screen */}
+            {/* Premium Custom End Screen */}
             {gameState === 'gameOver' && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black/95 z-[70] animate-in fade-in duration-300 overflow-y-auto px-4 py-6" onPointerDown={e => e.stopPropagation()}>
-                <div className="rounded-3xl max-w-md w-full shadow-2xl border border-gray-800 bg-gray-950 flex flex-col max-h-[95dvh] my-auto">
-                  <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 p-4 sm:p-6 border-b border-gray-800 relative overflow-hidden pointer-events-none shrink-0 rounded-t-3xl">
-                    <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-purple-500/20 rounded-full blur-3xl"></div>
-                    <div className="absolute bottom-0 left-0 -mb-4 -ml-4 w-32 h-32 bg-pink-500/20 rounded-full blur-3xl"></div>
-                    <div className="relative z-10 flex flex-col items-center">
-                      <h2 className="text-2xl sm:text-3xl font-black text-white mb-1 tracking-tight">Time's Up!</h2>
-                      <p className="text-purple-400 font-medium text-sm sm:text-base">Priority Sorting • Speed Lv.{level}</p>
+              <div className="absolute inset-0 bg-[#05070e]/98 overflow-y-auto p-6 z-[70] select-none scrollbar-thin scroll-smooth backdrop-blur-sm animate-in fade-in duration-300" onPointerDown={e => e.stopPropagation()}>
+                <div className="min-h-full flex flex-col justify-center items-center py-4 w-full">
+                  <div className="max-w-md w-full text-center">
+                    {score > 0 && score >= bestScore && (
+                      <div className="inline-block bg-yellow-500 text-black text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-3 shadow-[0_0_15px_rgba(234,179,8,0.5)] animate-bounce font-mono">
+                        ⭐ NEW PERSONAL BEST!
+                      </div>
+                    )}
+                    
+                    <h2 className="text-xl font-black text-white uppercase tracking-wider mb-1 font-mono">
+                      Drill Complete
+                    </h2>
+                    <p className="text-xs text-slate-500 uppercase tracking-widest mb-6 font-mono">
+                      Peak difficulty reached: Level {level}
+                    </p>
+
+                    <div className="grid grid-cols-3 gap-2.5 mb-6 text-left font-mono">
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Final Score</span>
+                        <span className="text-sm font-black text-white">{score} <span className="text-[8px] text-slate-400 font-normal">PTS</span></span>
+                      </div>
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Accuracy</span>
+                        <span className="text-sm font-black text-white">{accuracy}%</span>
+                      </div>
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Best Score</span>
+                        <span className="text-sm font-black text-yellow-400">{bestScore}</span>
+                      </div>
+                      
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Hits</span>
+                        <span className="text-sm font-black text-emerald-400">{successfulHits}</span>
+                      </div>
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Mistakes</span>
+                        <span className="text-sm font-black text-red-400">{misses}</span>
+                      </div>
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Grade</span>
+                        <span className="text-sm font-black text-pink-400">{gradeLetter}</span>
+                      </div>
                     </div>
-                  </div>
-                  <div className="p-4 sm:p-6 pointer-events-none shrink-0 overflow-y-auto">
-                    <div className="flex justify-between items-center mb-6">
-                      <div className="flex flex-col">
-                        <span className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Final Score</span>
-                        <div className="flex items-end gap-1">
-                          <span className="text-5xl sm:text-6xl font-black text-white leading-none tracking-tighter">{score}</span>
-                          <span className="text-sm sm:text-lg text-gray-500 font-bold mb-1">PTS</span>
-                        </div>
+
+                    <div className="bg-[#0b0f19] border border-slate-850 p-3 rounded-xl mb-4 text-left">
+                      <span className={`text-xs font-black block text-center uppercase tracking-widest ${rankColor} mb-2`}>
+                        Rank: {rankName}
+                      </span>
+                      <div className="w-full h-px bg-slate-850 mb-2"></div>
+                      <div className="flex items-center gap-1.5 text-[9px] font-bold text-white uppercase mb-1 font-mono">
+                        <Sparkles className="w-3 h-3 text-purple-500" /> Diagnostics advice:
                       </div>
-                      <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center">
-                        <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
-                          <path className="text-gray-800" strokeWidth="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                          <path className={`${accuracy >= 80 ? 'text-green-500' : accuracy >= 50 ? 'text-yellow-500' : 'text-red-500'} transition-all duration-1000 ease-out`} strokeWidth="3" strokeDasharray="100" strokeDashoffset={`${100 - accuracy}`} strokeLinecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                        </svg>
-                        <div className="absolute inset-0 flex flex-col items-center justify-center">
-                          <span className={`text-lg sm:text-xl font-black ${accuracy >= 80 ? 'text-green-400' : accuracy >= 50 ? 'text-yellow-400' : 'text-red-400'}`}>{accuracy}%</span>
-                          <span className="text-[7px] sm:text-[8px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">Accuracy</span>
-                        </div>
-                      </div>
+                      <p className="text-[10px] text-slate-400 leading-normal">
+                        {diagnostics}
+                      </p>
                     </div>
-                    <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                      <div className="bg-gray-900/50 rounded-xl p-2 sm:p-3 text-center border border-gray-800">
-                        <div className="text-gray-400 text-[9px] sm:text-[10px] uppercase font-bold tracking-wider mb-1">Target Hits</div>
-                        <div className="text-lg sm:text-xl font-black text-green-400">{successfulHits}</div>
-                      </div>
-                      <div className="bg-gray-900/50 rounded-xl p-2 sm:p-3 text-center border border-gray-800">
-                        <div className="text-gray-400 text-[9px] sm:text-[10px] uppercase font-bold tracking-wider mb-1">Mistakes</div>
-                        <div className="text-lg sm:text-xl font-black text-red-400">{misses}</div>
-                      </div>
+
+                    <div className="flex gap-2">
+                      <PlayAgainButton onClick={startGame} colorTheme="purple" />
+                      <button
+                        onPointerDown={e => e.stopPropagation()}
+                        onClick={shareScore}
+                        className="p-3 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded-xl transition-colors active:scale-95 flex items-center justify-center"
+                        title="Share Score"
+                      >
+                        <Share2 className="w-4 h-4" />
+                      </button>
+                      {isFullscreen && (
+                        <button
+                          onPointerDown={e => e.stopPropagation()}
+                          onClick={resetGame}
+                          className="p-3 bg-red-900/30 border border-red-900/55 hover:bg-red-900/50 text-red-400 rounded-xl transition-colors active:scale-95 flex items-center justify-center"
+                          title="Exit Drill"
+                        >
+                          <LogOut className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
-                  </div>
-                  <div className="p-3 sm:p-5 bg-gray-900/50 border-t border-gray-800 flex gap-2 sm:gap-3 rounded-b-3xl shrink-0 mt-auto">
-                    <button onPointerDown={e => e.stopPropagation()} onClick={startGame} className="flex-1 py-3 sm:py-4 bg-purple-600 text-white rounded-xl font-black tracking-wide hover:bg-purple-500 transition-all active:scale-95 flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(168,85,247,0.4)] text-sm sm:text-base">
-                      <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5" /> PLAY AGAIN
-                    </button>
-                    <button onPointerDown={e => e.stopPropagation()} onClick={shareDrillLink} className="px-4 sm:px-5 py-3 sm:py-4 bg-gray-800 text-white rounded-xl font-bold hover:bg-gray-700 transition-all active:scale-95 border border-gray-700 flex items-center justify-center" title="Share Drill">
-                      <Share2 className="w-4 h-4 sm:w-5 sm:h-5" />
-                    </button>
-                    <button onPointerDown={e => e.stopPropagation()} onClick={resetGame} className="px-4 sm:px-5 py-3 sm:py-4 bg-red-900/30 text-red-400 rounded-xl font-bold hover:bg-red-900/50 transition-all active:scale-95 border border-red-900/50 flex items-center justify-center" title="Exit Drill">
-                      <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
-                    </button>
                   </div>
                 </div>
               </div>
@@ -846,10 +943,10 @@ export default function PrioritySortingClient() {
                 <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-4">
                     <RuleItem num="1" color="purple" text="Check center rule =" highlight="TARGET COLOR" result="Memorize" isDark={isDarkMode} />
-                    <RuleItem num="2" color="blue" text="Click targets matching rule" highlight="+5 PTS | +2s" result="Difficulty Up" isDark={isDarkMode} />
+                    <RuleItem num="2" color="blue" text="Click targets matching rule" highlight="+5 PTS | +2s" result="Increases Score" isDark={isDarkMode} />
                   </div>
                   <div className="space-y-4">
-                    <RuleItem num="3" color="red" text="Tapping wrong / Miss Rule" highlight="-5 PTS | -1s" result="Difficulty Down" isDark={isDarkMode} />
+                    <RuleItem num="3" color="red" text="Tapping wrong / Miss Rule" highlight="No PTS Penalty | -1s" result="Reduces Timer" isDark={isDarkMode} />
                     <RuleItem num="4" color="orange" text="Rule shifts randomly" highlight="Every ~3s" result="Re-Adapt" isDark={isDarkMode} />
                   </div>
                 </div>

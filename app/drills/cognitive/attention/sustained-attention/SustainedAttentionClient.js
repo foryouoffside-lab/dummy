@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
@@ -8,8 +8,9 @@ import {
   BarChart3, Info, RefreshCw,Activity,
   Users, Share2, XCircle, Gauge, TrendingUp,
   GraduationCap, Lightbulb, Brain, Search,
-  ChevronRight, ArrowRight, Play, Award, CheckCircle2, LogOut, Hash
+  ChevronRight, ArrowRight, Play, Award, CheckCircle2, LogOut, Hash, Sparkles
 } from 'lucide-react';
+import PlayAgainButton from "../../../../../components/PlayAgainButton";
 
 // ============================================================
 // ZERO-LATENCY AUDIO SYNTHESIZER
@@ -83,6 +84,7 @@ export default function SustainedAttentionClient() {
   
   const [currentSpeed, setCurrentSpeed] = useState(1000);
   const [localTimeRemaining, setLocalTimeRemaining] = useState(60.0);
+  const [highestLevelReached, setHighestLevelReached] = useState(1);
   
   const [currentNumber, setCurrentNumber] = useState(null);
   const [targetNumber, setTargetNumber] = useState(null);
@@ -97,6 +99,8 @@ export default function SustainedAttentionClient() {
   const scoreRef = useRef(0);
   const timeRef = useRef(60.0);
   const speedRef = useRef(1000);
+  const levelRef = useRef(1);
+  const highestLevelRef = useRef(1);
   const bestScoreRef = useRef(0);
   
   const targetNumberRef = useRef(null);
@@ -115,6 +119,7 @@ export default function SustainedAttentionClient() {
     setCurrentScore(scoreRef.current);
     setCurrentSpeed(speedRef.current);
     setStats({ ...statsRef.current });
+    setHighestLevelReached(highestLevelRef.current);
     
     const totalActions = statsRef.current.hits + statsRef.current.wrongs + statsRef.current.misses;
     setAccuracy(totalActions > 0 ? Math.round((statsRef.current.hits / totalActions) * 100) : 100);
@@ -220,6 +225,8 @@ export default function SustainedAttentionClient() {
     setCurrentScore(0);
     setAccuracy(100);
     setCurrentSpeed(1000);
+    levelRef.current = 1;
+    highestLevelRef.current = 1;
     setStats({ hits: 0, misses: 0, wrongs: 0, combo: 0 });
     setIsMemorizing(false);
     setCurrentNumber(null);
@@ -233,14 +240,27 @@ export default function SustainedAttentionClient() {
     }, 500);
   }, []);
 
+  const updateDifficulty = useCallback(() => {
+    const newLevel = Math.floor(scoreRef.current / 60) + 1;
+    if (newLevel > levelRef.current) {
+      triggerFeedback(`⚡ LEVEL UP: ${newLevel}!`, 'success');
+      if (audioSynth) audioSynth.playSound('combo');
+    }
+    levelRef.current = newLevel;
+    highestLevelRef.current = Math.max(highestLevelRef.current, newLevel);
+
+    const progress = Math.min(1, scoreRef.current / 400); // Max at 400 points
+    speedRef.current = Math.max(200, Math.floor(1000 - (progress * 800))); // Scales from 1000ms down to 200ms
+  }, [triggerFeedback]);
+
   const processPenalty = useCallback((isMiss = false) => {
     statsRef.current.combo = 0;
-    scoreRef.current = Math.max(0, scoreRef.current - 10);
     timeRef.current -= 5.0;
-    speedRef.current = Math.min(1000, speedRef.current + 50); // Decrease difficulty (slower)
     
     if (audioSynth) audioSynth.playSound(isMiss ? 'penalty' : 'wrong');
-    triggerFeedback(isMiss ? '✗ Missed Target -10' : '✗ Wrong Tap -10', 'error');
+    triggerFeedback(isMiss ? '✗ Missed Target -5s' : '✗ Wrong Tap -5s', 'error');
+    
+    updateDifficulty();
     
     if (timeRef.current <= 0) {
       timeRef.current = 0;
@@ -251,7 +271,7 @@ export default function SustainedAttentionClient() {
     
     setLocalTimeRemaining(timeRef.current);
     syncScoresToUI();
-  }, [triggerFeedback, syncScoresToUI, endGame]);
+  }, [triggerFeedback, syncScoresToUI, updateDifficulty, endGame]);
 
   const spawnNumber = useCallback(() => {
     if (gameStateRef.current !== 'playing') return;
@@ -301,7 +321,7 @@ export default function SustainedAttentionClient() {
       // Correct!
       scoreRef.current += 20;
       timeRef.current = Math.min(60.0, timeRef.current + 5.0); // Changed time increment to +5 seconds
-      speedRef.current = Math.max(200, speedRef.current - 50); // Increase difficulty (faster)
+      updateDifficulty();
       
       statsRef.current.hits += 1;
       statsRef.current.combo += 1;
@@ -324,7 +344,7 @@ export default function SustainedAttentionClient() {
     
     setLocalTimeRemaining(timeRef.current);
     syncScoresToUI();
-  }, [isMemorizing, processPenalty, triggerFeedback, syncScoresToUI]);
+  }, [isMemorizing, processPenalty, triggerFeedback, syncScoresToUI, updateDifficulty]);
 
   const startGame = useCallback(async () => {
     if (audioSynth) audioSynth.init(); 
@@ -338,6 +358,8 @@ export default function SustainedAttentionClient() {
     timeRef.current = 60.0;
     scoreRef.current = 0;
     speedRef.current = 1000; // Base speed
+    levelRef.current = 1;
+    highestLevelRef.current = 1;
     statsRef.current = { hits: 0, misses: 0, wrongs: 0, combo: 0, bestCombo: 0 };
     
     setLocalTimeRemaining(60.0);
@@ -397,14 +419,32 @@ export default function SustainedAttentionClient() {
     setShowNameInput(false);
   }, [playerNameInput]);
 
-  const shareDrillLink = useCallback(() => {
-    const url = 'https://skilldrills.online/drills/cognitive/attention/sustained-attention';
-    if (navigator.share) {
-      navigator.share({ title: 'Sustained Attention Drill', text: 'Test your sustained attention and reaction speed! Free online cognitive training.', url }).catch(() => {});
-    } else {
-      navigator.clipboard.writeText(url).then(() => alert('Link copied!')).catch(() => prompt('Copy:', url));
+  const shareScore = useCallback(() => {
+    const totalMistakes = stats.misses + stats.wrongs;
+    const totalActions = stats.hits + totalMistakes;
+    const finalAcc = totalActions > 0 ? Math.round((stats.hits / totalActions) * 100) : 100;
+    
+    let finalRank = 'Bronze';
+    if (currentScore >= 700 && finalAcc >= 90) finalRank = 'Grandmaster';
+    else if (currentScore >= 550 && finalAcc >= 82) finalRank = 'Master';
+    else if (currentScore >= 400 && finalAcc >= 75) finalRank = 'Diamond';
+    else if (currentScore >= 250 && finalAcc >= 65) finalRank = 'Platinum';
+    else if (currentScore >= 120 && finalAcc >= 55) finalRank = 'Gold';
+    else if (currentScore >= 60) finalRank = 'Silver';
+
+    const text = `🧠 I scored ${currentScore} PTS with ${finalAcc}% accuracy on the Sustained Attention Test! Rank: ${finalRank}. Train your attention span: https://skilldrills.online/drills/cognitive/attention/sustained-attention`;
+    
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      navigator.share({
+        title: 'My SkillDrills Cognitive Score',
+        text: text,
+        url: 'https://skilldrills.online/drills/cognitive/attention/sustained-attention'
+      }).catch(() => {});
+    } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+      alert('Score card copied to clipboard!');
     }
-  }, []);
+  }, [currentScore, stats.hits, stats.misses, stats.wrongs]);
 
   if (loading || !isClient) {
     return (
@@ -418,6 +458,48 @@ export default function SustainedAttentionClient() {
   }
 
   const totalMistakes = stats.misses + stats.wrongs;
+
+  // Calculate grade based on score and accuracy
+  let gradeLetter = 'F';
+  if (accuracy >= 90 && currentScore >= 550) gradeLetter = 'S';
+  else if (accuracy >= 80 && currentScore >= 400) gradeLetter = 'A';
+  else if (accuracy >= 70 && currentScore >= 250) gradeLetter = 'B';
+  else if (accuracy >= 60 && currentScore >= 120) gradeLetter = 'C';
+  else if (accuracy >= 45 && currentScore >= 60) gradeLetter = 'D';
+
+  let rankName = 'Bronze';
+  let rankColor = 'text-slate-500';
+  if (currentScore >= 700 && accuracy >= 90) {
+    rankName = 'Grandmaster';
+    rankColor = 'text-fuchsia-400 font-extrabold';
+  } else if (currentScore >= 550 && accuracy >= 82) {
+    rankName = 'Master';
+    rankColor = 'text-red-400 font-extrabold';
+  } else if (currentScore >= 400 && accuracy >= 75) {
+    rankName = 'Diamond';
+    rankColor = 'text-cyan-400 font-extrabold';
+  } else if (currentScore >= 250 && accuracy >= 65) {
+    rankName = 'Platinum';
+    rankColor = 'text-indigo-400 font-extrabold';
+  } else if (currentScore >= 120 && accuracy >= 55) {
+    rankName = 'Gold';
+    rankColor = 'text-yellow-400 font-extrabold';
+  } else if (currentScore >= 60) {
+    rankName = 'Silver';
+    rankColor = 'text-gray-300 font-extrabold';
+  }
+
+  let diagnostics = "Excellent sustained attention and vigilance! You maintained high arousal and target detection levels throughout the test.";
+  if (accuracy < 60) {
+    diagnostics = "Vigilance decrement detected. Make sure to only tap when the flashed number matches the target number template shown at the top.";
+  } else if (stats.misses > stats.hits * 0.4) {
+    diagnostics = "High target omission rate. Keep your eyes centered on the flash zone and try to maintain tonic arousal levels.";
+  } else if (stats.wrongs > stats.misses) {
+    diagnostics = "High target commission rate (impulsivity). Do not guess or click prematurely. Focus on active inhibition when non-targets flash.";
+  } else if (stats.combo < 5 && currentScore > 100) {
+    diagnostics = "Frequent lapses in attention span. Try to maintain focus for longer streaks to optimize performance.";
+  }
+
   const strokeDasharray = 100;
   const strokeDashoffset = strokeDasharray - accuracy;
 
@@ -585,77 +667,81 @@ export default function SustainedAttentionClient() {
 
           {/* END SCREEN */}
           {gameState === 'ended' && (
-            <div className="absolute inset-0 flex items-center justify-center z-[70] bg-black/95 pointer-events-auto animate-in fade-in duration-300 overflow-y-auto px-4 py-6" onPointerDown={e => e.stopPropagation()}>
-              <div className="rounded-3xl max-w-md w-full shadow-2xl border border-gray-800 bg-gray-950 flex flex-col max-h-[95vh] overflow-y-auto my-auto">
-                
-                <div className="bg-gradient-to-br from-orange-900/40 to-red-900/40 p-4 sm:p-6 border-b border-gray-800 relative overflow-hidden pointer-events-none shrink-0 rounded-t-3xl">
-                  <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-orange-500/20 rounded-full blur-3xl"></div>
-                  <div className="absolute bottom-0 left-0 -mb-4 -ml-4 w-32 h-32 bg-red-500/20 rounded-full blur-3xl"></div>
-                  <div className="relative z-10 flex flex-col items-center">
-                    {isNewBest && (
-                      <div className="bg-yellow-500 text-black text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-2 shadow-[0_0_15px_rgba(234,179,8,0.5)]">
-                        ⭐ New Personal Best
-                      </div>
-                    )}
-                    <h2 className="text-2xl sm:text-3xl font-black text-white mb-1 tracking-tight">Mission Complete</h2>
-                    <p className="text-orange-400 font-medium text-xs sm:text-sm">Sustained Attention • Peak Speed: {speedRef.current}ms</p>
-                  </div>
-                </div>
+            <div className="absolute inset-0 bg-[#05070e]/98 overflow-y-auto p-6 z-[70] select-none scrollbar-thin scroll-smooth backdrop-blur-sm" onPointerDown={e => e.stopPropagation()}>
+              <div className="min-h-full flex flex-col justify-center items-center py-4 w-full">
+                <div className="max-w-md w-full text-center">
+                  {isNewBest && (
+                    <div className="inline-block bg-yellow-500 text-black text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-3 shadow-[0_0_15px_rgba(234,179,8,0.5)] animate-bounce font-mono">
+                      ⭐ NEW PERSONAL BEST!
+                    </div>
+                  )}
+                  
+                  <h2 className="text-xl font-black text-white uppercase tracking-wider mb-1 font-mono">
+                    Drill Complete
+                  </h2>
+                  <p className="text-xs text-slate-500 uppercase tracking-widest mb-6 font-mono">
+                    Peak difficulty reached: Level {highestLevelReached}
+                  </p>
 
-                <div className="p-4 sm:p-6 pointer-events-none shrink-0">
-                  <div className="flex justify-between items-center mb-4 sm:mb-6">
-                    <div className="flex flex-col">
-                      <span className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Final Score</span>
-                      <div className="flex items-end gap-1">
-                        <span className="text-4xl sm:text-6xl font-black text-white leading-none tracking-tighter">{currentScore}</span>
-                        <span className="text-sm sm:text-lg text-gray-500 font-bold mb-1">PTS</span>
-                      </div>
+                  <div className="grid grid-cols-3 gap-2.5 mb-6 text-left font-mono">
+                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Final Score</span>
+                      <span className="text-sm font-black text-white">{currentScore} <span className="text-[8px] text-slate-400 font-normal">PTS</span></span>
+                    </div>
+                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Accuracy</span>
+                      <span className="text-sm font-black text-white">{accuracy}%</span>
+                    </div>
+                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Max Combo</span>
+                      <span className="text-sm font-black text-orange-400">{stats.bestCombo}x</span>
                     </div>
                     
-                    <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center">
-                      <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
-                        <path className="text-gray-800" strokeWidth="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                        <path 
-                          className={`${accuracy >= 80 ? 'text-green-500' : accuracy >= 50 ? 'text-yellow-500' : 'text-red-500'} transition-all duration-1000 ease-out`} 
-                          strokeWidth="3" strokeDasharray={`${strokeDasharray}`} strokeDashoffset={`${strokeDashoffset}`} strokeLinecap="round" stroke="currentColor" fill="none" 
-                          d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" 
-                        />
-                      </svg>
-                      <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <span className={`text-base sm:text-xl font-black ${accuracy >= 80 ? 'text-green-400' : accuracy >= 50 ? 'text-yellow-400' : 'text-red-400'}`}>{accuracy}%</span>
-                        <span className="text-[7px] sm:text-[8px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">Accuracy</span>
-                      </div>
+                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Hits</span>
+                      <span className="text-sm font-black text-emerald-400">{stats.hits}</span>
+                    </div>
+                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Mistakes</span>
+                      <span className="text-sm font-black text-red-400">{totalMistakes}</span>
+                    </div>
+                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Best Score</span>
+                      <span className="text-sm font-black text-yellow-400">{bestScore}</span>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-2 sm:gap-3">
-                    <div className="bg-gray-900/50 rounded-xl p-2 text-center border border-gray-800">
-                      <div className="text-gray-400 text-[9px] sm:text-[10px] uppercase font-bold tracking-wider mb-1">Perfects</div>
-                      <div className="text-base sm:text-xl font-black text-emerald-400">{stats.hits}</div>
+                  <div className="bg-[#0b0f19] border border-slate-850 p-3 rounded-xl mb-4 text-left">
+                    <span className={`text-xs font-black block text-center uppercase tracking-widest ${rankColor} mb-2`}>
+                      Rank: {rankName}
+                    </span>
+                    <div className="w-full h-px bg-slate-850 mb-2"></div>
+                    <div className="flex items-center gap-1.5 text-[9px] font-bold text-white uppercase mb-1 font-mono">
+                      <Sparkles className="w-3 h-3 text-yellow-500" /> Diagnostics advice:
                     </div>
-                    <div className="bg-gray-900/50 rounded-xl p-2 text-center border border-gray-800">
-                      <div className="text-gray-400 text-[9px] sm:text-[10px] uppercase font-bold tracking-wider mb-1">Mistakes</div>
-                      <div className="text-base sm:text-xl font-black text-red-400">{totalMistakes}</div>
-                    </div>
-                    <div className="bg-gray-900/50 rounded-xl p-2 text-center border border-gray-800">
-                      <div className="text-gray-400 text-[9px] sm:text-[10px] uppercase font-bold tracking-wider mb-1">Max Combo</div>
-                      <div className="text-base sm:text-xl font-black text-yellow-400">{statsRef.current.bestCombo}</div>
-                    </div>
+                    <p className="text-[10px] text-slate-400 leading-normal">
+                      {diagnostics}
+                    </p>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <PlayAgainButton onClick={() => { endGame(); startGame(); }} colorTheme="orange" />
+                    <button
+                      onClick={shareScore}
+                      className="p-3 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded-xl transition-colors active:scale-95"
+                      title="Share Score"
+                    >
+                      <Share2 className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={handleExit}
+                      className="p-3 bg-red-900/30 border border-red-900/55 hover:bg-red-900/50 text-red-400 rounded-xl transition-colors active:scale-95 flex items-center justify-center"
+                      title="Exit Drill"
+                    >
+                      <LogOut className="w-4 h-4" />
+                    </button>
                   </div>
                 </div>
-
-                <div className="p-3 sm:p-5 bg-gray-900/50 border-t border-gray-800 flex gap-2 sm:gap-3 rounded-b-3xl shrink-0">
-                  <button onPointerDown={e => e.stopPropagation()} onClick={() => { endGame(); startGame(); }} className="flex-1 py-3 sm:py-4 bg-orange-600 text-white rounded-xl font-black tracking-wide hover:bg-orange-500 transition-all active:scale-95 flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(234,88,12,0.4)] text-sm sm:text-base">
-                    <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5" /> PLAY AGAIN
-                  </button>
-                  <button onPointerDown={e => e.stopPropagation()} onClick={shareDrillLink} className="px-4 sm:px-5 py-3 sm:py-4 bg-gray-800 text-white rounded-xl font-bold hover:bg-gray-700 transition-all active:scale-95 border border-gray-700 flex items-center justify-center" title="Share Drill">
-                    <Share2 className="w-4 h-4 sm:w-5 sm:h-5" />
-                  </button>
-                  <button onPointerDown={e => e.stopPropagation()} onClick={handleExit} className="px-4 sm:px-5 py-3 sm:py-4 bg-red-900/30 text-red-400 rounded-xl font-bold hover:bg-red-900/50 transition-all active:scale-95 border border-red-900/50 flex items-center justify-center" title="Exit Drill">
-                    <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
-                  </button>
-                </div>
-                
               </div>
             </div>
           )}
@@ -673,10 +759,10 @@ export default function SustainedAttentionClient() {
               <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-5">
                   <RuleItem color="green" text="Correct Target" highlight="+20 PTS | +5s" result="Increases Speed" />
-                  <RuleItem color="purple" text="Adaptive Speed" highlight="Scales Down" result="Based on Precision" />
+                  <RuleItem color="purple" text="Adaptive Speed" highlight="Scales Down" result="Based on Score" />
                 </div>
                 <div className="space-y-5">
-                  <RuleItem color="red" text="Wrong / Miss" highlight="-10 PTS | -5s" result="Decreases Speed" />
+                  <RuleItem color="red" text="Wrong / Miss" highlight="No PTS Penalty | -5s" result="Decreases Time" />
                   <RuleItem color="blue" text="Time Limit Capped" highlight="Max 60 Seconds" result="Endless Survival" />
                 </div>
               </div>
@@ -728,7 +814,7 @@ export default function SustainedAttentionClient() {
                   <ul className="text-sm leading-relaxed space-y-3 pl-2 text-gray-400">
                     <li><strong className="text-gray-200">Rhythmic Processing:</strong> Establish a mental rhythm matching the interval of the flashes. Do not attempt to react immediately; let the visual metronome guide your tap.</li>
                     <li><strong className="text-gray-200">Impulse Suppression:</strong> The engine forces high-speed distractor strings. Keep your finger/cursor ready but <strong className="text-white font-semibold">actively suppress the urge to tap</strong> unless you perfectly verify the target.</li>
-                    <li><strong className="text-gray-200">Survival Mechanics:</strong> You must maintain accuracy to add time (+5s) and score (+20 PTS) back to your clock. Misses actively drain the clock (-5s). The max time ceiling is 60 seconds.</li>
+                    <li><strong className="text-gray-200">Survival Mechanics:</strong> You must maintain accuracy to add time (+5s) and score (+20 PTS) back to your clock. Errors or misses actively drain the clock (-5s) but do not reduce your score.</li>
                   </ul>
                 </div>
                 
@@ -740,11 +826,11 @@ export default function SustainedAttentionClient() {
                   <div className="space-y-5">
                     <div>
                       <h4 className="text-sm font-bold text-gray-200 tracking-tight">How does the difficulty adapt?</h4>
-                      <p className="text-xs text-gray-400 mt-1.5 leading-relaxed">The engine maps directly to your precision. Every successful target scales the presentation speed downward, shrinking the visual flash window to a minimum of 200ms. If you miss or false-alarm, the engine gracefully slows down to allow recovery.</p>
+                      <p className="text-xs text-gray-400 mt-1.5 leading-relaxed">The engine tracks your score. Every 60 points you earn increases your difficulty Level, shrinking the visual flash window to a minimum of 200ms. If you miss or make mistakes, you lose time, but your level and score are protected.</p>
                     </div>
                     <div>
-                      <h4 className="text-sm font-bold text-gray-200 tracking-tight">Why did I lose points without tapping?</h4>
-                      <p className="text-xs text-gray-400 mt-1.5 leading-relaxed">This drill penalizes inaction equally. If the target number appears and the timer runs out before you tap, it registers as a "Missed Target" mistake, incurring a direct -10 point penalty and draining 5 seconds from your clock.</p>
+                      <h4 className="text-sm font-bold text-gray-200 tracking-tight">Why did I lose time without tapping?</h4>
+                      <p className="text-xs text-gray-400 mt-1.5 leading-relaxed">This drill penalizes inaction equally. If the target number appears and the timer runs out before you tap, it registers as a "Missed Target" mistake, incurring a -5 second penalty to your clock.</p>
                     </div>
                   </div>
                 </div>

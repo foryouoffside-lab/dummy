@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useEffect, useState, useRef, useCallback } from 'react';
 import Link from 'next/link';
@@ -7,9 +7,9 @@ import {
   Eye, Volume2, VolumeX, Info, Activity, Target, Clock, Timer,
   Trophy, Zap, RefreshCw, GraduationCap, Lightbulb, TrendingUp, 
   BarChart3, CheckCircle2, Star, ArrowRight, Share2, Copy,
-  Brain, Lock, RotateCcw, XCircle, LogOut, Play, Search, Layers ,ChevronRight,Users
-  
+  Brain, Lock, RotateCcw, XCircle, LogOut, Play, Search, Layers ,ChevronRight,Users, Sparkles
 } from 'lucide-react';
+import PlayAgainButton from "../../../../../components/PlayAgainButton";
 
 // ============================================================
 // ZERO-LATENCY AUDIO SYNTHESIZER
@@ -104,6 +104,7 @@ export default function SwitchCostIntegratorClient() {
   const [bestScore, setBestScore] = useState(0);
   const [timeLeft, setTimeLeft] = useState(60.0);
   const [level, setLevel] = useState(1);
+  const [highestLevelReached, setHighestLevelReached] = useState(1);
   const [successfulHits, setSuccessfulHits] = useState(0);
   const [misses, setMisses] = useState(0);
   const [accuracy, setAccuracy] = useState(100);
@@ -120,6 +121,7 @@ export default function SwitchCostIntegratorClient() {
   const scoreRef = useRef(0);
   const timeRef = useRef(60.0);
   const levelRef = useRef(1);
+  const highestLevelRef = useRef(1);
   const hitsRef = useRef(0);
   const missRef = useRef(0);
   const effectiveHitsRef = useRef(0); // Used for dynamic difficulty sliding
@@ -232,25 +234,22 @@ export default function SwitchCostIntegratorClient() {
   }, []);
 
   // === Dynamic Difficulty Scaling ===
-  const updateDifficulty = useCallback((isHit) => {
-    if (isHit) {
-      effectiveHitsRef.current += 1;
-    } else {
-      effectiveHitsRef.current = Math.max(0, effectiveHitsRef.current - 1);
-    }
-
-    const newLevel = Math.floor(effectiveHitsRef.current / 5) + 1;
+  const updateDifficulty = useCallback(() => {
+    const newLevel = Math.floor(scoreRef.current / 50) + 1;
     
-    if (newLevel > levelRef.current && isHit) {
+    if (newLevel > levelRef.current) {
       if (audioSynth) audioSynth.playLevelUp();
       triggerFeedback(`⚡ Speed Up! Level ${newLevel}`, 'warning');
     }
     
     levelRef.current = newLevel;
     setLevel(newLevel);
+    highestLevelRef.current = Math.max(highestLevelRef.current, newLevel);
+    setHighestLevelReached(highestLevelRef.current);
 
-    // Scale Speed (1000ms down to tightly bound minimum)
-    gameDataRef.current.currentInterval = Math.max(300, 1000 - (newLevel * 45));
+    // Scale Speed (1000ms down to tightly bound minimum of 300ms based on score up to 300 points)
+    const progress = Math.min(1, scoreRef.current / 300);
+    gameDataRef.current.currentInterval = Math.max(300, Math.floor(1000 - (progress * 700)));
   }, [triggerFeedback]);
 
   // === Game Mechanics ===
@@ -282,7 +281,7 @@ export default function SwitchCostIntegratorClient() {
     setTimeLeft(timeRef.current);
     setSuccessfulHits(hitsRef.current);
     
-    updateDifficulty(true);
+    updateDifficulty();
     triggerFeedback('Perfect! +10 PTS | +2s', 'success'); // FIXED: Feedback matches 2s
     
     const total = hitsRef.current + missRef.current;
@@ -293,7 +292,6 @@ export default function SwitchCostIntegratorClient() {
     if (!isActiveRef.current) return;
     if (audioSynth) audioSynth.playMiss();
     
-    scoreRef.current = Math.max(0, scoreRef.current - 5);
     timeRef.current -= 2.0;
     missRef.current += 1;
     
@@ -301,8 +299,8 @@ export default function SwitchCostIntegratorClient() {
     setTimeLeft(timeRef.current);
     setMisses(missRef.current);
     
-    updateDifficulty(false);
-    triggerFeedback(`Penalty! ${reason} -5 PTS | -2s`, 'error');
+    updateDifficulty();
+    triggerFeedback(`Penalty! ${reason} -2s`, 'error');
     
     const total = hitsRef.current + missRef.current;
     if (total > 0) setAccuracy(Math.round((hitsRef.current / total) * 100));
@@ -526,13 +524,13 @@ export default function SwitchCostIntegratorClient() {
     if (orbTimeoutRef.current) clearTimeout(orbTimeoutRef.current);
     if (animationRef.current) cancelAnimationFrame(animationRef.current);
 
-    scoreRef.current = 0; timeRef.current = 60.0; levelRef.current = 1; 
+    scoreRef.current = 0; timeRef.current = 60.0; levelRef.current = 1; highestLevelRef.current = 1;
     hitsRef.current = 0; missRef.current = 0; effectiveHitsRef.current = 0;
     
     gameDataRef.current.isOrbActive = false; gameDataRef.current.currentInterval = 1000;
     isActiveRef.current = true;
     
-    setScore(0); setTimeLeft(60.0); setLevel(1); setSuccessfulHits(0); setMisses(0); setAccuracy(100);
+    setScore(0); setTimeLeft(60.0); setLevel(1); setHighestLevelReached(1); setSuccessfulHits(0); setMisses(0); setAccuracy(100);
     gameStateRef.current = 'playing';
     setGameState('playing'); 
     crosshairInitRef.current = false;
@@ -560,6 +558,8 @@ export default function SwitchCostIntegratorClient() {
     isActiveRef.current = false;
     gameStateRef.current = 'start';
     setGameState('start'); 
+    levelRef.current = 1;
+    highestLevelRef.current = 1;
     
     if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); 
     if (orbTimeoutRef.current) clearTimeout(orbTimeoutRef.current);
@@ -567,14 +567,67 @@ export default function SwitchCostIntegratorClient() {
     if (document.pointerLockElement) document.exitPointerLock();
   }, []);
 
-  const shareDrillLink = useCallback(async () => {
-    const url = 'https://skilldrills.online/drills/cognitive/attention/switch-cost';
-    if (navigator.share) {
-      try { await navigator.share({ title: 'Switch-Cost Integrator | SkillDrills', text: 'Train your cognitive flexibility and eliminate context-switching lag! Free online training.', url }); } catch (e) {}
-    } else {
-      navigator.clipboard.writeText(url).then(() => alert('Link copied!')).catch(() => prompt('Copy:', url));
+  const shareScore = useCallback(() => {
+    let finalRank = 'Bronze';
+    if (score >= 400 && accuracy >= 90) finalRank = 'Grandmaster';
+    else if (score >= 300 && accuracy >= 82) finalRank = 'Master';
+    else if (score >= 220 && accuracy >= 75) finalRank = 'Diamond';
+    else if (score >= 150 && accuracy >= 65) finalRank = 'Platinum';
+    else if (score >= 80 && accuracy >= 55) finalRank = 'Gold';
+    else if (score >= 40) finalRank = 'Silver';
+
+    const text = `🧠 I scored ${score} PTS with ${accuracy}% accuracy on the Task Switching Test! Rank: ${finalRank}. Train your cognitive flexibility: https://skilldrills.online/drills/cognitive/attention/switch-cost`;
+    
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      navigator.share({
+        title: 'My SkillDrills Cognitive Score',
+        text: text,
+        url: 'https://skilldrills.online/drills/cognitive/attention/switch-cost'
+      }).catch(() => {});
+    } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+      alert('Score card copied to clipboard!');
     }
-  }, []);
+  }, [score, accuracy]);
+
+  // Calculate grade based on score and accuracy
+  let gradeLetter = 'F';
+  if (accuracy >= 90 && score >= 300) gradeLetter = 'S';
+  else if (accuracy >= 80 && score >= 220) gradeLetter = 'A';
+  else if (accuracy >= 70 && score >= 150) gradeLetter = 'B';
+  else if (accuracy >= 60 && score >= 80) gradeLetter = 'C';
+  else if (accuracy >= 45 && score >= 40) gradeLetter = 'D';
+
+  let rankName = 'Bronze';
+  let rankColor = 'text-slate-500';
+  if (score >= 400 && accuracy >= 90) {
+    rankName = 'Grandmaster';
+    rankColor = 'text-fuchsia-400 font-extrabold';
+  } else if (score >= 300 && accuracy >= 82) {
+    rankName = 'Master';
+    rankColor = 'text-red-400 font-extrabold';
+  } else if (score >= 220 && accuracy >= 75) {
+    rankName = 'Diamond';
+    rankColor = 'text-cyan-400 font-extrabold';
+  } else if (score >= 150 && accuracy >= 65) {
+    rankName = 'Platinum';
+    rankColor = 'text-indigo-400 font-extrabold';
+  } else if (score >= 80 && accuracy >= 55) {
+    rankName = 'Gold';
+    rankColor = 'text-yellow-400 font-extrabold';
+  } else if (score >= 40) {
+    rankName = 'Silver';
+    rankColor = 'text-gray-300 font-extrabold';
+  }
+
+  let diagnostics = "Superb set-shifting speed! You successfully minimized context-switching lag and reconfigured rulesets with minimal errors.";
+  if (accuracy < 60) {
+    diagnostics = "High error rate. Make sure to look closely at whether the spawning target has a dashed shadow before clicking.";
+  } else if (misses > successfulHits * 0.4) {
+    diagnostics = "High timeout rate. Establish a rapid scanning sequence. Look for the dashed opposite shadow first.";
+  } else if (score < 80) {
+    diagnostics = "Slow set-shifting speed. Practice rule alternation regularly to reduce your brain's context-switching cost.";
+  }
 
   // === RENDER ===
   if (loading || !isClient) return (
@@ -723,69 +776,80 @@ export default function SwitchCostIntegratorClient() {
           
           {/* Game Over Screen */}
           {gameState === 'gameOver' && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black/95 pointer-events-auto animate-in fade-in duration-300 overflow-y-auto px-4 py-6" onPointerDown={e => e.stopPropagation()}>
-              <div className="rounded-3xl max-w-md w-full shadow-2xl border border-gray-800 bg-gray-950 flex flex-col max-h-[95vh] overflow-y-auto my-auto">
-                <div className="bg-gradient-to-br from-purple-900/40 to-indigo-900/40 p-4 sm:p-6 border-b border-gray-800 relative overflow-hidden pointer-events-none shrink-0 rounded-t-3xl">
-                  <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-purple-500/20 rounded-full blur-3xl"></div>
-                  <div className="absolute bottom-0 left-0 -mb-4 -ml-4 w-32 h-32 bg-indigo-500/20 rounded-full blur-3xl"></div>
-                  <div className="relative z-10 flex flex-col items-center">
-                    {score > 0 && score >= bestScore && (
-                      <div className="bg-yellow-500 text-black text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-2 shadow-[0_0_15px_rgba(234,179,8,0.5)]">
-                        ⭐ New Personal Best
-                      </div>
-                    )}
-                    <h2 className="text-2xl sm:text-3xl font-black text-white mb-1 tracking-tight">Time's Up!</h2>
-                    <p className="text-purple-400 font-medium text-xs sm:text-sm">Switch-Cost Integrator • Max Speed Lv.{level}</p>
-                  </div>
-                </div>
+            <div className="absolute inset-0 bg-[#05070e]/98 overflow-y-auto p-6 z-[70] select-none scrollbar-thin scroll-smooth backdrop-blur-sm" onPointerDown={e => e.stopPropagation()}>
+              <div className="min-h-full flex flex-col justify-center items-center py-4 w-full">
+                <div className="max-w-md w-full text-center">
+                  {score > 0 && score >= bestScore && (
+                    <div className="inline-block bg-yellow-500 text-black text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-3 shadow-[0_0_15px_rgba(234,179,8,0.5)] animate-bounce font-mono">
+                      ⭐ NEW PERSONAL BEST!
+                    </div>
+                  )}
+                  
+                  <h2 className="text-xl font-black text-white uppercase tracking-wider mb-1 font-mono">
+                    Drill Complete
+                  </h2>
+                  <p className="text-xs text-slate-500 uppercase tracking-widest mb-6 font-mono">
+                    Peak difficulty reached: Level {highestLevelReached}
+                  </p>
 
-                <div className="p-4 sm:p-6 pointer-events-none shrink-0">
-                  <div className="flex justify-between items-center mb-4 sm:mb-6">
-                    <div className="flex flex-col">
-                      <span className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Final Score</span>
-                      <div className="flex items-end gap-1">
-                        <span className="text-4xl sm:text-6xl font-black text-white leading-none tracking-tighter">{score}</span>
-                        <span className="text-sm sm:text-lg text-gray-500 font-bold mb-1">PTS</span>
-                      </div>
+                  <div className="grid grid-cols-3 gap-2.5 mb-6 text-left font-mono">
+                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Final Score</span>
+                      <span className="text-sm font-black text-white">{score} <span className="text-[8px] text-slate-400 font-normal">PTS</span></span>
                     </div>
-                    <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center">
-                      <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
-                        <path className="text-gray-800" strokeWidth="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                        <path className={`${accuracy >= 80 ? 'text-green-500' : accuracy >= 50 ? 'text-yellow-500' : 'text-red-500'} transition-all duration-1000 ease-out`} strokeWidth="3" strokeDasharray="100" strokeDashoffset={`${100 - accuracy}`} strokeLinecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                      </svg>
-                      <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <span className={`text-base sm:text-xl font-black ${accuracy >= 80 ? 'text-green-400' : accuracy >= 50 ? 'text-yellow-400' : 'text-red-400'}`}>{accuracy}%</span>
-                        <span className="text-[7px] sm:text-[8px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">Accuracy</span>
-                      </div>
+                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Accuracy</span>
+                      <span className="text-sm font-black text-white">{accuracy}%</span>
                     </div>
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-2 sm:gap-3">
-                    <div className="bg-gray-900/50 rounded-xl p-2 text-center border border-gray-800">
-                      <div className="text-gray-400 text-[9px] sm:text-[10px] uppercase font-bold tracking-wider mb-1">Target Hits</div>
-                      <div className="text-base sm:text-xl font-black text-green-400">{successfulHits}</div>
+                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Best Score</span>
+                      <span className="text-sm font-black text-yellow-400">{bestScore}</span>
                     </div>
-                    <div className="bg-gray-900/50 rounded-xl p-2 text-center border border-gray-800">
-                      <div className="text-gray-400 text-[9px] sm:text-[10px] uppercase font-bold tracking-wider mb-1">Mistakes</div>
-                      <div className="text-base sm:text-xl font-black text-red-400">{misses}</div>
+                    
+                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Target Hits</span>
+                      <span className="text-sm font-black text-emerald-400">{successfulHits}</span>
                     </div>
-                    <div className="bg-gray-900/50 rounded-xl p-2 text-center border border-gray-800">
-                      <div className="text-gray-400 text-[9px] sm:text-[10px] uppercase font-bold tracking-wider mb-1">Peak Lvl</div>
-                      <div className="text-base sm:text-xl font-black text-purple-400">{level}</div>
+                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Mistakes</span>
+                      <span className="text-sm font-black text-red-400">{misses}</span>
+                    </div>
+                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Peak Level</span>
+                      <span className="text-sm font-black text-purple-400">Lv.{level}</span>
                     </div>
                   </div>
-                </div>
 
-                <div className="p-3 sm:p-5 bg-gray-900/50 border-t border-gray-800 flex gap-2 sm:gap-3 rounded-b-3xl shrink-0">
-                  <button onPointerDown={e => e.stopPropagation()} onClick={startGame} className="flex-1 py-3 sm:py-4 bg-purple-600 text-white rounded-xl font-black tracking-wide hover:bg-purple-500 transition-all active:scale-95 flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(168,85,247,0.4)] text-sm sm:text-base">
-                    <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5" /> PLAY AGAIN
-                  </button>
-                  <button onPointerDown={e => e.stopPropagation()} onClick={shareDrillLink} className="px-4 sm:px-5 py-3 sm:py-4 bg-gray-800 text-white rounded-xl font-bold hover:bg-gray-700 transition-all active:scale-95 border border-gray-700 flex items-center justify-center" title="Share Drill">
-                    <Share2 className="w-4 h-4 sm:w-5 sm:h-5" />
-                  </button>
-                  <button onPointerDown={e => e.stopPropagation()} onClick={handleExit} className="px-4 sm:px-5 py-3 sm:py-4 bg-red-900/30 text-red-400 rounded-xl font-bold hover:bg-red-900/50 transition-all active:scale-95 border border-red-900/50 flex items-center justify-center" title="Exit Drill">
-                    <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
-                  </button>
+                  <div className="bg-[#0b0f19] border border-slate-850 p-3 rounded-xl mb-4 text-left">
+                    <span className={`text-xs font-black block text-center uppercase tracking-widest ${rankColor} mb-2`}>
+                      Rank: {rankName}
+                    </span>
+                    <div className="w-full h-px bg-slate-850 mb-2"></div>
+                    <div className="flex items-center gap-1.5 text-[9px] font-bold text-white uppercase mb-1 font-mono">
+                      <Sparkles className="w-3 h-3 text-yellow-500" /> Diagnostics advice:
+                    </div>
+                    <p className="text-[10px] text-slate-400 leading-normal">
+                      {diagnostics}
+                    </p>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <PlayAgainButton onClick={() => { resetGame(); startGame(); }} colorTheme="purple" />
+                    <button
+                      onClick={shareScore}
+                      className="p-3 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded-xl transition-colors active:scale-95"
+                      title="Share Score"
+                    >
+                      <Share2 className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={handleExit}
+                      className="p-3 bg-red-900/30 border border-red-900/55 hover:bg-red-900/50 text-red-400 rounded-xl transition-colors active:scale-95 flex items-center justify-center"
+                      title="Exit Drill"
+                    >
+                      <LogOut className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -807,9 +871,9 @@ export default function SwitchCostIntegratorClient() {
                   <RuleItem color="blue" text="Target Hit" highlight="Correct" result="+10 PTS | +2s" isDark={isDarkMode} />
                 </div>
                 <div className="space-y-4">
-                  <RuleItem color="red" text="Tapping wrong / Miss" highlight="Penalty" result="-5 PTS | -2s" isDark={isDarkMode} />
+                  <RuleItem color="red" text="Tapping wrong / Miss" highlight="Penalty" result="No PTS Penalty | -2s" isDark={isDarkMode} />
                   <RuleItem color="orange" text="Targets spawn in 8 dynamic locations =" highlight="Random" result="Stay Alert" isDark={isDarkMode} />
-                  <RuleItem color="yellow" text="Difficulty scales directly with success =" highlight="Speed Up" result="Adaptive" isDark={isDarkMode} />
+                  <RuleItem color="yellow" text="Difficulty scales directly with score =" highlight="Speed Up" result="Adaptive" isDark={isDarkMode} />
                 </div>
               </div>
             </div>
@@ -862,7 +926,7 @@ export default function SwitchCostIntegratorClient() {
                   <ul className={`text-xs space-y-3 pl-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                     <li><strong className={isDarkMode ? 'text-gray-200' : 'text-gray-800'}>Inhibit the Impulse:</strong> The most common error is rushing. Visually confirm if the shadow spawned before initiating your mechanical movement.</li>
                     <li><strong className={isDarkMode ? 'text-gray-200' : 'text-gray-800'}>Center Your Gaze:</strong> Keep your eyes relatively central to easily spot the entire perimeter using peripheral vision.</li>
-                    <li><strong className={isDarkMode ? 'text-gray-200' : 'text-gray-800'}>Adaptive Survival:</strong> Because incorrect actions penalize heavily (-5 PTS, -2s), slowing down slightly when confused is statistically better than guessing and dropping speed levels.</li>
+                    <li><strong className={isDarkMode ? 'text-gray-200' : 'text-gray-800'}>Adaptive Survival:</strong> While incorrect actions do not deduct points, they still drain time (-2s) and break combos. Balance speed with inhibition to maximize your score.</li>
                   </ul>
                 </div>
 
@@ -875,7 +939,7 @@ export default function SwitchCostIntegratorClient() {
                   <div className="space-y-5">
                     <div>
                       <h4 className={`text-sm font-bold tracking-tight ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>How does the dynamic difficulty work?</h4>
-                      <p className={`text-xs mt-1.5 leading-relaxed ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>The engine is directly tied to your accuracy streak. Successfully completing targets tightens the flash window, forcing faster reactions. If you miss or guess incorrectly, the engine dials back the speed to allow you to re-calibrate.</p>
+                      <p className={`text-xs mt-1.5 leading-relaxed ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>The engine tracks your score. Every 50 points you earn increases your difficulty Level, shrinking the spawn interval down to a minimum of 300ms. If you miss, you lose time, but your level and score are protected.</p>
                     </div>
                     <div>
                       <h4 className={`text-sm font-bold tracking-tight ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>What exactly is "Switch-Cost"?</h4>

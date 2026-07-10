@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { Component, useEffect, useState, useRef, useCallback } from 'react';
 import Link from 'next/link';
@@ -7,9 +7,10 @@ import {
   Info, RefreshCw, GraduationCap, Lightbulb, TrendingUp, 
   BarChart3, ArrowRight, Brain, Users, AlertTriangle, Target, 
   CheckCircle, XCircle, Play, Share2, ChevronRight, Clock, Search, Activity,
-  LogOut, Crosshair, Zap
+  LogOut, Crosshair, Zap, Sparkles
 } from 'lucide-react';
 import useGameEngine from '../../../../../lib/useGameEngine';
+import PlayAgainButton from '../../../../../components/PlayAgainButton';
 
 // ============================================================
 // ZERO-LATENCY AUDIO SYNTHESIZER
@@ -179,11 +180,17 @@ export default function DifferenceSpotterClient() {
 
   // Strict Economy Logic
   const updateEconomy = useCallback((scoreDelta, timeDelta) => {
+    let finalScore = 0;
     setCustomScore(prev => {
       const updated = Math.max(0, prev + scoreDelta);
       customScoreRef.current = updated;
+      finalScore = updated;
       return updated;
     });
+
+    if (engineRef.current && typeof engineRef.current.setScore === 'function') {
+      engineRef.current.setScore(finalScore);
+    }
 
     // Clamp time strictly between 0 and 60
     localTimeRef.current = Math.min(60, Math.max(0, localTimeRef.current + timeDelta));
@@ -252,7 +259,10 @@ export default function DifferenceSpotterClient() {
     // Smaller objects optimized for mobile
     const radius = Math.max(12, Math.min(w, h) * 0.04); 
 
-    for (let i = 0; i < 6; i++) { 
+    const baseCount = 5;
+    const dynamicCount = Math.min(10, baseCount + Math.floor(customScoreRef.current / 20));
+
+    for (let i = 0; i < dynamicCount; i++) { 
       objs.push({ 
         x: marginX + Math.random() * safeW, 
         y: marginY + Math.random() * safeH, 
@@ -287,14 +297,14 @@ export default function DifferenceSpotterClient() {
     streakRef.current = 0; 
     setStreak(0); 
     
-    // PENALTY: -3 Score, -1 Second
-    updateEconomy(-3, -1);
+    // PENALTY: 0 Score, -1 Second
+    updateEconomy(0, -1);
     
     // DECREASE DIFFICULTY: Increase study time to make it easier
     studyTimeRef.current = Math.min(5.0, studyTimeRef.current + 0.5); 
     setStudyTime(Math.round(studyTimeRef.current * 10) / 10); 
     
-    triggerFeedback(`Miss! -3 PTS | -1s`, 'error'); 
+    triggerFeedback(`Miss! -1s`, 'error'); 
     if (audioSynth) audioSynth.playFail(); 
     
     stateRef.current = "FEEDBACK"; 
@@ -590,6 +600,30 @@ export default function DifferenceSpotterClient() {
     }
   };
 
+  const shareScore = useCallback(() => {
+    const accuracy = successfulHits + missedHits > 0 ? Math.round((successfulHits / (successfulHits + missedHits)) * 100) : 0;
+    let finalRank = 'Bronze';
+    if (customScoreRef.current >= 80 && accuracy >= 85) finalRank = 'Grandmaster';
+    else if (customScoreRef.current >= 65 && accuracy >= 75) finalRank = 'Master';
+    else if (customScoreRef.current >= 50 && accuracy >= 65) finalRank = 'Diamond';
+    else if (customScoreRef.current >= 35 && accuracy >= 55) finalRank = 'Platinum';
+    else if (customScoreRef.current >= 20 && accuracy >= 45) finalRank = 'Gold';
+    else if (customScoreRef.current >= 10) finalRank = 'Silver';
+
+    const text = `🔍 I scored ${customScoreRef.current} PTS with ${accuracy}% spotting accuracy on the Difference Spotter Drill! Rank: ${finalRank}. Try it here: https://skilldrills.online/drills/visual/visual-recognition/difference-spotter`;
+    
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      navigator.share({
+        title: 'My SkillDrills Visual Score',
+        text: text,
+        url: 'https://skilldrills.online/drills/visual/visual-recognition/difference-spotter'
+      }).catch(() => {});
+    } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+      alert('Score card copied to clipboard!');
+    }
+  }, [successfulHits, missedHits]);
+
   if (loading || !isClient) { 
     return (
       <div className="min-h-screen flex items-center justify-center bg-black">
@@ -603,6 +637,44 @@ export default function DifferenceSpotterClient() {
 
   const accuracyPercentage = (successfulHits + missedHits) === 0 ? 0 : Math.round((successfulHits / (successfulHits + missedHits)) * 100);
   const isNewBest = engine.gameState === 'ended' && customScore > bestScore && customScore > 0;
+
+  let gradeLetter = 'F';
+  if (accuracyPercentage >= 85 && customScore >= 80) gradeLetter = 'S';
+  else if (accuracyPercentage >= 75 && customScore >= 65) gradeLetter = 'A';
+  else if (accuracyPercentage >= 65 && customScore >= 50) gradeLetter = 'B';
+  else if (accuracyPercentage >= 55 && customScore >= 35) gradeLetter = 'C';
+  else if (accuracyPercentage >= 45 && customScore >= 20) gradeLetter = 'D';
+
+  let rankName = 'Bronze';
+  let rankColor = 'text-slate-500';
+  if (customScore >= 80 && accuracyPercentage >= 85) {
+    rankName = 'Grandmaster';
+    rankColor = 'text-fuchsia-400 font-extrabold';
+  } else if (customScore >= 65 && accuracyPercentage >= 75) {
+    rankName = 'Master';
+    rankColor = 'text-red-400 font-extrabold';
+  } else if (customScore >= 50 && accuracyPercentage >= 65) {
+    rankName = 'Diamond';
+    rankColor = 'text-cyan-400 font-extrabold';
+  } else if (customScore >= 35 && accuracyPercentage >= 55) {
+    rankName = 'Platinum';
+    rankColor = 'text-indigo-400 font-extrabold';
+  } else if (customScore >= 20 && accuracyPercentage >= 45) {
+    rankName = 'Gold';
+    rankColor = 'text-yellow-400 font-extrabold';
+  } else if (customScore >= 10) {
+    rankName = 'Silver';
+    rankColor = 'text-gray-300 font-extrabold';
+  }
+
+  let diagnostics = "Superb change detection accuracy! Your visual working memory is highly resilient to transient blank-screen blinks.";
+  if (accuracyPercentage < 40) {
+    diagnostics = "Low difference detection accuracy. Keep your focus widely distributed rather than locked to a single object.";
+  } else if (bestDetection > 1500) {
+    diagnostics = "Good accuracy, but detection speed is slow. Try scanning the layout immediately following the blink for faster reaction.";
+  } else if (customScore < 30) {
+    diagnostics = "Build a longer streak of correct hits to scale up target density and earn highscore points.";
+  }
 
   return (
     <div className="min-h-screen select-none bg-black text-white selection:bg-transparent" style={{ WebkitTapHighlightColor: 'transparent' }}>
@@ -731,80 +803,88 @@ export default function DifferenceSpotterClient() {
 
             {/* Premium Custom Structural End Card Component */}
             {(engine.gameState === 'ended' || isTimeUpRef.current) && (
-              <div className="absolute inset-0 flex items-center justify-center z-[70] bg-black/95 pointer-events-auto animate-in fade-in duration-300 p-4 overflow-y-auto">
-                <div className="rounded-3xl max-w-md w-full shadow-2xl border border-gray-800 bg-gray-950 flex flex-col max-h-[90vh] my-auto shrink-0">
-                  
-                  <div className="flex-1 overflow-y-auto">
-                    <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 p-5 sm:p-6 border-b border-gray-800 relative overflow-hidden pointer-events-none shrink-0">
-                      <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-purple-500/20 rounded-full blur-3xl"></div>
-                      <div className="absolute bottom-0 left-0 -mb-4 -ml-4 w-32 h-32 bg-pink-500/20 rounded-full blur-3xl"></div>
-                      <div className="relative z-10 flex flex-col items-center">
-                        {isNewBest && (
-                          <div className="bg-yellow-500 text-black text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-2 shadow-[0_0_15px_rgba(234,179,8,0.5)]">
-                            ⭐ New Personal Best
-                          </div>
-                        )}
-                        <h2 className="text-2xl sm:text-3xl font-black text-white mb-1 tracking-tight">Mission Complete</h2>
-                        <p className="text-purple-400 font-medium text-sm">Difference Spotter Lab</p>
+              <div className="absolute inset-0 bg-[#05070e]/98 overflow-y-auto p-6 z-[70] select-none scrollbar-thin scroll-smooth backdrop-blur-sm animate-in fade-in duration-300 pointer-events-auto">
+                <div className="min-h-full flex flex-col justify-center items-center py-4 w-full">
+                  <div className="max-w-md w-full text-center">
+                    {customScore > 0 && customScore >= (bestScore || 0) && (
+                      <div className="inline-block bg-yellow-500 text-black text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-3 shadow-[0_0_15px_rgba(234,179,8,0.5)] animate-bounce font-mono">
+                        ⭐ NEW PERSONAL BEST!
+                      </div>
+                    )}
+                    
+                    <h2 className="text-xl font-black text-white uppercase tracking-wider mb-1 font-mono">
+                      Drill Complete
+                    </h2>
+                    <p className="text-xs text-slate-500 uppercase tracking-widest mb-6 font-mono">
+                      Difference Spotter Lab
+                    </p>
+
+                    <div className="grid grid-cols-3 gap-2.5 mb-6 text-left font-mono">
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Final Score</span>
+                        <span className="text-sm font-black text-white">{customScore} <span className="text-[8px] text-slate-400 font-normal">PTS</span></span>
+                      </div>
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Accuracy</span>
+                        <span className="text-sm font-black text-white">{accuracyPercentage}%</span>
+                      </div>
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Best Score</span>
+                        <span className="text-sm font-black text-green-400">{bestScore}</span>
+                      </div>
+                      
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Total Hits</span>
+                        <span className="text-sm font-black text-emerald-400">{successfulHits}</span>
+                      </div>
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Miss/Error</span>
+                        <span className="text-sm font-black text-red-400">{missedHits}</span>
+                      </div>
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold font-mono">Grade</span>
+                        <span className="text-sm font-black text-pink-400 font-mono">{gradeLetter}</span>
                       </div>
                     </div>
 
-                    <div className="p-5 sm:p-6 pointer-events-none shrink-0">
-                      <div className="flex justify-between items-center mb-6">
-                        <div className="flex flex-col">
-                          <span className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Final Score</span>
-                          <div className="flex items-end gap-1">
-                            <span className="text-5xl sm:text-6xl font-black text-white leading-none tracking-tighter">{customScore}</span>
-                            <span className="text-sm sm:text-lg text-gray-500 font-bold mb-1">PTS</span>
-                          </div>
-                        </div>
-                        
-                        <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center">
-                          <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
-                            <path className="text-gray-800" strokeWidth="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                            <path 
-                              className={`${accuracyPercentage >= 80 ? 'text-green-500' : accuracyPercentage >= 50 ? 'text-yellow-500' : 'text-red-500'} transition-all duration-1000 ease-out`} 
-                              strokeWidth="3" strokeDasharray="100" strokeDashoffset={100 - accuracyPercentage} strokeLinecap="round" stroke="currentColor" fill="none" 
-                              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" 
-                            />
-                          </svg>
-                          <div className="absolute inset-0 flex flex-col items-center justify-center">
-                            <span className={`text-lg sm:text-xl font-black ${accuracyPercentage >= 80 ? 'text-green-400' : accuracyPercentage >= 50 ? 'text-yellow-400' : 'text-red-400'}`}>{accuracyPercentage}%</span>
-                            <span className="text-[7px] sm:text-[8px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">Accuracy</span>
-                          </div>
-                        </div>
+                    <div className="bg-[#0b0f19] border border-slate-850 p-3 rounded-xl mb-4 text-left font-sans">
+                      <span className={`text-xs font-black block text-center uppercase tracking-widest ${rankColor} mb-2`}>
+                        Rank: {rankName}
+                      </span>
+                      <div className="w-full h-px bg-slate-850 mb-2"></div>
+                      <div className="flex items-center gap-1.5 text-[9px] font-bold text-white uppercase mb-1 font-mono">
+                        <Sparkles className="w-3 h-3 text-amber-500" /> Diagnostics advice:
                       </div>
+                      <p className="text-[10px] text-slate-400 leading-normal font-sans">
+                        {diagnostics}
+                      </p>
+                    </div>
 
-                      <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-2">
-                        <div className="bg-gray-900/50 rounded-xl p-2 sm:p-3 text-center border border-gray-800">
-                          <div className="text-gray-400 text-[9px] sm:text-[10px] uppercase font-bold tracking-wider mb-1">Total Hits</div>
-                          <div className="text-lg sm:text-xl font-black text-green-400">{successfulHits}</div>
-                        </div>
-                        <div className="bg-gray-900/50 rounded-xl p-2 sm:p-3 text-center border border-gray-800">
-                          <div className="text-gray-400 text-[9px] sm:text-[10px] uppercase font-bold tracking-wider mb-1">Miss/Error</div>
-                          <div className="text-lg sm:text-xl font-black text-red-400">{missedHits}</div>
-                        </div>
-                        <div className="bg-gray-900/50 rounded-xl p-2 sm:p-3 text-center border border-gray-800">
-                          <div className="text-gray-400 text-[9px] sm:text-[10px] uppercase font-bold tracking-wider mb-1">Max Streak</div>
-                          <div className="text-lg sm:text-xl font-black text-orange-400">{bestStreak}</div>
-                        </div>
-                      </div>
+                    <div className="flex gap-2">
+                      <PlayAgainButton
+                        onClick={() => { if(engine.endGame) engine.endGame(); handleStartGame(); }}
+                        colorTheme="purple"
+                      />
+                      <button
+                        onPointerDown={(e)=>e.stopPropagation()}
+                        onClick={shareScore}
+                        className="p-3 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded-xl transition-colors active:scale-95 flex items-center justify-center"
+                        title="Share Score"
+                      >
+                        <Share2 className="w-4 h-4" />
+                      </button>
+                      {isFullscreen && (
+                        <button
+                          onPointerDown={(e)=>e.stopPropagation()}
+                          onClick={handleExitToStart}
+                          className="p-3 bg-red-900/30 border border-red-900/55 hover:bg-red-900/50 text-red-400 rounded-xl transition-colors active:scale-95 flex items-center justify-center"
+                          title="Exit Drill"
+                        >
+                          <LogOut className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
                   </div>
-
-                  {/* Fixed Bottom Action Row */}
-                  <div className="p-3 sm:p-5 bg-gray-900/50 border-t border-gray-800 flex gap-2 sm:gap-3 shrink-0 rounded-b-3xl">
-                    <button onPointerDown={(e)=>e.stopPropagation()} onClick={() => { if(engine.endGame) engine.endGame(); handleStartGame(); }} className="flex-1 py-3 sm:py-4 bg-purple-600 text-white rounded-xl font-black tracking-wide hover:bg-purple-500 transition-all active:scale-95 flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(168,85,247,0.4)] text-sm sm:text-base">
-                      <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5" /> PLAY AGAIN
-                    </button>
-                    <button onPointerDown={(e)=>e.stopPropagation()} onClick={shareDrillLink} className="px-4 sm:px-5 py-3 sm:py-4 bg-gray-800 text-white rounded-xl font-bold hover:bg-gray-700 transition-all active:scale-95 border border-gray-700 flex items-center justify-center" title="Share Drill">
-                      <Share2 className="w-4 h-4 sm:w-5 sm:h-5" />
-                    </button>
-                    <button onPointerDown={(e)=>e.stopPropagation()} onClick={handleExitToStart} className="px-4 sm:px-5 py-3 sm:py-4 bg-red-900/30 text-red-400 rounded-xl font-bold hover:bg-red-900/50 transition-all active:scale-95 border border-red-900/50 flex items-center justify-center" title="Exit Drill">
-                      <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
-                    </button>
-                  </div>
-
                 </div>
               </div>
             )}
@@ -827,7 +907,7 @@ export default function DifferenceSpotterClient() {
                   <RuleItem num="2" color="cyan" text="Adaptive Study" highlight="Speed decreases study time" result="Scales Difficulty" />
                 </div>
                 <div className="space-y-5">
-                  <RuleItem num="3" color="red" text="Wrong Click/Timeout" highlight="-3 PTS | -1.0s Clock" result="Increases Study Time" />
+                  <RuleItem num="3" color="red" text="Wrong Click/Timeout" highlight="0 PTS | -1.0s Clock" result="Increases Study Time" />
                   <RuleItem num="4" color="orange" text="Time Limit" highlight="60 Seconds" result="Strict Maximum Cap" />
                 </div>
               </div>
@@ -892,7 +972,7 @@ export default function DifferenceSpotterClient() {
                     <ul className="space-y-3 list-disc pl-5 border-l border-gray-800/50 sm:pl-6">
                       <li><strong className="text-green-400">Accuracy:</strong> Correct identifications keep your streak alive and reward +5 Score / +5 Seconds.</li>
                       <li><strong className="text-blue-400">Speed:</strong> Faster reaction times scale the difficulty by reducing your study time.</li>
-                      <li><strong className="text-red-400">Errors:</strong> Misses or false positives will penalize your run (-3 Score / -1 Second) and reset your streak.</li>
+                      <li><strong className="text-red-400">Errors:</strong> Misses or false positives will penalize your time (-1 Second) but do not reduce your score.</li>
                     </ul>
                   </div>
                 </div>
@@ -909,8 +989,8 @@ export default function DifferenceSpotterClient() {
                       <p className="text-xs text-gray-400 mt-1">If you successfully identify the changed object rapidly (under 800ms), your study time for the next round shrinks (down to a minimum of 2.0s). If you take longer than 1500ms or make a mistake, the study time increases to give you more time to memorize.</p>
                     </div>
                     <div>
-                      <h4 className="text-sm font-bold text-gray-200">Why am I losing points?</h4>
-                      <p className="text-xs text-gray-400 mt-1">Clicking the wrong object, or failing to click the correct object within the 3-second answer window after the blink, results in a -3 point score deduction and -1 second timer penalty.</p>
+                      <h4 className="text-sm font-bold text-gray-200">Are there point deductions for errors?</h4>
+                      <p className="text-xs text-gray-400 mt-1">Clicking the wrong object, or failing to click the correct object within the 3-second answer window after the blink, results in a -1 second timer penalty. Your score is never penalized.</p>
                     </div>
                     <div>
                       <h4 className="text-sm font-bold text-gray-200">What constitutes a change?</h4>

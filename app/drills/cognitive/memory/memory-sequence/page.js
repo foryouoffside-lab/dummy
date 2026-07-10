@@ -96,12 +96,51 @@ const faqSchema = {
   ]
 };
 
+const howToSchema = {
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "How to Practice with Memory Sequence Spatial Recall Drill",
+  "description": "Test and train your sequential working memory and visual pattern recall with progressively expanding block sequences.",
+  "step": [
+    {
+      "@type": "HowToStep",
+      "position": 1,
+      "name": "Observe the Sequence",
+      "text": "Watch the grid cells light up. Pay close attention to both the spatial coordinates and the exact chronological order of flashes."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 2,
+      "name": "Reproduce the Pattern",
+      "text": "Click or tap the grid blocks in the exact same sequence. Each correct sequence increases your score (+10 PTS) and adds +5s to the timer."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 3,
+      "name": "Avoid Sequence Mistakes",
+      "text": "Clicking a wrong block does not deduct score points, but it deducts -3s from the clock. The sequence will replay for another attempt."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 4,
+      "name": "Scale Score & Level",
+      "text": "Every 30 points earned scales up your difficulty Level, increasing grid sizes and sequence length to push your working memory limits."
+    }
+  ]
+};
+
 export const metadata = {
-  title: "Sequence Memory Test – Free Simon Says Spatial Recall Game | SkillDrills",
-  description: "Test your sequence memory online. Watch and repeat expanding patterns in this free Simon Says-style spatial recall game. Tests working memory span. No sign-up required.",
+  title: "Play Simon Says Online Free | Memory Sequence Game | SkillDrills",
+  description: "Challenge your brain with our free online memory sequence game. Play classic Simon Says, remember color and sound patterns, and test your cognitive recall today!",
   keywords: [
-    "sequence memory test",
+    "simon says game online free",
     "memory sequence game",
+    "spatial span task",
+    "visual memory span test",
+    "corsi block tapping test online",
+    "spatial working memory task",
+    "visual memory capacity test",
+    "sequence memory test",
     "simon says game online",
     "chimp test memory",
     "digit span test online",
@@ -110,7 +149,6 @@ export const metadata = {
     "visual sequence recall test",
     "sequence recall brain training",
     "working memory span test",
-    "Corsi block test online",
     "pattern sequence memory game"
   ],
   alternates: {
@@ -118,18 +156,18 @@ export const metadata = {
   },
   robots: { index: true, follow: true },
   openGraph: {
-    title: "Sequence Memory Test – Free Simon Says Spatial Recall Game | SkillDrills",
-    description: "Test your sequence memory online. Watch and repeat expanding patterns in this free Simon Says-style spatial recall game. Tests working memory span. No sign-up required.",
+    title: "Play Simon Says Online Free | Memory Sequence Game | SkillDrills",
+    description: "Challenge your brain with our free online memory sequence game. Play classic Simon Says, remember color and sound patterns, and test your cognitive recall today!",
     url: "https://skilldrills.online/drills/cognitive/memory/memory-sequence",
     siteName: 'SkillDrills',
     locale: 'en_US',
     type: 'website',
-    images: [{ url: 'https://skilldrills.online/icons/icon-512x512.png', width: 512, height: 512, alt: "Sequence Memory Test – Simon Says Spatial Recall Game" }],
+    images: [{ url: 'https://skilldrills.online/icons/icon-512x512.png', width: 512, height: 512, alt: "Play Simon Says Online Free | Memory Sequence Game" }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Sequence Memory Test – Free Simon Says Spatial Recall Game | SkillDrills",
-    description: "Test your sequence memory online. Watch and repeat expanding patterns in this free Simon Says-style spatial recall game. Tests working memory span. No sign-up required.",
+    title: "Play Simon Says Online Free | Memory Sequence Game | SkillDrills",
+    description: "Challenge your brain with our free online memory sequence game. Play classic Simon Says, remember color and sound patterns, and test your cognitive recall today!",
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
 };
@@ -140,6 +178,7 @@ export default function MemorySequencePage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }} />
       <MemorySequenceClient />
     </>
   );

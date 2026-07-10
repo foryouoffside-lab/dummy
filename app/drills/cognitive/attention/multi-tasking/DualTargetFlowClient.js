@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useEffect, useState, useRef, useCallback } from 'react';
 import Link from 'next/link';
@@ -8,8 +8,9 @@ import {
   Eye, Activity, RefreshCw, GraduationCap, Lightbulb, 
   TrendingUp, BarChart3, CheckCircle2, ArrowRight, Share2, 
   Clock, Brain, XCircle, RotateCcw, Copy, Info, Star, ChevronRight,Play,Users,
-  LogOut, Hash, Search, Layers
+  LogOut, Hash, Search, Layers, Sparkles
 } from 'lucide-react';
+import PlayAgainButton from "../../../../../components/PlayAgainButton";
 
 export default function DualTargetFlowClient() {
   // === UI & Environment State ===
@@ -28,6 +29,7 @@ export default function DualTargetFlowClient() {
   const [bestScore, setBestScore] = useState(0);
   const [timeLeft, setTimeLeft] = useState(60.0);
   const [level, setLevel] = useState(1);
+  const [highestLevelReached, setHighestLevelReached] = useState(1);
   const [successfulHits, setSuccessfulHits] = useState(0);
   const [misses, setMisses] = useState(0);
   const [accuracy, setAccuracy] = useState(100);
@@ -45,6 +47,7 @@ export default function DualTargetFlowClient() {
   const scoreRef = useRef(0);
   const timeRef = useRef(60.0);
   const levelRef = useRef(1);
+  const highestLevelRef = useRef(1);
   const hitsRef = useRef(0);
   const missRef = useRef(0);
   const isActiveRef = useRef(false);
@@ -145,23 +148,40 @@ export default function DualTargetFlowClient() {
 
     setGameState('start');
     gameStateRef.current = 'start';
+    levelRef.current = 1;
+    highestLevelRef.current = 1;
     setTimeLeft(60.0);
     setScore(0);
     setAccuracy(100);
     setSuccessfulHits(0);
     setMisses(0);
     setLevel(1);
+    setHighestLevelReached(1);
   }, [isFullscreen]);
 
   // Social Sharing Actions
-  const sharePage = useCallback(() => {
-    const url = 'https://skilldrills.online/drills/cognitive/attention/dual-target-flow';
-    if (navigator.share) {
-      navigator.share({ title: 'Dual-Target Flow Drill', text: 'Train your divided attention with high-speed multi-tracking! Free training.', url }).catch(() => {});
-    } else {
-      navigator.clipboard.writeText(url).then(() => alert('Link copied!')).catch(() => prompt('Copy:', url));
+  const shareScore = useCallback(() => {
+    let finalRank = 'Bronze';
+    if (score >= 400 && accuracy >= 90) finalRank = 'Grandmaster';
+    else if (score >= 300 && accuracy >= 82) finalRank = 'Master';
+    else if (score >= 220 && accuracy >= 75) finalRank = 'Diamond';
+    else if (score >= 150 && accuracy >= 65) finalRank = 'Platinum';
+    else if (score >= 80 && accuracy >= 55) finalRank = 'Gold';
+    else if (score >= 40) finalRank = 'Silver';
+
+    const text = `🧠 I scored ${score} PTS with ${accuracy}% accuracy on the Multitasking Test! Rank: ${finalRank}. Challenge your brain: https://skilldrills.online/drills/cognitive/attention/multi-tasking`;
+    
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      navigator.share({
+        title: 'My SkillDrills Cognitive Score',
+        text: text,
+        url: 'https://skilldrills.online/drills/cognitive/attention/multi-tasking'
+      }).catch(() => {});
+    } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+      alert('Score card copied to clipboard!');
     }
-  }, []);
+  }, [score, accuracy]);
   
   const copyPageLink = () => { navigator.clipboard.writeText(window.location.href); alert('Link copied!'); };
 
@@ -210,11 +230,11 @@ export default function DualTargetFlowClient() {
   // DYNAMIC DIFFICULTY SCALING
   // ============================================================
   const updateDifficulty = useCallback(() => {
-    const hits = hitsRef.current;
-    
-    const newLevel = Math.max(1, Math.floor(hits / 10) + 1);
+    const newLevel = Math.floor(scoreRef.current / 50) + 1;
     levelRef.current = newLevel;
     setLevel(newLevel);
+    highestLevelRef.current = Math.max(highestLevelRef.current, newLevel);
+    setHighestLevelReached(highestLevelRef.current);
 
     if (newLevel >= 3 && !isDifferentTargetsRef.current) {
       isDifferentTargetsRef.current = true;
@@ -225,7 +245,6 @@ export default function DualTargetFlowClient() {
       setLeftTarget(shuffled[0]);
       setRightTarget(shuffled[1]);
     } else if (newLevel < 3 && isDifferentTargetsRef.current) {
-      // Revert to synchronized targets if difficulty drops
       isDifferentTargetsRef.current = false;
       triggerFeedback('Speed Reduced. Targets Synced.', 'success');
       const newTarget = leftTargetRef.current;
@@ -297,19 +316,15 @@ export default function DualTargetFlowClient() {
     if (!isActiveRef.current) return;
     playSound('miss');
     
-    scoreRef.current = Math.max(0, scoreRef.current - 5);
     timeRef.current -= 3.0; // -3 Seconds
     missRef.current += 1;
-    
-    // Decrease difficulty on penalty
-    hitsRef.current = Math.max(0, hitsRef.current - 1);
     
     setScore(scoreRef.current);
     setTimeLeft(Math.max(0, timeRef.current));
     setMisses(missRef.current);
     
     updateDifficulty();
-    triggerFeedback(`Penalty! ${reason} -5 PTS | -3s`, 'error');
+    triggerFeedback(`Penalty! ${reason} -3s`, 'error');
     
     const total = hitsRef.current + missRef.current;
     if (total > 0) setAccuracy(Math.round((hitsRef.current / total) * 100));
@@ -459,6 +474,7 @@ export default function DualTargetFlowClient() {
     scoreRef.current = 0;
     timeRef.current = 60.0;
     levelRef.current = 1;
+    highestLevelRef.current = 1;
     hitsRef.current = 0;
     missRef.current = 0;
     speedRef.current = 3.0;
@@ -471,6 +487,7 @@ export default function DualTargetFlowClient() {
     setScore(0);
     setTimeLeft(60.0);
     setLevel(1);
+    setHighestLevelReached(1);
     setSuccessfulHits(0);
     setMisses(0);
     setAccuracy(100);
@@ -503,6 +520,45 @@ export default function DualTargetFlowClient() {
 
     initAudio();
   }, [scheduleLeftSpawn, scheduleRightSpawn, setRandomTargets, triggerFeedback, initAudio, endGame]);
+
+  // Calculate grade based on score and accuracy
+  let gradeLetter = 'F';
+  if (accuracy >= 90 && score >= 300) gradeLetter = 'S';
+  else if (accuracy >= 80 && score >= 220) gradeLetter = 'A';
+  else if (accuracy >= 70 && score >= 150) gradeLetter = 'B';
+  else if (accuracy >= 60 && score >= 80) gradeLetter = 'C';
+  else if (accuracy >= 45 && score >= 40) gradeLetter = 'D';
+
+  let rankName = 'Bronze';
+  let rankColor = 'text-slate-500';
+  if (score >= 400 && accuracy >= 90) {
+    rankName = 'Grandmaster';
+    rankColor = 'text-fuchsia-400 font-extrabold';
+  } else if (score >= 300 && accuracy >= 82) {
+    rankName = 'Master';
+    rankColor = 'text-red-400 font-extrabold';
+  } else if (score >= 220 && accuracy >= 75) {
+    rankName = 'Diamond';
+    rankColor = 'text-cyan-400 font-extrabold';
+  } else if (score >= 150 && accuracy >= 65) {
+    rankName = 'Platinum';
+    rankColor = 'text-indigo-400 font-extrabold';
+  } else if (score >= 80 && accuracy >= 55) {
+    rankName = 'Gold';
+    rankColor = 'text-yellow-400 font-extrabold';
+  } else if (score >= 40) {
+    rankName = 'Silver';
+    rankColor = 'text-gray-300 font-extrabold';
+  }
+
+  let diagnostics = "Superb multitasking capacity! You maintained a high processing rate across both target streams simultaneously.";
+  if (accuracy < 60) {
+    diagnostics = "High error rate. Focus on clicking only matching shapes for the respective left/right active templates.";
+  } else if (misses > successfulHits * 0.4) {
+    diagnostics = "High omission rate. Try to split your gaze centrally and track shapes in your peripheral fields.";
+  } else if (score < 80) {
+    diagnostics = "Tonic bottleneck. Practice switching your focus back and forth between streams to build automaticity.";
+  }
 
   // ============================================================
   // RENDER
@@ -680,69 +736,83 @@ export default function DualTargetFlowClient() {
 
           {/* Game Over Screen */}
           {gameState === 'gameOver' && (
-             <div className="absolute inset-0 flex items-center justify-center bg-black/95 backdrop-blur-sm z-[70] animate-in fade-in duration-300 overflow-y-auto px-4 py-6" onPointerDown={e => e.stopPropagation()}>
-               <div className="rounded-3xl max-w-md w-full shadow-2xl border border-gray-800 bg-gray-950 flex flex-col max-h-[95vh] overflow-y-auto my-auto">
-                 <div className="bg-gradient-to-br from-blue-900/40 to-cyan-900/40 p-4 sm:p-6 border-b border-gray-800 relative overflow-hidden pointer-events-none shrink-0 rounded-t-3xl text-center">
-                   <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-blue-500/20 rounded-full blur-3xl"></div>
-                   <div className="absolute bottom-0 left-0 -mb-4 -ml-4 w-32 h-32 bg-cyan-500/20 rounded-full blur-3xl"></div>
-                   <div className="relative z-10 flex flex-col items-center">
-                     {isNewBest && (
-                       <div className="bg-yellow-500 text-black text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-2 shadow-[0_0_15px_rgba(234,179,8,0.5)]">
-                         ⭐ New Personal Best
-                       </div>
-                     )}
-                     <h2 className="text-2xl sm:text-3xl font-black text-white mb-1 tracking-tight">Time's Up!</h2>
-                     <p className="text-blue-400 font-medium text-xs sm:text-sm">Dual-Target Flow • Peak Level {level}</p>
-                   </div>
-                 </div>
+            <div className="absolute inset-0 bg-[#05070e]/98 overflow-y-auto p-6 z-[70] select-none scrollbar-thin scroll-smooth backdrop-blur-sm" onPointerDown={e => e.stopPropagation()}>
+              <div className="min-h-full flex flex-col justify-center items-center py-4 w-full">
+                <div className="max-w-md w-full text-center">
+                  {score > 0 && score >= bestScore && (
+                    <div className="inline-block bg-yellow-500 text-black text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-3 shadow-[0_0_15px_rgba(234,179,8,0.5)] animate-bounce font-mono">
+                      ⭐ NEW PERSONAL BEST!
+                    </div>
+                  )}
+                  
+                  <h2 className="text-xl font-black text-white uppercase tracking-wider mb-1 font-mono">
+                    Drill Complete
+                  </h2>
+                  <p className="text-xs text-slate-500 uppercase tracking-widest mb-6 font-mono">
+                    Peak difficulty reached: Level {highestLevelReached}
+                  </p>
 
-                 <div className="p-4 sm:p-6 pointer-events-none shrink-0">
-                   <div className="flex justify-between items-center mb-4 sm:mb-6">
-                     <div className="flex flex-col">
-                       <span className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Final Score</span>
-                       <div className="flex items-end gap-1">
-                         <span className="text-4xl sm:text-6xl font-black text-white leading-none tracking-tighter">{score}</span>
-                         <span className="text-sm sm:text-lg text-gray-500 font-bold mb-1">PTS</span>
-                       </div>
-                     </div>
-                     
-                     <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center">
-                       <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
-                         <path className="text-gray-800" strokeWidth="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                         <path className={`${accuracy >= 80 ? 'text-green-500' : accuracy >= 50 ? 'text-yellow-500' : 'text-red-500'} transition-all duration-1000 ease-out`} strokeWidth="3" strokeDasharray="100" strokeDashoffset={`${100 - accuracy}`} strokeLinecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                       </svg>
-                       <div className="absolute inset-0 flex flex-col items-center justify-center">
-                         <span className={`text-base sm:text-xl font-black ${accuracy >= 80 ? 'text-green-400' : accuracy >= 50 ? 'text-yellow-400' : 'text-red-400'}`}>{accuracy}%</span>
-                         <span className="text-[7px] sm:text-[8px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">Accuracy</span>
-                       </div>
-                     </div>
-                   </div>
+                  <div className="grid grid-cols-3 gap-2.5 mb-6 text-left font-mono">
+                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Final Score</span>
+                      <span className="text-sm font-black text-white">{score} <span className="text-[8px] text-slate-400 font-normal">PTS</span></span>
+                    </div>
+                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Accuracy</span>
+                      <span className="text-sm font-black text-white">{accuracy}%</span>
+                    </div>
+                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Best Score</span>
+                      <span className="text-sm font-black text-yellow-400">{bestScore}</span>
+                    </div>
+                    
+                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Target Hits</span>
+                      <span className="text-sm font-black text-emerald-400">{successfulHits}</span>
+                    </div>
+                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Mistakes</span>
+                      <span className="text-sm font-black text-red-400">{misses}</span>
+                    </div>
+                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Peak Level</span>
+                      <span className="text-sm font-black text-purple-400">Lv.{level}</span>
+                    </div>
+                  </div>
 
-                   <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                     <div className="bg-gray-900/50 rounded-xl p-2 text-center border border-gray-800">
-                       <div className="text-gray-400 text-[9px] sm:text-[10px] uppercase font-bold tracking-wider mb-1">Target Hits</div>
-                       <div className="text-base sm:text-xl font-black text-green-400">{successfulHits}</div>
-                     </div>
-                     <div className="bg-gray-900/50 rounded-xl p-2 text-center border border-gray-800">
-                       <div className="text-gray-400 text-[9px] sm:text-[10px] uppercase font-bold tracking-wider mb-1">Mistakes</div>
-                       <div className="text-base sm:text-xl font-black text-red-400">{misses}</div>
-                     </div>
-                   </div>
-                 </div>
+                  <div className="bg-[#0b0f19] border border-slate-850 p-3 rounded-xl mb-4 text-left">
+                    <span className={`text-xs font-black block text-center uppercase tracking-widest ${rankColor} mb-2`}>
+                      Rank: {rankName}
+                    </span>
+                    <div className="w-full h-px bg-slate-850 mb-2"></div>
+                    <div className="flex items-center gap-1.5 text-[9px] font-bold text-white uppercase mb-1 font-mono">
+                      <Sparkles className="w-3 h-3 text-yellow-500" /> Diagnostics advice:
+                    </div>
+                    <p className="text-[10px] text-slate-400 leading-normal">
+                      {diagnostics}
+                    </p>
+                  </div>
 
-                 <div className="p-3 sm:p-5 bg-gray-900/50 border-t border-gray-800 flex gap-2 sm:gap-3 rounded-b-3xl shrink-0">
-                   <button onPointerDown={e => e.stopPropagation()} onClick={() => { endGame(); startGame(); }} className="flex-1 py-3 sm:py-4 bg-blue-600 text-white rounded-xl font-black tracking-wide hover:bg-blue-500 transition-all active:scale-95 flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(37,99,235,0.4)] text-sm sm:text-base">
-                     <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5" /> PLAY AGAIN
-                   </button>
-                   <button onPointerDown={e => e.stopPropagation()} onClick={sharePage} className="px-4 sm:px-5 py-3 sm:py-4 bg-gray-800 text-white rounded-xl font-bold hover:bg-gray-700 transition-all active:scale-95 border border-gray-700 flex items-center justify-center" title="Share Drill">
-                     <Share2 className="w-4 h-4 sm:w-5 sm:h-5" />
-                   </button>
-                   <button onPointerDown={e => e.stopPropagation()} onClick={handleExit} className="px-4 sm:px-5 py-3 sm:py-4 bg-red-900/30 text-red-400 rounded-xl font-bold hover:bg-red-900/50 transition-all active:scale-95 border border-red-900/50 flex items-center justify-center" title="Exit Drill">
-                     <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
-                   </button>
-                 </div>
-               </div>
-             </div>
+                  <div className="flex gap-2">
+                    <PlayAgainButton onClick={() => { endGame(); startGame(); }} colorTheme="blue" />
+                    <button
+                      onClick={shareScore}
+                      className="p-3 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded-xl transition-colors active:scale-95"
+                      title="Share Score"
+                    >
+                      <Share2 className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={handleExit}
+                      className="p-3 bg-red-900/30 border border-red-900/55 hover:bg-red-900/50 text-red-400 rounded-xl transition-colors active:scale-95 flex items-center justify-center"
+                      title="Exit Drill"
+                    >
+                      <LogOut className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
           )}
         </div>
 
@@ -758,7 +828,7 @@ export default function DualTargetFlowClient() {
                 <div className="space-y-4">
                   <RuleItem num="1" color="green" text="Correct Target" highlight="+10 PTS | +7s" result="Difficulty Up" isDark={isDarkMode} />
                   <RuleItem num="2" color="cyan" text="Avoid distractors & let them" highlight="Flow Out" result="Safe" isDark={isDarkMode} />
-                  <RuleItem num="3" color="red" text="Wrong / Missed Target" highlight="-5 PTS | -3s" result="Difficulty Down" isDark={isDarkMode} />
+                  <RuleItem num="3" color="red" text="Wrong / Missed Target" highlight="No PTS Penalty | -3s" result="Time Penalty" isDark={isDarkMode} />
                 </div>
                 <div className="space-y-4">
                   <RuleItem num="4" color="purple" text="Starts easy with" highlight="Matching Targets" result="Lv 1-2" isDark={isDarkMode} />
@@ -814,7 +884,7 @@ export default function DualTargetFlowClient() {
                   <ul className={`text-xs space-y-3 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                     <li className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-yellow-500 mt-0.5 flex-shrink-0" /><strong>Peripheral Anchoring:</strong> Keep your gaze relatively centered. Rely on your peripheral vision to track incoming shapes instead of chasing them individually.</li>
                     <li className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-yellow-500 mt-0.5 flex-shrink-0" /><strong>Inhibitory Control:</strong> Wait for visual confirmation before clicking. High-speed distractors will bait you into impulse taps.</li>
-                    <li className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-yellow-500 mt-0.5 flex-shrink-0" /><strong>Survival Mechanics:</strong> You must maintain accuracy to add time (+7s) and score (+10 PTS) back to your clock. Misses actively drain the clock (-3s). The max time ceiling is 60 seconds.</li>
+                    <li className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-yellow-500 mt-0.5 flex-shrink-0" /><strong>Survival Mechanics:</strong> While wrong answers do not deduct points, they still drain time (-3s) from your clock. Keep scoring to extend your play session.</li>
                   </ul>
                 </div>
 
@@ -827,7 +897,7 @@ export default function DualTargetFlowClient() {
                   <div className="space-y-5">
                     <div>
                       <h4 className={`text-sm font-bold tracking-tight ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>How does the difficulty adapt?</h4>
-                      <p className={`text-xs mt-1.5 leading-relaxed ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>The engine maps directly to your precision. Every successful target scales the presentation speed upward. At Level 3, the targets diverge (e.g., Triangle on left, Star on right). If you miss or false-alarm, the engine dynamically reduces the difficulty level to allow you to recover your rhythm.</p>
+                      <p className={`text-xs mt-1.5 leading-relaxed ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>The engine tracks your score. Every 50 points you earn increases your difficulty Level, ramping up speed and making targets diverge (e.g., Triangle on left, Star on right) starting at Level 3. Your Level is protected even if you make mistakes.</p>
                     </div>
                     <div>
                       <h4 className={`text-sm font-bold tracking-tight ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>What happens during a target scramble?</h4>

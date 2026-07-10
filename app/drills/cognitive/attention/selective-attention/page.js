@@ -96,6 +96,39 @@ const faqSchema = {
   ]
 };
 
+const howToSchema = {
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "How to Take the Selective Attention Test",
+  "description": "Strengthen your cognitive inhibition and distraction filtering with this computerized flanker test.",
+  "step": [
+    {
+      "@type": "HowToStep",
+      "position": 1,
+      "name": "Observe Target Template",
+      "text": "At the start of the round, inspect the target color and shape template shown on the screen (e.g. Red Triangle)."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 2,
+      "name": "Scan Spawned Items",
+      "text": "Wait for items to spawn. A set of shapes of varying colors and types will appear, flanked by distracting shapes."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 3,
+      "name": "Click Target Only",
+      "text": "Locate and click/tap only the item that exactly matches the target shape and color template. Do not click surrounding distractors."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 4,
+      "name": "Maintain Pace",
+      "text": "Act before the countdown expires. Missing correct windows or clicking distractors reduces your time buffer."
+    }
+  ]
+};
+
 export const metadata = {
   title: "Selective Attention Test – Free Flanker Distraction Filter Game | SkillDrills",
   description: "Take this free selective attention test online. Train your brain to filter distractions and focus on targets with this Flanker-style cognitive game. No sign-up required.",
@@ -111,7 +144,11 @@ export const metadata = {
     "selective attention training",
     "filter distractions brain game",
     "cognitive inhibition training",
-    "focus filter game online"
+    "focus filter game online",
+    "selective attention game",
+    "visual search task game",
+    "cognitive attention training",
+    "focus exercises online"
   ],
   alternates: {
     canonical: "https://skilldrills.online/drills/cognitive/attention/selective-attention",
@@ -140,6 +177,7 @@ export default function SelectiveAttentionPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }} />
       <SelectiveAttentionClient />
     </>
   );

@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { Component, useEffect, useState, useRef, useCallback } from 'react';
 import Link from 'next/link';
@@ -7,9 +7,10 @@ import {
   Info, RefreshCw, RotateCcw, GraduationCap, Lightbulb, TrendingUp, 
   BarChart3, ArrowRight, Brain, Users, AlertTriangle, Target, 
   CheckCircle, XCircle, Play, Share2, ChevronRight, Clock, Search,
-  Activity, Layers, Crosshair, LogOut
+  Activity, Layers, Crosshair, LogOut, Sparkles
 } from 'lucide-react';
 import useGameEngine from '../../../../../lib/useGameEngine';
+import PlayAgainButton from '../../../../../components/PlayAgainButton';
 
 // ============================================================
 // ZERO-LATENCY AUDIO SYNTHESIZER
@@ -208,15 +209,15 @@ export default function EntropicGridClient() {
     }
   }, []);
 
-  const clearAllIntervals = useCallback(() => { 
+  const clearAllIntervals = useCallback((keepAnimation = false) => { 
     if (timerIntervalRef.current) { clearInterval(timerIntervalRef.current); timerIntervalRef.current = null; }
     if (targetRefreshIntervalRef.current) { clearInterval(targetRefreshIntervalRef.current); targetRefreshIntervalRef.current = null; }
-    if (animationRef.current) { cancelAnimationFrame(animationRef.current); animationRef.current = null; }
+    if (!keepAnimation && animationRef.current) { cancelAnimationFrame(animationRef.current); animationRef.current = null; }
   }, []);
 
   useEffect(() => {
     if (engine.gameState === 'ended' || engine.gameState === 'start') {
-      clearAllIntervals();
+      clearAllIntervals(false);
       isActiveRef.current = false;
       if (engine.gameState === 'ended') updateLocalBestScore(customScoreRef.current);
     }
@@ -276,8 +277,8 @@ export default function EntropicGridClient() {
     
     // Scaling Difficulty Parameters
     const baseCorruptCount = 2;
-    const addedCorruption = Math.floor(streakRef.current / 3); // More streak = more corruption
-    const currentCorruptCount = Math.min(8, baseCorruptCount + addedCorruption);
+    const addedCorruption = Math.floor(customScoreRef.current / 15); // More score = more corruption
+    const currentCorruptCount = Math.min(10, baseCorruptCount + addedCorruption);
     
     // Corrupt random cells
     for (let i = 0; i < currentCorruptCount; i++) {
@@ -331,42 +332,65 @@ export default function EntropicGridClient() {
     streakRef.current = 0;
     setStreak(0);
     
-    // ERROR MODIFIERS: -1 PTS | -0.5s
-    updateEconomy(-1, -0.5);
+    // ERROR MODIFIERS: 0 PTS | -0.5s
+    updateEconomy(0, -0.5);
     
     cellsRef.current[idx].missTime = Date.now();
     
     if (audioSynth) audioSynth.playFail();
-    triggerFeedback(`✗ MISS! -1 PTS | -0.5s`, 'error');
+    triggerFeedback(`✗ MISS! -0.5s`, 'error');
 
   }, [updateEconomy, triggerFeedback]);
 
+  const startTimer = useCallback(() => {
+    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+
+    timerIntervalRef.current = setInterval(() => { 
+      localTimeRef.current -= 0.1; // Smooth drain mapping
+      
+      if (localTimeRef.current <= 0) { 
+        localTimeRef.current = 0;
+        setTimeLeft(0);
+        isTimeUpRef.current = true;
+        isActiveRef.current = false; 
+        clearAllIntervals();
+        if (engineRef.current && typeof engineRef.current.endGame === 'function') {
+          engineRef.current.endGame();
+        }
+        return;
+      } 
+      
+      setTimeLeft(prev => {
+        const currentCeil = Math.ceil(localTimeRef.current);
+        if (currentCeil !== prev) {
+          return currentCeil;
+        }
+        return prev;
+      });
+    }, 100); 
+  }, [clearAllIntervals]);
+
   // Precision Economy 60s Drain
   useEffect(() => { 
-    if (engine.gameState === 'playing' && !isTimeUpRef.current) { 
-      timerIntervalRef.current = setInterval(() => { 
-        localTimeRef.current -= 0.1; // Smooth drain mapping
-        
-        if (localTimeRef.current <= 0) { 
-          localTimeRef.current = 0;
-          setTimeLeft(0);
-          isTimeUpRef.current = true;
-          isActiveRef.current = false; 
-          clearAllIntervals();
-          engineRef.current.endGame();
-          return;
-        } 
-        
-        // Only update React state every second for UI text performance
-        if (Math.abs(Math.ceil(localTimeRef.current) - timeLeft) >= 1) {
-          setTimeLeft(Math.ceil(localTimeRef.current));
-        }
-      }, 100); 
-    } 
+    if (engine.gameState !== 'playing') { 
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current);
+        timerIntervalRef.current = null;
+      }
+      return;
+    }
+    
+    if (!timerIntervalRef.current && !isTimeUpRef.current) {
+      startTimer();
+    }
+    
     return () => { 
-      if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); 
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current);
+        timerIntervalRef.current = null;
+      }
     }; 
-  }, [engine.gameState, clearAllIntervals, timeLeft]);
+  }, [engine.gameState, startTimer]);
 
   // Unified Pointer Handler
   const handlePointerDown = useCallback((e) => { 
@@ -441,8 +465,8 @@ export default function EntropicGridClient() {
       if (!isActiveRef.current || isTimeUpRef.current) return;
 
       // Entropy Timer Execution (Adaptive Speed)
-      const currentInterval = Math.max(250, 1000 - (streakRef.current * 40)); 
-      setCurrentDifficulty(Math.round((1000 - currentInterval) / 10)); // Visual metric 0-75
+      const currentInterval = Math.max(200, 1000 - (customScoreRef.current * 15)); 
+      setCurrentDifficulty(Math.round((1000 - currentInterval) / 10)); // Visual metric 0-80
 
       const now = Date.now();
       if (now - lastEntropyTimeRef.current > currentInterval) {
@@ -562,7 +586,7 @@ export default function EntropicGridClient() {
     isActiveRef.current = true; 
     gameStateRef.current = 'playing';
     
-    clearAllIntervals(); 
+    clearAllIntervals(true); 
     
     // Secure Auto-Fullscreen trigger
     try { 
@@ -581,7 +605,8 @@ export default function EntropicGridClient() {
         triggerFeedback('🔄 MATRIX FLUSH! New Target', 'warning');
     }, TARGET_REFRESH_INTERVAL);
     
-  }, [clearAllIntervals, initGrid, triggerFeedback, engine]);
+    startTimer();
+  }, [clearAllIntervals, initGrid, triggerFeedback, engine, startTimer]);
 
   const shareDrillLink = async () => {
     const url = 'https://skilldrills.online/drills/visual/visual-recognition/entropic-grid';
@@ -591,6 +616,30 @@ export default function EntropicGridClient() {
       try { await navigator.clipboard.writeText(url); alert('Link copied!'); } catch(e){}
     }
   };
+
+  const shareScore = useCallback(() => {
+    const accuracy = successfulHits + missedHits > 0 ? Math.round((successfulHits / (successfulHits + missedHits)) * 100) : 0;
+    let finalRank = 'Bronze';
+    if (customScoreRef.current >= 80 && accuracy >= 85) finalRank = 'Grandmaster';
+    else if (customScoreRef.current >= 65 && accuracy >= 75) finalRank = 'Master';
+    else if (customScoreRef.current >= 50 && accuracy >= 65) finalRank = 'Diamond';
+    else if (customScoreRef.current >= 35 && accuracy >= 55) finalRank = 'Platinum';
+    else if (customScoreRef.current >= 20 && accuracy >= 45) finalRank = 'Gold';
+    else if (customScoreRef.current >= 10) finalRank = 'Silver';
+
+    const text = `🎯 I scored ${customScoreRef.current} PTS with ${accuracy}% accuracy on the Entropic Grid Concentration Drill! Rank: ${finalRank}. Try it here: https://skilldrills.online/drills/visual/visual-recognition/entropic-grid`;
+    
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      navigator.share({
+        title: 'My SkillDrills Visual Score',
+        text: text,
+        url: 'https://skilldrills.online/drills/visual/visual-recognition/entropic-grid'
+      }).catch(() => {});
+    } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+      alert('Score card copied to clipboard!');
+    }
+  }, [successfulHits, missedHits]);
 
   if (loading || !isClient) { 
     return (
@@ -605,6 +654,42 @@ export default function EntropicGridClient() {
 
   const accuracyPercentage = (successfulHits + missedHits) === 0 ? 0 : Math.round((successfulHits / (successfulHits + missedHits)) * 100);
   const isNewBest = engine.gameState === 'ended' && customScore > bestScore && customScore > 0;
+
+  let gradeLetter = 'F';
+  if (accuracyPercentage >= 85 && customScore >= 80) gradeLetter = 'S';
+  else if (accuracyPercentage >= 75 && customScore >= 65) gradeLetter = 'A';
+  else if (accuracyPercentage >= 65 && customScore >= 50) gradeLetter = 'B';
+  else if (accuracyPercentage >= 55 && customScore >= 35) gradeLetter = 'C';
+  else if (accuracyPercentage >= 45 && customScore >= 20) gradeLetter = 'D';
+
+  let rankName = 'Bronze';
+  let rankColor = 'text-slate-500';
+  if (customScore >= 80 && accuracyPercentage >= 85) {
+    rankName = 'Grandmaster';
+    rankColor = 'text-fuchsia-400 font-extrabold';
+  } else if (customScore >= 65 && accuracyPercentage >= 75) {
+    rankName = 'Master';
+    rankColor = 'text-red-400 font-extrabold';
+  } else if (customScore >= 50 && accuracyPercentage >= 65) {
+    rankName = 'Diamond';
+    rankColor = 'text-cyan-400 font-extrabold';
+  } else if (customScore >= 35 && accuracyPercentage >= 55) {
+    rankName = 'Platinum';
+    rankColor = 'text-indigo-400 font-extrabold';
+  } else if (customScore >= 20 && accuracyPercentage >= 45) {
+    rankName = 'Gold';
+    rankColor = 'text-yellow-400 font-extrabold';
+  } else if (customScore >= 10) {
+    rankName = 'Silver';
+    rankColor = 'text-gray-300 font-extrabold';
+  }
+
+  let diagnostics = "Superb visual scanning speed and spatial stamina! Your focus resists high-entropy noise levels.";
+  if (accuracyPercentage < 50) {
+    diagnostics = "Low visual scanning accuracy. Slow down slightly to avoid false positives in the grid cells.";
+  } else if (customScore < 30) {
+    diagnostics = "Increase your strike speed to stay ahead of the natural stamina decay curve and keep the round active.";
+  }
 
   return (
     <div className="min-h-screen select-none bg-black text-white selection:bg-transparent" style={{ WebkitTapHighlightColor: 'transparent' }}>
@@ -749,80 +834,88 @@ export default function EntropicGridClient() {
 
             {/* Premium Custom Structural End Card Component */}
             {(engine.gameState === 'ended' || isTimeUpRef.current) && (
-              <div className="absolute inset-0 flex items-center justify-center z-[70] bg-black/95 pointer-events-auto animate-in fade-in duration-300 p-4 overflow-y-auto">
-                <div className="rounded-3xl max-w-md w-full shadow-2xl border border-gray-800 bg-gray-950 flex flex-col max-h-[90vh] my-auto shrink-0">
-                  
-                  <div className="flex-1 overflow-y-auto">
-                    <div className="bg-gradient-to-br from-blue-900/40 to-indigo-900/40 p-5 sm:p-6 border-b border-gray-800 relative overflow-hidden pointer-events-none shrink-0">
-                      <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-blue-500/20 rounded-full blur-3xl"></div>
-                      <div className="absolute bottom-0 left-0 -mb-4 -ml-4 w-32 h-32 bg-indigo-500/20 rounded-full blur-3xl"></div>
-                      <div className="relative z-10 flex flex-col items-center">
-                        {isNewBest && (
-                          <div className="bg-yellow-500 text-black text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-2 shadow-[0_0_15px_rgba(234,179,8,0.5)]">
-                            ⭐ New Personal Best
-                          </div>
-                        )}
-                        <h2 className="text-2xl sm:text-3xl font-black text-white mb-1 tracking-tight">Mission Complete</h2>
-                        <p className="text-blue-400 font-medium text-sm">Entropic Grid Lab</p>
+              <div className="absolute inset-0 bg-[#05070e]/98 overflow-y-auto p-6 z-[70] select-none scrollbar-thin scroll-smooth backdrop-blur-sm animate-in fade-in duration-300 pointer-events-auto">
+                <div className="min-h-full flex flex-col justify-center items-center py-4 w-full">
+                  <div className="max-w-md w-full text-center">
+                    {customScore > 0 && customScore >= (bestScore || 0) && (
+                      <div className="inline-block bg-yellow-500 text-black text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-3 shadow-[0_0_15px_rgba(234,179,8,0.5)] animate-bounce font-mono">
+                        ⭐ NEW PERSONAL BEST!
+                      </div>
+                    )}
+                    
+                    <h2 className="text-xl font-black text-white uppercase tracking-wider mb-1 font-mono">
+                      Drill Complete
+                    </h2>
+                    <p className="text-xs text-slate-500 uppercase tracking-widest mb-6 font-mono">
+                      Entropic Grid Lab
+                    </p>
+
+                    <div className="grid grid-cols-3 gap-2.5 mb-6 text-left font-mono">
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Final Score</span>
+                        <span className="text-sm font-black text-white">{customScore} <span className="text-[8px] text-slate-400 font-normal">PTS</span></span>
+                      </div>
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Accuracy</span>
+                        <span className="text-sm font-black text-white">{accuracyPercentage}%</span>
+                      </div>
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Best Score</span>
+                        <span className="text-sm font-black text-green-400">{bestScore}</span>
+                      </div>
+                      
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Total Hits</span>
+                        <span className="text-sm font-black text-emerald-400">{successfulHits}</span>
+                      </div>
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Miss/Error</span>
+                        <span className="text-sm font-black text-red-400">{missedHits}</span>
+                      </div>
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold font-mono">Grade</span>
+                        <span className="text-sm font-black text-pink-400 font-mono">{gradeLetter}</span>
                       </div>
                     </div>
 
-                    <div className="p-5 sm:p-6 pointer-events-none shrink-0">
-                      <div className="flex justify-between items-center mb-6">
-                        <div className="flex flex-col">
-                          <span className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Final Score</span>
-                          <div className="flex items-end gap-1">
-                            <span className="text-5xl sm:text-6xl font-black text-white leading-none tracking-tighter">{customScore}</span>
-                            <span className="text-sm sm:text-lg text-gray-500 font-bold mb-1">PTS</span>
-                          </div>
-                        </div>
-                        
-                        <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center">
-                          <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
-                            <path className="text-gray-800" strokeWidth="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                            <path 
-                              className={`${accuracyPercentage >= 80 ? 'text-green-500' : accuracyPercentage >= 50 ? 'text-yellow-500' : 'text-red-500'} transition-all duration-1000 ease-out`} 
-                              strokeWidth="3" strokeDasharray="100" strokeDashoffset={100 - accuracyPercentage} strokeLinecap="round" stroke="currentColor" fill="none" 
-                              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" 
-                            />
-                          </svg>
-                          <div className="absolute inset-0 flex flex-col items-center justify-center">
-                            <span className={`text-lg sm:text-xl font-black ${accuracyPercentage >= 80 ? 'text-green-400' : accuracyPercentage >= 50 ? 'text-yellow-400' : 'text-red-400'}`}>{accuracyPercentage}%</span>
-                            <span className="text-[7px] sm:text-[8px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">Accuracy</span>
-                          </div>
-                        </div>
+                    <div className="bg-[#0b0f19] border border-slate-850 p-3 rounded-xl mb-4 text-left font-sans">
+                      <span className={`text-xs font-black block text-center uppercase tracking-widest ${rankColor} mb-2`}>
+                        Rank: {rankName}
+                      </span>
+                      <div className="w-full h-px bg-slate-850 mb-2"></div>
+                      <div className="flex items-center gap-1.5 text-[9px] font-bold text-white uppercase mb-1 font-mono">
+                        <Sparkles className="w-3 h-3 text-amber-500" /> Diagnostics advice:
                       </div>
+                      <p className="text-[10px] text-slate-400 leading-normal font-sans">
+                        {diagnostics}
+                      </p>
+                    </div>
 
-                      <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-2">
-                        <div className="bg-gray-900/50 rounded-xl p-2 sm:p-3 text-center border border-gray-800">
-                          <div className="text-gray-400 text-[9px] sm:text-[10px] uppercase font-bold tracking-wider mb-1">Total Hits</div>
-                          <div className="text-lg sm:text-xl font-black text-green-400">{successfulHits}</div>
-                        </div>
-                        <div className="bg-gray-900/50 rounded-xl p-2 sm:p-3 text-center border border-gray-800">
-                          <div className="text-gray-400 text-[9px] sm:text-[10px] uppercase font-bold tracking-wider mb-1">Miss/Error</div>
-                          <div className="text-lg sm:text-xl font-black text-red-400">{missedHits}</div>
-                        </div>
-                        <div className="bg-gray-900/50 rounded-xl p-2 sm:p-3 text-center border border-gray-800">
-                          <div className="text-gray-400 text-[9px] sm:text-[10px] uppercase font-bold tracking-wider mb-1">Max Streak</div>
-                          <div className="text-lg sm:text-xl font-black text-orange-400">{bestStreak}</div>
-                        </div>
-                      </div>
+                    <div className="flex gap-2">
+                      <PlayAgainButton
+                        onClick={() => { if(engine.endGame) engine.endGame(); handleStartGame(); }}
+                        colorTheme="blue"
+                      />
+                      <button
+                        onPointerDown={(e)=>e.stopPropagation()}
+                        onClick={shareScore}
+                        className="p-3 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded-xl transition-colors active:scale-95 flex items-center justify-center"
+                        title="Share Score"
+                      >
+                        <Share2 className="w-4 h-4" />
+                      </button>
+                      {isFullscreen && (
+                        <button
+                          onPointerDown={(e)=>e.stopPropagation()}
+                          onClick={handleExitToStart}
+                          className="p-3 bg-red-900/30 border border-red-900/55 hover:bg-red-900/50 text-red-400 rounded-xl transition-colors active:scale-95 flex items-center justify-center"
+                          title="Exit Drill"
+                        >
+                          <LogOut className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
                   </div>
-
-                  {/* Fixed Bottom Action Row */}
-                  <div className="p-3 sm:p-5 bg-gray-900/50 border-t border-gray-800 flex gap-2 sm:gap-3 shrink-0 rounded-b-3xl">
-                    <button onPointerDown={(e)=>e.stopPropagation()} onClick={() => { if(engine.endGame) engine.endGame(); handleStartGame(); }} className="flex-1 py-3 sm:py-4 bg-blue-600 text-white rounded-xl font-black tracking-wide hover:bg-blue-500 transition-all active:scale-95 flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(59,130,246,0.4)] text-sm sm:text-base">
-                      <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5" /> PLAY AGAIN
-                    </button>
-                    <button onPointerDown={(e)=>e.stopPropagation()} onClick={shareDrillLink} className="px-4 sm:px-5 py-3 sm:py-4 bg-gray-800 text-white rounded-xl font-bold hover:bg-gray-700 transition-all active:scale-95 border border-gray-700 flex items-center justify-center" title="Share Drill">
-                      <Share2 className="w-4 h-4 sm:w-5 sm:h-5" />
-                    </button>
-                    <button onPointerDown={(e)=>e.stopPropagation()} onClick={handleExitToStart} className="px-4 sm:px-5 py-3 sm:py-4 bg-red-900/30 text-red-400 rounded-xl font-bold hover:bg-red-900/50 transition-all active:scale-95 border border-red-900/50 flex items-center justify-center" title="Exit Drill">
-                      <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
-                    </button>
-                  </div>
-
                 </div>
               </div>
             )}
@@ -842,10 +935,10 @@ export default function EntropicGridClient() {
               <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-5">
                   <RuleItem num="1" color="green" text="Correct ID =" highlight="Tap Active Target" result="+3 PTS | +1.5s Clock" />
-                  <RuleItem num="2" color="cyan" text="Entropy Scaling" highlight="Speed increases on streak" result="Adaptive Matrix System" />
+                  <RuleItem num="2" color="cyan" text="Entropy Scaling" highlight="Speed increases on score" result="Adaptive Matrix System" />
                 </div>
                 <div className="space-y-5">
-                  <RuleItem num="3" color="red" text="Wrong Selection" result="-1 PTS | -0.5s Clock" />
+                  <RuleItem num="3" color="red" text="Wrong Selection" result="0 PTS | -0.5s Clock" />
                   <RuleItem num="4" color="orange" text="Time Depletion" result="Timer Caps Strictly [0s - 60s]" />
                 </div>
               </div>
@@ -889,7 +982,7 @@ export default function EntropicGridClient() {
                       <div className="w-8 h-8 rounded-lg bg-purple-600 flex items-center justify-center"><BarChart3 className="w-4 h-4 text-white" /></div>
                       <h3 className="text-sm font-bold text-white">Performance Metrics</h3>
                     </div>
-                    <p className="text-xs leading-relaxed text-gray-400">Total volume of accurate identifications, absolute precision index, error penalty rates, and adaptation to extreme entropy scaling.</p>
+                    <p className="text-xs leading-relaxed text-gray-400">Total volume of accurate identifications, absolute precision index, accuracy ratio, and adaptation to extreme entropy scaling.</p>
                   </div>
                 </div>
 
@@ -903,7 +996,7 @@ export default function EntropicGridClient() {
                     <li><strong className="text-gray-200">Identify the Target:</strong> Observe the active 2-character target displayed in the HUD node (top-left).</li>
                     <li><strong className="text-gray-200">Scan the Grid:</strong> Rapidly scan the 100-cell matrix to find matching string signatures. Multiple copies can exist simultaneously.</li>
                     <li><strong className="text-gray-200">Execute Strike:</strong> Click or tap directly on the matching cell to log a hit.</li>
-                    <li><strong className="text-gray-200">Manage Economy:</strong> Striking the correct cell awards points and adds seconds to your timer. Incorrect inputs or hesitation will drain the strict 60-second clock.</li>
+                    <li><strong className="text-gray-200">Manage Economy:</strong> Striking the correct cell awards points and adds seconds to your timer. Incorrect inputs apply a time penalty (-0.5s) but do not reduce your score.</li>
                   </ol>
                 </div>
 
@@ -916,7 +1009,7 @@ export default function EntropicGridClient() {
                   <div className="space-y-4">
                     <div>
                       <h4 className="text-sm font-bold text-gray-200">How exactly does the entropy scaling work?</h4>
-                      <p className="text-xs text-gray-400 mt-1">Difficulty is dictated by an adaptive engine. For every consecutive target you successfully strike, your streak grows. As your streak compounds, the engine aggressively increases the frequency and volume of background cell corruption, forcing your brain to filter heavier visual noise.</p>
+                      <p className="text-xs text-gray-400 mt-1">Difficulty is dictated by an adaptive engine. As your active score grows, the engine aggressively increases the frequency and volume of background cell corruption, forcing your brain to filter heavier visual noise.</p>
                     </div>
                     <div>
                       <h4 className="text-sm font-bold text-gray-200">Why does my timer not exceed 60 seconds?</h4>

@@ -96,10 +96,52 @@ const faqSchema = {
   ]
 };
 
+const howToSchema = {
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "How to Practice with Card Matching Working Memory Drill",
+  "description": "Test and train your visuospatial working memory and visual pattern recall with progressive card pairs matching.",
+  "step": [
+    {
+      "@type": "HowToStep",
+      "position": 1,
+      "name": "Flip a Card",
+      "text": "Click or tap any face-down card to reveal its shape symbol and color."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 2,
+      "name": "Search for its Matching Partner",
+      "text": "Flip a second card. If they match, they are permanently cleared from the active board."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 3,
+      "name": "Avoid Blind Guessing",
+      "text": "Flipping the same card more than 5 times without a successful match triggers a penalty (-1s from the clock). Incorrect actions do not deduct score points."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 4,
+      "name": "Clear Board to Progress",
+      "text": "Clear all cards to finish the grid and earn +20 PTS and +15s. Difficulty dynamically increases as your score scales up."
+    }
+  ]
+};
+
 export const metadata = {
-  title: "Memory Matching Game Online – Free Visual Card Memory Game | SkillDrills",
-  description: "Play the classic memory matching card game online for free. Train visuospatial working memory and spatial recall on progressively harder grid boards. No sign-up required.",
+  title: "Play Memory Card Game Online Free | Classic Matching Game | SkillDrills",
+  description: "Train your brain with our free online memory card matching game. Test your concentration, match the pairs, and improve your short-term memory. No downloads, play instantly!",
   keywords: [
+    "memory card game online free",
+    "card matching game",
+    "matching cards game",
+    "play concentration card game unblocked",
+    "free flip card memory game",
+    "working memory exercises for adults",
+    "short term memory card game",
+    "spatial memory training online",
+    "ADHD working memory games",
     "memory matching game",
     "memory card game online",
     "matching card game",
@@ -118,8 +160,8 @@ export const metadata = {
   },
   robots: { index: true, follow: true },
   openGraph: {
-    title: "Memory Matching Game Online – Free Visual Card Memory Game | SkillDrills",
-    description: "Play the classic memory matching card game online for free. Train visuospatial working memory and spatial recall on progressively harder grid boards. No sign-up required.",
+    title: "Play Memory Card Game Online Free | Classic Matching Game | SkillDrills",
+    description: "Train your brain with our free online memory card matching game. Test your concentration, match the pairs, and improve your short-term memory. No downloads, play instantly!",
     url: "https://skilldrills.online/drills/cognitive/memory/card-matching",
     siteName: 'SkillDrills',
     locale: 'en_US',
@@ -128,8 +170,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Memory Matching Game Online – Free Visual Card Memory Game | SkillDrills",
-    description: "Play the classic memory matching card game online for free. Train visuospatial working memory and spatial recall on progressively harder grid boards. No sign-up required.",
+    title: "Play Memory Card Game Online Free | Classic Matching Game | SkillDrills",
+    description: "Train your brain with our free online memory card matching game. Test your concentration, match the pairs, and improve your short-term memory. No downloads, play instantly!",
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
 };
@@ -140,6 +182,7 @@ export default function CardMatchingPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }} />
       <CardMatchingClient />
     </>
   );

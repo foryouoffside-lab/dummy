@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { Component, useEffect, useState, useRef, useCallback } from 'react';
 import Link from 'next/link';
@@ -7,9 +7,10 @@ import {
   Info, RefreshCw, RotateCcw, GraduationCap, Lightbulb, TrendingUp, 
   BarChart3, ArrowRight, Brain, Users, AlertTriangle, Target, 
   CheckCircle, XCircle, Play, Share2, ChevronRight, Activity, 
-  Grid3X3, Search, LogOut
+  Grid3X3, Search, LogOut, Sparkles
 } from 'lucide-react';
 import useGameEngine from '../../../../../lib/useGameEngine';
+import PlayAgainButton from '../../../../../components/PlayAgainButton';
 
 // ============================================================
 // ZERO-LATENCY AUDIO SYNTHESIZER
@@ -299,16 +300,19 @@ export default function RhythmAnomalyClient() {
     streakRef.current = 0;
     setStreak(0);
     
-    scoreRef.current = Math.max(0, scoreRef.current - 1);
+    // Remove negative scoring penalty
     setScore(scoreRef.current);
+    if (engineRef.current && typeof engineRef.current.setScore === 'function') {
+      engineRef.current.setScore(scoreRef.current);
+    }
     
     localTimeRef.current = Math.max(0, localTimeRef.current - 1);
     setLocalTimeRemaining(localTimeRef.current);
     
-    // Forgive scaling slightly
-    anomalyDurationRef.current = Math.max(1200, anomalyDurationRef.current - 40);
-    entropyIntervalRef.current = Math.min(800, entropyIntervalRef.current + 20);
-    timeoutLimitRef.current = Math.min(8000, timeoutLimitRef.current + 200);
+    const baseSpeedShift = Math.floor(scoreRef.current / 12) * 20;
+    anomalyDurationRef.current = Math.min(1950, 1400 + baseSpeedShift);
+    entropyIntervalRef.current = Math.min(800, 800 - (scoreRef.current * 5) + 50);
+    timeoutLimitRef.current = Math.min(8000, 8000 - (scoreRef.current * 100) + 500);
     setSpeedLevel(Math.max(1, Math.floor((anomalyDurationRef.current - 1400) / 20) + 1));
 
     if (localTimeRef.current <= 0) {
@@ -321,14 +325,14 @@ export default function RhythmAnomalyClient() {
     }
 
     if (type === 'miss') {
-        setMissedHits(m => m + 1);
-        if (audioSynth) audioSynth.playFail();
-        triggerFeedback(`✗ Wrong! -1 PTS | -1s`, 'error');
+      setMissedHits(m => m + 1);
+      if (audioSynth) audioSynth.playFail();
+      triggerFeedback(`✗ Wrong! -1s`, 'error');
     } else {
-        setTimeouts(t => t + 1);
-        if (audioSynth) audioSynth.playTimeout();
-        triggerFeedback(`⏳ Timeout! -1 PTS | -1s`, 'warning');
-        relocateAnomaly(); 
+      setTimeouts(t => t + 1);
+      if (audioSynth) audioSynth.playTimeout();
+      triggerFeedback(`⏳ Timeout! -1s`, 'warning');
+      relocateAnomaly(); 
     }
   }, [triggerFeedback, relocateAnomaly]);
 
@@ -346,14 +350,17 @@ export default function RhythmAnomalyClient() {
     
     scoreRef.current += 3;
     setScore(scoreRef.current);
+    if (engineRef.current && typeof engineRef.current.setScore === 'function') {
+      engineRef.current.setScore(scoreRef.current);
+    }
     
     localTimeRef.current = Math.min(60, localTimeRef.current + 2);
     setLocalTimeRemaining(localTimeRef.current);
     
-    // Ramp up scaling 
-    anomalyDurationRef.current = Math.min(1950, anomalyDurationRef.current + 20);
-    entropyIntervalRef.current = Math.max(200, entropyIntervalRef.current - 15);
-    timeoutLimitRef.current = Math.max(3000, timeoutLimitRef.current - 150);
+    const baseSpeedShift = Math.floor(scoreRef.current / 12) * 20;
+    anomalyDurationRef.current = Math.min(1950, 1400 + baseSpeedShift + (streakRef.current * 4));
+    entropyIntervalRef.current = Math.max(200, 800 - (scoreRef.current * 5));
+    timeoutLimitRef.current = Math.max(3000, 8000 - (scoreRef.current * 100));
     
     setSpeedLevel(Math.max(1, Math.floor((anomalyDurationRef.current - 1400) / 20) + 1));
 
@@ -583,6 +590,30 @@ export default function RhythmAnomalyClient() {
     }
   }, []);
 
+  const shareScore = useCallback(() => {
+    const accuracy = successfulHits + missedHits + timeouts > 0 ? Math.round((successfulHits / (successfulHits + missedHits + timeouts)) * 100) : 0;
+    let finalRank = 'Bronze';
+    if (scoreRef.current >= 80 && accuracy >= 85) finalRank = 'Grandmaster';
+    else if (scoreRef.current >= 65 && accuracy >= 75) finalRank = 'Master';
+    else if (scoreRef.current >= 50 && accuracy >= 65) finalRank = 'Diamond';
+    else if (scoreRef.current >= 35 && accuracy >= 55) finalRank = 'Platinum';
+    else if (scoreRef.current >= 20 && accuracy >= 45) finalRank = 'Gold';
+    else if (scoreRef.current >= 10) finalRank = 'Silver';
+
+    const text = `🎯 I scored ${scoreRef.current} PTS with ${accuracy}% accuracy on the Rhythm Anomaly Visual Timing Drill! Rank: ${finalRank}. Try it here: https://skilldrills.online/drills/visual/visual-recognition/rhythm-anomaly`;
+    
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      navigator.share({
+        title: 'My SkillDrills Visual Score',
+        text: text,
+        url: 'https://skilldrills.online/drills/visual/visual-recognition/rhythm-anomaly'
+      }).catch(() => {});
+    } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+      alert('Score card copied to clipboard!');
+    }
+  }, [successfulHits, missedHits, timeouts]);
+
   if (loading || !isClient) { 
     return (
       <div className="min-h-screen flex items-center justify-center bg-black">
@@ -597,6 +628,44 @@ export default function RhythmAnomalyClient() {
   const accuracyPercentage = (successfulHits + missedHits + timeouts) === 0 ? 100 : Math.round((successfulHits / (successfulHits + missedHits + timeouts)) * 100);
   const strokeDasharray = 100;
   const strokeDashoffset = strokeDasharray - accuracyPercentage;
+
+  let gradeLetter = 'F';
+  if (accuracyPercentage >= 85 && score >= 80) gradeLetter = 'S';
+  else if (accuracyPercentage >= 75 && score >= 65) gradeLetter = 'A';
+  else if (accuracyPercentage >= 65 && score >= 50) gradeLetter = 'B';
+  else if (accuracyPercentage >= 55 && score >= 35) gradeLetter = 'C';
+  else if (accuracyPercentage >= 45 && score >= 20) gradeLetter = 'D';
+
+  let rankName = 'Bronze';
+  let rankColor = 'text-slate-500';
+  if (score >= 80 && accuracyPercentage >= 85) {
+    rankName = 'Grandmaster';
+    rankColor = 'text-fuchsia-400 font-extrabold';
+  } else if (score >= 65 && accuracyPercentage >= 75) {
+    rankName = 'Master';
+    rankColor = 'text-red-400 font-extrabold';
+  } else if (score >= 50 && accuracyPercentage >= 65) {
+    rankName = 'Diamond';
+    rankColor = 'text-cyan-400 font-extrabold';
+  } else if (score >= 35 && accuracyPercentage >= 55) {
+    rankName = 'Platinum';
+    rankColor = 'text-indigo-400 font-extrabold';
+  } else if (score >= 20 && accuracyPercentage >= 45) {
+    rankName = 'Gold';
+    rankColor = 'text-yellow-400 font-extrabold';
+  } else if (score >= 10) {
+    rankName = 'Silver';
+    rankColor = 'text-gray-300 font-extrabold';
+  }
+
+  let diagnostics = "Sensational temporal tracking! Your ability to isolate subtle phase differences against visual noise is superior.";
+  if (accuracyPercentage < 50) {
+    diagnostics = "Low rhythm discrimination accuracy. Watch the pulse intervals longer to confirm the faster anomaly.";
+  } else if (timeouts > 3) {
+    diagnostics = "Too many timeouts. Scan the grid columns faster to locate the anomaly before the timeout limit hits.";
+  } else if (score < 30) {
+    diagnostics = "Speed up your clicks to keep the dynamic scaling active and build your score multiplier.";
+  }
 
   return (
     <div className="min-h-screen select-none bg-black text-white selection:bg-transparent" style={{ WebkitTapHighlightColor: 'transparent' }}>
@@ -733,71 +802,85 @@ export default function RhythmAnomalyClient() {
 
             {/* Premium Custom End Screen */}
             {(engine.gameState === 'ended' || isTimeUp) && !showRotateWarning && (
-              <div className="absolute inset-0 flex items-center justify-center z-[70] bg-black/90 pointer-events-auto animate-in fade-in duration-300 p-4" onPointerDown={e => e.stopPropagation()}>
-                <div className="rounded-3xl max-w-md w-full shadow-2xl border border-gray-800 bg-gray-950 overflow-hidden flex flex-col max-h-[95vh]">
-                  
-                  <div className="bg-gradient-to-br from-blue-900/40 to-indigo-900/40 p-5 sm:p-6 border-b border-gray-800 relative overflow-hidden pointer-events-none shrink-0">
-                    <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-blue-500/20 rounded-full blur-3xl"></div>
-                    <div className="absolute bottom-0 left-0 -mb-4 -ml-4 w-32 h-32 bg-indigo-500/20 rounded-full blur-3xl"></div>
-                    <div className="relative z-10 flex flex-col items-center">
-                      {isNewBest && (
-                        <div className="bg-yellow-500 text-black text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-2 shadow-[0_0_15px_rgba(234,179,8,0.5)]">
-                          ⭐ New Personal Best
-                        </div>
-                      )}
-                      <h2 className="text-2xl sm:text-3xl font-black text-white mb-1 tracking-tight">Mission Complete</h2>
-                      <p className="text-blue-400 font-medium text-sm sm:text-base">Rhythm Anomaly • Lvl {speedLevel}</p>
-                    </div>
-                  </div>
+              <div className="absolute inset-0 bg-[#05070e]/98 overflow-y-auto p-6 z-[70] select-none scrollbar-thin scroll-smooth backdrop-blur-sm animate-in fade-in duration-300 pointer-events-auto" onPointerDown={e => e.stopPropagation()}>
+                <div className="min-h-full flex flex-col justify-center items-center py-4 w-full">
+                  <div className="max-w-md w-full text-center">
+                    {score > 0 && score >= (bestScore || 0) && (
+                      <div className="inline-block bg-yellow-500 text-black text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-3 shadow-[0_0_15px_rgba(234,179,8,0.5)] animate-bounce font-mono">
+                        ⭐ NEW PERSONAL BEST!
+                      </div>
+                    )}
+                    
+                    <h2 className="text-xl font-black text-white uppercase tracking-wider mb-1 font-mono">
+                      Drill Complete
+                    </h2>
+                    <p className="text-xs text-slate-500 uppercase tracking-widest mb-6 font-mono">
+                      Rhythm Anomaly • Lvl {speedLevel}
+                    </p>
 
-                  <div className="flex-1 flex flex-col p-5 sm:p-6 overflow-y-auto min-h-0 pointer-events-auto">
-                    <div className="flex justify-between items-center mb-6">
-                      <div className="flex flex-col">
-                        <span className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Final Score</span>
-                        <div className="flex items-end gap-1">
-                          <span className="text-5xl sm:text-6xl font-black text-white leading-none tracking-tighter">{score}</span>
-                          <span className="text-sm sm:text-lg text-gray-500 font-bold mb-1">PTS</span>
-                        </div>
+                    <div className="grid grid-cols-3 gap-2.5 mb-6 text-left font-mono">
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Final Score</span>
+                        <span className="text-sm font-black text-white">{score} <span className="text-[8px] text-slate-400 font-normal">PTS</span></span>
+                      </div>
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Accuracy</span>
+                        <span className="text-sm font-black text-white">{accuracyPercentage}%</span>
+                      </div>
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Best Score</span>
+                        <span className="text-sm font-black text-green-400">{bestScore}</span>
                       </div>
                       
-                      <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center shrink-0">
-                        <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
-                          <path className="text-gray-800" strokeWidth="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                          <path 
-                            className={`${accuracyPercentage >= 80 ? 'text-green-500' : accuracyPercentage >= 50 ? 'text-yellow-500' : 'text-red-500'} transition-all duration-1000 ease-out`} 
-                            strokeWidth="3" strokeDasharray={`${strokeDasharray}`} strokeDashoffset={`${strokeDashoffset}`} strokeLinecap="round" stroke="currentColor" fill="none" 
-                            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" 
-                          />
-                        </svg>
-                        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                          <span className={`text-lg sm:text-xl font-black ${accuracyPercentage >= 80 ? 'text-green-400' : accuracyPercentage >= 50 ? 'text-yellow-400' : 'text-red-400'}`}>{accuracyPercentage}%</span>
-                          <span className="text-[7px] sm:text-[8px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">Accuracy</span>
-                        </div>
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Target Hits</span>
+                        <span className="text-sm font-black text-emerald-400">{successfulHits}</span>
+                      </div>
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Misses / TOs</span>
+                        <span className="text-sm font-black text-red-400">{missedHits + timeouts}</span>
+                      </div>
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold font-mono">Grade</span>
+                        <span className="text-sm font-black text-pink-400 font-mono">{gradeLetter}</span>
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                      <div className="bg-gray-900/50 rounded-xl p-3 text-center border border-gray-800">
-                        <div className="text-gray-400 text-[10px] uppercase font-bold tracking-wider mb-1">Target Hits</div>
-                        <div className="text-xl font-black text-green-400">{successfulHits}</div>
+                    <div className="bg-[#0b0f19] border border-slate-850 p-3 rounded-xl mb-4 text-left font-sans">
+                      <span className={`text-xs font-black block text-center uppercase tracking-widest ${rankColor} mb-2`}>
+                        Rank: {rankName}
+                      </span>
+                      <div className="w-full h-px bg-slate-850 mb-2"></div>
+                      <div className="flex items-center gap-1.5 text-[9px] font-bold text-white uppercase mb-1 font-mono">
+                        <Sparkles className="w-3 h-3 text-amber-500" /> Diagnostics advice:
                       </div>
-                      <div className="bg-gray-900/50 rounded-xl p-3 text-center border border-gray-800">
-                        <div className="text-gray-400 text-[10px] uppercase font-bold tracking-wider mb-1">Misses / TOs</div>
-                        <div className="text-xl font-black text-red-400">{missedHits + timeouts}</div>
-                      </div>
+                      <p className="text-[10px] text-slate-400 leading-normal font-sans">
+                        {diagnostics}
+                      </p>
                     </div>
-                  </div>
 
-                  <div className="p-4 sm:p-5 bg-gray-900/80 border-t border-gray-800 flex flex-wrap gap-2 sm:gap-3 shrink-0 pointer-events-auto">
-                    <button onClick={(e) => { e.stopPropagation(); engine.endGame(); handleStartGame(); }} className="flex-1 min-w-[140px] py-3.5 bg-blue-600 text-white rounded-xl font-black tracking-wide hover:bg-blue-500 transition-all active:scale-95 flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(59,130,246,0.4)]">
-                      <RefreshCw className="w-5 h-5" /> PLAY AGAIN
-                    </button>
-                    <button onClick={(e) => { e.stopPropagation(); shareDrillLink(); }} className="px-5 py-3.5 bg-gray-800 text-white rounded-xl font-bold hover:bg-gray-700 transition-all active:scale-95 border border-gray-700 flex items-center justify-center">
-                      <Share2 className="w-5 h-5" />
-                    </button>
-                    <button onClick={(e) => { e.stopPropagation(); handleExitGame(); }} className="px-5 py-3.5 bg-gray-800 text-red-400 rounded-xl font-bold hover:bg-gray-700 hover:text-red-300 transition-all active:scale-95 border border-gray-700 flex items-center justify-center">
-                      <LogOut className="w-5 h-5" />
-                    </button>
+                    <div className="flex gap-2">
+                      <PlayAgainButton
+                        onClick={(e) => { e.stopPropagation(); engine.endGame(); handleStartGame(); }}
+                        colorTheme="blue"
+                      />
+                      <button
+                        onClick={(e) => { e.stopPropagation(); shareScore(); }}
+                        className="p-3 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded-xl transition-colors active:scale-95 flex items-center justify-center"
+                        title="Share Score"
+                      >
+                        <Share2 className="w-4 h-4" />
+                      </button>
+                      {isFullscreen && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleExitGame(); }}
+                          className="p-3 bg-red-900/30 border border-red-900/55 hover:bg-red-900/50 text-red-400 rounded-xl transition-colors active:scale-95 flex items-center justify-center"
+                          title="Exit Drill"
+                        >
+                          <LogOut className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -805,7 +888,6 @@ export default function RhythmAnomalyClient() {
           </div>
         </GameErrorBoundary>
 
-        {/* Instructions */}
         {!isFullscreen && (
           <section className="mt-10">
             <div className="rounded-2xl border border-gray-800 overflow-hidden bg-gray-900 shadow-2xl pointer-events-none">
@@ -818,8 +900,8 @@ export default function RhythmAnomalyClient() {
                   <RuleItem num="2" color="cyan" text="Entropy" highlight="Corrupts Cells" result="Ignore Text Changes" />
                 </div>
                 <div className="space-y-5">
-                  <RuleItem num="3" color="red" text="Wrong Click" highlight="-1 PTS | -1s" result="Resets Streak" />
-                  <RuleItem num="4" color="orange" text="Timeout" highlight="-1 PTS | -1s" result="If taking too long" />
+                  <RuleItem num="3" color="red" text="Wrong Click" highlight="0 PTS | -1s" result="Resets Streak" />
+                  <RuleItem num="4" color="orange" text="Timeout" highlight="0 PTS | -1s" result="If taking too long" />
                 </div>
               </div>
             </div>
@@ -884,8 +966,8 @@ export default function RhythmAnomalyClient() {
                       <h4 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Scoring Rules</h4>
                       <ul className="text-sm text-gray-300 space-y-3 list-disc pl-4 marker:text-gray-500">
                         <li><strong className="text-green-400">Correct (+3 PTS | +2s):</strong> Hitting the true anomaly rewards you with points, adds valuable time, and increases the difficulty slightly.</li>
-                        <li><strong className="text-red-400">Wrong (-1 PTS | -1s):</strong> Tapping a normal or flickering cell directly penalizes your score and aggressively drains your clock.</li>
-                        <li><strong className="text-orange-400">Timeout (-1 PTS | -1s):</strong> Failing to find the anomaly within the allowed time limit penalizes you and relocates the target.</li>
+                        <li><strong className="text-red-400">Wrong (0 PTS | -1s):</strong> Tapping a normal or flickering cell directly drains your clock but does not reduce your score.</li>
+                        <li><strong className="text-orange-400">Timeout (0 PTS | -1s):</strong> Failing to find the anomaly within the allowed time limit drains your clock and relocates the target.</li>
                       </ul>
                     </div>
                   </div>
@@ -904,7 +986,7 @@ export default function RhythmAnomalyClient() {
                     </div>
                     <div>
                       <h4 className="text-sm font-bold text-gray-200">Why did the anomaly move before I clicked it?</h4>
-                      <p className="text-xs text-gray-400 mt-1">You took too long. Depending on your current level, you only have between 2.5 to 8 seconds to identify the anomaly. Failing to do so triggers a Timeout, penalizes your score and time, and forces the anomaly to relocate.</p>
+                      <p className="text-xs text-gray-400 mt-1">You took too long. Depending on your current level, you only have between 2.5 to 8 seconds to identify the anomaly. Failing to do so triggers a Timeout, penalizes your time, and forces the anomaly to relocate.</p>
                     </div>
                   </div>
                 </div>

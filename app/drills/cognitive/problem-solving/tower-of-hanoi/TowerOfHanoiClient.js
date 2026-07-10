@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
@@ -9,9 +9,10 @@ import {
   Crosshair, Dumbbell, Database, Keyboard, Star, Users,
   GraduationCap, Lightbulb, TrendingUp, Clock, ArrowRight,
   BookOpen, Brain, Code2, Hash, Calculator, Layers,
-  RotateCcw, Move, Award, ChevronRight, Play, CheckCircle, XCircle, Share2
+  RotateCcw, Move, Award, ChevronRight, Play, CheckCircle, XCircle, Share2, Sparkles, LogOut
 } from 'lucide-react';
 import useGameEngine from '../../../../../lib/useGameEngine';
+import PlayAgainButton from "../../../../../components/PlayAgainButton";
 
 // ============================================================
 // LEVEL & DIFFICULTY SYSTEM
@@ -434,9 +435,8 @@ export default function TowerOfHanoiClient() {
       checkGameComplete(nt, movesRef.current); 
       syncToUI();
     } else { 
-      // INVALID MOVE PENALTY (-5 Points | -2 Seconds)
+      // INVALID MOVE PENALTY (No PTS Penalty | -2 Seconds)
       penaltiesRef.current += 1;
-      scoreRef.current = Math.max(0, scoreRef.current - 5);
       
       // Apply the time penalty, ensuring it doesn't go below 0
       localTimeRef.current = Math.max(0, localTimeRef.current - 2);
@@ -450,7 +450,7 @@ export default function TowerOfHanoiClient() {
       
       setSelectedTower(null); 
       if (audioSynth) audioSynth.playPenalty(); 
-      triggerFeedback('Invalid Move! -5 PTS | -2s', 'error'); 
+      triggerFeedback('Invalid Move! -2s', 'error'); 
       syncToUI();
     } 
     
@@ -497,6 +497,31 @@ export default function TowerOfHanoiClient() {
     }
   }, []);
 
+  const shareScore = useCallback(() => {
+    const finalAccuracy = moves + penalties > 0 ? Math.round((moves / (moves + penalties)) * 100) : 100;
+    
+    let finalRank = 'Bronze';
+    if (scoreRef.current >= 150 && finalAccuracy >= 90) finalRank = 'Grandmaster';
+    else if (scoreRef.current >= 100 && finalAccuracy >= 82) finalRank = 'Master';
+    else if (scoreRef.current >= 60 && finalAccuracy >= 75) finalRank = 'Diamond';
+    else if (scoreRef.current >= 40 && finalAccuracy >= 65) finalRank = 'Platinum';
+    else if (scoreRef.current >= 20 && finalAccuracy >= 55) finalRank = 'Gold';
+    else if (scoreRef.current >= 10) finalRank = 'Silver';
+
+    const text = `🧠 I scored ${scoreRef.current} PTS with ${finalAccuracy}% accuracy on the Tower of Hanoi Speed-Logic Drill! Solved with ${currentLevel} disks. Rank: ${finalRank}. Try it here: https://skilldrills.online/drills/cognitive/problem-solving/tower-of-hanoi`;
+    
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      navigator.share({
+        title: 'My SkillDrills Cognitive Score',
+        text: text,
+        url: 'https://skilldrills.online/drills/cognitive/problem-solving/tower-of-hanoi'
+      }).catch(() => {});
+    } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+      alert('Score card copied to clipboard!');
+    }
+  }, [currentLevel, moves, penalties]);
+
   const getDiskColor = useCallback((ds) => { 
     const c = ['bg-red-500','bg-orange-500','bg-yellow-500','bg-green-500','bg-blue-500','bg-indigo-500','bg-purple-500','bg-pink-500']; 
     return c[(ds - 1) % c.length]; 
@@ -521,6 +546,45 @@ export default function TowerOfHanoiClient() {
   const accuracy = moves + penalties > 0 
     ? Math.round((moves / (moves + penalties)) * 100) 
     : 100;
+
+  // Calculate grade based on score and accuracy
+  let gradeLetter = 'F';
+  if (accuracy >= 85 && score >= 100) gradeLetter = 'S';
+  else if (accuracy >= 75 && score >= 60) gradeLetter = 'A';
+  else if (accuracy >= 65 && score >= 40) gradeLetter = 'B';
+  else if (accuracy >= 55 && score >= 20) gradeLetter = 'C';
+  else if (accuracy >= 45 && score >= 10) gradeLetter = 'D';
+
+  let rankName = 'Bronze';
+  let rankColor = 'text-slate-500';
+  if (score >= 150 && accuracy >= 90) {
+    rankName = 'Grandmaster';
+    rankColor = 'text-fuchsia-400 font-extrabold';
+  } else if (score >= 100 && accuracy >= 82) {
+    rankName = 'Master';
+    rankColor = 'text-red-400 font-extrabold';
+  } else if (score >= 60 && accuracy >= 75) {
+    rankName = 'Diamond';
+    rankColor = 'text-cyan-400 font-extrabold';
+  } else if (score >= 40 && accuracy >= 65) {
+    rankName = 'Platinum';
+    rankColor = 'text-indigo-400 font-extrabold';
+  } else if (score >= 20 && accuracy >= 55) {
+    rankName = 'Gold';
+    rankColor = 'text-yellow-400 font-extrabold';
+  } else if (score >= 10) {
+    rankName = 'Silver';
+    rankColor = 'text-gray-300 font-extrabold';
+  }
+
+  let diagnostics = "Phenomenal recursive thinking! Your brain solves the sub-problems of moving smaller disk piles effortlessly, planning moves in advance.";
+  if (penalties > 4) {
+    diagnostics = "High rate of invalid disk movements. Take a brief moment to trace the relative sizes of target and source disk configurations.";
+  } else if (accuracy < 60) {
+    diagnostics = "Slips in sequential logic detected. Maintain focus on the minimum move target to train optimal recursive pathways.";
+  } else if (score < 40) {
+    diagnostics = "To improve your score, focus on resolving the 3 and 4 disk levels with minimal moves to bank time extensions.";
+  }
   const strokeDasharray = 100;
   const strokeDashoffset = strokeDasharray - accuracy;
 
@@ -717,70 +781,85 @@ export default function TowerOfHanoiClient() {
 
           {/* Premium Custom End Screen */}
           {(engine.gameState === 'ended' || isTimeUp) && !showRotateWarning && (
-            <div className="absolute inset-0 flex items-center justify-center z-[70] bg-black/90 pointer-events-auto animate-in fade-in duration-300">
-              <div className="rounded-3xl max-w-lg w-full mx-4 shadow-2xl border border-gray-800 bg-gray-950 overflow-hidden flex flex-col">
-                
-                <div className="bg-gradient-to-br from-amber-900/40 to-orange-900/40 p-6 border-b border-gray-800 relative overflow-hidden pointer-events-none">
-                  <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-amber-500/20 rounded-full blur-3xl"></div>
-                  <div className="absolute bottom-0 left-0 -mb-4 -ml-4 w-32 h-32 bg-orange-500/20 rounded-full blur-3xl"></div>
-                  <div className="relative z-10 flex flex-col items-center">
-                    {isNewBest && (
-                      <div className="bg-yellow-500 text-black text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-3 shadow-[0_0_15px_rgba(234,179,8,0.5)]">
-                        ⭐ New Personal Best
-                      </div>
-                    )}
-                    <h2 className="text-3xl font-black text-white mb-1 tracking-tight">Mission Complete</h2>
-                    <p className="text-amber-400 font-medium">Tower of Hanoi • Reached {currentLevel} Disks</p>
-                  </div>
-                </div>
+            <div className="absolute inset-0 bg-[#05070e]/98 overflow-y-auto p-6 z-[70] select-none scrollbar-thin scroll-smooth backdrop-blur-sm animate-in fade-in duration-300 pointer-events-auto" onPointerDown={e => e.stopPropagation()}>
+              <div className="min-h-full flex flex-col justify-center items-center py-4 w-full">
+                <div className="max-w-md w-full text-center">
+                  {score > 0 && score >= bestScore && (
+                    <div className="inline-block bg-yellow-500 text-black text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-3 shadow-[0_0_15px_rgba(234,179,8,0.5)] animate-bounce font-mono">
+                      ⭐ NEW PERSONAL BEST!
+                    </div>
+                  )}
+                  
+                  <h2 className="text-xl font-black text-white uppercase tracking-wider mb-1 font-mono">
+                    Drill Complete
+                  </h2>
+                  <p className="text-xs text-slate-500 uppercase tracking-widest mb-6 font-mono">
+                    Max Level Reached: {currentLevel} Disks
+                  </p>
 
-                <div className="p-6 pointer-events-none">
-                  <div className="flex justify-between items-center mb-8">
-                    <div className="flex flex-col">
-                      <span className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-1">Final Score</span>
-                      <div className="flex items-end gap-1">
-                        <span className="text-6xl font-black text-white leading-none tracking-tighter">{score}</span>
-                        <span className="text-lg text-gray-500 font-bold mb-1">PTS</span>
-                      </div>
+                  <div className="grid grid-cols-3 gap-2.5 mb-6 text-left font-mono">
+                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Final Score</span>
+                      <span className="text-sm font-black text-white">{score} <span className="text-[8px] text-slate-400 font-normal">PTS</span></span>
+                    </div>
+                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Accuracy</span>
+                      <span className="text-sm font-black text-white">{accuracy}%</span>
+                    </div>
+                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Best Score</span>
+                      <span className="text-sm font-black text-yellow-400">{bestScore}</span>
                     </div>
                     
-                    <div className="relative w-24 h-24 flex items-center justify-center">
-                      <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
-                        <path className="text-gray-800" strokeWidth="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                        <path 
-                          className={`${accuracy >= 80 ? 'text-green-500' : accuracy >= 50 ? 'text-yellow-500' : 'text-red-500'} transition-all duration-1000 ease-out`} 
-                          strokeWidth="3" strokeDasharray={`${strokeDasharray}`} strokeDashoffset={`${strokeDashoffset}`} strokeLinecap="round" stroke="currentColor" fill="none" 
-                          d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" 
-                        />
-                      </svg>
-                      <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <span className={`text-xl font-black ${accuracy >= 80 ? 'text-green-400' : accuracy >= 50 ? 'text-yellow-400' : 'text-red-400'}`}>{accuracy}%</span>
-                        <span className="text-[8px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">Accuracy</span>
-                      </div>
+                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold font-mono">Total Moves</span>
+                      <span className="text-sm font-black text-emerald-400">{moves}</span>
+                    </div>
+                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Penalties</span>
+                      <span className="text-sm font-black text-red-400">{penalties}</span>
+                    </div>
+                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Grade</span>
+                      <span className="text-sm font-black text-pink-400">{gradeLetter}</span>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3 mb-4">
-                    <div className="bg-gray-900/50 rounded-xl p-3 text-center border border-gray-800">
-                      <div className="text-gray-400 text-[10px] uppercase font-bold tracking-wider mb-1">Invalid Moves</div>
-                      <div className="text-xl font-black text-red-400">{penalties}</div>
+                  <div className="bg-[#0b0f19] border border-slate-850 p-3 rounded-xl mb-4 text-left">
+                    <span className={`text-xs font-black block text-center uppercase tracking-widest ${rankColor} mb-2`}>
+                      Rank: {rankName}
+                    </span>
+                    <div className="w-full h-px bg-slate-850 mb-2"></div>
+                    <div className="flex items-center gap-1.5 text-[9px] font-bold text-white uppercase mb-1 font-mono">
+                      <Sparkles className="w-3 h-3 text-amber-500" /> Diagnostics advice:
                     </div>
-                    <div className="bg-gray-900/50 rounded-xl p-3 text-center border border-gray-800">
-                      <div className="text-gray-400 text-[10px] uppercase font-bold tracking-wider mb-1">Total Moves</div>
-                      <div className="text-xl font-black text-cyan-400">{moves}</div>
-                    </div>
+                    <p className="text-[10px] text-slate-400 leading-normal">
+                      {diagnostics}
+                    </p>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <PlayAgainButton onClick={() => { if(engineRef.current) engineRef.current.endGame(); handleStartGame(); }} colorTheme="orange" />
+                    <button
+                      onPointerDown={e => e.stopPropagation()}
+                      onClick={shareScore}
+                      className="p-3 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded-xl transition-colors active:scale-95 flex items-center justify-center"
+                      title="Share Score"
+                    >
+                      <Share2 className="w-4 h-4" />
+                    </button>
+                    {isFullscreen && (
+                      <button
+                        onPointerDown={e => e.stopPropagation()}
+                        onClick={() => { if(engineRef.current) engineRef.current.endGame(); }}
+                        className="p-3 bg-red-900/30 border border-red-900/55 hover:bg-red-900/50 text-red-400 rounded-xl transition-colors active:scale-95 flex items-center justify-center"
+                        title="Exit Drill"
+                      >
+                        <LogOut className="w-4 h-4" />
+                      </button>
+                    )}
                   </div>
                 </div>
-
-                <div className="p-6 bg-gray-900/50 border-t border-gray-800 flex gap-3">
-                  <button onClick={() => { if(engineRef.current) engineRef.current.endGame(); handleStartGame(); }} className="flex-1 py-4 bg-amber-600 text-white rounded-xl font-black tracking-wide hover:bg-amber-500 transition-all active:scale-95 flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(245,158,11,0.4)]">
-                    <RefreshCw className="w-5 h-5" /> PLAY AGAIN
-                  </button>
-                  <button onClick={shareDrillLink} className="px-6 py-4 bg-gray-800 text-white rounded-xl font-bold hover:bg-gray-700 transition-all active:scale-95 border border-gray-700 flex items-center justify-center">
-                    <Share2 className="w-5 h-5" />
-                  </button>
-                </div>
-                
               </div>
             </div>
           )}
@@ -798,7 +877,7 @@ export default function TowerOfHanoiClient() {
                   <RuleItem num="2" color="indigo" text="Complete a tower" result="+20 PTS & +10s Time" />
                 </div>
                 <div className="space-y-5">
-                  <RuleItem num="3" color="red" text="Dropping large disk on small" result="-5 PTS & -2s Penalty" />
+                  <RuleItem num="3" color="red" text="Dropping large disk on small" result="No PTS Penalty & -2s Penalty" />
                   <RuleItem num="4" color="amber" text="Complete in minimum moves" result="Perfect Bonus" />
                 </div>
               </div>

@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import Link from 'next/link';
@@ -9,9 +9,10 @@ import {
   GraduationCap, Lightbulb, TrendingUp, BarChart3,
   Brain, Users, ArrowRight,
   RefreshCw, Award, XCircle,
-  AlertTriangle, Crosshair, Calculator, Code2, LogOut, Radio
+  AlertTriangle, Crosshair, Calculator, Code2, LogOut, Radio, Check, Sparkles
 } from 'lucide-react';
 import useGameEngine from '../../../../../lib/useGameEngine';
+import PlayAgainButton from '../../../../../components/PlayAgainButton';
 
 // ==========================================
 // ZERO-LATENCY AUDIO SYNTHESIZER
@@ -232,11 +233,15 @@ export default function NeuroSwitchClient() {
     if (animationRef.current) { cancelAnimationFrame(animationRef.current); animationRef.current = null; }
   }, []);
 
-  // === Time & Score Economic Modifiers ===
   const updateEconomy = useCallback((scoreDelta, timeDelta) => {
     setCustomScore(prev => {
       const updated = Math.max(0, prev + scoreDelta);
       customScoreRef.current = updated;
+      if (engineRef.current && typeof engineRef.current.setScore === 'function') {
+        engineRef.current.setScore(updated);
+      }
+      // Score-based difficulty scaling: shrink response window duration as score grows
+      windowTimeRef.current = Math.max(minWindowTime, maxWindowTime - Math.floor(updated * 8));
       return updated;
     });
 
@@ -323,11 +328,9 @@ export default function NeuroSwitchClient() {
         setStreak(0);
         setFailedHits(prev => prev + 1);
         
-        updateEconomy(-3, -2); // 2 Second Penalty
+        updateEconomy(0, -2); // No PTS Penalty, -2s
         if (audioSynth) audioSynth.playDrillSound('fail');
-        triggerFeedback('⏰ TIMEOUT! -3 PTS | -2s', 'error');
-        
-        windowTimeRef.current = Math.min(maxWindowTime, windowTimeRef.current + 45); // Decrease difficulty
+        triggerFeedback('⏰ TIMEOUT! -2s', 'error');
         
         scheduleNextFlash();
       }
@@ -427,18 +430,14 @@ export default function NeuroSwitchClient() {
       updateEconomy(5, 2);
       if (audioSynth) audioSynth.playDrillSound('success');
       triggerFeedback(`✓ HIT! +5 PTS | +2s (${currentLatency}ms)`, 'success');
-      
-      windowTimeRef.current = Math.max(minWindowTime, windowTimeRef.current - 25); // Increase difficulty
     } else {
       streakRef.current = 0;
       setStreak(0);
       setFailedHits(prev => prev + 1);
       
-      updateEconomy(-3, -2); // 2 Second Penalty
+      updateEconomy(0, -2); // No PTS Penalty, -2s
       if (audioSynth) audioSynth.playDrillSound('fail');
-      triggerFeedback(`✗ MISMATCH! -3 PTS | -2s`, 'error');
-
-      windowTimeRef.current = Math.min(maxWindowTime, windowTimeRef.current + 45); // Decrease difficulty
+      triggerFeedback(`✗ MISMATCH! -2s`, 'error');
     }
 
     scheduleNextFlash();
@@ -536,12 +535,31 @@ export default function NeuroSwitchClient() {
   const totalStrikes = perfectHits + failedHits;
   const accuracy = totalStrikes > 0 ? Math.round((perfectHits / totalStrikes) * 100) : 0;
 
-  const sharePage = async () => {
-    const url = 'https://skilldrills.online/drills/visual/reaction-speed/neuro-switch';
-    if (navigator.share) {
-      try { await navigator.share({ title: 'Neuro-Switch Drill', text: 'Train auditory reaction speed!', url }); } catch (e) {}
-    } else { try { await navigator.clipboard.writeText(url); alert('Link copied!'); } catch (e) {} }
-  };
+  const shareScore = useCallback(() => {
+    const totalStrikes = perfectHits + failedHits;
+    const finalAccuracy = totalStrikes > 0 ? Math.round((perfectHits / totalStrikes) * 100) : 0;
+    
+    let finalRank = 'Bronze';
+    if (customScoreRef.current >= 120 && finalAccuracy >= 90) finalRank = 'Grandmaster';
+    else if (customScoreRef.current >= 80 && finalAccuracy >= 82) finalRank = 'Master';
+    else if (customScoreRef.current >= 50 && finalAccuracy >= 75) finalRank = 'Diamond';
+    else if (customScoreRef.current >= 30 && finalAccuracy >= 65) finalRank = 'Platinum';
+    else if (customScoreRef.current >= 15 && finalAccuracy >= 55) finalRank = 'Gold';
+    else if (customScoreRef.current >= 5) finalRank = 'Silver';
+
+    const text = `🎯 I scored ${customScoreRef.current} PTS with ${finalAccuracy}% accuracy on the Sound Reaction audio cue test! Rank: ${finalRank}. Try it here: https://skilldrills.online/drills/visual/reaction-speed/sound-reaction`;
+    
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      navigator.share({
+        title: 'My SkillDrills Visual Score',
+        text: text,
+        url: 'https://skilldrills.online/drills/visual/reaction-speed/sound-reaction'
+      }).catch(() => {});
+    } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+      alert('Score card copied to clipboard!');
+    }
+  }, [perfectHits, failedHits]);
 
   if (loading || !isClient) {
     return (
@@ -552,6 +570,44 @@ export default function NeuroSwitchClient() {
         </div>
       </div>
     );
+  }
+
+  let gradeLetter = 'F';
+  if (accuracy >= 90 && customScore >= 120) gradeLetter = 'S';
+  else if (accuracy >= 80 && customScore >= 80) gradeLetter = 'A';
+  else if (accuracy >= 70 && customScore >= 50) gradeLetter = 'B';
+  else if (accuracy >= 60 && customScore >= 30) gradeLetter = 'C';
+  else if (accuracy >= 50 && customScore >= 15) gradeLetter = 'D';
+
+  let rankName = 'Bronze';
+  let rankColor = 'text-slate-500';
+  if (customScore >= 120 && accuracy >= 90) {
+    rankName = 'Grandmaster';
+    rankColor = 'text-fuchsia-400 font-extrabold';
+  } else if (customScore >= 80 && accuracy >= 82) {
+    rankName = 'Master';
+    rankColor = 'text-red-400 font-extrabold';
+  } else if (customScore >= 50 && accuracy >= 75) {
+    rankName = 'Diamond';
+    rankColor = 'text-cyan-400 font-extrabold';
+  } else if (customScore >= 30 && accuracy >= 65) {
+    rankName = 'Platinum';
+    rankColor = 'text-indigo-400 font-extrabold';
+  } else if (customScore >= 15 && accuracy >= 55) {
+    rankName = 'Gold';
+    rankColor = 'text-yellow-400 font-extrabold';
+  } else if (customScore >= 5) {
+    rankName = 'Silver';
+    rankColor = 'text-gray-300 font-extrabold';
+  }
+
+  let diagnostics = "Outstanding auditory reflex speed! Your discrimination accuracy shows well-developed audio-motor pathways.";
+  if (failedHits > 5) {
+    diagnostics = "High rate of pitch choice errors or timeouts. Listen to the pitch attack envelope carefully before executing the click response.";
+  } else if (accuracy < 60) {
+    diagnostics = "Low pitch discrimination accuracy. Slow down to prioritize accuracy, then build speed.";
+  } else if (customScore < 40) {
+    diagnostics = "Keep the clock alive by maintaining high hit streaks to raise your score.";
   }
 
   return (
@@ -660,81 +716,90 @@ export default function NeuroSwitchClient() {
               </div>
             )}
 
-            {/* Premium Custom Structural End Card Component Inline Block */}
+            {/* Premium Custom Structural End Card Component Inline */}
             {(engine.gameState === 'ended' || isTimeUp) && (
-              <div className="absolute inset-0 flex items-center justify-center z-[70] bg-black/95 pointer-events-auto animate-in fade-in duration-300 p-4 overflow-y-auto">
-                <div className="rounded-3xl max-w-md w-full shadow-2xl border border-gray-800 bg-gray-950 flex flex-col max-h-[90vh] my-auto shrink-0">
-                  
-                  <div className="flex-1 overflow-y-auto">
-                    <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 p-5 sm:p-6 border-b border-gray-800 relative overflow-hidden pointer-events-none shrink-0">
-                      <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-purple-500/20 rounded-full blur-3xl"></div>
-                      <div className="absolute bottom-0 left-0 -mb-4 -ml-4 w-32 h-32 bg-pink-500/20 rounded-full blur-3xl"></div>
-                      <div className="relative z-10 flex flex-col items-center">
-                        {customScore > (engine.bestScore || 0) && customScore > 0 && (
-                          <div className="bg-yellow-500 text-black text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-2 shadow-[0_0_15px_rgba(234,179,8,0.5)]">
-                            ⭐ New Personal Best
-                          </div>
-                        )}
-                        <h2 className="text-2xl sm:text-3xl font-black text-white mb-1 tracking-tight">Mission Complete</h2>
-                        <p className="text-purple-400 font-medium text-sm">Neuro-Switch Lab</p>
+              <div className="absolute inset-0 bg-[#05070e]/98 overflow-y-auto p-6 z-[70] select-none scrollbar-thin scroll-smooth backdrop-blur-sm animate-in fade-in duration-300 pointer-events-auto">
+                <div className="min-h-full flex flex-col justify-center items-center py-4 w-full">
+                  <div className="max-w-md w-full text-center">
+                    {customScore > 0 && customScore >= (engine.bestScore || 0) && (
+                      <div className="inline-block bg-yellow-500 text-black text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-3 shadow-[0_0_15px_rgba(234,179,8,0.5)] animate-bounce font-mono">
+                        ⭐ NEW PERSONAL BEST!
+                      </div>
+                    )}
+                    
+                    <h2 className="text-xl font-black text-white uppercase tracking-wider mb-1 font-mono">
+                      Drill Complete
+                    </h2>
+                    <p className="text-xs text-slate-500 uppercase tracking-widest mb-6 font-mono">
+                      Neuro-Switch Lab
+                    </p>
+
+                    <div className="grid grid-cols-3 gap-2.5 mb-6 text-left font-mono">
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Final Score</span>
+                        <span className="text-sm font-black text-white">{customScore} <span className="text-[8px] text-slate-400 font-normal">PTS</span></span>
+                      </div>
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Accuracy</span>
+                        <span className="text-sm font-black text-white">{accuracy}%</span>
+                      </div>
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Best Score</span>
+                        <span className="text-sm font-black text-yellow-400">{engine.bestScore || 0}</span>
+                      </div>
+                      
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Perfect Hits</span>
+                        <span className="text-sm font-black text-emerald-400">{perfectHits}</span>
+                      </div>
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Miss/Timeout</span>
+                        <span className="text-sm font-black text-red-400">{failedHits}</span>
+                      </div>
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold font-mono">Grade</span>
+                        <span className="text-sm font-black text-pink-400 font-mono">{gradeLetter}</span>
                       </div>
                     </div>
 
-                    <div className="p-5 sm:p-6 pointer-events-none shrink-0">
-                      <div className="flex justify-between items-center mb-6">
-                        <div className="flex flex-col">
-                          <span className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Final Score</span>
-                          <div className="flex items-end gap-1">
-                            <span className="text-5xl sm:text-6xl font-black text-white leading-none tracking-tighter">{customScore}</span>
-                            <span className="text-sm sm:text-lg text-gray-500 font-bold mb-1">PTS</span>
-                          </div>
-                        </div>
-                        
-                        <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center">
-                          <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
-                            <path className="text-gray-800" strokeWidth="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                            <path 
-                              className={`${accuracy >= 80 ? 'text-purple-500' : accuracy >= 50 ? 'text-pink-500' : 'text-red-500'} transition-all duration-1000 ease-out`} 
-                              strokeWidth="3" strokeDasharray="100" strokeDashoffset={100 - accuracy} strokeLinecap="round" stroke="currentColor" fill="none" 
-                              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" 
-                            />
-                          </svg>
-                          <div className="absolute inset-0 flex flex-col items-center justify-center">
-                            <span className={`text-lg sm:text-xl font-black ${accuracy >= 80 ? 'text-purple-400' : accuracy >= 50 ? 'text-pink-400' : 'text-red-400'}`}>{accuracy}%</span>
-                            <span className="text-[7px] sm:text-[8px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">Accuracy</span>
-                          </div>
-                        </div>
+                    <div className="bg-[#0b0f19] border border-slate-850 p-3 rounded-xl mb-4 text-left font-sans">
+                      <span className={`text-xs font-black block text-center uppercase tracking-widest ${rankColor} mb-2`}>
+                        Rank: {rankName}
+                      </span>
+                      <div className="w-full h-px bg-slate-850 mb-2"></div>
+                      <div className="flex items-center gap-1.5 text-[9px] font-bold text-white uppercase mb-1 font-mono">
+                        <Sparkles className="w-3 h-3 text-amber-500" /> Diagnostics advice:
                       </div>
+                      <p className="text-[10px] text-slate-400 leading-normal font-sans">
+                        {diagnostics}
+                      </p>
+                    </div>
 
-                      <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-2">
-                        <div className="bg-gray-900/50 rounded-xl p-2 sm:p-3 text-center border border-gray-800">
-                          <div className="text-gray-400 text-[9px] sm:text-[10px] uppercase font-bold tracking-wider mb-1">Perfect Hits</div>
-                          <div className="text-lg sm:text-xl font-black text-green-400">{perfectHits}</div>
-                        </div>
-                        <div className="bg-gray-900/50 rounded-xl p-2 sm:p-3 text-center border border-gray-800">
-                          <div className="text-gray-400 text-[9px] sm:text-[10px] uppercase font-bold tracking-wider mb-1">Miss/Timeout</div>
-                          <div className="text-lg sm:text-xl font-black text-red-400">{failedHits}</div>
-                        </div>
-                        <div className="bg-gray-900/50 rounded-xl p-2 sm:p-3 text-center border border-gray-800">
-                          <div className="text-gray-400 text-[9px] sm:text-[10px] uppercase font-bold tracking-wider mb-1">Max Streak</div>
-                          <div className="text-lg sm:text-xl font-black text-orange-400">{bestStreak}</div>
-                        </div>
-                      </div>
+                    <div className="flex gap-2">
+                      <PlayAgainButton
+                        onClick={() => { if(engine.endGame) engine.endGame(); handleStartGame(); }}
+                        colorTheme="purple"
+                      />
+                      <button
+                        onPointerDown={(e)=>e.stopPropagation()}
+                        onClick={shareScore}
+                        className="p-3 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded-xl transition-colors active:scale-95 flex items-center justify-center"
+                        title="Share Score"
+                      >
+                        <Share2 className="w-4 h-4" />
+                      </button>
+                      {isFullscreen && (
+                        <button
+                          onPointerDown={(e)=>e.stopPropagation()}
+                          onClick={handleExitToStart}
+                          className="p-3 bg-red-900/30 border border-red-900/55 hover:bg-red-900/50 text-red-400 rounded-xl transition-colors active:scale-95 flex items-center justify-center"
+                          title="Exit Drill"
+                        >
+                          <LogOut className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
                   </div>
-
-                  <div className="p-3 sm:p-5 bg-gray-900/50 border-t border-gray-800 flex gap-2 sm:gap-3 shrink-0 rounded-b-3xl">
-                    <button onPointerDown={(e)=>e.stopPropagation()} onClick={() => { if(engine.endGame) engine.endGame(); handleStartGame(); }} className="flex-1 py-3 sm:py-4 bg-purple-600 text-white rounded-xl font-black tracking-wide hover:bg-purple-500 transition-all active:scale-95 flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(147,51,234,0.4)] text-sm sm:text-base">
-                      <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5" /> PLAY AGAIN
-                    </button>
-                    <button onPointerDown={(e)=>e.stopPropagation()} onClick={sharePage} className="px-4 sm:px-5 py-3 sm:py-4 bg-gray-800 text-white rounded-xl font-bold hover:bg-gray-700 transition-all active:scale-95 border border-gray-700 flex items-center justify-center" title="Share Drill">
-                      <Share2 className="w-4 h-4 sm:w-5 sm:h-5" />
-                    </button>
-                    <button onPointerDown={(e)=>e.stopPropagation()} onClick={handleExitToStart} className="px-4 sm:px-5 py-3 sm:py-4 bg-red-900/30 text-red-400 rounded-xl font-bold hover:bg-red-900/50 transition-all active:scale-95 border border-red-900/50 flex items-center justify-center" title="Exit Drill">
-                      <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
-                    </button>
-                  </div>
-
                 </div>
               </div>
             )}
@@ -757,7 +822,7 @@ export default function NeuroSwitchClient() {
                   <RuleItem num="2" color="blue" text="Low Tone =" highlight="RED Sphere" result={`+5 PTS | +2s`} />
                 </div>
                 <div className="space-y-5">
-                  <RuleItem num="3" color="red" text="Mismatch / Timeout" result="-3 PTS | -2s" />
+                  <RuleItem num="3" color="red" text="Mismatch / Timeout" result="0 PTS | -2s" />
                   <RuleItem num="4" color="cyan" text="Zero Latency Input" highlight="Desktop & Mobile" result="Direct Touch Support" />
                 </div>
               </div>
@@ -815,7 +880,7 @@ export default function NeuroSwitchClient() {
                     <li><strong className="text-gray-200">Prepare for Sound:</strong> Keep your headset active. This drill requires immediate interpretation of tone frequencies.</li>
                     <li><strong className="text-gray-200">Decode the Pitch:</strong> A higher soothing tone dictates a strike on the green sphere. A lower soothing tone commands a strike on the red sphere.</li>
                     <li><strong className="text-gray-200">Execute the Selection:</strong> Tap or click directly on the selected color target before the internal countdown slips away.</li>
-                    <li><strong className="text-gray-200">Maintain Precision:</strong> Clicking incorrect targets or timing out drops your overall score and costs you time on the clock. Consecutive hits compress the countdown window.</li>
+                    <li><strong className="text-gray-200">Maintain Precision:</strong> Clicking incorrect targets or timing out costs you time on the clock but does not deduct points. As your score increases, the response window shrinks.</li>
                   </ol>
                 </div>
 
@@ -828,11 +893,11 @@ export default function NeuroSwitchClient() {
                   <div className="space-y-4">
                     <div>
                       <h4 className="text-sm font-bold text-gray-200">Why does the target expiration window shrink?</h4>
-                      <p className="text-xs text-gray-400 mt-1">This represents our adaptive difficulty scaling. Building a streak demonstrates cognitive mastery over the current tone pacing, prompting the engine to trim the lifespan down from 1300ms toward 350ms to push your limits.</p>
+                      <p className="text-xs text-gray-400 mt-1">This represents our adaptive difficulty scaling. Earning higher scores demonstrates cognitive mastery over the audio cues, prompting the engine to trim the lifespan down from 1300ms toward 350ms to push your limits.</p>
                     </div>
                     <div>
                       <h4 className="text-sm font-bold text-gray-200">What constitutes a high-tier performance score?</h4>
-                      <p className="text-xs text-gray-400 mt-1">Maintaining an accuracy ratio above 85% while driving scores past 120 points highlights excellent cognitive efficiency and low auditory processing lag.</p>
+                      <p className="text-xs text-gray-400 mt-1">Maintaining an accuracy ratio above 85% while driving scores past 80 points highlights excellent cognitive efficiency and low auditory processing lag.</p>
                     </div>
                   </div>
                 </div>

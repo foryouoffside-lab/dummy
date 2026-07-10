@@ -96,12 +96,48 @@ const faqSchema = {
   ]
 };
 
+const howToSchema = {
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "How to Take the Set Shifting Color Sort Test",
+  "description": "Test and train your cognitive set shifting and color categorization speed under time pressure.",
+  "step": [
+    {
+      "@type": "HowToStep",
+      "position": 1,
+      "name": "Note the Target Color",
+      "text": "At the start of each round, a target color name (e.g. RED, BLUE, GREEN) will flash at the top of the canvas."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 2,
+      "name": "Locate Matching Spheres",
+      "text": "Locate all spheres on the screen that match the flashed target color name."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 3,
+      "name": "Tap the Correct Spheres",
+      "text": "Tap or click on the matching spheres quickly before the timer at the top drains."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 4,
+      "name": "Build Score & Level Up",
+      "text": "Correct selections add score and extend your time. As your score reaches milestones, target size decreases and speed increases."
+    }
+  ]
+};
+
 export const metadata = {
-  title: "Color Sorting Game Online – Timed Set-Shifting Cognitive Drill | SkillDrills",
-  description: "Play this free online color sorting game to train set-shifting, cognitive flexibility, and visual categorization under time pressure. No sign-up required.",
+  title: "Play Color Sorting Game Online | Free Brain Training Puzzle | SkillDrills",
+  description: "Relax and train your brain with our free online color sorting game. Test your set shifting speed, sort the colors, and level up your cognitive flexibility.",
   keywords: [
     "color sorting game",
     "color sorting game online",
+    "play color sorting game online free",
+    "cognitive flexibility activities for adults",
+    "test your set shifting ability",
     "set shifting test online",
     "cognitive flexibility game",
     "color matching brain training",
@@ -118,8 +154,8 @@ export const metadata = {
   },
   robots: { index: true, follow: true },
   openGraph: {
-    title: "Color Sorting Game Online – Timed Set-Shifting Cognitive Drill | SkillDrills",
-    description: "Play this free online color sorting game to train set-shifting, cognitive flexibility, and visual categorization under time pressure. No sign-up required.",
+    title: "Play Color Sorting Game Online | Free Brain Training Puzzle | SkillDrills",
+    description: "Relax and train your brain with our free online color sorting game. Test your set shifting speed, sort the colors, and level up your cognitive flexibility.",
     url: "https://skilldrills.online/drills/cognitive/attention/batch-processing",
     siteName: 'SkillDrills',
     locale: 'en_US',
@@ -128,8 +164,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Color Sorting Game Online – Timed Set-Shifting Cognitive Drill | SkillDrills",
-    description: "Play this free online color sorting game to train set-shifting, cognitive flexibility, and visual categorization under time pressure. No sign-up required.",
+    title: "Play Color Sorting Game Online | Free Brain Training Puzzle | SkillDrills",
+    description: "Relax and train your brain with our free online color sorting game. Test your set shifting speed, sort the colors, and level up your cognitive flexibility.",
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
 };
@@ -140,6 +176,7 @@ export default function BatchProcessingPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }} />
       <BatchProcessingClient />
     </>
   );

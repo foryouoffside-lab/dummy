@@ -96,12 +96,51 @@ const faqSchema = {
   ]
 };
 
+const howToSchema = {
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "How to Measure Your Attention Span and Concentration Stamina",
+  "description": "Test and train your sustained concentration, target discrimination, and rules integration speed.",
+  "step": [
+    {
+      "@type": "HowToStep",
+      "position": 1,
+      "name": "Note the Rule Class",
+      "text": "At the start and during the session, look at the active rule name at the top (e.g. VOWELS or PRIMES)."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 2,
+      "name": "Identify Target Characters",
+      "text": "Register the character appearing on the center of the screen and match it with the active rule (e.g., A is a Vowel, 3 is a Prime)."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 3,
+      "name": "Tap the Screen or Spacebar",
+      "text": "Tapping/clicking or pressing the Spacebar/Enter key triggers a selection. Only select targets and ignore distractors."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 4,
+      "name": "Maintain Focus under Switch Cost",
+      "text": "Every 10 seconds, the active rule class changes accompanied by an audio indicator. Keep scoring to extend your duration."
+    }
+  ]
+};
+
 export const metadata = {
-  title: "Concentration Stamina Test – Free Mental Focus Endurance Game | SkillDrills",
-  description: "Test your concentration stamina and mental endurance online. Free target discrimination drill that measures vigilance decrement and builds sustained focus. No sign-up.",
+  title: "Free Focus Test Online: Measure Your Concentration & Attention Span | SkillDrills",
+  description: "Worried about your attention span? Take our free focus test online to measure your concentration levels, challenge your brain, and see how you score against the average!",
   keywords: [
-    "concentration test online",
     "focus test online",
+    "concentration test online",
+    "concentration test",
+    "attention span test",
+    "measure focus",
+    "test my attention",
+    "how to improve focus",
+    "attention span training",
     "sustained focus training",
     "mental stamina test",
     "attention span test online",
@@ -118,8 +157,8 @@ export const metadata = {
   },
   robots: { index: true, follow: true },
   openGraph: {
-    title: "Concentration Stamina Test – Free Mental Focus Endurance Game | SkillDrills",
-    description: "Test your concentration stamina and mental endurance online. Free target discrimination drill that measures vigilance decrement and builds sustained focus. No sign-up.",
+    title: "Free Focus Test Online: Measure Your Concentration & Attention Span | SkillDrills",
+    description: "Worried about your attention span? Take our free focus test online to measure your concentration levels, challenge your brain, and see how you score against the average!",
     url: "https://skilldrills.online/drills/cognitive/attention/concentration-stamina",
     siteName: 'SkillDrills',
     locale: 'en_US',
@@ -128,8 +167,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Concentration Stamina Test – Free Mental Focus Endurance Game | SkillDrills",
-    description: "Test your concentration stamina and mental endurance online. Free target discrimination drill that measures vigilance decrement and builds sustained focus. No sign-up.",
+    title: "Free Focus Test Online: Measure Your Concentration & Attention Span | SkillDrills",
+    description: "Worried about your attention span? Take our free focus test online to measure your concentration levels, challenge your brain, and see how you score against the average!",
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
 };
@@ -140,6 +179,7 @@ export default function ConcentrationStaminaPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }} />
       <ConcentrationStaminaClient />
     </>
   );

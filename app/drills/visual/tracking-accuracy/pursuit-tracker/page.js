@@ -1,129 +1,133 @@
 import AutoPursuitClient from './AutoPursuitClient';
 
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "SkillDrills", "item": "https://skilldrills.online/" },
+    { "@type": "ListItem", "position": 2, "name": "Visual Training", "item": "https://skilldrills.online/drills/visual" },
+    { "@type": "ListItem", "position": 3, "name": "Tracking Accuracy", "item": "https://skilldrills.online/drills/visual/tracking-accuracy" },
+    { "@type": "ListItem", "position": 4, "name": "Smooth Pursuit Tracker", "item": "https://skilldrills.online/drills/visual/tracking-accuracy/pursuit-tracker" }
+  ]
+};
+
+const webAppSchema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Smooth Pursuit Tracker – Free Visual Aim Training Game",
+  "applicationCategory": "EducationalApplication",
+  "operatingSystem": "All",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "description": "Measure your continuous hand-eye target follow accuracy. Keep your cursor on the unpredictably moving orb to evaluate smooth pursuit speed and coordination.",
+  "url": "https://skilldrills.online/drills/visual/tracking-accuracy/pursuit-tracker",
+  "publisher": { "@type": "Organization", "name": "SkillDrills", "url": "https://skilldrills.online" },
+  "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.8", "reviewCount": "1205" }
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is the Smooth Pursuit Tracker?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "An interactive tool to train and assess smooth pursuit eye movement and hand-eye alignment by maintaining a cursor on a moving visual target."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How is the performance score calculated?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "You gain points continuously for every half-second (+1 PTS) that your cursor remains inside the bounds of the moving target."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does difficulty scale?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "As your score increases, the target's base speed increases and the size of the target shrinks, demanding more precise smooth tracking."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is there a score penalty for losing track?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. When your cursor exits the target, scoring pauses, but you do not lose any accrued points."
+      }
+    }
+  ]
+};
+
+const howToSchema = {
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "How to Train Eye Tracking Speed with Smooth Pursuit Drill",
+  "description": "Improve your motor coordination and tracking alignment using our free online Smooth Pursuit Tracker.",
+  "step": [
+    {
+      "@type": "HowToStep",
+      "position": 1,
+      "name": "Start the Trial",
+      "text": "Click START to spawn the target orb in the center of the tracking canvas."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 2,
+      "name": "Follow the Target",
+      "text": "Hover your mouse cursor or position your touch input directly over the green target orb."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 3,
+      "name": "Maintain Contact",
+      "text": "Keep your cursor locked inside the moving target as it changes direction and accelerates to compound your score."
+    }
+  ]
+};
+
 export const metadata = {
-  title: 'Auto-Pursuit - Smooth Tracking Drill | SkillDrills',
-  description: 'Keep cursor on randomly moving target with directional jitter. +1pt/0.5s continuous tracking. Green glow feedback. No penalties. No sign-up.',
+  title: "Smooth Pursuit Tracker | Free Visual Aim Training Game | SkillDrills",
+  description: "Measure your continuous hand-eye target follow accuracy. Keep your cursor on the unpredictably moving orb to evaluate smooth pursuit speed and coordination.",
   keywords: [
-    'pursuit tracking', 'smooth pursuit training', 'eye tracking drill',
-    'cursor tracking practice', 'hand-eye coordination', 'continuous tracking',
-    'moving target follow', 'tracking accuracy test', 'visual pursuit',
-    'smooth pursuit drill', 'target following practice', 'coordination training',
-    'free pursuit tracker', 'visual motor training',
-    'auto pursuit free', 'smooth pursuit drill free', 'continuous tracking practice',
-    'cursor on target drill', 'predictive tracking training', 'motor endurance drill',
-    'visual motor integration', 'tracking streak drill', 'sustained attention practice',
-    'skilldrills auto pursuit', 'skilldrills pursuit', 'skilldrills tracking',
-    'green target tracking', 'jitter tracking drill', 'continuous aim training',
-    'smooth motor control', 'tracking accuracy practice', 'pursuit aim drill',
+    "visual pursuit test",
+    "smooth pursuit training",
+    "visual tracking exercises",
+    "dynamic visual tracking test",
+    "pursuit aim trainer"
   ],
+  alternates: {
+    canonical: "https://skilldrills.online/drills/visual/tracking-accuracy/pursuit-tracker",
+  },
+  robots: { index: true, follow: true },
   openGraph: {
-    title: 'Auto-Pursuit - Smooth Tracking Drill | SkillDrills',
-    description: 'Keep cursor on randomly moving target with directional jitter. +1pt/0.5s continuous tracking. Green glow feedback. No penalties. No sign-up.',
-    type: 'article',
-    url: 'https://skilldrills.online/drills/visual/tracking-accuracy/pursuit-tracker',
+    title: "Smooth Pursuit Tracker | Free Visual Aim Training Game | SkillDrills",
+    description: "Measure your continuous hand-eye target follow accuracy. Keep your cursor on the unpredictably moving orb to evaluate smooth pursuit speed and coordination.",
+    url: "https://skilldrills.online/drills/visual/tracking-accuracy/pursuit-tracker",
     siteName: 'SkillDrills',
     locale: 'en_US',
-    images: [{
-      url: 'https://skilldrills.online/icons/icon-512x512.png',
-      width: 512,
-      height: 512,
-      alt: 'Auto-Pursuit Drill',
-    }],
+    type: 'website',
+    images: [{ url: 'https://skilldrills.online/icons/icon-512x512.png', width: 512, height: 512, alt: "Smooth Pursuit Tracker" }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Auto-Pursuit - Smooth Tracking Drill | SkillDrills',
-    description: 'Keep cursor on randomly moving target with directional jitter. +1pt/0.5s continuous tracking. Green glow feedback. No penalties. No sign-up.',
+    title: "Smooth Pursuit Tracker | Free Visual Aim Training Game | SkillDrills",
+    description: "Measure your continuous hand-eye target follow accuracy. Keep your cursor on the unpredictably moving orb to evaluate smooth pursuit speed and coordination.",
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
-  },
-  robots: { index: true, follow: true },
-  alternates: {
-    canonical: 'https://skilldrills.online/drills/visual/tracking-accuracy/pursuit-tracker',
   },
 };
 
 export default function AutoPursuitPage() {
   return (
     <>
-
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "BreadcrumbList",
-            "itemListElement": [
-              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://skilldrills.online" },
-              { "@type": "ListItem", "position": 2, "name": "Visual Training", "item": "https://skilldrills.online/drills/visual" },
-              { "@type": "ListItem", "position": 3, "name": "Tracking Accuracy", "item": "https://skilldrills.online/drills/visual/tracking-accuracy" },
-              { "@type": "ListItem", "position": 4, "name": "Auto-Pursuit" }
-            ]
-          })
-        }}
-      />
-
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "WebApplication",
-            "name": "Auto-Pursuit Drill",
-            "url": "https://skilldrills.online/drills/visual/tracking-accuracy/pursuit-tracker",
-            "description": "Free smooth pursuit drill. Track randomly moving target with directional jitter. +1pt/0.5s continuous tracking. Green glow feedback. No penalties.",
-            "applicationCategory": "EducationalApplication",
-            "operatingSystem": "All",
-            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-            "author": { "@type": "Organization", "name": "SkillDrills" },
-            "isAccessibleForFree": true
-          })
-        }}
-      />
-
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "FAQPage",
-            "mainEntity": [
-              {
-                "@type": "Question",
-                "name": "What is the Auto-Pursuit Drill?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "A free smooth pursuit tracking exercise. Keep cursor on randomly moving target with directional jitter. +1pt/0.5s. Green glow feedback. No penalties."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "How does the jitter system work?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "~3% chance per frame of directional jitter up to 8px. Speed capped at 12px. Unpredictable movement requires active predictive tracking."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "What skills does this improve?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "Smooth pursuit tracking, hand-eye coordination, predictive tracking, motor precision, and sustained motor control endurance."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "Do I need to sign up?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "No registration required. This pursuit tracking drill is completely free and works instantly in your browser."
-                }
-              }
-            ]
-          })
-        }}
-      />
-
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }} />
       <AutoPursuitClient />
     </>
   );

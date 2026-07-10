@@ -7,9 +7,10 @@ import {
   Volume2, VolumeX, Maximize2, Minimize2, Sun, Moon, Eye,
   BarChart3, Info, CheckCircle2, Calculator, ArrowRight, Hash, RefreshCw,
   Users, Share2, LogOut, GraduationCap, Lightbulb, TrendingUp, Play, XCircle,
-  ChevronRight, Brain, Award, Grid, Layers
+  ChevronRight, Brain, Award, Grid, Layers, Sparkles
 } from 'lucide-react';
 import useGameEngine from '../../../../../lib/useGameEngine';
+import PlayAgainButton from "../../../../../components/PlayAgainButton";
 
 // ============================================================
 // LEVEL SYSTEM (Difficulty Scaling)
@@ -197,7 +198,8 @@ export default function PatternRecognitionClient() {
     }
 
     timerIntervalRef.current = setInterval(() => {
-      localTimeRef.current -= 0.1;
+      // Use Number & toFixed to prevent JavaScript floating point drift (e.g. 59.900000000000006)
+      localTimeRef.current = Number((localTimeRef.current - 0.1).toFixed(1));
       
       if (localTimeRef.current <= 0) {
         localTimeRef.current = 0;
@@ -356,7 +358,7 @@ export default function PatternRecognitionClient() {
             v = i % 2 === 0 ? v * mult : v + add;
           }
           answer = v;
-          type = 'Interleaved (* / +)';
+          type = 'Interleaved (* and +)';
           hint = `Alternate: ×${mult} then +${add}`;
         } else if (typeRand < 0.66) {
           const diffs = [1, 2, 4, 7, 11, 16, 22]; 
@@ -406,6 +408,12 @@ export default function PatternRecognitionClient() {
     }
   }, [generatePatternData]);
 
+  // === DYNAMIC DIFFICULTY ===
+  const updateDifficulty = useCallback(() => {
+    const newLevel = Math.min(MAX_LEVEL, Math.floor(scoreRef.current / 45) + 1);
+    currentLevelRef.current = newLevel;
+  }, []);
+
   // === ANSWER EVALUATION ===
   const checkInputAnswer = useCallback((e) => { 
     if (e) e.preventDefault();
@@ -413,7 +421,8 @@ export default function PatternRecognitionClient() {
     
     clickCooldownRef.current = true; 
     
-    const ua = userAnswer.toLowerCase().trim(); 
+    // Dynamically strip commas in case user inputs '1,000' instead of '1000'
+    const ua = userAnswer.toLowerCase().replace(/,/g, '').trim(); 
     const ca = currentPattern.answer.toString().toLowerCase(); 
     const isCorrect = ua === ca;
     
@@ -421,14 +430,14 @@ export default function PatternRecognitionClient() {
       setCorrectAnswers(prev => prev + 1);
       
       const scoreGain = hintUsed ? 5 : 15;
-      const timeGain = hintUsed ? 5 : 10;
+      const timeGain = hintUsed ? 2 : 5; // Updated per request: +5 base, +2 with hint
 
       scoreRef.current += scoreGain; 
       localTimeRef.current = Math.min(60, localTimeRef.current + timeGain);
       setLocalTimeRemaining(Math.ceil(localTimeRef.current));
       
       // Increase Difficulty
-      currentLevelRef.current = Math.min(MAX_LEVEL, currentLevelRef.current + 1);
+      updateDifficulty();
       
       comboRef.current++; 
       if (comboRef.current > bestComboRef.current) bestComboRef.current = comboRef.current;
@@ -448,17 +457,15 @@ export default function PatternRecognitionClient() {
     } else { 
       setIncorrectAnswers(prev => prev + 1);
       
-      // Penalty: -10 Score, -5s Time
-      scoreRef.current = Math.max(0, scoreRef.current - 10); 
+      // Penalty: -5s Time (No PTS Penalty)
       localTimeRef.current = Math.max(0, localTimeRef.current - 5);
       setLocalTimeRemaining(Math.ceil(localTimeRef.current));
       
-      // Decrease Difficulty
-      currentLevelRef.current = Math.max(1, currentLevelRef.current - 1);
+      updateDifficulty();
       comboRef.current = 0; 
       
       if (audioSynth) audioSynth.playPenalty(); 
-      triggerFeedback('✗ Wrong! -10 PTS | -5s', 'error'); 
+      triggerFeedback('✗ Wrong! -5s', 'error'); 
       
       setCurrentScore(scoreRef.current);
       setCombo(comboRef.current);
@@ -477,7 +484,7 @@ export default function PatternRecognitionClient() {
     }
     
     setTimeout(() => { clickCooldownRef.current = false; }, 100);
-  }, [currentPattern, userAnswer, hintUsed, loadNewPattern, triggerFeedback]);
+  }, [currentPattern, userAnswer, hintUsed, loadNewPattern, triggerFeedback, updateDifficulty]);
 
   const handleShowHint = useCallback(() => { 
     setShowHint(prev => !prev); 
@@ -530,6 +537,32 @@ export default function PatternRecognitionClient() {
     }
   }, []);
 
+  const shareScore = useCallback(() => {
+    const ta = correctAnswers + incorrectAnswers;
+    const finalAccuracy = ta > 0 ? Math.round((correctAnswers / ta) * 100) : 100;
+    
+    let finalRank = 'Bronze';
+    if (scoreRef.current >= 200 && finalAccuracy >= 90) finalRank = 'Grandmaster';
+    else if (scoreRef.current >= 150 && finalAccuracy >= 82) finalRank = 'Master';
+    else if (scoreRef.current >= 100 && finalAccuracy >= 75) finalRank = 'Diamond';
+    else if (scoreRef.current >= 60 && finalAccuracy >= 65) finalRank = 'Platinum';
+    else if (scoreRef.current >= 30 && finalAccuracy >= 55) finalRank = 'Gold';
+    else if (scoreRef.current >= 15) finalRank = 'Silver';
+
+    const text = `🧠 I scored ${scoreRef.current} PTS with ${finalAccuracy}% accuracy on the Pattern Recognition Math Sequence Drill! Reached Level ${currentLevelRef.current}. Rank: ${finalRank}. Try it here: https://skilldrills.online/drills/cognitive/problem-solving/pattern-recognition`;
+    
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      navigator.share({
+        title: 'My SkillDrills Cognitive Score',
+        text: text,
+        url: 'https://skilldrills.online/drills/cognitive/problem-solving/pattern-recognition'
+      }).catch(() => {});
+    } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+      alert('Score card copied to clipboard!');
+    }
+  }, [correctAnswers, incorrectAnswers]);
+
   const getAccuracy = useCallback(() => { 
     const ta = correctAnswers + incorrectAnswers; 
     if (ta === 0) return 100; 
@@ -550,6 +583,45 @@ export default function PatternRecognitionClient() {
   const accuracy = getAccuracy();
   const strokeDasharray = 100;
   const strokeDashoffset = strokeDasharray - accuracy;
+
+  // Calculate grade based on score and accuracy
+  let gradeLetter = 'F';
+  if (accuracy >= 85 && currentScore >= 150) gradeLetter = 'S';
+  else if (accuracy >= 75 && currentScore >= 100) gradeLetter = 'A';
+  else if (accuracy >= 65 && currentScore >= 60) gradeLetter = 'B';
+  else if (accuracy >= 55 && currentScore >= 30) gradeLetter = 'C';
+  else if (accuracy >= 45 && currentScore >= 15) gradeLetter = 'D';
+
+  let rankName = 'Bronze';
+  let rankColor = 'text-slate-500';
+  if (currentScore >= 200 && accuracy >= 90) {
+    rankName = 'Grandmaster';
+    rankColor = 'text-fuchsia-400 font-extrabold';
+  } else if (currentScore >= 150 && accuracy >= 82) {
+    rankName = 'Master';
+    rankColor = 'text-red-400 font-extrabold';
+  } else if (currentScore >= 100 && accuracy >= 75) {
+    rankName = 'Diamond';
+    rankColor = 'text-cyan-400 font-extrabold';
+  } else if (currentScore >= 60 && accuracy >= 65) {
+    rankName = 'Platinum';
+    rankColor = 'text-indigo-400 font-extrabold';
+  } else if (currentScore >= 30 && accuracy >= 55) {
+    rankName = 'Gold';
+    rankColor = 'text-yellow-400 font-extrabold';
+  } else if (currentScore >= 15) {
+    rankName = 'Silver';
+    rankColor = 'text-gray-300 font-extrabold';
+  }
+
+  let diagnostics = "Outstanding mathematical synthesis! Your prefrontal cortex excels at identifying complex multi-step numeric progressions.";
+  if (incorrectAnswers > 4) {
+    diagnostics = "High sequence error rate. Use the scratchpad or write out differences step-by-step to avoid calculation errors.";
+  } else if (accuracy < 60) {
+    diagnostics = "Attentional slips detected. Take a breath and double-check interleaved operators (* and +) before entering answers.";
+  } else if (currentScore < 50) {
+    diagnostics = "To improve, practice recognizing common sequence formulas: Squares (N²), Cubes (N³), and alternating arithmetic sequences.";
+  }
 
   return (
     <div className={`min-h-screen select-none font-sans ${isDarkMode ? 'bg-[#050508] text-white' : 'bg-gray-50 text-gray-900'}`} style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}>
@@ -698,6 +770,8 @@ export default function PatternRecognitionClient() {
                         ref={inputRef} 
                         id="puzzle-answer" 
                         type="text" 
+                        inputMode="numeric"
+                        pattern="[0-9\-]*"
                         value={userAnswer} 
                         onChange={(e) => setUserAnswer(e.target.value)} 
                         className={`w-24 landscape:w-20 sm:w-48 px-3 landscape:px-2 sm:px-5 py-2 landscape:py-1.5 sm:py-4 border-2 rounded-lg sm:rounded-xl outline-none transition text-lg landscape:text-base sm:text-2xl font-black text-center tracking-widest ${isBoxDarkMode ? 'bg-gray-900 border-gray-700 text-white focus:border-blue-500 focus:bg-black shadow-inner' : 'bg-white border-gray-300 text-gray-900 focus:border-blue-500 shadow-inner'}`} 
@@ -751,75 +825,87 @@ export default function PatternRecognitionClient() {
               </div>
             )}
 
-            {/* Premium Custom End Screen (Scrollable) */}
+            {/* Premium Custom End Screen */}
             {(engine.gameState === 'ended' || isTimeUp) && (
-              <div className="absolute inset-0 flex items-center justify-center z-[70] bg-black/95 pointer-events-auto animate-in fade-in duration-300 overflow-y-auto px-4 py-6" onPointerDown={e => e.stopPropagation()}>
-                <div className="rounded-3xl max-w-md w-full shadow-2xl border border-gray-800 bg-gray-950 flex flex-col my-auto max-h-[95vh] overflow-y-auto">
-                  
-                  <div className="bg-gradient-to-br from-blue-900/40 to-indigo-900/40 p-4 sm:p-6 border-b border-gray-800 relative overflow-hidden pointer-events-none shrink-0 rounded-t-3xl">
-                    <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-blue-500/20 rounded-full blur-3xl"></div>
-                    <div className="absolute bottom-0 left-0 -mb-4 -ml-4 w-32 h-32 bg-indigo-500/20 rounded-full blur-3xl"></div>
-                    <div className="relative z-10 flex flex-col items-center">
-                      {isNewBest && (
-                        <div className="bg-yellow-500 text-black text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-2 shadow-[0_0_15px_rgba(234,179,8,0.5)]">
-                          ⭐ New Personal Best
-                        </div>
-                      )}
-                      <h2 className="text-2xl sm:text-3xl font-black text-white mb-1 tracking-tight">Mission Complete</h2>
-                      <p className="text-blue-400 font-medium text-xs sm:text-sm">Pattern Recognition • Lvl {currentLevelRef.current}</p>
-                    </div>
-                  </div>
+              <div className="absolute inset-0 bg-[#05070e]/98 overflow-y-auto p-6 z-[70] select-none scrollbar-thin scroll-smooth backdrop-blur-sm animate-in fade-in duration-300" onPointerDown={e => e.stopPropagation()}>
+                <div className="min-h-full flex flex-col justify-center items-center py-4 w-full">
+                  <div className="max-w-md w-full text-center">
+                    {currentScore > 0 && currentScore >= bestScore && (
+                      <div className="inline-block bg-yellow-500 text-black text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-3 shadow-[0_0_15px_rgba(234,179,8,0.5)] animate-bounce font-mono">
+                        ⭐ NEW PERSONAL BEST!
+                      </div>
+                    )}
+                    
+                    <h2 className="text-xl font-black text-white uppercase tracking-wider mb-1 font-mono">
+                      Drill Complete
+                    </h2>
+                    <p className="text-xs text-slate-500 uppercase tracking-widest mb-6 font-mono">
+                      Peak difficulty reached: Level {currentLevelRef.current}
+                    </p>
 
-                  <div className="p-4 sm:p-6 pointer-events-none shrink-0">
-                    <div className="flex justify-between items-center mb-4 sm:mb-6">
-                      <div className="flex flex-col">
-                        <span className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Final Score</span>
-                        <div className="flex items-end gap-1">
-                          <span className="text-5xl sm:text-6xl font-black text-white leading-none tracking-tighter">{currentScore}</span>
-                          <span className="text-sm sm:text-lg text-gray-500 font-bold mb-1">PTS</span>
-                        </div>
+                    <div className="grid grid-cols-3 gap-2.5 mb-6 text-left font-mono">
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Final Score</span>
+                        <span className="text-sm font-black text-white">{currentScore} <span className="text-[8px] text-slate-400 font-normal">PTS</span></span>
+                      </div>
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Accuracy</span>
+                        <span className="text-sm font-black text-white">{accuracy}%</span>
+                      </div>
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Best Score</span>
+                        <span className="text-sm font-black text-yellow-400">{bestScore}</span>
                       </div>
                       
-                      <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center">
-                        <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
-                          <path className="text-gray-800" strokeWidth="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                          <path 
-                            className={`${accuracy >= 80 ? 'text-green-500' : accuracy >= 50 ? 'text-yellow-500' : 'text-red-500'} transition-all duration-1000 ease-out`} 
-                            strokeWidth="3" strokeDasharray="100" strokeDashoffset={`${100 - accuracy}`} strokeLinecap="round" stroke="currentColor" fill="none" 
-                            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" 
-                          />
-                        </svg>
-                        <div className="absolute inset-0 flex flex-col items-center justify-center">
-                          <span className={`text-base sm:text-xl font-black ${accuracy >= 80 ? 'text-green-400' : accuracy >= 50 ? 'text-yellow-400' : 'text-red-400'}`}>{accuracy}%</span>
-                          <span className="text-[7px] sm:text-[8px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">Accuracy</span>
-                        </div>
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Solved</span>
+                        <span className="text-sm font-black text-emerald-400">{correctAnswers}</span>
+                      </div>
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Incorrect</span>
+                        <span className="text-sm font-black text-red-400">{incorrectAnswers}</span>
+                      </div>
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Max Combo</span>
+                        <span className="text-sm font-black text-pink-400">{bestComboRef.current}</span>
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                      <div className="bg-gray-900/50 rounded-xl p-2 sm:p-3 text-center border border-gray-800">
-                        <div className="text-gray-400 text-[9px] sm:text-[10px] uppercase font-bold tracking-wider mb-1">Solved</div>
-                        <div className="text-lg sm:text-xl font-black text-emerald-400">{correctAnswers}</div>
+                    <div className="bg-[#0b0f19] border border-slate-850 p-3 rounded-xl mb-4 text-left">
+                      <span className={`text-xs font-black block text-center uppercase tracking-widest ${rankColor} mb-2`}>
+                        Rank: {rankName}
+                      </span>
+                      <div className="w-full h-px bg-slate-850 mb-2"></div>
+                      <div className="flex items-center gap-1.5 text-[9px] font-bold text-white uppercase mb-1 font-mono">
+                        <Sparkles className="w-3 h-3 text-yellow-500" /> Diagnostics advice:
                       </div>
-                      <div className="bg-gray-900/50 rounded-xl p-2 sm:p-3 text-center border border-gray-800">
-                        <div className="text-gray-400 text-[9px] sm:text-[10px] uppercase font-bold tracking-wider mb-1">Max Combo</div>
-                        <div className="text-lg sm:text-xl font-black text-yellow-400">{bestComboRef.current}</div>
-                      </div>
+                      <p className="text-[10px] text-slate-400 leading-normal">
+                        {diagnostics}
+                      </p>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <PlayAgainButton onClick={() => { if(engineRef.current) engineRef.current.endGame(); startGame(); }} colorTheme="blue" />
+                      <button
+                        onPointerDown={e => e.stopPropagation()}
+                        onClick={shareScore}
+                        className="p-3 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded-xl transition-colors active:scale-95"
+                        title="Share Score"
+                      >
+                        <Share2 className="w-4 h-4" />
+                      </button>
+                      {isFullscreen && (
+                        <button
+                          onPointerDown={e => e.stopPropagation()}
+                          onClick={handleExit}
+                          className="p-3 bg-red-900/30 border border-red-900/55 hover:bg-red-900/50 text-red-400 rounded-xl transition-colors active:scale-95 flex items-center justify-center"
+                          title="Exit Drill"
+                        >
+                          <LogOut className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
                   </div>
-
-                  <div className="p-3 sm:p-5 bg-gray-900/50 border-t border-gray-800 flex gap-2 sm:gap-3 rounded-b-3xl shrink-0 mt-auto">
-                    <button onPointerDown={e => e.stopPropagation()} onClick={() => { if(engineRef.current) engineRef.current.endGame(); startGame(); }} className="flex-1 py-3 sm:py-4 bg-blue-600 text-white rounded-xl font-black tracking-wide hover:bg-blue-500 transition-all active:scale-95 flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(37,99,235,0.4)] text-sm sm:text-base">
-                      <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5" /> PLAY AGAIN
-                    </button>
-                    <button onPointerDown={e => e.stopPropagation()} onClick={shareDrillLink} className="px-4 sm:px-5 py-3 sm:py-4 bg-gray-800 text-white rounded-xl font-bold hover:bg-gray-700 transition-all active:scale-95 border border-gray-700 flex items-center justify-center" title="Share Drill">
-                      <Share2 className="w-4 h-4 sm:w-5 sm:h-5" />
-                    </button>
-                    <button onPointerDown={e => e.stopPropagation()} onClick={handleExit} className="px-4 sm:px-5 py-3 sm:py-4 bg-red-900/30 text-red-400 rounded-xl font-bold hover:bg-red-900/50 transition-all active:scale-95 border border-red-900/50 flex items-center justify-center" title="Exit Drill">
-                      <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
-                    </button>
-                  </div>
-                  
                 </div>
               </div>
             )}
@@ -834,11 +920,11 @@ export default function PatternRecognitionClient() {
                 </div>
                 <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-5">
-                    <RuleItem color="green" text="Correct Sequence" highlight="+15 PTS | +10s" result="Difficulty Up" isDark={isDarkMode} />
-                    <RuleItem color="purple" text="Adaptive Puzzles" highlight="Scales up to 15 Levels" result="Dynamic Generation" isDark={isDarkMode} />
+                    <RuleItem color="green" text="Correct Sequence" highlight="+15 PTS | +5s" result="Increases Score" isDark={isDarkMode} />
+                    <RuleItem color="purple" text="Adaptive Puzzles" highlight="Scales up to 15 Levels" result="Scales on Score" isDark={isDarkMode} />
                   </div>
                   <div className="space-y-5">
-                    <RuleItem color="red" text="Wrong Answer" highlight="-10 PTS | -5s" result="Difficulty Down" isDark={isDarkMode} />
+                    <RuleItem color="red" text="Wrong Answer" highlight="No PTS Penalty | -5s" result="Reduces Timer" isDark={isDarkMode} />
                     <RuleItem color="orange" text="Time Limit Capped" highlight="Max 60 Seconds" result="Endless Survival" isDark={isDarkMode} />
                   </div>
                 </div>
@@ -889,8 +975,8 @@ export default function PatternRecognitionClient() {
                       <h3 className="text-sm font-bold text-white uppercase tracking-wider">How to Practice Effectively</h3>
                     </div>
                     <ol className="text-sm leading-relaxed space-y-3 list-decimal pl-5 text-gray-400">
-                      <li><strong className="text-gray-200">Avoid Guessing:</strong> Submitting a wrong answer triggers a strict -10 Point and -5 Second penalty, dropping your internal difficulty. Calculate carefully.</li>
-                      <li><strong className="text-gray-200">Survival Mechanics:</strong> Every correct answer rewards you with +15 Points and +10 Seconds to keep you alive. The timer hard caps at 60s, so pace yourself without rushing.</li>
+                      <li><strong className="text-gray-200">Avoid Guessing:</strong> Submitting a wrong answer triggers a strict -5 Second penalty, dropping your internal difficulty. Calculate carefully.</li>
+                      <li><strong className="text-gray-200">Survival Mechanics:</strong> Every correct answer rewards you with +15 Points and +5 Seconds to keep you alive. The timer hard caps at 60s, so pace yourself without rushing.</li>
                       <li><strong className="text-gray-200">Abandon Linear Thinking:</strong> If standard addition/subtraction fails, look for alternating rulesets, squares, primes, or Fibonacci sequencing.</li>
                     </ol>
                   </div>
@@ -907,7 +993,7 @@ export default function PatternRecognitionClient() {
                       </div>
                       <div>
                         <h4 className="text-sm font-bold text-gray-200 tracking-tight">Are there penalties for using hints?</h4>
-                        <p className="text-xs text-gray-400 mt-1.5 leading-relaxed">Yes. Using a hint will reduce your correct answer reward to +5 Points and +5 Seconds to balance out the assistance provided.</p>
+                        <p className="text-xs text-gray-400 mt-1.5 leading-relaxed">Yes. Using a hint will reduce your correct answer reward to +5 Points and +2 Seconds to balance out the assistance provided.</p>
                       </div>
                     </div>
                   </div>

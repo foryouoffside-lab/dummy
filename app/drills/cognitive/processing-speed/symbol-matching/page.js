@@ -96,40 +96,62 @@ const faqSchema = {
   ]
 };
 
+const howToSchema = {
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "How to Play Symbol Matching Drill",
+  "description": "Improve your processing speed, visual-motor mapping, and cognitive coding speed by matching active symbols to numbers.",
+  "step": [
+    {
+      "@type": "HowToStep",
+      "position": 1,
+      "name": "Press Start Drill",
+      "text": "Start the timer-attack. A reference key grid mapping symbols to numbers will appear at the top."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 2,
+      "name": "Find the Matching Number",
+      "text": "Look at the large active symbol displayed in the center. Find its matching number from the reference key."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 3,
+      "name": "Enter the Match",
+      "text": "Press the corresponding number key on your keyboard (1-9) or tap it on the number pad to submit. Speed up to gain bonus time."
+    }
+  ]
+};
+
 export const metadata = {
-  title: "Symbol Matching Test – Free Digit Symbol Substitution Brain Game | SkillDrills",
-  description: "Take the free Digit Symbol Substitution Test (DSST) online. Train cognitive processing speed, visual scanning, and mental flexibility. No sign-up required.",
+  title: "Play Symbol Matching Online | Free Symbol Search Test | SkillDrills",
+  description: "Play our free Symbol Matching online game. Challenge your cognitive processing speed, take a symbol search test, and train your visual working memory.",
   keywords: [
-    "symbol matching game",
-    "digit symbol substitution test",
-    "processing speed test online",
-    "DSST test online",
-    "SDMT test online free",
+    "symbol search test",
     "symbol digit modalities test",
+    "symbol matching game",
     "cognitive processing speed test",
-    "coding test cognition",
-    "processing speed brain test",
-    "symbol matching brain training",
-    "rapid symbol matching test",
-    "visual scanning speed test"
+    "visual search test",
+    "WAIS symbol search online",
+    "brain decoding test"
   ],
   alternates: {
     canonical: "https://skilldrills.online/drills/cognitive/processing-speed/symbol-matching",
   },
   robots: { index: true, follow: true },
   openGraph: {
-    title: "Symbol Matching Test – Free Digit Symbol Substitution Brain Game | SkillDrills",
-    description: "Take the free Digit Symbol Substitution Test (DSST) online. Train cognitive processing speed, visual scanning, and mental flexibility. No sign-up required.",
+    title: "Play Symbol Matching Online | Free Symbol Search Test | SkillDrills",
+    description: "Play our free Symbol Matching online game. Challenge your cognitive processing speed, take a symbol search test, and train your visual working memory.",
     url: "https://skilldrills.online/drills/cognitive/processing-speed/symbol-matching",
     siteName: 'SkillDrills',
     locale: 'en_US',
     type: 'website',
-    images: [{ url: 'https://skilldrills.online/icons/icon-512x512.png', width: 512, height: 512, alt: "Symbol Matching Test – Digit Symbol Substitution Brain Game" }],
+    images: [{ url: 'https://skilldrills.online/icons/icon-512x512.png', width: 512, height: 512, alt: "Play Symbol Matching Online" }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Symbol Matching Test – Free Digit Symbol Substitution Brain Game | SkillDrills",
-    description: "Take the free Digit Symbol Substitution Test (DSST) online. Train cognitive processing speed, visual scanning, and mental flexibility. No sign-up required.",
+    title: "Play Symbol Matching Online | Free Symbol Search Test | SkillDrills",
+    description: "Play our free Symbol Matching online game. Challenge your cognitive processing speed, take a symbol search test, and train your visual working memory.",
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
 };
@@ -140,6 +162,7 @@ export default function SymbolMatchingPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }} />
       <SymbolMatchingClient />
     </>
   );

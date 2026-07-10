@@ -96,10 +96,50 @@ const faqSchema = {
   ]
 };
 
+const howToSchema = {
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "How to Train with the Distraction Fighter Game",
+  "description": "Test and train your selective attention, inhibitory control, and Stroop conflict resolution.",
+  "step": [
+    {
+      "@type": "HowToStep",
+      "position": 1,
+      "name": "Identify the Ink Color",
+      "text": "Observe the color-word text displayed on screen. Focus entirely on the physical color of the ink."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 2,
+      "name": "Select the Correct Color Option",
+      "text": "Ignore the text word itself (which is a distraction). Select the button matching the physical ink color."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 3,
+      "name": "Avoid Impulse Tapping",
+      "text": "Do not rush. Incorrect selections or timeouts do not deduct points but will penalize your timer by -1.5 seconds."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 4,
+      "name": "Scale Difficulty with Milestones",
+      "text": "Every 50 points earned increases your Level, shrinking the target visual duration window down to a minimum of 600ms."
+    }
+  ]
+};
+
 export const metadata = {
-  title: "Distraction Fighter – Free Stroop Test & Inhibitory Control Game | SkillDrills",
-  description: "Fight distractions online. Train inhibitory control and Stroop-effect resistance with this free cognitive focus game. Learn to block out distractions. No sign-up required.",
+  title: "Ignore Distractions Game: Free Online Focus & Attention Training | SkillDrills",
+  description: "Train your brain to block out noise! Play our free online focus games designed to improve your selective attention, ignore distractions, and boost your daily productivity.",
   keywords: [
+    "ignore distractions game",
+    "focus games online free",
+    "distraction training",
+    "selective attention game",
+    "brain training for focus",
+    "block out distractions",
+    "concentration games",
     "distraction test online",
     "Stroop test online free",
     "inhibitory control training",
@@ -118,8 +158,8 @@ export const metadata = {
   },
   robots: { index: true, follow: true },
   openGraph: {
-    title: "Distraction Fighter – Free Stroop Test & Inhibitory Control Game | SkillDrills",
-    description: "Fight distractions online. Train inhibitory control and Stroop-effect resistance with this free cognitive focus game. Learn to block out distractions. No sign-up required.",
+    title: "Ignore Distractions Game: Free Online Focus & Attention Training | SkillDrills",
+    description: "Train your brain to block out noise! Play our free online focus games designed to improve your selective attention, ignore distractions, and boost your daily productivity.",
     url: "https://skilldrills.online/drills/cognitive/focus/distraction-fighter",
     siteName: 'SkillDrills',
     locale: 'en_US',
@@ -128,8 +168,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Distraction Fighter – Free Stroop Test & Inhibitory Control Game | SkillDrills",
-    description: "Fight distractions online. Train inhibitory control and Stroop-effect resistance with this free cognitive focus game. Learn to block out distractions. No sign-up required.",
+    title: "Ignore Distractions Game: Free Online Focus & Attention Training | SkillDrills",
+    description: "Train your brain to block out noise! Play our free online focus games designed to improve your selective attention, ignore distractions, and boost your daily productivity.",
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
 };
@@ -140,6 +180,7 @@ export default function DistractionFighterPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }} />
       <DistractionFighterClient />
     </>
   );

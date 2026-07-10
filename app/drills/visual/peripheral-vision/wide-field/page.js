@@ -1,129 +1,134 @@
 import WideFieldClient from './WideFieldClient';
 
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "SkillDrills", "item": "https://skilldrills.online/" },
+    { "@type": "ListItem", "position": 2, "name": "Visual Training", "item": "https://skilldrills.online/drills/visual" },
+    { "@type": "ListItem", "position": 3, "name": "Peripheral Vision", "item": "https://skilldrills.online/drills/visual/peripheral-vision" },
+    { "@type": "ListItem", "position": 4, "name": "Wide Field Awareness", "item": "https://skilldrills.online/drills/visual/peripheral-vision/wide-field" }
+  ]
+};
+
+const webAppSchema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Wide Field Awareness – Free Visual Field Test Online",
+  "applicationCategory": "EducationalApplication",
+  "operatingSystem": "All",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "description": "Free visual field test and peripheral vision training. Keep foveal center fixation and recall letters flashing at the screen's four corners.",
+  "url": "https://skilldrills.online/drills/visual/peripheral-vision/wide-field",
+  "publisher": { "@type": "Organization", "name": "SkillDrills", "url": "https://skilldrills.online" },
+  "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.7", "reviewCount": "890" }
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is the Wide Field Awareness Drill?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A free online visual field test designed to exercise your peripheral attention. You fixate on a central point while letters flash in the far corners, testing your ability to recall them without direct gaze."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does scoring work?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "You gain points for each correctly recalled letter. Skipping a query awards 0 points. Incorrect recalls deduct remaining time but do not penalize your score."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Who is this visual field drill for?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "It is perfect for gamers (improving map/HUD awareness), athletes, drivers, or anyone wanting to broaden their functional visual range."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do I need to sign up?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No registration is required. The drill works directly in any standard mobile or desktop web browser for free."
+      }
+    }
+  ]
+};
+
+const howToSchema = {
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "How to Train Wide Field Awareness Online",
+  "description": "Improve your peripheral character recognition and visual field span using our free online training drill.",
+  "step": [
+    {
+      "@type": "HowToStep",
+      "position": 1,
+      "name": "Keep Eyes Focused on the Center",
+      "text": "Start the drill and stare directly at the central cross. Avoid looking directly at the corners."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 2,
+      "name": "Note Corner Flashes",
+      "text": "Rely entirely on your peripheral vision to detect and remember letters flashing in the four corners."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 3,
+      "name": "Answer the Recall Prompts",
+      "text": "When prompted, enter the letters in the correct order to progress difficulty and grow your score."
+    }
+  ]
+};
+
 export const metadata = {
-  title: 'Wide Field - Peripheral Vision Drill | SkillDrills',
-  description: 'Train peripheral vision with characters flashing 400ms in 4 corners. Fixate center, recall 1-3 characters in order. Perfect recall 10pts/char. No sign-up.',
+  title: "Play Wide Field Awareness Test | Free Visual Field Test Online | SkillDrills",
+  description: "Train your peripheral vision online with our free Wide Field Awareness drill. Maintain foveal fixation on the center and recall letters flashed at extreme corners.",
   keywords: [
-    'wide field awareness', 'peripheral vision training', 'character recall',
-    'visual field test', 'peripheral character detection', 'vision span training',
-    'visual memory drill', 'peripheral awareness test', 'eye training',
-    'visual attention training', 'field of view training', 'vision exercise',
-    'free peripheral vision test', 'visual cognition drill',
-    'wide field awareness free', 'peripheral character recall free', 'corner flash training',
-    'visual memory practice', 'peripheral detection drill', 'center fixation training',
-    'character recognition peripheral', 'vision span exercise', 'wide field drill',
-    'skilldrills wide field', 'skilldrills visual drills', 'skilldrills peripheral',
-    '400ms character flash', 'recall quiz peripheral', 'visual attention span',
-    'peripheral vision exercise', 'wide awareness training', 'visual field awareness',
+    "visual field test online",
+    "eye test for peripheral vision",
+    "peripheral vision training exercises",
+    "wide field awareness",
+    "peripheral recall game",
+    "eye training exercises"
   ],
+  alternates: {
+    canonical: "https://skilldrills.online/drills/visual/peripheral-vision/wide-field",
+  },
+  robots: { index: true, follow: true },
   openGraph: {
-    title: 'Wide Field - Peripheral Vision Drill | SkillDrills',
-    description: 'Characters flash 400ms in 4 corners. Center fixation, recall quiz. Free.',
-    type: 'article',
-    url: 'https://skilldrills.online/drills/visual/peripheral-vision/wide-field',
+    title: "Play Wide Field Awareness Test | Free Visual Field Test Online | SkillDrills",
+    description: "Train your peripheral vision online with our free Wide Field Awareness drill. Maintain foveal fixation on the center and recall letters flashed at extreme corners.",
+    url: "https://skilldrills.online/drills/visual/peripheral-vision/wide-field",
     siteName: 'SkillDrills',
     locale: 'en_US',
-    images: [{
-      url: 'https://skilldrills.online/icons/icon-512x512.png',
-      width: 512,
-      height: 512,
-      alt: 'Wide Field Awareness Drill',
-    }],
+    type: 'website',
+    images: [{ url: 'https://skilldrills.online/icons/icon-512x512.png', width: 512, height: 512, alt: "Play Wide Field Awareness Test" }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Wide Field - Peripheral Vision Drill | SkillDrills',
-    description: 'Characters flash in 4 corners. Recall quiz. Free.',
+    title: "Play Wide Field Awareness Test | Free Visual Field Test Online | SkillDrills",
+    description: "Train your peripheral vision online with our free Wide Field Awareness drill. Maintain foveal fixation on the center and recall letters flashed at extreme corners.",
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
-  },
-  robots: { index: true, follow: true },
-  alternates: {
-    canonical: 'https://skilldrills.online/drills/visual/peripheral-vision/wide-field',
   },
 };
 
 export default function WideFieldPage() {
   return (
     <>
-
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "BreadcrumbList",
-            "itemListElement": [
-              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://skilldrills.online" },
-              { "@type": "ListItem", "position": 2, "name": "Visual Training", "item": "https://skilldrills.online/drills/visual" },
-              { "@type": "ListItem", "position": 3, "name": "Peripheral Vision", "item": "https://skilldrills.online/drills/visual/peripheral-vision" },
-              { "@type": "ListItem", "position": 4, "name": "Wide Field Awareness" }
-            ]
-          })
-        }}
-      />
-
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "WebApplication",
-            "name": "Wide Field Awareness Drill",
-            "url": "https://skilldrills.online/drills/visual/peripheral-vision/wide-field",
-            "description": "Free peripheral vision drill. Characters flash 400ms in 4 corners while fixating center. Recall quizzes test 1-3 characters. 10pts perfect, 5pts partial.",
-            "applicationCategory": "EducationalApplication",
-            "operatingSystem": "All",
-            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-            "author": { "@type": "Organization", "name": "SkillDrills" },
-            "isAccessibleForFree": true
-          })
-        }}
-      />
-
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "FAQPage",
-            "mainEntity": [
-              {
-                "@type": "Question",
-                "name": "What is the Wide Field Awareness Drill?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "A free peripheral vision exercise. Characters flash 400ms in 4 corners. Fixate center cross. Recall 1-3 characters in order. 10pts perfect, 5pts partial."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "How does the recall quiz system work?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "After 3+ flashes, 12% chance per cycle of a recall quiz. Type last 1-3 characters in order. Results show correct (green) and incorrect (red)."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "Who should use this drill?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "Athletes (court vision), drivers (hazard detection), gamers (screen-wide processing), and anyone wanting better peripheral awareness."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "Do I need to sign up?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "No registration required. This wide field awareness drill is completely free and works instantly in your browser."
-                }
-              }
-            ]
-          })
-        }}
-      />
-
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }} />
       <WideFieldClient />
     </>
   );

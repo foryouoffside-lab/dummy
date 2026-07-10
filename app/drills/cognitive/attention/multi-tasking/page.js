@@ -96,9 +96,42 @@ const faqSchema = {
   ]
 };
 
+const howToSchema = {
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "How to Take the Multitasking Test",
+  "description": "Test and train your divided attention and multitasking efficiency by managing dual target flows.",
+  "step": [
+    {
+      "@type": "HowToStep",
+      "position": 1,
+      "name": "Observe Active Targets",
+      "text": "Identify the active target shapes displayed at the top of the left and right panels."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 2,
+      "name": "Track Spawning Shapes",
+      "text": "Shapes will spawn from the sides of the panels and move across the screen."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 3,
+      "name": "Click Matching Shapes Only",
+      "text": "Click or tap ONLY on the shapes that match the active target shapes for that panel. Ignore all other distractor shapes."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 4,
+      "name": "Survive the Speed Scaling",
+      "text": "Every correct hit adds time (+7s) to your clock. Avoid errors and build combos to level up and push your score limit."
+    }
+  ]
+};
+
 export const metadata = {
-  title: "Multitasking Test – Free Dual-Task Cognitive Flexibility Game | SkillDrills",
-  description: "Take this free online multitasking test. Train your brain to handle multiple overlapping tasks and reduce context switching costs. No sign-up required.",
+  title: "Multitasking Test | Dual Target Flow Brain Training | SkillDrills",
+  description: "Take our free online multitasking test. Challenge your brain with dual-target tracking and improve cognitive flexibility. No sign-up required.",
   keywords: [
     "multitasking test",
     "multitasking games",
@@ -118,8 +151,8 @@ export const metadata = {
   },
   robots: { index: true, follow: true },
   openGraph: {
-    title: "Multitasking Test – Free Dual-Task Cognitive Flexibility Game | SkillDrills",
-    description: "Take this free online multitasking test. Train your brain to handle multiple overlapping tasks and reduce context switching costs. No sign-up required.",
+    title: "Multitasking Test | Dual Target Flow Brain Training | SkillDrills",
+    description: "Take our free online multitasking test. Challenge your brain with dual-target tracking and improve cognitive flexibility. No sign-up required.",
     url: "https://skilldrills.online/drills/cognitive/attention/multi-tasking",
     siteName: 'SkillDrills',
     locale: 'en_US',
@@ -128,8 +161,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Multitasking Test – Free Dual-Task Cognitive Flexibility Game | SkillDrills",
-    description: "Take this free online multitasking test. Train your brain to handle multiple overlapping tasks and reduce context switching costs. No sign-up required.",
+    title: "Multitasking Test | Dual Target Flow Brain Training | SkillDrills",
+    description: "Take our free online multitasking test. Challenge your brain with dual-target tracking and improve cognitive flexibility. No sign-up required.",
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
 };
@@ -140,6 +173,7 @@ export default function MultiTaskingPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }} />
       <DualTargetFlowClient />
     </>
   );

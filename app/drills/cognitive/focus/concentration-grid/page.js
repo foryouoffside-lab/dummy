@@ -96,12 +96,49 @@ const faqSchema = {
   ]
 };
 
+const howToSchema = {
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "How to Train with the Concentration Grid Exercise",
+  "description": "Test and train your visual scanning, sequential search speed, and peripheral field focus.",
+  "step": [
+    {
+      "@type": "HowToStep",
+      "position": 1,
+      "name": "Identify the Start Number",
+      "text": "Locate the number 1 randomized within the displayed grid matrix."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 2,
+      "name": "Scan and Click in Sequence",
+      "text": "Click or tap the number 1. Immediately scan for the next sequential number (2, then 3, then 4, etc.)."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 3,
+      "name": "Avoid Guessing Taps",
+      "text": "Only tap correct sequence numbers. Incorrect clicks drain time (-2s) from your survival clock."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 4,
+      "name": "Complete Grid to Expand Size",
+      "text": "Once you clear all numbers in a grid, your score increases (+20 PTS), time extends (+10s), and the grid matrix size scales up."
+    }
+  ]
+};
+
 export const metadata = {
-  title: "Concentration Grid Game – Free Online Schulte Table Focus Test | SkillDrills",
-  description: "Play the concentration grid (Schulte Table) online. Find numbers 1 to 100 in sequence under time pressure. Free sports psychology focus test for athletes and students. No sign-up.",
+  title: "Play the Concentration Grid: Mental Focus Game & Test | SkillDrills",
+  description: "Train your brain like an elite athlete. Play our interactive concentration grid online to improve your visual scanning, reaction time, and mental focus.",
   keywords: [
     "concentration grid",
     "concentration grid game",
+    "play concentration grid online",
+    "printable concentration grid pdf",
+    "sports psychology focus grid printables",
+    "concentration grid for athletes",
     "Schulte table online",
     "number search grid game",
     "sports psychology focus test",
@@ -118,8 +155,8 @@ export const metadata = {
   },
   robots: { index: true, follow: true },
   openGraph: {
-    title: "Concentration Grid Game – Free Online Schulte Table Focus Test | SkillDrills",
-    description: "Play the concentration grid (Schulte Table) online. Find numbers 1 to 100 in sequence under time pressure. Free sports psychology focus test for athletes and students. No sign-up.",
+    title: "Play the Concentration Grid: Mental Focus Game & Test | SkillDrills",
+    description: "Train your brain like an elite athlete. Play our interactive concentration grid online to improve your visual scanning, reaction time, and mental focus.",
     url: "https://skilldrills.online/drills/cognitive/focus/concentration-grid",
     siteName: 'SkillDrills',
     locale: 'en_US',
@@ -128,8 +165,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Concentration Grid Game – Free Online Schulte Table Focus Test | SkillDrills",
-    description: "Play the concentration grid (Schulte Table) online. Find numbers 1 to 100 in sequence under time pressure. Free sports psychology focus test for athletes and students. No sign-up.",
+    title: "Play the Concentration Grid: Mental Focus Game & Test | SkillDrills",
+    description: "Train your brain like an elite athlete. Play our interactive concentration grid online to improve your visual scanning, reaction time, and mental focus.",
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
 };
@@ -140,6 +177,7 @@ export default function ConcentrationGridPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }} />
       <ConcentrationGridClient />
     </>
   );

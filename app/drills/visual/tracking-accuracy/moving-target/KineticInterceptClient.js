@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import Link from 'next/link';
@@ -8,9 +8,10 @@ import {
   Eye, Timer, Move, Brain, Trophy, Info, Share2,
   GraduationCap, Lightbulb, TrendingUp, BarChart3, ArrowRight,
   RefreshCw, RotateCcw, Smartphone, Award, XCircle, Check,
-  AlertTriangle, Crosshair, Calculator, Code2, Users, Layers, LogOut
+  AlertTriangle, Crosshair, Calculator, Code2, Users, Layers, LogOut, Sparkles
 } from 'lucide-react';
 import useGameEngine from '../../../../../lib/useGameEngine';
+import PlayAgainButton from '../../../../../components/PlayAgainButton';
 
 // ==========================================
 // ERROR BOUNDARY
@@ -72,8 +73,7 @@ export default function KineticInterceptClient() {
   const streakRef = useRef(0);
   const bestStreakRef = useRef(0);
   
-  // Smaller Target radius for precision
-  const TARGET_RADIUS = 20; 
+  const targetRadiusRef = useRef(20);
   const targetRef = useRef({ x: -100, y: -100, vx: 0, vy: 0, active: false });
   
   const spawnTimeoutRef = useRef(null);
@@ -180,6 +180,9 @@ export default function KineticInterceptClient() {
     setCustomScore(prev => {
       const updated = Math.max(0, prev + scoreDelta);
       customScoreRef.current = updated;
+      if (engineRef.current && typeof engineRef.current.setScore === 'function') {
+        engineRef.current.setScore(updated);
+      }
       return updated;
     });
 
@@ -275,9 +278,12 @@ export default function KineticInterceptClient() {
     const angleToCenter = Math.atan2((cvs.height / 2) - spawnY, (cvs.width / 2) - spawnX);
     const randomizedAngle = angleToCenter + (Math.random() - 0.5) * 1.0; 
 
-    // Difficulty scaling: Speed increases with streak
-    const calculatedSpeed = Math.min(30, 6 + (streakRef.current * 0.9) + (Math.random() * 3));
+    // Difficulty scaling: Speed increases with score
+    const calculatedSpeed = Math.min(32, 7 + (customScoreRef.current * 0.18) + (Math.random() * 4));
     
+    // Target radius shrinks from 24 down to 10 as score grows
+    targetRadiusRef.current = Math.max(10, 24 - Math.floor(customScoreRef.current * 0.15));
+
     targetRef.current = {
       x: spawnX,
       y: spawnY,
@@ -294,13 +300,13 @@ export default function KineticInterceptClient() {
     if (!isActiveRef.current || isTimeUp) return;
     
     targetRef.current.active = false;
-    streakRef.current = 0; // Dropping streak reduces speed (Decreases Difficulty)
+    streakRef.current = 0; 
     setStreak(0);
     setFailedHits(prev => prev + 1);
     
-    updateEconomy(-3, -1);
+    updateEconomy(0, -1); // No PTS Penalty, -1s
     playDrillSound('fail');
-    showFeedbackRef.current?.(`⏰ ESCAPED! -3 PTS | -1s`, 'error');
+    showFeedbackRef.current?.(`⏰ ESCAPED! -1s`, 'error');
 
     spawnTimeoutRef.current = setTimeout(() => {
       if (isActiveRef.current && gameStateRef.current === 'playing' && !isTimeUp) spawnTarget();
@@ -356,7 +362,7 @@ export default function KineticInterceptClient() {
     const clickY = (e.clientY - rect.top) * (cvs.height / rect.height);
 
     // Padding allows mobile fat-fingers despite smaller orb
-    const physicalClickRadius = TARGET_RADIUS + 30; 
+    const physicalClickRadius = targetRadiusRef.current + 30; 
     const distanceToTarget = Math.hypot(clickX - targetRef.current.x, clickY - targetRef.current.y);
 
     if (targetRef.current.active && distanceToTarget <= physicalClickRadius) {
@@ -383,14 +389,14 @@ export default function KineticInterceptClient() {
       }, 300);
 
     } else {
-      // FALSE ALARM (Clicked canvas, missed target) -> -3 PTS | -1s | Decrease Difficulty
+      // FALSE ALARM (Clicked canvas, missed target) -> 0 PTS | -1s | Decrease Difficulty
       streakRef.current = 0; // Resets speed mapping downward
       setStreak(0);
       setFailedHits(prev => prev + 1);
       
-      updateEconomy(-3, -1);
+      updateEconomy(0, -1); // No PTS Penalty, -1s
       playDrillSound('fail');
-      showFeedbackRef.current?.(`✗ MISS CLICK! -3 PTS | -1s`, 'error');
+      showFeedbackRef.current?.(`✗ MISS CLICK! -1s`, 'error');
     }
   }, [isTimeUp, spawnTarget, updateEconomy, playDrillSound]);
 
@@ -454,14 +460,15 @@ export default function KineticInterceptClient() {
           // Render 3D Target Orb
           const tx = tr.x;
           const ty = tr.y;
+          const r = targetRadiusRef.current;
 
-          const gradient = ctx.createRadialGradient(tx - TARGET_RADIUS*0.3, ty - TARGET_RADIUS*0.3, TARGET_RADIUS*0.1, tx, ty, TARGET_RADIUS);
+          const gradient = ctx.createRadialGradient(tx - r*0.3, ty - r*0.3, r*0.1, tx, ty, r);
           gradient.addColorStop(0, '#ffffff'); // Bright core
           gradient.addColorStop(0.5, '#f97316'); // Orange edge
           gradient.addColorStop(1, '#ea580c'); // Deep orange rim
 
           ctx.beginPath();
-          ctx.arc(tx, ty, TARGET_RADIUS, 0, Math.PI * 2);
+          ctx.arc(tx, ty, r, 0, Math.PI * 2);
           ctx.fillStyle = gradient;
           
           ctx.shadowColor = '#f97316';
@@ -471,7 +478,7 @@ export default function KineticInterceptClient() {
 
           // Pulse Core Indicator
           ctx.beginPath();
-          ctx.arc(tx, ty, TARGET_RADIUS * 0.4, 0, Math.PI * 2);
+          ctx.arc(tx, ty, r * 0.4, 0, Math.PI * 2);
           ctx.fillStyle = 'rgba(255,255,255,0.8)';
           ctx.fill();
 
@@ -522,6 +529,32 @@ export default function KineticInterceptClient() {
     } else { try { await navigator.clipboard.writeText(url); alert('Link copied!'); } catch (e) {} }
   };
 
+  const shareScore = useCallback(() => {
+    const totalStrikes = perfectHits + failedHits;
+    const finalAccuracy = totalStrikes > 0 ? Math.round((perfectHits / totalStrikes) * 100) : 0;
+    
+    let finalRank = 'Bronze';
+    if (customScoreRef.current >= 150 && finalAccuracy >= 90) finalRank = 'Grandmaster';
+    else if (customScoreRef.current >= 100 && finalAccuracy >= 82) finalRank = 'Master';
+    else if (customScoreRef.current >= 60 && finalAccuracy >= 75) finalRank = 'Diamond';
+    else if (customScoreRef.current >= 35 && finalAccuracy >= 65) finalRank = 'Platinum';
+    else if (customScoreRef.current >= 15 && finalAccuracy >= 55) finalRank = 'Gold';
+    else if (customScoreRef.current >= 5) finalRank = 'Silver';
+
+    const text = `🎯 I scored ${customScoreRef.current} PTS with ${finalAccuracy}% accuracy on the Moving Target click test! Rank: ${finalRank}. Try it here: https://skilldrills.online/drills/visual/tracking-accuracy/kinetic-intercept`;
+    
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      navigator.share({
+        title: 'My SkillDrills Visual Score',
+        text: text,
+        url: 'https://skilldrills.online/drills/visual/tracking-accuracy/kinetic-intercept'
+      }).catch(() => {});
+    } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+      alert('Score card copied to clipboard!');
+    }
+  }, [perfectHits, failedHits]);
+
   if (loading || !isClient) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-black">
@@ -531,6 +564,44 @@ export default function KineticInterceptClient() {
         </div>
       </div>
     );
+  }
+
+  let gradeLetter = 'F';
+  if (accuracy >= 90 && customScore >= 150) gradeLetter = 'S';
+  else if (accuracy >= 80 && customScore >= 100) gradeLetter = 'A';
+  else if (accuracy >= 70 && customScore >= 60) gradeLetter = 'B';
+  else if (accuracy >= 60 && customScore >= 35) gradeLetter = 'C';
+  else if (accuracy >= 50 && customScore >= 15) gradeLetter = 'D';
+
+  let rankName = 'Bronze';
+  let rankColor = 'text-slate-500';
+  if (customScore >= 150 && accuracy >= 90) {
+    rankName = 'Grandmaster';
+    rankColor = 'text-fuchsia-400 font-extrabold';
+  } else if (customScore >= 100 && accuracy >= 82) {
+    rankName = 'Master';
+    rankColor = 'text-red-400 font-extrabold';
+  } else if (customScore >= 60 && accuracy >= 75) {
+    rankName = 'Diamond';
+    rankColor = 'text-cyan-400 font-extrabold';
+  } else if (customScore >= 35 && accuracy >= 65) {
+    rankName = 'Platinum';
+    rankColor = 'text-indigo-400 font-extrabold';
+  } else if (customScore >= 15 && accuracy >= 55) {
+    rankName = 'Gold';
+    rankColor = 'text-yellow-400 font-extrabold';
+  } else if (customScore >= 5) {
+    rankName = 'Silver';
+    rankColor = 'text-gray-300 font-extrabold';
+  }
+
+  let diagnostics = "Outstanding kinetic tracking speed! Your accuracy shows excellent visual pursuit and motor coordination.";
+  if (failedHits > 6) {
+    diagnostics = "High rate of missed targets or false clicks. Focus on keeping your cursor centered on the target trajectory and wait for the hover green ring.";
+  } else if (accuracy < 60) {
+    diagnostics = "Low interception accuracy. Track the target smoothly before clicking to prevent miss clicks.";
+  } else if (customScore < 45) {
+    diagnostics = "Maintain a high pace of hit streaks to keep the timer charged and climb standard score brackets.";
   }
 
   return (
@@ -671,82 +742,89 @@ export default function KineticInterceptClient() {
               </div>
             )}
 
-            {/* Premium Custom Structural End Card Component (Optimized for Mobile Visibility) */}
             {(engine.gameState === 'ended' || isTimeUp) && (
-              <div className="absolute inset-0 flex items-center justify-center z-[70] bg-black/95 pointer-events-auto animate-in fade-in duration-300 p-4 overflow-y-auto">
-                <div className="rounded-3xl max-w-md w-full shadow-2xl border border-gray-800 bg-gray-950 flex flex-col max-h-[90vh] my-auto shrink-0">
-                  
-                  <div className="flex-1 overflow-y-auto">
-                    <div className="bg-gradient-to-br from-red-900/40 to-orange-900/40 p-5 sm:p-6 border-b border-gray-800 relative overflow-hidden pointer-events-none shrink-0">
-                      <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-red-500/20 rounded-full blur-3xl"></div>
-                      <div className="absolute bottom-0 left-0 -mb-4 -ml-4 w-32 h-32 bg-orange-500/20 rounded-full blur-3xl"></div>
-                      <div className="relative z-10 flex flex-col items-center">
-                        {customScore > (engine.bestScore || 0) && customScore > 0 && (
-                          <div className="bg-yellow-500 text-black text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-2 shadow-[0_0_15px_rgba(234,179,8,0.5)]">
-                            ⭐ New Personal Best
-                          </div>
-                        )}
-                        <h2 className="text-2xl sm:text-3xl font-black text-white mb-1 tracking-tight">Mission Complete</h2>
-                        <p className="text-orange-400 font-medium text-sm">Kinetic Intercept Lab</p>
+              <div className="absolute inset-0 bg-[#05070e]/98 overflow-y-auto p-6 z-[70] select-none scrollbar-thin scroll-smooth backdrop-blur-sm animate-in fade-in duration-300 pointer-events-auto">
+                <div className="min-h-full flex flex-col justify-center items-center py-4 w-full">
+                  <div className="max-w-md w-full text-center">
+                    {customScore > 0 && customScore >= (engine.bestScore || 0) && (
+                      <div className="inline-block bg-yellow-500 text-black text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-3 shadow-[0_0_15px_rgba(234,179,8,0.5)] animate-bounce font-mono">
+                        ⭐ NEW PERSONAL BEST!
+                      </div>
+                    )}
+                    
+                    <h2 className="text-xl font-black text-white uppercase tracking-wider mb-1 font-mono">
+                      Drill Complete
+                    </h2>
+                    <p className="text-xs text-slate-500 uppercase tracking-widest mb-6 font-mono">
+                      Kinetic Intercept Lab
+                    </p>
+
+                    <div className="grid grid-cols-3 gap-2.5 mb-6 text-left font-mono">
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Final Score</span>
+                        <span className="text-sm font-black text-white">{customScore} <span className="text-[8px] text-slate-400 font-normal">PTS</span></span>
+                      </div>
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Accuracy</span>
+                        <span className="text-sm font-black text-white">{accuracy}%</span>
+                      </div>
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Best Score</span>
+                        <span className="text-sm font-black text-yellow-400">{engine.bestScore || 0}</span>
+                      </div>
+                      
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Total Hits</span>
+                        <span className="text-sm font-black text-emerald-400">{perfectHits}</span>
+                      </div>
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Miss/Escape</span>
+                        <span className="text-sm font-black text-red-400">{failedHits}</span>
+                      </div>
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold font-mono">Grade</span>
+                        <span className="text-sm font-black text-pink-400 font-mono">{gradeLetter}</span>
                       </div>
                     </div>
 
-                    <div className="p-5 sm:p-6 pointer-events-none shrink-0">
-                      <div className="flex justify-between items-center mb-6">
-                        <div className="flex flex-col">
-                          <span className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Final Score</span>
-                          <div className="flex items-end gap-1">
-                            <span className="text-5xl sm:text-6xl font-black text-white leading-none tracking-tighter">{customScore}</span>
-                            <span className="text-sm sm:text-lg text-gray-500 font-bold mb-1">PTS</span>
-                          </div>
-                        </div>
-                        
-                        <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center">
-                          <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
-                            <path className="text-gray-800" strokeWidth="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                            <path 
-                              className={`${accuracy >= 80 ? 'text-green-500' : accuracy >= 50 ? 'text-orange-500' : 'text-red-500'} transition-all duration-1000 ease-out`} 
-                              strokeWidth="3" strokeDasharray="100" strokeDashoffset={100 - accuracy} strokeLinecap="round" stroke="currentColor" fill="none" 
-                              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" 
-                            />
-                          </svg>
-                          <div className="absolute inset-0 flex flex-col items-center justify-center">
-                            <span className={`text-lg sm:text-xl font-black ${accuracy >= 80 ? 'text-green-400' : accuracy >= 50 ? 'text-orange-400' : 'text-red-400'}`}>{accuracy}%</span>
-                            <span className="text-[7px] sm:text-[8px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">Accuracy</span>
-                          </div>
-                        </div>
+                    <div className="bg-[#0b0f19] border border-slate-850 p-3 rounded-xl mb-4 text-left font-sans">
+                      <span className={`text-xs font-black block text-center uppercase tracking-widest ${rankColor} mb-2`}>
+                        Rank: {rankName}
+                      </span>
+                      <div className="w-full h-px bg-slate-850 mb-2"></div>
+                      <div className="flex items-center gap-1.5 text-[9px] font-bold text-white uppercase mb-1 font-mono">
+                        <Sparkles className="w-3 h-3 text-amber-500" /> Diagnostics advice:
                       </div>
+                      <p className="text-[10px] text-slate-400 leading-normal font-sans">
+                        {diagnostics}
+                      </p>
+                    </div>
 
-                      <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-2">
-                        <div className="bg-gray-900/50 rounded-xl p-2 sm:p-3 text-center border border-gray-800">
-                          <div className="text-gray-400 text-[9px] sm:text-[10px] uppercase font-bold tracking-wider mb-1">Total Hits</div>
-                          <div className="text-lg sm:text-xl font-black text-green-400">{perfectHits}</div>
-                        </div>
-                        <div className="bg-gray-900/50 rounded-xl p-2 sm:p-3 text-center border border-gray-800">
-                          <div className="text-gray-400 text-[9px] sm:text-[10px] uppercase font-bold tracking-wider mb-1">Miss/Escape</div>
-                          <div className="text-lg sm:text-xl font-black text-red-400">{failedHits}</div>
-                        </div>
-                        <div className="bg-gray-900/50 rounded-xl p-2 sm:p-3 text-center border border-gray-800">
-                          <div className="text-gray-400 text-[9px] sm:text-[10px] uppercase font-bold tracking-wider mb-1">Max Streak</div>
-                          <div className="text-lg sm:text-xl font-black text-orange-400">{bestStreak}</div>
-                        </div>
-                      </div>
+                    <div className="flex gap-2">
+                      <PlayAgainButton
+                        onClick={() => { if(engine.endGame) engine.endGame(); handleStartGame(); }}
+                        colorTheme="orange"
+                      />
+                      <button
+                        onPointerDown={(e)=>e.stopPropagation()}
+                        onClick={shareScore}
+                        className="p-3 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded-xl transition-colors active:scale-95 flex items-center justify-center"
+                        title="Share Score"
+                      >
+                        <Share2 className="w-4 h-4" />
+                      </button>
+                      {isFullscreen && (
+                        <button
+                          onPointerDown={(e)=>e.stopPropagation()}
+                          onClick={handleExitToStart}
+                          className="p-3 bg-red-900/30 border border-red-900/55 hover:bg-red-900/50 text-red-400 rounded-xl transition-colors active:scale-95 flex items-center justify-center"
+                          title="Exit Drill"
+                        >
+                          <LogOut className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
                   </div>
-
-                  {/* Fixed Bottom Action Row */}
-                  <div className="p-3 sm:p-5 bg-gray-900/50 border-t border-gray-800 flex gap-2 sm:gap-3 shrink-0 rounded-b-3xl">
-                    <button onPointerDown={(e)=>e.stopPropagation()} onClick={() => { if(engine.endGame) engine.endGame(); handleStartGame(); }} className="flex-1 py-3 sm:py-4 bg-orange-600 text-white rounded-xl font-black tracking-wide hover:bg-orange-500 transition-all active:scale-95 flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(234,88,12,0.4)] text-sm sm:text-base">
-                      <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5" /> PLAY AGAIN
-                    </button>
-                    <button onPointerDown={(e)=>e.stopPropagation()} onClick={sharePage} className="px-4 sm:px-5 py-3 sm:py-4 bg-gray-800 text-white rounded-xl font-bold hover:bg-gray-700 transition-all active:scale-95 border border-gray-700 flex items-center justify-center" title="Share Drill">
-                      <Share2 className="w-4 h-4 sm:w-5 sm:h-5" />
-                    </button>
-                    <button onPointerDown={(e)=>e.stopPropagation()} onClick={handleExitToStart} className="px-4 sm:px-5 py-3 sm:py-4 bg-red-900/30 text-red-400 rounded-xl font-bold hover:bg-red-900/50 transition-all active:scale-95 border border-red-900/50 flex items-center justify-center" title="Exit Drill">
-                      <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
-                    </button>
-                  </div>
-
                 </div>
               </div>
             )}
@@ -766,11 +844,11 @@ export default function KineticInterceptClient() {
               <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-5">
                   <RuleItem num="1" color="green" text="Intercept Target =" highlight="Tap/Click the moving Orb" result={`+5 PTS | +3s Clock`} />
-                  <RuleItem num="2" color="orange" text="Velocity Scaling" highlight="Speed accelerates on hit" result="Adaptive Pacing System" />
+                  <RuleItem num="2" color="orange" text="Adaptive Difficulty" highlight="Speed and size scale on score" result="Dynamic Pacing System" />
                 </div>
                 <div className="space-y-5">
-                  <RuleItem num="3" color="red" text="Target Escapes Off-Screen" result="-3 PTS | -1s Clock" />
-                  <RuleItem num="4" color="purple" text="Missed Strike / Early Click" result="-3 PTS | -1s Clock" />
+                  <RuleItem num="3" color="red" text="Target Escapes Off-Screen" result="0 PTS | -1s Clock" />
+                  <RuleItem num="4" color="purple" text="Missed Strike / Early Click" result="0 PTS | -1s Clock" />
                 </div>
               </div>
             </div>
@@ -827,7 +905,7 @@ export default function KineticInterceptClient() {
                     <li><strong className="text-gray-200">Track the Vector:</strong> A target orb will spawn dynamically from any edge and glide across the visual frame.</li>
                     <li><strong className="text-gray-200">Predict Trajectory:</strong> Determine the target's direct path and synchronize your physical input to intercept it.</li>
                     <li><strong className="text-gray-200">Instant Execution:</strong> Tap or click exactly on the orb before it vanishes off-screen.</li>
-                    <li><strong className="text-gray-200">Manage Economy:</strong> Striking the target awards points and adds seconds to your timer. Missing the orb or letting it escape strips away points and precious seconds. Your maximum time limit is capped at a strict 60 seconds.</li>
+                    <li><strong className="text-gray-200">Manage Economy:</strong> Striking the target awards points and adds seconds to your timer. Missing the orb or letting it escape applies a time penalty but does not reduce your score. Your maximum time limit is capped at a strict 60 seconds.</li>
                   </ol>
                 </div>
 
@@ -839,8 +917,8 @@ export default function KineticInterceptClient() {
                   </div>
                   <div className="space-y-4">
                     <div>
-                      <h4 className="text-sm font-bold text-gray-200">How exactly does the velocity scale?</h4>
-                      <p className="text-xs text-gray-400 mt-1">Velocity is dictated by an adaptive difficulty engine. For every consecutive target you successfully strike, your hit streak grows. As your streak compounds, the engine violently accelerates the speed of spawning targets until you miscalculate, which drops the difficulty back down.</p>
+                      <h4 className="text-sm font-bold text-gray-200">How exactly does the difficulty scale?</h4>
+                      <p className="text-xs text-gray-400 mt-1">Velocity and target size are dictated by our adaptive difficulty scaling. As your score increases, the engine dynamically accelerates the speed of spawned targets and shrinks their hitboxes to continuously challenge your visual pursuit and motor coordination limits.</p>
                     </div>
                     <div>
                       <h4 className="text-sm font-bold text-gray-200">Why does my timer not exceed 60 seconds?</h4>

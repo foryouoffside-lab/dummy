@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { Component, useEffect, useState, useRef, useCallback } from 'react';
 import Link from 'next/link';
@@ -6,9 +6,10 @@ import {
   Eye, Zap, Timer, Trophy, Volume2, VolumeX, Maximize2, Minimize2,
   Info, RefreshCw, RotateCcw, GraduationCap, Lightbulb, TrendingUp, 
   BarChart3, ArrowRight, Brain, Users, AlertTriangle, Target, 
-  CheckCircle, XCircle, Play, Share2, ChevronRight, Activity, LogOut
+  CheckCircle, XCircle, Play, Share2, ChevronRight, Activity, LogOut, Sparkles
 } from 'lucide-react';
 import useGameEngine from '../../../../../lib/useGameEngine';
+import PlayAgainButton from '../../../../../components/PlayAgainButton';
 
 // ============================================================
 // ZERO-LATENCY AUDIO SYNTHESIZER
@@ -313,9 +314,6 @@ export default function DistanceJudgmentClient() {
     streakRef.current = 0;
     setStreak(0);
     
-    scoreRef.current = Math.max(0, scoreRef.current - 2); 
-    setScore(scoreRef.current); 
-    
     localTimeRef.current = Math.max(0, localTimeRef.current - 0.5); 
     setLocalTimeRemaining(localTimeRef.current);
     
@@ -329,7 +327,7 @@ export default function DistanceJudgmentClient() {
     }
 
     if (audioSynth) audioSynth.playFail(); 
-    triggerFeedback(`MISS! -2 PTS`, 'error'); 
+    triggerFeedback(`MISS! -0.5s`, 'error'); 
 
     cycleTimeoutRef.current = setTimeout(() => {
         if (isActiveRef.current) startCycle();
@@ -346,8 +344,9 @@ export default function DistanceJudgmentClient() {
     const deviation = Math.abs(currentZRef.current - targetZRef.current);
     resultDeviationRef.current = deviation;
     
-    // STRICT ACCURACY REQUIREMENT: Must be <= 3 deviation
-    if (deviation <= 3) {
+    // Dynamic difficulty: tolerance shrinks from 3.0% to 1.5% as score increases
+    const currentTolerance = Math.max(1.5, 3.0 - (scoreRef.current * 0.03));
+    if (deviation <= currentTolerance) {
         setPerfectHits(p => p + 1);
         streakRef.current += 1;
         setStreak(streakRef.current);
@@ -359,7 +358,7 @@ export default function DistanceJudgmentClient() {
         
         scoreRef.current += 3;
         setScore(scoreRef.current);
-        setSpeedLevel(Math.max(1, Math.floor(scoreRef.current / 10) + 1)); // ADDED: dynamically updates level
+        setSpeedLevel(Math.max(1, Math.floor(scoreRef.current / 10) + 1)); 
         localTimeRef.current = Math.min(60, localTimeRef.current + 0.5); 
         setLocalTimeRemaining(localTimeRef.current);
         
@@ -371,7 +370,6 @@ export default function DistanceJudgmentClient() {
         
         triggerFeedback(`ACCURATE! +3 PTS`, 'success');
     } else {
-        // ANY DEVIATION > 3 IS A FULL MISS
         handlePenalty('miss');
         return; 
     }
@@ -502,8 +500,8 @@ export default function DistanceJudgmentClient() {
           
           if (showResultFlashRef.current) {
               const dev = resultDeviationRef.current;
-              // Only green if highly accurate (<= 3)
-              if (dev <= 3) { coreColor = '#4ade80'; edgeColor = '#16a34a'; shadowColor = '#22c55e'; }
+              const currentTolerance = Math.max(1.5, 3.0 - (scoreRef.current * 0.03));
+              if (dev <= currentTolerance) { coreColor = '#4ade80'; edgeColor = '#16a34a'; shadowColor = '#22c55e'; }
               else { coreColor = '#f87171'; edgeColor = '#dc2626'; shadowColor = '#e11d48'; }
               
               explosionRadiusRef.current += (1000 / durationRef.current) * 2;
@@ -580,6 +578,32 @@ export default function DistanceJudgmentClient() {
     }
   }, []);
 
+  const shareScore = useCallback(() => {
+    const totalActions = perfectHits + missedHits;
+    const finalAccuracy = totalActions > 0 ? Math.round((perfectHits / totalActions) * 100) : 100;
+    
+    let finalRank = 'Bronze';
+    if (scoreRef.current >= 50 && finalAccuracy >= 90) finalRank = 'Grandmaster';
+    else if (scoreRef.current >= 40 && finalAccuracy >= 82) finalRank = 'Master';
+    else if (scoreRef.current >= 30 && finalAccuracy >= 75) finalRank = 'Diamond';
+    else if (scoreRef.current >= 20 && finalAccuracy >= 65) finalRank = 'Platinum';
+    else if (scoreRef.current >= 10 && finalAccuracy >= 55) finalRank = 'Gold';
+    else if (scoreRef.current >= 5) finalRank = 'Silver';
+
+    const text = `👁️ I scored ${scoreRef.current} PTS with ${finalAccuracy}% accuracy on the Distance Judgment Depth Perception Drill! Reached Speed Level ${speedLevel}. Rank: ${finalRank}. Try it here: https://skilldrills.online/drills/visual/depth-perception/distance-judgment`;
+    
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      navigator.share({
+        title: 'My SkillDrills Visual Score',
+        text: text,
+        url: 'https://skilldrills.online/drills/visual/depth-perception/distance-judgment'
+      }).catch(() => {});
+    } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+      alert('Score card copied to clipboard!');
+    }
+  }, [speedLevel, perfectHits, missedHits]);
+
   if (loading || !isClient) { 
     return (
       <div className="min-h-screen flex items-center justify-center bg-black">
@@ -595,6 +619,45 @@ export default function DistanceJudgmentClient() {
   const accuracyPercentage = totalActions === 0 ? 100 : Math.round((perfectHits / totalActions) * 100);
   const strokeDasharray = 100;
   const strokeDashoffset = strokeDasharray - accuracyPercentage;
+
+  // Calculate grade based on score and accuracy
+  let gradeLetter = 'F';
+  if (accuracyPercentage >= 90 && score >= 40) gradeLetter = 'S';
+  else if (accuracyPercentage >= 80 && score >= 30) gradeLetter = 'A';
+  else if (accuracyPercentage >= 70 && score >= 20) gradeLetter = 'B';
+  else if (accuracyPercentage >= 60 && score >= 10) gradeLetter = 'C';
+  else if (accuracyPercentage >= 50 && score >= 5) gradeLetter = 'D';
+
+  let rankName = 'Bronze';
+  let rankColor = 'text-slate-500';
+  if (score >= 50 && accuracyPercentage >= 90) {
+    rankName = 'Grandmaster';
+    rankColor = 'text-fuchsia-400 font-extrabold';
+  } else if (score >= 40 && accuracyPercentage >= 82) {
+    rankName = 'Master';
+    rankColor = 'text-red-400 font-extrabold';
+  } else if (score >= 30 && accuracyPercentage >= 75) {
+    rankName = 'Diamond';
+    rankColor = 'text-cyan-400 font-extrabold';
+  } else if (score >= 20 && accuracyPercentage >= 65) {
+    rankName = 'Platinum';
+    rankColor = 'text-indigo-400 font-extrabold';
+  } else if (score >= 10 && accuracyPercentage >= 55) {
+    rankName = 'Gold';
+    rankColor = 'text-yellow-400 font-extrabold';
+  } else if (score >= 5) {
+    rankName = 'Silver';
+    rankColor = 'text-gray-300 font-extrabold';
+  }
+
+  let diagnostics = "Incredible depth-interception skills! Your brain processes 3D stereoscopic space and velocity vectors with precision.";
+  if (missedHits > 8) {
+    diagnostics = "High rate of misses. Focus on the target ring rather than tracking the sphere directly, relying on your peripheral timing.";
+  } else if (accuracyPercentage < 65) {
+    diagnostics = "Slips in depth calibration detected. Let the ball get slightly closer to center before tapping.";
+  } else if (score < 15) {
+    diagnostics = "To boost score, maintain a higher intercept accuracy to add time and increase the speed multipliers.";
+  }
 
   return (
     <div className="min-h-screen select-none bg-black text-white selection:bg-transparent" style={{ WebkitTapHighlightColor: 'transparent' }}>
@@ -743,73 +806,87 @@ export default function DistanceJudgmentClient() {
 
             {/* Premium Custom End Screen */}
             {(engine.gameState === 'ended' || isTimeUp) && !showRotateWarning && (
-              <div className="absolute inset-0 flex items-center justify-center z-[70] bg-black/90 pointer-events-auto animate-in fade-in duration-300 p-4" onPointerDown={e => e.stopPropagation()}>
-                <div className="rounded-3xl max-w-md w-full shadow-2xl border border-gray-800 bg-gray-950 overflow-hidden flex flex-col max-h-[95vh]">
-                  
-                  <div className="bg-gradient-to-br from-rose-900/40 to-pink-900/40 p-5 sm:p-6 border-b border-gray-800 relative overflow-hidden pointer-events-none shrink-0">
-                    <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-rose-500/20 rounded-full blur-3xl"></div>
-                    <div className="absolute bottom-0 left-0 -mb-4 -ml-4 w-32 h-32 bg-pink-500/20 rounded-full blur-3xl"></div>
-                    <div className="relative z-10 flex flex-col items-center">
-                      {isNewBest && (
-                        <div className="bg-yellow-500 text-black text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-2 shadow-[0_0_15px_rgba(234,179,8,0.5)]">
-                          ⭐ New Personal Best
-                        </div>
-                      )}
-                      <h2 className="text-2xl sm:text-3xl font-black text-white mb-1 tracking-tight">Mission Complete</h2>
-                      <p className="text-rose-400 font-medium text-sm sm:text-base">Distance Judgment • Lvl {speedLevel}</p>
-                    </div>
-                  </div>
+              <div className="absolute inset-0 bg-[#05070e]/98 overflow-y-auto p-6 z-[70] select-none scrollbar-thin scroll-smooth backdrop-blur-sm animate-in fade-in duration-300 pointer-events-auto" onPointerDown={e => e.stopPropagation()}>
+                <div className="min-h-full flex flex-col justify-center items-center py-4 w-full">
+                  <div className="max-w-md w-full text-center">
+                    {score > 0 && score >= bestScore && (
+                      <div className="inline-block bg-yellow-500 text-black text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-3 shadow-[0_0_15px_rgba(234,179,8,0.5)] animate-bounce font-mono">
+                        ⭐ NEW PERSONAL BEST!
+                      </div>
+                    )}
+                    
+                    <h2 className="text-xl font-black text-white uppercase tracking-wider mb-1 font-mono">
+                      Drill Complete
+                    </h2>
+                    <p className="text-xs text-slate-500 uppercase tracking-widest mb-6 font-mono">
+                      Speed Level Reached: Level {speedLevel}
+                    </p>
 
-                  {/* Wrapper allows internal scrolling if needed on very small screens, 
-                      but layout should mostly fit without scrolling now */}
-                  <div className="flex-1 flex flex-col p-5 sm:p-6 pointer-events-none overflow-y-auto min-h-0">
-                    <div className="flex justify-between items-center mb-6">
-                      <div className="flex flex-col">
-                        <span className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Final Score</span>
-                        <div className="flex items-end gap-1">
-                          <span className="text-5xl sm:text-6xl font-black text-white leading-none tracking-tighter">{score}</span>
-                          <span className="text-sm sm:text-lg text-gray-500 font-bold mb-1">PTS</span>
-                        </div>
+                    <div className="grid grid-cols-3 gap-2.5 mb-6 text-left font-mono">
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Final Score</span>
+                        <span className="text-sm font-black text-white">{score} <span className="text-[8px] text-slate-400 font-normal">PTS</span></span>
+                      </div>
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Accuracy</span>
+                        <span className="text-sm font-black text-white">{accuracyPercentage}%</span>
+                      </div>
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Best Score</span>
+                        <span className="text-sm font-black text-yellow-400">{bestScore}</span>
                       </div>
                       
-                      <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center shrink-0">
-                        <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
-                          <path className="text-gray-800" strokeWidth="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                          <path 
-                            className={`${accuracyPercentage >= 80 ? 'text-green-500' : accuracyPercentage >= 50 ? 'text-yellow-500' : 'text-red-500'} transition-all duration-1000 ease-out`} 
-                            strokeWidth="3" strokeDasharray={`${strokeDasharray}`} strokeDashoffset={`${strokeDashoffset}`} strokeLinecap="round" stroke="currentColor" fill="none" 
-                            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" 
-                          />
-                        </svg>
-                        <div className="absolute inset-0 flex flex-col items-center justify-center">
-                          <span className={`text-lg sm:text-xl font-black ${accuracyPercentage >= 80 ? 'text-green-400' : accuracyPercentage >= 50 ? 'text-yellow-400' : 'text-red-400'}`}>{accuracyPercentage}%</span>
-                          <span className="text-[7px] sm:text-[8px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">Accuracy</span>
-                        </div>
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold font-mono">Accurate Hits</span>
+                        <span className="text-sm font-black text-emerald-400">{perfectHits}</span>
+                      </div>
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Misses</span>
+                        <span className="text-sm font-black text-red-400">{missedHits}</span>
+                      </div>
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Grade</span>
+                        <span className="text-sm font-black text-pink-400">{gradeLetter}</span>
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                      <div className="bg-gray-900/50 rounded-xl p-3 text-center border border-gray-800">
-                        <div className="text-gray-400 text-[10px] uppercase font-bold tracking-wider mb-1">Accurate Hits</div>
-                        <div className="text-xl font-black text-green-400">{perfectHits}</div>
+                    <div className="bg-[#0b0f19] border border-slate-850 p-3 rounded-xl mb-4 text-left">
+                      <span className={`text-xs font-black block text-center uppercase tracking-widest ${rankColor} mb-2`}>
+                        Rank: {rankName}
+                      </span>
+                      <div className="w-full h-px bg-slate-850 mb-2"></div>
+                      <div className="flex items-center gap-1.5 text-[9px] font-bold text-white uppercase mb-1 font-mono">
+                        <Sparkles className="w-3 h-3 text-amber-500" /> Diagnostics advice:
                       </div>
-                      <div className="bg-gray-900/50 rounded-xl p-3 text-center border border-gray-800">
-                        <div className="text-gray-400 text-[10px] uppercase font-bold tracking-wider mb-1">Misses</div>
-                        <div className="text-xl font-black text-red-400">{missedHits}</div>
-                      </div>
+                      <p className="text-[10px] text-slate-400 leading-normal">
+                        {diagnostics}
+                      </p>
                     </div>
-                  </div>
 
-                  <div className="p-4 sm:p-5 bg-gray-900/80 border-t border-gray-800 flex flex-wrap gap-2 sm:gap-3 shrink-0">
-                    <button onPointerDown={e => e.stopPropagation()} onClick={() => { engine.endGame(); handleStartGame(); }} className="flex-1 min-w-[140px] py-3.5 bg-rose-600 text-white rounded-xl font-black tracking-wide hover:bg-rose-500 transition-all active:scale-95 flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(244,63,94,0.4)]">
-                      <RefreshCw className="w-5 h-5" /> PLAY AGAIN
-                    </button>
-                    <button onPointerDown={e => e.stopPropagation()} onClick={shareDrillLink} className="px-5 py-3.5 bg-gray-800 text-white rounded-xl font-bold hover:bg-gray-700 transition-all active:scale-95 border border-gray-700 flex items-center justify-center">
-                      <Share2 className="w-5 h-5" />
-                    </button>
-                    <button onPointerDown={e => e.stopPropagation()} onClick={handleExitGame} className="px-5 py-3.5 bg-gray-800 text-red-400 rounded-xl font-bold hover:bg-gray-700 hover:text-red-300 transition-all active:scale-95 border border-gray-700 flex items-center justify-center">
-                      <LogOut className="w-5 h-5" />
-                    </button>
+                    <div className="flex gap-2">
+                      <PlayAgainButton
+                        onClick={() => { engine.endGame(); handleStartGame(); }}
+                        colorTheme="rose"
+                      />
+                      <button
+                        onPointerDown={e => e.stopPropagation()}
+                        onClick={shareScore}
+                        className="p-3 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded-xl transition-colors active:scale-95 flex items-center justify-center"
+                        title="Share Score"
+                      >
+                        <Share2 className="w-4 h-4" />
+                      </button>
+                      {isFullscreen && (
+                        <button
+                          onPointerDown={e => e.stopPropagation()}
+                          onClick={handleExitGame}
+                          className="p-3 bg-red-900/30 border border-red-900/55 hover:bg-red-900/50 text-red-400 rounded-xl transition-colors active:scale-95 flex items-center justify-center"
+                          title="Exit Drill"
+                        >
+                          <LogOut className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -830,7 +907,7 @@ export default function DistanceJudgmentClient() {
                   <RuleItem num="2" color="blue" text="Dynamic Velocity" highlight="Random speeds" result="Prevents rhythm abuse" />
                 </div>
                 <div className="space-y-5">
-                  <RuleItem num="3" color="red" text="Miss / Timeout" highlight="-2 PTS | -0.5s" result="Deviation > 3%" />
+                  <RuleItem num="3" color="red" text="Miss / Timeout" highlight="No PTS Penalty | -0.5s" result="Deviation > 3%" />
                   <RuleItem num="4" color="orange" text="Timer Max Limit" highlight="60 Seconds" result="Clock drains on misses" />
                 </div>
               </div>
@@ -903,7 +980,7 @@ export default function DistanceJudgmentClient() {
                     </div>
                     <div>
                       <h4 className="text-sm font-bold text-gray-200">I felt like I hit it, why did I get a miss?</h4>
-                      <p className="text-xs text-gray-400 mt-1">The accuracy requirement is incredibly strict (deviation ≤ 3%). If the ball is slightly inside or slightly outside the dashed target ring, it registers as a full MISS and penalizes your score and time. True precision is required.</p>
+                      <p className="text-xs text-gray-400 mt-1">The accuracy requirement is incredibly strict (deviation ≤ 3.0% initially, shrinking down to 1.5% as your score rises). If the ball is slightly inside or slightly outside the dashed target ring, it registers as a full MISS and penalizes your remaining time. True precision is required.</p>
                     </div>
                   </div>
                 </div>

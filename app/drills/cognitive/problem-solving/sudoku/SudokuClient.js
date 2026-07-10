@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
@@ -6,11 +6,12 @@ import {
   Target, Zap, Timer, Trophy, 
   Volume2, VolumeX, Maximize2, Minimize2, Eye,
   BarChart3, Info, Grid3X3, CheckCircle2, RefreshCw,
-  Crosshair, Users, Share2,
+  Crosshair, Users, Share2, Sparkles, LogOut,
   GraduationCap, Lightbulb, TrendingUp, ArrowRight,
   ChevronRight, Play, XCircle
 } from 'lucide-react';
 import useGameEngine from '../../../../../lib/useGameEngine';
+import PlayAgainButton from "../../../../../components/PlayAgainButton";
 
 // ============================================================
 // LEVEL & DIFFICULTY SYSTEM
@@ -402,14 +403,12 @@ export default function SudokuClient() {
       mistakesRef.current += 1;
       setMistakes(mistakesRef.current);
       
-      scoreRef.current = Math.max(0, scoreRef.current - 2); 
-      setScore(scoreRef.current); 
-
+      // Removed score deduction on mistake
       localTimeRef.current -= 2;
       setLocalTimeRemaining(Math.max(0, localTimeRef.current));
       
       if (audioSynth) audioSynth.playPenalty(); 
-      triggerFeedback('Mistake! -2 PTS | -2s', 'error'); 
+      triggerFeedback('Mistake! -2s', 'error'); 
 
       if (localTimeRef.current <= 0) {
         setIsTimeUp(true);
@@ -470,6 +469,31 @@ export default function SudokuClient() {
     }
   }, []);
 
+  const shareScore = useCallback(() => {
+    const finalAccuracy = totalCorrect + mistakes > 0 ? Math.round((totalCorrect / (totalCorrect + mistakes)) * 100) : 100;
+    
+    let finalRank = 'Bronze';
+    if (scoreRef.current >= 150 && finalAccuracy >= 90) finalRank = 'Grandmaster';
+    else if (scoreRef.current >= 100 && finalAccuracy >= 82) finalRank = 'Master';
+    else if (scoreRef.current >= 60 && finalAccuracy >= 75) finalRank = 'Diamond';
+    else if (scoreRef.current >= 40 && finalAccuracy >= 65) finalRank = 'Platinum';
+    else if (scoreRef.current >= 20 && finalAccuracy >= 55) finalRank = 'Gold';
+    else if (scoreRef.current >= 10) finalRank = 'Silver';
+
+    const text = `🧠 I scored ${scoreRef.current} PTS with ${finalAccuracy}% accuracy on the Sudoku Speed-Logic Drill! Cleared ${completedGrids} progressive grids. Rank: ${finalRank}. Try it here: https://skilldrills.online/drills/cognitive/problem-solving/sudoku`;
+    
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      navigator.share({
+        title: 'My SkillDrills Cognitive Score',
+        text: text,
+        url: 'https://skilldrills.online/drills/cognitive/problem-solving/sudoku'
+      }).catch(() => {});
+    } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+      alert('Score card copied to clipboard!');
+    }
+  }, [completedGrids, totalCorrect, mistakes]);
+
   const getGridLabel = useCallback(() => { if (gridSize === 4) return '4×4'; if (gridSize === 5) return '5×5'; if (gridSize === 6) return '6×6'; return '7×7'; }, [gridSize]);
   const getAvailableNumbers = useCallback(() => Array.from({ length: gridSize }, (_, i) => i + 1), [gridSize]);
 
@@ -487,6 +511,45 @@ export default function SudokuClient() {
   const accuracy = totalCorrect + mistakes > 0 
     ? Math.round((totalCorrect / (totalCorrect + mistakes)) * 100) 
     : 0;
+
+  // Calculate grade based on score and accuracy
+  let gradeLetter = 'F';
+  if (accuracy >= 85 && score >= 100) gradeLetter = 'S';
+  else if (accuracy >= 75 && score >= 60) gradeLetter = 'A';
+  else if (accuracy >= 65 && score >= 40) gradeLetter = 'B';
+  else if (accuracy >= 55 && score >= 20) gradeLetter = 'C';
+  else if (accuracy >= 45 && score >= 10) gradeLetter = 'D';
+
+  let rankName = 'Bronze';
+  let rankColor = 'text-slate-500';
+  if (score >= 150 && accuracy >= 90) {
+    rankName = 'Grandmaster';
+    rankColor = 'text-fuchsia-400 font-extrabold';
+  } else if (score >= 100 && accuracy >= 82) {
+    rankName = 'Master';
+    rankColor = 'text-red-400 font-extrabold';
+  } else if (score >= 60 && accuracy >= 75) {
+    rankName = 'Diamond';
+    rankColor = 'text-cyan-400 font-extrabold';
+  } else if (score >= 40 && accuracy >= 65) {
+    rankName = 'Platinum';
+    rankColor = 'text-indigo-400 font-extrabold';
+  } else if (score >= 20 && accuracy >= 55) {
+    rankName = 'Gold';
+    rankColor = 'text-yellow-400 font-extrabold';
+  } else if (score >= 10) {
+    rankName = 'Silver';
+    rankColor = 'text-gray-300 font-extrabold';
+  }
+
+  let diagnostics = "Sensational spatial deduction! Your prefrontal cortex processes row, column, and subgrid constraints in parallel under high time pressure.";
+  if (mistakes > 4) {
+    diagnostics = "High logical error rate. Take a brief moment to scan both the row and column of the target cell before placing a digit.";
+  } else if (accuracy < 60) {
+    diagnostics = "Slips in constraint checking detected. Keep practice focused on smaller 4x4 and 5x5 grids to build speed without error.";
+  } else if (score < 40) {
+    diagnostics = "To improve your score, focus on clearing the initial 4x4 grid as quickly as possible to bank time bonuses.";
+  }
   const strokeDasharray = 100;
   const strokeDashoffset = strokeDasharray - accuracy;
 
@@ -676,72 +739,87 @@ export default function SudokuClient() {
             </div>
           )}
 
-          {/* END SCREEN (Scrollable) */}
+          {/* Premium Custom End Screen */}
           {(engine.gameState === 'ended' || isTimeUp) && (
-            <div className="absolute inset-0 flex items-center justify-center z-[70] bg-black/95 pointer-events-auto animate-in fade-in duration-300 overflow-y-auto px-4 py-6">
-              <div className="rounded-3xl max-w-md w-full shadow-2xl border border-gray-800 bg-gray-950 flex flex-col max-h-[95vh] overflow-y-auto my-auto">
-                
-                <div className="bg-gradient-to-br from-blue-900/40 to-indigo-900/40 p-4 sm:p-6 border-b border-gray-800 relative overflow-hidden pointer-events-none shrink-0 rounded-t-3xl">
-                  <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-blue-500/20 rounded-full blur-3xl"></div>
-                  <div className="absolute bottom-0 left-0 -mb-4 -ml-4 w-32 h-32 bg-indigo-500/20 rounded-full blur-3xl"></div>
-                  <div className="relative z-10 flex flex-col items-center">
-                    {isNewBest && (
-                      <div className="bg-yellow-500 text-black text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-2 shadow-[0_0_15px_rgba(234,179,8,0.5)]">
-                        ⭐ New Personal Best
-                      </div>
-                    )}
-                    <h2 className="text-2xl sm:text-3xl font-black text-white mb-1 tracking-tight">Time Expired</h2>
-                    <p className="text-blue-400 font-medium text-sm">Sudoku Speed-Logic • {completedGrids} Clears</p>
-                  </div>
-                </div>
+            <div className="absolute inset-0 bg-[#05070e]/98 overflow-y-auto p-6 z-[70] select-none scrollbar-thin scroll-smooth backdrop-blur-sm animate-in fade-in duration-300 pointer-events-auto" onPointerDown={e => e.stopPropagation()}>
+              <div className="min-h-full flex flex-col justify-center items-center py-4 w-full">
+                <div className="max-w-md w-full text-center">
+                  {score > 0 && score >= bestScore && (
+                    <div className="inline-block bg-yellow-500 text-black text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-3 shadow-[0_0_15px_rgba(234,179,8,0.5)] animate-bounce font-mono">
+                      ⭐ NEW PERSONAL BEST!
+                    </div>
+                  )}
+                  
+                  <h2 className="text-xl font-black text-white uppercase tracking-wider mb-1 font-mono">
+                    Drill Complete
+                  </h2>
+                  <p className="text-xs text-slate-500 uppercase tracking-widest mb-6 font-mono">
+                    Max Grid Cleared: {gridSize}x{gridSize}
+                  </p>
 
-                <div className="p-4 sm:p-6 pointer-events-none shrink-0">
-                  <div className="flex justify-between items-center mb-6">
-                    <div className="flex flex-col">
-                      <span className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Final Score</span>
-                      <div className="flex items-end gap-1">
-                        <span className="text-5xl sm:text-6xl font-black text-white leading-none tracking-tighter">{score}</span>
-                        <span className="text-sm sm:text-lg text-gray-500 font-bold mb-1">PTS</span>
-                      </div>
+                  <div className="grid grid-cols-3 gap-2.5 mb-6 text-left font-mono">
+                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Final Score</span>
+                      <span className="text-sm font-black text-white">{score} <span className="text-[8px] text-slate-400 font-normal">PTS</span></span>
+                    </div>
+                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Accuracy</span>
+                      <span className="text-sm font-black text-white">{accuracy}%</span>
+                    </div>
+                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Best Score</span>
+                      <span className="text-sm font-black text-yellow-400">{bestScore}</span>
                     </div>
                     
-                    <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center">
-                      <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
-                        <path className="text-gray-800" strokeWidth="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                        <path 
-                          className={`${accuracy >= 80 ? 'text-green-500' : accuracy >= 50 ? 'text-yellow-500' : 'text-red-500'} transition-all duration-1000 ease-out`} 
-                          strokeWidth="3" strokeDasharray={`${strokeDasharray}`} strokeDashoffset={`${strokeDashoffset}`} strokeLinecap="round" stroke="currentColor" fill="none" 
-                          d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" 
-                        />
-                      </svg>
-                      <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <span className={`text-lg sm:text-xl font-black ${accuracy >= 80 ? 'text-green-400' : accuracy >= 50 ? 'text-yellow-400' : 'text-red-400'}`}>{accuracy}%</span>
-                        <span className="text-[7px] sm:text-[8px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">Accuracy</span>
-                      </div>
+                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Grids Cleared</span>
+                      <span className="text-sm font-black text-emerald-400">{completedGrids}</span>
+                    </div>
+                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Penalties</span>
+                      <span className="text-sm font-black text-red-400">{mistakes}</span>
+                    </div>
+                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Grade</span>
+                      <span className="text-sm font-black text-pink-400">{gradeLetter}</span>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-2">
-                    <div className="bg-gray-900/50 rounded-xl p-2 sm:p-3 text-center border border-gray-800">
-                      <div className="text-gray-400 text-[9px] sm:text-[10px] uppercase font-bold tracking-wider mb-1">Max Matrix Size</div>
-                      <div className="text-lg sm:text-xl font-black text-cyan-400">{gridSize}x{gridSize}</div>
+                  <div className="bg-[#0b0f19] border border-slate-850 p-3 rounded-xl mb-4 text-left">
+                    <span className={`text-xs font-black block text-center uppercase tracking-widest ${rankColor} mb-2`}>
+                      Rank: {rankName}
+                    </span>
+                    <div className="w-full h-px bg-slate-850 mb-2"></div>
+                    <div className="flex items-center gap-1.5 text-[9px] font-bold text-white uppercase mb-1 font-mono">
+                      <Sparkles className="w-3 h-3 text-blue-500" /> Diagnostics advice:
                     </div>
-                    <div className="bg-gray-900/50 rounded-xl p-2 sm:p-3 text-center border border-gray-800">
-                      <div className="text-gray-400 text-[9px] sm:text-[10px] uppercase font-bold tracking-wider mb-1">Total Penalties</div>
-                      <div className="text-lg sm:text-xl font-black text-red-400">{mistakes}</div>
-                    </div>
+                    <p className="text-[10px] text-slate-400 leading-normal">
+                      {diagnostics}
+                    </p>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <PlayAgainButton onClick={() => { if(engineRef.current) engineRef.current.endGame(); handleStartGame(); }} colorTheme="blue" />
+                    <button
+                      onPointerDown={e => e.stopPropagation()}
+                      onClick={shareScore}
+                      className="p-3 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded-xl transition-colors active:scale-95 flex items-center justify-center"
+                      title="Share Score"
+                    >
+                      <Share2 className="w-4 h-4" />
+                    </button>
+                    {isFullscreen && (
+                      <button
+                        onPointerDown={e => e.stopPropagation()}
+                        onClick={() => { if(engineRef.current) engineRef.current.endGame(); }}
+                        className="p-3 bg-red-900/30 border border-red-900/55 hover:bg-red-900/50 text-red-400 rounded-xl transition-colors active:scale-95 flex items-center justify-center"
+                        title="Exit Drill"
+                      >
+                        <LogOut className="w-4 h-4" />
+                      </button>
+                    )}
                   </div>
                 </div>
-
-                <div className="p-3 sm:p-5 bg-gray-900/50 border-t border-gray-800 flex gap-2 sm:gap-3 shrink-0 rounded-b-3xl">
-                  <button onClick={() => { if(engineRef.current) engineRef.current.endGame(); handleStartGame(); }} className="flex-1 py-3 sm:py-4 bg-blue-600 text-white rounded-xl font-black tracking-wide hover:bg-blue-500 transition-all active:scale-95 flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(37,99,235,0.4)] text-sm sm:text-base">
-                    <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5" /> PLAY AGAIN
-                  </button>
-                  <button onClick={shareDrillLink} className="px-4 sm:px-5 py-3 sm:py-4 bg-gray-800 text-white rounded-xl font-bold hover:bg-gray-700 transition-all active:scale-95 border border-gray-700 flex items-center justify-center" title="Share Drill">
-                    <Share2 className="w-4 h-4 sm:w-5 sm:h-5" />
-                  </button>
-                </div>
-                
               </div>
             </div>
           )}
@@ -760,7 +838,7 @@ export default function SudokuClient() {
                   <RuleItem num="2" color="indigo" text="Complete the entire grid" result="+20 PTS & +15s Time" />
                 </div>
                 <div className="space-y-5">
-                  <RuleItem num="3" color="red" text="Inputting a wrong number" result="-2 PTS & -2s Penalty" />
+                  <RuleItem num="3" color="red" text="Inputting a wrong number" result="No PTS Penalty & -2s Penalty" />
                   <RuleItem num="4" color="purple" text="Scale up to" highlight="7x7 Grids" result="Adaptive Difficulty" />
                 </div>
               </div>

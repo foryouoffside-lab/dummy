@@ -96,40 +96,62 @@ const faqSchema = {
   ]
 };
 
+const howToSchema = {
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "How to Test and Train Reaction Speed",
+  "description": "Improve your motor latency, hand-eye coordination, and selective attention by targeting active nodes while ignoring distractors.",
+  "step": [
+    {
+      "@type": "HowToStep",
+      "position": 1,
+      "name": "Press Start Drill",
+      "text": "Start the timer-attack. Red targets and blue distractors will immediately begin to spawn on the grid."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 2,
+      "name": "Tap the Red Target",
+      "text": "Quickly tap or click on the active RED target to score +5 PTS and gain +2 seconds on the clock."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 3,
+      "name": "Avoid Blue Distractors",
+      "text": "Do not tap on the blue distractors or the background. Tapping them or timing out will deduct 1 second from your clock."
+    }
+  ]
+};
+
 export const metadata = {
-  title: "Reaction Time Test – Free Click Speed & Visual Reflex Trainer | SkillDrills",
-  description: "Take this free reaction time test online. Measure your click reflex speed in milliseconds, compare to the average, and train to improve. No sign-up required.",
+  title: "Free Reaction Time Test | Online Neuro Speed & Reflex Trainer | SkillDrills",
+  description: "Test your reaction speed for free with our online neuro speed test. Assess your reflexes, compare against human benchmarks, and train your cognitive response.",
   keywords: [
-    "reaction time test",
-    "reaction speed test",
-    "reflex test online",
-    "click speed test",
+    "reaction time test online",
+    "test reaction speed free",
+    "neuro speed test",
     "human benchmark reaction time",
-    "what is average reaction time",
-    "how to improve reaction time",
-    "reaction time test milliseconds",
-    "visual reaction time test",
-    "reflex tester game",
-    "esports reaction speed test",
-    "click reaction test free"
+    "reflex training",
+    "cognitive speed assessment",
+    "gamer reaction test"
   ],
   alternates: {
     canonical: "https://skilldrills.online/drills/cognitive/processing-speed/reaction-time",
   },
   robots: { index: true, follow: true },
   openGraph: {
-    title: "Reaction Time Test – Free Click Speed & Visual Reflex Trainer | SkillDrills",
-    description: "Take this free reaction time test online. Measure your click reflex speed in milliseconds, compare to the average, and train to improve. No sign-up required.",
+    title: "Free Reaction Time Test | Online Neuro Speed & Reflex Trainer | SkillDrills",
+    description: "Test your reaction speed for free with our online neuro speed test. Assess your reflexes, compare against human benchmarks, and train your cognitive response.",
     url: "https://skilldrills.online/drills/cognitive/processing-speed/reaction-time",
     siteName: 'SkillDrills',
     locale: 'en_US',
     type: 'website',
-    images: [{ url: 'https://skilldrills.online/icons/icon-512x512.png', width: 512, height: 512, alt: "Reaction Time Test – Free Click Speed & Reflex Trainer" }],
+    images: [{ url: 'https://skilldrills.online/icons/icon-512x512.png', width: 512, height: 512, alt: "Free Reaction Time Test" }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Reaction Time Test – Free Click Speed & Visual Reflex Trainer | SkillDrills",
-    description: "Take this free reaction time test online. Measure your click reflex speed in milliseconds, compare to the average, and train to improve. No sign-up required.",
+    title: "Free Reaction Time Test | Online Neuro Speed & Reflex Trainer | SkillDrills",
+    description: "Test your reaction speed for free with our online neuro speed test. Assess your reflexes, compare against human benchmarks, and train your cognitive response.",
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
 };
@@ -140,6 +162,7 @@ export default function ReactionTimePage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }} />
       <EliteNeuroSwitchClient />
     </>
   );

@@ -9,9 +9,10 @@ import {
   Crosshair, Star, Users, Share2, 
   GraduationCap, Lightbulb, TrendingUp, Clock, ArrowRight,
   Brain, Keyboard, Layers, Award, CheckCircle, XCircle,
-  ChevronRight, Play, LogOut, Hash, Search
+  ChevronRight, Play, LogOut, Hash, Search, Sparkles
 } from 'lucide-react';
 import useGameEngine from '../../../../../lib/useGameEngine';
+import PlayAgainButton from "../../../../../components/PlayAgainButton";
 
 // ============================================================
 // ZERO-LATENCY AUDIO SYNTHESIZER
@@ -336,12 +337,42 @@ export default function ConcentrationGridClient() {
     }, 600);
   }, []);
 
-  const shareDrillLink = useCallback(() => {
-    const url = 'https://skilldrills.online/drills/cognitive/focus/concentration-grid';
-    if (navigator.share) {
-      navigator.share({ title: 'Concentration Grid Drill', text: 'Free cognitive drill! Scale up to 8x8 matrices.', url }).catch(() => {});
-    } else {
-      navigator.clipboard.writeText(url).then(() => alert('Link copied!')).catch(() => prompt('Copy:', url));
+  // === UPDATED DIFFICULTY SCALING ===
+  const updateDifficulty = useCallback(() => {
+    const newLevel = Math.floor(scoreRef.current / 50) + 1;
+    levelRef.current = newLevel;
+    setCurrentLevel(newLevel);
+    
+    // Grid size starts at 3, and increases by 1 for EVERY new level.
+    const targetGridSize = Math.min(8, 3 + (newLevel - 1));
+    
+    if (gridSizeRef.current !== targetGridSize) {
+      gridSizeRef.current = targetGridSize;
+      setGridSize(targetGridSize);
+    }
+  }, []);
+
+  const shareScore = useCallback(() => {
+    const accuracyVal = totalClicksRef.current > 0 ? Math.round((correctClicksRef.current / totalClicksRef.current) * 100) : 100;
+    let finalRank = 'Bronze';
+    if (scoreRef.current >= 400 && accuracyVal >= 90) finalRank = 'Grandmaster';
+    else if (scoreRef.current >= 300 && accuracyVal >= 82) finalRank = 'Master';
+    else if (scoreRef.current >= 220 && accuracyVal >= 75) finalRank = 'Diamond';
+    else if (scoreRef.current >= 150 && accuracyVal >= 65) finalRank = 'Platinum';
+    else if (scoreRef.current >= 80 && accuracyVal >= 55) finalRank = 'Gold';
+    else if (scoreRef.current >= 40) finalRank = 'Silver';
+
+    const text = `🧠 I scored ${scoreRef.current} PTS with ${accuracyVal}% accuracy on the Concentration Grid Test! Rank: ${finalRank}. Challenge your focus: https://skilldrills.online/drills/cognitive/focus/concentration-grid`;
+    
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      navigator.share({
+        title: 'My SkillDrills Cognitive Score',
+        text: text,
+        url: 'https://skilldrills.online/drills/cognitive/focus/concentration-grid'
+      }).catch(() => {});
+    } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+      alert('Score card copied to clipboard!');
     }
   }, []);
 
@@ -388,14 +419,15 @@ export default function ConcentrationGridClient() {
         
         // Exact custom score logic: +20 Score
         scoreRef.current += 20;
+        if (engineRef.current && typeof engineRef.current.setScore === 'function') {
+          engineRef.current.setScore(scoreRef.current);
+        }
         
         // Add +10 seconds (Max 60)
         localTimeRef.current = Math.min(60.0, localTimeRef.current + 10.0);
         setLocalTimeRemaining(localTimeRef.current);
         
-        // Advance Level & Size
-        levelRef.current += 1;
-        if (gridSizeRef.current < 8) gridSizeRef.current += 1;
+        updateDifficulty();
         
         triggerFeedback(`Grid Cleared! +20 PTS | +10s Time`, 'success');
         generateNewGrid(gridSizeRef.current);
@@ -408,12 +440,12 @@ export default function ConcentrationGridClient() {
       if (audioSynth) audioSynth.playBuzz();
       penaltyCountRef.current += 1;
       
-      // Exact custom penalty logic: -5 score, -2s time, decrease difficulty
-      scoreRef.current = Math.max(0, scoreRef.current - 5);
+      // Exact custom penalty logic: no score penalty, -2s time
       localTimeRef.current -= 2.0;
-      levelRef.current = Math.max(1, levelRef.current - 1);
       
-      triggerFeedback(`Mistake! -5 PTS | -2s`, 'error');
+      updateDifficulty();
+      
+      triggerFeedback(`Mistake! -2s`, 'error');
 
       if (localTimeRef.current <= 0) {
         localTimeRef.current = 0;
@@ -425,7 +457,7 @@ export default function ConcentrationGridClient() {
       }
       syncToUI();
     }
-  }, [generateNewGrid, triggerFeedback, syncToUI, isTimeUp]);
+  }, [generateNewGrid, triggerFeedback, syncToUI, isTimeUp, updateDifficulty]);
 
   // Start sequence resets
   useEffect(() => {
@@ -454,7 +486,46 @@ export default function ConcentrationGridClient() {
     );
   }
 
-  const accuracy = totalClicks > 0 ? Math.round((correctClicks / totalClicks) * 100) : 0;
+  const accuracy = totalClicks > 0 ? Math.round((correctClicks / totalClicks) * 100) : 100;
+
+  // Calculate grade based on score and accuracy
+  let gradeLetter = 'F';
+  if (accuracy >= 90 && currentScore >= 80) gradeLetter = 'S';
+  else if (accuracy >= 80 && currentScore >= 60) gradeLetter = 'A';
+  else if (accuracy >= 70 && currentScore >= 40) gradeLetter = 'B';
+  else if (accuracy >= 60 && currentScore >= 20) gradeLetter = 'C';
+  else if (accuracy >= 45 && currentScore >= 20) gradeLetter = 'D';
+
+  let rankName = 'Bronze';
+  let rankColor = 'text-slate-500';
+  if (currentScore >= 160 && accuracy >= 90) {
+    rankName = 'Grandmaster';
+    rankColor = 'text-fuchsia-400 font-extrabold';
+  } else if (currentScore >= 120 && accuracy >= 82) {
+    rankName = 'Master';
+    rankColor = 'text-red-400 font-extrabold';
+  } else if (currentScore >= 80 && accuracy >= 75) {
+    rankName = 'Diamond';
+    rankColor = 'text-cyan-400 font-extrabold';
+  } else if (currentScore >= 60 && accuracy >= 65) {
+    rankName = 'Platinum';
+    rankColor = 'text-indigo-400 font-extrabold';
+  } else if (currentScore >= 40 && accuracy >= 55) {
+    rankName = 'Gold';
+    rankColor = 'text-yellow-400 font-extrabold';
+  } else if (currentScore >= 20) {
+    rankName = 'Silver';
+    rankColor = 'text-gray-300 font-extrabold';
+  }
+
+  let diagnostics = "Superb visual search efficiency! Your eyes processed the grid matrix numbers systematically without getting overwhelmed by the visual noise.";
+  if (accuracy < 60) {
+    diagnostics = "High search error rate. Ensure you click the correct next sequential number. Speed up your search before you commit to click.";
+  } else if (penaltyCount > 3) {
+    diagnostics = "Impulsive motor actions detected. Take a split second to scan and confirm number orientation before clicking.";
+  } else if (currentScore < 40) {
+    diagnostics = "Visual scanning delay. Try using systemic saccadic eye movements (e.g. scanning rows/cols or spiral outward) to find numbers faster.";
+  }
   const strokeDasharray = 100;
   const strokeDashoffset = strokeDasharray - accuracy;
 
@@ -637,73 +708,83 @@ export default function ConcentrationGridClient() {
 
           {/* END SCREEN */}
           {(engine.gameState === 'ended' || isTimeUp) && (
-            <div className="absolute inset-0 flex items-center justify-center z-[70] bg-black/95 pointer-events-auto animate-in fade-in duration-300 overflow-y-auto px-4 py-6" onPointerDown={e => e.stopPropagation()}>
-              <div className="rounded-3xl max-w-md w-full shadow-2xl border border-gray-800 bg-gray-950 flex flex-col max-h-[95vh] overflow-y-auto my-auto">
-                
-                <div className="bg-gradient-to-br from-cyan-900/40 to-blue-900/40 p-4 sm:p-6 border-b border-gray-800 relative overflow-hidden pointer-events-none shrink-0 rounded-t-3xl">
-                  <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-cyan-500/20 rounded-full blur-3xl"></div>
-                  <div className="absolute bottom-0 left-0 -mb-4 -ml-4 w-32 h-32 bg-blue-500/20 rounded-full blur-3xl"></div>
-                  <div className="relative z-10 flex flex-col items-center">
-                    {isNewBest && (
-                      <div className="bg-yellow-500 text-black text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-2 shadow-[0_0_15px_rgba(234,179,8,0.5)]">
-                        ⭐ New Personal Best
-                      </div>
-                    )}
-                    <h2 className="text-2xl sm:text-3xl font-black text-white mb-1 tracking-tight">Mission Complete</h2>
-                    <p className="text-cyan-400 font-medium text-xs sm:text-sm">Concentration Grid • Reached {gridSize}x{gridSize}</p>
-                  </div>
-                </div>
+            <div className="absolute inset-0 bg-[#05070e]/98 overflow-y-auto p-6 z-[70] select-none scrollbar-thin scroll-smooth backdrop-blur-sm" onPointerDown={e => e.stopPropagation()}>
+              <div className="min-h-full flex flex-col justify-center items-center py-4 w-full">
+                <div className="max-w-md w-full text-center">
+                  {currentScore > 0 && currentScore >= bestScore && (
+                    <div className="inline-block bg-yellow-500 text-black text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-3 shadow-[0_0_15px_rgba(234,179,8,0.5)] animate-bounce font-mono">
+                      ⭐ NEW PERSONAL BEST!
+                    </div>
+                  )}
+                  
+                  <h2 className="text-xl font-black text-white uppercase tracking-wider mb-1 font-mono">
+                    Drill Complete
+                  </h2>
+                  <p className="text-xs text-slate-500 uppercase tracking-widest mb-6 font-mono">
+                    Peak difficulty reached: Level {currentLevel} • Matrix Size: {gridSize}x{gridSize}
+                  </p>
 
-                <div className="p-4 sm:p-6 pointer-events-none shrink-0">
-                  <div className="flex justify-between items-center mb-4 sm:mb-6">
-                    <div className="flex flex-col">
-                      <span className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Final Score</span>
-                      <div className="flex items-end gap-1">
-                        <span className="text-4xl sm:text-6xl font-black text-white leading-none tracking-tighter">{currentScore}</span>
-                        <span className="text-sm sm:text-lg text-gray-500 font-bold mb-1">PTS</span>
-                      </div>
+                  <div className="grid grid-cols-3 gap-2.5 mb-6 text-left font-mono">
+                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Final Score</span>
+                      <span className="text-sm font-black text-white">{currentScore} <span className="text-[8px] text-slate-400 font-normal">PTS</span></span>
+                    </div>
+                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Accuracy</span>
+                      <span className="text-sm font-black text-white">{accuracy}%</span>
+                    </div>
+                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Best Score</span>
+                      <span className="text-sm font-black text-yellow-400">{bestScore}</span>
                     </div>
                     
-                    <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center">
-                      <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
-                        <path className="text-gray-800" strokeWidth="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                        <path 
-                          className={`${accuracy >= 80 ? 'text-green-500' : accuracy >= 50 ? 'text-yellow-500' : 'text-red-500'} transition-all duration-1000 ease-out`} 
-                          strokeWidth="3" strokeDasharray={`${strokeDasharray}`} strokeDashoffset={`${strokeDashoffset}`} strokeLinecap="round" stroke="currentColor" fill="none" 
-                          d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" 
-                        />
-                      </svg>
-                      <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <span className={`text-base sm:text-xl font-black ${accuracy >= 80 ? 'text-green-400' : accuracy >= 50 ? 'text-yellow-400' : 'text-red-400'}`}>{accuracy}%</span>
-                        <span className="text-[7px] sm:text-[8px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">Accuracy</span>
-                      </div>
+                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Correct Clicks</span>
+                      <span className="text-sm font-black text-emerald-400">{correctClicks}</span>
+                    </div>
+                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Errors</span>
+                      <span className="text-sm font-black text-red-400">{penaltyCount}</span>
+                    </div>
+                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Peak Size</span>
+                      <span className="text-sm font-black text-purple-400">{gridSize}x{gridSize}</span>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                    <div className="bg-gray-900/50 rounded-xl p-2 sm:p-3 text-center border border-gray-800">
-                      <div className="text-gray-400 text-[9px] sm:text-[10px] uppercase font-bold tracking-wider mb-1">Max Level Reached</div>
-                      <div className="text-base sm:text-xl font-black text-cyan-400">Level {currentLevel}</div>
+                  <div className="bg-[#0b0f19] border border-slate-850 p-3 rounded-xl mb-4 text-left">
+                    <span className={`text-xs font-black block text-center uppercase tracking-widest ${rankColor} mb-2`}>
+                      Rank: {rankName}
+                    </span>
+                    <div className="w-full h-px bg-slate-850 mb-2"></div>
+                    <div className="flex items-center gap-1.5 text-[9px] font-bold text-white uppercase mb-1 font-mono">
+                      <Sparkles className="w-3 h-3 text-yellow-500" /> Diagnostics advice:
                     </div>
-                    <div className="bg-gray-900/50 rounded-xl p-2 sm:p-3 text-center border border-gray-800">
-                      <div className="text-gray-400 text-[9px] sm:text-[10px] uppercase font-bold tracking-wider mb-1">Total Errors</div>
-                      <div className="text-base sm:text-xl font-black text-red-400">{penaltyCount}</div>
-                    </div>
+                    <p className="text-[10px] text-slate-400 leading-normal">
+                      {diagnostics}
+                    </p>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <PlayAgainButton onClick={handleStartGame} colorTheme="blue" />
+                    <button
+                      onClick={shareScore}
+                      className="p-3 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded-xl transition-colors active:scale-95"
+                      title="Share Score"
+                    >
+                      <Share2 className="w-4 h-4" />
+                    </button>
+                    {isFullscreen && (
+                      <button
+                        onClick={handleExit}
+                        className="p-3 bg-red-900/30 border border-red-900/55 hover:bg-red-900/50 text-red-400 rounded-xl transition-colors active:scale-95 flex items-center justify-center"
+                        title="Exit Drill"
+                      >
+                        <LogOut className="w-4 h-4" />
+                      </button>
+                    )}
                   </div>
                 </div>
-
-                <div className="p-3 sm:p-5 bg-gray-900/50 border-t border-gray-800 flex gap-2 sm:gap-3 flex-wrap sm:flex-nowrap rounded-b-3xl shrink-0">
-                  <button onPointerDown={e => e.stopPropagation()} onClick={handleStartGame} className="flex-1 min-w-[140px] py-3 sm:py-4 bg-cyan-600 text-white rounded-xl font-black tracking-wide hover:bg-cyan-500 transition-all active:scale-95 flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(6,182,212,0.4)] text-sm sm:text-base">
-                    <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5" /> PLAY AGAIN
-                  </button>
-                  <button onPointerDown={e => e.stopPropagation()} onClick={shareDrillLink} className="px-4 sm:px-5 py-3 sm:py-4 bg-gray-800 text-white rounded-xl font-bold hover:bg-gray-700 transition-all active:scale-95 border border-gray-700 flex items-center justify-center" title="Share Drill">
-                    <Share2 className="w-4 h-4 sm:w-5 sm:h-5" />
-                  </button>
-                  <button onPointerDown={e => e.stopPropagation()} onClick={handleExit} className="px-4 sm:px-5 py-3 sm:py-4 bg-red-900/30 text-red-400 rounded-xl font-bold hover:bg-red-900/50 transition-all active:scale-95 border border-red-900/50 flex items-center justify-center" title="Exit Drill">
-                    <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
-                  </button>
-                </div>
-                
               </div>
             </div>
           )}
@@ -724,7 +805,7 @@ export default function ConcentrationGridClient() {
                   <RuleItem color="green" text="Clear Grid" highlight="+20 PTS | +10s" result="Increases Difficulty" />
                 </div>
                 <div className="space-y-5">
-                  <RuleItem color="red" text="Wrong Tap" highlight="-5 PTS | -2s" result="Decreases Difficulty" />
+                  <RuleItem color="red" text="Wrong Tap" highlight="No PTS Penalty | -2s" result="Reduces Timer" />
                   <RuleItem color="purple" text="Time Limit Capped" highlight="Max 60 Seconds" result="Endless Survival" />
                 </div>
               </div>
@@ -779,7 +860,7 @@ export default function ConcentrationGridClient() {
                   <ul className="text-sm leading-relaxed space-y-3 pl-2 text-gray-400">
                     <li><strong className="text-gray-200">Peripheral Anchoring:</strong> Do not read the grid left-to-right like a book. Softly focus your eyes in the center of the grid and force your peripheral vision to detect the shapes of the numbers.</li>
                     <li><strong className="text-gray-200">Parallel Processing:</strong> While your finger/cursor is moving to click the current number, your eyes should already be scanning the board for the next number in the sequence.</li>
-                    <li><strong className="text-gray-200">Economy:</strong> You are actively rewarded (+10s and +20 points) for clearing grids, but penalized (-2s and -5 points) for spamming or guessing. Maintain a steady rhythm.</li>
+                    <li><strong className="text-gray-200">Economy:</strong> You are actively rewarded (+10s and +20 points) for clearing grids. While wrong answers do not deduct points, they still drain time (-2s) from your clock. Keep scoring to extend your play session.</li>
                   </ul>
                 </div>
 
@@ -791,11 +872,11 @@ export default function ConcentrationGridClient() {
                   <div className="space-y-5">
                     <div>
                       <h4 className="text-sm font-bold text-gray-200 tracking-tight">Why am I losing time rapidly?</h4>
-                      <p className="text-xs text-gray-400 mt-1.5 leading-relaxed">Incorrect taps result in a sharp 2-second penalty and immediately decrease the game's difficulty logic. To survive, accuracy must be prioritized alongside speed.</p>
+                      <p className="text-xs text-gray-400 mt-1.5 leading-relaxed">Incorrect taps result in a 2-second time penalty. While wrong answers do not deduct points, they reduce your remaining time. Prioritize accuracy alongside speed to survive.</p>
                     </div>
                     <div>
                       <h4 className="text-sm font-bold text-gray-200 tracking-tight">What is the maximum grid size?</h4>
-                      <p className="text-xs text-gray-400 mt-1.5 leading-relaxed">The engine dynamically scales the matrix up to an 8x8 grid (64 items) as you successfully complete levels. If you make errors, the difficulty scaling will regress.</p>
+                      <p className="text-xs text-gray-400 mt-1.5 leading-relaxed">The engine tracks your score. Every 50 points you earn increases your difficulty Level, scaling the matrix size up from 3x3 to a maximum of 8x8 (64 items). Your Level is protected even if you make mistakes.</p>
                     </div>
                   </div>
                 </div>

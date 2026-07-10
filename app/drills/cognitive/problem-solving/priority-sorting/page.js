@@ -96,40 +96,71 @@ const faqSchema = {
   ]
 };
 
+const howToSchema = {
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "How to Practice with Priority Sorting Decision Game",
+  "description": "Test and train your priority task selection and impulse control with rapidly shifting rule sets.",
+  "step": [
+    {
+      "@type": "HowToStep",
+      "position": 1,
+      "name": "Check Center Active Rule",
+      "text": "Identify the active priority color (RED, GREEN, or BLUE) displayed in the center box."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 2,
+      "name": "Identify Matching Targets",
+      "text": "Locate moving orbs that match the active rule. Avoid distractor colors."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 3,
+      "name": "Aim and Hit Targets",
+      "text": "Click or tap matching target orbs before they fade away. Each hit adds +5 PTS and +2s. Incorrect targets deduct time."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 4,
+      "name": "Adapt to Shifting Rules",
+      "text": "When the center rule shifts, instantly change your priority targets. Level difficulty scales up based on score."
+    }
+  ]
+};
+
 export const metadata = {
-  title: "Priority Sorting Game – Free Task Triage & Decision Speed Drill | SkillDrills",
-  description: "Train decision-making speed and task prioritization online. Free rule-based priority sorting game to improve executive function and triage skills. No sign-up required.",
+  title: "Play Priority Sorting Game Online | Decision Making Test | SkillDrills",
+  description: "Test your priority decision-making and task triage online for free. Sort moving targets based on shifting rules to train your executive function.",
   keywords: [
-    "decision making game online",
+    "priority matrix online",
+    "eisenhower matrix test",
+    "decision making test",
+    "priority task sorting game",
     "task prioritization training",
-    "prioritization skills test",
     "executive function games",
     "speed sorting game",
-    "how to prioritize tasks quickly",
-    "triage decision game",
-    "priority sorting brain game",
-    "priority decision training",
-    "rule based sorting game",
-    "cognitive triage training",
-    "fast decision making exercise"
+    "cognitive triage test",
+    "prioritization skills test",
+    "how to prioritize tasks quickly"
   ],
   alternates: {
     canonical: "https://skilldrills.online/drills/cognitive/problem-solving/priority-sorting",
   },
   robots: { index: true, follow: true },
   openGraph: {
-    title: "Priority Sorting Game – Free Task Triage & Decision Speed Drill | SkillDrills",
-    description: "Train decision-making speed and task prioritization online. Free rule-based priority sorting game to improve executive function and triage skills. No sign-up required.",
+    title: "Play Priority Sorting Game Online | Decision Making Test | SkillDrills",
+    description: "Test your priority decision-making and task triage online for free. Sort moving targets based on shifting rules to train your executive function.",
     url: "https://skilldrills.online/drills/cognitive/problem-solving/priority-sorting",
     siteName: 'SkillDrills',
     locale: 'en_US',
     type: 'website',
-    images: [{ url: 'https://skilldrills.online/icons/icon-512x512.png', width: 512, height: 512, alt: "Priority Sorting Game – Task Triage & Decision Speed Drill" }],
+    images: [{ url: 'https://skilldrills.online/icons/icon-512x512.png', width: 512, height: 512, alt: "Play Priority Sorting Game Online" }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Priority Sorting Game – Free Task Triage & Decision Speed Drill | SkillDrills",
-    description: "Train decision-making speed and task prioritization online. Free rule-based priority sorting game to improve executive function and triage skills. No sign-up required.",
+    title: "Play Priority Sorting Game Online | Decision Making Test | SkillDrills",
+    description: "Test your priority decision-making and task triage online for free. Sort moving targets based on shifting rules to train your executive function.",
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
 };
@@ -140,6 +171,7 @@ export default function PrioritySortingPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }} />
       <PrioritySortingClient />
     </>
   );

@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
@@ -7,9 +7,10 @@ import {
   Volume2, VolumeX, Maximize2, Minimize2, Eye,
   BarChart3, Info, ShieldCheck, CheckCircle, XCircle, AlertCircle, RefreshCw,
   Users, Share2, GraduationCap, Lightbulb, TrendingUp, ArrowRight, Brain, 
-  Keyboard, ChevronRight, Play, Code2, Calculator, Hash, LogOut, RotateCcw, Layers , Search
+  Keyboard, ChevronRight, Play, Code2, Calculator, Hash, LogOut, RotateCcw, Layers , Search, Sparkles
 } from 'lucide-react';
 import useGameEngine from '../../../../../lib/useGameEngine';
+import PlayAgainButton from "../../../../../components/PlayAgainButton";
 
 // ============================================================
 // ZERO-LATENCY AUDIO SYNTHESIZER
@@ -114,6 +115,8 @@ export default function DistractionFighterClient() {
   const [mistakes, setMistakes] = useState(0);
   const [timeouts, setTimeouts] = useState(0);
   const [currentSpeedLvl, setCurrentSpeedLvl] = useState(1);
+  const [level, setLevel] = useState(1);
+  const [highestLevelReached, setHighestLevelReached] = useState(1);
   
   const [currentTarget, setCurrentTarget] = useState(null);
   const [options, setOptions] = useState([]);
@@ -132,6 +135,8 @@ export default function DistractionFighterClient() {
   const mistakesRef = useRef(0);
   const timeoutsRef = useRef(0);
   const localTimeRef = useRef(60.0);
+  const levelRef = useRef(1);
+  const highestLevelRef = useRef(1);
 
   // Adaptive Speed Refs
   const speedRef = useRef(2000); // Starts at 2.0 seconds
@@ -312,22 +317,32 @@ export default function DistractionFighterClient() {
     }, 600);
   }, []);
 
+  // === DYNAMIC DIFFICULTY ===
+  const updateDifficulty = useCallback(() => {
+    const newLevel = Math.floor(scoreRef.current / 50) + 1;
+    levelRef.current = newLevel;
+    setLevel(newLevel);
+    highestLevelRef.current = Math.max(highestLevelRef.current, newLevel);
+    setHighestLevelReached(highestLevelRef.current);
+
+    const progress = Math.min(1, (newLevel - 1) / 10); 
+    speedRef.current = Math.max(600, Math.floor(2000 - (progress * 1400)));
+  }, []);
+
   // === CORE MECHANICS ===
   const applyPenalty = useCallback((type) => {
     if (audioSynth) audioSynth.playSoftThud();
     
-    scoreRef.current = Math.max(0, scoreRef.current - 3); // -3 Score
     localTimeRef.current -= 1.5; // -1.5s Time
     
-    // Decrease Difficulty
-    speedRef.current = Math.min(2000, speedRef.current + 30);
+    updateDifficulty();
     
     if (type === 'wrong') {
       mistakesRef.current += 1;
-      triggerFeedback('Wrong! -3 PTS | -1.5s', 'error');
+      triggerFeedback('Wrong! -1.5s', 'error');
     } else {
       timeoutsRef.current += 1;
-      triggerFeedback('Too Slow! -3 PTS | -1.5s', 'error');
+      triggerFeedback('Too Slow! -1.5s', 'error');
     }
     
     if (localTimeRef.current <= 0) {
@@ -344,25 +359,27 @@ export default function DistractionFighterClient() {
     syncToUI();
     setFlashBg('red');
     setTimeout(() => setFlashBg(null), 100);
-  }, [syncToUI, triggerFeedback, endGame]);
+  }, [syncToUI, triggerFeedback, endGame, updateDifficulty]);
 
   const applyReward = useCallback(() => {
     if (audioSynth) audioSynth.playSoothingPop();
       
     scoreRef.current += 5; // +5 Score
+    if (engineRef.current && typeof engineRef.current.setScore === 'function') {
+      engineRef.current.setScore(scoreRef.current);
+    }
     correctRef.current += 1;
     localTimeRef.current = Math.min(60.0, localTimeRef.current + 3.0); // +3s, Max 60
     setLocalTimeRemaining(localTimeRef.current);
     
-    // Increase Difficulty
-    speedRef.current = Math.max(600, speedRef.current - 25);
+    updateDifficulty();
     
     syncToUI();
     triggerFeedback('Perfect! +5 PTS | +3s', 'success');
     
     setFlashBg('green');
     setTimeout(() => setFlashBg(null), 100);
-  }, [syncToUI, triggerFeedback]);
+  }, [syncToUI, triggerFeedback, updateDifficulty]);
 
   const spawnTrial = useCallback(() => {
     if (trialTimerRef.current) clearTimeout(trialTimerRef.current);
@@ -454,9 +471,13 @@ export default function DistractionFighterClient() {
     mistakesRef.current = 0;
     timeoutsRef.current = 0;
     speedRef.current = 2000; // Reset Speed to 2.0s
+    levelRef.current = 1;
+    highestLevelRef.current = 1;
     currentTargetObjRef.current = null;
     clickCooldownRef.current = false;
     
+    setLevel(1);
+    setHighestLevelReached(1);
     syncToUI();
     setLocalFeedback({ id: 0, text: '', type: 'success', visible: false });
     
@@ -487,14 +508,75 @@ export default function DistractionFighterClient() {
     }, 300);
   }, [clearTimers, endGame, spawnTrial, syncToUI]);
 
-  const shareDrillLink = useCallback(() => {
-    const url = 'https://skilldrills.online/drills/cognitive/focus/distraction-fighter';
-    if (navigator.share) {
-      navigator.share({ title: 'Distraction Fighter', text: 'Hardcore Stroop test drill! Build your cognitive inhibition and processing speed. Free online training.', url }).catch(() => {});
-    } else {
-      navigator.clipboard.writeText(url).then(() => alert('Link copied!')).catch(() => prompt('Copy:', url));
+  const shareScore = useCallback(() => {
+    const totalAct = correctRef.current + mistakesRef.current + timeoutsRef.current;
+    const accuracyVal = totalAct > 0 ? Math.round((correctRef.current / totalAct) * 100) : 100;
+    
+    let finalRank = 'Bronze';
+    if (scoreRef.current >= 400 && accuracyVal >= 90) finalRank = 'Grandmaster';
+    else if (scoreRef.current >= 300 && accuracyVal >= 82) finalRank = 'Master';
+    else if (scoreRef.current >= 220 && accuracyVal >= 75) finalRank = 'Diamond';
+    else if (scoreRef.current >= 150 && accuracyVal >= 65) finalRank = 'Platinum';
+    else if (scoreRef.current >= 80 && accuracyVal >= 55) finalRank = 'Gold';
+    else if (scoreRef.current >= 40) finalRank = 'Silver';
+
+    const text = `🧠 I scored ${scoreRef.current} PTS with ${accuracyVal}% accuracy on the Distraction Fighter (Stroop) Test! Rank: ${finalRank}. Challenge your inhibition: https://skilldrills.online/drills/cognitive/focus/distraction-fighter`;
+    
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      navigator.share({
+        title: 'My SkillDrills Cognitive Score',
+        text: text,
+        url: 'https://skilldrills.online/drills/cognitive/focus/distraction-fighter'
+      }).catch(() => {});
+    } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+      alert('Score card copied to clipboard!');
     }
   }, []);
+
+  const totalActions = correctCount + mistakes + timeouts;
+  const accuracy = totalActions > 0 ? Math.round((correctCount / totalActions) * 100) : 100;
+  const strokeDasharray = 100;
+  const strokeDashoffset = strokeDasharray - accuracy;
+
+  // Calculate grade based on score and accuracy
+  let gradeLetter = 'F';
+  if (accuracy >= 90 && score >= 300) gradeLetter = 'S';
+  else if (accuracy >= 80 && score >= 220) gradeLetter = 'A';
+  else if (accuracy >= 70 && score >= 150) gradeLetter = 'B';
+  else if (accuracy >= 60 && score >= 80) gradeLetter = 'C';
+  else if (accuracy >= 45 && score >= 40) gradeLetter = 'D';
+
+  let rankName = 'Bronze';
+  let rankColor = 'text-slate-500';
+  if (score >= 400 && accuracy >= 90) {
+    rankName = 'Grandmaster';
+    rankColor = 'text-fuchsia-400 font-extrabold';
+  } else if (score >= 300 && accuracy >= 82) {
+    rankName = 'Master';
+    rankColor = 'text-red-400 font-extrabold';
+  } else if (score >= 220 && accuracy >= 75) {
+    rankName = 'Diamond';
+    rankColor = 'text-cyan-400 font-extrabold';
+  } else if (score >= 150 && accuracy >= 65) {
+    rankName = 'Platinum';
+    rankColor = 'text-indigo-400 font-extrabold';
+  } else if (score >= 80 && accuracy >= 55) {
+    rankName = 'Gold';
+    rankColor = 'text-yellow-400 font-extrabold';
+  } else if (score >= 40) {
+    rankName = 'Silver';
+    rankColor = 'text-gray-300 font-extrabold';
+  }
+
+  let diagnostics = "Superb Stroop filter capacity! Your prefrontal cortex successfully suppressed conflict and color-ink distractors.";
+  if (accuracy < 60) {
+    diagnostics = "Distraction bottleneck detected. Make sure to identify the color of the INK, not the word text itself.";
+  } else if (timeouts > correctCount * 0.4) {
+    diagnostics = "Sluggish cognitive processing speed. Practice visual processing speed to discriminate inks under time pressure faster.";
+  } else if (score < 80) {
+    diagnostics = "Conflict adaptation delay. Work on sustained attention grid to increase processing flexibility.";
+  }
 
   if (loading || !isClient) {
     return (
@@ -506,11 +588,6 @@ export default function DistractionFighterClient() {
       </div>
     );
   }
-
-  const totalActions = correctCount + mistakes + timeouts;
-  const accuracy = totalActions > 0 ? Math.round((correctCount / totalActions) * 100) : 100;
-  const strokeDasharray = 100;
-  const strokeDashoffset = strokeDasharray - accuracy;
 
   return (
     <div className="min-h-screen select-none bg-[#050505] text-white selection:bg-transparent font-sans" style={{ WebkitTapHighlightColor: 'transparent' }}>
@@ -692,76 +769,83 @@ export default function DistractionFighterClient() {
 
           {/* END SCREEN */}
           {(engine.gameState === 'ended' || isTimeUp) && (
-            <div className="absolute inset-0 flex items-center justify-center z-[70] bg-black/95 pointer-events-auto animate-in fade-in duration-300 overflow-y-auto px-4 py-6" onPointerDown={e => e.stopPropagation()}>
-              <div className="rounded-3xl max-w-md w-full shadow-2xl border border-gray-800 bg-gray-950 flex flex-col max-h-[95vh] overflow-y-auto my-auto">
-                <div className="bg-gradient-to-br from-rose-900/40 to-pink-900/40 p-4 sm:p-6 border-b border-gray-800 relative overflow-hidden pointer-events-none shrink-0 rounded-t-3xl">
-                  <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-rose-500/20 rounded-full blur-3xl"></div>
-                  <div className="absolute bottom-0 left-0 -mb-4 -ml-4 w-32 h-32 bg-pink-500/20 rounded-full blur-3xl"></div>
-                  <div className="relative z-10 flex flex-col items-center">
-                    {isNewBest && (
-                      <div className="bg-yellow-500 text-black text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-2 shadow-[0_0_15px_rgba(234,179,8,0.5)]">
-                        ⭐ New Personal Best
-                      </div>
-                    )}
-                    <h2 className="text-2xl sm:text-3xl font-black text-white mb-1 tracking-tight">Time Expired</h2>
-                    <p className="text-rose-400 font-medium text-xs sm:text-sm">Distraction Fighter • Speed Lvl {currentSpeedLvl}</p>
-                  </div>
-                </div>
+            <div className="absolute inset-0 bg-[#05070e]/98 overflow-y-auto p-6 z-[70] select-none scrollbar-thin scroll-smooth backdrop-blur-sm" onPointerDown={e => e.stopPropagation()}>
+              <div className="min-h-full flex flex-col justify-center items-center py-4 w-full">
+                <div className="max-w-md w-full text-center">
+                  {score > 0 && score >= bestScore && (
+                    <div className="inline-block bg-yellow-500 text-black text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-3 shadow-[0_0_15px_rgba(234,179,8,0.5)] animate-bounce font-mono">
+                      ⭐ NEW PERSONAL BEST!
+                    </div>
+                  )}
+                  
+                  <h2 className="text-xl font-black text-white uppercase tracking-wider mb-1 font-mono">
+                    Drill Complete
+                  </h2>
+                  <p className="text-xs text-slate-500 uppercase tracking-widest mb-6 font-mono">
+                    Peak difficulty reached: Level {highestLevelReached}
+                  </p>
 
-                <div className="p-4 sm:p-6 pointer-events-none shrink-0">
-                  <div className="flex justify-between items-center mb-4 sm:mb-6">
-                    <div className="flex flex-col">
-                      <span className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Final Score</span>
-                      <div className="flex items-end gap-1">
-                        <span className="text-4xl sm:text-6xl font-black text-white leading-none tracking-tighter">{score}</span>
-                        <span className="text-sm sm:text-lg text-gray-500 font-bold mb-1">PTS</span>
-                      </div>
+                  <div className="grid grid-cols-3 gap-2.5 mb-6 text-left font-mono">
+                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Final Score</span>
+                      <span className="text-sm font-black text-white">{score} <span className="text-[8px] text-slate-400 font-normal">PTS</span></span>
+                    </div>
+                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Accuracy</span>
+                      <span className="text-sm font-black text-white">{accuracy}%</span>
+                    </div>
+                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Best Score</span>
+                      <span className="text-sm font-black text-yellow-400">{bestScore}</span>
                     </div>
                     
-                    <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center">
-                      <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
-                        <path className="text-gray-800" strokeWidth="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                        <path 
-                          className={`${accuracy >= 80 ? 'text-green-500' : accuracy >= 50 ? 'text-yellow-500' : 'text-red-500'} transition-all duration-1000 ease-out`} 
-                          strokeWidth="3" strokeDasharray={`${strokeDasharray}`} strokeDashoffset={`${strokeDashoffset}`} strokeLinecap="round" stroke="currentColor" fill="none" 
-                          d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" 
-                        />
-                      </svg>
-                      <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <span className={`text-base sm:text-xl font-black ${accuracy >= 80 ? 'text-green-400' : accuracy >= 50 ? 'text-yellow-400' : 'text-red-400'}`}>{accuracy}%</span>
-                        <span className="text-[7px] sm:text-[8px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">Accuracy</span>
-                      </div>
+                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Correct Hits</span>
+                      <span className="text-sm font-black text-emerald-400">{correctCount}</span>
+                    </div>
+                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Mistakes</span>
+                      <span className="text-sm font-black text-red-400">{mistakes + timeouts}</span>
+                    </div>
+                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Peak Level</span>
+                      <span className="text-sm font-black text-purple-400">Lv.{level}</span>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-2 sm:gap-3">
-                    <div className="bg-gray-900/50 rounded-xl p-2 text-center border border-gray-800">
-                      <div className="text-gray-400 text-[9px] sm:text-[10px] uppercase font-bold tracking-wider mb-1">Correct Hits</div>
-                      <div className="text-base sm:text-xl font-black text-emerald-400">{correctCount}</div>
+                  <div className="bg-[#0b0f19] border border-slate-850 p-3 rounded-xl mb-4 text-left">
+                    <span className={`text-xs font-black block text-center uppercase tracking-widest ${rankColor} mb-2`}>
+                      Rank: {rankName}
+                    </span>
+                    <div className="w-full h-px bg-slate-850 mb-2"></div>
+                    <div className="flex items-center gap-1.5 text-[9px] font-bold text-white uppercase mb-1 font-mono">
+                      <Sparkles className="w-3 h-3 text-yellow-500" /> Diagnostics advice:
                     </div>
-                    <div className="bg-gray-900/50 rounded-xl p-2 text-center border border-gray-800">
-                      <div className="text-gray-400 text-[9px] sm:text-[10px] uppercase font-bold tracking-wider mb-1">Mistakes</div>
-                      <div className="text-base sm:text-xl font-black text-red-400">{mistakes}</div>
-                    </div>
-                    <div className="bg-gray-900/50 rounded-xl p-2 text-center border border-gray-800">
-                      <div className="text-gray-400 text-[9px] sm:text-[10px] uppercase font-bold tracking-wider mb-1">Timeouts</div>
-                      <div className="text-base sm:text-xl font-black text-orange-400">{timeouts}</div>
-                    </div>
+                    <p className="text-[10px] text-slate-400 leading-normal">
+                      {diagnostics}
+                    </p>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <PlayAgainButton onClick={() => { if(engineRef.current) engineRef.current.endGame(); handleStartGame(); }} colorTheme="purple" />
+                    <button
+                      onClick={shareScore}
+                      className="p-3 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded-xl transition-colors active:scale-95"
+                      title="Share Score"
+                    >
+                      <Share2 className="w-4 h-4" />
+                    </button>
+                    {isFullscreen && (
+                      <button
+                        onClick={handleExit}
+                        className="p-3 bg-red-900/30 border border-red-900/55 hover:bg-red-900/50 text-red-400 rounded-xl transition-colors active:scale-95 flex items-center justify-center"
+                        title="Exit Drill"
+                      >
+                        <LogOut className="w-4 h-4" />
+                      </button>
+                    )}
                   </div>
                 </div>
-
-                <div className="p-3 sm:p-5 bg-gray-900/50 border-t border-gray-800 flex gap-2 sm:gap-3 rounded-b-3xl shrink-0">
-                  <button onPointerDown={e => e.stopPropagation()} onClick={() => { if(engineRef.current) engineRef.current.endGame(); handleStartGame(); }} className="flex-1 py-3 sm:py-4 bg-rose-600 text-white rounded-xl font-black tracking-wide hover:bg-rose-500 transition-all active:scale-95 flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(225,29,72,0.4)] text-sm sm:text-base">
-                    <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5" /> PLAY AGAIN
-                  </button>
-                  <button onPointerDown={e => e.stopPropagation()} onClick={shareDrillLink} className="px-4 sm:px-5 py-3 sm:py-4 bg-gray-800 text-white rounded-xl font-bold hover:bg-gray-700 transition-all active:scale-95 border border-gray-700 flex items-center justify-center" title="Share Drill">
-                    <Share2 className="w-4 h-4 sm:w-5 sm:h-5" />
-                  </button>
-                  <button onPointerDown={e => e.stopPropagation()} onClick={handleExit} className="px-4 sm:px-5 py-3 sm:py-4 bg-red-900/30 text-red-400 rounded-xl font-bold hover:bg-red-900/50 transition-all active:scale-95 border border-red-900/50 flex items-center justify-center" title="Exit Drill">
-                    <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
-                  </button>
-                </div>
-                
               </div>
             </div>
           )}
@@ -780,8 +864,8 @@ export default function DistractionFighterClient() {
                   <RuleItem color="purple" text="Ignore Text" highlight="Avoid Trap" result="Focus on Ink Color" />
                 </div>
                 <div className="space-y-5">
-                  <RuleItem color="red" text="Wrong Color" highlight="-3 PTS | -1.5s" result="Decreases Difficulty" />
-                  <RuleItem color="orange" text="Timeout" highlight="-3 PTS | -1.5s" result="Decreases Difficulty" />
+                  <RuleItem color="red" text="Wrong Color" highlight="No PTS Penalty | -1.5s" result="Reduces Timer" />
+                  <RuleItem color="orange" text="Timeout" highlight="No PTS Penalty | -1.5s" result="Reduces Timer" />
                 </div>
               </div>
             </div>
@@ -836,7 +920,7 @@ export default function DistractionFighterClient() {
                   <ol className="text-sm leading-relaxed space-y-3 list-decimal pl-5 text-gray-400">
                     <li><strong className="text-gray-200">De-Focus Technique:</strong> Marginally blur your vision or look slightly past the text to stop your brain from reading the word naturally, focusing solely on the hue.</li>
                     <li><strong className="text-gray-200">Rhythm Tracking:</strong> The engine accelerates rapidly on correct answers. Build a steady tapping rhythm rather than panic-clicking to maintain composure.</li>
-                    <li><strong className="text-gray-200">Mistake Recovery:</strong> If you miss a target or timeout, the engine deducts time (-1.5s) but immediately slows the target presentation slightly to help you recover.</li>
+                    <li><strong className="text-gray-200">Mistake Recovery:</strong> While wrong answers do not deduct points, they still drain time (-1.5s) from your clock. Keep scoring to extend your play session.</li>
                   </ol>
                 </div>
 
@@ -849,11 +933,11 @@ export default function DistractionFighterClient() {
                   <div className="space-y-5">
                     <div>
                       <h4 className="text-sm font-bold text-gray-200 tracking-tight">Why does the timer drain so rapidly?</h4>
-                      <p className="text-xs text-gray-400 mt-1.5 leading-relaxed">Unlike passive drills, you are penalized dynamically (-1.5 seconds) for either missing the active flash window or clicking the incorrect color. You must remain both fast AND accurate to survive.</p>
+                      <p className="text-xs text-gray-400 mt-1.5 leading-relaxed">You are penalized dynamically (-1.5 seconds) for either missing the active window or clicking the incorrect color option. You must remain both fast AND accurate to survive.</p>
                     </div>
                     <div>
                       <h4 className="text-sm font-bold text-gray-200 tracking-tight">How does the difficulty adapt?</h4>
-                      <p className="text-xs text-gray-400 mt-1.5 leading-relaxed">The engine reacts to your precision. Every successful target scales the presentation speed downward, shrinking the visual flash window. If you miss or false-alarm, the engine gracefully slows down to allow recovery.</p>
+                      <p className="text-xs text-gray-400 mt-1.5 leading-relaxed">The engine tracks your score. Every 50 points you earn increases your difficulty Level, shrinking target display duration down to a minimum of 600ms. Your Level is protected even if you make mistakes.</p>
                     </div>
                   </div>
                 </div>

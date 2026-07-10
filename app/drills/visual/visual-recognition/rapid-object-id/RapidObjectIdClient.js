@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useEffect, useState, useRef, useCallback, Component } from 'react';
 import Link from 'next/link';
@@ -7,9 +7,10 @@ import {
   Info, RefreshCw, RotateCcw, Smartphone, GraduationCap, Lightbulb, 
   TrendingUp, BarChart3, ArrowRight, Brain, Users, Gauge, AlertTriangle, 
   Target, CheckCircle, XCircle, Play, Share2, ChevronRight, Circle, Square,
-  Activity, LogOut
+  Activity, LogOut, Sparkles
 } from 'lucide-react';
 import useGameEngine from '../../../../../lib/useGameEngine';
+import PlayAgainButton from '../../../../../components/PlayAgainButton';
 
 // ============================================================
 // ZERO-LATENCY AUDIO SYNTHESIZER
@@ -280,17 +281,21 @@ export default function RapidObjectIdClient() {
     streakRef.current = 0;
     setStreak(0);
 
-    scoreRef.current = Math.max(0, scoreRef.current - 3); 
+    // Remove negative scoring penalty
     setScore(scoreRef.current); 
+    if (engineRef.current && typeof engineRef.current.setScore === 'function') {
+      engineRef.current.setScore(scoreRef.current);
+    }
     
     localTimeRef.current = Math.max(0, localTimeRef.current - 2.0); // 2 SECOND PENALTY
     setLocalTimeRemaining(localTimeRef.current);
     
-    triggerFeedback('Miss! -3 PTS | -2s', 'error'); 
+    triggerFeedback('Miss! -2s', 'error'); 
     if (audioSynth) audioSynth.playFail(); 
     
-    flashDurationRef.current = Math.min(400, flashDurationRef.current + 15); 
-    gapDurationRef.current = Math.min(800, gapDurationRef.current + 20);
+    const baseSpeedShift = Math.floor(scoreRef.current / 15) * 8;
+    flashDurationRef.current = Math.min(400, 350 - baseSpeedShift + 25); 
+    gapDurationRef.current = Math.min(800, 600 - baseSpeedShift + 30);
     setSpeedLevel(Math.max(1, Math.floor((400 - flashDurationRef.current) / 15)));
   }, [triggerFeedback]);
 
@@ -324,6 +329,9 @@ export default function RapidObjectIdClient() {
     
     scoreRef.current += 5; 
     setScore(scoreRef.current); 
+    if (engineRef.current && typeof engineRef.current.setScore === 'function') {
+      engineRef.current.setScore(scoreRef.current);
+    }
     
     localTimeRef.current = Math.min(60.0, localTimeRef.current + 2.0); 
     setLocalTimeRemaining(localTimeRef.current);
@@ -331,8 +339,10 @@ export default function RapidObjectIdClient() {
     if (audioSynth) audioSynth.playPerfect(); 
     triggerFeedback(`Hit! +5 PTS | +2s`, 'success'); 
     
-    flashDurationRef.current = Math.max(50, flashDurationRef.current - 8); 
-    gapDurationRef.current = Math.max(200, gapDurationRef.current - 10);
+    const baseSpeedShift = Math.floor(scoreRef.current / 15) * 8;
+    const dynamicMinFlash = Math.max(30, 50 - Math.floor(scoreRef.current / 20) * 5);
+    flashDurationRef.current = Math.max(dynamicMinFlash, 350 - baseSpeedShift - (streakRef.current * 4)); 
+    gapDurationRef.current = Math.max(150, 600 - baseSpeedShift - (streakRef.current * 5));
     setSpeedLevel(Math.max(1, Math.floor((400 - flashDurationRef.current) / 15)));
     
     isShapeVisibleRef.current = false; 
@@ -517,6 +527,30 @@ export default function RapidObjectIdClient() {
     }
   }, []);
 
+  const shareScore = useCallback(() => {
+    const accuracy = successfulHits + missedHits > 0 ? Math.round((successfulHits / (successfulHits + missedHits)) * 100) : 0;
+    let finalRank = 'Bronze';
+    if (scoreRef.current >= 80 && accuracy >= 85) finalRank = 'Grandmaster';
+    else if (scoreRef.current >= 65 && accuracy >= 75) finalRank = 'Master';
+    else if (scoreRef.current >= 50 && accuracy >= 65) finalRank = 'Diamond';
+    else if (scoreRef.current >= 35 && accuracy >= 55) finalRank = 'Platinum';
+    else if (scoreRef.current >= 20 && accuracy >= 45) finalRank = 'Gold';
+    else if (scoreRef.current >= 10) finalRank = 'Silver';
+
+    const text = `🎯 I scored ${scoreRef.current} PTS with ${accuracy}% accuracy on the Neural Shape ID Drill! Rank: ${finalRank}. Try it here: https://skilldrills.online/drills/visual/visual-recognition/rapid-object-id`;
+    
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      navigator.share({
+        title: 'My SkillDrills Visual Score',
+        text: text,
+        url: 'https://skilldrills.online/drills/visual/visual-recognition/rapid-object-id'
+      }).catch(() => {});
+    } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+      alert('Score card copied to clipboard!');
+    }
+  }, [successfulHits, missedHits]);
+
   if (loading || !isClient) { 
     return (
       <div className="min-h-screen flex items-center justify-center bg-black">
@@ -532,6 +566,44 @@ export default function RapidObjectIdClient() {
   const strokeDasharray = 100;
   const strokeDashoffset = strokeDasharray - accuracyPercentage;
   const isNewBest = engine.gameState === 'ended' && score > bestScore && score > 0;
+
+  let gradeLetter = 'F';
+  if (accuracyPercentage >= 85 && score >= 80) gradeLetter = 'S';
+  else if (accuracyPercentage >= 75 && score >= 65) gradeLetter = 'A';
+  else if (accuracyPercentage >= 65 && score >= 50) gradeLetter = 'B';
+  else if (accuracyPercentage >= 55 && score >= 35) gradeLetter = 'C';
+  else if (accuracyPercentage >= 45 && score >= 20) gradeLetter = 'D';
+
+  let rankName = 'Bronze';
+  let rankColor = 'text-slate-500';
+  if (score >= 80 && accuracyPercentage >= 85) {
+    rankName = 'Grandmaster';
+    rankColor = 'text-fuchsia-400 font-extrabold';
+  } else if (score >= 65 && accuracyPercentage >= 75) {
+    rankName = 'Master';
+    rankColor = 'text-red-400 font-extrabold';
+  } else if (score >= 50 && accuracyPercentage >= 65) {
+    rankName = 'Diamond';
+    rankColor = 'text-cyan-400 font-extrabold';
+  } else if (score >= 35 && accuracyPercentage >= 55) {
+    rankName = 'Platinum';
+    rankColor = 'text-indigo-400 font-extrabold';
+  } else if (score >= 20 && accuracyPercentage >= 45) {
+    rankName = 'Gold';
+    rankColor = 'text-yellow-400 font-extrabold';
+  } else if (score >= 10) {
+    rankName = 'Silver';
+    rankColor = 'text-gray-300 font-extrabold';
+  }
+
+  let diagnostics = "Phenomenal visual speed! Your neural shape discrimination and latency thresholds are operating at elite levels.";
+  if (accuracyPercentage < 50) {
+    diagnostics = "Low shape classification accuracy. Slow down your click responses to confirm the flashed shape before inputting.";
+  } else if (bestReaction > 350) {
+    diagnostics = "Good accuracy, but shape processing speed is sluggish. Try using the keyboard (A/D) to bypass cursor travel latency.";
+  } else if (score < 30) {
+    diagnostics = "Keep your correct hit streak active to accelerate the flash duration and compound your points.";
+  }
 
   return (
     <div className="min-h-screen select-none bg-black text-white selection:bg-transparent" style={{ WebkitTapHighlightColor: 'transparent' }}>
@@ -684,78 +756,85 @@ export default function RapidObjectIdClient() {
 
             {/* Premium Custom End Screen */}
             {engine.gameState === 'ended' && (
-              <div className="absolute inset-0 flex items-center justify-center z-[70] bg-black/95 pointer-events-auto animate-in fade-in duration-300 p-4 overflow-y-auto">
-                <div className="rounded-3xl max-w-md w-full shadow-2xl border border-gray-800 bg-gray-950 flex flex-col max-h-[90vh] my-auto shrink-0">
-                  
-                  <div className="flex-1 overflow-y-auto">
-                    <div className="bg-gradient-to-br from-blue-900/40 to-cyan-900/40 p-5 sm:p-6 border-b border-gray-800 relative overflow-hidden pointer-events-none shrink-0">
-                      <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-blue-500/20 rounded-full blur-3xl"></div>
-                      <div className="absolute bottom-0 left-0 -mb-4 -ml-4 w-32 h-32 bg-cyan-500/20 rounded-full blur-3xl"></div>
-                      <div className="relative z-10 flex flex-col items-center">
-                        {isNewBest && (
-                          <div className="bg-yellow-500 text-black text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-2 shadow-[0_0_15px_rgba(234,179,8,0.5)]">
-                            ⭐ New Personal Best
-                          </div>
-                        )}
-                        <h2 className="text-2xl sm:text-3xl font-black text-white mb-1 tracking-tight">Mission Complete</h2>
-                        <p className="text-blue-400 font-medium text-sm">Neural Shape ID • Lvl {speedLevel}</p>
+              <div className="absolute inset-0 bg-[#05070e]/98 overflow-y-auto p-6 z-[70] select-none scrollbar-thin scroll-smooth backdrop-blur-sm animate-in fade-in duration-300 pointer-events-auto">
+                <div className="min-h-full flex flex-col justify-center items-center py-4 w-full">
+                  <div className="max-w-md w-full text-center">
+                    {score > 0 && score >= (bestScore || 0) && (
+                      <div className="inline-block bg-yellow-500 text-black text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-3 shadow-[0_0_15px_rgba(234,179,8,0.5)] animate-bounce font-mono">
+                        ⭐ NEW PERSONAL BEST!
+                      </div>
+                    )}
+                    
+                    <h2 className="text-xl font-black text-white uppercase tracking-wider mb-1 font-mono">
+                      Drill Complete
+                    </h2>
+                    <p className="text-xs text-slate-500 uppercase tracking-widest mb-6 font-mono">
+                      Neural Shape ID • Lvl {speedLevel}
+                    </p>
+
+                    <div className="grid grid-cols-3 gap-2.5 mb-6 text-left font-mono">
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Final Score</span>
+                        <span className="text-sm font-black text-white">{score} <span className="text-[8px] text-slate-400 font-normal">PTS</span></span>
+                      </div>
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Accuracy</span>
+                        <span className="text-sm font-black text-white">{accuracyPercentage}%</span>
+                      </div>
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Best Score</span>
+                        <span className="text-sm font-black text-green-400">{bestScore}</span>
+                      </div>
+                      
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Target Hits</span>
+                        <span className="text-sm font-black text-emerald-400">{successfulHits}</span>
+                      </div>
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Best RT</span>
+                        <span className="text-sm font-black text-cyan-400">{bestReaction > 0 ? `${bestReaction}ms` : '-'}</span>
+                      </div>
+                      <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
+                        <span className="text-[7.5px] text-slate-500 block uppercase font-bold font-mono">Grade</span>
+                        <span className="text-sm font-black text-pink-400 font-mono">{gradeLetter}</span>
                       </div>
                     </div>
 
-                    <div className="p-5 sm:p-6 pointer-events-none shrink-0">
-                      <div className="flex justify-between items-center mb-6">
-                        <div className="flex flex-col">
-                          <span className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Final Score</span>
-                          <div className="flex items-end gap-1">
-                            <span className="text-5xl sm:text-6xl font-black text-white leading-none tracking-tighter">{score}</span>
-                            <span className="text-sm sm:text-lg text-gray-500 font-bold mb-1">PTS</span>
-                          </div>
-                        </div>
-                        
-                        <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center">
-                          <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
-                            <path className="text-gray-800" strokeWidth="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                            <path 
-                              className={`${accuracyPercentage >= 80 ? 'text-green-500' : accuracyPercentage >= 50 ? 'text-yellow-500' : 'text-red-500'} transition-all duration-1000 ease-out`} 
-                              strokeWidth="3" strokeDasharray="100" strokeDashoffset={100 - accuracyPercentage} strokeLinecap="round" stroke="currentColor" fill="none" 
-                              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" 
-                            />
-                          </svg>
-                          <div className="absolute inset-0 flex flex-col items-center justify-center">
-                            <span className={`text-lg sm:text-xl font-black ${accuracyPercentage >= 80 ? 'text-green-400' : accuracyPercentage >= 50 ? 'text-yellow-400' : 'text-red-400'}`}>{accuracyPercentage}%</span>
-                            <span className="text-[7px] sm:text-[8px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">Accuracy</span>
-                          </div>
-                        </div>
+                    <div className="bg-[#0b0f19] border border-slate-850 p-3 rounded-xl mb-4 text-left font-sans">
+                      <span className={`text-xs font-black block text-center uppercase tracking-widest ${rankColor} mb-2`}>
+                        Rank: {rankName}
+                      </span>
+                      <div className="w-full h-px bg-slate-850 mb-2"></div>
+                      <div className="flex items-center gap-1.5 text-[9px] font-bold text-white uppercase mb-1 font-mono">
+                        <Sparkles className="w-3 h-3 text-amber-500" /> Diagnostics advice:
                       </div>
-
-                      <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-2">
-                        <div className="bg-gray-900/50 rounded-xl p-2 sm:p-3 text-center border border-gray-800">
-                          <div className="text-gray-400 text-[9px] sm:text-[10px] uppercase font-bold tracking-wider mb-1">Target Hits</div>
-                          <div className="text-lg sm:text-xl font-black text-green-400">{successfulHits}</div>
-                        </div>
-                        <div className="bg-gray-900/50 rounded-xl p-2 sm:p-3 text-center border border-gray-800">
-                          <div className="text-gray-400 text-[9px] sm:text-[10px] uppercase font-bold tracking-wider mb-1">Best RT</div>
-                          <div className="text-lg sm:text-xl font-black text-cyan-400">{bestReaction}ms</div>
-                        </div>
-                        <div className="bg-gray-900/50 rounded-xl p-2 sm:p-3 text-center border border-gray-800">
-                          <div className="text-gray-400 text-[9px] sm:text-[10px] uppercase font-bold tracking-wider mb-1">Max Streak</div>
-                          <div className="text-lg sm:text-xl font-black text-orange-400">{bestStreak}</div>
-                        </div>
-                      </div>
+                      <p className="text-[10px] text-slate-400 leading-normal font-sans">
+                        {diagnostics}
+                      </p>
                     </div>
-                  </div>
 
-                  {/* Fixed Bottom Action Row */}
-                  <div className="p-3 sm:p-5 bg-gray-900/50 border-t border-gray-800 flex gap-2 sm:gap-3 shrink-0 rounded-b-3xl">
-                    <button onClick={() => { if(engineRef.current.endGame) engineRef.current.endGame(); handleStartGame(); }} className="flex-1 py-3 sm:py-4 bg-blue-600 text-white rounded-xl font-black tracking-wide hover:bg-blue-500 transition-all active:scale-95 flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(37,99,235,0.4)] text-sm sm:text-base">
-                      <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5" /> PLAY AGAIN
-                    </button>
-                    <button onClick={shareDrillLink} className="px-4 sm:px-5 py-3 sm:py-4 bg-gray-800 text-white rounded-xl font-bold hover:bg-gray-700 transition-all active:scale-95 border border-gray-700 flex items-center justify-center" title="Share Drill">
-                      <Share2 className="w-4 h-4 sm:w-5 sm:h-5" />
-                    </button>
-                    <button onClick={handleExitToStart} className="px-4 sm:px-5 py-3 sm:py-4 bg-red-900/30 text-red-400 rounded-xl font-bold hover:bg-red-900/50 transition-all active:scale-95 border border-red-900/50 flex items-center justify-center" title="Exit Drill">
-                      <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
-                    </button>
+                    <div className="flex gap-2">
+                      <PlayAgainButton
+                        onClick={() => { if(engineRef.current.endGame) engineRef.current.endGame(); handleStartGame(); }}
+                        colorTheme="blue"
+                      />
+                      <button
+                        onClick={shareScore}
+                        className="p-3 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded-xl transition-colors active:scale-95 flex items-center justify-center"
+                        title="Share Score"
+                      >
+                        <Share2 className="w-4 h-4" />
+                      </button>
+                      {isFullscreen && (
+                        <button
+                          onClick={handleExitToStart}
+                          className="p-3 bg-red-900/30 border border-red-900/55 hover:bg-red-900/50 text-red-400 rounded-xl transition-colors active:scale-95 flex items-center justify-center"
+                          title="Exit Drill"
+                        >
+                          <LogOut className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -763,7 +842,6 @@ export default function RapidObjectIdClient() {
           </div>
         </GameErrorBoundary>
 
-        {/* Instructions */}
         {!isFullscreen && (
           <section className="mt-10 pointer-events-none">
             <div className="rounded-2xl border border-gray-800 overflow-hidden bg-gray-900 shadow-2xl">
@@ -776,7 +854,7 @@ export default function RapidObjectIdClient() {
                   <RuleItem num="2" color="cyan" text="Dynamic Adjustments" highlight="Speed Configurations" result="Adaptive Environment" />
                 </div>
                 <div className="space-y-5">
-                  <RuleItem num="3" color="red" text="Wrong Answer" highlight="-3 PTS | -2s" result="Decreases Difficulty" />
+                  <RuleItem num="3" color="red" text="Wrong Answer" highlight="0 PTS | -2s" result="Decreases Difficulty" />
                   <RuleItem num="4" color="yellow" text="Timer Economy" highlight="Max 60s" result="Time Ends = Game Over" />
                 </div>
               </div>
@@ -801,7 +879,7 @@ export default function RapidObjectIdClient() {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
                   <div className="p-5 rounded-xl border border-gray-800 bg-black/40">
                     <div className="flex items-center gap-3 mb-3">
-                      <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center"><Users className="w-4 h-4 text-white" /></div>
+                      <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center"><Brain className="w-4 h-4 text-white" /></div>
                       <h3 className="text-sm font-bold text-white">Target Audience</h3>
                     </div>
                     <p className="text-xs leading-relaxed text-gray-400">Esports athletes, traditional sports players, drivers, and anyone wanting faster visual processing and dual-choice reaction time.</p>
@@ -818,7 +896,7 @@ export default function RapidObjectIdClient() {
                       <div className="w-8 h-8 rounded-lg bg-purple-600 flex items-center justify-center"><BarChart3 className="w-4 h-4 text-white" /></div>
                       <h3 className="text-sm font-bold text-white">Performance Metrics</h3>
                     </div>
-                    <p className="text-xs leading-relaxed text-gray-400">Net score economy (+5/-3), clock management (+2s/-2s), accuracy percentage, total hits, misses, best reaction time (ms), and maximum dynamic speed level.</p>
+                    <p className="text-xs leading-relaxed text-gray-400">Net score economy (+5 PTS), clock management (+2s/-2s), accuracy percentage, total hits, misses, best reaction time (ms), and maximum dynamic speed level.</p>
                   </div>
                 </div>
                 
@@ -839,7 +917,7 @@ export default function RapidObjectIdClient() {
                     <ul className="space-y-3 list-disc pl-5 border-l border-gray-800/50 sm:pl-6">
                       <li><strong className="text-green-400">Accuracy (+5 PTS | +2s):</strong> Correct identifications keep your streak alive and reward you with time.</li>
                       <li><strong className="text-blue-400">Speed Level:</strong> Faster reaction times scale the difficulty higher, testing pure cognitive form perception.</li>
-                      <li><strong className="text-red-400">Errors (-3 PTS | -2s):</strong> Misses or false positives will severely penalize your run and drain the clock.</li>
+                      <li><strong className="text-red-400">Errors (0 PTS | -2s):</strong> Misses or false positives will drain the clock but will not reduce your score.</li>
                     </ul>
                   </div>
                 </div>

@@ -96,21 +96,54 @@ const faqSchema = {
   ]
 };
 
+const howToSchema = {
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "How to Practice with Pattern Recognition Sequence Drill",
+  "description": "Test and train your mathematical sequence logic and inductive pattern recognition with progressively complex numeric sequences.",
+  "step": [
+    {
+      "@type": "HowToStep",
+      "position": 1,
+      "name": "Observe the Sequence",
+      "text": "Analyze the displayed sequence of numbers (e.g. arithmetic, geometric, squares, prime patterns, or alternating operations)."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 2,
+      "name": "Deduce the Logical Rule",
+      "text": "Find the difference or factor between successive items to figure out the mathematical progression rule."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 3,
+      "name": "Input the Next Number",
+      "text": "Calculate the next number in the sequence and type your answer in the text box. Mistakes do not deduct points but deduct -5s from the clock."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 4,
+      "name": "Increase Your Score",
+      "text": "Every correct answer yields +15 PTS (+5 with hint). Your difficulty Level dynamically scales based on your cumulative score."
+    }
+  ]
+};
+
 export const metadata = {
-  title: "Pattern Recognition Test – Free Visual Spatial Matrix Game | SkillDrills",
-  description: "Test your pattern recognition online. Identify and recall visual spatial patterns and matrix sequences in this free cognitive intelligence game. No sign-up needed.",
+  title: "Play Pattern Recognition Game Online | Math Sequence Test | SkillDrills",
+  description: "Test your pattern recognition and mathematical sequence logic online for free. Solve arithmetic, geometric, and alternating numeric sequences to train your fluid intelligence.",
   keywords: [
     "pattern recognition test",
     "pattern recognition games",
-    "visual pattern test online",
-    "matrix reasoning test",
-    "spatial reasoning test",
+    "math sequence test",
     "find the pattern game online",
-    "spatial pattern memory game",
-    "pattern recognition cognitive test",
+    "number series test",
     "inductive reasoning test online",
-    "visual matrix game",
-    "Raven's progressive matrices practice",
+    "matrix reasoning test",
+    "numerical reasoning test",
+    "visual pattern test online",
+    "spatial reasoning test",
+    "pattern recognition cognitive test",
     "pattern matching brain training"
   ],
   alternates: {
@@ -118,18 +151,18 @@ export const metadata = {
   },
   robots: { index: true, follow: true },
   openGraph: {
-    title: "Pattern Recognition Test – Free Visual Spatial Matrix Game | SkillDrills",
-    description: "Test your pattern recognition online. Identify and recall visual spatial patterns and matrix sequences in this free cognitive intelligence game. No sign-up needed.",
+    title: "Play Pattern Recognition Game Online | Math Sequence Test | SkillDrills",
+    description: "Test your pattern recognition and mathematical sequence logic online for free. Solve arithmetic, geometric, and alternating numeric sequences to train your fluid intelligence.",
     url: "https://skilldrills.online/drills/cognitive/memory/pattern-recognition",
     siteName: 'SkillDrills',
     locale: 'en_US',
     type: 'website',
-    images: [{ url: 'https://skilldrills.online/icons/icon-512x512.png', width: 512, height: 512, alt: "Pattern Recognition Test – Visual Spatial Matrix Game" }],
+    images: [{ url: 'https://skilldrills.online/icons/icon-512x512.png', width: 512, height: 512, alt: "Play Pattern Recognition Game Online" }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Pattern Recognition Test – Free Visual Spatial Matrix Game | SkillDrills",
-    description: "Test your pattern recognition online. Identify and recall visual spatial patterns and matrix sequences in this free cognitive intelligence game. No sign-up needed.",
+    title: "Play Pattern Recognition Game Online | Math Sequence Test | SkillDrills",
+    description: "Test your pattern recognition and mathematical sequence logic online for free. Solve arithmetic, geometric, and alternating numeric sequences to train your fluid intelligence.",
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
 };
@@ -140,6 +173,7 @@ export default function PatternRecognitionPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }} />
       <PatternRecognitionClient />
     </>
   );

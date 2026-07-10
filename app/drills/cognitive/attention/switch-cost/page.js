@@ -96,9 +96,42 @@ const faqSchema = {
   ]
 };
 
+const howToSchema = {
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "How to Take the Task Switching Test",
+  "description": "Test and train your cognitive flexibility and set-shifting efficiency by managing rule alternation.",
+  "step": [
+    {
+      "@type": "HowToStep",
+      "position": 1,
+      "name": "Analyze the Spawning Mode",
+      "text": "A targets spawns as either a solid orb (Direct Mode) or an orb with a dashed shadow (Opposite Mode)."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 2,
+      "name": "Inhibit Default Impulse",
+      "text": "Before clicking, verify if the shadow is present. If it is, suppress the impulse to click the orb directly."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 3,
+      "name": "Click the Correct Target",
+      "text": "In Direct Mode, click the orb itself. In Opposite Mode, click the center of the dashed shadow across from the orb."
+    },
+    {
+      "@type": "HowToStep",
+      "position": 4,
+      "name": "Maintain Speed & Accuracy",
+      "text": "Every correct hit adds 2 seconds to your clock. Build combos and avoid errors to scale your difficulty level and maximize your score."
+    }
+  ]
+};
+
 export const metadata = {
-  title: "Task Switching Test – Free Cognitive Flexibility & Switch Cost Trainer | SkillDrills",
-  description: "Measure your task switching speed and cognitive flexibility online. Free set-shifting drill to reduce switch cost, train mental agility, and boost alternating attention. No sign-up.",
+  title: "Cognitive Flexibility Test | Task Switching & Set Shifting | SkillDrills",
+  description: "Measure your task switching speed and cognitive flexibility online. Free set-shifting drill to reduce switch cost and boost alternating attention. No sign-up.",
   keywords: [
     "cognitive flexibility test",
     "task switching test",
@@ -118,8 +151,8 @@ export const metadata = {
   },
   robots: { index: true, follow: true },
   openGraph: {
-    title: "Task Switching Test – Free Cognitive Flexibility & Switch Cost Trainer | SkillDrills",
-    description: "Measure your task switching speed and cognitive flexibility online. Free set-shifting drill to reduce switch cost, train mental agility, and boost alternating attention. No sign-up.",
+    title: "Cognitive Flexibility Test | Task Switching & Set Shifting | SkillDrills",
+    description: "Measure your task switching speed and cognitive flexibility online. Free set-shifting drill to reduce switch cost and boost alternating attention. No sign-up.",
     url: "https://skilldrills.online/drills/cognitive/attention/switch-cost",
     siteName: 'SkillDrills',
     locale: 'en_US',
@@ -128,8 +161,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Task Switching Test – Free Cognitive Flexibility & Switch Cost Trainer | SkillDrills",
-    description: "Measure your task switching speed and cognitive flexibility online. Free set-shifting drill to reduce switch cost, train mental agility, and boost alternating attention. No sign-up.",
+    title: "Cognitive Flexibility Test | Task Switching & Set Shifting | SkillDrills",
+    description: "Measure your task switching speed and cognitive flexibility online. Free set-shifting drill to reduce switch cost and boost alternating attention. No sign-up.",
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
 };
@@ -140,6 +173,7 @@ export default function SwitchCostPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }} />
       <SwitchCostIntegratorClient />
     </>
   );
