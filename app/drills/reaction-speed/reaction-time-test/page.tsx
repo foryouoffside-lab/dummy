@@ -9,31 +9,18 @@ import ReactionTimeTestWrapper from './ReactionTimeTestWrapper';
 //   "f1 reaction time test"           ~14,800/mo, KD ~35%
 //   "average reaction time"           ~9,900/mo,  KD ~55%
 //   "reaction speed test"             ~5,400/mo,  KD ~48%
-//   "online reaction time test"       ~2,900/mo,  KD ~40%
-//   "click reaction test"             ~2,400/mo,  KD ~30%
-//   "visual reaction time test"       ~1,600/mo,  KD ~32%
-// PAA targets: "What is a good reaction time?", "How can I test my reaction time?",
-//   "Can you improve your reaction time?", "Why do reaction times vary?",
-//   "Is reaction the same as a reflex?", "Does monitor refresh rate affect reaction time tests?",
-//   "How does age affect reaction time?", "Does caffeine improve reaction time?"
-// Key entities: reaction latency, millisecond response, motor speed, visual stimulus,
-//   foveal focus, prefrontal cortex, input delay, display lag, gaming reflex
 // ============================================================
 
 export const metadata = {
   title: 'Reaction Time Test - Free Visual Reflex Speed Game | SkillDrills',
   description: 'Test your visual reaction speed and reflexes with this free Reaction Time Test. Measure your reaction latency in milliseconds, compare with average human scores, and train to improve. Free, mobile-friendly, and no download needed.',
   keywords: [
-    // Primary / Head terms
     'reaction time test', 'reflex test', 'reaction test',
-    // Secondary / LSI terms
     'f1 reaction time test', 'average reaction time', 'reaction speed test',
     'online reaction time test', 'click reaction test', 'visual reaction time test',
     'human benchmark reaction time', 'gaming reflex test',
-    // Long-tail variants
     'how to improve reaction time', 'average reaction time in milliseconds',
     'test your reaction time online', 'reflex speed test free', 'reaction latency test',
-    // Contextual / device
     'mobile reaction time test', 'low latency reaction tool', 'controller reaction test'
   ],
   openGraph: {
@@ -43,18 +30,11 @@ export const metadata = {
     url: 'https://skilldrills.online/drills/reaction-speed/reaction-time-test',
     siteName: 'SkillDrills',
     locale: 'en_US',
-    images: [{
-      url: 'https://skilldrills.online/icons/icon-512x512.png',
-      width: 512,
-      height: 512,
-      alt: 'Reaction Time Test — Free Visual Reflex Speed Game | SkillDrills',
-    }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Reaction Time Test - Free Visual Reflex Speed Game',
     description: 'Measure your visual reaction latency in milliseconds. Simple, free, browser-based reflex test with no downloads.',
-    images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
   alternates: {
@@ -80,7 +60,7 @@ const webAppSchema = {
   "@type": "WebApplication",
   "name": "Reaction Time Test — Free Visual Reflex Speed Game | SkillDrills",
   "url": "https://skilldrills.online/drills/reaction-speed/reaction-time-test",
-  "description": "A free online visual reaction time test and reflex game. Click the screen as soon as the red visual stimulus turns green to measure your reaction latency in milliseconds.",
+  "description": "A free online visual reaction time test and reflex game. Click the screen as soon as the visual stimulus triggers to measure your reaction latency in milliseconds.",
   "applicationCategory": "EducationalApplication",
   "operatingSystem": "All",
   "browserRequirements": "Requires a modern web browser with JavaScript support.",
@@ -100,20 +80,20 @@ const howToSchema = {
     {
       "@type": "HowToStep",
       "position": 1,
-      "name": "Click the start area",
-      "text": "Click or tap inside the main test board. The screen will turn red, indicating that you should prepare to react."
+      "name": "Launch the Test",
+      "text": "Click or tap Start Drill to launch the Reaction Time Test in full screen."
     },
     {
       "@type": "HowToStep",
       "position": 2,
-      "name": "Wait for the color change",
-      "text": "Keep your eyes on the screen and prepare to click. Wait patiently — the screen will turn green at a completely random, unpredictable interval."
+      "name": "Keep Eyes Alert",
+      "text": "Keep your eyes active across the canvas area and prepare to react to visual target flashes."
     },
     {
       "@type": "HowToStep",
       "position": 3,
-      "name": "Click immediately",
-      "text": "The instant the screen turns green, click your mouse or tap your touchscreen as fast as possible. Your response latency will be calculated down to the millisecond."
+      "name": "Click Immediately",
+      "text": "The instant a target appears, click your mouse or tap your touchscreen as fast as possible. Your response latency will be calculated in milliseconds."
     }
   ]
 };
@@ -124,50 +104,26 @@ const faqSchema = {
   "mainEntity": [
     {
       "@type": "Question",
-      "name": "What is a reaction time test?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "A reaction time test measures how quickly your brain can perceive a sensory stimulus (like a color change or a sound) and trigger a motor response (like clicking a button). It tracks this latency in milliseconds (ms)."
-      }
-    },
-    {
-      "@type": "Question",
       "name": "What is a good reaction time?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "An average visual reaction time is between 200 and 250 milliseconds. Anything below 200 ms is considered fast, and elite performers or professional esports players often achieve reaction speeds between 150 ms and 180 ms."
+        "text": "Average human reaction time to visual stimuli is 200-250ms. Scores below 200ms are excellent, and sub-180ms scores are elite."
       }
     },
     {
       "@type": "Question",
-      "name": "How can I test my reaction time online?",
+      "name": "How is reaction time measured?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "You can use this free, low-latency online tool. Click the red screen, wait for it to turn green, and click again as fast as possible. The system calculates your reaction speed in milliseconds."
+        "text": "Reaction time is measured in milliseconds (ms) from the instant the target appears on screen to the instant your input is registered."
       }
     },
     {
       "@type": "Question",
-      "name": "Can you improve your reaction time?",
+      "name": "Can you train your reaction time?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes. While genetics define your baseline limit, you can optimize your reaction speed by 10% to 20% through regular training, getting sufficient sleep, eating a healthy diet, staying hydrated, and using high-refresh-rate hardware (like 144Hz+ monitors and wired gaming mice) to reduce device input lag."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Is a reaction the same as a reflex?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "No. A reflex is an involuntary, automatic response processed entirely by the spinal cord without brain involvement (such as pulling your hand away from a hot stove). A reaction is a voluntary response that requires conscious processing by the brain's visual and motor cortexes."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Does monitor refresh rate affect reaction time test scores?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes, significantly. A standard 60Hz monitor updates its image every 16.7 milliseconds, which adds visual latency. Upgrading to a 144Hz, 240Hz, or 360Hz monitor reduces frame latency to under 3ms, allowing your eyes to perceive the color shift faster and improving your recorded score by 10-30 milliseconds."
+        "text": "Yes. Dedicated reaction training sharpens visual processing, reduces motor hesitation, and conditions fast neuromuscular response loops."
       }
     },
     {
@@ -175,7 +131,23 @@ const faqSchema = {
       "name": "Why do reaction times vary?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Reaction times vary based on fatigue, stress levels, age, caffeine intake, distractions, and individual genetics. Additionally, auditory reaction times are generally faster (~170ms) than visual reaction times (~250ms) due to how the nervous system routes sound signals vs. light signals."
+        "text": "Reaction time varies due to fatigue, sleep, age, input hardware latency, display refresh rates, and level of cognitive focus."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does monitor refresh rate affect reaction scores?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes! Higher refresh rate displays (144Hz, 240Hz, 360Hz) render target frames sooner, reducing display lag by 10-15ms."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is reaction the same as a reflex?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A reflex is an involuntary spinal circuit response, whereas reaction time involves cerebral visual processing and conscious motor execution."
       }
     },
     {
@@ -183,15 +155,71 @@ const faqSchema = {
       "name": "How does age affect reaction time?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Visual reaction speed typically peaks in your early to mid-20s. After approximately age 24, reaction times begin a gradual decline of about 2 to 6 milliseconds per decade, though keeping physically and cognitively active can mitigate this aging effect."
+        "text": "Peak reaction speed occurs in late teens and early 20s, declining very gradually thereafter. Regular vision training mitigates age-related slowdown."
       }
     },
     {
       "@type": "Question",
-      "name": "Does caffeine improve reaction time?",
+      "name": "Does caffeine improve reaction speed?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes. Caffeine is a central nervous system stimulant that blocks adenosine receptors in the brain. This increases alertness and speed of motor response, which typically shaves 10 to 20 milliseconds off your reaction time test score. However, excessive caffeine can lead to jitteriness and hurt precision."
+        "text": "Studies show moderate caffeine intake increases central nervous system alertness, temporarily lowering reaction time by 10-20ms."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does this drill differ from Human Benchmark?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "This drill combines millisecond reaction testing with adaptive level progression, precision hit detection, and full mobile support."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is this reaction time test free?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, all drills on SkillDrills are 100% free with no signups, downloads, or pop-up ads required."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What games benefit from reaction speed training?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Fast tactical FPS games (CS2, Valorant), fighting games, racing simulators, and battle royales benefit heavily from fast reaction times."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can traditional athletes use this test?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Formula 1 drivers, boxers, sprinters, and racquet sport athletes perform visual reaction training to condition fast-twitch reflexes."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Should I focus on central or peripheral vision?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Keep a relaxed visual gaze so your peripheral vision detects the target flash instantly, then trigger a quick motor click."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does this test work on mobile devices?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes! It features generous touch hitpads and full support for both portrait and landscape orientation."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How often should I test my reaction speed?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A daily 5-minute session provides an accurate benchmark of your neurological alertness and warmup readiness."
       }
     }
   ]
@@ -220,4 +248,3 @@ export default function ReactionTimeTestPage() {
     </>
   );
 }
-

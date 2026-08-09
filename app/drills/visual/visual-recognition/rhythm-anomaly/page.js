@@ -1,8 +1,8 @@
 import RhythmAnomalyClient from './RhythmAnomalyClient';
 
 export const metadata = {
-  title: 'Rhythm Anomaly - Pulse & Visual Rhythm | SkillDrills',
-  description: 'Find the faster-pulsing cell in a 6x6 grid. Steady cells pulse at 2s, anomaly at 1.4s. Stamina system with decay. No sign-up.',
+  title: 'Rhythm Anomaly Pro - Visual Rhythm & Temporal Perception Test | SkillDrills',
+  description: 'Train visual temporal discrimination with 6x6 pulsing cell grid. Find out-of-sync anomaly cells in endless Time-Attack mode. Free online tool.',
   keywords: [
     'rhythm anomaly', 'entropic grid', 'pulse detection training',
     'visual rhythm drill', 'entropic cell finder', 'pulse pattern recognition',
@@ -17,24 +17,17 @@ export const metadata = {
     'visual scanning rhythm', 'pulse interval detection', 'rhythm comparison drill',
   ],
   openGraph: {
-    title: 'Rhythm Anomaly - Pulse & Visual Rhythm | SkillDrills',
-    description: 'Find the faster-pulsing cell in a 6x6 grid. Steady cells pulse at 2s, anomaly at 1.4s. Stamina system with decay. No sign-up.',
+    title: 'Rhythm Anomaly Pro - Visual Rhythm & Temporal Perception Test | SkillDrills',
+    description: 'Train visual temporal discrimination with 6x6 pulsing cell grid. Find out-of-sync anomaly cells in endless Time-Attack mode. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/visual/visual-recognition/rhythm-anomaly',
     siteName: 'SkillDrills',
     locale: 'en_US',
-    images: [{
-      url: 'https://skilldrills.online/icons/icon-512x512.png',
-      width: 512,
-      height: 512,
-      alt: 'Rhythm Anomaly Drill',
-    }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Rhythm Anomaly - Pulse & Visual Rhythm | SkillDrills',
-    description: 'Find the faster-pulsing cell in a 6x6 grid. Steady cells pulse at 2s, anomaly at 1.4s. Stamina system with decay. No sign-up.',
-    images: ['https://skilldrills.online/icons/icon-512x512.png'],
+    title: 'Rhythm Anomaly Pro - Visual Rhythm & Temporal Perception Test | SkillDrills',
+    description: 'Train visual temporal discrimination with 6x6 pulsing cell grid. Find out-of-sync anomaly cells in endless Time-Attack mode. Free.',
   },
   robots: { index: true, follow: true },
   alternates: {
@@ -56,7 +49,7 @@ export default function RhythmAnomalyPage() {
               { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://skilldrills.online" },
               { "@type": "ListItem", "position": 2, "name": "Visual Training", "item": "https://skilldrills.online/drills/visual" },
               { "@type": "ListItem", "position": 3, "name": "Visual Recognition", "item": "https://skilldrills.online/drills/visual/visual-recognition" },
-              { "@type": "ListItem", "position": 4, "name": "Rhythm Anomaly" }
+              { "@type": "ListItem", "position": 4, "name": "Rhythm Anomaly Pro" }
             ]
           })
         }}
@@ -68,9 +61,9 @@ export default function RhythmAnomalyPage() {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "WebApplication",
-            "name": "Rhythm Anomaly Drill",
+            "name": "Rhythm Anomaly Pro Drill",
             "url": "https://skilldrills.online/drills/visual/visual-recognition/rhythm-anomaly",
-            "description": "Free visual rhythm drill. 6x6 grid, 36 pulsing cells. Find anomaly at 1.4s vs steady 2s. Stamina system with decay. System Collapse at zero.",
+            "description": "Free visual rhythm and temporal discrimination drill. 6x6 grid with 36 pulsing cells. Find out-of-sync anomaly cell in endless Time-Attack mode.",
             "applicationCategory": "EducationalApplication",
             "operatingSystem": "All",
             "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
@@ -89,26 +82,26 @@ export default function RhythmAnomalyPage() {
             "mainEntity": [
               {
                 "@type": "Question",
-                "name": "What is the Rhythm Anomaly Drill?",
+                "name": "What is the Rhythm Anomaly Pro Drill?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "A free visual rhythm exercise. 6x6 grid of 36 pulsing cells. Find the anomaly at 1.4s vs steady 2s. Anomaly relocates after each find."
+                  "text": "A free visual temporal perception exercise. 6x6 grid of 36 pulsing cells. Find the cell pulsing at a faster frequency than the steady grid rhythm."
                 }
               },
               {
                 "@type": "Question",
-                "name": "How does the stamina system work?",
+                "name": "How does Time-Attack work?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "100 stamina. +5 per correct, -15 per wrong, -0.5/s decay. Zero stamina = System Collapse. Bar turns red below 30."
+                  "text": "You start with 45 seconds. Correct hits add +3 PTS, while misclicks and timeouts reset your current streak with zero time or score penalties."
                 }
               },
               {
                 "@type": "Question",
-                "name": "What skills does this improve?",
+                "name": "How does speed scaling work?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Visual rhythm perception, temporal discrimination, sustained visual attention, anomaly detection, and cognitive stamina."
+                  "text": "Consecutive hits increase the speed level, accelerating pulse frequencies and tightening timeout limits."
                 }
               },
               {
@@ -116,7 +109,7 @@ export default function RhythmAnomalyPage() {
                 "name": "Do I need to sign up?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "No registration required. This rhythm anomaly drill is completely free and works instantly in your browser."
+                  "text": "No registration required. This drill is completely free and works instantly in your browser."
                 }
               }
             ]

@@ -23,18 +23,11 @@ export const metadata = {
     url: 'https://skilldrills.online/drills/memory/short-term-memory/digit-span',
     siteName: 'SkillDrills',
     locale: 'en_US',
-    images: [{
-      url: 'https://skilldrills.online/icons/icon-512x512.png',
-      width: 512,
-      height: 512,
-      alt: 'Digit Span Drill',
-    }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Digit Span - Number Sequence Memory | SkillDrills',
     description: 'Infinite progressive digit sequences. Type recall. Free.',
-    images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
   alternates: {
@@ -92,7 +85,7 @@ export default function DigitSpanPage() {
                 "name": "What is the Digit Span Drill?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "A free working memory exercise based on the scientifically-validated digit span test. 3-second memorization of random digit sequences, then type the exact order."
+                  "text": "A free working memory exercise based on the digit span test. Memorize random digit sequences, then type the exact order."
                 }
               },
               {
@@ -100,7 +93,15 @@ export default function DigitSpanPage() {
                 "name": "How does progressive difficulty work?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Sequence length = level + 2. Level 1 has 3 digits, infinite progression. Font auto-adjusts from 56px down to 22px for longer sequences."
+                  "text": "Sequence length = level. Level 3 has 3 digits, Level 4 has 4, and so on as you score perfect rounds."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Are there negative score or time penalties?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "No. Incorrect entries or timeouts drop your digit count by 1 (this drill is an adaptive span test), but never deduct score points or reduce remaining timer seconds."
                 }
               },
               {
@@ -108,7 +109,7 @@ export default function DigitSpanPage() {
                 "name": "Why is digit span important?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "A core measure of working memory used in WAIS intelligence tests. Average adult span is 7±2 digits. Regular practice improves working memory capacity."
+                  "text": "It measures working memory capacity used in cognitive performance. Average adult span is 7±2 digits."
                 }
               },
               {
@@ -116,7 +117,15 @@ export default function DigitSpanPage() {
                 "name": "Do I need to sign up?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "No registration required. This digit span drill is completely free and works instantly in your browser."
+                  "text": "No registration required. This drill runs directly in your browser with instant response."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "How long does each drill session last?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Each round is timed for exactly 45 seconds of continuous focus."
                 }
               }
             ]

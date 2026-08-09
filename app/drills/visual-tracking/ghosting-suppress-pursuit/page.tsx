@@ -1,98 +1,120 @@
 import GhostingSuppressPursuitClient from './GhostingSuppressPursuitClient';
 
 export const metadata = {
-  title: 'Ghosting Suppress Pursuit - Visual Pursuit & Tracking Drill | SkillDrills',
-  description: 'Suppress lag indicators and trail overlays to isolate target tracking. Train visual pursuit tracking and coordinate re-acquisition speeds. No sign-up required.',
-  keywords: ['ghosting suppress pursuit', 'visual tracking drill', 'smooth pursuit eye training', 'saccadic eye movement test', 'visual processing speed', 'foveal tracking', 'esports vision training', 'athletic vision drill'],
+  title: "Ghosting Suppress Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
+  description: "Train foveal tracking precision by suppressing motion ghosting artifacts and visual lag. Free browser-based visual tracking drill with customizable speed, duration, and random acceleration.",
+  keywords: [
+    "ghosting suppress pursuit",
+    "visual tracking drill",
+    "smooth pursuit eye training",
+    "motion blur suppression",
+    "gaze stability exercise",
+    "esports vision training",
+    "athletic vision drill",
+    "ocular motor training",
+    "eye tracking practice online"
+  ],
+  alternates: {
+    canonical: "https://skilldrills.online/drills/visual-tracking/ghosting-suppress-pursuit",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
   openGraph: {
-    title: 'Ghosting Suppress Pursuit - Visual Pursuit & Tracking Drill | SkillDrills',
-    description: 'Suppress lag indicators and trail overlays to isolate target tracking. Train visual pursuit tracking and coordinate re-acquisition speeds. No sign-up required.',
-    type: 'article',
-    url: 'https://skilldrills.online/drills/visual-tracking/ghosting-suppress-pursuit',
+    title: "Ghosting Suppress Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
+    description: "Train foveal tracking precision by suppressing motion ghosting artifacts and visual lag. Free browser-based visual tracking drill.",
+    url: "https://skilldrills.online/drills/visual-tracking/ghosting-suppress-pursuit",
     siteName: 'SkillDrills',
     locale: 'en_US',
-    images: [{
-      url: 'https://skilldrills.online/icons/icon-512x512.png',
-      width: 512,
-      height: 512,
-      alt: 'Ghosting Suppress Pursuit Drill',
-    }],
+    type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Ghosting Suppress Pursuit - Visual Pursuit & Tracking Drill | SkillDrills',
-    description: 'Suppress lag indicators and trail overlays to isolate target tracking. Train visual pursuit tracking and coordinate re-acquisition speeds. No sign-up required.',
-    images: ['https://skilldrills.online/icons/icon-512x512.png'],
-  },
-  robots: { index: true, follow: true },
-  alternates: {
-    canonical: 'https://skilldrills.online/drills/visual-tracking/ghosting-suppress-pursuit',
+    title: "Ghosting Suppress Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
+    description: "Train foveal tracking precision by suppressing motion ghosting artifacts and visual lag. Free browser-based visual tracking drill.",
   },
 };
 
 export default function GhostingSuppressPursuitPage() {
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "SkillDrills", "item": "https://skilldrills.online/" },
+      { "@type": "ListItem", "position": 2, "name": "Visual Tracking", "item": "https://skilldrills.online/drills/visual-tracking" },
+      { "@type": "ListItem", "position": 3, "name": "Ghosting Suppress Pursuit", "item": "https://skilldrills.online/drills/visual-tracking/ghosting-suppress-pursuit" }
+    ]
+  };
+
+  const softwareSchema = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Ghosting Suppress Pursuit Drill",
+    "applicationCategory": "EducationalApplication",
+    "operatingSystem": "Web Browser",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "description": "An interactive web-based visual tracking drill to suppress motion blur clutter and isolate true target trajectory.",
+    "url": "https://skilldrills.online/drills/visual-tracking/ghosting-suppress-pursuit",
+    "publisher": {
+      "@type": "Organization",
+      "name": "SkillDrills",
+      "url": "https://skilldrills.online"
+    }
+  };
+
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is the Ghosting Suppress Pursuit drill?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The Ghosting Suppress Pursuit drill trains your visual system to suppress motion ghosting and trailing artifacts, helping your eyes lock onto true target coordinates."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Why use the 'Hide Line' setting?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Hiding trajectory indicators forces your visual motor cortex to react dynamically to real-time object movement without visual direction cues."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What does the Random Speed feature do?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Random Speed introduces unpredictable acceleration bursts, strengthening eye muscle modulation under erratic speeds."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How long should I practice visual tracking daily?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "We recommend 5 to 10 minutes of daily visual tracking training before gaming or athletic practice to warm up ocular muscles and reduce eye fatigue."
+        }
+      }
+    ]
+  };
+
   return (
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "BreadcrumbList",
-            "itemListElement": [
-              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://skilldrills.online" },
-              { "@type": "ListItem", "position": 2, "name": "Drills Hub", "item": "https://skilldrills.online/drills" },
-              { "@type": "ListItem", "position": 3, "name": "Visual Tracking", "item": "https://skilldrills.online/drills/visual-tracking" },
-              { "@type": "ListItem", "position": 4, "name": "Ghosting Suppress Pursuit" }
-            ]
-          })
-        }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
-
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "WebApplication",
-            "name": "Ghosting Suppress Pursuit Drill",
-            "url": "https://skilldrills.online/drills/visual-tracking/ghosting-suppress-pursuit",
-            "description": "Suppress lag indicators and trail overlays to isolate target tracking.",
-            "applicationCategory": "EducationalApplication",
-            "operatingSystem": "All",
-            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-            "author": { "@type": "Organization", "name": "SkillDrills" },
-            "isAccessibleForFree": true
-          })
-        }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }}
       />
-
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "FAQPage",
-            "mainEntity": [
-              {
-                "@type": "Question",
-                "name": "What is the Ghosting Suppress Pursuit Drill?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "Suppress lag indicators and trail overlays to isolate target tracking."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "Who is this drill designed for?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "Competitive gamers, sports athletes, and anyone wanting to improve ocular muscle agility and tracking precision."
-                }
-              }
-            ]
-          })
-        }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
 
       <GhostingSuppressPursuitClient />

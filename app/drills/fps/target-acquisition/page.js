@@ -1,25 +1,23 @@
 import TargetAcquisitionClient from './TargetAcquisitionClient';
 
 export const metadata = {
-  title: "Target Acquisition Aim Trainer - First Shot Accuracy | SkillDrills",
+  title: "Target Acquisition Trainer - First Shot Aim | SkillDrills",
   description: "Improve your visual target acquisition and threat identification speed. Practice first shot accuracy and cognitive aim response times online.",
   keywords: [
-    "target acquisition aim training",
+    "target acquisition aim trainer",
     "first shot accuracy drill",
-    "visual target identification",
-    "esports target acquisition",
-    "target acquisition trainer",
-    "target acquisition training",
-    "fps target identification",
+    "target selection training fps",
+    "CS2 target acquisition practice",
+    "Valorant target priority drill",
+    "how to find enemies faster in fps",
+    "how to improve target selection valorant",
+    "best drill for first shot accuracy",
+    "free browser target acquisition trainer",
+    "visual discrimination training for gamers",
+    "how to stop missing the right target",
     "target recognition speed",
     "visual target detection",
-    "fps decision making trainer",
-    "cognitive aim trainer",
-    "threat assessment training",
-    "target selection drill",
-    "valorant target acquisition",
-    "cs2 target id training",
-    "free target acquisition game"
+    "cognitive aim trainer"
   ],
   alternates: {
     canonical: "https://skilldrills.online/drills/fps/target-acquisition",
@@ -29,26 +27,17 @@ export const metadata = {
     follow: true,
   },
   openGraph: {
-    title: "Target Acquisition Aim Trainer - First Shot Accuracy | SkillDrills",
+    title: "Target Acquisition Trainer - First Shot Aim | SkillDrills",
     description: "Improve your visual target acquisition and threat identification speed. Practice first shot accuracy and cognitive aim response times online.",
     url: "https://skilldrills.online/drills/fps/target-acquisition",
     siteName: 'SkillDrills',
     locale: 'en_US',
     type: 'website',
-    images: [
-      {
-        url: 'https://skilldrills.online/icons/icon-512x512.png',
-        width: 512,
-        height: 512,
-        alt: "Target Acquisition Aim Trainer - First Shot Accuracy",
-      },
-    ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Target Acquisition Aim Trainer - First Shot Accuracy | SkillDrills",
+    title: "Target Acquisition Trainer - First Shot Aim | SkillDrills",
     description: "Improve your visual target acquisition and threat identification speed. Practice first shot accuracy and cognitive aim response times online.",
-    images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
 };
 
@@ -66,7 +55,7 @@ export default function TargetAcquisitionPage() {
   const softwareSchema = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
-    "name": "Target Acquisition Aim Trainer",
+    "name": "Target Acquisition Pro",
     "applicationCategory": "GameApplication",
     "operatingSystem": "Web Browser",
     "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
@@ -80,6 +69,19 @@ export default function TargetAcquisitionPage() {
     }
   };
 
+  const videoGameSchema = {
+    "@context": "https://schema.org",
+    "@type": "VideoGame",
+    "name": "Target Acquisition Pro",
+    "url": "https://skilldrills.online/drills/fps/target-acquisition",
+    "description": "A free browser FPS drill training visual target identification speed, threat recognition, and first-shot accuracy for competitive FPS games.",
+    "gamePlatform": "Web Browser",
+    "genre": ["FPS Training", "Aim Trainer"],
+    "playMode": "SinglePlayer",
+    "applicationCategory": "Game",
+    "operatingSystem": "Web Browser"
+  };
+
   const faqSchema = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
@@ -89,7 +91,7 @@ export default function TargetAcquisitionPage() {
         "name": "What is target acquisition in FPS games?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Target acquisition is the combined process of visually detecting a threat, identifying it as an enemy (not a teammate), deciding to engage, and getting your crosshair on the target fast enough to fire first. It involves both cognitive processing (recognition and decision) and mechanical execution (crosshair movement). This is the skill that separates players who \"see\" enemies fast from those who react slowly."
+          "text": "Target acquisition is the combined process of visually detecting a threat, identifying it as an enemy (not a teammate), deciding to engage, and getting your crosshair on the target fast enough to fire first. It involves both cognitive processing (recognition and decision) and mechanical execution (crosshair movement). This is the skill that separates players who see enemies fast from those who react slowly."
         }
       },
       {
@@ -105,7 +107,7 @@ export default function TargetAcquisitionPage() {
         "name": "Why do some players always seem to see enemies before others?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Players with trained target acquisition have learned unconscious threat pattern recognition — their visual system has been trained to flag enemy silhouettes, color cues, and movement patterns faster than untrained players. This creates the illusion that they \"see first\" when actually their brain is processing the same visual information faster and more efficiently."
+          "text": "Players with trained target acquisition have learned unconscious threat pattern recognition — their visual system has been trained to flag enemy silhouettes, color cues, and movement patterns faster than untrained players. This creates the illusion that they see first when actually their brain is processing the same visual information faster and more efficiently."
         }
       },
       {
@@ -121,7 +123,31 @@ export default function TargetAcquisitionPage() {
         "name": "What cognitive skills does target acquisition training improve?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Target acquisition training improves visual processing speed (how fast your eyes register a target), pattern recognition (identifying enemy silhouettes), selective attention (filtering enemies from background), and decision speed (choosing to engage). Together these create the \"faster\" perception that high-rank players possess."
+          "text": "Target acquisition training improves visual processing speed (how fast your eyes register a target), pattern recognition (identifying enemy silhouettes), selective attention (filtering enemies from background), and decision speed (choosing to engage). Together these create the faster perception that high-rank players possess."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can target acquisition be trained independently of mechanical aim?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, target acquisition isolates the visual identification and decision phase of aim. Training target acquisition helps your brain recognize threat patterns faster, allowing your existing mechanical aim to execute with higher confidence."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does target acquisition impact CS2 and tactical shooters?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "In CS2, time-to-kill is extremely fast. Spotting a target's head pixel a fraction of a second earlier grants the critical advantage needed to secure first-bullet headshots."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the optimal daily target acquisition training routine?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "We recommend 10 to 15 minutes of target acquisition drills at the start of your gaming session to warm up visual processing speed before entering competitive matches."
         }
       }
     ]
@@ -153,32 +179,27 @@ export default function TargetAcquisitionPage() {
 
   return (
     <>
-      {/* Breadcrumb Schema */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
-
-      {/* SoftwareApplication Schema */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }}
       />
-
-      {/* FAQPage Schema */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
-
-      {/* HowTo Schema */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-
       <TargetAcquisitionClient />
     </>
   );
 }
-

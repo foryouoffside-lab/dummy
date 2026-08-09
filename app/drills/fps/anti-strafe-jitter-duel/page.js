@@ -1,23 +1,29 @@
 import AntiStrafeJitterClient from './AntiStrafeJitterClient';
 
 export const metadata = {
-  title: "Counter-Strafe Aim Trainer - Strafe Duel Drill | SkillDrills",
-  description: "Master movement accuracy with our online Counter-Strafe Aim Trainer. Learn shot-timing synchronization and beat strafing opponents in competitive FPS.",
+  title: "Anti-Strafe Jitter Trainer — Reactive Aim | SkillDrills",
+  description: "Improve reactive tracking, anti-strafe aim, and high-frequency ADAD jitter duel tracking for competitive games like Apex Legends, Overwatch 2 & Warzone.",
   keywords: [
-    "counter strafe aim trainer",
-    "counter strafe training",
-    "counter strafing practice",
-    "strafe duel aim trainer",
-    "how to counter strafe",
-    "anti strafe training",
-    "ADAD strafe shooting",
-    "ADAD tracking drill",
-    "strafe stop shot timing",
-    "cs2 counter strafe",
-    "valorant anti strafe",
-    "strafe duel practice",
-    "fps movement aim training",
-    "read enemy movement fps"
+    "anti strafe jitter duel trainer",
+    "reactive tracking aim trainer",
+    "adad jitter tracking practice",
+    "apex legends anti strafe drill",
+    "overwatch 2 jitter duel trainer",
+    "warzone close quarters tracking",
+    "anti strafe reaction drill",
+    "free reactive tracking aim trainer",
+    "high ttk jitter tracking drill",
+    "wrist jitter correction trainer",
+    "fps reactive tracking practice",
+    "valorant anti strafe practice",
+    "cs2 jitter tracking trainer",
+    "the finals tracking drill",
+    "call of duty jitter duel",
+    "hardware raw input jitter tracking",
+    "continuous adad strafe tracking",
+    "anti overflicking jitter trainer",
+    "fine motor micro correction drill",
+    "reactive direction change aim practice"
   ],
   alternates: {
     canonical: "https://skilldrills.online/drills/fps/anti-strafe-jitter-duel",
@@ -27,26 +33,17 @@ export const metadata = {
     follow: true,
   },
   openGraph: {
-    title: "Counter-Strafe Aim Trainer - Strafe Duel Drill | SkillDrills",
-    description: "Master movement accuracy with our online Counter-Strafe Aim Trainer. Learn shot-timing synchronization and beat strafing opponents in competitive FPS.",
+    title: "Anti-Strafe Jitter Trainer — Reactive Aim | SkillDrills",
+    description: "Improve reactive tracking, anti-strafe aim, and high-frequency ADAD jitter duel tracking for competitive games like Apex Legends, Overwatch 2 & Warzone.",
     url: "https://skilldrills.online/drills/fps/anti-strafe-jitter-duel",
     siteName: 'SkillDrills',
     locale: 'en_US',
     type: 'website',
-    images: [
-      {
-        url: 'https://skilldrills.online/icons/icon-512x512.png',
-        width: 512,
-        height: 512,
-        alt: "Counter-Strafe Aim Trainer - Strafe Duel Drill",
-      },
-    ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Counter-Strafe Aim Trainer - Strafe Duel Drill | SkillDrills",
-    description: "Master movement accuracy with our online Counter-Strafe Aim Trainer. Learn shot-timing synchronization and beat strafing opponents in competitive FPS.",
-    images: ['https://skilldrills.online/icons/icon-512x512.png'],
+    title: "Anti-Strafe Jitter Trainer — Reactive Aim | SkillDrills",
+    description: "Improve reactive tracking, anti-strafe aim, and high-frequency ADAD jitter duel tracking for competitive games like Apex Legends, Overwatch 2 & Warzone.",
   },
 };
 
@@ -57,19 +54,19 @@ export default function AntiStrafeJitterPage() {
     "itemListElement": [
       { "@type": "ListItem", "position": 1, "name": "SkillDrills", "item": "https://skilldrills.online/" },
       { "@type": "ListItem", "position": 2, "name": "FPS Drills", "item": "https://skilldrills.online/drills/fps" },
-      { "@type": "ListItem", "position": 3, "name": "Counter-Strafe Aim Trainer", "item": "https://skilldrills.online/drills/fps/anti-strafe-jitter-duel" }
+      { "@type": "ListItem", "position": 3, "name": "Anti-Strafe Jitter Duel", "item": "https://skilldrills.online/drills/fps/anti-strafe-jitter-duel" }
     ]
   };
 
   const softwareSchema = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
-    "name": "Counter-Strafe Aim Trainer",
+    "name": "Anti-Strafe Jitter Duel Trainer",
     "applicationCategory": "GameApplication",
     "operatingSystem": "Web Browser",
     "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-    "description": "A free browser-based FPS drill training counter-strafing shot timing, anti-strafe accuracy, and ADAD jitter-duel tracking for competitive FPS games.",
-    "genre": "FPS Training / Movement Mechanics",
+    "description": "Improve reactive tracking, anti-strafe aim, and high-frequency ADAD jitter duel tracking.",
+    "genre": "FPS Training / Anti-Strafe",
     "url": "https://skilldrills.online/drills/fps/anti-strafe-jitter-duel",
     "publisher": {
       "@type": "Organization",
@@ -78,48 +75,142 @@ export default function AntiStrafeJitterPage() {
     }
   };
 
+  const videoGameSchema = {
+    "@context": "https://schema.org",
+    "@type": "VideoGame",
+    "name": "Anti-Strafe Jitter Duel",
+    "url": "https://skilldrills.online/drills/fps/anti-strafe-jitter-duel",
+    "description": "Improve reactive tracking, anti-strafe aim, and high-frequency ADAD jitter duel tracking.",
+    "gamePlatform": "Web Browser",
+    "genre": ["FPS Training", "Aim Trainer"],
+    "playMode": "SinglePlayer",
+    "applicationCategory": "Game",
+    "operatingSystem": "Web Browser",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+  };
+
   const faqSchema = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
     "mainEntity": [
       {
         "@type": "Question",
-        "name": "What is counter-strafing and why is it important in CS2?",
+        "name": "What is reactive tracking?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Counter-strafing is pressing the opposite movement key (A or D) to instantly stop your character's momentum, making you accurate while stationary for a brief window. In CS2, your bullets are inaccurate while moving, so counter-strafing creates the accuracy window needed to fire. This drill trains you to time shots within that accuracy window."
+          "text": "Reactive tracking is the mechanical ability in FPS games to continuously follow a rapidly and unpredictably moving target with your crosshair, requiring fast visual reaction and micro-corrections."
         }
       },
       {
         "@type": "Question",
-        "name": "What is ADAD jitter strafing and how do I counter it?",
+        "name": "How do I improve tracking aim?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "ADAD jitter strafing is rapidly pressing A and D to create an erratic side-to-side movement pattern that makes you harder to track. The counter is to read the rhythm and click at the natural pause points of the jitter, or to use spray-down techniques. This drill trains both tracking and pause-timing against jitter movement patterns."
+          "text": "Improve tracking aim by maintaining high visual focus on the target itself rather than your crosshair, training against fast direction changes, and practicing smooth, continuous mouse adjustments without tensing your hand."
         }
       },
       {
         "@type": "Question",
-        "name": "How does this drill differ from a standard tracking trainer?",
+        "name": "What is anti-strafe tracking?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Standard tracking trainers move targets predictably. This drill simulates ADAD and jitter-strafe patterns — the non-linear, rhythm-based movement that real enemies use in gunfights. It trains the specific split-second timing of reading a strafe direction change and clicking at the movement window."
+          "text": "Anti-strafe tracking is a specialized aiming skill to counter an enemy's ADAD movement patterns, where the target quickly switches horizontal directions to break tracking alignment."
         }
       },
       {
         "@type": "Question",
-        "name": "Does this help with Apex Legends movement gunfights?",
+        "name": "How do professional Apex players train tracking?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Yes. Apex Legends has highly mobile movement mechanics where enemies frequently perform strafe-based evasion during gunfights. This drill trains your ability to track and click accurately through jitter-based evasion, directly improving your ability to win mobile 1v1 gunfights at close range."
+          "text": "Professional Apex Legends players practice tracking by using high-strafe reactive tracking trainers, learning target velocity changes, and performing smooth close-quarters tracking warmups."
         }
       },
       {
         "@type": "Question",
-        "name": "What skills does anti-strafe training improve?",
+        "name": "How do Overwatch players improve tracking aim?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Anti-strafe training improves shot timing, movement reading, reactive tracking, click precision during direction changes, and the cognitive ability to anticipate the next strafe direction — all critical skills for winning close-range duels in competitive FPS games."
+          "text": "Overwatch players improve tracking aim by training against erratic movement patterns (like ADAD and crouch strafes) and maintaining crosshair alignment on high-mobility heroes like Tracer and Genji."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Why is tracking important?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Tracking aim is critical for fully automatic weapons and high time-to-kill (TTK) games like Apex, Overwatch, and The Finals, where damage output is directly proportional to how long your crosshair remains on the enemy."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can this improve close-range aim?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, this drill simulates rapid close-range strafes and jitter duels where targets move wide across your screen, forcing your eyes and wrist to make high-speed reactive adjustments."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does this help Apex Legends?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Absolutely. Apex duels are defined by fast ADAD strafes, slide jumps, and close-quarter jitter movements. This drill directly targets those reaction mechanics."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does this help Overwatch?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. It trains your hand to match the instant, zero-momentum direction changes typical of Overwatch characters, improving hit registration for tracking heroes like Soldier: 76, Zarya, and Tracer."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does this help Call of Duty?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, tracking and reading player movement changes is essential in Call of Duty for tracking slide cancelers and fast strafers in close-quarters gunfights."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How often should I practice tracking?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "We recommend dedicating 10-15 minutes to reactive tracking and direction change drills daily before launching your games."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is this drill free?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, this reactive tracking trainer is completely free to use and runs directly in any modern browser without requiring any downloads or account registration."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What skills does this improve?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "It improves anti-strafe response, jitter correction speed, continuous tracking uptime, mouse tension control, and target lock-on retention."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can tracking drills improve consistency?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, repetitive practice against high-speed direction shifts develops consistent wrist-to-screen coordinate mapping, minimizing mechanical errors and aiming panic."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I read fast direction changes?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Do not try to guess when the target will turn. Relax your eyes, widen your focal awareness, and react to the target's change in velocity as a reflex rather than an anticipation."
         }
       }
     ]
@@ -128,55 +219,50 @@ export default function AntiStrafeJitterPage() {
   const howToSchema = {
     "@context": "https://schema.org",
     "@type": "HowTo",
-    "name": "How to Practice Counter-Strafing Shot Timing",
-    "description": "Step-by-step instructions to coordinate your movement stops with accurate clicks on moving targets.",
+    "name": "How to Train Anti-Strafe Jitter Duel Aim",
+    "description": "Step-by-step instructions to train reactive tracking against high-frequency ADAD jitter strafes.",
     "step": [
       {
         "@type": "HowToStep",
-        "name": "Sync Movement Controls",
-        "text": "Move left and right using the A and D keys. Coordinate your finger transitions to stop your character's velocity."
+        "name": "Adjust Sensitivity",
+        "text": "Set your Universal Sens slider to match your primary game."
       },
       {
         "@type": "HowToStep",
-        "name": "Acquire the Target",
-        "text": "Observe the target's side-to-side ADAD movement. Read the deceleration pauses at each direction shift."
+        "name": "Track ADAD Jitter Target",
+        "text": "Keep your crosshair continuously locked on the target as it performs rapid horizontal direction switches."
       },
       {
         "@type": "HowToStep",
-        "name": "Tap the Opposite Key and Click",
-        "text": "Press the opposite direction key (e.g., tap D while moving left) and click the target center at the exact instant you stop."
+        "name": "Maintain Tracking Combos",
+        "text": "Avoid tracking breaks to sustain high combo multipliers and extend your time budget."
       }
     ]
   };
 
   return (
     <>
-      {/* Breadcrumb Schema */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
-
-      {/* SoftwareApplication Schema */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }}
       />
-
-      {/* FAQPage Schema */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
-
-      {/* HowTo Schema */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-
       <AntiStrafeJitterClient />
     </>
   );
 }
-

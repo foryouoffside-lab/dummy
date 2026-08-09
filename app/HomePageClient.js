@@ -2,131 +2,141 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { 
-  Target, ArrowRight, Zap, Trophy, BarChart3, Sparkles, 
-  TrendingUp, Brain, Crosshair, Eye, Timer, Keyboard, 
-  Dumbbell, Database, Star, Shield, Users, Activity,
-  AlertTriangle, Monitor, AlertCircle, MessageSquare, Lightbulb
+import Reveal from '@/components/Reveal';
+import SiteFooter from '@/components/SiteFooter';
+import { DRILLS, DESKTOP_ONLY_CATEGORIES } from '@/lib/drillsRegistry';
+import {
+  Target, ArrowRight, Zap, Trophy, BarChart3, Sparkles,
+  TrendingUp, Brain, Crosshair, Eye, Timer,
+  Dumbbell, Database, Star, Shield, Users, Activity, CheckCircle2, LineChart
 } from 'lucide-react';
 
-const categories = [
-  { 
-    name: 'FPS Training', 
-    description: 'Aim trainer, flick shots, tracking and reflex drills for competitive gaming', 
-    icon: Crosshair, 
-    href: '/drills/fps', 
-    gradient: 'from-red-500 via-rose-500 to-orange-500',
+const categoryConfigs = [
+  {
+    id: 'fps',
+    name: 'FPS Training',
+    description: 'Aim trainer, flick shots, tracking and reflex drills for competitive gaming',
+    icon: Crosshair,
+    href: '/drills/fps',
     iconBg: 'bg-gradient-to-br from-red-500 to-orange-500',
-    drills: '16 drills',
-    featured: true 
+    accentColor: 'text-red-400',
+    glow: 'rgba(239,68,68,0.28)',
+    featured: true
   },
-  { 
-    name: 'Cognitive', 
-    description: 'Memory, attention, focus and problem solving exercises', 
-    icon: Brain, 
-    href: '/drills/cognitive', 
-    gradient: 'from-blue-500 via-indigo-500 to-violet-500',
-    iconBg: 'bg-gradient-to-br from-blue-500 to-indigo-500',
-    drills: '18 drills' 
+  {
+    id: 'cognitive',
+    name: 'Cognitive',
+    description: 'Memory, attention, focus and problem solving exercises',
+    icon: Brain,
+    href: '/drills/cognitive',
+    iconBg: 'bg-gradient-to-br from-purple-500 to-indigo-500',
+    accentColor: 'text-purple-400',
+    glow: 'rgba(168,85,247,0.28)'
   },
-  { 
-    name: 'Visual', 
-    description: 'Peripheral vision, tracking accuracy and reaction speed', 
-    icon: Eye, 
-    href: '/drills/visual', 
-    gradient: 'from-purple-500 via-violet-500 to-pink-500',
-    iconBg: 'bg-gradient-to-br from-purple-500 to-pink-500',
-    drills: '14 drills' 
-  },
-  { 
-    name: 'Visual Tracking', 
-    description: 'Smooth pursuit, gaze stability, and trajectory prediction training', 
-    icon: Activity, 
-    href: '/drills/visual-tracking', 
-    gradient: 'from-cyan-500 via-blue-500 to-indigo-500',
-    iconBg: 'bg-gradient-to-br from-cyan-500 to-blue-500',
-    drills: '15 drills' 
-  },
-  { 
-    name: 'Academic', 
-    description: 'Reading comprehension, math speed, typing and writing', 
-    icon: Keyboard, 
-    href: '/drills/academic', 
-    gradient: 'from-emerald-500 via-green-500 to-teal-500',
-    iconBg: 'bg-gradient-to-br from-emerald-500 to-teal-500',
-    drills: '8 drills' 
-  },
-  { 
-    name: 'Memory', 
-    description: 'Working memory, spatial recall and long-term retention', 
-    icon: Database, 
-    href: '/drills/memory', 
-    gradient: 'from-indigo-500 via-purple-500 to-fuchsia-500',
+  {
+    id: 'memory',
+    name: 'Memory',
+    description: 'Working memory, spatial recall and long-term retention',
+    icon: Database,
+    href: '/drills/memory',
     iconBg: 'bg-gradient-to-br from-indigo-500 to-purple-500',
-    drills: '13 drills' 
+    accentColor: 'text-indigo-400',
+    glow: 'rgba(99,102,241,0.28)'
   },
-  { 
-    name: 'Motor Skills', 
-    description: 'Hand-eye coordination, precision control and timing', 
-    icon: Target, 
-    href: '/drills/motor', 
-    gradient: 'from-orange-500 via-amber-500 to-yellow-500',
-    iconBg: 'bg-gradient-to-br from-orange-500 to-amber-500',
-    drills: '14 drills' 
+  {
+    id: 'motor',
+    name: 'Motor Skills',
+    description: 'Hand-eye coordination, precision control and timing accuracy',
+    icon: Dumbbell,
+    href: '/drills/motor',
+    iconBg: 'bg-gradient-to-br from-emerald-500 to-teal-500',
+    accentColor: 'text-emerald-400',
+    glow: 'rgba(16,185,129,0.28)'
   },
-  { 
-    name: 'Physical', 
-    description: 'Balance training, coordination drills and reflex exercises', 
-    icon: Dumbbell, 
-    href: '/drills/physical', 
-    gradient: 'from-rose-500 via-red-500 to-orange-500',
+  {
+    id: 'physical',
+    name: 'Physical',
+    description: 'Balance training, directional reflex and coordination drills',
+    icon: Activity,
+    href: '/drills/physical',
     iconBg: 'bg-gradient-to-br from-rose-500 to-red-500',
-    drills: '14 drills' 
+    accentColor: 'text-rose-400',
+    glow: 'rgba(251,113,133,0.28)'
+  },
+  {
+    id: 'visual',
+    name: 'Visual Training',
+    description: 'Peripheral awareness, saccadic recognition and flash detection',
+    icon: Eye,
+    href: '/drills/visual',
+    iconBg: 'bg-gradient-to-br from-fuchsia-500 to-pink-500',
+    accentColor: 'text-fuchsia-400',
+    glow: 'rgba(232,121,249,0.28)'
+  },
+  {
+    id: 'visual-tracking',
+    name: 'Visual Tracking',
+    description: 'Smooth pursuit, continuous path tracking, and trajectory prediction',
+    icon: Activity,
+    href: '/drills/visual-tracking',
+    iconBg: 'bg-gradient-to-br from-cyan-500 to-blue-500',
+    accentColor: 'text-cyan-400',
+    glow: 'rgba(34,211,238,0.28)'
+  },
+  {
+    id: 'reaction-speed',
+    name: 'Reaction Speed',
+    description: 'Simple and choice stimulus latency calibration and reflex response',
+    icon: Zap,
+    href: '/drills/reaction-speed',
+    iconBg: 'bg-gradient-to-br from-amber-500 to-yellow-500',
+    accentColor: 'text-amber-400',
+    glow: 'rgba(245,158,11,0.28)'
   },
 ];
+
+function handleCardMouseMove(e) {
+  const rect = e.currentTarget.getBoundingClientRect();
+  e.currentTarget.style.setProperty('--mx', `${e.clientX - rect.left}px`);
+  e.currentTarget.style.setProperty('--my', `${e.clientY - rect.top}px`);
+}
 
 const features = [
   { 
     icon: Zap, 
-    title: 'Real-time Feedback', 
-    description: 'Get instant performance metrics and visual feedback during every drill session', 
+    title: 'Real-time Telemetry', 
+    description: 'Instant latency, precision, and accuracy metrics updated every millisecond', 
     gradient: 'from-amber-400 to-yellow-500',
-    bgGradient: 'from-amber-50 to-yellow-50'
   },
   { 
     icon: BarChart3, 
-    title: 'Performance Analytics', 
-    description: 'Track scores, accuracy rates, and improvement trends with detailed charts', 
+    title: 'Local Progress Curves', 
+    description: 'Track scores and neural adaptation rates privately in your browser', 
     gradient: 'from-blue-400 to-indigo-500',
-    bgGradient: 'from-blue-50 to-indigo-50'
   },
   { 
     icon: Trophy, 
-    title: 'Achievement System', 
-    description: 'Earn badges and beat personal records across all training categories', 
+    title: 'Adaptive Progression', 
+    description: 'Dynamic difficulty curves adjust target speeds to keep you in peak flow', 
     gradient: 'from-orange-400 to-red-500',
-    bgGradient: 'from-orange-50 to-red-50'
   },
   { 
     icon: Shield, 
-    title: 'Science-Backed', 
-    description: 'Drills designed using cognitive science and professional gaming principles', 
+    title: 'Validated Paradigms', 
+    description: 'Modeled directly on established cognitive psych instruments and esports standards', 
     gradient: 'from-purple-400 to-violet-500',
-    bgGradient: 'from-purple-50 to-violet-50'
   },
   { 
     icon: Target, 
-    title: 'Focused Training', 
-    description: 'Target specific skill areas with 120 specialized drills across 9 categories', 
+    title: 'Focused Skill Vectors', 
+    description: 'Target specific bottlenecks across 8 specialized performance categories', 
     gradient: 'from-emerald-400 to-green-500',
-    bgGradient: 'from-emerald-50 to-green-50'
   },
   { 
     icon: Users, 
-    title: 'Community Driven', 
-    description: 'Join thousands of gamers and learners improving their skills daily', 
+    title: 'Zero Latency & Friction', 
+    description: '100% free, client-side execution with zero account registration or credit card', 
     gradient: 'from-pink-400 to-rose-500',
-    bgGradient: 'from-pink-50 to-rose-50'
   },
 ];
 
@@ -135,33 +145,29 @@ const audienceData = [
     icon: Crosshair, 
     gradient: 'from-red-500 to-orange-500',
     title: 'Competitive Gamers', 
-    description: 'Dominate in Valorant, CS2, Overwatch, and Apex Legends with pro-level aim training, flick shots, and tracking drills.' 
+    description: 'Sharpen flick accuracy, target tracking, and reaction times for Valorant, CS2, Overwatch, and Apex Legends.' 
   },
   { 
     icon: Brain, 
     gradient: 'from-blue-500 to-indigo-500',
-    title: 'Students & Learners', 
-    description: 'Boost memory retention, double your reading speed, and master mental math for academic excellence.' 
+    title: 'Cognitive Performers', 
+    description: 'Expand working memory span, improve attention stamina, and accelerate processing speed.' 
   },
   { 
     icon: BarChart3, 
     gradient: 'from-emerald-500 to-green-500',
-    title: 'Professionals', 
-    description: 'Focus, memory, attention, problem solving, and cognitive skill training.' 
+    title: 'Daily Training Enthusiasts', 
+    description: '5-minute micro-sessions designed for quick mental warm-ups and daily mechanical calibration.' 
   },
 ];
 
 export default function HomePageClient() {
   const [profile, setProfile] = useState(null);
-  const [showBetaNotice, setShowBetaNotice] = useState(false);
-  
-  useEffect(() => {
-    // Session Storage Check for Beta Notice
-    const noticeShown = sessionStorage.getItem('home_beta_notice_shown');
-    if (!noticeShown) {
-      setShowBetaNotice(true);
-    }
 
+  const totalDrillsCount = DRILLS?.length || 113;
+  const totalCategoriesCount = categoryConfigs.length;
+
+  useEffect(() => {
     try {
       const keys = Object.keys(localStorage);
       let totalDrillsPlayed = 0;
@@ -175,11 +181,11 @@ export default function HomePageClient() {
         fps: { name: 'FPS Aim', count: 0, levels: 0, games: 0 },
         cognitive: { name: 'Cognitive', count: 0, levels: 0, games: 0 },
         memory: { name: 'Memory', count: 0, levels: 0, games: 0 },
-        academic: { name: 'Academic', count: 0, levels: 0, games: 0 },
         visual: { name: 'Visual', count: 0, levels: 0, games: 0 },
         'visual-tracking': { name: 'Visual Tracking', count: 0, levels: 0, games: 0 },
         motor: { name: 'Motor Skills', count: 0, levels: 0, games: 0 },
         physical: { name: 'Physical', count: 0, levels: 0, games: 0 },
+        'reaction-speed': { name: 'Reaction Speed', count: 0, levels: 0, games: 0 },
       };
       
       keys.forEach(key => {
@@ -206,18 +212,6 @@ export default function HomePageClient() {
           }
         }
       });
-      
-      keys.forEach(key => {
-        if (key.endsWith('BestScore') || key.endsWith('Best') || key.endsWith('HighScore')) {
-          const val = localStorage.getItem(key);
-          if (val) {
-            const score = parseInt(val, 10);
-            if (!isNaN(score)) {
-              totalBestScore += score;
-            }
-          }
-        }
-      });
 
       if (totalDrillsPlayed > 0 || drillCount > 0) {
         setProfile({
@@ -226,531 +220,469 @@ export default function HomePageClient() {
           maxLevel,
           drillsCount: drillCount,
           totalXp,
-          fitnessRating: Math.min(100, Math.round((totalLevel * 5) + (totalBestScore / 200) + (totalDrillsPlayed * 2))),
+          fitnessRating: Math.min(100, Math.round((totalLevel * 5) + (totalDrillsPlayed * 2))),
           sectors: sectorStats
         });
       }
     } catch (e) {}
   }, []);
 
-  const handleDismissNotice = () => {
-    sessionStorage.setItem('home_beta_notice_shown', 'true');
-    setShowBetaNotice(false);
-  };
-
-  const copyPageLink = () => {
-    navigator.clipboard.writeText('https://skilldrills.online');
-    alert('Link copied to clipboard! Share SkillDrills with your friends.');
-  };
-
-  const sharePage = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: 'SkillDrills - Free FPS Aim Trainer & Brain Training',
-          text: '120 free drills for FPS gaming, cognitive skills, visual tracking, and mental fitness. No sign-up!',
-          url: 'https://skilldrills.online',
-        });
-      } catch (error) {
-        console.log('Share cancelled');
-      }
-    } else {
-      copyPageLink();
-    }
-  };
-
   return (
-    <div 
-      className="min-h-screen bg-[#050508] text-gray-100 selection:bg-blue-500/20 selection:text-blue-400 font-sans relative overflow-hidden"
-      style={{ 
-        backgroundImage: 'radial-gradient(circle at 50% 50%, rgba(20, 24, 38, 0.4) 0%, rgba(5, 5, 8, 1) 85%), linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px)', 
-        backgroundSize: '100% 100%, 48px 48px, 48px 48px' 
-      }}
-    >
-      {/* BETA NOTICE MODAL */}
-      {showBetaNotice && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
-          <div className="bg-[#0b101e] border border-blue-500/40 rounded-2xl p-6 sm:p-8 max-w-lg w-full shadow-[0_0_40px_rgba(59,130,246,0.2)] relative overflow-hidden animate-in fade-in zoom-in duration-300 max-h-[90vh] overflow-y-auto">
-            <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-500 via-indigo-500 to-blue-500"></div>
-            
-            <h2 className="text-xl sm:text-2xl font-black text-white mb-5 flex items-center gap-3 font-mono tracking-tight uppercase">
-              <AlertTriangle className="text-blue-500 w-7 h-7 shrink-0" />
-              Notice / Beta Phase
-            </h2>
-            
-            <div className="space-y-4 text-sm text-slate-300 mb-8">
-              <div className="flex items-start gap-3 bg-blue-500/10 border border-blue-500/20 p-3 rounded-xl">
-                <Monitor className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" />
-                <p><strong>Desktop Recommended for FPS:</strong> FPS Aim Drills heavily rely on hardware pointer-lock and raw mouse inputs. They will not function correctly on mobile devices. (Cognitive & Memory drills work great on mobile!)</p>
-              </div>
+    <div className="min-h-screen bg-canvas text-ink-1 font-sans relative overflow-hidden">
+      {/* Layered premium background: mesh blobs + grid + grain */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[1200px] h-[560px] bg-blue-600/[0.14] rounded-full blur-[160px]" />
+        <div className="absolute top-[20%] -left-40 w-[520px] h-[520px] bg-purple-600/[0.10] rounded-full blur-[140px]" />
+        <div className="absolute top-[45%] -right-40 w-[520px] h-[480px] bg-cyan-500/[0.08] rounded-full blur-[140px]" />
+        <div
+          className="absolute inset-0 opacity-40"
+          style={{
+            backgroundImage: 'linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)',
+            backgroundSize: '40px 40px',
+            maskImage: 'radial-gradient(ellipse 80% 60% at 50% 20%, black 40%, transparent 90%)',
+          }}
+        />
+        <div
+          className="absolute inset-0 opacity-[0.04] mix-blend-overlay"
+          style={{
+            backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
+          }}
+        />
+      </div>
 
-              <div className="flex items-start gap-3 bg-yellow-500/10 border border-yellow-500/20 p-3 rounded-xl">
-                <AlertCircle className="w-5 h-5 text-yellow-400 shrink-0 mt-0.5" />
-                <p><strong>Testing Phase:</strong> The platform is currently in testing. You might encounter minor performance or UI discrepancies as we continue to optimize the engine.</p>
-              </div>
-
-              <div className="flex items-start gap-3 bg-green-500/10 border border-green-500/20 p-3 rounded-xl">
-                <MessageSquare className="w-5 h-5 text-green-400 shrink-0 mt-0.5" />
-                <p><strong>We Need Your Feedback:</strong> Encountered a bug or want a new feature? Please cooperate and let us know via social media links in the footer below. Your feedback is vital!</p>
-              </div>
-            </div>
-            
-            <button 
-              onClick={handleDismissNotice}
-              className="w-full py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:brightness-110 text-white font-black rounded-xl transition-all shadow-lg active:scale-95 uppercase tracking-widest text-sm"
-            >
-              I Understand, Let&apos;s Train
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Decorative Blur Shapes */}
-      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-blue-600/10 rounded-full filter blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-10 right-10 w-[600px] h-[600px] bg-purple-600/10 rounded-full filter blur-[150px] pointer-events-none" />
-
-      {/* HEADER */}
-      <header className="fixed top-4 left-4 right-4 z-50 bg-black/40 backdrop-blur-xl border border-white/5 rounded-2xl shadow-2xl max-w-7xl mx-auto" role="banner">
-        <div className="px-6 sm:px-8">
-          <div className="flex items-center justify-between h-16">
-            <Link 
-              href="/" 
-              className="flex items-center gap-3 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg group"
-              aria-label="SkillDrills Home - Free Brain Training Platform"
-              title="SkillDrills - Free FPS and Cognitive Training"
-            >
-              <div className="w-9 h-9 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
-                <Target className="w-5.5 h-5.5 text-white" aria-hidden="true" />
-              </div>
-              <span className="text-xl font-black tracking-tight text-white uppercase bg-clip-text">
-                SkillDrills<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 ml-1 font-bold">Pro</span>
-              </span>
-            </Link>
-            
-            <nav aria-label="Main navigation" className="hidden sm:flex items-center gap-6">
-              <Link href="/drills/fps" className="text-sm text-gray-400 hover:text-white transition-colors font-medium">FPS</Link>
-              <Link href="/drills/cognitive" className="text-sm text-gray-400 hover:text-white transition-colors font-medium">Cognitive</Link>
-              <Link href="/drills/memory" className="text-sm text-gray-400 hover:text-white transition-colors font-medium">Memory</Link>
-              <Link href="/drills/academic" className="text-sm text-gray-400 hover:text-white transition-colors font-medium">Academic</Link>
-              <Link href="/drills/visual" className="text-sm text-gray-400 hover:text-white transition-colors font-medium">Visual</Link>
-              <Link href="/drills/visual-tracking" className="text-sm text-gray-400 hover:text-white transition-colors font-medium">Tracking</Link>
-              <Link href="/drills" className="text-sm bg-gradient-to-r from-blue-600 to-purple-600 text-white px-5 py-2.5 rounded-xl hover:shadow-lg hover:shadow-blue-500/20 transition-all font-semibold">All Drills</Link>
-            </nav>
-          </div>
-        </div>
-      </header>
-
-      {/* SEO Content */}
+      {/* SEO Structured Content */}
       <section className="sr-only" aria-label="Platform description">
         <h2>SkillDrills - Free Brain Training and FPS Aim Trainer Platform</h2>
         <p>
-          SkillDrills is a completely free online training platform offering 120 interactive drills across 9 categories. 
-          FPS aim training for Valorant, CS2, Overwatch, Apex Legends and all competitive shooters. 
-          Cognitive brain training including memory games, attention exercises, focus training and problem-solving puzzles. 
-          Academic skills practice with typing tests, speed reading, mental math drills and reading comprehension.
-          Motor skills development for hand-eye coordination, precision control and timing accuracy. 
-          Visual training for peripheral vision, depth perception, reaction speed and visual recognition. 
-          Visual tracking for smooth pursuit, gaze stability, and trajectory prediction. 
-          Cognitive training for attention, focus, memory, and problem solving. 
-          Physical training with balance exercises, coordination drills and reflex training. 
-          No registration, no login, no credit card required. Start training instantly for free at skilldrills.online.
+          SkillDrills is a free online training platform offering {totalDrillsCount} interactive drills across {totalCategoriesCount} categories:
+          FPS aim training, cognitive brain exercises, visual tracking, working memory games, hand-eye motor skills, physical reflex drills, visual recognition, and reaction speed testing.
+          Zero registration, 100% browser-native performance drills.
         </p>
       </section>
 
-      {/* HERO SECTION */}
-      <section className="relative pt-36 pb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" aria-labelledby="hero-heading">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          {/* Left Text Column */}
-          <div className="lg:col-span-7 space-y-8 text-center lg:text-left">
-            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-full px-4.5 py-1.5 mx-auto lg:mx-0 shadow-inner">
-              <Sparkles className="w-4 h-4 text-cyan-400" aria-hidden="true" />
-              <span className="text-xs text-blue-300 font-bold uppercase tracking-wider">Esports & Cognitive Training Hub</span>
-            </div>
-            
-            <h1 id="hero-heading" className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-none text-white uppercase">
-              Master Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400">Mind</span> & <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-red-400 animate-pulse">Mechanics</span>
-            </h1>
-            
-            <p className="text-lg sm:text-xl text-gray-400 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
-              Elevate your visual processing, mechanical aim, and working memory. Leverage 120 scientific, zero-latency training drills. No installations. No credit cards.
-            </p>
-            
-            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <Link 
-                href="/drills" 
-                className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-4 rounded-xl font-bold hover:shadow-xl hover:shadow-blue-500/25 transition transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-black"
-              >
-                Access All Drills
-                <ArrowRight className="w-5 h-5" aria-hidden="true" />
-              </Link>
-              <Link 
-                href="/drills/fps" 
-                className="inline-flex items-center justify-center gap-2 bg-white/5 backdrop-blur-md text-white border border-white/10 px-8 py-4 rounded-xl font-bold hover:bg-white/10 transition transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-black"
-              >
-                <Crosshair className="w-5 h-5 text-red-400" aria-hidden="true" />
-                Aim Trainer
-              </Link>
-            </div>
-            
-            {/* Quick Metrics */}
-            <div className="grid grid-cols-3 gap-6 max-w-xl mx-auto lg:mx-0 pt-8 border-t border-white/5">
-              <div className="text-left">
-                <p className="text-3xl font-black text-white tracking-tight">120</p>
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mt-1">Free Drills</p>
+      {/* 1. HERO SECTION */}
+      <section className="relative pt-10 pb-16 sm:pt-14 sm:pb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10" aria-labelledby="hero-heading">
+        <Reveal>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            {/* Left Text Column */}
+            <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
+              <div className="inline-flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 rounded-full px-4 py-1.5 mx-auto lg:mx-0">
+                <Sparkles className="w-4 h-4 text-cyan-400" aria-hidden="true" />
+                <span className="text-2xs sm:text-xs text-blue-300 font-mono font-bold uppercase tracking-wider">
+                  Scientific Browser-Native Training System
+                </span>
               </div>
-              <div className="text-left">
-                <p className="text-3xl font-black text-white tracking-tight">9</p>
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mt-1">Categories</p>
-              </div>
-              <div className="text-left">
-                <p className="text-3xl font-black text-white tracking-tight">240Hz</p>
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mt-1">Optimized</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Simulation Widget Column */}
-          <div className="lg:col-span-5 hidden lg:block">
-            <div className="relative bg-gradient-to-br from-slate-950/60 to-black/80 backdrop-blur-2xl border border-white/10 rounded-3xl p-6 shadow-2xl shadow-blue-500/10 overflow-hidden group">
-              <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 opacity-60" />
               
-              {/* Aiming Radar Interface */}
-              <div className="relative aspect-square max-w-[320px] mx-auto bg-black/40 rounded-full border border-blue-500/20 flex items-center justify-center overflow-hidden">
-                <div className="absolute inset-2 border border-blue-500/10 rounded-full" />
-                <div className="absolute inset-16 border border-blue-500/10 rounded-full" />
-                <div className="absolute inset-32 border border-blue-500/5 rounded-full" />
-                
-                {/* Radar sweep */}
-                <div className="absolute w-[2px] h-1/2 bg-gradient-to-t from-blue-500 to-transparent top-0 left-1/2 origin-bottom animate-[spin_4s_linear_infinite]" />
-                
-                {/* Glowing target nodes */}
-                <div className="absolute w-3.5 h-3.5 bg-green-400 rounded-full top-1/4 left-1/3 animate-ping shadow-[0_0_12px_#4ade80]" />
-                <div className="absolute w-2 h-2 bg-green-500 rounded-full top-1/4 left-1/3 shadow-[0_0_8px_#22c55e]" />
-                
-                <div className="absolute w-3 h-3 bg-red-400 rounded-full bottom-1/3 right-1/4 animate-ping shadow-[0_0_10px_#f87171]" style={{ animationDelay: '1s' }} />
-                <div className="absolute w-1.5 h-1.5 bg-red-500 rounded-full bottom-1/3 right-1/4 shadow-[0_0_6px_#ef4444]" />
-
-                <div className="absolute w-4 h-4 bg-purple-400 rounded-full top-1/2 right-1/3 animate-ping shadow-[0_0_14px_#c084fc]" style={{ animationDelay: '2.5s' }} />
-                <div className="absolute w-2 h-2 bg-purple-500 rounded-full top-1/2 right-1/3 shadow-[0_0_8px_#a855f7]" />
-                
-                {/* Center crosshair */}
-                <div className="absolute text-blue-400 w-8 h-8 flex items-center justify-center font-light"><Crosshair className="w-6 h-6 animate-pulse" /></div>
+              <h1 id="hero-heading" className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-none uppercase text-ink-1">
+                Master Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400">Mind</span> & <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-rose-400">Mechanics</span>
+              </h1>
+              
+              <p className="text-base sm:text-lg text-ink-2 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-normal">
+                Build mechanical precision, visual tracking velocity, and working memory span. Access {totalDrillsCount} zero-latency drills across {totalCategoriesCount} performance categories. Instant start, no installs.
+              </p>
+              
+              <div className="flex flex-col sm:flex-row gap-3.5 justify-center lg:justify-start pt-2">
+                <Link 
+                  href="/drills" 
+                  className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-7 py-3.5 rounded-xl font-bold hover:shadow-xl hover:shadow-blue-500/20 active:scale-[0.98] transition-all"
+                >
+                  Explore All {totalDrillsCount} Drills
+                  <ArrowRight className="w-4 h-4" aria-hidden="true" />
+                </Link>
+                <Link 
+                  href="/drills/fps" 
+                  className="inline-flex items-center justify-center gap-2 bg-surface-1 border border-hairline text-ink-1 px-7 py-3.5 rounded-xl font-bold hover:bg-surface-2 hover:border-hairline-2 active:scale-[0.98] transition-all"
+                >
+                  <Crosshair className="w-4.5 h-4.5 text-red-400" aria-hidden="true" />
+                  FPS Aim Hub
+                </Link>
+              </div>
+              
+              {/* Metric Chips */}
+              <div className="grid grid-cols-3 gap-4 max-w-xl mx-auto lg:mx-0 pt-6 border-t border-hairline">
+                <div className="text-left">
+                  <p className="text-2xl sm:text-3xl font-black text-ink-1 tracking-tight">{totalDrillsCount}</p>
+                  <p className="text-2xs font-mono font-bold text-ink-3 uppercase tracking-widest mt-0.5">Free Drills</p>
+                </div>
+                <div className="text-left">
+                  <p className="text-2xl sm:text-3xl font-black text-ink-1 tracking-tight">{totalCategoriesCount}</p>
+                  <p className="text-2xs font-mono font-bold text-ink-3 uppercase tracking-widest mt-0.5">Categories</p>
+                </div>
+                <div className="text-left">
+                  <p className="text-2xl sm:text-3xl font-black text-ink-1 tracking-tight">0ms</p>
+                  <p className="text-2xs font-mono font-bold text-ink-3 uppercase tracking-widest mt-0.5">Server Delay</p>
+                </div>
               </div>
 
-              {/* Telemetry Log */}
-              <div className="mt-6 bg-black/50 rounded-xl border border-white/5 p-4 font-mono text-[10px] space-y-2 text-gray-400">
-                <p className="flex justify-between"><span className="text-cyan-400">&gt; NEURAL_LATENCY:</span> <span className="text-green-400 font-bold">142ms (EXCELLENT)</span></p>
-                <p className="flex justify-between"><span className="text-cyan-400">&gt; AIM_MATCHING:</span> <span className="text-white">DPI_800 | SENS_0.35</span></p>
-                <p className="flex justify-between"><span className="text-cyan-400">&gt; STABILITY_INDEX:</span> <span className="text-cyan-300 font-bold">98.6%</span></p>
-                <div className="h-1 bg-white/5 rounded overflow-hidden mt-1">
-                  <div className="h-full bg-gradient-to-r from-blue-500 to-purple-500 w-[92%] animate-pulse" />
+              {/* Mobile Hero Visual Substitute (Replaces hidden widget on < lg screens) */}
+              <div className="lg:hidden mt-6 p-4 rounded-2xl bg-surface-1 border border-hairline text-left space-y-2">
+                <div className="flex items-center justify-between text-xs font-mono">
+                  <span className="text-cyan-400 font-bold">&gt; PLATFORM TELEMETRY</span>
+                  <span className="text-emerald-400 font-bold">READY</span>
+                </div>
+                <div className="grid grid-cols-3 gap-2 text-center pt-2">
+                  <div className="p-2 rounded-xl bg-surface-2 border border-hairline">
+                    <p className="text-xs font-bold text-ink-1">~140ms</p>
+                    <p className="text-[10px] text-ink-3 font-mono">Avg Latency</p>
+                  </div>
+                  <div className="p-2 rounded-xl bg-surface-2 border border-hairline">
+                    <p className="text-xs font-bold text-ink-1">98.4%</p>
+                    <p className="text-[10px] text-ink-3 font-mono">Precision</p>
+                  </div>
+                  <div className="p-2 rounded-xl bg-surface-2 border border-hairline">
+                    <p className="text-xs font-bold text-ink-1">240 Hz</p>
+                    <p className="text-[10px] text-ink-3 font-mono">Frame Target</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Desktop Widget Column */}
+            <div className="lg:col-span-5 hidden lg:block">
+              <div className="relative bg-surface-1 border border-hairline rounded-3xl p-6 shadow-2xl overflow-hidden">
+                <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 opacity-60" />
+                
+                {/* Aiming Radar Interface */}
+                <div className="relative aspect-square max-w-[300px] mx-auto bg-canvas/80 rounded-full border border-blue-500/20 flex items-center justify-center overflow-hidden">
+                  <div className="absolute inset-2 border border-blue-500/10 rounded-full" />
+                  <div className="absolute inset-16 border border-blue-500/10 rounded-full" />
+                  <div className="absolute inset-32 border border-blue-500/5 rounded-full" />
+                  
+                  {/* Radar sweep */}
+                  <div className="absolute w-[2px] h-1/2 bg-gradient-to-t from-blue-500 to-transparent top-0 left-1/2 origin-bottom animate-[spin_4s_linear_infinite]" />
+                  
+                  {/* Target nodes */}
+                  <div className="absolute w-3.5 h-3.5 bg-emerald-400 rounded-full top-1/4 left-1/3 animate-ping shadow-[0_0_12px_#4ade80]" />
+                  <div className="absolute w-2 h-2 bg-emerald-500 rounded-full top-1/4 left-1/3 shadow-[0_0_8px_#22c55e]" />
+                  
+                  <div className="absolute w-3 h-3 bg-red-400 rounded-full bottom-1/3 right-1/4 animate-ping shadow-[0_0_10px_#f87171]" style={{ animationDelay: '1s' }} />
+                  <div className="absolute w-1.5 h-1.5 bg-red-500 rounded-full bottom-1/3 right-1/4 shadow-[0_0_6px_#ef4444]" />
+
+                  <div className="absolute w-4 h-4 bg-purple-400 rounded-full top-1/2 right-1/3 animate-ping shadow-[0_0_14px_#c084fc]" style={{ animationDelay: '2.5s' }} />
+                  <div className="absolute w-2 h-2 bg-purple-500 rounded-full top-1/2 right-1/3 shadow-[0_0_8px_#a855f7]" />
+                  
+                  {/* Center crosshair */}
+                  <div className="absolute text-blue-400 w-8 h-8 flex items-center justify-center font-light"><Crosshair className="w-6 h-6 animate-pulse" /></div>
+                </div>
+
+                {/* Telemetry Log */}
+                <div className="mt-5 bg-canvas/90 rounded-xl border border-hairline p-4 font-mono text-2xs space-y-2 text-ink-3">
+                  <p className="flex justify-between"><span className="text-cyan-400">&gt; NEURAL_LATENCY:</span> <span className="text-emerald-400 font-bold">142ms (EXCELLENT)</span></p>
+                  <p className="flex justify-between"><span className="text-cyan-400">&gt; AIM_MATCHING:</span> <span className="text-ink-1">DPI_800 | SENS_0.35</span></p>
+                  <p className="flex justify-between"><span className="text-cyan-400">&gt; STABILITY_INDEX:</span> <span className="text-cyan-300 font-bold">98.6%</span></p>
+                  <div className="h-1 bg-white/5 rounded overflow-hidden mt-1">
+                    <div className="h-full bg-gradient-to-r from-blue-500 to-purple-500 w-[92%] animate-pulse" />
+                  </div>
                 </div>
               </div>
             </div>
           </div>
+        </Reveal>
+      </section>
+
+      {/* 2. PROOF BAND (Flagship Preview + Methodology Paradigms + Progress Curve) */}
+      <section className="py-12 border-y border-hairline bg-surface-1/50 relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Reveal>
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+              
+              {/* Column A: Flagship Drill Preview Frame */}
+              <div className="md:col-span-5 bg-surface-1/80 backdrop-blur-xl border border-hairline rounded-2xl p-4 shadow-xl relative overflow-hidden">
+                <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-red-500 to-blue-500 opacity-50" />
+                <div className="flex items-center justify-between pb-3 mb-3 border-b border-hairline text-2xs font-mono text-ink-3">
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/70" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/70" />
+                    <span className="ml-2 font-bold text-ink-2">Flick Shot Calibration</span>
+                  </div>
+                  <span className="px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">LIVE ENGINE</span>
+                </div>
+                <div className="relative aspect-video bg-canvas rounded-xl border border-hairline flex items-center justify-center overflow-hidden">
+                  <div className="absolute inset-0 bg-[radial-gradient(#3b82f6_1px,transparent_1px)] [background-size:16px_16px] opacity-20" />
+                  
+                  {/* Simulated Drill Target Motion */}
+                  <div className="relative w-full h-full">
+                    <div className="absolute top-1/3 left-1/4 w-8 h-8 rounded-full border-2 border-red-500 bg-red-500/20 flex items-center justify-center animate-ping" />
+                    <div className="absolute top-1/3 left-1/4 w-6 h-6 rounded-full bg-red-500 border border-white flex items-center justify-center shadow-lg shadow-red-500/50">
+                      <div className="w-1 h-1 bg-white rounded-full" />
+                    </div>
+                    
+                    <div className="absolute bottom-1/4 right-1/3 w-6 h-6 rounded-full border-2 border-blue-400 bg-blue-400/20 flex items-center justify-center animate-pulse" />
+                    <div className="absolute bottom-1/4 right-1/3 w-4 h-4 rounded-full bg-blue-400 border border-white shadow-lg" />
+                    
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none text-ink-3 text-2xs font-mono">
+                      [ +100 PTS | 165ms ]
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between pt-3 text-2xs font-mono text-ink-3">
+                  <span>Target Snap: 42px</span>
+                  <span>Accuracy: 98.2%</span>
+                </div>
+              </div>
+
+              {/* Column B: Methodology & Paradigm Validation */}
+              <div className="md:col-span-7 space-y-4">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-2xs font-mono text-indigo-400 font-bold uppercase">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-indigo-400" />
+                  <span>Cognitive &amp; Mechanical Paradigms</span>
+                </div>
+                
+                <h2 className="text-xl sm:text-2xl font-bold text-ink-1">
+                  Rooted in Cognitive Science &amp; Esports Mechanics
+                </h2>
+
+                <p className="text-xs sm:text-sm text-ink-2 leading-relaxed">
+                  Every drill is modeled on established psychometric tests and competitive gaming requirements — designed to isolate specific neurological and physical reaction components.
+                </p>
+
+                {/* Paradigm Pills */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2">
+                  <div className="p-2.5 rounded-xl bg-surface-1 border border-hairline text-center">
+                    <p className="text-xs font-bold text-ink-1">Digit Span</p>
+                    <p className="text-[10px] text-ink-3 font-mono">Working Memory</p>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-surface-1 border border-hairline text-center">
+                    <p className="text-xs font-bold text-ink-1">N-Back Task</p>
+                    <p className="text-[10px] text-ink-3 font-mono">Cognitive Control</p>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-surface-1 border border-hairline text-center">
+                    <p className="text-xs font-bold text-ink-1">Choice RT</p>
+                    <p className="text-[10px] text-ink-3 font-mono">Latency Calibration</p>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-surface-1 border border-hairline text-center">
+                    <p className="text-xs font-bold text-ink-1">Task Switch</p>
+                    <p className="text-[10px] text-ink-3 font-mono">Executive Control</p>
+                  </div>
+                </div>
+
+                {/* Example Progress Curve Note */}
+                <div className="p-3 rounded-xl bg-canvas border border-hairline flex items-center justify-between text-xs text-ink-3 font-mono">
+                  <div className="flex items-center gap-2">
+                    <LineChart className="w-4 h-4 text-emerald-400" />
+                    <span>Typical Adaptation Curve: 15-22% latency reduction over 14 days</span>
+                  </div>
+                  <span className="text-[10px] text-ink-3 font-sans italic opacity-75 hidden sm:inline">(Example progress curve)</span>
+                </div>
+              </div>
+
+            </div>
+          </Reveal>
         </div>
       </section>
 
-      {/* PROFILE SECTION */}
+      {/* 3. DIAGNOSTIC PROFILE (Returning Users) */}
       {profile && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
-          <div className="bg-gradient-to-r from-blue-900/30 to-purple-900/30 border border-blue-500/20 rounded-3xl p-6 md:p-8 backdrop-blur-xl shadow-2xl relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
-            <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-              <div className="flex items-center gap-5">
-                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/20">
-                  <Brain className="w-8 h-8 text-white animate-pulse" />
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <Reveal>
+            <div className="bg-surface-1/80 border border-hairline rounded-3xl p-6 sm:p-8 backdrop-blur-xl shadow-2xl relative overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 opacity-60" />
+              <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="flex items-center gap-4">
+                  <div className="relative w-14 h-14 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/20 shrink-0">
+                    <div className="absolute -inset-2 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 opacity-40 blur-lg -z-10" />
+                    <Brain className="w-7 h-7 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg sm:text-xl font-bold text-ink-1 uppercase tracking-tight">Your Diagnostic Profile</h2>
+                    <p className="text-xs text-ink-3">Local browser progression aggregated across completed drills</p>
+                  </div>
                 </div>
-                <div>
-                  <h2 className="text-xl sm:text-2xl font-black text-white uppercase tracking-tight">Your Diagnostic Profile</h2>
-                  <p className="text-xs sm:text-sm text-gray-400">Lifetime training metrics aggregated across all diagnostic sectors</p>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 w-full md:w-auto">
-                <div className="bg-black/40 border border-white/5 p-4 rounded-2xl text-center">
-                  <p className="text-2xl font-black text-white">{profile.gamesPlayed}</p>
-                  <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">Sessions</p>
-                </div>
-                <div className="bg-black/40 border border-white/5 p-4 rounded-2xl text-center">
-                  <p className="text-2xl font-black text-white">{profile.drillsCount}</p>
-                  <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">Drills</p>
-                </div>
-                <div className="bg-black/40 border border-white/5 p-4 rounded-2xl text-center">
-                  <p className="text-2xl font-black text-white">Lvl {profile.avgLevel}</p>
-                  <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">Avg Level</p>
-                </div>
-                <div className="bg-black/40 border border-white/5 p-4 rounded-2xl text-center bg-gradient-to-br from-yellow-500/5 to-amber-500/5 hover:border-yellow-500/20 transition-all">
-                  <p className="text-2xl font-black text-yellow-400 flex items-center justify-center gap-1">
-                    <Trophy className="w-5 h-5" />
-                    {profile.fitnessRating}%
-                  </p>
-                  <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">Fitness Rating</p>
+                
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full md:w-auto">
+                  <div className="bg-canvas border border-hairline p-3.5 rounded-xl text-center">
+                    <p className="text-xl font-black text-ink-1">{profile.gamesPlayed}</p>
+                    <p className="text-[10px] font-mono font-bold text-ink-3 uppercase tracking-widest mt-0.5">Sessions</p>
+                  </div>
+                  <div className="bg-canvas border border-hairline p-3.5 rounded-xl text-center">
+                    <p className="text-xl font-black text-ink-1">{profile.drillsCount}</p>
+                    <p className="text-[10px] font-mono font-bold text-ink-3 uppercase tracking-widest mt-0.5">Drills</p>
+                  </div>
+                  <div className="bg-canvas border border-hairline p-3.5 rounded-xl text-center">
+                    <p className="text-xl font-black text-ink-1">Lvl {profile.avgLevel}</p>
+                    <p className="text-[10px] font-mono font-bold text-ink-3 uppercase tracking-widest mt-0.5">Avg Level</p>
+                  </div>
+                  <div className="bg-canvas border border-hairline p-3.5 rounded-xl text-center">
+                    <p className="text-xl font-black text-amber-400 flex items-center justify-center gap-1">
+                      <Trophy className="w-4 h-4" />
+                      {profile.fitnessRating}%
+                    </p>
+                    <p className="text-[10px] font-mono font-bold text-ink-3 uppercase tracking-widest mt-0.5">Rating</p>
+                  </div>
                 </div>
               </div>
             </div>
-            
-            <div className="mt-6 pt-6 border-t border-white/5">
-              <div className="flex justify-between items-center text-xs mb-2">
-                <span className="text-gray-400 font-bold uppercase tracking-widest">Neuro-Adaptation Progress</span>
-                <span className="text-blue-400 font-black">{profile.totalXp} Cumulative XP</span>
-              </div>
-              <div className="h-2 bg-white/5 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 transition-all duration-1000" 
-                  style={{ width: `${Math.min(100, (profile.totalXp / 1000) * 100)}%` }}
-                />
-              </div>
-            </div>
-
-            {profile.sectors && Object.keys(profile.sectors).some(s => profile.sectors[s].games > 0) && (
-              <div className="mt-8 pt-6 border-t border-white/5">
-                <h3 className="text-xs font-bold text-white uppercase tracking-wider mb-4">Sector Diagnostic Breakdown</h3>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-                  {Object.keys(profile.sectors).map(sector => {
-                    const stats = profile.sectors[sector];
-                    if (stats.games === 0) return null;
-                    const avgLvl = Math.round(stats.levels / stats.count);
-                    return (
-                      <div key={sector} className="bg-black/40 border border-white/5 p-4 rounded-2xl flex flex-col justify-between hover:border-blue-500/20 transition-all">
-                        <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider truncate">{stats.name}</span>
-                        <div className="mt-3 flex justify-between items-end">
-                          <span className="text-xl font-black text-white">Lvl {avgLvl}</span>
-                          <span className="text-[10px] font-semibold text-blue-400">{stats.games} games</span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-          </div>
+          </Reveal>
         </section>
       )}
 
-      {/* CATEGORIES SECTION */}
-      <section className="py-20 relative border-t border-white/5 bg-black/20" aria-labelledby="categories-heading">
+      {/* 4. CATEGORIES SECTION (ALL 8 CATEGORIES) */}
+      <section className="py-16 relative" aria-labelledby="categories-heading">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16 space-y-3">
-            <h2 id="categories-heading" className="text-3xl sm:text-4xl font-black tracking-tight text-white uppercase">
+          <Reveal className="text-center mb-12 space-y-2">
+            <h2 id="categories-heading" className="text-2xl sm:text-4xl font-black tracking-tight text-ink-1 uppercase">
               Training Categories
             </h2>
-            <p className="text-gray-500 max-w-2xl mx-auto">
-              Select a cognitive or mechanical vector to begin your diagnostic training program.
+            <p className="text-ink-2 max-w-2xl mx-auto text-sm sm:text-base">
+              Select a specialized skill vector to begin your performance calibration.
             </p>
-          </div>
+          </Reveal>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-            {categories.map((category) => {
-              const Icon = category.icon;
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {categoryConfigs.map((cat, idx) => {
+              const Icon = cat.icon;
+              const count = DRILLS.filter(d => d.category === cat.id).length;
+              const isDesktopOnly = DESKTOP_ONLY_CATEGORIES.includes(cat.id);
               return (
-                <Link
-                  key={category.name}
-                  href={category.href}
-                  className="group relative bg-[#0E111A]/60 rounded-2xl border border-white/5 p-6 hover:border-white/10 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 overflow-hidden"
-                  title={`${category.name} - ${category.description}`}
-                >
-                  {/* Glowing background on hover */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  
-                  <div className={`w-12 h-12 rounded-xl ${category.iconBg} flex items-center justify-center mb-5 group-hover:scale-110 transition-transform shadow-lg shadow-black/40`}>
-                    <Icon className="w-6 h-6 text-white" aria-hidden="true" />
-                  </div>
-                  
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-lg font-bold text-white uppercase tracking-tight">
-                      {category.name}
-                    </h3>
-                    {category.featured && (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 text-[10px] font-bold uppercase rounded-full">
-                        Popular
-                      </span>
-                    )}
-                  </div>
-                  
-                  <p className="text-sm text-gray-400 mb-6 leading-relaxed line-clamp-2">{category.description}</p>
-                  
-                  <div className="flex items-center justify-between pt-4 border-t border-white/5">
-                    <span className="text-xs font-bold text-gray-400 tracking-wider bg-white/5 px-3 py-1 rounded-lg">
-                      {category.drills}
-                    </span>
-                    <div className="flex items-center gap-1.5 text-blue-400 font-bold text-xs uppercase tracking-wider group-hover:text-blue-300">
-                      <span>Enter</span>
-                      <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
+                <Reveal key={cat.id} delay={idx * 50} className="h-full">
+                  <Link
+                    href={cat.href}
+                    onMouseMove={handleCardMouseMove}
+                    className="group relative isolate flex h-full flex-col justify-between overflow-hidden bg-surface-1/70 backdrop-blur-xl border border-hairline rounded-2xl p-5 hover:border-hairline-2 hover:-translate-y-1 active:scale-[0.98] transition-all duration-300 shadow-xl hover:shadow-2xl"
+                  >
+                    {/* Top accent hairline */}
+                    <div className={`absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r ${cat.iconBg.replace('bg-gradient-to-br ', '')} opacity-70`} />
+
+                    {/* Cursor-tracked spotlight */}
+                    <span
+                      aria-hidden="true"
+                      className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                      style={{ background: `radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%), ${cat.glow}, transparent 70%)` }}
+                    />
+
+                    <div className="relative">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className={`relative w-11 h-11 rounded-xl ${cat.iconBg} flex items-center justify-center text-white shadow-lg group-hover:scale-105 transition-transform duration-300`}>
+                          <div className={`absolute -inset-1.5 rounded-xl ${cat.iconBg} opacity-40 blur-md -z-10 group-hover:opacity-70 transition-opacity`} />
+                          <Icon className="w-5.5 h-5.5" />
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          {isDesktopOnly && (
+                            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-red-500/10 text-red-400 border border-red-500/20">
+                              Desktop Only
+                            </span>
+                          )}
+                          <span className="text-2xs font-mono font-semibold px-2.5 py-1 rounded-full bg-white/5 text-ink-3 border border-hairline">
+                            {count} Drills
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between mb-1.5">
+                        <h3 className={`text-base font-bold text-ink-1 transition-colors group-hover:${cat.accentColor}`}>
+                          {cat.name}
+                        </h3>
+                        {cat.featured && (
+                          <span className="px-2 py-0.5 bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[10px] font-mono font-bold uppercase rounded-full">
+                            Popular
+                          </span>
+                        )}
+                      </div>
+
+                      <p className="text-xs text-ink-2 leading-relaxed mb-4 line-clamp-2">{cat.description}</p>
                     </div>
-                  </div>
-                </Link>
+
+                    <div className={`relative pt-4 border-t border-hairline flex items-center justify-between text-xs font-semibold ${cat.accentColor}`}>
+                      <span>Explore Category</span>
+                      <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                    </div>
+                  </Link>
+                </Reveal>
               );
             })}
           </div>
         </div>
       </section>
 
-      {/* WHY TRAIN WITH US (FEATURES) */}
-      <section className="py-20 relative border-t border-white/5" aria-labelledby="features-heading">
+      {/* 5. FEATURES / ARCHITECTURE */}
+      <section className="py-16 border-t border-hairline bg-surface-1/40" aria-labelledby="features-heading">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16 space-y-3">
-            <h2 id="features-heading" className="text-3xl sm:text-4xl font-black tracking-tight text-white uppercase">
-              Engine Diagnostics
+          <Reveal className="text-center mb-12 space-y-2">
+            <h2 id="features-heading" className="text-2xl sm:text-4xl font-black tracking-tight text-ink-1 uppercase">
+              Engine Diagnostics &amp; Features
             </h2>
-            <p className="text-gray-500 max-w-2xl mx-auto">
-              Our training architecture maps real performance indexes to maximize structural neurological development.
+            <p className="text-ink-2 max-w-2xl mx-auto text-sm sm:text-base">
+              Built for high-refresh rates and instant tactile response in all modern browsers.
             </p>
-          </div>
+          </Reveal>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {features.map((feature, index) => {
               const Icon = feature.icon;
               return (
-                <article 
-                  key={index} 
-                  className="group bg-[#0B0D13]/60 rounded-2xl border border-white/5 p-6 hover:border-white/10 transition-all duration-300 hover:-translate-y-1"
-                >
-                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-5 group-hover:scale-110 transition-transform shadow-lg`}>
-                    <Icon className="w-5.5 h-5.5 text-white" aria-hidden="true" />
-                  </div>
-                  <h3 className="text-lg font-bold text-white mb-2 uppercase tracking-tight">{feature.title}</h3>
-                  <p className="text-sm text-gray-400 leading-relaxed">{feature.description}</p>
-                </article>
+                <Reveal key={index} delay={index * 50}>
+                  <article className="group relative overflow-hidden bg-surface-1/70 backdrop-blur-xl border border-hairline rounded-2xl p-5 hover:border-hairline-2 hover:-translate-y-1 transition-all duration-300 shadow-lg hover:shadow-xl">
+                    <div className={`relative w-10 h-10 rounded-xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-4 text-white shadow-lg group-hover:scale-105 transition-transform duration-300`}>
+                      <div className={`absolute -inset-1.5 rounded-xl bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-50 blur-md -z-10 transition-opacity`} />
+                      <Icon className="w-5 h-5" />
+                    </div>
+                    <h3 className="text-base font-bold text-ink-1 mb-1.5 uppercase tracking-tight">{feature.title}</h3>
+                    <p className="text-xs sm:text-sm text-ink-2 leading-relaxed">{feature.description}</p>
+                  </article>
+                </Reveal>
               );
             })}
           </div>
         </div>
       </section>
 
-      {/* AUDIENCE TARGETS */}
-      <section className="py-20 relative border-t border-white/5 bg-black/10" aria-labelledby="audience-heading">
+      {/* 6. AUDIENCE PROFILE ADAPTATION */}
+      <section className="py-16 border-t border-hairline" aria-labelledby="audience-heading">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16 space-y-3">
-            <h2 id="audience-heading" className="text-3xl sm:text-4xl font-black tracking-tight text-white uppercase">
-              Profile Adaptation
+          <Reveal className="text-center mb-12 space-y-2">
+            <h2 id="audience-heading" className="text-2xl sm:text-4xl font-black tracking-tight text-ink-1 uppercase">
+              Target Audience
             </h2>
-            <p className="text-gray-500 max-w-2xl mx-auto">
-              SkillDrills adapts vectors directly matching your target environment.
+            <p className="text-ink-2 max-w-2xl mx-auto text-sm sm:text-base">
+              Tailored training paths whether you are calibrating aim or expanding cognitive limits.
             </p>
-          </div>
+          </Reveal>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {audienceData.map((item, index) => {
               const Icon = item.icon;
               return (
-                <div key={index} className="group text-center p-8 bg-[#0E111A]/40 border border-white/5 hover:border-white/10 rounded-2xl transition-all duration-300">
-                  <div className={`w-16 h-16 bg-gradient-to-br ${item.gradient} rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform shadow-lg shadow-black/50`}>
-                    <Icon className="w-7 h-7 text-white" aria-hidden="true" />
+                <Reveal key={index} delay={index * 60}>
+                  <div className="group text-center p-6 bg-surface-1/70 backdrop-blur-xl border border-hairline rounded-2xl hover:border-hairline-2 hover:-translate-y-1 transition-all duration-300 shadow-lg hover:shadow-xl">
+                    <div className={`relative w-14 h-14 bg-gradient-to-br ${item.gradient} rounded-2xl flex items-center justify-center mx-auto mb-4 text-white shadow-lg group-hover:scale-105 transition-transform duration-300`}>
+                      <div className={`absolute -inset-2 rounded-2xl bg-gradient-to-br ${item.gradient} opacity-0 group-hover:opacity-40 blur-md -z-10 transition-opacity`} />
+                      <Icon className="w-6.5 h-6.5" />
+                    </div>
+                    <h3 className="text-base font-bold text-ink-1 mb-2 uppercase tracking-tight">{item.title}</h3>
+                    <p className="text-xs sm:text-sm text-ink-2 leading-relaxed">{item.description}</p>
                   </div>
-                  <h3 className="text-lg font-bold text-white mb-3 uppercase tracking-tight">{item.title}</h3>
-                  <p className="text-sm text-gray-400 leading-relaxed">{item.description}</p>
-                </div>
+                </Reveal>
               );
             })}
           </div>
         </div>
       </section>
 
-      {/* CALL TO ACTION */}
-      <section className="relative overflow-hidden border-t border-white/5" aria-labelledby="cta-heading">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-900/20 to-purple-900/20" />
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
-          <h2 id="cta-heading" className="text-3xl sm:text-4xl font-black tracking-tight text-white uppercase mb-4">
-            Initialize Diagnostics
-          </h2>
-          <p className="text-gray-400 mb-8 max-w-2xl mx-auto text-base">
-            No accounts. No payments. Bypasses browser latency to record raw physical parameters instantly.
-          </p>
-          <Link 
-            href="/drills" 
-            className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-10 py-4.5 rounded-xl font-bold hover:shadow-xl hover:shadow-blue-500/20 transition transform hover:-translate-y-0.5"
-          >
-            Start Core Routine
-            <ArrowRight className="w-5 h-5" aria-hidden="true" />
-          </Link>
+      {/* 7. CALL TO ACTION */}
+      <section className="py-20 border-t border-hairline bg-surface-1/60 relative overflow-hidden" aria-labelledby="cta-heading">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-4">
+          <Reveal>
+            <h2 id="cta-heading" className="text-2xl sm:text-4xl font-black tracking-tight text-ink-1 uppercase">
+              Start Training Now
+            </h2>
+            <p className="text-ink-2 max-w-2xl mx-auto text-sm sm:text-base leading-relaxed">
+              No accounts. No payments. {totalDrillsCount} browser-native drills ready for instant calibration.
+            </p>
+            <div className="pt-4">
+              <Link 
+                href="/drills" 
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-9 py-4 rounded-xl font-bold hover:shadow-xl hover:shadow-blue-500/20 active:scale-[0.98] transition-all"
+              >
+                Browse All {totalDrillsCount} Drills
+                <ArrowRight className="w-5 h-5" aria-hidden="true" />
+              </Link>
+            </div>
+          </Reveal>
         </div>
       </section>
 
-      {/* FOOTER */}
-      <footer className="bg-[#030305] border-t border-white/5 text-gray-500 py-16" role="contentinfo">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8 mb-12">
-            <div>
-              <h3 className="text-white font-bold tracking-wider mb-4 text-xs uppercase">FPS Training</h3>
-              <ul className="space-y-2.5 text-sm text-gray-400">
-                <li><Link href="/drills/fps/flick-shot-training" className="hover:text-white transition-colors">Flick Shot Trainer</Link></li>
-                <li><Link href="/drills/fps/target-acquisition" className="hover:text-white transition-colors">Target Acquisition</Link></li>
-               
-                <li><Link href="/drills/fps" className="text-blue-400 hover:text-blue-300 transition-colors font-semibold">All 16 FPS Drills →</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-white font-bold tracking-wider mb-4 text-xs uppercase">Cognitive Hub</h3>
-              <ul className="space-y-2.5 text-sm text-gray-400">
-                <li><Link href="/drills/cognitive/memory/card-matching" className="hover:text-white transition-colors">Memory Games</Link></li>
-                <li><Link href="/drills/cognitive/attention/divided-attention" className="hover:text-white transition-colors">Attention Drills</Link></li>
-                <li><Link href="/drills/cognitive/problem-solving/logic-puzzles" className="hover:text-white transition-colors">Logic Puzzles</Link></li>
-                <li><Link href="/drills/cognitive" className="text-blue-400 hover:text-blue-300 transition-colors font-semibold">All 18 Cognitive Drills →</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-white font-bold tracking-wider mb-4 text-xs uppercase">Academic Hub</h3>
-              <ul className="space-y-2.5 text-sm text-gray-400">
-                <li><Link href="/drills/academic/writing-speed/typing-test" className="hover:text-white transition-colors">Typing Speed Test</Link></li>
-                <li><Link href="/drills/academic/reading-speed/speed-reader" className="hover:text-white transition-colors">Speed Reader</Link></li>
-                <li><Link href="/drills/academic/math-speed/mental-math" className="hover:text-white transition-colors">Mental Math</Link></li>
-                <li><Link href="/drills/academic" className="text-blue-400 hover:text-blue-300 transition-colors font-semibold">All 8 Academic Drills →</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-white font-bold tracking-wider mb-4 text-xs uppercase">Visual & Tracking</h3>
-              <ul className="space-y-2.5 text-sm text-gray-400">
-                <li><Link href="/drills/visual/reaction-speed/light-reaction" className="hover:text-white transition-colors">Reaction Time Test</Link></li>
-                <li><Link href="/drills/motor/hand-eye-coordination/aim-trainer" className="hover:text-white transition-colors">Hand-Eye Coordination</Link></li>
-                <li><Link href="/drills/visual-tracking" className="hover:text-white transition-colors">Visual Tracking Drills</Link></li>
-                <li><Link href="/drills/visual" className="text-blue-400 hover:text-blue-300 transition-colors font-semibold">All Visual Drills →</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-white font-bold tracking-wider mb-4 text-xs uppercase">More Categories</h3>
-              <ul className="space-y-2.5 text-sm text-gray-400">
-                <li><Link href="/drills/memory" className="hover:text-white transition-colors">Memory (13 drills)</Link></li>
-                <li><Link href="/drills/cognitive" className="hover:text-white transition-colors">Cognitive</Link></li>
-                <li><Link href="/drills/physical" className="hover:text-white transition-colors">Physical (14 drills)</Link></li>
-                <li><Link href="/drills/visual-tracking" className="hover:text-white transition-colors">Tracking (15 drills)</Link></li>
-              </ul>
-            </div>
-          </div>
-          
-          <div className="border-t border-white/5 pt-10 text-center">
-            <div className="flex items-center justify-center gap-3 mb-6">
-              <div className="w-9 h-9 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
-                <Target className="w-5.5 h-5.5 text-white" aria-hidden="true" />
-              </div>
-              <span className="text-white font-black text-xl tracking-tight uppercase">SkillDrills <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">Pro</span></span>
-            </div>
-            <p className="text-sm text-gray-500 mb-3">&copy; 2026 SkillDrills. Elite Performance Training.</p>
-            <p className="text-xs text-gray-600 max-w-2xl mx-auto leading-relaxed mb-8">
-              SkillDrills is a free high-performance training platform with 120 interactive drills across 9 categories including FPS aim training, cognitive brain games, memory exercises, typing speed tests, mental math, speed reading, visual tracking, hand-eye coordination, and cognitive training tools. No registration required. Start training instantly at skilldrills.online.
-            </p>
-            <div className="flex items-center justify-center gap-6 flex-wrap">
-              <button onClick={sharePage} className="text-gray-500 hover:text-white transition-colors" title="Share SkillDrills" aria-label="Share SkillDrills with friends">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
-              </button>
-              <button onClick={copyPageLink} className="text-gray-500 hover:text-white transition-colors" title="Copy Link" aria-label="Copy SkillDrills link to clipboard">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
-              </button>
-             
-              <a href="https://twitter.com/skilldrillss" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-white transition-colors" title="Follow on Twitter" aria-label="Follow SkillDrills on Twitter">
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-              </a>
-              <a href="https://instagram.com/skilldrills.online" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-white transition-colors" title="Follow on Instagram" aria-label="Follow SkillDrills on Instagram">
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
-              </a>
-              <a href="https://pinterest.com/skilldrills" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-white transition-colors" title="Follow on Pinterest" aria-label="Follow SkillDrills on Pinterest">
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0C5.373 0 0 5.372 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738.098.119.112.224.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.631-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12 0-6.628-5.373-12-12-12z"/></svg>
-              </a>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

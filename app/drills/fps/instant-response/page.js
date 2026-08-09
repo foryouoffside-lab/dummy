@@ -4,23 +4,20 @@ export const metadata = {
   title: "FPS Reaction Time Test - Gaming Reflex Trainer | SkillDrills",
   description: "Test and train your reflex speed with our FPS Reaction Time Test. Measure click response times and improve visual reaction speed for competitive gaming.",
   keywords: [
-    "fps reaction time test",
-    "reaction time test fps",
-    "reflex trainer fps",
-    "visual reaction speed test",
+    "reaction time trainer fps",
     "click reaction test",
-    "gaming reflex test",
-    "reaction time trainer",
-    "fps reflex training",
-    "visual response speed",
-    "reaction time test online",
-    "valorant reaction training",
-    "cs2 reaction time",
-    "apex reflex training",
-    "instant reaction trainer",
-    "free reaction time test",
-    "browser reflex trainer",
-    "response time test gaming"
+    "visual reaction training",
+    "CS2 reaction time practice",
+    "Valorant reaction trainer",
+    "how to improve reaction time for gaming",
+    "what is a good reaction time fps",
+    "free browser reaction time test",
+    "how to stop pre-firing",
+    "average human reaction time gaming",
+    "train visual reflexes for shooters",
+    "fps reaction time test",
+    "reflex trainer fps",
+    "gaming reflex test"
   ],
   alternates: {
     canonical: "https://skilldrills.online/drills/fps/instant-response",
@@ -36,20 +33,11 @@ export const metadata = {
     siteName: 'SkillDrills',
     locale: 'en_US',
     type: 'website',
-    images: [
-      {
-        url: 'https://skilldrills.online/icons/icon-512x512.png',
-        width: 512,
-        height: 512,
-        alt: "FPS Reaction Time Test - Gaming Reflex Trainer",
-      },
-    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: "FPS Reaction Time Test - Gaming Reflex Trainer | SkillDrills",
     description: "Test and train your reflex speed with our FPS Reaction Time Test. Measure click response times and improve visual reaction speed for competitive gaming.",
-    images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
 };
 
@@ -67,7 +55,7 @@ export default function InstantResponsePage() {
   const softwareSchema = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
-    "name": "FPS Reaction Time Test",
+    "name": "Instant Response Pro",
     "applicationCategory": "GameApplication",
     "operatingSystem": "Web Browser",
     "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
@@ -81,48 +69,141 @@ export default function InstantResponsePage() {
     }
   };
 
+  const videoGameSchema = {
+    "@context": "https://schema.org",
+    "@type": "VideoGame",
+    "name": "Instant Response Pro",
+    "url": "https://skilldrills.online/drills/fps/instant-response",
+    "description": "A free browser-based FPS drill measuring and training visual reaction time, click reflex speed, and stimulus response latency for competitive gaming.",
+    "gamePlatform": "Web Browser",
+    "genre": ["FPS Training", "Reaction Trainer"],
+    "playMode": "SinglePlayer",
+    "applicationCategory": "Game",
+    "operatingSystem": "Web Browser"
+  };
+
   const faqSchema = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
     "mainEntity": [
       {
         "@type": "Question",
-        "name": "What is a good reaction time for FPS games?",
+        "name": "What is FPS reaction training?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "The average human visual reaction time is 200-250 milliseconds. Competitive FPS players typically achieve 150-200ms reaction times after training. Professional esports players often measure below 150ms. However, raw reaction time is only one factor — decision-making, crosshair placement, and prediction also determine who wins gunfights."
+          "text": "FPS reaction training involves specific drills designed to improve your ability to detect, process, and react to visual stimuli and unexpected threats in a competitive gaming environment."
         }
       },
       {
         "@type": "Question",
-        "name": "How does this FPS reaction time test work?",
+        "name": "How do professional FPS players react so quickly?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "The drill displays a visual stimulus on screen and measures the time between stimulus appearance and your click response. It uses browser high-resolution timing APIs for accurate millisecond measurements. Multiple rounds are averaged to give a reliable baseline of your current visual reaction speed."
+          "text": "Pros combine lower hardware input latency with trained visual anticipation, crosshair placement, and high-speed neurological processing."
         }
       },
       {
         "@type": "Question",
-        "name": "Can I actually improve my reaction time with training?",
+        "name": "Can visual reaction speed be trained?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Yes. While genetics determine your absolute lower limit, consistent training reduces the cognitive overhead between stimulus detection and motor response. Regular practice teaches your visual system to process FPS-specific stimuli faster, and your motor system to execute clicks with less hesitation, effectively reducing your practical reaction time by 20-50ms over weeks of training."
+          "text": "Yes, consistent exposure to visual reflex stimuli strengthens the brain's neural pathways, reducing the delay between detection and trigger execution."
         }
       },
       {
         "@type": "Question",
-        "name": "What is visual reaction time vs. auditory reaction time?",
+        "name": "Does this drill help in Valorant?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Visual reaction time (reacting to a visual stimulus like an enemy appearing) averages 200-250ms. Auditory reaction time (reacting to a sound like a gunshot) averages 150-180ms, making it inherently faster. This drill tests visual reaction time, which is the primary stimulus type in FPS games when enemies appear on screen."
+          "text": "Yes. In Valorant, holding defensive angles requires fast visual stimulus reaction to click peeking opponents instantly."
         }
       },
       {
         "@type": "Question",
-        "name": "How is this different from a general reaction time test?",
+        "name": "Does this drill help in CS2?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "This drill is specifically designed for FPS context — it simulates the visual pattern of enemy targets appearing on screen and measures your click-to-target response. General reaction tests use simple colored shapes. This trainer presents FPS-relevant visual stimuli to build gaming-specific neural pathways."
+          "text": "Absolutely. CS2 gunfights are won in milliseconds. Improving visual stimulus response speed directly translates to winning quick-peek engagements."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is raw reflex latency?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Raw reflex latency is the speed at which your motor reflex fires upon seeing a visual color/light change on screen, independent of cursor movement."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How often should I train my reflexes?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "We recommend daily 10-15 minute reflex sessions as a warm-up before queueing up competitive matches."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Why does missing reset my combo instead of penalizing my time or score?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "To keep every run comparable, this drill never drains your clock or deducts points. Pre-firing, missing, and timing out only reset your combo multiplier, so your final score stays a clean measure of skill."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is click timing consistency?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Consistency measures the deviation between your reaction times. Lower deviation means highly stable and predictable in-game reflexes."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does sleep affect my reaction time?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, fatigue and sleep deprivation can degrade reaction time by 50ms or more, heavily impacting gaming performance."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What games benefit from reflex training?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "All fast-paced shooters like Apex Legends, Call of Duty, Overwatch 2, CS2, Valorant, and Spectre Divide."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is this reflex test free?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, it is 100% free and runs directly in your browser with raw pointer lock precision."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does dynamic scaling make the drill harder?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "As your score increases, the flash duration decreases from 550ms down to a minimum of 200ms, forcing higher neural speed."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is anticipation clicking?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Anticipation clicking (pre-firing) is clicking based on timing prediction rather than visual stimulus response, which is penalized in this drill."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does peripheral vision play a role here?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Even though the target is centered, keeping your visual focus sharp and relaxed helps register the flash state faster."
         }
       }
     ]
@@ -154,32 +235,27 @@ export default function InstantResponsePage() {
 
   return (
     <>
-      {/* Breadcrumb Schema */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
-
-      {/* SoftwareApplication Schema */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }}
       />
-
-      {/* FAQPage Schema */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
-
-      {/* HowTo Schema */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-
       <InstantResponseClient />
     </>
   );
 }
-

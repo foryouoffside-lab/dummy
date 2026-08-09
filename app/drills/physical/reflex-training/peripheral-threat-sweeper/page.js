@@ -14,8 +14,8 @@ import PeripheralThreatSweeperClient from './PeripheralThreatSweeperClient';
 // ============================================================
 
 export const metadata = {
-  title: 'Peripheral Vision Training - Free Reflex Sweeper Game | SkillDrills',
-  description: 'Train peripheral vision, spatial awareness, and reflex reaction times. Defend the central core from radial threats in this free visual-motor training game.',
+  title: 'Peripheral Threat Sweeper — Peripheral Vision Trainer | SkillDrills',
+  description: 'Train peripheral vision, spatial awareness, and target acquisition. Intercept radial threats before they breach your core in this free reflex game.',
   keywords: [
     // Primary / Head terms
     'peripheral vision training', 'reflex sweeper game',
@@ -31,24 +31,17 @@ export const metadata = {
   },
   robots: { index: true, follow: true },
   openGraph: {
-    title: 'Peripheral Vision Training - Free Reflex Sweeper Game | SkillDrills',
-    description: 'Expand your active field of view and reflex speed. Intercept radial threats before they breach your core in this adaptive visual training game.',
+    title: 'Peripheral Threat Sweeper — Peripheral Vision Trainer | SkillDrills',
+    description: 'Train peripheral vision, spatial awareness, and target acquisition. Intercept radial threats before they breach your core in this free reflex game.',
     url: 'https://skilldrills.online/drills/physical/reflex-training/peripheral-threat-sweeper',
     siteName: 'SkillDrills',
     locale: 'en_US',
     type: 'website',
-    images: [{
-      url: 'https://skilldrills.online/icons/icon-512x512.png',
-      width: 512,
-      height: 512,
-      alt: 'Peripheral Vision Training - Reflex Sweeper Game | SkillDrills',
-    }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Peripheral Vision Training - Free Reflex Sweeper Game | SkillDrills',
-    description: 'Train peripheral vision and reflex reaction times. Defend the core from dynamic radial threats. No sign-up required.',
-    images: ['https://skilldrills.online/icons/icon-512x512.png'],
+    title: 'Peripheral Threat Sweeper — Peripheral Vision Trainer | SkillDrills',
+    description: 'Train peripheral vision, spatial awareness, and target acquisition. Intercept radial threats before they breach your core in this free reflex game.',
   },
 };
 
@@ -61,16 +54,16 @@ const breadcrumbSchema = {
     { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://skilldrills.online" },
     { "@type": "ListItem", "position": 2, "name": "Physical Training", "item": "https://skilldrills.online/drills/physical" },
     { "@type": "ListItem", "position": 3, "name": "Reflex Training", "item": "https://skilldrills.online/drills/physical/reflex-training" },
-    { "@type": "ListItem", "position": 4, "name": "Peripheral Vision Training (Threat Sweeper)", "item": "https://skilldrills.online/drills/physical/reflex-training/peripheral-threat-sweeper" }
+    { "@type": "ListItem", "position": 4, "name": "Peripheral Threat Sweeper", "item": "https://skilldrills.online/drills/physical/reflex-training/peripheral-threat-sweeper" }
   ]
 };
 
 const webAppSchema = {
   "@context": "https://schema.org",
-  "@type": "WebApplication",
-  "name": "Peripheral Vision Training - Free Reflex Sweeper Game | SkillDrills",
+  "@type": "SoftwareApplication",
+  "name": "Peripheral Threat Sweeper — Peripheral Vision Trainer",
   "url": "https://skilldrills.online/drills/physical/reflex-training/peripheral-threat-sweeper",
-  "description": "Improve peripheral vision speed and target scanning. Intercept radial targets before they reach the central shield. Features adaptive threat types, combo multipliers, and an intense 60-second survival loop.",
+  "description": "Improve peripheral vision speed and target scanning. Intercept radial targets before they reach the central shield.",
   "applicationCategory": "EducationalApplication",
   "operatingSystem": "Web Browser",
   "browserRequirements": "Requires a modern web browser with JavaScript support.",
@@ -81,37 +74,17 @@ const webAppSchema = {
   "teaches": "Peripheral Vision, Spatial Awareness, Threat Interception, Visual Scanning, Eye-Hand Coordination"
 };
 
-const howToSchema = {
+const videoGameSchema = {
   "@context": "https://schema.org",
-  "@type": "HowTo",
-  "name": "How to Play the Peripheral Threat Sweeper",
-  "description": "A step-by-step guide to testing your peripheral awareness and visual-motor interception.",
-  "step": [
-    {
-      "@type": "HowToStep",
-      "position": 1,
-      "name": "Hold Center Focus",
-      "text": "Lock your cursor into the game and keep your physical eyes focused on the central cyan shield core."
-    },
-    {
-      "@type": "HowToStep",
-      "position": 2,
-      "name": "Scan Peripherally",
-      "text": "Threat nodes will spawn at the outer edges of your vision and move inward. Use your peripheral vision to detect them without moving your eyes from the center."
-    },
-    {
-      "@type": "HowToStep",
-      "position": 3,
-      "name": "Intercept Threats",
-      "text": "Flick your mouse to click and destroy the incoming threats before they breach the core. Successful intercepts grant +1.0s to your clock."
-    },
-    {
-      "@type": "HowToStep",
-      "position": 4,
-      "name": "Survive the Adaptive Swarm",
-      "text": "Misclicks and core breaches drain your time violently. As you level up, the engine will spawn faster threats and erratic 'wobbling' enemies to test your precision."
-    }
-  ]
+  "@type": "VideoGame",
+  "name": "Peripheral Threat Sweeper — Peripheral Vision Trainer",
+  "url": "https://skilldrills.online/drills/physical/reflex-training/peripheral-threat-sweeper",
+  "description": "Train peripheral vision, spatial awareness, and target acquisition. Intercept radial threats before they breach your core in this free reflex game.",
+  "genre": ["Reflex Training", "Esports", "Aim Trainer", "Peripheral Vision"],
+  "gamePlatform": "Web Browser",
+  "playMode": "SinglePlayer",
+  "applicationCategory": "Game",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
 };
 
 const faqSchema = {
@@ -147,39 +120,47 @@ const faqSchema = {
       "name": "What are the different threat types?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "As the game difficulty adapts, you will face Standard threats (linear path), Fast threats (Orange, moving 1.5x speed), and Evasive threats (Purple, wobbling and altering their trajectory)."
+        "text": "As the game difficulty adapts, you will face Standard threats (Red, linear path), Fast threats (Orange, moving 1.6x speed), and Evasive threats (Purple, wobbling and altering their trajectory)."
       }
     },
     {
       "@type": "Question",
-      "name": "Why do I lose time for clicking empty space?",
+      "name": "How does difficulty scale in Peripheral Threat Sweeper?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "To prevent 'spam clicking'. The drill trains precise visual-motor integration. If you fire without acquiring a valid target, the engine deducts 1.5 seconds from your survival clock to enforce accuracy."
+        "text": "As your score increases, the level rises up to Level 15. Threat movement speed accelerates from 80 px/s up to 500 px/s, spawn interval drops from 1.4s down to 0.3s, and evasive wobbling threats appear more frequently."
       }
     },
     {
       "@type": "Question",
-      "name": "What happens during a core breach?",
+      "name": "What happens when I miss or allow a core breach?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "If a threat hits the central shield, it violently drains -3.5s from your master survival clock and immediately resets your combo multiplier back to 1.0x."
+        "text": "Missing a threat or allowing a core breach resets your combo multiplier back to 1.0x and triggers a red flash overlay. There are no score deductions or time penalties."
       }
     },
     {
       "@type": "Question",
-      "name": "How does the Combo System work?",
+      "name": "How long does each session run?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Consecutive intercepts without a core breach or false click build your multiplier. Reach a 40+ streak to unlock the maximum 3.0x score multiplier and rapidly scale the levels."
+        "text": "Each session runs for a fixed 45 seconds. The game timer counts down steadily from 45s to 0s, providing a standard, reproducible performance benchmark."
       }
     },
     {
       "@type": "Question",
-      "name": "Does the difficulty scale automatically?",
+      "name": "Does this game help with Valorant or CS2 aim?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes. Every 150 points you score triggers a Level Up. The engine will accelerate target speeds, decrease the spawn intervals, and introduce harder threat variations."
+        "text": "Yes. It trains rapid peripheral target acquisition and micro-flicks. Spotting enemy movement off-center without losing crosshair control is critical for tactical shooter success."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is a good score in Peripheral Threat Sweeper?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Scoring 8,000+ points earns a Gold or Platinum grade, while reaching 17,000+ points with 90%+ accuracy places you in the Master tier."
       }
     },
     {
@@ -187,17 +168,21 @@ const faqSchema = {
       "name": "Is this reflex game free to play?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes! The SkillDrills Peripheral Sweeper is entirely free, open-source, and runs purely in your web browser with zero downloads required."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "What is a good score for the Peripheral Threat Sweeper?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "A score of 1000+ is Platinum tier. 2000+ indicates Diamond-level peripheral acquisition, and 3500+ with 90% accuracy places you in the Elite Master tier."
+        "text": "Yes, Peripheral Threat Sweeper on SkillDrills is 100% free, ad-free, and runs entirely in your web browser with zero downloads."
       }
     }
+  ]
+};
+
+const howToSchema = {
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "How to Practice the Peripheral Threat Sweeper Drill",
+  "description": "Step-by-step instructions to train peripheral vision and threat interception using the SkillDrills Peripheral Threat Sweeper trainer.",
+  "step": [
+    { "@type": "HowToStep", "name": "Hold the Center", "text": "Keep your crosshair anchored near the central core." },
+    { "@type": "HowToStep", "name": "Scan the Edges", "text": "Threat nodes spawn at the perimeter and move inward toward the core." },
+    { "@type": "HowToStep", "name": "Intercept Before Breach", "text": "Click each threat before it reaches the core to score and build combo." }
   ]
 };
 
@@ -214,11 +199,15 @@ export default function PeripheralThreatSweeperPage() {
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }}
       />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
       <PeripheralThreatSweeperClient />
     </>

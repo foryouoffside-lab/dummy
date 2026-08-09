@@ -19,7 +19,7 @@ function walkDir(dir, fileList = []) {
 const allPages = walkDir(drillsDir);
 
 const drillRoutes = [];
-const categoryPages = new Set(['/', '/drills/academic', '/drills/cognitive', '/drills/fps', '/drills/memory', '/drills/motor', '/drills/physical', '/drills/visual', '/drills/visual-tracking']);
+const categoryPages = new Set(['/', '/drills/cognitive', '/drills/fps', '/drills/memory', '/drills/motor', '/drills/physical', '/drills/visual', '/drills/visual-tracking']);
 
 allPages.forEach(filePath => {
   const relativePath = path.relative(drillsDir, filePath);
@@ -46,7 +46,7 @@ allPages.forEach(filePath => {
     
     let priority = 0.85;
     if (category === 'fps') priority = 1.0;
-    else if (category === 'academic' || category === 'motor' || category === 'physical') priority = 0.9;
+    else if (category === 'motor' || category === 'physical') priority = 0.9;
     
     drillRoutes.push({
       path: route,

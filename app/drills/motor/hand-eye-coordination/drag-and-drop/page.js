@@ -1,51 +1,49 @@
 import DragAndDropClient from './DragAndDropClient';
 
 export const metadata = {
-  title: "Drag and Drop Game - Mouse Precision Training | SkillDrills",
-  description: "Improve fine motor control and cursor stability with our free Drag and Drop Game. Train mouse dragging precision and hand-eye coordination.",
+  title: "Drag & Drop Trainer — Mouse Spatial Control | SkillDrills",
+  description: "Master mouse spatial dragging control, cursor deceleration speed, and release timing with this free online drag and drop precision trainer.",
   keywords: [
-    "drag and drop game",
-    "mouse precision training",
-    "free drag and drop game",
-    "mouse precision test",
-    "fine motor skills training",
-    "hand eye coordination game",
-    "drag and drop game online",
-    "mouse precision drill",
-    "fine motor control game",
-    "motor skills test",
-    "mouse control training",
-    "mouse dexterity training",
-    "mouse dragging practice",
-    "hand eye coordination test",
-    "hand eye coordination training",
-    "cursor precision game",
-    "drag accuracy test",
-    "mouse accuracy game"
+    "drag and drop precision trainer",
+    "mouse spatial drag test",
+    "free drag and drop precision drill",
+    "cursor deceleration practice",
+    "mouse stopping power trainer",
+    "spatial coordinate drag test",
+    "hand eye drag drop trainer",
+    "score based drag precision drill",
+    "raw mouse input drag trainer",
+    "moving target drop test",
+    "free online drag and drop game",
+    "motor skill drag precision drill",
+    "graphic designer mouse trainer",
+    "video editor timeline precision drill",
+    "mouse inventory drag practice",
+    "universal sensitivity drag trainer",
+    "micro drag precision drill",
+    "anti overflicking drag trainer",
+    "fine motor cursor control test",
+    "survival difficulty drag precision"
   ],
+  alternates: {
+    canonical: "https://skilldrills.online/drills/motor/hand-eye-coordination/drag-and-drop",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
   openGraph: {
-    title: "Drag and Drop Game - Mouse Precision Training | SkillDrills",
-    description: "Improve fine motor control and cursor stability with our free Drag and Drop Game. Train mouse dragging precision and hand-eye coordination.",
-    type: 'website',
-    url: 'https://skilldrills.online/drills/motor/hand-eye-coordination/drag-and-drop',
+    title: "Drag & Drop Trainer — Mouse Spatial Control | SkillDrills",
+    description: "Master mouse spatial dragging control, cursor deceleration speed, and release timing with this free online drag and drop precision trainer.",
+    url: "https://skilldrills.online/drills/motor/hand-eye-coordination/drag-and-drop",
     siteName: 'SkillDrills',
     locale: 'en_US',
-    images: [{
-      url: 'https://skilldrills.online/icons/icon-512x512.png',
-      width: 512,
-      height: 512,
-      alt: 'Drag and Drop Game - Mouse Precision Training',
-    }],
+    type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Drag and Drop Game - Mouse Precision Training | SkillDrills",
-    description: "Improve fine motor control and cursor stability with our free Drag and Drop Game. Train mouse dragging precision and hand-eye coordination.",
-    images: ['https://skilldrills.online/icons/icon-512x512.png'],
-  },
-  robots: { index: true, follow: true },
-  alternates: {
-    canonical: 'https://skilldrills.online/drills/motor/hand-eye-coordination/drag-and-drop',
+    title: "Drag & Drop Trainer — Mouse Spatial Control | SkillDrills",
+    description: "Master mouse spatial dragging control, cursor deceleration speed, and release timing with this free online drag and drop precision trainer.",
   },
 };
 
@@ -54,24 +52,41 @@ export default function DragAndDropPage() {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     "itemListElement": [
-      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://skilldrills.online" },
-      { "@type": "ListItem", "position": 2, "name": "Motor Training", "item": "https://skilldrills.online/drills/motor" },
-      { "@type": "ListItem", "position": 3, "name": "Hand-Eye Coordination", "item": "https://skilldrills.online/drills/motor" },
-      { "@type": "ListItem", "position": 4, "name": "Drag and Drop Game" }
+      { "@type": "ListItem", "position": 1, "name": "SkillDrills", "item": "https://skilldrills.online/" },
+      { "@type": "ListItem", "position": 2, "name": "Motor Drills", "item": "https://skilldrills.online/drills/motor" },
+      { "@type": "ListItem", "position": 3, "name": "Drag & Drop Precision Trainer", "item": "https://skilldrills.online/drills/motor/hand-eye-coordination/drag-and-drop" }
     ]
   };
 
   const softwareSchema = {
     "@context": "https://schema.org",
-    "@type": "WebApplication",
-    "name": "Drag and Drop Game - Free Mouse Precision Training",
-    "url": "https://skilldrills.online/drills/motor/hand-eye-coordination/drag-and-drop",
-    "description": "Free Drag and Drop Game for Mouse Precision Training. Improve fine motor control, cursor accuracy, hand-eye coordination, and drag precision with adaptive score-based difficulty. Timer-based progression system. No download required.",
-    "applicationCategory": "EducationalApplication",
-    "operatingSystem": "Any",
+    "@type": "SoftwareApplication",
+    "name": "Drag & Drop Precision Trainer",
+    "applicationCategory": "GameApplication",
+    "operatingSystem": "Web Browser",
     "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-    "author": { "@type": "Organization", "name": "SkillDrills" },
-    "isAccessibleForFree": true
+    "description": "Master mouse spatial dragging control, cursor deceleration speed, and release timing.",
+    "genre": "Cursor Control / Motor Precision",
+    "url": "https://skilldrills.online/drills/motor/hand-eye-coordination/drag-and-drop",
+    "publisher": {
+      "@type": "Organization",
+      "name": "SkillDrills",
+      "url": "https://skilldrills.online"
+    }
+  };
+
+  const videoGameSchema = {
+    "@context": "https://schema.org",
+    "@type": "VideoGame",
+    "name": "Drag & Drop Precision Trainer",
+    "url": "https://skilldrills.online/drills/motor/hand-eye-coordination/drag-and-drop",
+    "description": "Master mouse spatial dragging control, cursor deceleration speed, and release timing.",
+    "gamePlatform": "Web Browser",
+    "genre": ["Motor Precision Training", "Cursor Control"],
+    "playMode": "SinglePlayer",
+    "applicationCategory": "Game",
+    "operatingSystem": "Web Browser",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
   };
 
   const faqSchema = {
@@ -80,98 +95,122 @@ export default function DragAndDropPage() {
     "mainEntity": [
       {
         "@type": "Question",
-        "name": "What is a drag and drop game?",
+        "name": "What is the Drag and Drop Precision Trainer?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "A drag and drop game is an interactive browser drill where users click, hold, and move an object (like a ball) into a specific target zone. It is designed to test and improve spatial accuracy and motor control."
+          "text": "The Drag and Drop Precision Trainer is a specialized motor drill designed to test and refine fine cursor control, spatial dragging accuracy, and deceleration timing."
         }
       },
       {
         "@type": "Question",
-        "name": "How does mouse precision training work?",
+        "name": "How does drag and drop training improve mouse control?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Mouse precision training forces the user to make highly deliberate, controlled movements with their mouse or trackpad. By reducing the margin of error (target size) over time, the brain learns to refine its motor output for finer cursor control."
+          "text": "By requiring you to click, transport, and accurately release objects into moving target zones under time pressure, it strengthens micro-motor pathways and cursor stability."
         }
       },
       {
         "@type": "Question",
-        "name": "Can this improve cursor control?",
+        "name": "Does drag precision training benefit FPS players?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Yes. This drill specifically isolates the 'drag' mechanic, which requires continuous muscle tension and smooth pathing. Practicing this improves overall cursor stability and eliminates shaky mouse movements."
+          "text": "Yes, dragging and releasing precise coordinates trains mouse deceleration and stopping power, essential for crosshair placement and inventory management."
         }
       },
       {
         "@type": "Question",
-        "name": "Is this useful for FPS games?",
+        "name": "How does difficulty scale in this drill?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "While traditional aim trainers focus on quick flicks (clicks), drag and drop training improves the smooth tracking and tension control needed for recoil management and precise crosshair placement in games like Valorant and CS2."
+          "text": "As your score increases, the level scales from 1 to 15, shrinking target containers, accelerating movement speed, and shortening target lifespan."
         }
       },
       {
         "@type": "Question",
-        "name": "Can designers benefit from this?",
+        "name": "What happens when a drop misses the target?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Absolutely. Graphic designers, illustrators, and 3D modelers rely heavily on pixel-perfect dragging for selecting nodes, drawing bezier curves, and moving assets. This drill directly trains those exact professional motor skills."
+          "text": "Releasing outside the target zone resets your current combo multiplier to zero and triggers a red error flash without point loss."
         }
       },
       {
         "@type": "Question",
-        "name": "Can video editors benefit?",
+        "name": "How is drag accuracy calculated?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Yes. Video editors constantly drag and drop clips onto timelines, adjust audio levels, and manipulate keyframes. Better mouse precision leads to faster, error-free editing workflows."
+          "text": "Accuracy is calculated as total successful target drops divided by total drop attempts, displayed as a real-time percentage."
         }
       },
       {
         "@type": "Question",
-        "name": "How is accuracy calculated?",
+        "name": "Can I adjust mouse sensitivity for this drill?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Accuracy is calculated as the percentage of your total drops that successfully land inside the target ring versus drops that miss the target entirely."
+          "text": "Yes, the Universal Sens slider allows you to match your raw input multiplier and cm/360 sensitivity setting."
         }
       },
       {
         "@type": "Question",
-        "name": "How does adaptive difficulty work?",
+        "name": "Is this drag and drop drill free?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "The difficulty scales automatically based on your score. As you reach higher score milestones (Levels 1-6), the target ring becomes smaller, moves faster, and demands higher spatial precision."
+          "text": "Yes, the drill is 100% free with no sign-ups or downloads required, running directly in modern web browsers."
         }
       },
       {
         "@type": "Question",
-        "name": "What is a good score?",
+        "name": "How do combo multipliers work?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "A score over 500 (Diamond rank) indicates strong fine motor control. Elite users with professional-level precision can consistently score over 1200 (Grandmaster)."
+          "text": "Sustaining consecutive accurate drops builds combo multipliers up to 3.0x bonus points per successful placement."
         }
       },
       {
         "@type": "Question",
-        "name": "Can I play on mobile?",
+        "name": "Can graphic designers and editors benefit from this drill?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Yes! The drill is fully responsive and optimized for touch screens. You can tap, hold, and drag the ball just like you would use a mouse on a desktop."
+          "text": "Yes, designers and editors build high-precision dragging dexterity needed for adjusting nodes, layers, and clip placement on timelines."
         }
       },
       {
         "@type": "Question",
-        "name": "How often should I practice?",
+        "name": "Does this drill support touch screen input?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "For the best results in developing fine motor control, 5 to 10 minutes of daily practice is recommended. Consistency builds muscle memory faster than long, infrequent sessions."
+          "text": "This drill requires pointer-lock mouse input for cursor control, so it is not playable on touch-only phones or tablets. Use a desktop or laptop with a mouse for the full experience."
         }
       },
       {
         "@type": "Question",
-        "name": "Is the drill free?",
+        "name": "How long should I train drag precision daily?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Yes, this Drag and Drop Mouse Precision Training game is 100% free. There are no downloads, no sign-ups, and no paywalls."
+          "text": "A 10-15 minute daily session helps build muscle memory and maintain high baseline cursor control."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How is high performance maintained during gameplay?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The canvas engine utilizes cached backdrop grid rendering and hardware-accelerated requestAnimationFrame loops for smooth 60+ FPS performance."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the best technique for high scores?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Maintain smooth, controlled dragging speed rather than rushing, avoiding premature drops outside target boundaries."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does the 45-second session timer work?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Each session runs for a fixed 45 seconds, giving you a standardized time window to score maximum points and benchmark your performance."
         }
       }
     ]
@@ -180,53 +219,49 @@ export default function DragAndDropPage() {
   const howToSchema = {
     "@context": "https://schema.org",
     "@type": "HowTo",
-    "name": "How to Train Drag and Drop Precision",
-    "description": "Step-by-step instructions to train mouse dragging and target drop accuracy.",
+    "name": "How to Train Mouse Drag & Drop Precision",
+    "description": "Step-by-step instructions to train mouse spatial dragging control, deceleration speed, and release timing.",
     "step": [
       {
         "@type": "HowToStep",
-        "name": "Pick up the interactive object",
-        "text": "Hover your cursor over the ball, press and hold your primary mouse button to select it."
+        "name": "Adjust Sensitivity",
+        "text": "Set your Universal Sens slider to match your raw input multiplier."
       },
       {
         "@type": "HowToStep",
-        "name": "Drag to target area",
-        "text": "Maintain mouse button tension. Drag the ball smoothly along the canvas workspace towards the active ring zone."
+        "name": "Acquire and Drag Ball",
+        "text": "Click or touch the draggable object and transport it smoothly toward the moving bucket container."
       },
       {
         "@type": "HowToStep",
-        "name": "Release inside ring",
-        "text": "Align the center of the ball with the target ring. Release your mouse button to execute a drop. Avoid dropping early or dragging past the ring."
+        "name": "Release Inside Target",
+        "text": "Release your mouse button or touch input precisely inside the moving target boundary to score points and build combo multipliers."
       }
     ]
   };
 
   return (
     <>
-      {/* Breadcrumb Schema */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
-
-      {/* SoftwareApplication Schema */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }}
       />
-
-      {/* FAQPage Schema */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
-
-      {/* HowTo Schema */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-
       <DragAndDropClient />
     </>
   );

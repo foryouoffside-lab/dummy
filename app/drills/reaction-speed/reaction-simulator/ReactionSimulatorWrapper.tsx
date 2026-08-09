@@ -1,12 +1,5 @@
 'use client';
 
-import dynamic from 'next/dynamic';
+import ReactionSimulatorClient from './ReactionSimulatorClient';
 
-const ReactionSimulatorClient = dynamic(
-  () => import('./ReactionSimulatorClient'),
-  { ssr: false }
-);
-
-export default function ReactionSimulatorWrapper() {
-  return <ReactionSimulatorClient />;
-}
+export default ReactionSimulatorClient;

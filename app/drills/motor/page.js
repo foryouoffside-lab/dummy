@@ -2,7 +2,7 @@ import MotorDrillsClient from './MotorDrillsClient';
 
 export const metadata = {
   title: 'Free Aim Trainer & Motor Skills Drills - Mouse Precision Online | SkillDrills',
-  description: 'Free aim trainer and motor skills drills online. 12 hand eye coordination, reaction time, fine motor, and click speed tests. No sign-up. Play instantly in your browser.',
+  description: 'Free aim trainer and motor skills drills online. 9 hand eye coordination, movement speed, and precision control tests. No sign-up. Play instantly in your browser.',
   keywords: [
     'free aim trainer', 'aim trainer online', 'motor skills drills', 'motor skills training',
     'hand eye coordination training', 'hand eye coordination game', 'hand eye coordination test',
@@ -21,11 +21,11 @@ export const metadata = {
     'movement speed drill', 'timing accuracy drill', 'coordination training',
     'skilldrills motor', 'skilldrills aim', 'free online skill training',
     'no download motor game', 'browser skill game', 'instant motor training',
-    '12 free drills', 'motor skills game online', 'precision mouse training',
+    'motor skills game online', 'precision mouse training',
   ],
   openGraph: {
     title: 'Free Aim Trainer & Motor Skills Drills - Mouse Precision Online | SkillDrills',
-    description: 'Free aim trainer and motor skills drills. 12 hand eye coordination, click speed, fine motor, and reaction time tests. No sign-up.',
+    description: 'Free aim trainer and motor skills drills. 9 hand eye coordination, click speed, and precision control tests. No sign-up.',
     type: 'website',
     url: 'https://skilldrills.online/drills/motor',
     siteName: 'SkillDrills',
@@ -40,7 +40,7 @@ export const metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Free Aim Trainer & Motor Skills Drills - Mouse Precision Online | SkillDrills',
-    description: 'Free aim trainer and motor skills drills. 12 hand eye coordination, click speed, fine motor, and reaction time tests. No sign-up.',
+    description: 'Free aim trainer and motor skills drills. 9 hand eye coordination, click speed, and precision control tests. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -60,28 +60,25 @@ export default function MotorDrillsPage() {
             "@type": "CollectionPage",
             "name": "Free Aim Trainer & Motor Skills Drills - Mouse Precision Online",
             "url": "https://skilldrills.online/drills/motor",
-            "description": "12 free motor skills drills and aim trainer games online. Hand eye coordination, click speed tests, fine motor skills, flick training, reaction time tests, and timing accuracy drills. No sign-up required.",
+            "description": "9 free motor skills drills and aim trainer games online. Hand eye coordination, click speed tests, flick training, and precision control drills. No sign-up required.",
             "author": { "@type": "Organization", "name": "SkillDrills" },
             "hasPart": [
               { "@type": "WebApplication", "name": "Free Aim Trainer Online", "url": "https://skilldrills.online/drills/motor/hand-eye-coordination/aim-trainer" },
-              { "@type": "WebApplication", "name": "Mouse Accuracy Test - Click Accuracy Drill", "url": "https://skilldrills.online/drills/motor/hand-eye-coordination/click-accuracy" },
               { "@type": "WebApplication", "name": "Drag and Drop Game - Mouse Precision Training", "url": "https://skilldrills.online/drills/motor/hand-eye-coordination/drag-and-drop" },
+              { "@type": "WebApplication", "name": "Precision Flick Shot Trainer", "url": "https://skilldrills.online/drills/motor/hand-eye-coordination/precision-flick-shot" },
               { "@type": "WebApplication", "name": "Finger Speed Test - Finger Sequencing Drill", "url": "https://skilldrills.online/drills/motor/movement-speed/finger-sequencing" },
               { "@type": "WebApplication", "name": "Flick Training Online - Gesture Speed Drill", "url": "https://skilldrills.online/drills/motor/movement-speed/gesture-speed" },
               { "@type": "WebApplication", "name": "Keyboard Recognition & Keybind Speed Trainer", "url": "https://skilldrills.online/drills/motor/movement-speed/keyboard-recognition" },
               { "@type": "WebApplication", "name": "Click Speed Test - Rapid Tapping CPS Test", "url": "https://skilldrills.online/drills/motor/movement-speed/rapid-tapping" },
-              { "@type": "WebApplication", "name": "Fine Motor Skills Training - Precision Path Tracking", "url": "https://skilldrills.online/drills/motor/precision-control/fine-motor" },
               { "@type": "WebApplication", "name": "Steady Hand Game - Mouse Path Tracing", "url": "https://skilldrills.online/drills/motor/precision-control/steady-hand" },
-              { "@type": "WebApplication", "name": "Mouse Tracing Game - Wave Tracking Drill", "url": "https://skilldrills.online/drills/motor/precision-control/tracing" },
-              { "@type": "WebApplication", "name": "Reaction Time Test - Stopwatch Timing Drill", "url": "https://skilldrills.online/drills/motor/timing-accuracy/stopwatch-click" },
-              { "@type": "WebApplication", "name": "Rhythm Click Game - Synchronization Timing Drill", "url": "https://skilldrills.online/drills/motor/timing-accuracy/synchronization" }
+              { "@type": "WebApplication", "name": "Mouse Tracing Game - Wave Tracking Drill", "url": "https://skilldrills.online/drills/motor/precision-control/tracing" }
             ]
           })
         }}
       />
       <noscript>
         <h1>Free Aim Trainer & Motor Skills Drills - Mouse Precision, Click Speed & Hand Eye Coordination</h1>
-        <p>12 free motor skills drills: aim trainer, mouse accuracy test, click speed test, fine motor skills training, flick training, and reaction time tests. No sign-up required.</p>
+        <p>9 free motor skills drills: aim trainer, drag and drop, click speed test, precision flick shot, and steady hand tracing. No sign-up required.</p>
       </noscript>
       <MotorDrillsClient />
     </>

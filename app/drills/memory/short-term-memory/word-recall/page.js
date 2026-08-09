@@ -2,7 +2,7 @@ import WordRecallClient from './WordRecallClient';
 
 export const metadata = {
   title: 'Word Recall - Short-Term Memory | SkillDrills',
-  description: 'Train verbal memory with 50 unique words and progressive difficulty. 10-second memorization, then free recall typing. No sign-up.',
+  description: 'Train verbal memory with 50 unique words and progressive difficulty. 2-second memorization, then free recall typing. No sign-up.',
   keywords: [
     'word recall', 'verbal memory', 'word list memory', 'short term memory words',
     'word recall test', 'verbal learning drill', 'word memory game',
@@ -18,23 +18,16 @@ export const metadata = {
   ],
   openGraph: {
     title: 'Word Recall - Short-Term Memory | SkillDrills',
-    description: 'Train verbal memory with 50 unique words and progressive difficulty. 10-second memorization, then free recall typing. No sign-up.',
+    description: 'Train verbal memory with 50 unique words and progressive difficulty. 2-second memorization, then free recall typing. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/memory/short-term-memory/word-recall',
     siteName: 'SkillDrills',
     locale: 'en_US',
-    images: [{
-      url: 'https://skilldrills.online/icons/icon-512x512.png',
-      width: 512,
-      height: 512,
-      alt: 'Word Recall Drill',
-    }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Word Recall - Short-Term Memory | SkillDrills',
-    description: 'Train verbal memory with 50 unique words and progressive difficulty. 10-second memorization, then free recall typing. No sign-up.',
-    images: ['https://skilldrills.online/icons/icon-512x512.png'],
+    description: 'Train verbal memory with 50 unique words and progressive difficulty. 2-second memorization, then free recall typing. No sign-up.',
   },
   robots: { index: true, follow: true },
   alternates: {
@@ -70,7 +63,7 @@ export default function WordRecallPage() {
             "@type": "WebApplication",
             "name": "Word Recall Drill",
             "url": "https://skilldrills.online/drills/memory/short-term-memory/word-recall",
-            "description": "Free verbal memory drill with 50 unique words. 10-second memorization, free recall typing. Progressive difficulty starting at 3 words. Green/red feedback.",
+            "description": "Free verbal memory drill with 50 unique words. 2-second memorization, free recall typing. Progressive difficulty starting at 3 words. Green/red feedback.",
             "applicationCategory": "EducationalApplication",
             "operatingSystem": "All",
             "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
@@ -92,7 +85,7 @@ export default function WordRecallPage() {
                 "name": "What is the Word Recall Drill?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "A free verbal memory exercise with 50 unique words. 10-second memorization, then free recall typing without cues. Green/red feedback on results."
+                  "text": "A free verbal memory exercise. Memorize random word lists, then type out recalled words without order constraints."
                 }
               },
               {
@@ -108,7 +101,23 @@ export default function WordRecallPage() {
                 "name": "How does progressive difficulty work?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Start at 3 words. Perfect recall advances to next level with +1 word. Any mistake stays at current level. No upper limit."
+                  "text": "Start at 3 words. Perfect recall advances to the next level with +1 word, up to 12. Any mistake drops you back one level."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Does word order matter when typing?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "No. This is a free recall test. You can type recalled words in any order separated by spaces."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Are there negative score or time penalties?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "No. Missing or extra words never deduct score points or reduce remaining timer seconds — they only decrease the word count level (this drill is an adaptive span test, so that's intentional, not a penalty)."
                 }
               },
               {
@@ -116,7 +125,23 @@ export default function WordRecallPage() {
                 "name": "Do I need to sign up?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "No registration required. This word recall drill is completely free and works instantly in your browser."
+                  "text": "No registration required. This drill runs directly in your browser with instant response."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "How long does each drill session last?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Each round is timed for exactly 45 seconds of continuous focus."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Can I skip the memorization timer?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Yes! Click the SKIP button as soon as you finish memorizing the word list to enter the typing phase immediately."
                 }
               }
             ]

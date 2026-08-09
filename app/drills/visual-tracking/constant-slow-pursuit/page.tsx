@@ -1,98 +1,119 @@
 import ConstantSlowPursuitClient from './ConstantSlowPursuitClient';
 
 export const metadata = {
-  title: 'Constant Slow Pursuit - Visual Pursuit & Tracking Drill | SkillDrills',
-  description: 'Condition foveal pursuit along a continuous, visible Lissajous curve at low velocity. Train visual pursuit tracking and coordinate re-acquisition speeds. No sign-up required.',
-  keywords: ['constant slow pursuit', 'visual tracking drill', 'smooth pursuit eye training', 'saccadic eye movement test', 'visual processing speed', 'foveal tracking', 'esports vision training', 'athletic vision drill'],
+  title: "Constant Slow Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
+  description: "Train smooth pursuit eye movements along a continuous Lissajous curve. Free browser-based visual tracking drill with customizable speed, duration, and random acceleration.",
+  keywords: [
+    "constant slow pursuit",
+    "visual tracking drill",
+    "smooth pursuit eye training",
+    "gaze stability exercise",
+    "esports vision training",
+    "athletic vision drill",
+    "ocular motor training",
+    "eye tracking practice online"
+  ],
+  alternates: {
+    canonical: "https://skilldrills.online/drills/visual-tracking/constant-slow-pursuit",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
   openGraph: {
-    title: 'Constant Slow Pursuit - Visual Pursuit & Tracking Drill | SkillDrills',
-    description: 'Condition foveal pursuit along a continuous, visible Lissajous curve at low velocity. Train visual pursuit tracking and coordinate re-acquisition speeds. No sign-up required.',
-    type: 'article',
-    url: 'https://skilldrills.online/drills/visual-tracking/constant-slow-pursuit',
+    title: "Constant Slow Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
+    description: "Train smooth pursuit eye movements along a continuous Lissajous curve. Free browser-based visual tracking drill.",
+    url: "https://skilldrills.online/drills/visual-tracking/constant-slow-pursuit",
     siteName: 'SkillDrills',
     locale: 'en_US',
-    images: [{
-      url: 'https://skilldrills.online/icons/icon-512x512.png',
-      width: 512,
-      height: 512,
-      alt: 'Constant Slow Pursuit Drill',
-    }],
+    type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Constant Slow Pursuit - Visual Pursuit & Tracking Drill | SkillDrills',
-    description: 'Condition foveal pursuit along a continuous, visible Lissajous curve at low velocity. Train visual pursuit tracking and coordinate re-acquisition speeds. No sign-up required.',
-    images: ['https://skilldrills.online/icons/icon-512x512.png'],
-  },
-  robots: { index: true, follow: true },
-  alternates: {
-    canonical: 'https://skilldrills.online/drills/visual-tracking/constant-slow-pursuit',
+    title: "Constant Slow Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
+    description: "Train smooth pursuit eye movements along a continuous Lissajous curve. Free browser-based visual tracking drill.",
   },
 };
 
 export default function ConstantSlowPursuitPage() {
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "SkillDrills", "item": "https://skilldrills.online/" },
+      { "@type": "ListItem", "position": 2, "name": "Visual Tracking", "item": "https://skilldrills.online/drills/visual-tracking" },
+      { "@type": "ListItem", "position": 3, "name": "Constant Slow Pursuit", "item": "https://skilldrills.online/drills/visual-tracking/constant-slow-pursuit" }
+    ]
+  };
+
+  const softwareSchema = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Constant Slow Pursuit Drill",
+    "applicationCategory": "EducationalApplication",
+    "operatingSystem": "Web Browser",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "description": "An interactive web-based visual tracking drill to condition smooth pursuit eye movement and gaze calibration.",
+    "url": "https://skilldrills.online/drills/visual-tracking/constant-slow-pursuit",
+    "publisher": {
+      "@type": "Organization",
+      "name": "SkillDrills",
+      "url": "https://skilldrills.online"
+    }
+  };
+
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is the Constant Slow Pursuit drill?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The Constant Slow Pursuit drill exercises smooth pursuit eye movements by having your eyes track a target along a continuous Lissajous path at controlled or randomized speeds."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Why use the 'Hide Line' setting?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Hiding the guide lines forces your eyes to track the moving target purely based on dynamic visual input rather than relying on visual path cues."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What does the Random Speed feature do?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Random Speed introduces unpredictable acceleration and deceleration along the tracking path, challenging your visual motor cortex to dynamically adjust focus speeds."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How long should I practice visual tracking daily?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "We recommend 5 to 10 minutes of daily visual tracking training before gaming or athletic practice to warm up ocular muscles and reduce eye fatigue."
+        }
+      }
+    ]
+  };
+
   return (
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "BreadcrumbList",
-            "itemListElement": [
-              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://skilldrills.online" },
-              { "@type": "ListItem", "position": 2, "name": "Drills Hub", "item": "https://skilldrills.online/drills" },
-              { "@type": "ListItem", "position": 3, "name": "Visual Tracking", "item": "https://skilldrills.online/drills/visual-tracking" },
-              { "@type": "ListItem", "position": 4, "name": "Constant Slow Pursuit" }
-            ]
-          })
-        }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
-
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "WebApplication",
-            "name": "Constant Slow Pursuit Drill",
-            "url": "https://skilldrills.online/drills/visual-tracking/constant-slow-pursuit",
-            "description": "Condition foveal pursuit along a continuous, visible Lissajous curve at low velocity.",
-            "applicationCategory": "EducationalApplication",
-            "operatingSystem": "All",
-            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-            "author": { "@type": "Organization", "name": "SkillDrills" },
-            "isAccessibleForFree": true
-          })
-        }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }}
       />
-
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "FAQPage",
-            "mainEntity": [
-              {
-                "@type": "Question",
-                "name": "What is the Constant Slow Pursuit Drill?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "Condition foveal pursuit along a continuous, visible Lissajous curve at low velocity."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "Who is this drill designed for?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "Competitive gamers, sports athletes, and anyone wanting to improve ocular muscle agility and tracking precision."
-                }
-              }
-            ]
-          })
-        }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
 
       <ConstantSlowPursuitClient />

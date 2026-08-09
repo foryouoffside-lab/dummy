@@ -16,7 +16,7 @@ import ReactionSpeedDrillsClient from './ReactionSpeedDrillsClient';
 
 export const metadata = {
   title: 'Free Reaction Time Test & Reaction Speed Training | SkillDrills',
-  description: 'Improve your reflexes with free online Reaction Time Tests and Reaction Speed Training drills. Train your click speed, saccadic tracking, and eye agility with 12 free tools.',
+  description: 'Improve your reflexes with free online Reaction Time Tests and Reaction Speed Training drills. Train your click speed, saccadic tracking, and eye agility with 8 free tools.',
   keywords: [
     // Primary / Head terms
     'reaction time test', 'reaction speed training', 'reflex training',
@@ -50,7 +50,7 @@ export const metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Free Reaction Time Test & Reaction Speed Training',
-    description: 'Train click speed, saccadic reflex calibration, and visual processing speeds with 12 free interactive reaction speed drills.',
+    description: 'Train click speed, saccadic reflex calibration, and visual processing speeds with 8 free interactive reaction speed drills.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
 };
@@ -72,21 +72,17 @@ const collectionPageSchema = {
   "@type": "CollectionPage",
   "name": "Free Reaction Time Test & Reaction Speed Training Drills",
   "url": "https://skilldrills.online/drills/reaction-speed",
-  "description": "A curated collection of 12 free interactive reaction time tests and reflex training games online. Practice eye coordination, smooth pursuit tracking, corner checking, and click speed responses.",
+  "description": "A curated collection of 8 free interactive reaction time tests and reflex training games online. Practice eye coordination, smooth pursuit tracking, corner checking, and click speed responses.",
   "author": { "@type": "Organization", "name": "SkillDrills", "url": "https://skilldrills.online" },
   "hasPart": [
     { "@type": "WebApplication", "name": "Reaction Time Test", "url": "https://skilldrills.online/drills/reaction-speed/reaction-time-test" },
     { "@type": "WebApplication", "name": "Reaction Simulator", "url": "https://skilldrills.online/drills/reaction-speed/reaction-simulator" },
     { "@type": "WebApplication", "name": "Reflex Training Drill", "url": "https://skilldrills.online/drills/reaction-speed/reflex-training-drill" },
     { "@type": "WebApplication", "name": "Saccadic Gallery (Eye Exercises)", "url": "https://skilldrills.online/drills/reaction-speed/saccadic-gallery" },
-    { "@type": "WebApplication", "name": "Saccadic Snap (Eye Focus exercises)", "url": "https://skilldrills.online/drills/reaction-speed/saccadic-snap" },
     { "@type": "WebApplication", "name": "Visual Tracking Speed Test", "url": "https://skilldrills.online/drills/reaction-speed/visual-tracking-speed-test" },
     { "@type": "WebApplication", "name": "Aim Tracking Trainer (FPS Tracking)", "url": "https://skilldrills.online/drills/reaction-speed/fps-tracking-trainer" },
-    { "@type": "WebApplication", "name": "Reactive Strafe Pursuit", "url": "https://skilldrills.online/drills/reaction-speed/reactive-strafe-pursuit" },
     { "@type": "WebApplication", "name": "Cover Peeking Reflex Drill (Barrier sequence)", "url": "https://skilldrills.online/drills/reaction-speed/barrier-sequence-pursuit" },
-    { "@type": "WebApplication", "name": "Corner Checking Trainer (Market doors)", "url": "https://skilldrills.online/drills/reaction-speed/market-doors-pursuit" },
-    { "@type": "WebApplication", "name": "Slide Dash Acceleration (Visual tracking)", "url": "https://skilldrills.online/drills/reaction-speed/slide-dash-acceleration" },
-    { "@type": "WebApplication", "name": "Stop and Go Dash (Smooth pursuit)", "url": "https://skilldrills.online/drills/reaction-speed/stop-and-go-dash" }
+    { "@type": "WebApplication", "name": "Corner Checking Trainer (Market doors)", "url": "https://skilldrills.online/drills/reaction-speed/market-doors-pursuit" }
   ]
 };
 

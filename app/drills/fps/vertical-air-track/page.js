@@ -1,8 +1,8 @@
 import VerticalAirTrackClient from './VerticalAirTrackClient';
 
 export const metadata = {
-  title: "Vertical Aim Trainer - Aerial Y-Axis Tracking | SkillDrills",
-  description: "Improve your Y-axis mouse control with our Vertical Aim Trainer. Practice aerial target tracking and popcorn tracking for Apex and Overwatch.",
+  title: "Vertical Aim Trainer — Y-Axis Tracking | SkillDrills",
+  description: "Improve your Y-axis mouse control with our free Vertical Aim Trainer. Practice aerial tracking and arc prediction for Apex Legends & Overwatch.",
   keywords: [
     "vertical aim training",
     "popcorn tracking aim practice",
@@ -19,7 +19,11 @@ export const metadata = {
     "jump shot training fps",
     "popcorn tracking trainer",
     "elevator peek aim",
-    "vertical aim practice"
+    "vertical aim practice",
+    "overwatch air tracking",
+    "apex air tracking trainer",
+    "halo infinite vertical aim",
+    "parabolic arc tracking"
   ],
   alternates: {
     canonical: "https://skilldrills.online/drills/fps/vertical-air-track",
@@ -29,26 +33,17 @@ export const metadata = {
     follow: true,
   },
   openGraph: {
-    title: "Vertical Aim Trainer - Aerial Y-Axis Tracking | SkillDrills",
-    description: "Improve your Y-axis mouse control with our Vertical Aim Trainer. Practice aerial target tracking and popcorn tracking for Apex and Overwatch.",
+    title: "Vertical Aim Trainer — Y-Axis Tracking | SkillDrills",
+    description: "Improve your Y-axis mouse control with our free Vertical Aim Trainer. Practice aerial tracking and arc prediction for Apex Legends & Overwatch.",
     url: "https://skilldrills.online/drills/fps/vertical-air-track",
     siteName: 'SkillDrills',
     locale: 'en_US',
     type: 'website',
-    images: [
-      {
-        url: 'https://skilldrills.online/icons/icon-512x512.png',
-        width: 512,
-        height: 512,
-        alt: "Vertical Aim Trainer - Aerial Y-Axis Tracking",
-      },
-    ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Vertical Aim Trainer - Aerial Y-Axis Tracking | SkillDrills",
-    description: "Improve your Y-axis mouse control with our Vertical Aim Trainer. Practice aerial target tracking and popcorn tracking for Apex and Overwatch.",
-    images: ['https://skilldrills.online/icons/icon-512x512.png'],
+    title: "Vertical Aim Trainer — Y-Axis Tracking | SkillDrills",
+    description: "Improve your Y-axis mouse control with our free Vertical Aim Trainer. Practice aerial tracking and arc prediction for Apex Legends & Overwatch.",
   },
 };
 
@@ -70,7 +65,7 @@ export default function VerticalAirTrackPage() {
     "applicationCategory": "GameApplication",
     "operatingSystem": "Web Browser",
     "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-    "description": "A free browser FPS drill training vertical aim, aerial target tracking, Y-axis mouse control, and jump shot prediction for Apex Legends, Overwatch 2, and Titanfall 2.",
+    "description": "A free browser FPS drill training vertical aim, aerial target tracking, Y-axis mouse control, and jump shot prediction for Apex Legends, Overwatch 2, and Halo Infinite.",
     "genre": "FPS Training / Vertical & Aerial Tracking",
     "url": "https://skilldrills.online/drills/fps/vertical-air-track",
     "publisher": {
@@ -78,6 +73,20 @@ export default function VerticalAirTrackPage() {
       "name": "SkillDrills",
       "url": "https://skilldrills.online"
     }
+  };
+
+  const videoGameSchema = {
+    "@context": "https://schema.org",
+    "@type": "VideoGame",
+    "name": "Vertical Air Track",
+    "url": "https://skilldrills.online/drills/fps/vertical-air-track",
+    "description": "A free browser FPS drill training vertical aim, aerial target tracking, Y-axis mouse control, and jump shot prediction for Apex Legends, Overwatch 2, and Halo Infinite.",
+    "gamePlatform": "Web Browser",
+    "genre": ["FPS Training", "Aim Trainer"],
+    "playMode": "SinglePlayer",
+    "applicationCategory": "Game",
+    "operatingSystem": "Web Browser",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
   };
 
   const faqSchema = {
@@ -89,15 +98,15 @@ export default function VerticalAirTrackPage() {
         "name": "What is vertical aim training in FPS games?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Vertical aim training focuses on the Y-axis (up and down) movement of your mouse, which is systematically under-trained compared to horizontal tracking. Aerial targets — enemies who are jumping, climbing, or moving through vertical space — require vertical mouse tracking to follow. Most aim trainers use primarily horizontal movement, leaving vertical tracking as a significant skill gap for most players."
+          "text": "Vertical aim training focuses on the Y-axis (up and down) movement of your mouse, which is systematically under-trained compared to horizontal tracking. Airborne targets require vertical mouse tracking to follow cleanly in games like Apex Legends and Overwatch 2."
         }
       },
       {
         "@type": "Question",
-        "name": "What is \"popcorn tracking\" and does this drill train it?",
+        "name": "What is popcorn tracking and does this drill train it?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Popcorn tracking is the colloquial term for tracking targets that bounce or hop vertically, creating irregular up-down movement patterns — similar to popcorn bouncing in a bag. It is a critical skill for Apex Legends where characters like Pathfinder and Octane use vertical movement to evade shots. This drill trains the specific vertical mouse control needed to track bouncing aerial movement."
+          "text": "Popcorn tracking is tracking targets that bounce or hop vertically, creating irregular parabolic movement patterns — similar to popcorn kernels popping. This drill trains the specific vertical mouse control needed to track bouncing aerial movement."
         }
       },
       {
@@ -105,23 +114,103 @@ export default function VerticalAirTrackPage() {
         "name": "How does vertical aim training help in Apex Legends?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Apex Legends has more vertical movement than almost any other battle royale — grappling hooks, jump pads, elevated terrain, and air gliding all create aerial targets. Shooting players in the air requires Y-axis tracking that horizontal practice never develops. Training vertical aim specifically closes this gap, enabling you to punish opponents in the air rather than losing them when they go vertical."
+          "text": "Apex Legends features high vertical movement — grappling hooks, jump pads, Horizon lifts, and air gliding all create aerial targets. Training vertical aim specifically enables you to track and punish opponents in the air rather than losing crosshair alignment."
         }
       },
       {
         "@type": "Question",
-        "name": "What is an elevator peek and how does this drill prepare you for it?",
+        "name": "What is an elevator peek in FPS shooters?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "An elevator peek is when an opponent uses a building's height advantage to appear above your crosshair level unexpectedly, requiring you to flick or track vertically upward immediately. This drill trains the upward flick and hold motion, building the mouse control needed to instantly adjust vertical crosshair position when enemies appear from elevated positions."
+          "text": "An elevator peek is when an opponent uses a building's height advantage or zipline to appear above your crosshair level unexpectedly. This drill trains the upward flick and hold motion needed to instantly adjust vertical crosshair position."
         }
       },
       {
         "@type": "Question",
-        "name": "Is vertical tracking harder than horizontal tracking?",
+        "name": "Why is vertical tracking harder than horizontal tracking?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "For most players, yes. Horizontal mouse movement is practiced constantly in daily computer use (browsing, working). Vertical mouse movement for precise aim is an unnatural motion that receives far less daily training. The asymmetry in practice explains why most FPS players track horizontal movement more consistently than vertical — and why dedicated vertical training provides outsized improvement."
+          "text": "Horizontal mouse movement is practiced constantly in daily computer use. Vertical mouse movement for precise aim is an unnatural motion that receives far less daily muscle memory training, making dedicated vertical practice essential."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do Overwatch 2 players train aerial tracking?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Overwatch players practice tracking high-mobility heroes like Pharah, Echo, Mercy, or Winston during leaps. Using vertical aim trainers helps smooth out Y-axis tracking adjustments."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does vertical aim training help in Halo Infinite?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, Halo Infinite features grapples, repulsors, and jump pads that launch players high into the air. Vertical tracking practice helps you land consistent shots on airborne targets."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does this drill improve vertical mouse control?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, this vertical air track trainer specifically isolates and trains Y-axis micro-adjustments, arc prediction, and vertical mouse speed control."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do professional players track parabolic arcs?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Pros anticipate target acceleration at the start of a jump and slow down their tracking near the apex of the arc where vertical velocity drops to zero, securing high-damage tracking ticks."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is Y-axis mouse sensitivity calibration?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Y-axis sensitivity calibration ensures your vertical mouse movements feel natural and proportional to horizontal movements. Some players run a 1:1 ratio, while others adjust Y-sensitivity to compensate for wrist biomechanics."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does vertical tracking help in Titanfall 2?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, Titanfall 2 features extreme verticality, wall-running, and double jumping, which require excellent vertical tracking skills to counter."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How often should I train vertical aim?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "We recommend training vertical aim for 10-15 minutes daily as part of your FPS warm-up routine to build consistent muscle memory on the Y-axis."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is this vertical aim trainer free?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, this Vertical Air Track Aim Trainer is 100% free, runs in any desktop browser using raw hardware pointer input, and contains no ads."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What skills does this drill improve?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "This drill trains vertical tracking, air tracking, parabolic arc prediction, Y-axis mouse control, visual processing speed, and tracking consistency."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can vertical aim training improve overall tracking consistency?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, isolating vertical aim training smooths out jittery vertical movements, making your overall mouse tracking more consistent across both axes."
         }
       }
     ]
@@ -165,6 +254,12 @@ export default function VerticalAirTrackPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }}
       />
 
+      {/* VideoGame Schema */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }}
+      />
+
       {/* FAQPage Schema */}
       <script
         type="application/ld+json"
@@ -181,4 +276,3 @@ export default function VerticalAirTrackPage() {
     </>
   );
 }
-

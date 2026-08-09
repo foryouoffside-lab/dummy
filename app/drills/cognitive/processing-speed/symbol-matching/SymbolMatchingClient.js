@@ -1,1102 +1,786 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
-import { 
-  Target, Zap, Timer, Trophy, 
-  Volume2, VolumeX, Maximize2, Minimize2, 
-  BarChart3, Info, Compass, RefreshCw, 
-  Crosshair, Users, Share2, 
-  GraduationCap, Lightbulb, TrendingUp, ArrowRight,
-  Brain, Keyboard, CheckCircle, XCircle, LogOut,
-  ChevronRight, Play, Calculator, Code2, Eye, Sparkles
+import {
+  Target, Volume2, VolumeX,
+  Play, RefreshCw, Share2, ArrowLeft, Heart, Users, TrendingUp, Repeat, Zap, Trophy
 } from 'lucide-react';
-import useGameEngine from '../../../../../lib/useGameEngine';
-import PlayAgainButton from "../../../../../components/PlayAgainButton";
 
-// ============================================================
-// ZERO-LATENCY AUDIO SYNTHESIZER
-// ============================================================
-class AudioSynthesizer {
-  constructor() {
-    this.ctx = null;
-    this.enabled = true;
-  }
-  
-  init() {
-    if (!this.ctx) {
-      this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-    }
-  }
+import generateShareCard, { shareScoreCard } from '../../../../../components/ShareScoreCard';
+import { drillAudio } from '../../../../../lib/drillAudio';
+import { getPlayerName } from '../../../../../lib/leaderboard';
+import { getFpsScoreGrade } from '../../../../../lib/scoringEngine';
+import { getDifficultyProgress, getStartLevel } from '../../../../../lib/drillDifficulty';
+import useDrillFlash from '../../../../../lib/useDrillFlash';
+import useUnexpectedExitGuard from '../../../../../lib/useUnexpectedExitGuard';
+import DrillFooter from '../../../../../components/drill/DrillFooter';
+import DrillCountdown from '../../../../../components/drill/DrillCountdown';
+import DrillAccordion from '../../../../../components/drill/DrillAccordion';
+import DrillFlashOverlay from '../../../../../components/drill/DrillFlashOverlay';
+import FpsStartCard from '../../../../../components/drill/FpsStartCard';
 
-  playPop() {
-    if (!this.enabled || !this.ctx) return;
-    try {
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-      osc.type = 'sine'; 
-      osc.frequency.setValueAtTime(880, this.ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(440, this.ctx.currentTime + 0.15);
-      gain.gain.setValueAtTime(0.4, this.ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.15);
-      osc.connect(gain);
-      gain.connect(this.ctx.destination);
-      osc.start();
-      osc.stop(this.ctx.currentTime + 0.15);
-    } catch(e) {}
-  }
+const DRILL_DURATION = 45;
+const MAX_LIVES = 5;
+const POINTS_PER_HIT = 100;
+const POINTS_PER_LEVEL = 250;
+const ELITE_SCORE = 7500; // Target score for S+ rating (rebalanced after combo removal)
+const STORAGE_KEY = 'skilldrills_symbol_matching_v7';
 
-  playBuzz() {
-    if (!this.enabled || !this.ctx) return;
-    try {
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-      osc.type = 'sawtooth'; 
-      osc.frequency.setValueAtTime(150, this.ctx.currentTime);
-      gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.2);
-      osc.connect(gain);
-      gain.connect(this.ctx.destination);
-      osc.start();
-      osc.stop(this.ctx.currentTime + 0.2);
-    } catch(e) {}
-  }
-  
-  setEnabled(status) {
-    this.enabled = status;
-  }
-}
-
-const audioSynth = typeof window !== 'undefined' ? new AudioSynthesizer() : null;
-
-// ============================================================
-// LOCAL STORAGE
-// ============================================================
-const STORAGE_KEY = 'skilldrills_symbol_matching_v4';
+const ALL_SYMBOLS = ['Δ', 'Φ', 'Ω', 'Σ', 'Ξ', 'Π'];
 
 const getSavedData = () => {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { bestScore: 0 };
-    const data = JSON.parse(raw);
-    return { bestScore: Math.max(0, parseInt(data.bestScore) || 0) };
+    if (!raw) return { bestScore: 0, bestLevel: 1, totalSessions: 0 };
+    return { bestScore: 0, bestLevel: 1, totalSessions: 0, ...JSON.parse(raw) };
   } catch (e) {
-    return { bestScore: 0 };
+    return { bestScore: 0, bestLevel: 1, totalSessions: 0 };
   }
 };
 
 const saveData = (data) => {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ bestScore: data.bestScore }));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   } catch (e) {}
 };
 
-// ============================================================
-// MAIN COMPONENT
-// ============================================================
+
+
+const getLevelConfig = (level) => {
+  const p = getDifficultyProgress(level); // 0 -> 1 across L1..L15
+  return {
+    ttl: Math.max(600, Math.round(2200 - p * 1600)) // Trial duration 2200ms -> 600ms
+  };
+};
+
+const RULES_ITEMS = [
+  { title: "Symbol Digit Modality", text: "A key mapping bar at the top assigns 6 unique Greek symbols to digits 1 through 6." },
+  { title: "Target Symbol Prompt", text: "A target symbol appears in the central display. Tap the digit button that matches its assigned number." },
+  { title: "Visual Search & Translation", text: "Rapidly translate visual symbol patterns into numeric motor responses under strict time pressure." },
+  { title: "Precision Matters", text: "Tapping the wrong digit or letting a trial time out triggers a red alert — stay sharp to keep your accuracy high." }
+];
+
+const ABOUT_TEXT = `Symbol Matching is modeled after the clinical Symbol Digit Modality Test (SDMT), a gold-standard neuropsychological evaluation for measuring information processing speed, visual scanning efficiency, and working memory translation.
+
+In cognitive testing, SDMT performance correlates strongly with neuro-muscular throughput, executive function, and attentional endurance. By requiring subjects to cross-reference unfamiliar visual symbols against a key matrix, it measures the speed of central information processing.
+
+Regular practice on Symbol Matching enhances visual-spatial scanning, working memory lookup speed, and rapid cognitive translation.`;
+
+const FAQ_ITEMS = [
+  { q: "What is the Digit Symbol Substitution Test (DSST)?", a: "The Digit Symbol Substitution Test (DSST) is a classic neuropsychological test from the Wechsler Adult Intelligence Scale (WAIS). A legend at the top maps digits (1-9) to unique symbols. You must rapidly scan rows of digits below and write or select the corresponding symbol for each. It measures processing speed, visual scanning efficiency, short-term associative memory, and executive attention." },
+  { q: "What does the symbol matching test measure?", a: "Symbol matching measures: (1) Processing speed — how quickly your brain can look up and apply the digit-to-symbol mapping, (2) Visual scanning — efficient eye movement across the legend and test items, (3) Associative learning — binding digit-symbol pairs in short-term memory, (4) Executive attention — sustaining the task over repeated monotonous items, and (5) Motor speed — the time to indicate your response." },
+  { q: "What is the difference between DSST and SDMT?", a: "In the DSST (Wechsler), you look at a digit and must write the corresponding symbol. In the SDMT (Symbol Digit Modalities Test by Smith, 1973), you look at a symbol and must write or say the corresponding digit. The SDMT is often preferred in clinical settings because oral administration (saying numbers aloud) removes motor speed as a confounding variable, isolating pure cognitive processing speed." },
+  { q: "Is this symbol matching test used for dementia screening?", a: "Yes. The DSST and SDMT are among the most sensitive cognitive screening tools for neurological conditions including multiple sclerosis, Parkinson's disease, traumatic brain injury, and early Alzheimer's disease. Processing speed measured by symbol substitution tests declines measurably years before other cognitive deficits appear, making it a valuable early marker." },
+  { q: "How can I improve my cognitive processing speed?", a: "Evidence-based approaches include: (1) Regular computerized cognitive training (speed of processing games like DSST/SDMT), (2) Aerobic exercise (most consistently shown to improve processing speed across all ages), (3) Optimal sleep quality (sleep is critical for synaptic consolidation and myelination), (4) Cardiovascular health management (reduced vascular risk improves white matter integrity), and (5) Reducing chronic stress and inflammation." },
+  { q: "What is processing speed and why does it matter?", a: "Cognitive processing speed is the rate at which your brain can take in, comprehend, and begin to respond to information. It is one of the most important global indicators of overall brain health and is highly correlated with general intelligence. Faster processing means you can read faster, make decisions more quickly, follow conversations more easily, and react to environmental changes with less latency." },
+  { q: "How does the DSST predict future cognitive decline?", a: "Longitudinal studies show that DSST performance in midlife (ages 40-60) is a strong predictor of cognitive status in older age. Individuals with faster symbol substitution scores at 45-55 years show significantly lower rates of dementia and cognitive impairment at 75-85 years. This makes DSST-style training a potentially high-value preventive cognitive health activity." },
+  { q: "What strategies help improve symbol matching speed?", a: "Key strategies: (1) Memorize the legend early — don't look up every symbol, build automatic digit-symbol associations from the start, (2) Use chunking — match 2-3 items before re-scanning the legend, (3) Optimize eye movement — minimize the distance your eye travels between legend and test items with consistent scanning patterns, (4) Practice regularly — DSST performance improves significantly with repeated practice sessions." },
+  { q: "What is the average DSST score for adults?", a: "In the WAIS-IV standardization, the average DSST score for adults aged 20-34 is approximately 70-75 correct symbols in 120 seconds. Scores decline with age: 50-64 year-olds average 55-60, and 65-79 year-olds average 45-52. Top performers in cognitive training studies can achieve 85-100+ with extensive practice." },
+  { q: "Is this symbol matching test free to play online?", a: "Yes. The Symbol Matching drill on SkillDrills is completely free. No registration, downloads, or subscriptions required. It runs directly in your browser on desktop and mobile, measuring your processing speed and providing performance feedback after each session." }
+];
+
+const RELATED_DRILLS = [
+  { id: "reaction-time", name: "Reaction Time", cat: "Processing Speed", desc: "Train choice reaction speed and visual reflex latency.", href: "/drills/cognitive/processing-speed/reaction-time" },
+  { id: "rsvp-reader", name: "RSVP Speed Reader", cat: "Processing Speed", desc: "Process rapid serial visual presentation text streams.", href: "/drills/cognitive/processing-speed/rsvp-reader" },
+  { id: "divided-attention", name: "Divided Attention", cat: "Attention", desc: "Track and react to multiple independent target streams simultaneously.", href: "/drills/cognitive/attention/divided-attention" },
+  { id: "distraction-fighter", name: "Distraction Fighter", cat: "Focus", desc: "Filter out high-interference Stroop visual distractors.", href: "/drills/cognitive/focus/distraction-fighter" },
+  { id: "concentration-grid", name: "Concentration Grid", cat: "Focus", desc: "Scan and tap sequential numbers on expanding grid matrices.", href: "/drills/cognitive/focus/concentration-grid" },
+  { id: "multi-tasking", name: "Multi-Tasking", cat: "Attention", desc: "Track dual independent target streams under speed pressure.", href: "/drills/cognitive/attention/multi-tasking" }
+];
+
 export default function SymbolMatchingClient() {
-  
-  // === UI State ===
-  const [showRotateWarning, setShowRotateWarning] = useState(false);
+  const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
-  const [loading, setLoading] = useState(true);
-  const [isClient, setIsClient] = useState(false);
-  const [playerNameInput, setPlayerNameInput] = useState('');
-  const [showNameInput, setShowNameInput] = useState(false);
-  const [localFeedback, setLocalFeedback] = useState({ id: 0, text: '', type: 'success', visible: false });
+  const [openAccordion, setOpenAccordion] = useState(null);
+  const [isMobile, setIsMobile] = useState(false);
+  const [isPortrait, setIsPortrait] = useState(false);
+  const [countdownValue, setCountdownValue] = useState(3);
 
-  // === Game State ===
-  const SYMBOLS = useRef(['Δ', 'Φ', 'Ω', 'Σ', 'Ξ', 'Π', 'Ψ', 'Γ', 'Θ']);
-  const [keyMap, setKeyMap] = useState([]);
-  const [currentTarget, setCurrentTarget] = useState(null);
-  const [flashBg, setFlashBg] = useState(null); 
-
-  const [score, setScore] = useState(0);
+  // Live HUD State
+  const [uiScore, setUiScore] = useState(0);
+  const [uiLives, setUiLives] = useState(MAX_LIVES);
+  const [uiTimeLeft, setUiTimeLeft] = useState(DRILL_DURATION);
   const [bestScore, setBestScore] = useState(0);
+  const [bestLevel, setBestLevel] = useState(1);
+  const [totalSessions, setTotalSessions] = useState(0);
   const [isNewBest, setIsNewBest] = useState(false);
-  
-  const [correctCount, setCorrectCount] = useState(0);
-  const [mistakes, setMistakes] = useState(0);
-  const [currentSpeedLvl, setCurrentSpeedLvl] = useState(1);
 
-  // === Custom Decoupled Timer ===
-  const [localTimeRemaining, setLocalTimeRemaining] = useState(60);
-  const [isTimeUp, setIsTimeUp] = useState(false);
+  // Active Symbol Key Mapping & Target
+  const [keyMap, setKeyMap] = useState([]); // [{ digit: 1, symbol: 'Δ' }, ...]
+  const [currentTarget, setCurrentTarget] = useState(null); // { digit: 1, symbol: 'Δ' }
 
-  // === Absolute Truth Refs ===
-  const mountedRef = useRef(false);
-  const gameContainerRef = useRef(null);
-  
-  const scoreRef = useRef(0);
-  const correctRef = useRef(0);
-  const mistakesRef = useRef(0);
-  const localTimeRef = useRef(60);
-
-  // Adaptive Speed Refs
-  const speedRef = useRef(2500);
-  const currentTargetRef = useRef(null);
-
-  const targetTimerRef = useRef(null);
-  const timerIntervalRef = useRef(null);
-  const feedbackTimerRef = useRef(null);
-  
-  const gameStateRef = useRef('start');
-
-  // Sync state for UI rendering
-  const syncToUI = useCallback(() => {
-    setScore(scoreRef.current);
-    setCorrectCount(correctRef.current);
-    setMistakes(mistakesRef.current);
-    setCurrentSpeedLvl(Math.floor(correctRef.current / 10) + 1);
-  }, []);
-
-  // === Game Engine ===
-  const engine = useGameEngine({
-    category: 'cognitive',
-    drillId: 'symbol-matching',
-    drillName: 'Symbol Matching',
-    totalGameTime: 9999, 
-    lives: 9999, 
-    infiniteLives: true, 
-    sharePath: 'drills/cognitive/processing-speed/symbol-matching',
+  // Analytics
+  const [analytics, setAnalytics] = useState({
+    accuracy: 100,
+    successfulHits: 0,
+    mistakes: 0,
+    timeouts: 0,
+    finalLevel: 1,
+    grade: null
   });
 
-  const engineRef = useRef(engine);
+  // DOM & Engine Refs
+  const containerRef = useRef(null);
+  const countdownTimeoutsRef = useRef([]);
+  const timerIntervalRef = useRef(null);
+  const trialTimerRef = useRef(null);
 
+  const engine = useRef({
+    score: 0,
+    level: 1,
+    lives: MAX_LIVES,
+    successfulHits: 0,
+    mistakes: 0,
+    timeouts: 0,
+    timeLeft: DRILL_DURATION,
+    keyMap: [],
+    currentTarget: null
+  });
+
+  const { flashes, triggerFlash } = useDrillFlash();
+
+  // Screen/Orientation tracking
   useEffect(() => {
-    engineRef.current = engine;
-    gameStateRef.current = engine.gameState;
-    if (engine.gameState === 'playing') {
-      setIsNewBest(false);
-    }
-  }, [engine.gameState]);
+    if (typeof window !== 'undefined') {
+      const checkDevice = () => {
+        setIsMobile(window.innerWidth < 768);
+        setIsPortrait(window.innerHeight > window.innerWidth);
+      };
+      checkDevice();
+      window.addEventListener('resize', checkDevice);
+      window.addEventListener('orientationchange', checkDevice);
 
-  // === Custom Precision Clock ===
+      const saved = getSavedData();
+      setBestScore(saved.bestScore || 0);
+      setBestLevel(saved.bestLevel || 1);
+      setTotalSessions(saved.totalSessions || 0);
+
+      const handleFs = () => setIsFullscreen(!!document.fullscreenElement);
+      document.addEventListener('fullscreenchange', handleFs);
+
+      return () => {
+        window.removeEventListener('resize', checkDevice);
+        window.removeEventListener('orientationchange', checkDevice);
+        document.removeEventListener('fullscreenchange', handleFs);
+      };
+    }
+  }, []);
+
+  // Sound sync
   useEffect(() => {
-    if (engine.gameState !== 'playing') {
-      if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
-      return;
-    }
-    
-    if (!isTimeUp && localTimeRef.current === 60 && localTimeRemaining === 60) {
-      // Init
-    } else if (!isTimeUp && localTimeRef.current <= 0) {
-      localTimeRef.current = 60;
-      setLocalTimeRemaining(60);
-    }
-
-    timerIntervalRef.current = setInterval(() => {
-      localTimeRef.current -= 1;
-      
-      if (localTimeRef.current <= 0) {
-        localTimeRef.current = 0;
-        setLocalTimeRemaining(0);
-        clearInterval(timerIntervalRef.current);
-        setIsTimeUp(true); 
-        
-        if (typeof engineRef.current?.endGame === 'function') {
-          engineRef.current.endGame();
-        }
-      } else {
-        setLocalTimeRemaining(localTimeRef.current);
-      }
-    }, 1000);
-    
-    return () => {
-      if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
-    };
-  }, [engine.gameState, isTimeUp, localTimeRemaining]);
-
-  // Audio Sync
-  useEffect(() => {
-    if (audioSynth) audioSynth.setEnabled(soundEnabled);
+    drillAudio.setEnabled(soundEnabled);
   }, [soundEnabled]);
 
-  // Load Data
+  // Clean timers on unmount
   useEffect(() => {
-    setIsClient(true);
-    mountedRef.current = true;
-    try {
-      const savedData = getSavedData();
-      if (savedData.bestScore) setBestScore(savedData.bestScore);
-      const name = localStorage.getItem('skilldrills_player_name');
-      if (name) setPlayerNameInput(name);
-    } catch (e) {}
-    setTimeout(() => { if (mountedRef.current) setLoading(false); }, 200);
-
     return () => {
-      mountedRef.current = false;
-      if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
+      countdownTimeoutsRef.current.forEach(clearTimeout);
       if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
-      if (targetTimerRef.current) clearTimeout(targetTimerRef.current);
+      if (trialTimerRef.current) clearTimeout(trialTimerRef.current);
     };
   }, []);
 
-  // Screen Guard & Fullscreen Sync
-  useEffect(() => {
-    const fsHandler = () => setIsFullscreen(!!document.fullscreenElement);
-    document.addEventListener('fullscreenchange', fsHandler);
-    
-    const checkSize = () => {
-      if (typeof window === 'undefined') return;
-      const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '') && window.innerWidth < 1024;
-      
-      // Force rotation warning if in portrait mode on mobile
-      if (isMobile && window.innerHeight > window.innerWidth) { 
-        setShowRotateWarning(true); 
-      } else {
-        setShowRotateWarning(false);
-      }
-    };
-    
-    checkSize();
-    window.addEventListener('resize', checkSize);
-    window.addEventListener('orientationchange', checkSize);
-    return () => {
-      document.removeEventListener('fullscreenchange', fsHandler);
-      window.removeEventListener('resize', checkSize);
-      window.removeEventListener('orientationchange', checkSize);
-    };
-  }, []);
+  const handleExitDrill = useCallback(async () => {
+    markIntentionalExit();
+    countdownTimeoutsRef.current.forEach(clearTimeout);
+    countdownTimeoutsRef.current = [];
+    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    if (trialTimerRef.current) clearTimeout(trialTimerRef.current);
 
-  // Game End Logic (Save Score)
-  useEffect(() => {
-    if (engine.gameState === 'ended' || isTimeUp) {
-      const finalScore = scoreRef.current;
-      if (finalScore > bestScore && finalScore > 0) {
-        setIsNewBest(true);
-        setBestScore(finalScore);
-        saveData({ bestScore: finalScore });
-      }
-      syncToUI();
-      if (targetTimerRef.current) clearTimeout(targetTimerRef.current);
+    if (document.fullscreenElement) {
+      await document.exitFullscreen().catch(() => {});
     }
-  }, [engine.gameState, isTimeUp, bestScore, syncToUI]);
-
-  // === UI Handlers ===
-  const savePlayerName = useCallback(() => {
-    const name = playerNameInput.trim() || 'Anonymous Player';
-    try { localStorage.setItem('skilldrills_player_name', name); } catch (e) {}
-    setShowNameInput(false);
-  }, [playerNameInput]);
-
-  const enterFullscreen = useCallback(async () => {
-    if (!gameContainerRef.current) return;
-    try {
-      const el = gameContainerRef.current;
-      const reqFS = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
-      if (reqFS) await reqFS.call(el);
-    } catch (err) {}
+    setGameState('start');
   }, []);
 
-  const exitFullscreen = useCallback(async () => {
-    try {
-      if (document.fullscreenElement) {
-        await document.exitFullscreen();
-      }
-    } catch (err) {}
-  }, []);
+  const { markIntentionalExit } = useUnexpectedExitGuard({
+    active: gameState === 'playing' || gameState === 'countdown',
+    onUnexpectedExit: handleExitDrill,
+  });
 
-  const toggleFullscreen = useCallback(async () => {
-    if (!document.fullscreenElement) {
-      await enterFullscreen();
+  const endGame = useCallback(() => {
+    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    if (trialTimerRef.current) clearTimeout(trialTimerRef.current);
+
+    setGameState('gameOver');
+
+    const e = engine.current;
+    const totalActs = e.successfulHits + e.mistakes + e.timeouts;
+    const acc = totalActs > 0 ? Math.round((e.successfulHits / totalActs) * 100) : 100;
+
+    const gradeObj = getFpsScoreGrade(e.score, ELITE_SCORE);
+
+    setAnalytics({
+      accuracy: acc,
+      successfulHits: e.successfulHits,
+      mistakes: e.mistakes,
+      timeouts: e.timeouts,
+      finalLevel: e.level,
+      grade: gradeObj
+    });
+
+    const isNew = e.score > bestScore;
+    if (isNew) {
+      setIsNewBest(true);
+      setBestScore(e.score);
     } else {
-      await exitFullscreen();
+      setIsNewBest(false);
     }
-  }, [enterFullscreen, exitFullscreen]);
 
-  const handleExitGame = useCallback(async () => {
-    await exitFullscreen();
-    window.location.reload();
-  }, [exitFullscreen]);
+    const newBestLevel = Math.max(bestLevel, e.level);
+    setBestLevel(newBestLevel);
 
-  const triggerFeedback = useCallback((text, type = 'success') => {
-    setLocalFeedback({ id: Date.now(), text, type, visible: true });
-    if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
-    feedbackTimerRef.current = setTimeout(() => {
-      if (mountedRef.current) setLocalFeedback(prev => ({ ...prev, visible: false }));
-    }, 600);
-  }, []);
+    setTotalSessions((prev) => {
+      const next = prev + 1;
+      saveData({
+        bestScore: Math.max(bestScore, e.score),
+        bestLevel: newBestLevel,
+        totalSessions: next
+      });
+      return next;
+    });
 
-  // === CORE MECHANICS ===
-  const applyPenalty = useCallback((reason) => {
-    if (audioSynth) audioSynth.playBuzz();
-    
-    // Penalties: No PTS Penalty, -2s Time, decrease difficulty (increase time allowed)
-    mistakesRef.current += 1;
-    localTimeRef.current -= 2; 
-    
-    if (localTimeRef.current <= 0) {
-      localTimeRef.current = 0;
-      setLocalTimeRemaining(0);
-      setIsTimeUp(true);
-      if (typeof engineRef.current?.endGame === 'function') {
-        engineRef.current.endGame();
-      }
-      return;
-    }
-    
-    setLocalTimeRemaining(localTimeRef.current);
-    
-    // Forgiveness: Slow the game down slightly by 50ms
-    speedRef.current = Math.min(2500, speedRef.current + 50);
+    drillAudio.playSessionEnd();
+  }, [bestScore, bestLevel]);
 
-    syncToUI();
-    triggerFeedback(reason === 'timeout' ? 'Too Slow! -2s' : 'Wrong! -2s', 'error');
-    
-    setFlashBg('red');
-    setTimeout(() => setFlashBg(null), 100);
-  }, [syncToUI, triggerFeedback]);
+  // Trial Spawner
+  const spawnTrial = useCallback(() => {
+    if (trialTimerRef.current) clearTimeout(trialTimerRef.current);
+    const e = engine.current;
+    const config = getLevelConfig(e.level);
 
-  const spawnNextTarget = useCallback(() => {
-    if (targetTimerRef.current) clearTimeout(targetTimerRef.current);
-    if (gameStateRef.current !== 'playing' || localTimeRef.current <= 0) return;
-
-    // Generate New Map
-    const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9].sort(() => Math.random() - 0.5); 
-    const newMap = SYMBOLS.current.map((symbol, i) => ({ symbol, number: numbers[i] })); 
-    setKeyMap(newMap);
-
-    // Pick random target
-    const target = newMap[Math.floor(Math.random() * newMap.length)];
-    currentTargetRef.current = target;
+    // Pick random item from key map
+    const target = e.keyMap[Math.floor(Math.random() * e.keyMap.length)];
+    e.currentTarget = target;
     setCurrentTarget(target);
 
-    // Auto-Timeout Loop
-    targetTimerRef.current = setTimeout(() => {
-      if (gameStateRef.current === 'playing' && mountedRef.current && localTimeRef.current > 0) {
-        applyPenalty('timeout');
-        if (localTimeRef.current > 0) {
-          spawnNextTarget();
-        }
-      }
-    }, speedRef.current);
-  }, [applyPenalty]);
+    trialTimerRef.current = setTimeout(() => {
+      // Timeout miss - NO life lost (timeouts do not cost lives)
+      e.timeouts += 1;
+      triggerFlash();
+      drillAudio.playPenalty();
+      spawnTrial();
+    }, config.ttl);
+  }, [triggerFlash]);
 
-  // === INTERACTION HANDLERS ===
-  const handleInput = useCallback((num) => {
-    if (gameStateRef.current !== 'playing' || localTimeRef.current <= 0) return;
-    
-    const target = currentTargetRef.current;
-    if (!target) return;
-    currentTargetRef.current = null; 
+  const handleDigitClick = useCallback((digit, ev) => {
+    if (ev) ev.stopPropagation();
+    if (trialTimerRef.current) clearTimeout(trialTimerRef.current);
 
-    if (num === target.number) {
-      // CORRECT HIT: +20 Score, +10s Time (Max 60), Increase difficulty
-      if (audioSynth) audioSynth.playPop();
-      
-      scoreRef.current += 20; 
-      correctRef.current += 1;
-      localTimeRef.current = Math.min(60, localTimeRef.current + 10);
-      setLocalTimeRemaining(localTimeRef.current);
-      
-      // Speed Ramp: Increase speed by 30ms (cap at 400ms)
-      speedRef.current = Math.max(400, speedRef.current - 30);
-      
-      syncToUI();
-      triggerFeedback('Perfect! +20 PTS | +10s', 'success');
-      
-      setFlashBg('green');
-      setTimeout(() => setFlashBg(null), 100);
+    const eng = engine.current;
 
-      spawnNextTarget();
+    if (eng.currentTarget && digit === eng.currentTarget.digit) {
+      eng.successfulHits += 1;
+
+      eng.score += POINTS_PER_HIT;
+
+      const rawLevel = Math.floor(eng.score / POINTS_PER_LEVEL) + 1;
+      eng.level = Math.max(eng.level, rawLevel);
+
+      setUiScore(eng.score);
+      drillAudio.playHit();
+      spawnTrial();
     } else {
-      // WRONG HIT
-      applyPenalty('wrong_match');
-      if (localTimeRef.current > 0) {
-        spawnNextTarget();
+      // Wrong click / mistake: lose 1 life!
+      eng.mistakes += 1;
+      eng.lives -= 1;
+      setUiLives(Math.max(0, eng.lives));
+      triggerFlash();
+      drillAudio.playPenalty();
+
+      if (eng.lives <= 0) {
+        endGame();
+      } else {
+        spawnTrial();
       }
     }
-  }, [applyPenalty, syncToUI, triggerFeedback, spawnNextTarget]);
+  }, [spawnTrial, triggerFlash, endGame]);
 
-  // Keyboard Event Listener
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (gameStateRef.current !== 'playing') return;
-      const n = parseInt(e.key);
-      if (n >= 1 && n <= 9) {
-        e.preventDefault(); 
-        handleInput(n);
+  // Enter Drill
+  const enterDrill = useCallback(async () => {
+    try {
+      if (containerRef.current && !document.fullscreenElement) {
+        await containerRef.current.requestFullscreen();
       }
+    } catch (e) {}
+
+    countdownTimeoutsRef.current.forEach(clearTimeout);
+    countdownTimeoutsRef.current = [];
+    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    if (trialTimerRef.current) clearTimeout(trialTimerRef.current);
+
+    drillAudio.init();
+
+    const saved = getSavedData();
+    const startLevel = getStartLevel(saved.bestLevel);
+
+    // Generate random symbol-to-digit key mapping (6 digits: 1 to 6)
+    const shuffledSymbols = [...ALL_SYMBOLS].sort(() => Math.random() - 0.5);
+    const newKeyMap = shuffledSymbols.slice(0, 6).map((sym, idx) => ({ digit: idx + 1, symbol: sym }));
+    setKeyMap(newKeyMap);
+
+    setUiScore(0);
+    setUiLives(MAX_LIVES);
+    setUiTimeLeft(DRILL_DURATION);
+
+    engine.current = {
+      score: 0,
+      level: startLevel,
+      lives: MAX_LIVES,
+      successfulHits: 0,
+      mistakes: 0,
+      timeouts: 0,
+      timeLeft: DRILL_DURATION,
+      keyMap: newKeyMap,
+      currentTarget: newKeyMap[0]
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleInput]);
 
-  // Start sequence
-  const handleStartGame = useCallback(async () => {
-    if (audioSynth) audioSynth.init(); 
-    
-    // Auto Fullscreen Trigger
-    await enterFullscreen();
-    
-    setIsTimeUp(false);
-    localTimeRef.current = 60;
-    setLocalTimeRemaining(60);
-    
-    scoreRef.current = 0;
-    correctRef.current = 0;
-    mistakesRef.current = 0;
-    speedRef.current = 2500; 
-    currentTargetRef.current = null;
-    
-    syncToUI();
-    setLocalFeedback({ id: 0, text: '', type: 'success', visible: false });
-    
-    engineRef.current.startGame();
+    setGameState('countdown');
+    setCountdownValue(3);
+    drillAudio.playCountdownTick();
 
-    setTimeout(() => spawnNextTarget(), 300);
-  }, [syncToUI, spawnNextTarget, enterFullscreen]);
+    const t1 = setTimeout(() => {
+      setCountdownValue(2);
+      drillAudio.playCountdownTick();
+    }, 700);
 
-  const shareDrillLink = useCallback(() => {
+    const t2 = setTimeout(() => {
+      setCountdownValue(1);
+      drillAudio.playCountdownTick();
+    }, 1400);
+
+    const t3 = setTimeout(() => {
+      setCountdownValue('GO');
+      drillAudio.playGo();
+    }, 2100);
+
+    const t4 = setTimeout(() => {
+      setGameState('playing');
+
+      let remaining = DRILL_DURATION;
+      timerIntervalRef.current = setInterval(() => {
+        remaining -= 1;
+        setUiTimeLeft(remaining);
+        if (remaining <= 0) {
+          endGame();
+        }
+      }, 1000);
+
+      spawnTrial();
+    }, 2450);
+
+    countdownTimeoutsRef.current = [t1, t2, t3, t4];
+  }, [endGame, spawnTrial]);
+
+  const shareResult = useCallback(async () => {
     const url = 'https://skilldrills.online/drills/cognitive/processing-speed/symbol-matching';
-    if (navigator.share) {
-      navigator.share({ title: 'Symbol Matching Speed Drill', text: 'Hardcore cognitive reaction drill! Can you keep up?', url }).catch(() => {});
-    } else {
-      navigator.clipboard.writeText(url).then(() => alert('Link copied!')).catch(() => prompt('Copy:', url));
+    try {
+      const canvas = generateShareCard({
+        score: uiScore,
+        bestScore,
+        accuracy: analytics.accuracy,
+        rating: { letter: analytics.grade?.grade || analytics.grade?.letter || 'C', label: analytics.grade?.label || 'Keep Going', emoji: '🎯' },
+        newBest: isNewBest,
+        drillName: 'Symbol Matching',
+        playerName: getPlayerName(),
+      });
+      await shareScoreCard(url, canvas);
+    } catch (e) {
+      const text = `🎯 I scored ${uiScore} PTS (Level ${analytics.finalLevel}) on Symbol Matching! SDMT processing accuracy: ${analytics.accuracy}%. Practice free cognitive focus drills at skilldrills.online! ⚡`;
+      if (typeof navigator !== 'undefined' && navigator.share) {
+        navigator.share({ title: 'Symbol Matching Score', text, url }).catch(() => {});
+      } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
+        navigator.clipboard.writeText(`${text} ${url}`);
+      }
     }
-  }, []);
+  }, [uiScore, bestScore, analytics, isNewBest]);
 
-  const shareScore = useCallback(() => {
-    const totalActions = correctCount + mistakes;
-    const finalAccuracy = totalActions > 0 ? Math.round((correctCount / totalActions) * 100) : 100;
-    
-    let finalRank = 'Bronze';
-    if (scoreRef.current >= 600 && finalAccuracy >= 90) finalRank = 'Grandmaster';
-    else if (scoreRef.current >= 450 && finalAccuracy >= 82) finalRank = 'Master';
-    else if (scoreRef.current >= 300 && finalAccuracy >= 75) finalRank = 'Diamond';
-    else if (scoreRef.current >= 200 && finalAccuracy >= 65) finalRank = 'Platinum';
-    else if (scoreRef.current >= 100 && finalAccuracy >= 55) finalRank = 'Gold';
-    else if (scoreRef.current >= 50) finalRank = 'Silver';
+  return (
+    <div className="min-h-screen bg-[#050508] text-white flex flex-col font-sans select-none">
+      {/* ── HEADER / BREADCRUMB ── */}
+      {!isFullscreen && (
+      <header className="border-b border-white/5 bg-[#080811]/80 backdrop-blur-md sticky top-0 z-50">
+        <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
+          <div className="flex items-center gap-2 text-xs text-slate-400">
+            <Link href="/" className="hover:text-white transition-colors">Home</Link>
+            <span>/</span>
+            <Link href="/drills/cognitive" className="hover:text-white transition-colors">Cognitive</Link>
+            <span>/</span>
+            <span className="text-cyan-400 font-medium">Symbol Matching</span>
+          </div>
 
-    const text = `🧠 I scored ${scoreRef.current} PTS with ${finalAccuracy}% accuracy on the Symbol Matching Speed Drill! Reached Speed Level ${currentSpeedLvl}. Rank: ${finalRank}. Try it here: https://skilldrills.online/drills/cognitive/processing-speed/symbol-matching`;
-    
-    if (typeof navigator !== 'undefined' && navigator.share) {
-      navigator.share({
-        title: 'My SkillDrills Cognitive Score',
-        text: text,
-        url: 'https://skilldrills.online/drills/cognitive/processing-speed/symbol-matching'
-      }).catch(() => {});
-    } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
-      navigator.clipboard.writeText(text);
-      alert('Score card copied to clipboard!');
-    }
-  }, [currentSpeedLvl, correctCount, mistakes]);
+          <button
+            onClick={() => {
+              const next = !soundEnabled;
+              setSoundEnabled(next);
+              drillAudio.setEnabled(next);
+            }}
+            className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+            title={soundEnabled ? "Mute Sound" : "Unmute Sound"}
+          >
+            {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4 text-red-400" />}
+          </button>
+        </div>
+      </header>
+      )}
 
-  const getDiskColor = useCallback((ds) => { 
-    const c = ['bg-red-500','bg-orange-500','bg-yellow-500','bg-green-500','bg-blue-500','bg-indigo-500','bg-purple-500','bg-pink-500']; 
-    return c[(ds - 1) % c.length]; 
-  }, []);
-  
-  const getDiskWidth = useCallback((ds, md) => { 
-    const mw = 140; const miw = 40; 
-    return `${miw + ((ds - 1) / (md - 1)) * (mw - miw)}px`; 
-  }, []);
-
-  if (loading || !isClient) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-black">
+      {/* ── MAIN CONTENT AREA ── */}
+      <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
+        {/* Title */}
+        {!isFullscreen && (
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-violet-600 border-t-transparent rounded-full animate-spin mx-auto mb-4 shadow-[0_0_20px_rgba(139,92,246,0.5)]"></div>
-          <p className="text-gray-400 font-medium tracking-widest uppercase text-sm animate-pulse">Loading Decoder...</p>
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight bg-gradient-to-r from-white via-slate-200 to-cyan-400 bg-clip-text text-transparent">
+            SYMBOL MATCHING
+          </h1>
+          <p className="text-xs text-slate-400 mt-1">
+            Rapid Visual Matching & Symbol Discrimination Under Pressure
+          </p>
         </div>
-      </div>
-    );
-  }
-
-  const totalActions = correctCount + mistakes;
-  const accuracy = totalActions > 0 ? Math.round((correctCount / totalActions) * 100) : 100;
-
-  // Calculate grade based on score and accuracy
-  let gradeLetter = 'F';
-  if (accuracy >= 85 && score >= 500) gradeLetter = 'S';
-  else if (accuracy >= 75 && score >= 350) gradeLetter = 'A';
-  else if (accuracy >= 65 && score >= 200) gradeLetter = 'B';
-  else if (accuracy >= 55 && score >= 100) gradeLetter = 'C';
-  else if (accuracy >= 45 && score >= 50) gradeLetter = 'D';
-
-  let rankName = 'Bronze';
-  let rankColor = 'text-slate-500';
-  if (score >= 600 && accuracy >= 90) {
-    rankName = 'Grandmaster';
-    rankColor = 'text-fuchsia-400 font-extrabold';
-  } else if (score >= 450 && accuracy >= 82) {
-    rankName = 'Master';
-    rankColor = 'text-red-400 font-extrabold';
-  } else if (score >= 300 && accuracy >= 75) {
-    rankName = 'Diamond';
-    rankColor = 'text-cyan-400 font-extrabold';
-  } else if (score >= 200 && accuracy >= 65) {
-    rankName = 'Platinum';
-    rankColor = 'text-indigo-400 font-extrabold';
-  } else if (score >= 100 && accuracy >= 55) {
-    rankName = 'Gold';
-    rankColor = 'text-yellow-400 font-extrabold';
-  } else if (score >= 50) {
-    rankName = 'Silver';
-    rankColor = 'text-gray-300 font-extrabold';
-  }
-
-  let diagnostics = "Outstanding visual-motor translation speed! Your brain maps the shifting symbol-number associations in your working memory with precision.";
-  if (mistakes > 5) {
-    diagnostics = "High rate of decoding errors. Slow down slightly to verify the number-to-symbol key before pressing the key pad.";
-  } else if (accuracy < 60) {
-    diagnostics = "Slips in working memory mapping detected. Spend a split second scanning the key map before executing inputs.";
-  } else if (score < 150) {
-    diagnostics = "To boost your score, use keyboard number keys (1-9) to execute matches immediately without dragging or mouse clicks.";
-  }
-  const strokeDasharray = 100;
-  const strokeDashoffset = strokeDasharray - accuracy;
-
-  return (
-    <div className="min-h-screen select-none bg-black text-white selection:bg-transparent" style={{ WebkitTapHighlightColor: 'transparent' }}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        
-        {/* Breadcrumb */}
-        <nav className="mb-4">
-          <ol className="flex flex-wrap items-center gap-2 text-sm">
-            <li><Link href="/" className="text-gray-500 hover:text-gray-300 transition-colors">Home</Link></li>
-            <li className="text-gray-600"><ChevronRight className="w-4 h-4" /></li>
-            <li><Link href="/drills/cognitive" className="text-gray-500 hover:text-gray-300 transition-colors">Cognitive</Link></li>
-            <li className="text-gray-600"><ChevronRight className="w-4 h-4" /></li>
-            <li className="text-gray-500">Processing Speed</li>
-            <li className="text-gray-600"><ChevronRight className="w-4 h-4" /></li>
-            <li className="text-violet-400 font-medium">Symbol Matching</li>
-          </ol>
-        </nav>
-        
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl shadow-[0_0_20px_rgba(139,92,246,0.3)]">
-              <Compass className="w-7 h-7 text-white" />
-            </div>
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Symbol Matching</h1>
-              <p className="text-sm text-gray-400 mt-1 font-medium">Endless Time-Attack • Precision Scoring</p>
-            </div>
-          </div>
-          
-          <div className="flex gap-2 flex-wrap">
-            
-            {engine.gameState === 'playing' && !isTimeUp && (
-              <button onClick={() => { if(engineRef.current) engineRef.current.endGame(); handleStartGame(); }} className="p-2.5 rounded-lg border border-gray-700 bg-gray-900 text-gray-400 hover:text-white hover:border-gray-500 transition-all active:scale-95" title="Reset">
-                <RefreshCw className="w-5 h-5" />
-              </button>
-            )}
-            <button onClick={() => setSoundEnabled(v => !v)} className="p-2.5 rounded-lg border border-gray-700 bg-gray-900 text-gray-400 hover:text-white hover:border-gray-500 transition-all active:scale-95">
-              {soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
-            </button>
-            <button onClick={toggleFullscreen} className="p-2.5 rounded-lg border border-gray-700 bg-gray-900 text-gray-400 hover:text-white hover:border-gray-500 transition-all active:scale-95">
-              {isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
-            </button>
-          </div>
-        </div>
-
-        {showNameInput && (
-          <div className="mb-6 p-4 rounded-xl border border-gray-700 bg-gray-900 shadow-xl animate-in fade-in slide-in-from-top-2">
-            <div className="flex items-center gap-3">
-              <input type="text" value={playerNameInput} onChange={e => setPlayerNameInput(e.target.value)} placeholder="Enter your display name" maxLength={20}
-                className="flex-1 px-4 py-2.5 rounded-lg border border-gray-600 bg-black text-white placeholder-gray-500 text-sm focus:outline-none focus:border-violet-500 transition-colors"
-                onKeyDown={e => e.key === 'Enter' && savePlayerName()} />
-              <button onClick={savePlayerName} className="px-5 py-2.5 bg-violet-600 text-white rounded-lg text-sm font-semibold hover:bg-violet-500 transition-colors shadow-lg shadow-violet-600/20">Save</button>
-            </div>
-          </div>
         )}
 
-        {/* Inline Stats Bar (Responsive) */}
-        <div className="flex flex-wrap justify-center gap-2 sm:gap-3 mb-2 w-full">
-          <StatCard icon={<Target className="text-violet-400" />} value={score} label="Score" />
-          <StatCard icon={<Timer className={localTimeRemaining <= 10 ? 'text-red-400 animate-pulse' : 'text-green-400'} />} value={localTimeRemaining} label="Time" unit="s" />
-          <StatCard icon={<Zap className="text-indigo-400" />} value={`Lv.${currentSpeedLvl}`} label="Speed Lvl" />
-          <StatCard icon={<CheckCircle className="text-emerald-400" />} value={correctCount} label="Matches" />
-          <StatCard icon={<XCircle className="text-red-400" />} value={mistakes} label="Penalties" />
-          <StatCard icon={<Trophy className="text-yellow-400" />} value={bestScore} label="Best" />
-        </div>
-
-        {/* Dynamic Feedback Popup */}
-        <div className="h-8 mb-2 flex justify-center items-center pointer-events-none">
-          {localFeedback.visible && (
-            <div key={localFeedback.id} className={`animate-in zoom-in-75 fade-in duration-150 px-5 py-1.5 rounded-full text-white font-black tracking-widest text-sm shadow-xl ${localFeedback.type === 'success' ? 'bg-green-500/20 text-green-400 border border-green-500/50 shadow-green-500/20' : 'bg-red-500/20 text-red-400 border border-red-500/50 shadow-red-500/20'}`}>
-              {localFeedback.text}
-            </div>
-          )}
-        </div>
-
-        {/* Game Container (Optimized for Mobile Landscape & Fullscreen) */}
-        <div ref={gameContainerRef} 
-          onContextMenu={(e) => { if(engine.gameState === 'playing' && !isTimeUp) e.preventDefault(); }}
-          className={`relative overflow-hidden flex flex-col transition-colors duration-100 bg-[#0a0a0a] mx-auto ${
-            isFullscreen 
-              ? 'fixed inset-0 z-50' 
-              : 'rounded-2xl border border-gray-700 shadow-2xl w-full h-[65vh] md:h-[75vh] min-h-[400px] max-h-[700px]'
-          }`}
-          style={{ 
-            touchAction: (engine.gameState === 'playing' && !isTimeUp) ? 'none' : 'auto', 
-            overscrollBehavior: (engine.gameState === 'playing' && !isTimeUp) ? 'none' : 'auto',
-            backgroundColor: flashBg === 'red' ? '#450a0a' : flashBg === 'green' ? '#064e3b' : '#0a0a0a',
-            ...(isFullscreen && { width: '100vw', height: '100vh', maxWidth: 'none', margin: 0, borderRadius: 0, border: 'none' })
-          }}>
-          
-          {/* Subtle background gradient */}
-          <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-transparent to-violet-900/10" />
-
-          {/* Time Progress Bar */}
-          {engine.gameState === 'playing' && !isTimeUp && (
-            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gray-900 z-[60]">
-              <div 
-                className={`h-full transition-all duration-1000 ease-linear ${localTimeRemaining <= 10 ? 'bg-red-500 animate-pulse' : 'bg-violet-500'}`}
-                style={{ width: `${Math.min(100, (localTimeRemaining / 60) * 100)}%` }}
-              />
-            </div>
-          )}
-
-          {showRotateWarning && engine.gameState !== 'playing' && (
-            <div className="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-black/95 text-center p-6 backdrop-blur-sm touch-none">
-              <div className="animate-bounce mb-6 text-violet-500">
-                <svg className="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <h3 className="text-2xl font-bold text-white mb-3">Rotate Device</h3>
-              <p className="text-sm text-gray-400 max-w-xs mx-auto">Please rotate your device to landscape mode for the best playing experience.</p>
-            </div>
-          )}
-
-          {isFullscreen && engine.gameState === 'playing' && !isTimeUp && !showRotateWarning && (
-            <div className="absolute top-4 right-4 z-[60] flex gap-2">
-              <button onClick={() => { if(engineRef.current) engineRef.current.endGame(); handleStartGame(); }} className="p-3 bg-black/60 border border-gray-600 rounded-xl text-white hover:bg-gray-800 transition-colors"><RefreshCw className="w-5 h-5" /></button>
-              <button onClick={() => setSoundEnabled(v => !v)} className="p-3 bg-black/60 border border-gray-600 rounded-xl text-white hover:bg-gray-800 transition-colors">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button>
-              <button onClick={exitFullscreen} className="p-3 bg-black/60 border border-gray-600 rounded-xl text-white hover:bg-gray-800 transition-colors"><Minimize2 className="w-5 h-5" /></button>
-            </div>
-          )}
-
-          {/* === PHASE 2: ACTIVE GAMEPLAY === */}
-          {engine.gameState === 'playing' && !isTimeUp && !showRotateWarning && currentTarget && (
-            <div className="flex flex-col w-full h-full p-2 sm:p-4 pb-4">
-              
-              {/* Reference Key (Top Row) */}
-              <div className="w-full bg-gray-900/50 rounded-xl border border-gray-800 p-1 sm:p-2 shadow-md backdrop-blur-sm z-10 shrink-0">
-                <div className="grid grid-cols-9 gap-1 sm:gap-2">
-                  {keyMap.map((item, i) => (
-                    <div key={i} className="flex flex-col items-center">
-                      <div className="w-full py-1 sm:py-2 flex items-center justify-center text-[10px] sm:text-base md:text-xl font-bold rounded-t border-b-2 bg-gray-800 border-gray-700 text-white shadow-inner">
-                        {item.symbol}
-                      </div>
-                      <div className="w-full py-0.5 sm:py-1.5 flex items-center justify-center text-[9px] sm:text-sm md:text-base font-black rounded-b bg-gray-950 text-violet-400">
-                        {item.number}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Target Symbol (Center) */}
-              <div className="flex-1 flex items-center justify-center relative min-h-0">
-                <div key={currentTarget.symbol} className="font-bold leading-none text-5xl sm:text-[6rem] md:text-[8rem] text-white animate-in zoom-in-75 duration-100 drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">
-                  {currentTarget.symbol}
-                </div>
-              </div>
-
-              {/* Number Pad (Bottom Row) */}
-              <div className="w-full shrink-0">
-                <div className="grid grid-cols-9 gap-1.5 sm:gap-2">
-                  {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => (
-                    <button 
-                      key={n} 
-                      onPointerDown={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        handleInput(n);
-                      }} 
-                      className="h-10 sm:h-12 md:h-16 rounded-lg sm:rounded-xl font-black flex items-center justify-center border-2 transition-all hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-violet-500 text-base sm:text-xl md:text-2xl bg-gray-800 border-gray-700 text-white hover:border-violet-500 hover:bg-gray-700 shadow-md touch-none"
-                      aria-label={`Press ${n}`}
-                    >
-                      {n}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-            </div>
-          )}
-
-          {/* Minimal Start Screen */}
-          {engine.gameState === 'start' && !showRotateWarning && (
-            <div className="absolute inset-0 flex items-center justify-center z-40 bg-black/90 p-4 backdrop-blur-sm">
-              <div className="rounded-3xl p-6 sm:p-8 text-center max-w-sm w-full mx-4 border border-gray-700 bg-gray-900 shadow-2xl flex flex-col items-center justify-center">
-                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-violet-500 to-purple-600 rounded-2xl flex items-center justify-center mb-6 rotate-3 pointer-events-none shadow-[0_0_30px_rgba(139,92,246,0.3)]">
-                  <Compass className="w-8 h-8 sm:w-10 sm:h-10 text-white -rotate-3" />
-                </div>
-                <h2 className="text-2xl sm:text-3xl font-black mb-8 pointer-events-none tracking-tight">Symbol Matching</h2>
-                
-                <button 
-                  onClick={handleStartGame}
-                  className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-xl font-black text-lg hover:brightness-110 transition-all transform hover:scale-[1.02] active:scale-[0.98] animate-pulse hover:animate-none shadow-[0_0_20px_rgba(139,92,246,0.3)] focus:outline-none">
-                  <Play className="w-5 h-5 fill-white" />
-                  START DRILL
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Premium Custom End Screen */}
-          {(engine.gameState === 'ended' || isTimeUp) && !showRotateWarning && (
-            <div className="absolute inset-0 bg-[#05070e]/98 overflow-y-auto p-6 z-[70] select-none scrollbar-thin scroll-smooth backdrop-blur-sm animate-in fade-in duration-300 pointer-events-auto" onPointerDown={e => e.stopPropagation()}>
-              <div className="min-h-full flex flex-col justify-center items-center py-4 w-full">
-                <div className="max-w-md w-full text-center">
-                  {score > 0 && score >= bestScore && (
-                    <div className="inline-block bg-yellow-500 text-black text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-3 shadow-[0_0_15px_rgba(234,179,8,0.5)] animate-bounce font-mono">
-                      ⭐ NEW PERSONAL BEST!
-                    </div>
-                  )}
-                  
-                  <h2 className="text-xl font-black text-white uppercase tracking-wider mb-1 font-mono">
-                    Drill Complete
-                  </h2>
-                  <p className="text-xs text-slate-500 uppercase tracking-widest mb-6 font-mono">
-                    Speed Level Reached: Level {currentSpeedLvl}
-                  </p>
-
-                  <div className="grid grid-cols-3 gap-2.5 mb-6 text-left font-mono">
-                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
-                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Final Score</span>
-                      <span className="text-sm font-black text-white">{score} <span className="text-[8px] text-slate-400 font-normal">PTS</span></span>
-                    </div>
-                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
-                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Accuracy</span>
-                      <span className="text-sm font-black text-white">{accuracy}%</span>
-                    </div>
-                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
-                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Best Score</span>
-                      <span className="text-sm font-black text-yellow-400">{bestScore}</span>
-                    </div>
-                    
-                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
-                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold font-mono">Total Matches</span>
-                      <span className="text-sm font-black text-emerald-400">{correctCount}</span>
-                    </div>
-                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
-                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Penalties</span>
-                      <span className="text-sm font-black text-red-400">{mistakes}</span>
-                    </div>
-                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
-                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Grade</span>
-                      <span className="text-sm font-black text-pink-400">{gradeLetter}</span>
-                    </div>
-                  </div>
-
-                  <div className="bg-[#0b0f19] border border-slate-850 p-3 rounded-xl mb-4 text-left">
-                    <span className={`text-xs font-black block text-center uppercase tracking-widest ${rankColor} mb-2`}>
-                      Rank: {rankName}
-                    </span>
-                    <div className="w-full h-px bg-slate-850 mb-2"></div>
-                    <div className="flex items-center gap-1.5 text-[9px] font-bold text-white uppercase mb-1 font-mono">
-                      <Sparkles className="w-3 h-3 text-amber-500" /> Diagnostics advice:
-                    </div>
-                    <p className="text-[10px] text-slate-400 leading-normal">
-                      {diagnostics}
-                    </p>
-                  </div>
-
-                  <div className="flex gap-2">
-                    <PlayAgainButton onClick={handleStartGame} colorTheme="purple" />
-                    <button
-                      onPointerDown={e => e.stopPropagation()}
-                      onClick={shareScore}
-                      className="p-3 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded-xl transition-colors active:scale-95 flex items-center justify-center"
-                      title="Share Score"
-                    >
-                      <Share2 className="w-4 h-4" />
-                    </button>
-                    {isFullscreen && (
-                      <button
-                        onPointerDown={e => e.stopPropagation()}
-                        onClick={handleExitGame}
-                        className="p-3 bg-red-900/30 border border-red-900/55 hover:bg-red-900/50 text-red-400 rounded-xl transition-colors active:scale-95 flex items-center justify-center"
-                        title="Exit Drill"
-                      >
-                        <LogOut className="w-4 h-4" />
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* ============================================================ */}
-        {/* DRILL INFO SECTIONS */}
-        {/* ============================================================ */}
-
+        {/* Live Stat Cards */}
         {!isFullscreen && (
-          <section className="mt-10">
-            <div className="rounded-2xl border border-gray-800 overflow-hidden bg-gray-900 shadow-2xl pointer-events-none">
-              <div className="px-6 py-5 border-b border-gray-800 bg-black/40 flex items-center gap-3">
-                <Target className="w-5 h-5 text-violet-400" /><h2 className="font-bold text-white text-lg tracking-wide">Detailed Scoring Rules</h2>
-              </div>
-              <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-5">
-                  <RuleItem num="1" color="blue" text="Tap the" highlight="matching number" result="+20 PTS | +10s Time" />
-                  <RuleItem num="2" color="indigo" text="Speed up on hits" highlight="Endless scaling" result="Increases Difficulty" />
-                </div>
-                <div className="space-y-5">
-                  <RuleItem num="3" color="red" text="Timeout / Wrong Match" result="No PTS Penalty | -2s Time" />
-                  <RuleItem num="4" color="purple" text="Keyboard support" highlight="Press 1-9" result="Use for maximum speed" />
-                </div>
-              </div>
+        <div className="grid grid-cols-4 gap-2.5 max-w-2xl mx-auto w-full">
+          <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+            <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
+            <div className="text-lg sm:text-xl font-black text-cyan-400 tabular-nums">{uiScore}</div>
+          </div>
+          <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+            <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
+            <div className={`text-lg sm:text-xl font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>
+              {uiTimeLeft}s
             </div>
-          </section>
+          </div>
+          <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+            <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Level</div>
+            <div className="text-lg sm:text-xl font-black text-indigo-400 tabular-nums">L{engine.current.level}</div>
+          </div>
+          <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+            <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
+            <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
+          </div>
+        </div>
         )}
 
-        {!isFullscreen && (
-          <section className="mt-12" aria-label="About this drill">
-            <div className="rounded-2xl border border-gray-800 overflow-hidden bg-gray-900 shadow-xl">
-              <div className="px-6 py-5 border-b border-gray-800 bg-black/40 flex items-center gap-3">
-                <GraduationCap className="w-5 h-5 text-violet-400" />
-                <h2 className="font-bold text-white text-lg tracking-wide">About This Symbol Matching Drill</h2>
+        {/* DRILL BOX CONTAINER */}
+        <div
+          ref={containerRef}
+          className={
+            isFullscreen
+              ? 'fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#050508] flex flex-col items-center justify-center'
+              : isMobile
+                ? (isPortrait
+                    ? 'w-full rounded-2xl aspect-[3/4] min-h-[420px] max-h-[76vh] bg-[#080811] border border-white/10 relative overflow-hidden flex flex-col'
+                    : 'w-full rounded-2xl aspect-video min-h-[340px] max-h-[85vh] bg-[#080811] border border-white/10 relative overflow-hidden flex flex-col')
+                : 'w-full rounded-2xl aspect-video min-h-[460px] sm:min-h-[500px] max-h-[88vh] bg-[#080811] border border-white/10 relative overflow-hidden flex flex-col'
+          }
+        >
+          {/* Red Flash Overlay */}
+          {flashes.map((f) => (
+            <div key={f.id} className="fx-flash fx-flash-red" />
+          ))}
+
+          {/* IN-BOX OVERLAY HUD */}
+          {(gameState === 'playing' || gameState === 'countdown') && (
+            <>
+              {/* Top Left: Score & 5 Hearts */}
+              <div className="absolute top-4 left-4 z-30 pointer-events-none flex flex-col items-start gap-1">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Score</p>
+                <p className="text-2xl sm:text-3xl font-black text-white tabular-nums leading-tight">{uiScore}</p>
+                <div className="flex items-center gap-1 mt-0.5">
+                  {Array.from({ length: MAX_LIVES }).map((_, idx) => {
+                    const active = idx < uiLives;
+                    return (
+                      <Heart
+                        key={idx}
+                        className={`w-3.5 h-3.5 sm:w-4 sm:h-4 transition-all duration-200 ${
+                          active
+                            ? 'fill-red-500 text-red-500 drop-shadow-[0_0_6px_rgba(239,68,68,0.7)]'
+                            : 'fill-slate-800 text-slate-800'
+                        }`}
+                      />
+                    );
+                  })}
+                </div>
               </div>
+
+              {/* Top Right: Time Left */}
+              <div className="absolute top-4 right-4 z-30 pointer-events-none text-right">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Time Left</p>
+                <p className={`text-2xl sm:text-3xl font-black tabular-nums leading-tight ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>{uiTimeLeft}s</p>
+              </div>
+            </>
+          )}
+
+          {/* IN-GAME HUD SOUND TOGGLE */}
+          {gameState === 'playing' && (
+            <button
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.stopPropagation();
+                setSoundEnabled((v) => {
+                  drillAudio.setEnabled(!v);
+                  return !v;
+                });
+              }}
+              className="absolute bottom-4 right-4 z-40 p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+              title="Toggle Sound"
+            >
+              {soundEnabled ? <Volume2 className="w-4 h-4 text-cyan-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
+            </button>
+          )}
+
+          {/* PLAYING BOARD */}
+          {gameState === 'playing' && (
+            <div className="relative w-full h-full flex flex-col items-center justify-between p-4 sm:p-6">
+              {/* Background Grid */}
+              <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
+
+              {/* Legend Key Mapping Header (6 Symbol-Digit Pairs - Centered to prevent Score & Time overlap) */}
+              <div className="z-20 w-full max-w-[280px] sm:max-w-xs md:max-w-md bg-black/80 backdrop-blur-md rounded-2xl border border-white/10 p-1.5 sm:p-2.5 shadow-xl grid grid-cols-6 gap-1 sm:gap-2 mt-1 sm:mt-2">
+                {keyMap.map((pair) => (
+                  <div key={pair.digit} className="flex flex-col items-center justify-center bg-white/[0.03] border border-white/5 rounded-xl py-1 sm:py-1.5">
+                    <span className="text-sm sm:text-lg font-bold text-white font-serif leading-none">{pair.symbol}</span>
+                    <span className="text-[9px] sm:text-xs font-black text-slate-400 mt-1 leading-none">{pair.digit}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Target Symbol Center Prompt */}
+              <div className="flex-1 flex flex-col items-center justify-center z-20 my-2">
+                <div className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1.5">Target Symbol</div>
+                <div className="bg-black/60 backdrop-blur-md border border-white/20 rounded-3xl w-24 h-24 sm:w-32 sm:h-32 flex items-center justify-center shadow-[0_0_30px_rgba(255,255,255,0.15)]">
+                  <span className="text-5xl sm:text-6xl font-black text-white font-serif">
+                    {currentTarget ? currentTarget.symbol : '?'}
+                  </span>
+                </div>
+              </div>
+
+              {/* 6 Digit Touch Buttons Grid Bottom (Lifted higher to prevent Sound Button interference) */}
+              <div className="z-20 w-full max-w-[320px] sm:max-w-md grid grid-cols-6 gap-1.5 sm:gap-2.5 mb-6 sm:mb-8">
+                {[1, 2, 3, 4, 5, 6].map((digit) => (
+                  <button
+                    key={digit}
+                    type="button"
+                    onPointerDown={(e) => handleDigitClick(digit, e)}
+                    className="py-3 sm:py-4 rounded-xl bg-black/70 border border-white/10 hover:border-white/40 hover:bg-white/10 text-white font-black text-base sm:text-lg cursor-pointer active:scale-95 transition-transform flex items-center justify-center shadow-lg"
+                  >
+                    {digit}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* START CARD */}
+          {gameState === 'start' && (
+            <FpsStartCard
+              icon={Target}
+              accent="cyan"
+              title="Symbol Matching"
+              subtitle="SDMT Paradigm • Visual Search"
+              rules={[
+                { icon: Target, accent: 'cyan', title: 'Match Target Symbol to Digit', text: 'Locate target symbol and tap the matching number key' },
+                { icon: Zap, accent: 'blue', title: 'Top Key Mapping', text: 'Cross-reference unfamiliar symbols against the top key legend' },
+              ]}
+              stats={[
+                { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
+                { icon: TrendingUp, label: 'Best Level', value: `Lv. ${bestLevel}`, color: 'text-blue-400', accent: 'blue' },
+              ]}
+              isTouchOnlyDevice={false}
+              onStart={enterDrill}
+            />
+          )}
+
+          {/* COUNTDOWN OVERLAY */}
+          {gameState === 'countdown' && (
+            <DrillCountdown value={countdownValue} subtitle="GET READY" accent="#22d3ee" />
+          )}
+
+          {/* END SCREEN */}
+          {gameState === 'gameOver' && analytics.grade && (
+            <div className="absolute inset-0 z-40 flex bg-neutral-950/98 select-none font-sans" style={{ background: 'rgba(5,5,8,0.97)' }} onPointerDown={e => e.stopPropagation()}>
               
-              <div className="p-8">
-                <p className="text-sm leading-relaxed mb-6 text-gray-300">
-                  This free Symbol Matching drill trains cognitive flexibility and raw processing speed. By forcing your brain to constantly re-map distinct symbols to numbers on the fly under extreme time constraints, you actively break and re-build neural associations. It scales infinitely to match your processing limit.
-                </p>
+              {/* Left Grade Panel */}
+              <div className="w-[36%] flex flex-col items-center justify-center gap-1 border-r border-white/5 px-4" style={{ background: 'radial-gradient(ellipse 260px 200px at 50% 30%, rgba(34,211,238,.12), transparent 70%)' }}>
+                {isNewBest && (
+                  <span className="text-[9.5px] font-bold text-yellow-400 bg-yellow-500/10 border border-yellow-500/25 px-2.5 py-0.5 rounded-full mb-1 animate-pulse">
+                    NEW BEST
+                  </span>
+                )}
+                <div className={`text-5xl sm:text-6xl font-black leading-none ${analytics.grade?.color || 'text-cyan-400'}`}>
+                  {analytics.grade?.grade || analytics.grade?.letter || 'C'}
+                </div>
+                <div className="text-[10px] uppercase tracking-widest text-slate-500 text-center font-bold mt-1">
+                  {analytics.grade?.label || 'Good Effort'}
+                </div>
+                <div className="text-3xl sm:text-4xl font-black text-white mt-2 tabular-nums">
+                  {uiScore}
+                </div>
+                <div className="text-[9px] uppercase tracking-widest text-slate-500">Points</div>
+              </div>
+
+              {/* Right Stats & Actions Panel */}
+              <div className="flex-1 flex flex-col justify-center gap-3 px-6 py-4 min-w-0">
                 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
-                  <div className="p-5 rounded-xl border border-gray-800 bg-black/40">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center"><GraduationCap className="w-4 h-4 text-white" /></div>
-                      <h3 className="text-sm font-bold text-white">Who It's For</h3>
-                    </div>
-                    <p className="text-xs leading-relaxed text-gray-400">Gamers, coders, students, and professionals needing to process shifting visual data without freezing under pressure.</p>
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
+                    <p className="text-sm sm:text-base font-black text-white">{analytics.accuracy}%</p>
+                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Accuracy</p>
                   </div>
-                  <div className="p-5 rounded-xl border border-gray-800 bg-black/40">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-8 h-8 rounded-lg bg-green-600 flex items-center justify-center"><TrendingUp className="w-4 h-4 text-white" /></div>
-                      <h3 className="text-sm font-bold text-white">Skills Improved</h3>
-                    </div>
-                    <p className="text-xs leading-relaxed text-gray-400">Cognitive flexibility, visual processing speed, visual-motor mapping, and rapid subconscious pattern recognition.</p>
+                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
+                    <p className="text-sm sm:text-base font-black text-emerald-400">{analytics.successfulHits}</p>
+                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Hits</p>
                   </div>
-                  <div className="p-5 rounded-xl border border-gray-800 bg-black/40">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-8 h-8 rounded-lg bg-purple-600 flex items-center justify-center"><BarChart3 className="w-4 h-4 text-white" /></div>
-                      <h3 className="text-sm font-bold text-white">What You'll Track</h3>
-                    </div>
-                    <p className="text-xs leading-relaxed text-gray-400">Net Score, overall accuracy percentage, total correct matches, penalty count, and your peak dynamic speed level.</p>
+                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
+                    <p className="text-sm sm:text-base font-black text-red-400">{analytics.mistakes + analytics.timeouts}</p>
+                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Errors</p>
                   </div>
                 </div>
 
-                <div className="p-6 rounded-xl border border-gray-800 bg-black/40 mb-8">
-                  <div className="flex items-center gap-3 mb-4">
-                    <Info className="w-5 h-5 text-amber-400" />
-                    <h3 className="text-lg font-bold text-white tracking-wide">How to Play</h3>
-                  </div>
-                  <ol className="text-sm leading-relaxed space-y-4 list-decimal pl-5 text-gray-300">
-                    <li>Identify the large <span className="font-bold text-white">target symbol</span> displayed in the center of the screen.</li>
-                    <li>Quickly scan the top reference grid to find the corresponding <span className="text-violet-400 font-bold">number</span> matched to that symbol.</li>
-                    <li>Tap the correct number on the keypad (or use your physical keyboard keys <span className="font-bold text-gray-200">1-9</span> for maximum speed).</li>
-                    <li>With each correct match, you bank time, score points, and the drill speeds up. Hesitation causes the target to timeout, heavily draining your clock.</li>
-                  </ol>
+                <div className="flex gap-2">
+                  <button 
+                    type="button"
+                    onClick={enterDrill} 
+                    className="flex-1 py-3 rounded-[13px] bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-bold text-xs uppercase tracking-wide cursor-pointer transition-transform active:scale-[0.98] shadow-md flex items-center justify-center gap-1.5"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5" /> Play Again
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={shareResult} 
+                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform" 
+                    title="Share Score"
+                  >
+                    <Share2 className="w-4 h-4" />
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={handleExitDrill} 
+                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform" 
+                    title="Exit Drill"
+                  >
+                    <ArrowLeft className="w-4 h-4 text-red-400" />
+                  </button>
                 </div>
 
-                <div className="p-5 rounded-xl border border-gray-800 bg-black/40">
-                  <div className="flex items-center gap-3 mb-4">
-                    <Lightbulb className="w-5 h-5 text-yellow-400" />
-                    <h3 className="text-sm font-bold text-white uppercase tracking-wider">Frequently Asked Questions</h3>
+              </div>
+            </div>
+          )}
+
+        </div>
+
+        {/* ACCORDIONS */}
+        {!isFullscreen && (
+          <div className="[&>div]:!mt-0">
+            <DrillAccordion
+              id="rules"
+              title="Drill Instructions & Scoring System"
+              isOpen={openAccordion === 'rules'}
+              onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-sans">
+                {RULES_ITEMS.map((item, i) => (
+                  <div key={i} className="bg-[#080811] p-4 rounded-xl border border-white/10">
+                    <p className="text-sm font-bold text-white mb-1">{item.title}</p>
+                    <p className="text-xs text-gray-300 leading-relaxed">{item.text}</p>
                   </div>
+                ))}
+              </div>
+            </DrillAccordion>
+
+            <DrillAccordion
+              id="about"
+              title="About Symbol Matching"
+              isOpen={openAccordion === 'about'}
+              onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
+            >
+              <div className="space-y-8 font-sans">
+                <section>
                   <div className="space-y-4">
-                    <div>
-                      <h4 className="text-sm font-bold text-gray-200">Why does the timer seem to drop randomly?</h4>
-                      <p className="text-xs text-gray-400 mt-1">Every wrong answer or timeout applies an instant -2 second penalty to your clock. If you aren't paying close attention, these mistakes will drain your time extremely fast.</p>
+                    {ABOUT_TEXT.split('\n\n').map((para, i) => (
+                      <p key={i} className="text-sm leading-relaxed text-gray-300">{para}</p>
+                    ))}
+                  </div>
+                </section>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                    <div className="flex items-center gap-2.5 mb-2">
+                      <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
+                      <h5 className="text-xs font-bold text-white">Who Should Use This?</h5>
                     </div>
-                    <div>
-                      <h4 className="text-sm font-bold text-gray-200">How do I increase my response speed?</h4>
-                      <p className="text-xs text-gray-400 mt-1">Look at the target symbol first, keep that image in your working memory, and then scan the key block. Do not waste time reading every symbol in the grid. On desktop, resting your fingers on the number row keys allows instant reactions.</p>
+                    <p className="text-xs text-gray-300 leading-relaxed">Anyone who wants a quick self-check on processing speed, students and professionals tracking cognitive health over time, and gamers looking to sharpen rapid visual-to-motor translation.</p>
+                  </div>
+                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                    <div className="flex items-center gap-2.5 mb-2">
+                      <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
+                      <h5 className="text-xs font-bold text-white">Skills Improved</h5>
                     </div>
-                    <div>
-                      <h4 className="text-sm font-bold text-gray-200">Why does the target change before I click?</h4>
-                      <p className="text-xs text-gray-400 mt-1">This is an Endless Time-Attack mode. The target has a specific duration based on your current speed level. If you don't answer in time, it counts as a penalty miss and moves to the next symbol automatically.</p>
+                    <p className="text-xs text-gray-300 leading-relaxed">Information processing speed, visual scanning efficiency, associative working memory, and sustained executive attention over repetitive trials.</p>
+                  </div>
+                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                    <div className="flex items-center gap-2.5 mb-2">
+                      <div className="w-7 h-7 rounded-lg bg-purple-600 flex items-center justify-center"><Repeat className="w-3.5 h-3.5 text-white" /></div>
+                      <h5 className="text-xs font-bold text-white">Rotating Key Mapping</h5>
                     </div>
+                    <p className="text-xs text-gray-300 leading-relaxed">The symbol-to-digit key changes after every answer, preventing rote memorization and forcing a fresh visual lookup on each trial — just like the clinical SDMT.</p>
                   </div>
                 </div>
-
               </div>
-            </div>
-          </section>
-        )}
+            </DrillAccordion>
 
-        {/* ============================================================ */}
-        {/* RELATED DRILLS */}
-        {/* ============================================================ */}
-        {!isFullscreen && (
-          <section className="mt-14" aria-label="Related drills">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-1.5 h-6 rounded-full bg-gradient-to-b from-violet-500 to-purple-600"></div>
-              <h2 className="text-xl font-bold text-white">Explore Related Free Drills</h2>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <RelatedCard href="/drills/cognitive/processing-speed/reaction-time" title="Elite Neuro-Switch" desc="Click RED targets while ignoring BLUE distractors." color="red" icon={<Brain className="w-4 h-4" />} />
-              <RelatedCard href="/drills/cognitive/attention/divided-attention" title="Divided Attention" desc="Focus on relevant information while ignoring distractions." color="blue" icon={<Eye className="w-4 h-4" />} />
-              <RelatedCard href="/drills/cognitive/focus/concentration-grid" title="Concentration Grid" desc="Find numbers in sequence under time pressure." color="purple" icon={<Target className="w-4 h-4" />} />
-              <RelatedCard href="/drills/cognitive/processing-speed/reaction-time" title="Reaction Time" desc="Test visual reaction speed with simple click response." color="orange" icon={<Zap className="w-4 h-4" />} />
-            </div>
-          </section>
-        )}
-
-        {/* ============================================================ */}
-        {/* FOOTER */}
-        {/* ============================================================ */}
-        {!isFullscreen && (
-          <footer className="mt-16 bg-gray-950 text-gray-400 rounded-3xl py-12 px-8 border border-gray-800 shadow-xl" role="contentinfo">
-            <div className="max-w-7xl mx-auto">
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8 mb-10">
-                <div>
-                  <h3 className="text-white font-bold mb-4 text-sm tracking-wide">FPS Training</h3>
-                  <ul className="space-y-3 text-sm">
-                    <li><Link href="/drills/fps/flick-shot-training" className="hover:text-white transition-colors">Flick Shot Trainer</Link></li>
-                    <li><Link href="/drills/fps/target-acquisition" className="hover:text-white transition-colors">Target Acquisition</Link></li>
-                    <li><Link href="/drills/fps" className="text-blue-400 hover:text-blue-300 font-medium transition-colors mt-2 block">All 21 FPS Drills →</Link></li>
-                  </ul>
-                </div>
-                <div>
-                  <h3 className="text-white font-bold mb-4 text-sm tracking-wide">Cognitive</h3>
-                  <ul className="space-y-3 text-sm">
-                    <li><Link href="/drills/cognitive/memory/card-matching" className="hover:text-white transition-colors">Memory Games</Link></li>
-                    <li><Link href="/drills/cognitive/attention/divided-attention" className="hover:text-white transition-colors">Divided Attention</Link></li>
-                    <li><Link href="/drills/cognitive" className="text-blue-400 hover:text-blue-300 font-medium transition-colors mt-2 block">All 16 Cognitive Drills →</Link></li>
-                  </ul>
-                </div>
-                <div>
-                  <h3 className="text-white font-bold mb-4 text-sm tracking-wide">Academic</h3>
-                  <ul className="space-y-3 text-sm">
-                    <li><Link href="/drills/academic/writing-speed/typing-test" className="hover:text-white transition-colors">Typing Speed Test</Link></li>
-                    <li><Link href="/drills/academic/reading-speed/speed-reader" className="hover:text-white transition-colors">Speed Reader</Link></li>
-                    <li><Link href="/drills/academic" className="text-blue-400 hover:text-blue-300 font-medium transition-colors mt-2 block">All 12 Academic Drills →</Link></li>
-                  </ul>
-                </div>
-                <div>
-                  <h3 className="text-white font-bold mb-4 text-sm tracking-wide">Visual & Motor</h3>
-                  <ul className="space-y-3 text-sm">
-                    <li><Link href="/drills/visual/reaction-speed/light-reaction" className="hover:text-white transition-colors">Reaction Time Test</Link></li>
-                    <li><Link href="/drills/motor/hand-eye-coordination/aim-trainer" className="hover:text-white transition-colors">Hand-Eye Coordination</Link></li>
-                    <li><Link href="/drills/visual" className="text-blue-400 hover:text-blue-300 font-medium transition-colors mt-2 block">All 14 Visual Drills →</Link></li>
-                  </ul>
-                </div>
-                <div>
-                  <h3 className="text-white font-bold mb-4 text-sm tracking-wide">More Sections</h3>
-                  <ul className="space-y-3 text-sm">
-                    <li><Link href="/drills/memory" className="hover:text-white transition-colors">Memory (15 drills)</Link></li>
-                    <li><Link href="/drills/cognitive" className="hover:text-white transition-colors">Cognitive</Link></li>
-                    <li><Link href="/drills/physical" className="hover:text-white transition-colors">Physical (11 drills)</Link></li>
-                  </ul>
-                </div>
-              </div>
-              
-              <div className="border-t border-gray-800 pt-10 text-center">
-                <div className="flex items-center justify-center gap-3 mb-5">
-                  <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-violet-600/20">
-                    <Compass className="w-6 h-6 text-white" />
+            <DrillAccordion
+              id="faq"
+              title="Frequently Asked Questions"
+              isOpen={openAccordion === 'faq'}
+              onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-sans">
+                {FAQ_ITEMS.map((item, i) => (
+                  <div key={i} className="bg-[#05060b] border border-gray-800 rounded-xl p-5">
+                    <h4 className="text-sm font-bold text-gray-200 mb-2">{item.q}</h4>
+                    <p className="text-xs text-gray-400 leading-relaxed">{item.a}</p>
                   </div>
-                  <span className="text-white font-black text-xl tracking-tight">SkillDrills</span>
-                </div>
-                <p className="text-sm mb-3 font-medium">&copy; 2026 SkillDrills. All rights reserved.</p>
-                <p className="text-xs max-w-2xl mx-auto leading-relaxed mb-8 text-gray-500">
-                  Free online symbol matching drill. Train your cognitive flexibility and processing speed in an endless Time-Attack challenge.
-                </p>
-                
-                <div className="flex items-center justify-center gap-6 flex-wrap">
-                  <a href="https://youtube.com/@skilldrills.online" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="YouTube">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-                  </a>
-                  <a href="https://www.facebook.com/profile.php?id=61590093843779" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="Facebook">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-                  </a>
-                  <a href="https://x.com/skilldrillss" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="Twitter / X">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-                  </a>
-                  <a href="https://www.instagram.com/skilldrills.online/?__pwa=1" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="Instagram">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
-                  </a>
-                  <a href="https://pinterest.com/skilldrills" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="Pinterest">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.372 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738a.36.36 0 0 1 .083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.631-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12 0-6.628-5.373-12-12-12z"/></svg>
-                  </a>
-                </div>
+                ))}
               </div>
-            </div>
-          </footer>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function StatCard({ icon, value, label, unit = '' }) {
-  return (
-    <div className="flex-1 min-w-[28%] sm:min-w-[15%] rounded-xl border border-gray-800 bg-gray-900 p-1.5 sm:p-3 text-center flex flex-col justify-center h-full min-h-[70px] sm:min-h-[80px] transition-all duration-300 hover:border-gray-600 shadow-md pointer-events-none">
-      <div className="mb-0.5 sm:mb-1.5 flex justify-center opacity-90 scale-75 sm:scale-100">{icon}</div>
-      <p className="text-sm sm:text-2xl lg:text-3xl font-black tracking-tighter truncate text-white leading-none mt-0.5 sm:mt-0">
-        {value}<span className="text-[10px] sm:text-sm font-bold ml-0.5 text-gray-500">{unit}</span>
-      </p>
-      <p className="text-[8px] sm:text-[10px] font-bold uppercase tracking-widest truncate text-gray-500 mt-1">{label}</p>
-    </div>
-  );
-}
-
-function RuleItem({ num, color, text, highlight = '', result }) {
-  const colorMap = { 
-    blue: 'bg-blue-600 text-blue-300 border-blue-500', 
-    indigo: 'bg-indigo-600 text-indigo-300 border-indigo-500', 
-    red: 'bg-red-600 text-red-300 border-red-500', 
-    orange: 'bg-orange-600 text-orange-300 border-orange-500',
-    purple: 'bg-purple-600 text-purple-300 border-purple-500' 
-  };
-  const colors = colorMap[color] || 'bg-gray-600 text-gray-300 border-gray-500';
-  const [bg, txt, border] = colors.split(' ');
-  
-  return (
-    <div className="flex items-center gap-4 bg-black/40 p-4 rounded-xl border border-gray-800 shadow-sm">
-      <div className={`w-8 h-8 rounded-xl ${bg} border border-t-white/20 flex items-center justify-center text-white text-base font-black shadow-lg flex-shrink-0`}>{num}</div>
-      <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-        <p className="text-sm font-medium text-gray-300">
-          {text}{highlight && <span className={`font-black ${txt}`}> {highlight}</span>}
-        </p>
-        <div className={`text-xs font-black px-3 py-1.5 rounded-lg bg-gray-900 border ${border} ${txt} whitespace-nowrap shadow-inner tracking-wide text-center sm:text-left`}>
-          {result}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function RelatedCard({ href, title, desc, color, icon }) {
-  const gradients = {
-    blue: 'from-blue-500 to-indigo-500',
-    cyan: 'from-cyan-500 to-teal-500',
-    purple: 'from-purple-500 to-violet-500',
-    orange: 'from-orange-500 to-amber-500',
-    emerald: 'from-emerald-500 to-green-500',
-    rose: 'from-rose-500 to-pink-500',
-    indigo: 'from-indigo-500 to-blue-500',
-    red: 'from-red-500 to-rose-500'
-  };
-  
-  return (
-    <Link href={href} className="group relative overflow-hidden rounded-2xl border border-gray-800 bg-gray-900/80 transition-all duration-300 hover:shadow-[0_0_20px_rgba(255,255,255,0.05)] hover:-translate-y-1 hover:border-gray-600 flex flex-col h-full">
-      <div className={`absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r ${gradients[color] || 'from-blue-500 to-indigo-500'}`}></div>
-      <div className="p-5 flex-1 flex flex-col">
-        <div className="flex items-center gap-3 mb-3">
-          <div className="w-10 h-10 rounded-xl bg-black border border-gray-700 flex items-center justify-center text-gray-400 group-hover:text-white transition-colors shadow-inner">
-            {icon}
+            </DrillAccordion>
           </div>
-        </div>
-        <h3 className="font-bold text-base mb-1.5 text-white group-hover:text-violet-400 transition-colors tracking-tight">{title}</h3>
-        <p className="text-xs leading-relaxed text-gray-500 flex-1">{desc}</p>
-        <div className="flex items-center gap-1.5 mt-4 text-violet-400 text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-wider">
-          Start Drill <ArrowRight className="w-3.5 h-3.5" />
-        </div>
-      </div>
-    </Link>
+        )}
+
+        {/* RELATED DRILLS GRID */}
+        {!isFullscreen && (
+          <section className="mt-4">
+            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">
+              Related Cognitive Drills
+            </h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {RELATED_DRILLS.map((drill) => (
+                <Link
+                  key={drill.id}
+                  href={drill.href}
+                  className="group bg-[#0c0c16] border border-white/5 hover:border-cyan-500/40 rounded-xl p-3.5 transition-all duration-200 hover:-translate-y-0.5 flex flex-col justify-between"
+                >
+                  <div>
+                    <div className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider mb-1">{drill.cat}</div>
+                    <div className="text-xs font-bold text-white group-hover:text-cyan-300 transition-colors">{drill.name}</div>
+                    <div className="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">{drill.desc}</div>
+                  </div>
+                  <div className="text-[10px] font-bold text-slate-500 group-hover:text-cyan-400 mt-3 flex items-center gap-1 transition-colors">
+                    Train Drill <span>→</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* SITE FOOTER */}
+        {!isFullscreen && <DrillFooter />}
+
+      </main>
+    </div>
   );
 }

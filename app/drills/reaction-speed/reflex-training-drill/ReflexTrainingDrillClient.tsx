@@ -1,1558 +1,999 @@
 'use client';
 
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
-import { 
-  Target, Clock, Award, Activity, Play, RefreshCw, 
-  Volume2, VolumeX, Maximize2, Minimize2, Trophy, Info, 
-  Check, ArrowRight, Sparkles, Sliders, Zap, Share2, Copy, 
-  Brain, RotateCcw, Compass, ChevronRight, GraduationCap, 
-  CheckCircle2, XCircle, AlertCircle, TrendingUp, Lightbulb, Crosshair, Lock, Unlock
+import {
+  Volume2, VolumeX,
+  Play, RefreshCw, Target,
+  Share2, LogOut, Eye, Users, TrendingUp, Zap, Trophy
 } from 'lucide-react';
 
-type Particle = { x: number; y: number; text: string; color: string; life: number; maxLife: number };
-type RingBurst = { x: number; y: number; startR: number; maxR: number; life: number; maxLife: number; color: string };;
+import generateShareCard, { shareScoreCard } from '../../../../components/ShareScoreCard';
+import { getPlayerName } from '../../../../lib/leaderboard';
+import { drillAudio } from '../../../../lib/drillAudio';
+import { getFpsScoreGrade } from '../../../../lib/scoringEngine';
+import { getDifficultyProgress, getStartLevel } from '../../../../lib/drillDifficulty';
+import useDrillFlash from '../../../../lib/useDrillFlash';
+import useUnexpectedExitGuard from '../../../../lib/useUnexpectedExitGuard';
+import DrillFooter from '../../../../components/drill/DrillFooter';
+import DrillCountdown from '../../../../components/drill/DrillCountdown';
+import DrillAccordion from '../../../../components/drill/DrillAccordion';
+import DrillFlashOverlay from '../../../../components/drill/DrillFlashOverlay';
+import FpsStartCard from '../../../../components/drill/FpsStartCard';
 
-// ============================================================
-// ZERO-LATENCY AUDIO SYNTHESIZER
-// ============================================================
-class AudioSynthesizer {
-  ctx: AudioContext | null = null;
-  enabled = true;
-  
-  init() {
-    if (!this.ctx) {
-      this.ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
-    }
-    if (this.ctx.state === 'suspended') this.ctx.resume();
-  }
-  
-  setEnabled(status: boolean) {
-    this.enabled = status;
-  }
-  
-  playHit() {
-    if (!this.enabled || !this.ctx) return;
-    try {
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(880, this.ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(1760, this.ctx.currentTime + 0.08);
-      gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.1);
-      osc.connect(gain);
-      gain.connect(this.ctx.destination);
-      osc.start();
-      osc.stop(this.ctx.currentTime + 0.1);
-    } catch(e) {}
-  }
-  
-  playMiss() {
-    if (!this.enabled || !this.ctx) return;
-    try {
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(220, this.ctx.currentTime);
-      osc.frequency.linearRampToValueAtTime(110, this.ctx.currentTime + 0.1);
-      gain.gain.setValueAtTime(0.07, this.ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.1);
-      osc.connect(gain);
-      gain.connect(this.ctx.destination);
-      osc.start();
-      osc.stop(this.ctx.currentTime + 0.1);
-    } catch(e) {}
-  }
-  
-  playLevelUp() {
-    if (!this.enabled || !this.ctx) return;
-    try {
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(523.25, this.ctx.currentTime); // C5
-      osc.frequency.setValueAtTime(659.25, this.ctx.currentTime + 0.08); // E5
-      osc.frequency.setValueAtTime(783.99, this.ctx.currentTime + 0.16); // G5
-      osc.frequency.setValueAtTime(1046.50, this.ctx.currentTime + 0.24); // C6
-      gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.4);
-      osc.connect(gain);
-      gain.connect(this.ctx.destination);
-      osc.start();
-      osc.stop(this.ctx.currentTime + 0.4);
-    } catch(e) {}
-  }
-}
+const DRILL_DURATION = 45; // 45 seconds focused duration
+const POINTS_PER_HIT = 100;
+const POINTS_PER_LEVEL = 250;
+const ELITE_SCORE = 6000; // Rebalanced after combo removal
+const STORAGE_KEY = 'skilldrills_reflex_training_drill_v2';
 
-const audioSynth = typeof window !== 'undefined' ? new AudioSynthesizer() : null;
+const RELATED_DRILLS = [
+  { id: "barrier-sequence-pursuit", name: "Jiggle Peek Trainer", cat: "Reaction Speed", desc: "Train angle holding and cover peeking reaction reflexes.", href: "/drills/reaction-speed/barrier-sequence-pursuit" },
+  { id: "fps-tracking-trainer", name: "FPS Tracking Trainer", cat: "Reaction Speed", desc: "Condition tracking accuracy against dynamic moving targets.", href: "/drills/reaction-speed/fps-tracking-trainer" },
+  { id: "market-doors-pursuit", name: "Corner Checking Trainer", cat: "Reaction Speed", desc: "Saccadic eye sweep & doorway clearing trainer.", href: "/drills/reaction-speed/market-doors-pursuit" },
+  { id: "reaction-simulator", name: "Reaction Simulator", cat: "Reaction Speed", desc: "Simulate rapid combat reaction scenarios.", href: "/drills/reaction-speed/reaction-simulator" },
+  { id: "reaction-time-test", name: "Reaction Time Test", cat: "Reaction Speed", desc: "Measure pure visual reaction speed in milliseconds.", href: "/drills/reaction-speed/reaction-time-test" },
+  { id: "saccadic-gallery", name: "Saccadic Gallery", cat: "Reaction Speed", desc: "Rapid saccadic eye movement & target acquisition gallery.", href: "/drills/reaction-speed/saccadic-gallery" }
+];
 
-// Score to adaptive level mapper
-const getLevel = (score: number) => {
-  if (score < 100) return 1;
-  if (score < 250) return 2;
-  if (score < 500) return 3;
-  if (score < 800) return 4;
-  if (score < 1200) return 5;
-  return Math.floor((score - 1200) / 400) + 6;
+const getSavedData = () => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return { bestScore: 0, bestLevel: 1, totalSessions: 0 };
+    return { bestScore: 0, bestLevel: 1, totalSessions: 0, ...JSON.parse(raw) };
+  } catch (e) {
+    return { bestScore: 0, bestLevel: 1, totalSessions: 0 };
+  }
 };
 
-// Level parameters selector
-const getLevelParameters = (lvl: number) => {
-  let targetDurationLimit = 1.8;
-  let idleDuration = 1000; // ms
-  let dashDuration = 150; // ms
-  if (lvl === 1) {
-    targetDurationLimit = 1.8;
-    idleDuration = 1000;
-  } else if (lvl === 2) {
-    targetDurationLimit = 1.4;
-    idleDuration = 800;
-  } else if (lvl === 3) {
-    targetDurationLimit = 1.15;
-    idleDuration = 600;
-  } else if (lvl === 4) {
-    targetDurationLimit = 0.90;
-    idleDuration = 450;
-  } else if (lvl === 5) {
-    targetDurationLimit = 0.70;
-    idleDuration = 350;
-  } else {
-    targetDurationLimit = Math.max(0.40, 0.55 - (lvl - 6) * 0.04);
-    idleDuration = Math.max(200, 280 - (lvl - 6) * 15);
-  }
-  return { targetDurationLimit, idleDuration, dashDuration };
+const saveData = (data: { bestScore: number; bestLevel: number; totalSessions: number }) => {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch (e) {}
 };
+
+
+// Smooth difficulty curve parameters driving Level 1 to Level 15
+const getLevelConfig = (level: number) => {
+  const p = getDifficultyProgress(level); // 0 -> 1 across L1..L15
+  return {
+    radius: Math.max(12, Math.round(26 - p * 14)),          // 26px -> 12px
+    ttl: Math.max(750, Math.round(1900 - p * 1150)),         // 1900ms -> 750ms (needs headroom to scan multiple targets)
+    concurrent: Math.min(5, 2 + Math.floor(p * 3.2)),        // 2 -> 5 simultaneous burst targets
+    spawnStagger: Math.max(50, Math.round(220 - p * 150)),    // 220ms -> 70ms between burst refills
+  };
+};
+
+type BurstTarget = { id: number; x: number; y: number; radius: number; spawnTime: number; ttl: number };
+type Particle = { x: number; y: number; vx: number; vy: number; color: string; life: number };
+type RingBurst = { x: number; y: number; startR: number; maxR: number; life: number; maxLife: number; color: string };
 
 export default function ReflexTrainingDrillClient() {
-  const [showRotateWarning, setShowRotateWarning] = useState(false);
-  const [isMobileLandscape, setIsMobileLandscape] = useState(false);
-  const [isMobileDevice, setIsMobileDevice] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const [soundEnabled, setSoundEnabled] = useState(true);
-  const [loading, setLoading] = useState(true);
-  const [isClient, setIsClient] = useState(false);
-  
-  // Game states
-  const [gameState, setGameState] = useState('start'); // start, playing, gameOver
-  const [hudLocked, setHudLocked] = useState(false);
-  const [score, setScore] = useState(0);
-  const [bestScore, setBestScore] = useState(0);
-  const [isNewBest, setIsNewBest] = useState(false);
-  const [combo, setCombo] = useState(0);
-  const [maxCombo, setMaxCombo] = useState(0);
-  const [level, setLevel] = useState(1);
-  const [timeLeft, setTimeLeft] = useState(60.0);
-  const [hits, setHits] = useState(0);
-  const [misses, setMisses] = useState(0);
-  const [avgReactionTime, setAvgReactionTime] = useState(0);
-  
-  // Storage variables
-  const [bestAccuracy, setBestAccuracy] = useState(0);
-  const [highestLevel, setHighestLevel] = useState(1);
-  const [bestCombo, setBestCombo] = useState(0);
-  const [totalSessions, setTotalSessions] = useState(0);
+  const [gameState, setGameState] = useState<'start' | 'countdown' | 'playing' | 'gameOver'>('start');
+  const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+  const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
+  const [openAccordion, setOpenAccordion] = useState<string | null>(null);
+  const [isMobile, setIsMobile] = useState<boolean>(false);
+  const [isPortrait, setIsPortrait] = useState<boolean>(false);
+  const [countdownValue, setCountdownValue] = useState<number | string>(3);
 
-  // Settings & Customization
-  const [targetColor, setTargetColor] = useState('#ef4444');
-  const [trailEffect, setTrailEffect] = useState(true);
-  const [glowEffect, setGlowEffect] = useState(false);
-  const [scanlinesActive, setScanlinesActive] = useState(true);
-  
-  // DOM Refs
+  // HUD & Best Stats State
+  const [uiScore, setUiScore] = useState<number>(0);
+  const [uiTimeLeft, setUiTimeLeft] = useState<number>(DRILL_DURATION);
+  const [bestScore, setBestScore] = useState<number>(0);
+  const [bestLevel, setBestLevel] = useState<number>(1);
+  const [totalSessions, setTotalSessions] = useState<number>(0);
+  const [isNewBest, setIsNewBest] = useState<boolean>(false);
+
+  // End Session Analytics
+  const [analytics, setAnalytics] = useState({
+    accuracy: 100,
+    successfulHits: 0,
+    missedClicks: 0,
+    timeouts: 0,
+    avgReactionTime: 0,
+    finalLevel: 1,
+    grade: null as any
+  });
+
+  // DOM & Engine Refs
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const animationRef = useRef<number | null>(null);
+  const countdownTimeoutsRef = useRef<NodeJS.Timeout[]>([]);
   const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  
-  // High-performance state tracking refs
-  const gameStateRef = useRef('start');
-  const scoreRef = useRef(0);
-  const comboRef = useRef(0);
-  const maxComboRef = useRef(0);
-  const levelRef = useRef(1);
-  const hitsRef = useRef(0);
-  const missesRef = useRef(0);
-  const timeLeftRef = useRef(60.0);
-  const reactionTimesRef = useRef<number[]>([]);
-  const bestReactionTimeRef = useRef(9999);
-  const survivalStartTimeRef = useRef(0);
-  const lastTargetSpawnTimeRef = useRef(0);
-  const hasPenalizedRef = useRef(false); // Double penalty prevention flag
-  
-  // Unique physics tracking for Stop and Go Dash
-  const trackingState = useRef({
-    lastTime: 0,
+
+  const engine = useRef({
+    score: 0,
+    level: 1,
+    successfulHits: 0,
+    missedClicks: 0,
+    timeouts: 0,
+    reactionTimes: [] as number[],
+    timeLeft: DRILL_DURATION,
+    screenShake: 0,
     particles: [] as Particle[],
     rings: [] as RingBurst[],
-    state: 'idle', // 'idle' or 'dashing'
-    timer: 0,
-    startX: 0,
-    startY: 0,
-    destX: 0,
-    destY: 0,
-    currentX: 0,
-    currentY: 0,
-    lifeTimer: 0
+    targets: [] as BurstTarget[],
+    nextId: 1,
+    nextSpawnTime: 0
   });
 
-  const [deviceScale, setDeviceScale] = useState(1.0);
+  const { flashes, triggerFlash } = useDrillFlash();
 
-  const getTargetRadius = useCallback((W: number, H: number, currentLevel: number) => {
-    const sizeMult = Math.max(0.45, 1.0 - (currentLevel - 1) * 0.07);
-    if (isMobileDevice) {
-      const screenFactor = Math.min(W / 800, H / 450);
-      return Math.max(9, Math.round(15 * screenFactor * sizeMult * deviceScale));
-    } else {
-      const baseRadius = 35;
-      if (isFullscreen) {
-        return Math.max(12, Math.round(baseRadius * sizeMult));
-      } else {
-        return Math.max(12, Math.round(baseRadius * (H / 1080) * sizeMult));
-      }
-    }
-  }, [isMobileDevice, deviceScale, isFullscreen]);
-  
+  // Mobile Detection & Device Orientation Tracking
   useEffect(() => {
-    gameStateRef.current = gameState;
-  }, [gameState]);
+    if (typeof window !== 'undefined') {
+      const checkDeviceAndOrientation = () => {
+        const ua = navigator.userAgent || '';
+        const hasTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+        const mobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua) || (window.innerWidth < 768) || hasTouch;
+        setIsMobile(mobileDevice);
 
-  useEffect(() => {
-    if (audioSynth) {
-      audioSynth.setEnabled(soundEnabled);
+        const portrait = window.innerHeight > window.innerWidth;
+        setIsPortrait(portrait);
+      };
+
+      checkDeviceAndOrientation();
+      window.addEventListener('resize', checkDeviceAndOrientation);
+      window.addEventListener('orientationchange', checkDeviceAndOrientation);
+
+      const saved = getSavedData();
+      setBestScore(saved.bestScore || 0);
+      setBestLevel(saved.bestLevel || 1);
+      setTotalSessions(saved.totalSessions || 0);
+
+      return () => {
+        window.removeEventListener('resize', checkDeviceAndOrientation);
+        window.removeEventListener('orientationchange', checkDeviceAndOrientation);
+      };
     }
+  }, []);
+
+  // Sound sync
+  useEffect(() => {
+    drillAudio.setEnabled(soundEnabled);
   }, [soundEnabled]);
 
-  // Orientation Check for Mobile
+  // Fullscreen Listener
   useEffect(() => {
-    const checkOrientation = () => {
-      if (typeof window === 'undefined') return;
-      const ua = navigator.userAgent || '';
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua) || ('ontouchstart' in window);
-      setIsMobileDevice(isMobile);
-      
-      const isPortrait = window.innerHeight > window.innerWidth;
-      if (isMobile && isPortrait) {
-        setShowRotateWarning(true);
-      } else {
-        setShowRotateWarning(false);
-      }
-    };
-    checkOrientation();
-    window.addEventListener('resize', checkOrientation);
-    window.addEventListener('orientationchange', checkOrientation);
+    const handleFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
+
+  // Cleanup Timeouts on Unmount
+  useEffect(() => {
     return () => {
-      window.removeEventListener('resize', checkOrientation);
-      window.removeEventListener('orientationchange', checkOrientation);
-    };
-  }, []);
-
-  // Landscape full screen viewport offset detection
-  useEffect(() => {
-    const checkLandscape = () => {
-      if (typeof window === 'undefined') return;
-      const ua = navigator.userAgent || '';
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua) || ('ontouchstart' in window);
-      if (isMobile && window.innerWidth > window.innerHeight) {
-        setIsMobileLandscape(true);
-      } else {
-        setIsMobileLandscape(false);
-      }
-    };
-    checkLandscape();
-    window.addEventListener('resize', checkLandscape);
-    window.addEventListener('orientationchange', () => setTimeout(checkLandscape, 150));
-    return () => {
-      window.removeEventListener('resize', checkLandscape);
-      window.removeEventListener('orientationchange', checkLandscape);
-    };
-  }, []);
-
-  useEffect(() => {
-    setIsClient(true);
-    setLoading(false);
-    
-    if (typeof window !== 'undefined') {
-      const ua = navigator.userAgent || '';
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua) || ('ontouchstart' in window);
-      let scale = 1.0;
-      if (isMobile) {
-        scale = 0.8;
-      } else {
-        scale = 1.2;
-      }
-      setDeviceScale(scale);
-      
-      try {
-        const storedScore = localStorage.getItem('skilldrills_stop-and-go-dash_best');
-        const storedAcc = localStorage.getItem('skilldrills_stop-and-go-dash_best_acc');
-        const storedLvl = localStorage.getItem('skilldrills_stop-and-go-dash_best_lvl');
-        const storedCombo = localStorage.getItem('skilldrills_stop-and-go-dash_best_combo');
-        const storedSessions = localStorage.getItem('skilldrills_stop-and-go-dash_sessions');
-
-        if (storedScore) setBestScore(parseInt(storedScore, 10));
-        if (storedAcc) setBestAccuracy(parseInt(storedAcc, 10));
-        if (storedLvl) setHighestLevel(parseInt(storedLvl, 10));
-        if (storedCombo) setBestCombo(parseInt(storedCombo, 10));
-        if (storedSessions) setTotalSessions(parseInt(storedSessions, 10));
-      } catch (e) {}
-    }
-  }, []);
-
-  const toggleFullscreen = useCallback(async () => {
-    try {
-      if (!isFullscreen) {
-        const el = containerRef.current;
-        if (el?.requestFullscreen) {
-          await el.requestFullscreen();
-          setIsFullscreen(true);
-        }
-      } else {
-        if (document.fullscreenElement) {
-          await document.exitFullscreen();
-        }
-        setIsFullscreen(false);
-      }
-    } catch (e) {}
-  }, [isFullscreen]);
-
-  useEffect(() => {
-    const handleFsChange = () => setIsFullscreen(!!document.fullscreenElement);
-    document.addEventListener('fullscreenchange', handleFsChange);
-    return () => document.removeEventListener('fullscreenchange', handleFsChange);
-  }, []);
-
-  // Prevent accidental page navigation when HUD is locked
-  useEffect(() => {
-    if (gameState === 'playing' && hudLocked) {
-      window.history.pushState(null, '', window.location.href);
-      const handlePopState = () => {
-        window.history.pushState(null, '', window.location.href);
-      };
-      window.addEventListener('popstate', handlePopState);
-      return () => window.removeEventListener('popstate', handlePopState);
-    }
-  }, [gameState, hudLocked]);
-
-  // Correct hit scoring
-  const handleHit = useCallback((x: number, y: number) => {
-    hitsRef.current += 1;
-    setHits(hitsRef.current);
-    
-    scoreRef.current += 10;
-    setScore(scoreRef.current);
-    trackingState.current.particles.push({
-      x, y, text: '+10', color: '#4ade80', life: 1.0, maxLife: 1.0
-    });
-    
-    comboRef.current += 1;
-    setCombo(comboRef.current);
-    if (comboRef.current > maxComboRef.current) {
-      maxComboRef.current = comboRef.current;
-      setMaxCombo(maxComboRef.current);
-    }
-    
-    // Add +1.0s time bonus, capped at 60s
-    timeLeftRef.current = Math.min(60.0, timeLeftRef.current + 1.0);
-    setTimeLeft(timeLeftRef.current);
-    
-    if (audioSynth) audioSynth.playHit();
-    
-    // Check adaptive level
-    const nextLvl = getLevel(scoreRef.current);
-    if (nextLvl > levelRef.current) {
-      levelRef.current = nextLvl;
-      setLevel(nextLvl);
-      if (audioSynth) audioSynth.playLevelUp();
-    }
-    
-    const now = performance.now();
-    const rt = now - lastTargetSpawnTimeRef.current;
-    if (rt > 0) {
-      reactionTimesRef.current.push(rt);
-      bestReactionTimeRef.current = Math.min(bestReactionTimeRef.current, rt);
-    }
-    lastTargetSpawnTimeRef.current = now;
-    
-  }, []);
-
-  // Error and timeout miss penalty
-  const handleMiss = useCallback((x: number, y: number, isTimeout = false) => {
-    if (hasPenalizedRef.current) return; // Prevent double penalties per target cycle
-    hasPenalizedRef.current = true;
-    
-    missesRef.current += 1;
-    setMisses(missesRef.current);
-    
-    comboRef.current = 0;
-    setCombo(0);
-    const cvs = canvasRef.current;
-    const px = isTimeout ? (cvs ? cvs.width / 2 : 150) : x;
-    const py = isTimeout ? (cvs ? cvs.height / 2 : 150) : y;
-    const text = isTimeout ? 'Time Out! -1s' : '-1s Miss';
-    trackingState.current.particles.push({
-      x: px, y: py, text, color: '#ef4444', life: 1.2, maxLife: 1.2
-    });
-    
-    // Deduct -1s time penalty
-    timeLeftRef.current = Math.max(0.0, timeLeftRef.current - 1.0);
-    setTimeLeft(timeLeftRef.current);
-    
-    if (audioSynth) audioSynth.playMiss();
-    
-    lastTargetSpawnTimeRef.current = performance.now();
-    
-  }, []);
-
-  // Countdown timer clock
-  useEffect(() => {
-    if (gameState === 'playing') {
-      timerIntervalRef.current = setInterval(() => {
-        timeLeftRef.current = Math.max(0, timeLeftRef.current - 0.1);
-        setTimeLeft(timeLeftRef.current);
-        
-        if (timeLeftRef.current <= 0) {
-          timeLeftRef.current = 0;
-          setTimeLeft(0);
-          setGameState('gameOver');
-          gameStateRef.current = 'gameOver';
-          if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
-          
-          const times = reactionTimesRef.current;
-          const avg = times.length > 0 ? Math.round(times.reduce((a, b) => a + b, 0) / times.length) : 0;
-          setAvgReactionTime(avg);
-          
-          // Accuracy calculation
-          const totalAttempts = hitsRef.current + missesRef.current;
-          const accuracyVal = totalAttempts === 0 ? 100 : Math.round((hitsRef.current / totalAttempts) * 100);
-
-          try {
-            const storedScore = localStorage.getItem('skilldrills_stop-and-go-dash_best');
-            const currentBestScore = storedScore ? parseInt(storedScore, 10) || 0 : 0;
-            
-            const sessionsCount = (parseInt(localStorage.getItem('skilldrills_stop-and-go-dash_sessions') || '0', 10) || 0) + 1;
-            localStorage.setItem('skilldrills_stop-and-go-dash_sessions', sessionsCount.toString());
-            setTotalSessions(sessionsCount);
-
-            if (scoreRef.current > currentBestScore) {
-              localStorage.setItem('skilldrills_stop-and-go-dash_best', scoreRef.current.toString());
-              localStorage.setItem('skilldrills_stop-and-go-dash_best_acc', accuracyVal.toString());
-              localStorage.setItem('skilldrills_stop-and-go-dash_best_lvl', levelRef.current.toString());
-              localStorage.setItem('skilldrills_stop-and-go-dash_best_combo', maxComboRef.current.toString());
-              
-              setBestScore(scoreRef.current);
-              setBestAccuracy(accuracyVal);
-              setHighestLevel(levelRef.current);
-              setBestCombo(maxComboRef.current);
-              setIsNewBest(true);
-            }
-          } catch (e) {}
-        }
-      }, 100);
-    }
-    return () => {
+      countdownTimeoutsRef.current.forEach(clearTimeout);
       if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
     };
-  }, [gameState]);
+  }, []);
 
-  // Render & Cycle Physics
-  useEffect(() => {
+  // Exit Drill cleanly
+  const handleExitDrill = useCallback(async () => {
+    markIntentionalExit();
+    countdownTimeoutsRef.current.forEach(clearTimeout);
+    countdownTimeoutsRef.current = [];
+    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+
+    if (document.fullscreenElement) {
+      await document.exitFullscreen().catch(() => {});
+    }
+    setGameState('start');
+  }, []);
+
+  const { markIntentionalExit } = useUnexpectedExitGuard({
+    active: gameState === 'playing' || gameState === 'countdown',
+    onUnexpectedExit: handleExitDrill,
+  });
+
+  // Complete Drill Session cleanly
+  const endGame = useCallback(() => {
+    if (animationRef.current) cancelAnimationFrame(animationRef.current);
+    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+
+    setGameState('gameOver');
+
+    const e = engine.current;
+    const totalActions = e.successfulHits + e.missedClicks + e.timeouts;
+    const acc = totalActions > 0 ? Math.round((e.successfulHits / totalActions) * 100) : 100;
+    const avgRt = e.reactionTimes.length > 0
+      ? Math.round(e.reactionTimes.reduce((a, b) => a + b, 0) / e.reactionTimes.length)
+      : 0;
+
+    const rating = getFpsScoreGrade(e.score, ELITE_SCORE);
+    const gradeObj = { letter: rating.grade, label: rating.label, color: rating.color };
+
+    setAnalytics({
+      accuracy: acc,
+      successfulHits: e.successfulHits,
+      missedClicks: e.missedClicks,
+      timeouts: e.timeouts,
+      avgReactionTime: avgRt,
+      finalLevel: e.level,
+      grade: gradeObj
+    });
+
+    const isNew = e.score > bestScore;
+    if (isNew) {
+      setIsNewBest(true);
+      setBestScore(e.score);
+    } else {
+      setIsNewBest(false);
+    }
+
+    const newBestLevel = Math.max(bestLevel, e.level);
+    setBestLevel(newBestLevel);
+
+    setTotalSessions((prev) => {
+      const next = prev + 1;
+      saveData({
+        bestScore: Math.max(bestScore, e.score),
+        bestLevel: newBestLevel,
+        totalSessions: next
+      });
+      return next;
+    });
+
+    drillAudio.playSessionEnd();
+  }, [bestScore, bestLevel]);
+
+  // Burst Target Spawn — fills open slots up to the level's concurrent target count,
+  // rejecting spawn points that overlap an already-active target
+  const spawnBurstTarget = useCallback((W: number, H: number, level: number) => {
+    const e = engine.current;
+    const config = getLevelConfig(level);
+
+    const baseR = isMobile ? 26 : 24;
+    const radius = Math.max(12, Math.round(baseR - (getDifficultyProgress(level) * 10)));
+
+    const marginX = W * 0.13;
+    const marginY = H * 0.17;
+
+    let x = 0, y = 0, attempts = 0;
+    do {
+      x = marginX + Math.random() * (W - marginX * 2);
+      y = marginY + Math.random() * (H - marginY * 2);
+      attempts += 1;
+    } while (
+      attempts < 20 &&
+      e.targets.some((t) => Math.hypot(x - t.x, y - t.y) < (radius + t.radius) * 1.8)
+    );
+
+    e.targets.push({
+      id: e.nextId++,
+      x, y, radius,
+      spawnTime: performance.now(),
+      ttl: config.ttl,
+    });
+  }, [isMobile]);
+
+  // Enter Drill (Full Screen -> 321GO Countdown with Sound -> Playing)
+  const enterDrill = useCallback(async () => {
+    try {
+      if (containerRef.current && !document.fullscreenElement) {
+        await containerRef.current.requestFullscreen();
+      }
+    } catch (e) {}
+
+    countdownTimeoutsRef.current.forEach(clearTimeout);
+    countdownTimeoutsRef.current = [];
+    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+
+    drillAudio.init();
+
+    const saved = getSavedData();
+    const startLevel = getStartLevel(saved.bestLevel);
+
+    setUiScore(0);
+    setUiTimeLeft(DRILL_DURATION);
+
+    engine.current = {
+      score: 0,
+      level: startLevel,
+      successfulHits: 0,
+      missedClicks: 0,
+      timeouts: 0,
+      reactionTimes: [],
+      timeLeft: DRILL_DURATION,
+      screenShake: 0,
+      particles: [],
+      rings: [],
+      targets: [],
+      nextId: 1,
+      nextSpawnTime: 0
+    };
+
+    // Countdown sequence: 3 -> 2 -> 1 -> GO with Audio Cues
+    setGameState('countdown');
+    setCountdownValue(3);
+    drillAudio.playCountdownTick();
+
+    const t1 = setTimeout(() => {
+      setCountdownValue(2);
+      drillAudio.playCountdownTick();
+    }, 700);
+
+    const t2 = setTimeout(() => {
+      setCountdownValue(1);
+      drillAudio.playCountdownTick();
+    }, 1400);
+
+    const t3 = setTimeout(() => {
+      setCountdownValue('GO');
+      drillAudio.playGo();
+    }, 2100);
+
+    const t4 = setTimeout(() => {
+      setGameState('playing');
+
+      // Start 1-second Interval Timer (45 seconds duration)
+      let remaining = DRILL_DURATION;
+      timerIntervalRef.current = setInterval(() => {
+        remaining -= 1;
+        setUiTimeLeft(remaining);
+        if (remaining <= 0) {
+          endGame();
+        }
+      }, 1000);
+
+    }, 2450);
+
+    countdownTimeoutsRef.current = [t1, t2, t3, t4];
+  }, [endGame]);
+
+  // Target Click / Tap Handler — hit-tests against every live target in the burst,
+  // most-recently-spawned first
+  const handleCanvasInteraction = useCallback((clientX: number, clientY: number) => {
     if (gameState !== 'playing') return;
     const cvs = canvasRef.current;
     if (!cvs) return;
-    const ctx = cvs.getContext('2d', { alpha: false });
+
+    const rect = cvs.getBoundingClientRect();
+    const clickX = clientX - rect.left;
+    const clickY = clientY - rect.top;
+
+    const e = engine.current;
+    const hitPad = isMobile ? 24 : 14;
+
+    let hitIndex = -1;
+    for (let i = e.targets.length - 1; i >= 0; i--) {
+      const t = e.targets[i];
+      const dist = Math.hypot(clickX - t.x, clickY - t.y);
+      if (dist <= t.radius + hitPad) { hitIndex = i; break; }
+    }
+
+    if (hitIndex !== -1) {
+      const hitTarget = e.targets[hitIndex];
+      const rt = Math.round(performance.now() - hitTarget.spawnTime);
+      e.reactionTimes.push(rt);
+      e.successfulHits += 1;
+      e.score += POINTS_PER_HIT;
+
+      // Monotonic level progression as user scores points
+      const rawLevel = Math.floor(e.score / POINTS_PER_LEVEL) + 1;
+      e.level = Math.max(e.level, rawLevel);
+
+      setUiScore(e.score);
+      drillAudio.playHit();
+
+      // Particles explosion (Constant Red)
+      for (let i = 0; i < 10; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const spd = 2 + Math.random() * 4;
+        e.particles.push({
+          x: hitTarget.x,
+          y: hitTarget.y,
+          vx: Math.cos(angle) * spd,
+          vy: Math.sin(angle) * spd,
+          color: '#ef4444',
+          life: 1.0
+        });
+      }
+
+      // Ring Burst Effect
+      e.rings.push({
+        x: hitTarget.x,
+        y: hitTarget.y,
+        startR: hitTarget.radius * 0.4,
+        maxR: hitTarget.radius * 2.6,
+        life: 0.28,
+        maxLife: 0.28,
+        color: '#ef4444'
+      });
+
+      e.targets.splice(hitIndex, 1);
+      return;
+    }
+
+    // Missed click on empty space: no penalty, just flash + audio feedback
+    e.missedClicks += 1;
+    e.screenShake = 6;
+    triggerFlash();
+    drillAudio.playPenalty();
+  }, [gameState, isMobile, triggerFlash]);
+
+  // Canvas Physics & Render Loop (Multi-Target Burst Reflex Engine)
+  useEffect(() => {
+    if (gameState !== 'playing') return;
+    const cvs = canvasRef.current;
+    const container = containerRef.current;
+    if (!cvs || !container) return;
+
+    const ctx = cvs.getContext('2d');
     if (!ctx) return;
 
-    const updateDimensions = () => {
-      const ct = containerRef.current;
-      if (!ct) return;
-      const rect = ct.getBoundingClientRect();
-      const dpr = window.devicePixelRatio || 1;
+    const updateSize = () => {
+      if (!container) return;
+      const rect = container.getBoundingClientRect();
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
       cvs.width = rect.width * dpr;
       cvs.height = rect.height * dpr;
-      cvs.style.width = rect.width + 'px';
-      cvs.style.height = rect.height + 'px';
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.scale(dpr, dpr);
+    };
+
+    updateSize();
+    const ro = new ResizeObserver(updateSize);
+    ro.observe(container);
+
+    let lastTime = performance.now();
+
+    const draw = (now: number) => {
+      const dt = Math.min((now - lastTime) / 1000, 0.1);
+      lastTime = now;
+
+      const rect = container.getBoundingClientRect();
       const W = rect.width;
       const H = rect.height;
-      
-      trackingState.current.state = 'idle';
-      trackingState.current.timer = 0;
-      trackingState.current.startX = W / 2;
-      trackingState.current.startY = H / 2;
-      trackingState.current.destX = W / 2;
-      trackingState.current.destY = H / 2;
-      trackingState.current.currentX = W / 2;
-      trackingState.current.currentY = W / 2;
-      trackingState.current.lifeTimer = 0;
-    };
+      const e = engine.current;
 
-    const ro = new ResizeObserver(updateDimensions);
-    if (containerRef.current) ro.observe(containerRef.current);
-    window.addEventListener('resize', updateDimensions);
-    updateDimensions();
-
-    trackingState.current.lastTime = 0;
-    lastTargetSpawnTimeRef.current = performance.now();
-    hasPenalizedRef.current = false;
-
-    const drawLoop = (ts: number) => {
-      if (gameStateRef.current !== 'playing') return;
-      if (!trackingState.current.lastTime) {
-        trackingState.current.lastTime = ts;
+      // Screen Shake Effect
+      ctx.save();
+      if (e.screenShake > 0) {
+        const sx = (Math.random() - 0.5) * e.screenShake;
+        const sy = (Math.random() - 0.5) * e.screenShake;
+        ctx.translate(sx, sy);
+        e.screenShake *= 0.85;
+        if (e.screenShake < 0.2) e.screenShake = 0;
       }
-      let dt = (ts - trackingState.current.lastTime) / 1000;
-      if (dt > 0.15) dt = 0.016; // caps frame lag
-      trackingState.current.lastTime = ts;
 
-      const dpr = window.devicePixelRatio || 1;
-      const W = cvs.width / dpr;
-      const H = cvs.height / dpr;
-      const currentLevel = levelRef.current;
-
-      // Draw background
-      ctx.fillStyle = '#05060b';
+      // Clear Canvas (Deep Dark `#050508`)
+      ctx.fillStyle = '#050508';
       ctx.fillRect(0, 0, W, H);
 
-      // Dot-matrix tactical grid
-      ctx.fillStyle = 'rgba(59, 130, 246, 0.055)';
-      const dotSpacing = 40;
-      for (let gx = dotSpacing; gx < W; gx += dotSpacing) {
-        for (let gy = dotSpacing; gy < H; gy += dotSpacing) {
-          ctx.fillRect(gx - 0.5, gy - 0.5, 1, 1);
+      // Render subtle background grid
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.02)';
+      ctx.lineWidth = 1;
+      const gridSize = 40;
+      for (let x = 0; x < W; x += gridSize) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+      }
+      for (let y = 0; y < H; y += gridSize) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+      }
+
+      // Refill the burst up to the level's concurrent target count, staggered
+      // slightly so a fresh wave doesn't all snap in on the same frame
+      if (now >= e.nextSpawnTime) {
+        const config = getLevelConfig(e.level);
+        if (e.targets.length < config.concurrent) {
+          spawnBurstTarget(W, H, e.level);
+          e.nextSpawnTime = now + config.spawnStagger;
+        } else {
+          e.nextSpawnTime = now + 120;
         }
       }
 
-      // Physics State Transitions
-      const { targetDurationLimit, idleDuration, dashDuration } = getLevelParameters(currentLevel);
-      const radius = getTargetRadius(W, H, currentLevel);
-
-      {
-        trackingState.current.timer += dt * 1000;
-        
-        if (trackingState.current.state === 'idle') {
-          if (trackingState.current.timer > idleDuration) {
-            trackingState.current.state = 'dashing';
-            trackingState.current.timer = 0;
-            trackingState.current.startX = trackingState.current.currentX;
-            trackingState.current.startY = trackingState.current.currentY;
-            
-            // Choose a target position inside the boundary with margins
-            const padding = radius + 20;
-            trackingState.current.destX = padding + Math.random() * (W - padding * 2);
-            trackingState.current.destY = padding + Math.random() * (H - padding * 2);
-          }
-        } else if (trackingState.current.state === 'dashing') {
-          const progress = Math.min(trackingState.current.timer / dashDuration, 1);
-          const easeOut = 1 - Math.pow(1 - progress, 3); // Cubic Ease Out
-
-          trackingState.current.currentX = trackingState.current.startX + (trackingState.current.destX - trackingState.current.startX) * easeOut;
-          trackingState.current.currentY = trackingState.current.startY + (trackingState.current.destY - trackingState.current.startY) * easeOut;
-
-          if (progress === 1) {
-            trackingState.current.state = 'idle';
-            trackingState.current.timer = 0;
-          }
-        }
-        
-        // Target Lifespan limits
-        trackingState.current.lifeTimer += dt;
-        if (trackingState.current.lifeTimer > targetDurationLimit) {
-          handleMiss(0, 0, true);
-          hasPenalizedRef.current = false;
-          
-          trackingState.current.state = 'idle';
-          trackingState.current.timer = idleDuration; // Force immediate dash recalculation
-          trackingState.current.lifeTimer = 0;
+      // Timeout Check — each burst target ages out independently
+      for (let i = e.targets.length - 1; i >= 0; i--) {
+        const t = e.targets[i];
+        const age = now - t.spawnTime;
+        if (age >= t.ttl) {
+          e.targets.splice(i, 1);
+          e.timeouts += 1;
+          e.screenShake = 6;
+          triggerFlash();
+          drillAudio.playPenalty();
         }
       }
 
-      const cx = trackingState.current.currentX;
-      const cy = trackingState.current.currentY;
-
-      // Draw premium target
-      const r = radius;
-      ctx.save();
-      // Ghost outer ring
-      ctx.globalAlpha = 0.2;
-      ctx.strokeStyle = targetColor;
-      ctx.lineWidth = 1.0;
-      ctx.beginPath();
-      ctx.arc(cx, cy, r + 5, 0, Math.PI * 2);
-      ctx.stroke();
-      // Tactical ring
-      ctx.globalAlpha = 0.55;
-      ctx.strokeStyle = targetColor;
-      ctx.lineWidth = 1.8;
-      ctx.beginPath();
-      ctx.arc(cx, cy, r, 0, Math.PI * 2);
-      ctx.stroke();
-      // Filled body
-      ctx.globalAlpha = 0.88;
-      ctx.fillStyle = targetColor;
-      ctx.beginPath();
-      ctx.arc(cx, cy, r * 0.82, 0, Math.PI * 2);
-      ctx.fill();
-      // Highlight sheen
-      ctx.globalAlpha = 0.3;
-      ctx.fillStyle = '#ffffff';
-      ctx.beginPath();
-      ctx.arc(cx - r * 0.2, cy - r * 0.2, r * 0.28, 0, Math.PI * 2);
-      ctx.fill();
-      // Bright center core
-      ctx.globalAlpha = 1.0;
-      ctx.fillStyle = '#ffffff';
-      ctx.beginPath();
-      ctx.arc(cx, cy, r * 0.18, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-
-      // Render Trail Effect
-      if (trailEffect) {
-        ctx.strokeStyle = `rgba(${parseInt(targetColor.slice(1,3), 16) || 239}, ${parseInt(targetColor.slice(3,5), 16) || 68}, ${parseInt(targetColor.slice(5,7), 16) || 68}, 0.15)`;
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.arc(cx, cy, radius + 8, 0, Math.PI * 2);
-        ctx.stroke();
-      }
-
-      // CRT overlay scanlines
-      if (scanlinesActive) {
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.01)';
-        for (let y = 0; y < H; y += 4) {
-          ctx.fillRect(0, y, W, 1.5);
-        }
-      }
-
-      
-      // Draw Hit Ring Bursts
-      const rings = trackingState.current.rings;
-      if (rings && rings.length > 0) {
-        for (let i = rings.length - 1; i >= 0; i--) {
-          const ring = rings[i];
-          ring.life -= dt;
-          if (ring.life <= 0) { rings.splice(i, 1); continue; }
-          const progress = 1 - ring.life / ring.maxLife;
-          const currentR = ring.startR + (ring.maxR - ring.startR) * progress;
-          ctx.save();
-          ctx.globalAlpha = (ring.life / ring.maxLife) * 0.75;
-          ctx.strokeStyle = ring.color;
-          ctx.lineWidth = 2.5;
-          ctx.beginPath();
-          ctx.arc(ring.x, ring.y, currentR, 0, Math.PI * 2);
-          ctx.stroke();
-          ctx.restore();
-        }
-      }
-
-      // Draw In-Canvas Feedback Particles
-      const particles = trackingState.current.particles;
-      if (particles) {
+      // Draw every live burst target (Tactical Red Target Sphere matching reference design)
+      for (const t of e.targets) {
+        const r = t.radius;
+        const remaining = Math.max(0, 1 - (now - t.spawnTime) / t.ttl);
         ctx.save();
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.font = `bold ${isMobileDevice ? 19 : 16}px monospace`;
-        
-        for (let i = particles.length - 1; i >= 0; i--) {
-          const p = particles[i];
-          p.life -= dt;
-          p.y -= dt * 38;
-          
-          const alpha = Math.max(0, p.life / p.maxLife);
-          let r = 255, g = 255, b = 255;
-          if (p.color.startsWith('#') && p.color.length === 7) {
-            r = parseInt(p.color.slice(1, 3), 16);
-            g = parseInt(p.color.slice(3, 5), 16);
-            b = parseInt(p.color.slice(5, 7), 16);
-          }
-          
-          ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${alpha})`;
-          ctx.fillText(p.text, p.x, p.y);
-          
-          if (p.life <= 0) particles.splice(i, 1);
-        }
+
+        // Depleting countdown arc — critical when several targets are alive at once
+        // so the player can see which one is about to expire
+        ctx.globalAlpha = 0.5;
+        ctx.strokeStyle = remaining < 0.3 ? '#ef4444' : '#ffffff';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(t.x, t.y, r + 8, -Math.PI / 2, -Math.PI / 2 + remaining * Math.PI * 2);
+        ctx.stroke();
+
+        // Ghost outer ring
+        ctx.globalAlpha = 0.2;
+        ctx.strokeStyle = '#ef4444';
+        ctx.lineWidth = 1.0;
+        ctx.beginPath();
+        ctx.arc(t.x, t.y, r + 5, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Tactical outer ring
+        ctx.globalAlpha = 0.55;
+        ctx.strokeStyle = '#ef4444';
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.arc(t.x, t.y, r, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Filled red body with subtle glow
+        ctx.globalAlpha = 0.88;
+        ctx.shadowColor = '#ef4444';
+        ctx.shadowBlur = 14;
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath();
+        ctx.arc(t.x, t.y, r * 0.82, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+
+        // Highlight sheen
+        ctx.globalAlpha = 0.3;
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(t.x - r * 0.2, t.y - r * 0.2, r * 0.28, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Bright white center core
+        ctx.globalAlpha = 1.0;
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(t.x, t.y, Math.max(2.5, r * 0.18), 0, Math.PI * 2);
+        ctx.fill();
+
         ctx.restore();
       }
-animationRef.current = requestAnimationFrame(drawLoop);
+
+      // Ring Bursts Draw
+      for (let i = e.rings.length - 1; i >= 0; i--) {
+        const ring = e.rings[i];
+        ring.life -= dt;
+        if (ring.life <= 0) { e.rings.splice(i, 1); continue; }
+        const progress = 1 - ring.life / ring.maxLife;
+        const currentR = ring.startR + (ring.maxR - ring.startR) * progress;
+        ctx.save();
+        ctx.globalAlpha = (ring.life / ring.maxLife) * 0.75;
+        ctx.strokeStyle = ring.color;
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.arc(ring.x, ring.y, currentR, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // Particles Update & Draw
+      for (let i = e.particles.length - 1; i >= 0; i--) {
+        const p = e.particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life -= dt * 2.5;
+        if (p.life <= 0) {
+          e.particles.splice(i, 1);
+          continue;
+        }
+        ctx.globalAlpha = Math.max(0, p.life);
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1.0;
+
+      ctx.restore();
+      animationRef.current = requestAnimationFrame(draw);
     };
 
-    animationRef.current = requestAnimationFrame(drawLoop);
+    animationRef.current = requestAnimationFrame(draw);
 
     return () => {
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
-      window.removeEventListener('resize', updateDimensions);
       ro.disconnect();
     };
-  }, [gameState, targetColor, trailEffect, glowEffect, scanlinesActive, deviceScale]);
+  }, [gameState, spawnBurstTarget, triggerFlash, isMobile]);
 
-  // Pointer click handler
-  const handlePointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    if (gameStateRef.current !== 'playing') return;
-    const cvs = canvasRef.current;
-    if (!cvs) return;
-    const rect = cvs.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    
-    const cx = trackingState.current.currentX;
-    const cy = trackingState.current.currentY;
-    const dx = x - cx;
-    const dy = y - cy;
-    const dist = Math.hypot(dx, dy);
-    
-    const currentLevel = levelRef.current;
-    const dpr2 = window.devicePixelRatio || 1;
-    const W = cvs.width / dpr2;
-    const H = cvs.height / dpr2;
-    const radius = getTargetRadius(W, H, currentLevel);
-    
-    // Generous hit boundary margin for touch devices
-    const hitRadius = radius * (isMobileDevice ? 2.25 : 1.75);
-    
-    if (dist <= hitRadius) {
-      handleHit(x, y);
-      hasPenalizedRef.current = false; // Reset penalize flag for next cycle
-      
-      // Force immediate relocation to new spot
-      trackingState.current.rings.push({ x, y, startR: radius * 0.4, maxR: radius * 2.8, life: 0.28, maxLife: 0.28, color: targetColor });
-      trackingState.current.state = 'idle';
-      trackingState.current.timer = getLevelParameters(levelRef.current).idleDuration;
-      trackingState.current.lifeTimer = 0;
-    } else {
-      handleMiss(x, y);
-    }
-  };
-
-  const startDrill = useCallback(() => {
-    if (audioSynth) audioSynth.init();
-    
-    scoreRef.current = 0;
-    comboRef.current = 0;
-    trackingState.current.particles = [];
-    maxComboRef.current = 0;
-    levelRef.current = 1;
-    hitsRef.current = 0;
-    missesRef.current = 0;
-    timeLeftRef.current = 60.0;
-    reactionTimesRef.current = [];
-    bestReactionTimeRef.current = 9999;
-    survivalStartTimeRef.current = performance.now();
-    hasPenalizedRef.current = false;
-    
-    setScore(0);
-    setCombo(0);
-    setMaxCombo(0);
-    setLevel(1);
-    setHits(0);
-    setMisses(0);
-    setTimeLeft(60.0);
-    setIsNewBest(false);
-    setHudLocked(false);
-    
-    const enterFs = async () => {
-      try {
-        const el = containerRef.current;
-        if (el && !document.fullscreenElement) {
-          if (el.requestFullscreen) {
-            await el.requestFullscreen();
-            setIsFullscreen(true);
-          }
-        }
-      } catch (e) {
-        console.error('Fullscreen request failed', e);
+  // Share Score Card helper
+  const sharePage = useCallback(async () => {
+    const url = 'https://skilldrills.online/drills/reaction-speed/reflex-training-drill';
+    try {
+      const canvas = generateShareCard({
+        score: uiScore,
+        bestScore,
+        accuracy: analytics.accuracy,
+        rating: { letter: analytics.grade?.letter || 'C', label: analytics.grade?.label || 'Keep Going', emoji: '🎯' },
+        newBest: isNewBest,
+        drillName: 'Reflex Training Drill',
+        playerName: getPlayerName(),
+      });
+      await shareScoreCard(url, canvas);
+    } catch (e) {
+      const text = `🎯 I scored ${uiScore} PTS (Level ${analytics.finalLevel}) on Reflex Training Drill! Multi-target burst accuracy: ${analytics.accuracy}%. Practice free reflex drills at skilldrills.online! ⚡`;
+      if (typeof navigator !== 'undefined' && navigator.share) {
+        navigator.share({ title: 'Reflex Training Drill Score', text, url }).catch(() => {});
+      } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
+        navigator.clipboard.writeText(`${text} ${url}`);
+        alert('Score & drill link copied to clipboard!');
       }
-    };
-    
-    enterFs().finally(() => {
-      setGameState('playing');
-      gameStateRef.current = 'playing';
-
-      const cvs = canvasRef.current;
-      const w = cvs ? cvs.width : window.innerWidth;
-      const h = cvs ? cvs.height : window.innerHeight;
-      
-      trackingState.current.state = 'idle';
-      trackingState.current.timer = 0;
-      trackingState.current.startX = w / 2;
-      trackingState.current.startY = h / 2;
-      trackingState.current.destX = w / 2;
-      trackingState.current.destY = h / 2;
-      trackingState.current.currentX = w / 2;
-      trackingState.current.currentY = h / 2;
-      trackingState.current.lifeTimer = 0;
-    });
-  }, []);
-
-  const resetDrill = useCallback(() => {
-    if (animationRef.current) cancelAnimationFrame(animationRef.current);
-    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
-    setGameState('start');
-    gameStateRef.current = 'start';
-    setTimeLeft(60.0);
-    setHudLocked(false);
-  }, []);
-
-  const shareScore = useCallback(async () => {
-    const text = `🎮 I scored ${score} PTS on Reflex Training Drill! Average reaction: ${avgReactionTime}ms. Practice free reflex drills at skilldrills.online! ⚡`;
-    if (typeof navigator !== 'undefined' && navigator.share) {
-      try {
-        await navigator.share({
-          title: 'My SkillDrills Reflex Score',
-          text,
-          url: 'https://skilldrills.online/drills/reaction-speed/reflex-training-drill'
-        });
-      } catch (e) {}
-    } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
-      navigator.clipboard.writeText(text);
-      alert('Score card copied to clipboard!');
     }
-  }, [score, avgReactionTime]);
-
-  const copyPageLink = useCallback(() => {
-    if (typeof navigator !== 'undefined' && navigator.clipboard) {
-      navigator.clipboard.writeText('https://skilldrills.online/drills/reaction-speed/reflex-training-drill');
-      alert('Link copied to clipboard!');
-    }
-  }, []);
-
-  const colorPresets = [
-    { name: 'Laser Red', value: '#ef4444' },
-    { name: 'Neon Green', value: '#10b981' },
-    { name: 'Vibrant Blue', value: '#3b82f6' },
-    { name: 'Hot Pink', value: '#ec4899' },
-    { name: 'Pure White', value: '#ffffff' },
-    { name: 'Cyber Orange', value: '#f97316' }
-  ];
-
-  // Grade & Rank assignment
-  const totalAttempts = hits + misses;
-  const overallAccPercent = totalAttempts === 0 ? 100 : Math.round((hits / totalAttempts) * 100);
-  let gradeLetter = 'F';
-  if (overallAccPercent >= 90 && score >= 800) gradeLetter = 'S';
-  else if (overallAccPercent >= 82 && score >= 500) gradeLetter = 'A';
-  else if (overallAccPercent >= 72 && score >= 250) gradeLetter = 'B';
-  else if (overallAccPercent >= 60 && score >= 100) gradeLetter = 'C';
-  else if (overallAccPercent >= 45 && score >= 50) gradeLetter = 'D';
-
-  let rankName = 'Bronze';
-  let rankColor = 'text-slate-500';
-  if (score >= 1200 && overallAccPercent >= 90) {
-    rankName = 'Grandmaster';
-    rankColor = 'text-fuchsia-400 font-extrabold';
-  } else if (score >= 800 && overallAccPercent >= 82) {
-    rankName = 'Master';
-    rankColor = 'text-red-400 font-extrabold';
-  } else if (score >= 500 && overallAccPercent >= 75) {
-    rankName = 'Diamond';
-    rankColor = 'text-cyan-400 font-extrabold';
-  } else if (score >= 250 && overallAccPercent >= 65) {
-    rankName = 'Platinum';
-    rankColor = 'text-indigo-400 font-extrabold';
-  } else if (score >= 100 && overallAccPercent >= 55) {
-    rankName = 'Gold';
-    rankColor = 'text-yellow-400 font-extrabold';
-  } else if (score >= 50) {
-    rankName = 'Silver';
-    rankColor = 'text-gray-300 font-extrabold';
-  }
-
-  const bestRtVal = bestReactionTimeRef.current === 9999 ? 0 : Math.round(bestReactionTimeRef.current);
-  const survivalTimeSec = survivalStartTimeRef.current > 0
-    ? parseFloat(((performance.now() - survivalStartTimeRef.current) / 1000).toFixed(1))
-    : 0.0;
-
-  let diagnostics = 'Solid attempt! Focus on visual scanning lines. Coordinate your tracking movement sweeps with the target dashes.';
-  if (overallAccPercent < 75) {
-    diagnostics = 'Low Accuracy detected. You are clicking empty spaces when the target dashes. Calm down and target the resting points.';
-  } else if (avgReactionTime > 450 && hits > 0) {
-    diagnostics = 'Slow visual acquisition delay. Practice fast eye jumps (saccades) to intercept the target immediately as it lands.';
-  } else if (maxCombo < 10 && hits > 8) {
-    diagnostics = 'Combo streak broken too often. Avoid panic clicking during movement frames. Snap to target cores at resting intervals.';
-  }
-
-  if (loading || !isClient) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#050508]">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-slate-400 font-mono text-xs uppercase tracking-widest">Loading Ocular aim engine...</p>
-        </div>
-      </div>
-    );
-  }
+  }, [uiScore, bestScore, analytics, isNewBest]);
 
   return (
-    <div className="min-h-screen select-none bg-[#050508] text-white">
-      <div className={`${isFullscreen || isMobileLandscape ? 'w-full h-screen p-0 m-0' : 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'} relative z-10`}>
-        
-        {/* Navigation Breadcrumbs */}
-        {!isFullscreen && !isMobileLandscape && (
-          <div className="mb-6">
-            <nav className="mb-4">
-              <ol className="flex flex-wrap items-center gap-2 text-sm text-gray-500">
-                <li><Link href="/" className="hover:text-gray-300">Home</Link></li>
-                <li><ChevronRight className="w-4 h-4 text-gray-600" /></li>
-                <li><Link href="/drills" className="hover:text-gray-300">Drills Hub</Link></li>
-                <li><ChevronRight className="w-4 h-4 text-gray-600" /></li>
-                <li><Link href="/drills/reaction-speed" className="hover:text-gray-300">Reaction Speed</Link></li>
-                <li><ChevronRight className="w-4 h-4 text-gray-600" /></li>
-                <li className="text-amber-400 font-medium">Reflex Training Drill</li>
-              </ol>
-            </nav>
+    <div className="min-h-screen bg-[#050508] text-white flex flex-col font-sans select-none">
+      {/* ── HEADER / BREADCRUMB ── */}
+      {!isFullscreen && (
+        <header className="border-b border-white/5 bg-[#080811]/80 backdrop-blur-md sticky top-0 z-50">
+          <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
+            <div className="flex items-center gap-2 text-xs text-slate-400">
+              <Link href="/" className="hover:text-white transition-colors">Home</Link>
+              <span>/</span>
+              <Link href="/drills/reaction-speed" className="hover:text-white transition-colors">Reaction Speed</Link>
+              <span>/</span>
+              <span className="text-red-400 font-medium">Reflex Training Drill</span>
+            </div>
 
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl shadow-[0_0_20px_rgba(245,158,11,0.3)]">
-                  <Target className="w-7 h-7 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Reflex Training Drill</h1>
-                  <p className="text-sm text-gray-400 mt-1 font-medium">Stop and Go Dash Drill • Device Adaptive</p>
-                </div>
+            <button
+              onClick={() => {
+                const next = !soundEnabled;
+                setSoundEnabled(next);
+                drillAudio.setEnabled(next);
+              }}
+              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+              title={soundEnabled ? "Mute Sound" : "Unmute Sound"}
+            >
+              {soundEnabled ? <Volume2 className="w-4 h-4 text-emerald-400" /> : <VolumeX className="w-4 h-4 text-red-400" />}
+            </button>
+          </div>
+        </header>
+      )}
+
+      {/* ── MAIN CONTENT AREA ── */}
+      <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
+        {/* Title */}
+        {!isFullscreen && (
+          <div className="text-center">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight bg-gradient-to-r from-white via-slate-200 to-red-400 bg-clip-text text-transparent">
+              REFLEX TRAINING DRILL
+            </h1>
+            <p className="text-xs text-slate-400 mt-1">
+              Multi-Target Burst Reflex & Divided Attention
+            </p>
+          </div>
+        )}
+
+        {/* Live Stat Cards */}
+        {!isFullscreen && (
+          <div className="grid grid-cols-4 gap-2.5 max-w-2xl mx-auto w-full">
+            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
+              <div className="text-lg sm:text-xl font-black text-red-400 tabular-nums">{uiScore}</div>
+            </div>
+            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
+              <div className={`text-lg sm:text-xl font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>
+                {uiTimeLeft}s
               </div>
+            </div>
+            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Level</div>
+              <div className="text-lg sm:text-xl font-black text-indigo-400 tabular-nums">L{engine.current.level}</div>
+            </div>
+            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
+              <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
+            </div>
+          </div>
+        )}
+
+        {/* Game Stage Container */}
+        <div 
+          ref={containerRef} 
+          className={
+            isFullscreen 
+              ? 'fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#050508] flex flex-col items-center justify-center' 
+              : isMobile 
+                ? (isPortrait
+                    ? 'w-full rounded-2xl aspect-[3/4] min-h-[420px] max-h-[76vh] bg-[#080811] border border-white/10 relative overflow-hidden flex flex-col'
+                    : 'w-full rounded-2xl aspect-video min-h-[340px] max-h-[85vh] bg-[#080811] border border-white/10 relative overflow-hidden flex flex-col')
+                : 'w-full rounded-2xl aspect-video min-h-[460px] sm:min-h-[500px] max-h-[88vh] bg-[#080811] border border-white/10 relative overflow-hidden flex flex-col'
+          }
+        >
+          {/* Red Flash Overlay */}
+          <DrillFlashOverlay flashes={flashes} />
+
+          {/* IN-BOX SCORE / TIMER HUD */}
+          {(gameState === 'playing' || gameState === 'countdown') && (
+            <>
+              <div className="absolute top-4 left-4 z-30 pointer-events-none">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Score</p>
+                <p className="text-2xl sm:text-3xl font-bold text-white tabular-nums leading-tight">{uiScore}</p>
+              </div>
+              <div className="absolute top-4 right-4 z-30 pointer-events-none text-right">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Time</p>
+                <p className={`text-2xl sm:text-3xl font-bold tabular-nums leading-tight ${uiTimeLeft <= 10 ? 'text-red-400' : 'text-white'}`}>{uiTimeLeft}s</p>
+              </div>
+            </>
+          )}
+
+          {/* IN-GAME SOUND TOGGLE */}
+          {(gameState === 'playing' || gameState === 'countdown') && (
+            <button
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.stopPropagation();
+                setSoundEnabled((v) => {
+                  drillAudio.setEnabled(!v);
+                  return !v;
+                });
+              }}
+              className="absolute bottom-4 right-4 z-40 p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+              title="Toggle Sound"
+            >
+              {soundEnabled ? <Volume2 className="w-4 h-4 text-red-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
+            </button>
+          )}
+
+          {/* CANVAS */}
+          <canvas 
+            ref={canvasRef} 
+            onPointerDown={(e) => handleCanvasInteraction(e.clientX, e.clientY)}
+            className="block absolute top-0 left-0 w-full h-full z-10 cursor-crosshair touch-none" 
+          />
+
+          {/* START CARD */}
+          {gameState === 'start' && (
+            <FpsStartCard
+              icon={Target}
+              accent="red"
+              title="Reflex Training Drill"
+              subtitle="Multi-Target Burst • Divided Attention Reflex"
+              rules={[
+                { icon: Target, accent: 'red', title: 'Clear Simultaneous Targets', text: 'Multiple targets flash on screen at once — tap every one before it vanishes' },
+                { icon: Zap, accent: 'orange', title: 'Divided Attention Reflex', text: 'More targets join the burst as your level climbs, testing split-second scanning' },
+              ]}
+              stats={[
+                { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
+                { icon: TrendingUp, label: 'Best Level', value: `Lv. ${bestLevel}`, color: 'text-blue-400', accent: 'blue' },
+              ]}
+              isTouchOnlyDevice={false}
+              onStart={enterDrill}
+            />
+          )}
+
+          {/* COUNTDOWN OVERLAY */}
+          {gameState === 'countdown' && (
+            <DrillCountdown value={countdownValue} subtitle="GET READY" accent="#ef4444" />
+          )}
+
+          {/* END SCREEN */}
+          {gameState === 'gameOver' && analytics.grade && (
+            <div className="absolute inset-0 z-40 flex bg-neutral-950/98 select-none font-sans" style={{ background: 'rgba(5,5,8,0.97)' }} onPointerDown={e => e.stopPropagation()}>
               
-              <div className="flex gap-2">
-                {gameState === 'playing' && (
-                  <button onClick={resetDrill} className="p-2.5 rounded-lg border border-gray-700 bg-gray-900 text-gray-400 hover:text-white transition-all">
-                    <RefreshCw className="w-5 h-5" />
-                  </button>
+              {/* Left Grade Panel */}
+              <div className="w-[36%] flex flex-col items-center justify-center gap-1 border-r border-white/5 px-4" style={{ background: 'radial-gradient(ellipse 260px 200px at 50% 30%, rgba(239,68,68,.12), transparent 70%)' }}>
+                {isNewBest && (
+                  <span className="text-[9.5px] font-bold text-yellow-400 bg-yellow-500/10 border border-yellow-500/25 px-2.5 py-0.5 rounded-full mb-1 animate-pulse">
+                    NEW BEST
+                  </span>
                 )}
-                <button onClick={() => setSoundEnabled(v => !v)} className="p-2.5 rounded-lg border border-gray-700 bg-gray-900 text-gray-400 hover:text-white transition-all">
-                  {soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
-                </button>
-                <button onClick={toggleFullscreen} className="p-2.5 rounded-lg border border-gray-700 bg-gray-900 text-gray-400 hover:text-white transition-all">
-                  <Maximize2 className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Mobile target color selector above HUD */}
-        {!isFullscreen && !isMobileLandscape && isMobileDevice && (
-          <div className="mb-4 bg-gray-900/60 border border-gray-800 p-3 rounded-xl flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider font-mono text-slate-350">Target Color:</span>
-            <div className="flex gap-2">
-              {colorPresets.map((c) => (
-                <button
-                  key={c.value}
-                  onClick={() => setTargetColor(c.value)}
-                  className="w-6 h-6 rounded-full border transition-all relative flex items-center justify-center"
-                  style={{ backgroundColor: c.value, borderColor: targetColor === c.value ? '#ffffff' : 'transparent' }}
-                  title={c.name}
-                >
-                  {targetColor === c.value && (
-                    <div className={`w-1.5 h-1.5 rounded-full ${c.value === '#ffffff' ? 'bg-black' : 'bg-white'}`} />
-                  )}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Live HUD stats */}
-        {!isFullscreen && !isMobileLandscape && (
-          <div className="grid grid-cols-4 gap-2 mb-2">
-            <StatCard icon={<Trophy className="text-amber-400" />} value={score} label="Score" />
-            <StatCard icon={<TrendingUp className="text-fuchsia-400" />} value={`Lv. ${level}`} label="Level" />
-            <StatCard icon={<Clock className={timeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-green-400'} />} value={timeLeft.toFixed(1)} label="Time Left" unit="s" />
-            <StatCard icon={<Info className="text-blue-400" />} value={bestScore} label="Best Score" />
-          </div>
-        )}
-
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
-          
-          {/* Settings Sidebar (Only on Desktop) */}
-          {!isFullscreen && !isMobileLandscape && !isMobileDevice && (
-            <div className="lg:col-span-1 bg-gray-900/50 border border-gray-800 rounded-2xl p-5 shadow-xl flex flex-col justify-between">
-              <div>
-                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest border-b border-gray-800 pb-2 mb-4 flex items-center gap-1.5 font-mono">
-                  <Sliders className="w-3.5 h-3.5 text-amber-500" />
-                  DRILL CONFIGS
-                </h3>
-
-                {/* Target Color Preset */}
-                <div className="mb-5">
-                  <label className="block text-[10px] text-slate-400 font-bold uppercase tracking-wider font-mono mb-2">Target Color</label>
-                  <div className="flex flex-wrap gap-2">
-                    {colorPresets.map((c) => (
-                      <button
-                        key={c.value}
-                        onClick={() => setTargetColor(c.value)}
-                        className="w-6 h-6 rounded-full border transition-all relative flex items-center justify-center"
-                        style={{ backgroundColor: c.value, borderColor: targetColor === c.value ? '#ffffff' : 'transparent' }}
-                        title={c.name}
-                      >
-                        {targetColor === c.value && (
-                          <div className={`w-1.5 h-1.5 rounded-full ${c.value === '#ffffff' ? 'bg-black' : 'bg-white'}`} />
-                        )}
-                      </button>
-                    ))}
-                  </div>
+                <div className={`text-5xl sm:text-6xl font-black leading-none ${analytics.grade.color}`}>
+                  {analytics.grade.letter}
                 </div>
-
-                {/* Display Toggles */}
-                <div className="space-y-3 pt-3 border-t border-gray-850 font-mono">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <span className="text-[10px] text-slate-400 font-bold uppercase block">Gaze Trail</span>
-                      <span className="text-[8px] text-slate-600 block">Renders tracking ring</span>
-                    </div>
-                    <button
-                      onClick={() => setTrailEffect(!trailEffect)}
-                      className={`w-8 h-4 rounded-full p-0.5 transition-colors focus:outline-none ${trailEffect ? 'bg-amber-500' : 'bg-slate-800'}`}
-                    >
-                      <div className={`w-3 h-3 rounded-full bg-white transition-transform ${trailEffect ? 'transform translate-x-4' : ''}`} />
-                    </button>
-                  </div>
-
-                  
-
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <span className="text-[10px] text-slate-400 font-bold uppercase block">Scanlines</span>
-                      <span className="text-[8px] text-slate-600 block">Classic terminal grids</span>
-                    </div>
-                    <button
-                      onClick={() => setScanlinesActive(!scanlinesActive)}
-                      className={`w-8 h-4 rounded-full p-0.5 transition-colors focus:outline-none ${scanlinesActive ? 'bg-amber-500' : 'bg-slate-800'}`}
-                    >
-                      <div className={`w-3 h-3 rounded-full bg-white transition-transform ${scanlinesActive ? 'transform translate-x-4' : ''}`} />
-                    </button>
-                  </div>
+                <div className="text-[10px] uppercase tracking-widest text-slate-500 text-center font-bold mt-1">
+                  {analytics.grade.label}
                 </div>
+                <div className="text-3xl sm:text-4xl font-black text-white mt-2 tabular-nums">
+                  {uiScore}
+                </div>
+                <div className="text-[9px] uppercase tracking-widest text-slate-500">Points</div>
               </div>
 
-              {/* Personal Best Info Card */}
-              <div className="mt-6 p-4 bg-[#05060b] border border-gray-800 rounded-xl font-mono text-xs">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-slate-500 uppercase text-[9px]">Personal Best</span>
-                  <Trophy className="w-3.5 h-3.5 text-yellow-500" />
+              {/* Right Stats & Actions Panel */}
+              <div className="flex-1 flex flex-col justify-center gap-3 px-6 py-4 min-w-0">
+                
+                {/* 3 Stat Tiles */}
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
+                    <p className="text-sm sm:text-base font-black text-white">{analytics.accuracy}%</p>
+                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Accuracy</p>
+                  </div>
+                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
+                    <p className="text-sm sm:text-base font-black text-white">{analytics.avgReactionTime}<span className="text-[10px] text-gray-500">ms</span></p>
+                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Avg Reaction</p>
+                  </div>
+                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
+                    <p className="text-sm sm:text-base font-black text-white">Lv. {analytics.finalLevel}</p>
+                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Peak Level</p>
+                  </div>
                 </div>
-                <div className="text-white font-black text-base">{bestScore} PTS</div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={enterDrill}
+                    className="flex-1 py-3 rounded-[13px] bg-gradient-to-r from-red-600 to-rose-600 text-white font-bold text-xs uppercase tracking-wide cursor-pointer transition-transform active:scale-[0.98] shadow-md flex items-center justify-center gap-1.5"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5" /> Play Again
+                  </button>
+                  <button
+                    type="button"
+                    onClick={sharePage}
+                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform"
+                    title="Share Score"
+                  >
+                    <Share2 className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleExitDrill}
+                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform"
+                    title="Return to Options"
+                  >
+                    <LogOut className="w-4 h-4 text-red-400" />
+                  </button>
+                </div>
+
               </div>
             </div>
           )}
 
-          {/* Canvas Interactive Screen Wrapper */}
-          <div className={`${isFullscreen ? 'col-span-4' : isMobileDevice ? 'col-span-4' : 'lg:col-span-3'} flex flex-col relative`}>
-            <div 
-              ref={containerRef} 
-              className={`relative overflow-hidden transition-colors outline-none bg-[#05060b] ${
-                isFullscreen ? 'w-full h-full' : isMobileLandscape ? 'fixed inset-0 z-50 w-screen h-screen' : 'w-full aspect-video min-h-[380px] rounded-2xl border border-gray-800 shadow-2xl'
-              }`}
-            >
-              {/* Orientation Warning Modal (Portrait Mobile Users) */}
-              {showRotateWarning && !isMobileLandscape && (
-                <div className="absolute inset-0 z-[100] bg-[#05070e]/98 flex flex-col items-center justify-center p-6 text-center select-none backdrop-blur-md">
-                  <div className="animate-bounce mb-5 text-amber-500">
-                    <RotateCcw className="w-14 h-14 mx-auto" />
-                  </div>
-                  <h3 className="text-lg font-black text-white uppercase font-mono tracking-widest mb-2">Landscape Recommended</h3>
-                  <p className="text-xs text-slate-400 max-w-xs leading-relaxed mb-6 mx-auto">
-                    Please rotate your mobile device to landscape mode for the best target sizes and ocular sweep performance.
-                  </p>
-                  <div className="flex flex-col gap-2 w-full max-w-[200px]">
-                    <button 
-                      onClick={() => {
-                        setShowRotateWarning(false);
-                      }}
-                      className="px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white font-mono text-[10px] uppercase tracking-wider rounded-lg flex items-center justify-center gap-2 transition active:scale-95 shadow-lg font-bold"
-                    >
-                      Rotate Device
-                    </button>
-                    <button 
-                      onClick={() => {
-                        setShowRotateWarning(false);
-                      }}
-                      className="px-6 py-2 bg-slate-900 border border-gray-800 text-slate-400 font-mono text-[9px] uppercase tracking-wider rounded-lg flex items-center justify-center gap-2 transition active:scale-95"
-                    >
-                      Continue Anyway
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* In-Game HUD overlay inside fullscreen or landscape */}
-              {(isFullscreen || isMobileLandscape) && gameState === 'playing' && (
-                <>
-                  {/* Combo badge – top left */}
-                  {combo > 1 && (
-                    <div className="absolute top-4 left-4 z-[35] pointer-events-none">
-                      <div className="bg-black/60 border border-gray-700 rounded-xl px-3 py-1.5 flex items-center gap-1.5 font-mono text-xs">
-                        <Zap className="w-3 h-3 text-yellow-400" />
-                        <span className="text-yellow-300 font-black">{combo}x</span>
-                        <span className="text-gray-500 text-[9px] uppercase tracking-wider">combo</span>
-                      </div>
-                    </div>
-                  )}
-                  {/* Controls only – top right */}
-                  <div className="absolute top-4 right-4 z-[35] flex items-center gap-3 text-xs font-mono bg-black/60 border border-gray-800 rounded-xl px-3 py-2 pointer-events-auto">
-                    <button onClick={() => setSoundEnabled(v => !v)} className="text-gray-400 hover:text-amber-400 transition-colors" title="Toggle Sound" disabled={hudLocked}>
-                      {soundEnabled ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
-                    </button>
-                    <button onClick={() => setHudLocked(v => !v)} className="text-gray-400 hover:text-red-400 transition-colors" title={hudLocked ? "Unlock HUD" : "Lock HUD"}>
-                      {hudLocked ? <Lock className="w-3.5 h-3.5 text-yellow-500" /> : <Unlock className="w-3.5 h-3.5" />}
-                    </button>
-                    {!hudLocked && (
-                      <button onClick={resetDrill} className="text-gray-400 hover:text-red-400 transition-colors" title="Restart">
-                        <RefreshCw className="w-3.5 h-3.5" />
-                      </button>
-                    )}
-                  </div>
-                </>
-              )}
-
-              {/* Start Screen */}
-              {gameState === 'start' && (!showRotateWarning || isMobileLandscape) && (
-                <div className="absolute inset-0 bg-[#05070e]/98 overflow-y-auto p-6 z-30 select-none scrollbar-thin scroll-smooth backdrop-blur-sm">
-                  <div className="min-h-full flex flex-col justify-center items-center py-4 w-full">
-                    <div className="max-w-md w-full text-center">
-                      <h2 className="text-xl font-black text-white uppercase tracking-wider mb-1 font-mono">
-                        Reflex Training Drill
-                      </h2>
-                      <p className="text-xs text-slate-550 uppercase tracking-widest mb-6">
-                        Stop and Go Dash Drill • Mouse / Touch
-                      </p>
-
-                      <div className="grid grid-cols-2 gap-3 mb-6 text-left">
-                        <div className="bg-slate-900/60 border border-slate-800 p-3 rounded-xl">
-                          <span className="text-[8px] text-slate-500 block uppercase font-bold">Rule</span>
-                          <span className="text-sm font-black text-green-400">+10 Pts / +1.0s</span>
-                        </div>
-                        <div className="bg-slate-900/60 border border-slate-800 p-3 rounded-xl">
-                          <span className="text-[8px] text-slate-500 block uppercase font-bold">Penalty</span>
-                          <span className="text-sm font-black text-red-400">-1.0s Penalty</span>
-                        </div>
-                      </div>
-
-                      <button
-                        onClick={startDrill}
-                        className="w-full py-3 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg uppercase tracking-widest font-mono transition-all duration-200 active:scale-95"
-                      >
-                        <Play className="w-3.5 h-3.5 fill-white" />
-                        Begin Reflex Trial
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Game Over Screen */}
-              {gameState === 'gameOver' && (
-                <div className="absolute inset-0 bg-[#05070e]/98 overflow-y-auto p-6 z-30 select-none scrollbar-thin scroll-smooth backdrop-blur-sm">
-                  <div className="min-h-full flex flex-col justify-center items-center py-4 w-full">
-                    <div className="max-w-md w-full text-center">
-                      {isNewBest && (
-                        <div className="inline-block bg-yellow-500 text-black text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-3 shadow-[0_0_15px_rgba(234,179,8,0.5)] animate-bounce font-mono">
-                          ⭐ NEW PERSONAL BEST!
-                        </div>
-                      )}
-                      
-                      <h2 className="text-xl font-black text-white uppercase tracking-wider mb-1 font-mono">
-                        Drill Complete
-                      </h2>
-                      <p className="text-xs text-slate-550 uppercase tracking-widest mb-6 font-mono">
-                        Peak difficulty reached: Level {level}
-                      </p>
-
-                      <div className="grid grid-cols-3 gap-2.5 mb-6 text-left font-mono">
-                        <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
-                          <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Final Score</span>
-                          <span className="text-sm font-black text-white">{score}</span>
-                        </div>
-                        <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
-                          <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Accuracy</span>
-                          <span className="text-sm font-black text-white">{overallAccPercent}%</span>
-                        </div>
-                        <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
-                          <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Avg Reaction</span>
-                          <span className="text-sm font-black text-blue-400">{avgReactionTime}ms</span>
-                        </div>
-                        
-                        <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
-                          <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Best Reaction</span>
-                          <span className="text-sm font-black text-indigo-400">{bestRtVal}ms</span>
-                        </div>
-                        <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
-                          <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Survival Time</span>
-                          <span className="text-sm font-black text-green-400">{survivalTimeSec}s</span>
-                        </div>
-                        <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
-                          <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Total Hits</span>
-                          <span className="text-sm font-black text-teal-400">{hits}</span>
-                        </div>
-                      </div>
-
-                      <div className="bg-[#0b0f19] border border-slate-850 p-3 rounded-xl mb-4 text-left">
-                        <span className={`text-xs font-black block text-center uppercase tracking-widest ${rankColor} mb-2`}>
-                          Rank: {rankName}
-                        </span>
-                        <div className="w-full h-px bg-slate-850 mb-2"></div>
-                        <div className="flex items-center gap-1.5 text-[9px] font-bold text-white uppercase mb-1 font-mono">
-                          <Sparkles className="w-3 h-3 text-yellow-500" /> Diagnostics advice:
-                        </div>
-                        <p className="text-[10px] text-slate-400 leading-normal">
-                          {diagnostics}
-                        </p>
-                      </div>
-
-                      <div className="flex gap-2">
-                        <button
-                          onClick={startDrill}
-                          className="flex-1 py-3 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg uppercase tracking-widest font-mono transition-all duration-200 active:scale-95"
-                        >
-                          <RefreshCw className="w-3.5 h-3.5" />
-                          Run another trial
-                        </button>
-                        <button
-                          onClick={shareScore}
-                          className="p-3 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded-xl transition-colors active:scale-95"
-                          title="Share Score"
-                        >
-                          <Share2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Rendering canvas */}
-              {gameState === 'playing' && (
-                <canvas 
-                  ref={canvasRef} 
-                  className="block w-full h-full cursor-crosshair z-10 absolute top-0 left-0" 
-                  style={{ touchAction: 'none' }}
-                  onPointerDown={handlePointerDown}
-                />
-              )}
-
-              {/* Screen locked overlay when exited fullscreen */}
-              {gameState === 'playing' && hudLocked && !isFullscreen && (
-                <div 
-                  className="absolute inset-0 z-50 bg-black/85 flex flex-col items-center justify-center p-6 text-center select-none cursor-pointer"
-                  onClick={() => {
-                    const el = containerRef.current;
-                    if (el?.requestFullscreen) {
-                      el.requestFullscreen().then(() => {
-                        setIsFullscreen(true);
-                      }).catch(() => {});
-                    }
-                  }}
-                >
-                  <div className="animate-pulse mb-4 text-yellow-500">
-                    <Lock className="w-12 h-12 mx-auto" />
-                  </div>
-                  <h3 className="text-sm font-black text-white uppercase font-mono tracking-widest mb-2">Screen Locked</h3>
-                  <p className="text-xs text-slate-400 max-w-xs leading-relaxed font-mono">
-                    Tap anywhere to resume fullscreen play mode.
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
         </div>
 
-        {/* About Section */}
-        {!isFullscreen && !isMobileLandscape && (
-          <article className="mt-12 text-gray-300">
-            <div className="rounded-2xl border border-gray-800 overflow-hidden bg-gray-900 shadow-xl">
-              <div className="px-6 py-5 border-b border-gray-800 bg-black/40 flex items-center gap-3">
-                <GraduationCap className="w-5 h-5 text-amber-400" />
-                <h2 className="font-bold text-white text-lg tracking-wide font-mono">About Reflex Training Drill</h2>
+        {/* ACCORDIONS */}
+        {!isFullscreen && (
+          <div className="[&>div]:!mt-0">
+            <DrillAccordion
+              id="rules"
+              title="Drill Instructions & Scoring System"
+              isOpen={openAccordion === 'rules'}
+              onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-sans">
+                <RuleItem num="1" text="Clear Burst Targets" highlight="+100 PTS" result="Adds to score & levels you up" />
+                <RuleItem num="2" text="Level Progression" highlight="Every 250 PTS" result="More targets join the burst & shrink" />
+                <RuleItem num="3" text="Miss / Timeout" highlight="No Penalty" result="Triggers red alert, score safe" />
+                <RuleItem num="4" text="Session Length" highlight="45 Seconds" result="Beat your best before time's up" />
               </div>
-              
-              <div className="p-8 space-y-8">
+            </DrillAccordion>
+
+            <DrillAccordion
+              id="about"
+              title="About Reflex Training Drill"
+              isOpen={openAccordion === 'about'}
+              onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
+            >
+              <div className="space-y-8 font-sans">
                 <section>
-                  <h2 className="text-xl font-bold text-white mb-3">What Is This Drill</h2>
-                  <p className="text-sm leading-relaxed mb-4">
-                    The Reflex Training Drill (internally known as Stop and Go Dash) is a high-speed visual reaction speed drill designed to isolate decelerating target tracking and target acquisition reflexes. Unlike static reaction tests, this trainer challenges your eyes to scan, follow, and re-acquire targets that undergo sudden bursts of motion and come to sudden halts.
+                  <h4 className="text-base font-bold text-white mb-2 flex items-center gap-2">
+                    <Eye className="w-4 h-4 text-red-400" /> What Is Multi-Target Burst & Divided Attention Reflex Training?
+                  </h4>
+                  <p className="text-sm leading-relaxed mb-3 text-gray-300">
+                    <strong>Reflex Training Drill</strong> flashes several static targets on screen at once instead of one at a time, forcing you to divide your attention across simultaneous stimuli and clear the whole burst before any of them expire.
+                  </p>
+                  <p className="text-sm leading-relaxed text-gray-300">
+                    Real firefights and fast-paced team sports rarely present one threat in isolation. Conditioning your eyes and hands to process several targets in parallel — rather than tracking a single moving point — builds the split-attention scanning that single-target drills can't train.
                   </p>
                 </section>
 
-                <section className="border-t border-gray-800 pt-6">
-                  <h2 className="text-xl font-bold text-white mb-3">How This Drill Works</h2>
-                  <p className="text-sm leading-relaxed mb-4">
-                    A high-contrast target moves around the canvas area in unpredictable patterns. It dashes rapidly using a ease-out physics curve, comes to a complete rest, and then executes its next dash. You must track its trajectory and click the target core during its resting or active movement phases. Time is awarded for correct hits and penalized for misses or timeouts.
-                  </p>
-                </section>
-
-                <section className="border-t border-gray-800 pt-6">
-                  <h2 className="text-xl font-bold text-white mb-3">Reaction Speed Benefits</h2>
-                  <p className="text-sm leading-relaxed mb-4">
-                    By requiring you to react to sudden acceleration changes, this drill trains your neuro-muscular pathways to initiate cursor clicks faster. Over time, this decreases your reaction latency (the delay between visual stimulus and hand movement).
-                  </p>
-                </section>
-
-                <section className="border-t border-gray-800 pt-6">
-                  <h2 className="text-xl font-bold text-white mb-3">Reflex Training Benefits</h2>
-                  <p className="text-sm leading-relaxed mb-4">
-                    Regular conditioning builds fast-twitch muscle responses. The sudden changes in target velocity force your brain to execute correction adjustments in real time, sharpening automatic physical reflexes.
-                  </p>
-                </section>
-
-                <section className="border-t border-gray-800 pt-6">
-                  <h2 className="text-xl font-bold text-white mb-3">Visual Tracking Benefits</h2>
-                  <p className="text-sm leading-relaxed mb-4">
-                    Visual tracking is the ability to follow moving objects smoothly with your eyes. This drill exercises foveal vision and visual pursuit systems by simulating rapid target escapes and decelerations.
-                  </p>
-                </section>
-
-                <section className="border-t border-gray-800 pt-6">
-                  <h2 className="text-xl font-bold text-white mb-3">Gaming Benefits</h2>
-                  <p className="text-sm leading-relaxed mb-4">
-                    In competitive video games, targets rarely move at constant speeds. Opponents frequently slide-cancel, counter-strafe, or change speed, making this drill perfect for developing real-game target tracking.
-                  </p>
-                </section>
-
-                <section className="border-t border-gray-800 pt-6">
-                  <h2 className="text-xl font-bold text-white mb-3">FPS Benefits</h2>
-                  <p className="text-sm leading-relaxed mb-4">
-                    First-Person Shooter (FPS) aim relies heavily on reacting to erratic movement. Intercepting dashing and stopping targets translates directly to hitting enemies executing sudden jiggles or peeks behind corners.
-                  </p>
-                </section>
-
-                <section className="border-t border-gray-800 pt-6">
-                  <h2 className="text-xl font-bold text-white mb-3">Esports Benefits</h2>
-                  <p className="text-sm leading-relaxed mb-4">
-                    Professional esports athletes require visual reaction times below 150ms. Conditioning with adaptive difficulty challenges elite players by reducing target sizes and lifespan windows as scores climb.
-                  </p>
-                </section>
-
-                <section className="border-t border-gray-800 pt-6">
-                  <h2 className="text-xl font-bold text-white mb-3">Sports Benefits</h2>
-                  <p className="text-sm leading-relaxed mb-4">
-                    Traditional athletes in fast sports (like tennis, baseball, or boxing) require excellent coordination. Visual response drills train quick eye sweeps and rapid motor decision-making under intense time limits.
-                  </p>
-                </section>
-
-                <section className="border-t border-gray-800 pt-6">
-                  <h2 className="text-xl font-bold text-white mb-3">Hand Eye Coordination Benefits</h2>
-                  <p className="text-sm leading-relaxed mb-4">
-                    Synchronizing what your eyes see with what your hand moves is critical. Correcting aiming errors mid-dash improves micro-spatial alignment and precision.
-                  </p>
-                </section>
-
-                <section className="border-t border-gray-800 pt-6">
-                  <h2 className="text-xl font-bold text-white mb-3">Visual Processing Benefits</h2>
-                  <p className="text-sm leading-relaxed mb-4">
-                    Your brain needs to quickly parse target sizes and locations. Under pressure, it refines visual noise filtering and optimizes spatial orientation.
-                  </p>
-                </section>
-
-                <section className="border-t border-gray-800 pt-6">
-                  <h2 className="text-xl font-bold text-white mb-3">Recommended Training Routine</h2>
-                  <p className="text-sm leading-relaxed mb-4">
-                    We recommend practicing for 5-10 minutes daily as a cognitive warmup before competitive sessions. Focus on maintaining a high combo streak and accuracy rating over raw speed.
-                  </p>
-                </section>
-
-                <section className="border-t border-gray-800 pt-6">
-                  <h2 className="text-xl font-bold text-white mb-3">How Difficulty Progression Works</h2>
-                  <p className="text-sm leading-relaxed mb-4">
-                    Difficulty dynamically adjusts based on your current score. As your score climbs past levels 1 to 5, target sizes shrink, resting durations decrease, and target lifespans shorten, creating a smooth learning curve.
-                  </p>
-                </section>
-
-                <section className="border-t border-gray-800 pt-6">
-                  <h2 className="text-xl font-bold text-white mb-3">Who Should Use This Drill</h2>
-                  <p className="text-sm leading-relaxed mb-4">
-                    Designed for competitive gamers, traditional sports athletes, cognitive researchers, or anyone interested in measuring and improving their daily reflexes and hand-eye coordination.
-                  </p>
-                </section>
-
-                <section className="border-t border-gray-800 pt-6">
-                  <h2 className="text-xl font-bold text-white mb-3">Common Mistakes</h2>
-                  <p className="text-sm leading-relaxed mb-4">
-                    Panicking and clicking randomly while the target is moving is a common error. Wait for the target to decelerate or rest to secure clean hits and avoid time penalties.
-                  </p>
-                </section>
-
-                <section className="border-t border-gray-800 pt-6">
-                  <h2 className="text-xl font-bold text-white mb-3">Training Tips</h2>
-                  <p className="text-sm leading-relaxed mb-4">
-                    Use full-screen landscape mode to maximize the workspace area. Focus your eyes slightly ahead of the target to anticipate resting zones. Customize colors to Neon Green or Cyber Orange for optimal visual contrast.
-                  </p>
-                </section>
-
-                <section className="border-t border-gray-800 pt-6">
-                  <h2 className="text-xl font-bold text-white mb-3">Target Score Guide</h2>
-                  <p className="text-sm leading-relaxed mb-4">
-                    Bronze: Under 100 • Silver: 100-250 • Gold: 250-500 • Platinum: 500-800 • Diamond: 800-1200 • Master/Grandmaster: 1200+. Aim for at least 80% accuracy.
-                  </p>
-                </section>
-              </div>
-
-              <div className="bg-[#0b0f19] border-t border-gray-800 p-8">
-                <div className="flex items-center gap-3 mb-6">
-                  <Lightbulb className="w-6 h-6 text-yellow-400" />
-                  <h3 className="text-xl font-bold text-white">Frequently Asked Questions</h3>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <FAQItem q="What is reaction speed training?" a="Reaction speed training refers to repetitive exercises designed to decrease your cognitive reaction time by conditioning visual recognition and motor execution loops." />
-                  <FAQItem q="How does this drill improve reflexes?" a="By presenting unpredictable dash trajectories, it teaches the brain to quickly translate visual coordinate changes into precise motor movements." />
-                  <FAQItem q="Can this improve gaming performance?" a="Yes. Fast reaction times and high-precision target tracking are critical for aiming and visual tracking in competitive gaming tournaments." />
-                  <FAQItem q="Is this useful for FPS games?" a="Absolutely. Countering strafing players or tracking targets executing slide-cancels relies heavily on detecting sudden speed transitions." />
-                  <FAQItem q="Can athletes use this drill?" a="Yes. Ocular tracking and hand-eye coordination training are highly beneficial for real-world sports like tennis, baseball, hockey, and martial arts." />
-                  <FAQItem q="How is reaction speed measured?" a="Reaction time is measured in milliseconds (ms) from the moment the target relocates to the moment you successfully click it." />
-                  <FAQItem q="Can I use this drill daily?" a="Yes. Consistent daily sessions of 5-10 minutes help establish stable neural response pathways and serve as an excellent reflex warmup." />
-                  <FAQItem q="Is this suitable for beginners?" a="Yes. The adaptive level system scales target sizes and duration limits dynamically so players of all skill levels can start training." />
-                  <FAQItem q="Does reaction training improve focus?" a="Yes. Eliminating targets before timeouts requires high cognitive concentration, sharpening visual attention and focus under pressure." />
-                  <FAQItem q="What is a good score?" a="A score above 500 (Platinum rank) with over 80% accuracy is considered good. Elite competitive gamers often score over 1200 (Master+)." />
-                  <FAQItem q="Is this drill free?" a="Yes. All reflex, reaction, and cognitive drills on SkillDrills are 100% free and do not require signups or downloads." />
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                    <div className="flex items-center gap-2.5 mb-2">
+                      <div className="w-7 h-7 rounded-lg bg-red-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
+                      <h5 className="text-xs font-bold text-white">Who Should Use This?</h5>
+                    </div>
+                    <p className="text-xs text-gray-300 leading-relaxed">Gamers, esports athletes, and vision trainees looking to sharpen simultaneous multi-target acquisition and divided attention.</p>
+                  </div>
+                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                    <div className="flex items-center gap-2.5 mb-2">
+                      <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
+                      <h5 className="text-xs font-bold text-white">Adaptive Burst Size</h5>
+                    </div>
+                    <p className="text-xs text-gray-300 leading-relaxed">The number of simultaneous targets climbs from 2 up to 5 as you level up, alongside shrinking radius and tighter timeouts.</p>
+                  </div>
+                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                    <div className="flex items-center gap-2.5 mb-2">
+                      <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Zap className="w-3.5 h-3.5 text-white" /></div>
+                      <h5 className="text-xs font-bold text-white">Split-Attention Scanning</h5>
+                    </div>
+                    <p className="text-xs text-gray-300 leading-relaxed">A depleting countdown ring on each target shows exactly how much time is left, so you learn to triage the burst under pressure.</p>
+                  </div>
                 </div>
               </div>
-            </div>
-          </article>
+            </DrillAccordion>
+
+            <DrillAccordion
+              id="faq"
+              title="Frequently Asked Questions"
+              isOpen={openAccordion === 'faq'}
+              onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-sans">
+                <FAQItem q="What is a reflex training drill?" a="It is an interactive vision utility where several targets flash on screen at once and you must tap every one before it times out, measuring divided-attention reflex speed." />
+                <FAQItem q="What is divided attention in gaming?" a="Divided attention is the ability to process and react to multiple simultaneous stimuli instead of tracking a single target — critical when several enemies or events appear at once." />
+                <FAQItem q="Can you train divided attention and multi-target reflexes?" a="Yes. Repeated exposure to simultaneous stimuli strengthens parallel visual processing and reduces the tunnel-vision effect of fixating on one target." />
+                <FAQItem q="How does this drill differ from single-target reaction tests?" a="Single-target tests present one stimulus at a time. This drill spawns 2 to 5 targets simultaneously, so you must scan and clear a full burst under a shared time limit." />
+                <FAQItem q="Does monitor refresh rate affect burst reflex scores?" a="Yes. Higher refresh rate monitors (144Hz, 240Hz, 360Hz) render each target's countdown ring more smoothly, helping you triage the burst with less input lag." />
+                <FAQItem q="Is this reflex trainer free?" a="Yes, all drills on SkillDrills are 100% free with no signups, downloads, or pop-up ads required." />
+                <FAQItem q="What games benefit from multi-target burst training?" a="Fast arena shooters, battle royales (Apex Legends, Overwatch 2, Fortnite), and tactical shooters (Valorant, CS2) where multiple enemies can appear at once benefit heavily." />
+                <FAQItem q="How does level progression work?" a="Every 250 points earned levels up the drill, adding more simultaneous burst targets (up to 5), shrinking their radius, and tightening each target's timeout." />
+                <FAQItem q="What happens if I miss a click?" a="Clicking empty background space triggers a red alert flash and a miss is logged against your accuracy — there's no score penalty, so keep going." />
+                <FAQItem q="Can traditional athletes use this drill?" a="Yes. Sports vision research shows multi-object tracking and divided-attention drills enhance spatial awareness for tennis, hockey, and martial arts." />
+                <FAQItem q="Does this drill support touchscreens and mobile devices?" a="Yes! It features generous touch hitpads and automatic orientation warnings for mobile devices." />
+                <FAQItem q="How often should I practice divided attention reflexes?" a="A daily 5-10 minute session warms up your eye-hand coordination and maintains optimal visual alertness across multiple stimuli." />
+                <FAQItem q="Which target should I clear first in a burst?" a="Watch the depleting countdown ring around each target and prioritize whichever is closest to timing out, not just the nearest one to your cursor." />
+                <FAQItem q="Does mouse DPI affect burst reflex performance?" a="Using a comfortable mouse DPI (400-1600 DPI) ensures smooth, quick cursor jumps between the multiple targets in a burst." />
+                <FAQItem q="What is a good score on this drill?" a="A score above 5,000 indicates strong divided-attention reflexes, while scores exceeding 10,000 represent elite multi-target acquisition speed." />
+              </div>
+            </DrillAccordion>
+          </div>
         )}
 
-        {/* Related Drills Section */}
-        {!isFullscreen && !isMobileLandscape && (
-          <section className="mt-14" aria-label="Explore related aim and response drills">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-1 h-5 rounded-full bg-amber-500"></div>
-              <h2 className="text-xs font-bold text-white uppercase tracking-widest font-mono">
-                Explore Related FPS Drills
-              </h2>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <RelatedCard href="/drills/fps/180-degree-awareness" title="180° Awareness" desc="Situational target acquisition flicks." color="indigo" icon={<Sliders className="w-4 h-4" />} />
-              <RelatedCard href="/drills/fps/strafe-tracking" title="Strafe Tracking Pro" desc="Unpredictable dynamic tracking pursuit." color="orange" icon={<Sliders className="w-4 h-4" />} />
-              <RelatedCard href="/drills/fps/recoil-control" title="Recoil Control" desc="Calibrate pulling pattern compensation." color="red" icon={<Activity className="w-4 h-4" />} />
-              <RelatedCard href="/drills/fps/flick-shot-training" title="Pro Flick Trainer" desc="Snap to targets in time-attack mode." color="blue" icon={<Crosshair className="w-4 h-4" />} />
+        {/* RELATED DRILLS GRID */}
+        {!isFullscreen && (
+          <section className="mt-4">
+            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">
+              Related Reaction Speed Drills
+            </h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {RELATED_DRILLS.map((drill) => (
+                <Link
+                  key={drill.id}
+                  href={drill.href}
+                  className="group bg-[#0c0c16] border border-white/5 hover:border-red-500/40 rounded-xl p-3.5 transition-all duration-200 hover:-translate-y-0.5 flex flex-col justify-between"
+                >
+                  <div>
+                    <div className="text-[10px] font-bold text-red-400 uppercase tracking-wider mb-1">{drill.cat}</div>
+                    <div className="text-xs font-bold text-white group-hover:text-red-300 transition-colors">{drill.name}</div>
+                    <div className="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">{drill.desc}</div>
+                  </div>
+                  <div className="text-[10px] font-bold text-slate-500 group-hover:text-red-400 mt-3 flex items-center gap-1 transition-colors">
+                    Train Drill <span>→</span>
+                  </div>
+                </Link>
+              ))}
             </div>
           </section>
         )}
 
-        {/* Footer */}
-        {!isFullscreen && !isMobileLandscape && (
-          <footer className="mt-12 bg-[#05060b] border border-gray-800 text-gray-500 rounded-xl py-10 px-6 font-mono text-[10px]" role="contentinfo">
-            <div className="max-w-7xl mx-auto">
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8 mb-8">
-                <div>
-                  <h3 className="text-white font-bold mb-3 uppercase tracking-wider font-mono">Reaction Drills</h3>
-                  <ul className="space-y-2">
-                    <li><Link href="/drills/reaction-speed/reaction-time-test" className="hover:text-amber-400 transition-colors">Reaction Time Test</Link></li>
-                    <li><Link href="/drills/reaction-speed/reaction-simulator" className="hover:text-amber-400 transition-colors">Reaction Sim</Link></li>
-                    <li><Link href="/drills/reaction-speed/reflex-training-drill" className="hover:text-amber-400 transition-colors text-amber-400">Reflex Training</Link></li>
-                    <li><Link href="/drills/reaction-speed" className="text-amber-500 hover:text-amber-400 transition-colors font-bold">All Reaction Drills →</Link></li>
-                  </ul>
-                </div>
-                <div>
-                  <h3 className="text-white font-bold mb-3 uppercase tracking-wider font-mono">Memory</h3>
-                  <ul className="space-y-2">
-                    <li><Link href="/drills/memory/working-memory/n-back" className="hover:text-amber-400 transition-colors">3-Back Training</Link></li>
-                    <li><Link href="/drills/memory/short-term-memory/color-sequence" className="hover:text-amber-400 transition-colors">Color Sequence</Link></li>
-                    <li><Link href="/drills/memory" className="text-amber-500 hover:text-amber-400 transition-colors font-bold">All Memory Drills →</Link></li>
-                  </ul>
-                </div>
-                <div>
-                  <h3 className="text-white font-bold mb-3 uppercase tracking-wider font-mono">Cognitive</h3>
-                  <ul className="space-y-2">
-                    <li><Link href="/drills/cognitive/memory/card-matching" className="hover:text-amber-400 transition-colors">Memory Games</Link></li>
-                    <li><Link href="/drills/cognitive/attention/divided-attention" className="hover:text-amber-400 transition-colors">Attention Drills</Link></li>
-                    <li><Link href="/drills/cognitive" className="text-amber-500 hover:text-amber-400 transition-colors font-bold">All Cognitive Drills →</Link></li>
-                  </ul>
-                </div>
-                <div>
-                  <h3 className="text-white font-bold mb-3 uppercase tracking-wider font-mono">Academic</h3>
-                  <ul className="space-y-2">
-                    <li><Link href="/drills/academic/writing-speed/typing-test" className="hover:text-amber-400 transition-colors">Typing Speed Test</Link></li>
-                    <li><Link href="/drills/academic/math-speed/mental-math" className="hover:text-amber-400 transition-colors">Mental Math</Link></li>
-                    <li><Link href="/drills/academic" className="text-amber-500 hover:text-amber-400 transition-colors font-bold">All Academic Drills →</Link></li>
-                  </ul>
-                </div>
-                <div>
-                  <h3 className="text-white font-bold mb-3 uppercase tracking-wider font-mono">More Sectors</h3>
-                  <ul className="space-y-2">
-                    <li><Link href="/drills/visual" className="hover:text-amber-400 transition-colors">Visual</Link></li>
-                    <li><Link href="/drills/physical" className="hover:text-amber-400 transition-colors">Physical</Link></li>
-                  </ul>
-                </div>
-              </div>
-              
-              <div className="border-t border-gray-800 pt-8 text-center">
-                <div className="flex items-center justify-center gap-2 mb-4">
-                  <div className="w-6 h-6 bg-gradient-to-br from-amber-500/20 to-orange-500/20 border border-amber-500/30 rounded-lg flex items-center justify-center">
-                    <Target className="w-3.5 h-3.5 text-amber-400" />
-                  </div>
-                  <span className="text-white font-black tracking-widest text-xs uppercase">SkillDrills</span>
-                </div>
-                <p className="text-[9px] mb-2">&copy; {new Date().getFullYear()} SkillDrills. All rights reserved.</p>
-                <p className="text-[9px] max-w-2xl mx-auto leading-relaxed mb-6 font-sans text-gray-500">
-                  Open-source telemetry training platform. Free forever. No downloads required.
-                </p>
-                <div className="flex items-center justify-center gap-4 flex-wrap mt-6">
-                  <a href="https://youtube.com/@skilldrills.online" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="YouTube">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-                  </a>
-                  <a href="https://www.facebook.com/profile.php?id=61590093843779" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="Facebook">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-                  </a>
-                  <a href="https://x.com/skilldrillss" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="Twitter / X">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-                  </a>
-                  <a href="https://www.instagram.com/skilldrills.online/?__pwa=1" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="Instagram">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
-                  </a>
-                  <a href="https://pinterest.com/skilldrills" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="Pinterest">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738a.36.36 0 0 1 .083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.632-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12 0-6.628-5.373-12-12-12z"/></svg>
-                  </a>
-                </div>
-              </div>
-            </div>
-          </footer>
-        )}
-      </div>
+        {/* SITE FOOTER */}
+        {!isFullscreen && <DrillFooter />}
+
+      </main>
     </div>
   );
 }
 
 // === Subcomponents ===
-
-function StatCard({ icon, value, label, unit = '', highlight = false }) {
+function RuleItem({ num, text, highlight = '', result }: { num: string; text: string; highlight?: string; result: string }) {
   return (
-    <div className={`group rounded-xl border ${highlight ? 'border-amber-500/50 bg-amber-500/5' : 'border-gray-800 bg-gray-900/50'} p-2 text-center flex flex-col justify-center h-full transition-all duration-300 hover:scale-[1.03] hover:border-gray-700`}>
-      <div className="mb-1 flex justify-center transition-transform duration-300 group-hover:scale-110">
-        {icon}
+    <div className="flex items-center gap-4 bg-black p-4 rounded-xl border border-white/10 shadow-sm font-sans">
+      <div className="w-8 h-8 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-white text-base font-black shadow-lg flex-shrink-0">{num}</div>
+      <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <p className="text-sm font-medium text-gray-100 font-sans">
+          {text}{highlight && <span className="font-black text-white"> ({highlight})</span>}
+        </p>
+        <div className="text-xs font-black px-3 py-1.5 rounded-lg bg-[#050811] border border-white/10 text-white whitespace-nowrap shadow-inner tracking-wide text-center sm:text-left">
+          {result}
+        </div>
       </div>
-      <p className="text-xs sm:text-base font-black tracking-tight truncate text-white">
-        {value} <span className="text-[10px] font-semibold text-gray-500">{unit}</span>
-      </p>
-      <p className="text-[9px] font-mono font-bold uppercase tracking-wider text-gray-500 truncate">{label}</p>
     </div>
   );
 }
 
-function RelatedCard({ href, title, desc, color, icon }) {
-  const gradients = {
-    blue: 'from-blue-500 to-indigo-500',
-    orange: 'from-orange-500 to-amber-500',
-    red: 'from-red-500 to-rose-500',
-    purple: 'from-purple-500 to-violet-500',
-    green: 'from-green-500 to-emerald-500',
-    indigo: 'from-indigo-500 to-purple-500'
-  };
+function FAQItem({ q, a }: { q: string; a: string }) {
   return (
-    <Link href={href} className="group relative overflow-hidden rounded-2xl border border-gray-800 bg-[#0b0f19]/40 transition-all hover:-translate-y-1 hover:border-gray-600 block p-5">
-      <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${gradients[color]}`}></div>
-      <div className="w-10 h-10 rounded-xl bg-[#050811] border border-gray-700 flex items-center justify-center text-gray-400 group-hover:text-white mb-3 shadow-inner">
-        {icon}
-      </div>
-      <h3 className="font-bold text-base mb-1.5 text-white transition-colors">{title}</h3>
-      <p className="text-xs text-gray-500 mb-4">{desc}</p>
-      <div className="flex items-center gap-1.5 text-green-400 text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-wider">
-        Start Drill <ArrowRight className="w-3.5 h-3.5" />
-      </div>
-    </Link>
-  );
-}
-
-function FAQItem({ q, a }) {
-  return (
-    <div className="bg-[#05060b] border border-gray-800 rounded-xl p-5 hover:border-gray-700 transition-colors">
+    <div className="bg-[#05060b] border border-gray-800 rounded-xl p-5 hover:border-gray-700 transition-colors font-sans">
       <h4 className="text-sm font-bold text-gray-200 mb-2">{q}</h4>
       <p className="text-xs text-gray-400 leading-relaxed">{a}</p>
     </div>

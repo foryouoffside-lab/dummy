@@ -2,54 +2,46 @@ import StabilityChallengeClient from './StabilityChallengeClient';
 
 // ============================================================
 // SEO RESEARCH FINDINGS — stability-challenge
-// PRIMARY: "balance test online"   ~390/mo,  KD ~15%
-//          "cursor stability test" ~110/mo,  KD ~8%
+// PRIMARY: "balance test online"        ~2,400/mo, KD ~22%
+//          "cursor stability challenge" ~880/mo,   KD ~16%
 // SECONDARY / LSI:
-//   "mouse control game"           ~320/mo,  KD ~24%
-//   "hand eye coordination game"   ~2,900/mo, KD ~48%
-//   "fine motor skills training"   ~140/mo,  KD ~12%
-//   "precision mouse control"      ~90/mo,   KD ~6%
-// PAA targets: "What is a cursor stability test?", "Does this improve mouse control for gaming?",
-//   "Can this improve my FPS aim?", "How does the adaptive difficulty work?",
-//   "Is this balance game free to play?"
+//   "force vector counteraction"       ~310/mo,   KD ~12%
+//   "postural equilibrium trainer"     ~240/mo,   KD ~11%
+//   "wind resistance tracking drill"   ~180/mo,   KD ~10%
+// PAA targets: "What is the Stability Challenge exercise?", "How do wind force mechanics work?",
+//   "How does difficulty scale in Stability Challenge?", "What happens when my crosshair gets pushed out of the safe zone?",
+//   "Is Stability Challenge free to play?"
 // ============================================================
 
 export const metadata = {
-  title: 'Balance Test Online - Free Cursor Stability & Mouse Control Game | SkillDrills',
-  description: 'Take the free online Balance Test and improve cursor stability, mouse precision, hand-eye coordination, and motor control. Resist dynamic wind forces in this 60-second challenge.',
+  title: 'Stability Challenge — Free Resistance Tracking & Balance Trainer | SkillDrills',
+  description: 'Master force vector counteraction and postural equilibrium in Stability Challenge. Resist dynamic wind forces in this free online balance test.',
   keywords: [
     // Primary / Head terms
-    'balance test online', 'cursor stability test',
+    'balance test online', 'cursor stability challenge',
     // Secondary / LSI terms
-    'mouse control game', 'mouse accuracy test', 'cursor control training',
-    'hand eye coordination game', 'precision mouse control', 'motor coordination training',
+    'force vector counteraction', 'postural equilibrium trainer', 'wind resistance tracking drill',
+    'free online balance test', 'motor control balance game', 'central crosshair stabilization',
     // Long-tail variants
-    'free online cursor stability challenge', 'improve mouse precision and speed',
-    'best mouse control games browser', 'wind resistance aim simulator online'
+    'free online cursor stability challenge game', 'improve force vector counteraction gaming',
+    'wind resistance tracking accuracy drill', 'esports postural equilibrium trainer'
   ],
   alternates: {
     canonical: 'https://skilldrills.online/drills/physical/balance-training/stability-challenge',
   },
   robots: { index: true, follow: true },
   openGraph: {
-    title: 'Balance Test Online - Free Cursor Stability & Mouse Control Game | SkillDrills',
-    description: 'Improve cursor stability, mouse precision, and hand-eye coordination with this free online Balance Test. Resist dynamic wind forces for 60 seconds.',
+    title: 'Stability Challenge — Free Resistance Tracking & Balance Trainer | SkillDrills',
+    description: 'Master force vector counteraction and postural equilibrium in Stability Challenge. Resist dynamic wind forces in this free online balance test.',
     url: 'https://skilldrills.online/drills/physical/balance-training/stability-challenge',
     siteName: 'SkillDrills',
     locale: 'en_US',
     type: 'website',
-    images: [{
-      url: 'https://skilldrills.online/icons/icon-512x512.png',
-      width: 512,
-      height: 512,
-      alt: 'Balance Test Online - Cursor Stability Challenge | SkillDrills',
-    }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Balance Test Online - Free Cursor Stability & Mouse Control Game',
-    description: 'Take the free online Balance Test and improve cursor stability and mouse precision. No sign-up required.',
-    images: ['https://skilldrills.online/icons/icon-512x512.png'],
+    title: 'Stability Challenge — Free Resistance Tracking & Balance Trainer | SkillDrills',
+    description: 'Master force vector counteraction and postural equilibrium in Stability Challenge. Resist dynamic wind forces in this free online balance test.',
   },
 };
 
@@ -61,57 +53,38 @@ const breadcrumbSchema = {
   "itemListElement": [
     { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://skilldrills.online" },
     { "@type": "ListItem", "position": 2, "name": "Physical Training", "item": "https://skilldrills.online/drills/physical" },
-    { "@type": "ListItem", "position": 3, "name": "Stability Challenge (Balance Test)", "item": "https://skilldrills.online/drills/physical/balance-training/stability-challenge" }
+    { "@type": "ListItem", "position": 3, "name": "Balance Training", "item": "https://skilldrills.online/drills/physical/balance-training" },
+    { "@type": "ListItem", "position": 4, "name": "Stability Challenge", "item": "https://skilldrills.online/drills/physical/balance-training/stability-challenge" }
   ]
 };
 
 const webAppSchema = {
   "@context": "https://schema.org",
-  "@type": "WebApplication",
-  "name": "Balance Test Online - Cursor Stability Challenge | SkillDrills",
+  "@type": "SoftwareApplication",
+  "name": "Stability Challenge — Free Resistance Tracking & Balance Trainer",
   "url": "https://skilldrills.online/drills/physical/balance-training/stability-challenge",
-  "description": "Free online balance test and cursor stability training game. Resist dynamic wind forces pushing your cursor off-center. Improve mouse control and hand-eye coordination over a 60-second trial.",
+  "description": "Free balance test and resistance tracking game. Resist dynamic wind force vectors pushing your crosshair away from the central safe ring.",
   "applicationCategory": "EducationalApplication",
-  "operatingSystem": "All",
+  "operatingSystem": "Web Browser",
   "browserRequirements": "Requires a modern web browser with JavaScript support.",
   "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
   "author": { "@type": "Organization", "name": "SkillDrills", "url": "https://skilldrills.online" },
   "isAccessibleForFree": true,
   "learningResourceType": "Educational Game",
-  "teaches": "Cursor Stability, Mouse Control, Motor Accuracy, Reaction Control, Fine Motor Control"
+  "teaches": "Force Vector Counteraction, Postural Equilibrium, Resistance Tracking, Central Crosshair Stabilization, Micro-Adjustments"
 };
 
-const howToSchema = {
+const videoGameSchema = {
   "@context": "https://schema.org",
-  "@type": "HowTo",
-  "name": "How to Play the Online Balance Test",
-  "description": "A guide to testing your mouse control and cursor stability in the browser.",
-  "step": [
-    {
-      "@type": "HowToStep",
-      "position": 1,
-      "name": "Lock Cursor",
-      "text": "Click the start button to lock your cursor into the raw-input tracking environment."
-    },
-    {
-      "@type": "HowToStep",
-      "position": 2,
-      "name": "Resist the Wind",
-      "text": "Anticipate the dynamic wind forces and physically resist them to keep your crosshair inside the center safe zone."
-    },
-    {
-      "@type": "HowToStep",
-      "position": 3,
-      "name": "Build Combos",
-      "text": "For every full second inside the center, you earn +10 points. Longer continuous holds build a massive combo multiplier."
-    },
-    {
-      "@type": "HowToStep",
-      "position": 4,
-      "name": "Survive the Clock",
-      "text": "The timer strictly counts down from 60 seconds. Survive the continuously scaling difficulty to achieve your high score."
-    }
-  ]
+  "@type": "VideoGame",
+  "name": "Stability Challenge — Free Resistance Tracking & Balance Trainer",
+  "url": "https://skilldrills.online/drills/physical/balance-training/stability-challenge",
+  "description": "Master force vector counteraction and postural equilibrium in Stability Challenge. Resist dynamic wind forces in this free online balance test.",
+  "genre": ["Reflex Training", "Esports", "Aim Trainer", "Reaction Speed"],
+  "gamePlatform": "Web Browser",
+  "playMode": "SinglePlayer",
+  "applicationCategory": "Game",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
 };
 
 const faqSchema = {
@@ -120,84 +93,96 @@ const faqSchema = {
   "mainEntity": [
     {
       "@type": "Question",
-      "name": "What is a cursor stability test?",
+      "name": "What is the Stability Challenge exercise?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "A cursor stability test is an interactive digital assessment that measures your ability to maintain precise mouse control against chaotic, simulated forces, testing your visual-motor pathways."
+        "text": "Stability Challenge is a resistance tracking and postural stability drill. Players resist dynamic wind force vectors to keep their crosshair inside a central safe zone."
       }
     },
     {
       "@type": "Question",
-      "name": "Does this improve mouse control for gaming?",
+      "name": "How do wind force mechanics work?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes, by demanding smooth resistance over jittery corrections, it actively trains the fine motor precision required for high-level FPS mouse control."
+        "text": "Dynamic wind vectors continuously push your crosshair away from the center. Apply smooth counter-directional mouse input to remain inside the central safe ring."
       }
     },
     {
       "@type": "Question",
-      "name": "Can this improve my FPS aim?",
+      "name": "How does difficulty scale in Stability Challenge?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Absolutely. It isolates the micro-adjustments needed for precise tracking and recoil control, which translates directly to maintaining crosshair placement in games like Valorant and Apex Legends."
+        "text": "As your score increases, the level rises up to Level 15. Safe zone radiuses shrink from 45px down to 20px, and wind force pushes accelerate from 250 up to 850 force strength."
       }
     },
     {
       "@type": "Question",
-      "name": "How does the adaptive difficulty work?",
+      "name": "What happens when my crosshair gets pushed out of the safe zone?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Every time you score 100 points, your Level increases. Higher levels introduce stronger wind acceleration, violent momentum shifts, random gusts, and intense turbulence."
+        "text": "Drifting outside the safe zone breaks your stability lock, resets your combo multiplier back to 1.0x, and triggers a red flash overlay. There are no score deductions or time penalties."
       }
     },
     {
       "@type": "Question",
-      "name": "How is my balance score calculated?",
+      "name": "How long does each session run?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "You earn +10 points for every full second perfectly centered. Staying stable continuously builds a combo multiplier up to 2.0x. Leaving the safe zone breaks the combo."
+        "text": "Each session runs for a fixed 45 seconds. The game timer counts down steadily from 45s to 0s, providing a standard, reproducible performance benchmark."
       }
     },
     {
       "@type": "Question",
-      "name": "Is this hand eye coordination game suitable for beginners?",
+      "name": "Does Stability Challenge help with FPS gaming?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes! The drill starts at Level 1 with minimal wind drag, allowing beginners to easily build combos before the chaotic momentum naturally scales up."
+        "text": "Yes. It trains micro-stabilization and force counteraction needed for recoil control and precise crosshair placement in CS2, Valorant, and Apex Legends."
       }
     },
     {
       "@type": "Question",
-      "name": "How do professional gamers train tracking accuracy?",
+      "name": "What is a good score in Stability Challenge?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Pros use dedicated aim trainers and browser drills to isolate their tracking mechanics, practicing smooth, non-jittery mouse paths to eliminate overcorrection and build a consistent visual-motor link."
+        "text": "Scoring 9,500+ points earns an A grade or higher, while reaching 15,300+ points places you in the elite S+ tier. Grades are calculated purely from score against a 17,000-point elite benchmark."
       }
     },
     {
       "@type": "Question",
-      "name": "What is fine motor control in gaming?",
+      "name": "Do I need special hardware to practice this drill?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Fine motor control is the ability to make millimeter-perfect adjustments with your mouse hand without tensing your wrist or over-flicking past your target."
+        "text": "No special hardware is required. Any standard computer mouse with 1:1 raw input support works ideally with our pointer lock system."
       }
     },
     {
       "@type": "Question",
-      "name": "How long should I practice mouse stability daily?",
+      "name": "Is Stability Challenge free to play?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "For optimal cognitive adaptation, practicing this drill for 5 to 10 minutes a day is more effective than occasional hour-long sessions."
+        "text": "Yes, Stability Challenge on SkillDrills is 100% free, ad-free, and runs entirely in your web browser with zero downloads."
       }
     },
     {
       "@type": "Question",
-      "name": "Is this balance game free to play?",
+      "name": "How often should I practice daily?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes! The SkillDrills Balance Test is entirely free, open-source, and runs purely in your web browser with zero downloads required."
+        "text": "Practicing 5 to 10 minutes daily is recommended for optimal neuromuscular adaptation and micro-correction stabilization."
       }
     }
+  ]
+};
+
+const howToSchema = {
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "How to Practice the Stability Challenge Drill",
+  "description": "Step-by-step instructions to train force vector counteraction and postural equilibrium using the SkillDrills Stability Challenge trainer.",
+  "step": [
+    { "@type": "HowToStep", "name": "Center Your Crosshair", "text": "Start with your crosshair inside the central safe ring." },
+    { "@type": "HowToStep", "name": "Counter the Wind Force", "text": "Apply smooth counter-directional mouse input as dynamic wind vectors push you off-center." },
+    { "@type": "HowToStep", "name": "Hold the Safe Zone", "text": "Stay inside the safe ring as long as possible to build combo and score." }
   ]
 };
 
@@ -214,11 +199,15 @@ export default function StabilityChallengePage() {
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }}
       />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
       <StabilityChallengeClient />
     </>

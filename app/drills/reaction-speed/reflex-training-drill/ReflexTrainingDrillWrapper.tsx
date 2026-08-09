@@ -1,12 +1,5 @@
 'use client';
 
-import dynamic from 'next/dynamic';
+import ReflexTrainingDrillClient from './ReflexTrainingDrillClient';
 
-const ReflexTrainingDrillClient = dynamic(
-  () => import('./ReflexTrainingDrillClient'),
-  { ssr: false }
-);
-
-export default function ReflexTrainingDrillWrapper() {
-  return <ReflexTrainingDrillClient />;
-}
+export default ReflexTrainingDrillClient;

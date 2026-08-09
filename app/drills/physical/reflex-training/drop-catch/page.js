@@ -14,8 +14,8 @@ import DropCatchClient from './DropCatchClient';
 // ============================================================
 
 export const metadata = {
-  title: 'Free Reflex Test Online - Drop Catch Reaction Speed Game | SkillDrills',
-  description: 'Free reflex test online. Catch falling green targets and avoid red decoys — the best reflex training game for reaction speed and visual discrimination.',
+  title: 'Reflex Drop Catch — Free Reflex Test Online & Game | SkillDrills',
+  description: 'Free reflex test online. Catch falling green targets and avoid red decoys in this reflex training game for reaction speed and visual discrimination.',
   keywords: [
     // Primary / Head terms
     'reflex test online', 'reflex training game',
@@ -31,24 +31,17 @@ export const metadata = {
   },
   robots: { index: true, follow: true },
   openGraph: {
-    title: 'Free Reflex Test Online - Drop Catch Reaction Speed Game | SkillDrills',
-    description: 'Free reflex test online. Catch falling green targets and avoid red decoys — the best reflex training game for reaction speed and visual discrimination.',
+    title: 'Reflex Drop Catch — Free Reflex Test Online & Game | SkillDrills',
+    description: 'Free reflex test online. Catch falling green targets and avoid red decoys in this reflex training game for reaction speed and visual discrimination.',
     url: 'https://skilldrills.online/drills/physical/reflex-training/drop-catch',
     siteName: 'SkillDrills',
     locale: 'en_US',
     type: 'website',
-    images: [{
-      url: 'https://skilldrills.online/icons/icon-512x512.png',
-      width: 512,
-      height: 512,
-      alt: 'Free Reflex Test Online - Drop Catch Reaction Speed Game | SkillDrills',
-    }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Free Reflex Test Online - Drop Catch Reaction Speed Game | SkillDrills',
-    description: 'Free reflex test online. Catch green balls, avoid red decoys. Best adaptive reflex training game. No sign-up.',
-    images: ['https://skilldrills.online/icons/icon-512x512.png'],
+    title: 'Reflex Drop Catch — Free Reflex Test Online & Game | SkillDrills',
+    description: 'Free reflex test online. Catch falling green targets and avoid red decoys in this reflex training game for reaction speed and visual discrimination.',
   },
 };
 
@@ -61,16 +54,16 @@ const breadcrumbSchema = {
     { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://skilldrills.online" },
     { "@type": "ListItem", "position": 2, "name": "Physical Training", "item": "https://skilldrills.online/drills/physical" },
     { "@type": "ListItem", "position": 3, "name": "Reflex Training", "item": "https://skilldrills.online/drills/physical/reflex-training" },
-    { "@type": "ListItem", "position": 4, "name": "Reflex Test Online (Drop Catch)", "item": "https://skilldrills.online/drills/physical/reflex-training/drop-catch" }
+    { "@type": "ListItem", "position": 4, "name": "Reflex Drop Catch", "item": "https://skilldrills.online/drills/physical/reflex-training/drop-catch" }
   ]
 };
 
 const webAppSchema = {
   "@context": "https://schema.org",
-  "@type": "WebApplication",
-  "name": "Free Reflex Test Online - Drop Catch Reaction Speed Game | SkillDrills",
+  "@type": "SoftwareApplication",
+  "name": "Reflex Drop Catch — Free Reflex Test Online & Game",
   "url": "https://skilldrills.online/drills/physical/reflex-training/drop-catch",
-  "description": "Free reflex test online and reflex training game. Catch falling green balls (+1pt), avoid red decoy balls marked X. Adaptive speed 400-800px/s. 3 lives, streak bonuses. Best free online reflex test available.",
+  "description": "Free reflex test online and reflex training game. Catch falling green balls (+100pt), avoid red decoy balls marked X.",
   "applicationCategory": "EducationalApplication",
   "operatingSystem": "Web Browser",
   "browserRequirements": "Requires a modern web browser with JavaScript support.",
@@ -79,6 +72,19 @@ const webAppSchema = {
   "isAccessibleForFree": true,
   "learningResourceType": "Educational Game",
   "teaches": "Reaction Speed, Reflex Evasion, Target Discrimination, Visual Filtering, Neuromuscular Coordination"
+};
+
+const videoGameSchema = {
+  "@context": "https://schema.org",
+  "@type": "VideoGame",
+  "name": "Reflex Drop Catch — Free Reflex Test Online & Game",
+  "url": "https://skilldrills.online/drills/physical/reflex-training/drop-catch",
+  "description": "Free reflex test online. Catch falling green targets and avoid red decoys in this reflex training game for reaction speed and visual discrimination.",
+  "genre": ["Reflex Training", "Esports", "Aim Trainer", "Reaction Speed"],
+  "gamePlatform": "Web Browser",
+  "playMode": "SinglePlayer",
+  "applicationCategory": "Game",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
 };
 
 const faqSchema = {
@@ -114,23 +120,23 @@ const faqSchema = {
       "name": "How does the adaptive difficulty work?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Every 100 points you score triggers a Level Up. The engine automatically accelerates the falling velocity, shrinks the target radiuses, increases the spawn rate, and raises the probability of red decoys appearing."
+        "text": "As your score increases, the level rises up to Level 15. The engine automatically accelerates falling velocity, shrinks target radiuses, increases spawn rates, and raises the probability of red decoys appearing."
       }
     },
     {
       "@type": "Question",
-      "name": "Why does my timer drop so fast?",
+      "name": "What happens when I miss or hit a decoy?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Unlike standard aim trainers, this drill actively punishes bad accuracy and target mismanagement. Missing a green target subtracts -2.0s, and hitting a red decoy violently drains -4.0s from your clock. There are NO point deductions."
+        "text": "Missing a green target or clicking a red decoy resets your combo multiplier back to 1.0x and triggers a red flash overlay. There are no score deductions or time penalties."
       }
     },
     {
       "@type": "Question",
-      "name": "How does the survival clock work?",
+      "name": "How long does each session run?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "You begin with a strict 60 seconds. Valid catches grant +1 second (capped at 120s max). The game ends when the clock hits zero, forcing you to maintain high accuracy and speed to survive."
+        "text": "Each session runs for a fixed 45 seconds. The game timer counts down steadily from 45s to 0s, providing a standard, reproducible performance benchmark."
       }
     },
     {
@@ -154,7 +160,7 @@ const faqSchema = {
       "name": "What is a good score for the Reflex Test?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "A score of 800+ is Gold tier. 3000+ indicates Diamond-level discrimination speed, and 5000+ with 90% accuracy places you in the Master tier."
+        "text": "Scoring 8,000+ points earns a Gold or Platinum grade, while reaching 17,000+ points with 90%+ accuracy places you in the Master tier."
       }
     },
     {
@@ -165,6 +171,18 @@ const faqSchema = {
         "text": "For optimal cognitive adaptation and motor learning, practicing this drill for 5 to 10 minutes a day is more effective than occasional hour-long sessions."
       }
     }
+  ]
+};
+
+const howToSchema = {
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "How to Practice the Reflex Drop Catch Drill",
+  "description": "Step-by-step instructions to train reaction speed and target discrimination using the SkillDrills Reflex Drop Catch trainer.",
+  "step": [
+    { "@type": "HowToStep", "name": "Watch the Drop Zone", "text": "Balls fall from the top of the screen at increasing speed as your level rises." },
+    { "@type": "HowToStep", "name": "Identify the Color", "text": "Green balls are safe scoring targets; red balls marked with an X are decoys." },
+    { "@type": "HowToStep", "name": "Catch Green, Avoid Red", "text": "Click green balls before they fall past, and never click a red decoy, to build your combo." }
   ]
 };
 
@@ -181,7 +199,15 @@ export default function DropCatchPage() {
       />
       <script
         type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }}
+      />
+      <script
+        type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
       <DropCatchClient />
     </>

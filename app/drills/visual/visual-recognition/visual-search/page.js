@@ -1,8 +1,8 @@
 import VisualSearchClient from './VisualSearchClient';
 
 export const metadata = {
-  title: 'Visual Search - Conjunctive Scanning | SkillDrills',
-  description: 'Find C among 160 rotated O distractors in a 16x10 grid. Millisecond search time tracking. +1 correct, -1 wrong. 60-second challenge. No sign-up.',
+  title: 'Visual Search Pro - Conjunctive Scanning & Target Test | SkillDrills',
+  description: 'Train visual scanning speed with conjunctive search test. Find target C among rotated O distractors, zero negative penalties, 45-second session. Free online tool.',
   keywords: [
     'visual search', 'conjunctive search', 'visual scanning training',
     'find the letter', 'selective attention drill', 'visual discrimination',
@@ -17,24 +17,17 @@ export const metadata = {
     'visual search speed', 'attention to detail practice', 'concentration exercise',
   ],
   openGraph: {
-    title: 'Visual Search - Conjunctive Scanning | SkillDrills',
-    description: 'Find C among 160 rotated Os in 16x10 grid. Free.',
+    title: 'Visual Search Pro - Conjunctive Scanning & Target Test | SkillDrills',
+    description: 'Train visual scanning speed with conjunctive search test. Find target C among rotated O distractors, zero penalties. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/visual/visual-recognition/visual-search',
     siteName: 'SkillDrills',
     locale: 'en_US',
-    images: [{
-      url: 'https://skilldrills.online/icons/icon-512x512.png',
-      width: 512,
-      height: 512,
-      alt: 'Visual Search Drill',
-    }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Visual Search - Conjunctive Scanning | SkillDrills',
-    description: 'Find C among 160 rotated Os. Millisecond tracking. Free.',
-    images: ['https://skilldrills.online/icons/icon-512x512.png'],
+    title: 'Visual Search Pro - Conjunctive Scanning & Target Test | SkillDrills',
+    description: 'Train visual scanning speed with conjunctive search test. Find target C among rotated O distractors, zero penalties. Free.',
   },
   robots: { index: true, follow: true },
   alternates: {
@@ -56,7 +49,7 @@ export default function VisualSearchPage() {
               { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://skilldrills.online" },
               { "@type": "ListItem", "position": 2, "name": "Visual Training", "item": "https://skilldrills.online/drills/visual" },
               { "@type": "ListItem", "position": 3, "name": "Visual Recognition", "item": "https://skilldrills.online/drills/visual/visual-recognition" },
-              { "@type": "ListItem", "position": 4, "name": "Visual Search" }
+              { "@type": "ListItem", "position": 4, "name": "Visual Search Pro" }
             ]
           })
         }}
@@ -68,9 +61,9 @@ export default function VisualSearchPage() {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "WebApplication",
-            "name": "Visual Search Drill",
+            "name": "Visual Search Pro Drill",
             "url": "https://skilldrills.online/drills/visual/visual-recognition/visual-search",
-            "description": "Free conjunctive search drill. Find C among 160 rotated O distractors in 16x10 grid. Millisecond search time tracking. +1 correct, -1 wrong.",
+            "description": "Free conjunctive search drill. Find target letter C hidden among rotated O distractors in a dense grid, zero negative penalties, clean 45-second timer.",
             "applicationCategory": "EducationalApplication",
             "operatingSystem": "All",
             "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
@@ -89,10 +82,10 @@ export default function VisualSearchPage() {
             "mainEntity": [
               {
                 "@type": "Question",
-                "name": "What is the Visual Search Drill?",
+                "name": "What is the Visual Search Pro Drill?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "A free conjunctive search exercise. Find C among 160 rotated O distractors in a 16x10 grid. Each O randomly rotated. Millisecond search time tracked."
+                  "text": "A free conjunctive search exercise. Find the target letter 'C' hidden among rotated 'O' distractors in a grid."
                 }
               },
               {
@@ -100,15 +93,15 @@ export default function VisualSearchPage() {
                 "name": "What is conjunctive search?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Target shares features with distractors requiring focused attention. Unlike pop-out search, requires scanning each item. Transfers to real-world proofreading."
+                  "text": "Target shares features with distractors requiring focused attention. Scanning each rotated distractor builds real-world proofreading and target isolation speed."
                 }
               },
               {
                 "@type": "Question",
-                "name": "What skills does this improve?",
+                "name": "Are there negative score or time penalties?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Visual search, selective attention, visual discrimination, processing speed, and concentration during sustained scanning."
+                  "text": "No. Tapping a wrong cell never deducts score points or reduces remaining timer seconds — the cell just flashes red and you keep scanning."
                 }
               },
               {
@@ -116,7 +109,7 @@ export default function VisualSearchPage() {
                 "name": "Do I need to sign up?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "No registration required. This visual search drill is completely free and works instantly in your browser."
+                  "text": "No registration required. This drill is completely free and works instantly in your browser."
                 }
               }
             ]

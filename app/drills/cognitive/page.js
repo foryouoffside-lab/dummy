@@ -1,28 +1,30 @@
 import CognitiveHubClient from './CognitiveHubClient';
+import { DRILLS } from '../../../lib/drillsRegistry';
+
+const cognitiveDrills = DRILLS.filter((d) => d.category === 'cognitive');
+const cognitiveDrillCount = cognitiveDrills.length;
 
 export const metadata = {
-  title: 'Free Cognitive Training Online - Attention, Memory, Focus & Logic Drills | SkillDrills',
-  description: 'Free cognitive training online. 18 science-based drills for attention, working memory, focus, problem solving, and processing speed. No sign-up. Play instantly in your browser.',
+  title: 'Free Cognitive Training Online - Attention, Focus & Reaction Speed Drills | SkillDrills',
+  description: `Free cognitive training online. ${cognitiveDrillCount} science-based drills for attention, focus, and processing speed. No sign-up. Play instantly in your browser.`,
   keywords: [
     'cognitive training online', 'free cognitive training', 'cognitive training drills',
     'brain training games', 'free brain training', 'brain training online',
     'attention training', 'attention span test', 'divided attention game',
-    'selective attention test', 'sustained attention drill', 'concentration training',
-    'working memory training', 'working memory test', 'memory training games',
+    'selective attention test', 'concentration training',
     'focus training', 'focus concentration game', 'distraction fighter game',
-    'problem solving game', 'logic puzzles online', 'sudoku free online',
-    'tower of hanoi game', 'symbol matching game', 'pattern recognition game',
-    'processing speed test', 'cognitive speed training', 'reaction time cognitive',
+    'symbol matching game', 'rsvp speed reading', 'processing speed test',
+    'cognitive speed training', 'reaction time cognitive',
     'cognitive flexibility game', 'executive function training', 'attention games',
     'brain cognitive exercises', 'mental agility training', 'cognitive performance',
     'cognitive skills improvement', 'cognitive ability test online',
     'esports cognitive training', 'gamer brain training', 'fps cognitive drills',
     'skilldrills cognitive', 'free online cognitive drills', 'no download brain games',
-    '16 cognitive drills', 'attention focus memory game', 'brain performance training',
+    'attention focus reaction speed game', 'brain performance training',
   ],
   openGraph: {
-    title: 'Free Cognitive Training Online - Attention, Memory, Focus & Logic Drills | SkillDrills',
-    description: 'Free cognitive training online. 18 science-based drills for attention, working memory, focus, problem solving, and processing speed.',
+    title: 'Free Cognitive Training Online - Attention, Focus & Reaction Speed Drills | SkillDrills',
+    description: `Free cognitive training online. ${cognitiveDrillCount} science-based drills for attention, focus, and processing speed.`,
     type: 'website',
     url: 'https://skilldrills.online/drills/cognitive',
     siteName: 'SkillDrills',
@@ -31,8 +33,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Free Cognitive Training Online - Attention, Memory, Focus & Logic Drills | SkillDrills',
-    description: 'Free cognitive training online. 18 drills — attention, focus, working memory, problem solving. No sign-up.',
+    title: 'Free Cognitive Training Online - Attention, Focus & Reaction Speed Drills | SkillDrills',
+    description: `Free cognitive training online. ${cognitiveDrillCount} drills — attention, focus, processing speed. No sign-up.`,
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -45,28 +47,15 @@ export default function CognitiveDrillsPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         "@context": "https://schema.org",
         "@type": "CollectionPage",
-        "name": "Free Cognitive Training Online - Attention, Memory, Focus & Logic Drills",
+        "name": "Free Cognitive Training Online - Attention, Focus & Reaction Speed Drills",
         "url": "https://skilldrills.online/drills/cognitive",
-        "description": "18 free cognitive training drills online. Attention, working memory, focus, problem solving, and processing speed exercises. No sign-up required.",
+        "description": `${cognitiveDrillCount} free cognitive training drills online. Attention, focus, and processing speed exercises. No sign-up required.`,
         "author": { "@type": "Organization", "name": "SkillDrills" },
-        "hasPart": [
-          { "@type": "WebApplication", "name": "Divided Attention Drill", "url": "https://skilldrills.online/drills/cognitive/attention/divided-attention" },
-          { "@type": "WebApplication", "name": "Selective Attention Test", "url": "https://skilldrills.online/drills/cognitive/attention/selective-attention" },
-          { "@type": "WebApplication", "name": "Sustained Attention Training", "url": "https://skilldrills.online/drills/cognitive/attention/sustained-attention" },
-          { "@type": "WebApplication", "name": "Batch Processing", "url": "https://skilldrills.online/drills/cognitive/attention/batch-processing" },
-          { "@type": "WebApplication", "name": "Concentration Stamina", "url": "https://skilldrills.online/drills/cognitive/attention/concentration-stamina" },
-          { "@type": "WebApplication", "name": "Concentration Grid Game", "url": "https://skilldrills.online/drills/cognitive/focus/concentration-grid" },
-          { "@type": "WebApplication", "name": "Distraction Fighter Game", "url": "https://skilldrills.online/drills/cognitive/focus/distraction-fighter" },
-          { "@type": "WebApplication", "name": "Focus Timer Training", "url": "https://skilldrills.online/drills/cognitive/focus/focus-timer" },
-          { "@type": "WebApplication", "name": "Card Matching Memory Game", "url": "https://skilldrills.online/drills/cognitive/memory/card-matching" },
-          { "@type": "WebApplication", "name": "Memory Sequence Training", "url": "https://skilldrills.online/drills/cognitive/memory/memory-sequence" },
-          { "@type": "WebApplication", "name": "Number Recall Game", "url": "https://skilldrills.online/drills/cognitive/memory/number-recall" },
-          { "@type": "WebApplication", "name": "Pattern Recognition Game", "url": "https://skilldrills.online/drills/cognitive/problem-solving/pattern-recognition" },
-          { "@type": "WebApplication", "name": "Logic Puzzles Online", "url": "https://skilldrills.online/drills/cognitive/problem-solving/logic-puzzles" },
-          { "@type": "WebApplication", "name": "Free Sudoku Online", "url": "https://skilldrills.online/drills/cognitive/problem-solving/sudoku" },
-          { "@type": "WebApplication", "name": "Tower of Hanoi Game", "url": "https://skilldrills.online/drills/cognitive/problem-solving/tower-of-hanoi" },
-          { "@type": "WebApplication", "name": "Symbol Matching Game", "url": "https://skilldrills.online/drills/cognitive/problem-solving/symbol-matching" }
-        ]
+        "hasPart": cognitiveDrills.map((drill) => ({
+          "@type": "WebApplication",
+          "name": drill.name,
+          "url": `https://skilldrills.online${drill.href}`
+        }))
       })}} />
       <CognitiveHubClient />
     </>

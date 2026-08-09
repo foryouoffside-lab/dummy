@@ -1,8 +1,12 @@
 import FPSHubClient from './FPSHubClient';
+import { DRILLS } from '../../../lib/drillsRegistry';
+
+const fpsDrills = DRILLS.filter((d) => d.category === 'fps');
+const fpsDrillCount = fpsDrills.length;
 
 export const metadata = {
   title: 'Free FPS Aim Trainer - Best Online Aim Training Hub | SkillDrills',
-  description: 'Free FPS aim trainer hub. 12 professional aim training drills — flick shots, tracking aim, recoil control, reaction time, strafe tracking, and more. Valorant, CS2, Apex compatible. No sign-up.',
+  description: `Free FPS aim trainer hub. ${fpsDrillCount} professional aim training drills — flick shots, tracking aim, recoil control, reaction time, strafe tracking, and more. Valorant, CS2, Apex compatible. No sign-up.`,
   keywords: [
     'free fps aim trainer', 'fps aim trainer online', 'best aim trainer',
     'aim trainer online', 'free aim trainer', 'aim training online',
@@ -18,11 +22,11 @@ export const metadata = {
     'gaming aim practice', 'mouse precision fps', 'aim improvement game',
     'skilldrills fps', 'skilldrills aim trainer', 'free online aim practice',
     'no download aim trainer', 'browser aim trainer', 'instant aim training',
-    '12 fps drills', 'professional aim training', 'comprehensive aim trainer',
+    'professional aim training', 'comprehensive aim trainer',
   ],
   openGraph: {
     title: 'Free FPS Aim Trainer - Best Online Aim Training Hub | SkillDrills',
-    description: 'Free FPS aim trainer hub. 12 professional aim training drills — flick shots, tracking, recoil control, reaction time. Valorant, CS2, Apex. No sign-up.',
+    description: `Free FPS aim trainer hub. ${fpsDrillCount} professional aim training drills — flick shots, tracking, recoil control, reaction time. Valorant, CS2, Apex. No sign-up.`,
     type: 'website',
     url: 'https://skilldrills.online/drills/fps',
     siteName: 'SkillDrills',
@@ -32,7 +36,7 @@ export const metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Free FPS Aim Trainer - Best Online Aim Training Hub | SkillDrills',
-    description: 'Free FPS aim trainer. 12 professional drills — flick shots, tracking, recoil control, reaction time. Valorant, CS2, Apex. No sign-up.',
+    description: `Free FPS aim trainer. ${fpsDrillCount} professional drills — flick shots, tracking, recoil control, reaction time. Valorant, CS2, Apex. No sign-up.`,
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -47,22 +51,13 @@ export default function FPSHubPage() {
         "@type": "CollectionPage",
         "name": "Free FPS Aim Trainer - Best Online Aim Training Hub",
         "url": "https://skilldrills.online/drills/fps",
-        "description": "Free FPS aim trainer hub with 12 professional aim training drills. Flick shots, tracking aim, recoil control, reaction time tests, strafe tracking, crosshair placement, target acquisition, and more. Valorant, CS2, Apex Legends compatible. No sign-up required.",
+        "description": `Free FPS aim trainer hub with ${fpsDrillCount} professional aim training drills. Flick shots, tracking aim, recoil control, reaction time tests, strafe tracking, crosshair placement, target acquisition, and more. Valorant, CS2, Apex Legends compatible. No sign-up required.`,
         "author": { "@type": "Organization", "name": "SkillDrills" },
-        "hasPart": [
-          { "@type": "WebApplication", "name": "FPS Aim Training - 180 Degree Awareness", "url": "https://skilldrills.online/drills/fps/180-degree-awareness" },
-          { "@type": "WebApplication", "name": "Crosshair Placement Training - Angle Hold Drill", "url": "https://skilldrills.online/drills/fps/angle-hold-trainer" },
-          { "@type": "WebApplication", "name": "Flick Shot Training - FPS Aim Trainer", "url": "https://skilldrills.online/drills/fps/flick-shot-training" },
-          { "@type": "WebApplication", "name": "Reaction Time Test FPS - Raw Reflex Drill", "url": "https://skilldrills.online/drills/fps/instant-response" },
-          { "@type": "WebApplication", "name": "Tracking Aim Trainer - Smooth Pursuit Drill", "url": "https://skilldrills.online/drills/fps/pro-smooth-pursuit" },
-          { "@type": "WebApplication", "name": "Anti-Zigzag Movement Trainer - FPS Aim Training", "url": "https://skilldrills.online/drills/fps/anti-zigzag-movement-trainer" },
-          { "@type": "WebApplication", "name": "Recoil Control Training - CS2 & Valorant Spray", "url": "https://skilldrills.online/drills/fps/recoil-control" },
-          { "@type": "WebApplication", "name": "Strafe Tracking Aim - Movement Tracking Drill", "url": "https://skilldrills.online/drills/fps/strafe-tracking" },
-          { "@type": "WebApplication", "name": "Target Acquisition Training - Priority Aim Drill", "url": "https://skilldrills.online/drills/fps/target-acquisition" },
-          { "@type": "WebApplication", "name": "Target Prioritization Game - Swarm Focus Drill", "url": "https://skilldrills.online/drills/fps/target-prioritization" },
-          { "@type": "WebApplication", "name": "Target Switching Aim - Multi-Target Speed Drill", "url": "https://skilldrills.online/drills/fps/target-switching-swarm" },
-          { "@type": "WebApplication", "name": "Vertical Tracking Aim - Air Target Training", "url": "https://skilldrills.online/drills/fps/vertical-air-track" }
-        ]
+        "hasPart": fpsDrills.map((drill) => ({
+          "@type": "WebApplication",
+          "name": drill.name,
+          "url": `https://skilldrills.online${drill.href}`
+        }))
       })}} />
       <FPSHubClient />
     </>

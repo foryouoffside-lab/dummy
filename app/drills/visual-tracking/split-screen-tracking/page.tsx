@@ -1,98 +1,120 @@
 import SplitScreenTrackingClient from './SplitScreenTrackingClient';
 
 export const metadata = {
-  title: 'Split Screen Tracking - Visual Pursuit & Tracking Drill | SkillDrills',
-  description: 'Condition divided attention by tracking two targets moving along vertical and horizontal planes. Train visual pursuit tracking and coordinate re-acquisition speeds. No sign-up required.',
-  keywords: ['split screen tracking', 'visual tracking drill', 'smooth pursuit eye training', 'saccadic eye movement test', 'visual processing speed', 'foveal tracking', 'esports vision training', 'athletic vision drill'],
+  title: "Split-Screen Tracking — Visual Tracking & Gaze Calibration Drill | SkillDrills",
+  description: "Condition divided attention by tracking dual targets moving along vertical and horizontal axes. Free browser-based visual tracking drill with customizable speed, duration, and random acceleration.",
+  keywords: [
+    "split screen tracking",
+    "visual tracking drill",
+    "smooth pursuit eye training",
+    "divided attention training",
+    "dual target tracking",
+    "esports vision training",
+    "athletic vision drill",
+    "ocular motor training",
+    "eye tracking practice online"
+  ],
+  alternates: {
+    canonical: "https://skilldrills.online/drills/visual-tracking/split-screen-tracking",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
   openGraph: {
-    title: 'Split Screen Tracking - Visual Pursuit & Tracking Drill | SkillDrills',
-    description: 'Condition divided attention by tracking two targets moving along vertical and horizontal planes. Train visual pursuit tracking and coordinate re-acquisition speeds. No sign-up required.',
-    type: 'article',
-    url: 'https://skilldrills.online/drills/visual-tracking/split-screen-tracking',
+    title: "Split-Screen Tracking — Visual Tracking & Gaze Calibration Drill | SkillDrills",
+    description: "Condition divided attention by tracking dual targets moving along vertical and horizontal axes. Free browser-based visual tracking drill.",
+    url: "https://skilldrills.online/drills/visual-tracking/split-screen-tracking",
     siteName: 'SkillDrills',
     locale: 'en_US',
-    images: [{
-      url: 'https://skilldrills.online/icons/icon-512x512.png',
-      width: 512,
-      height: 512,
-      alt: 'Split-Screen Tracking Drill',
-    }],
+    type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Split Screen Tracking - Visual Pursuit & Tracking Drill | SkillDrills',
-    description: 'Condition divided attention by tracking two targets moving along vertical and horizontal planes. Train visual pursuit tracking and coordinate re-acquisition speeds. No sign-up required.',
-    images: ['https://skilldrills.online/icons/icon-512x512.png'],
-  },
-  robots: { index: true, follow: true },
-  alternates: {
-    canonical: 'https://skilldrills.online/drills/visual-tracking/split-screen-tracking',
+    title: "Split-Screen Tracking — Visual Tracking & Gaze Calibration Drill | SkillDrills",
+    description: "Condition divided attention by tracking dual targets moving along vertical and horizontal axes. Free browser-based visual tracking drill.",
   },
 };
 
 export default function SplitScreenTrackingPage() {
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "SkillDrills", "item": "https://skilldrills.online/" },
+      { "@type": "ListItem", "position": 2, "name": "Visual Tracking", "item": "https://skilldrills.online/drills/visual-tracking" },
+      { "@type": "ListItem", "position": 3, "name": "Split-Screen Tracking", "item": "https://skilldrills.online/drills/visual-tracking/split-screen-tracking" }
+    ]
+  };
+
+  const softwareSchema = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Split-Screen Tracking Drill",
+    "applicationCategory": "EducationalApplication",
+    "operatingSystem": "Web Browser",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "description": "An interactive web-based visual tracking drill to condition divided attention across dual independent movement planes.",
+    "url": "https://skilldrills.online/drills/visual-tracking/split-screen-tracking",
+    "publisher": {
+      "@type": "Organization",
+      "name": "SkillDrills",
+      "url": "https://skilldrills.online"
+    }
+  };
+
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is the Split-Screen Tracking drill?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The Split-Screen Tracking drill conditions divided visual attention by requiring your eyes to monitor two targets moving along orthogonal vertical and horizontal planes simultaneously."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Why use the 'Hide Line' setting?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Hiding the center split line and movement axes forces your visual cortex to process dual-field movements without visual region dividers."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What does the Random Speed feature do?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Random Speed introduces independent velocity fluctuations between the left vertical and right horizontal targets, strengthening ocular motor control."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How long should I practice visual tracking daily?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "We recommend 5 to 10 minutes of daily visual tracking training before gaming or athletic practice to warm up ocular muscles and reduce eye fatigue."
+        }
+      }
+    ]
+  };
+
   return (
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "BreadcrumbList",
-            "itemListElement": [
-              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://skilldrills.online" },
-              { "@type": "ListItem", "position": 2, "name": "Drills Hub", "item": "https://skilldrills.online/drills" },
-              { "@type": "ListItem", "position": 3, "name": "Visual Tracking", "item": "https://skilldrills.online/drills/visual-tracking" },
-              { "@type": "ListItem", "position": 4, "name": "Split-Screen Tracking" }
-            ]
-          })
-        }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
-
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "WebApplication",
-            "name": "Split-Screen Tracking Drill",
-            "url": "https://skilldrills.online/drills/visual-tracking/split-screen-tracking",
-            "description": "Condition divided attention by tracking two targets moving along vertical and horizontal planes.",
-            "applicationCategory": "EducationalApplication",
-            "operatingSystem": "All",
-            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-            "author": { "@type": "Organization", "name": "SkillDrills" },
-            "isAccessibleForFree": true
-          })
-        }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }}
       />
-
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "FAQPage",
-            "mainEntity": [
-              {
-                "@type": "Question",
-                "name": "What is the Split-Screen Tracking Drill?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "Condition divided attention by tracking two targets moving along vertical and horizontal planes."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "Who is this drill designed for?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "Competitive gamers, sports athletes, and anyone wanting to improve ocular muscle agility and tracking precision."
-                }
-              }
-            ]
-          })
-        }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
 
       <SplitScreenTrackingClient />

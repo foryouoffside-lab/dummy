@@ -4,23 +4,20 @@ export const metadata = {
   title: "Crosshair Placement & Angle Hold Trainer | SkillDrills",
   description: "Improve your crosshair placement and reaction time with our interactive angle holding trainer. Learn to counter peeker's advantage in Valorant and CS2.",
   keywords: [
+    "angle hold aim trainer",
+    "crosshair placement drill",
+    "pre-fire training fps",
+    "CS2 angle holding practice",
+    "Valorant crosshair placement trainer",
+    "how to hold an angle in cs2",
+    "how to stop pre-firing",
+    "best crosshair placement drill browser",
+    "how to improve peek reaction time",
+    "free angle holding trainer online",
+    "how to punish jiggle peekers",
     "crosshair placement trainer",
-    "angle hold trainer",
-    "crosshair placement training",
-    "crosshair placement practice",
     "pre aim training",
-    "corner pre-aiming practice",
-    "peek reaction trainer",
-    "peeker advantage training",
-    "valorant crosshair placement",
-    "cs2 crosshair placement",
-    "r6 siege angle holding",
-    "defensive fps training",
-    "holding angles fps",
-    "crosshair discipline training",
-    "first shot accuracy trainer",
-    "free crosshair placement trainer",
-    "headshot crosshair placement"
+    "peeker advantage training"
   ],
   alternates: {
     canonical: "https://skilldrills.online/drills/fps/angle-hold-trainer",
@@ -36,20 +33,11 @@ export const metadata = {
     siteName: 'SkillDrills',
     locale: 'en_US',
     type: 'website',
-    images: [
-      {
-        url: 'https://skilldrills.online/icons/icon-512x512.png',
-        width: 512,
-        height: 512,
-        alt: "Crosshair Placement & Angle Hold Trainer",
-      },
-    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: "Crosshair Placement & Angle Hold Trainer | SkillDrills",
     description: "Improve your crosshair placement and reaction time with our interactive angle holding trainer. Learn to counter peeker's advantage in Valorant and CS2.",
-    images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
 };
 
@@ -67,7 +55,7 @@ export default function AngleHoldPage() {
   const softwareSchema = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
-    "name": "Crosshair Placement & Angle Hold Trainer",
+    "name": "Angle Hold Pro",
     "applicationCategory": "GameApplication",
     "operatingSystem": "Web Browser",
     "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
@@ -81,40 +69,77 @@ export default function AngleHoldPage() {
     }
   };
 
+  const videoGameSchema = {
+    "@context": "https://schema.org",
+    "@type": "VideoGame",
+    "name": "Angle Hold Pro",
+    "url": "https://skilldrills.online/drills/fps/angle-hold-trainer",
+    "description": "A free browser-based FPS trainer teaching crosshair placement discipline, corner pre-aiming, and defensive angle holding for competitive tactical shooters.",
+    "gamePlatform": "Web Browser",
+    "genre": ["FPS Training", "Aim Trainer"],
+    "playMode": "SinglePlayer",
+    "applicationCategory": "Game",
+    "operatingSystem": "Web Browser"
+  };
+
   const faqSchema = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
     "mainEntity": [
       {
         "@type": "Question",
-        "name": "What is crosshair placement and why does it matter in FPS games?",
+        "name": "What is crosshair placement?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Crosshair placement means keeping your crosshair at head height and pre-aimed at angles where enemies are likely to appear, rather than pointing at the floor or walls. Good crosshair placement eliminates the need for large corrections when an enemy appears, dramatically increasing your first-shot accuracy and headshot rate in games like Valorant and CS2."
+          "text": "Crosshair placement is a core shooter mechanic where you position your aim cursor exactly where an enemy's head is expected to spawn or appear, minimizing the physical distance required to shoot them."
         }
       },
       {
         "@type": "Question",
-        "name": "What does the Angle Hold Trainer drill teach?",
+        "name": "What is peeker's advantage?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "This drill trains you to hold crosshairs at precise angles and react the moment a target peeks into your field of view. It simulates defensive corner-holding scenarios, teaching you to wait patiently with proper pre-aim and fire immediately when the peek occurs — replicating real tactical FPS gameplay."
+          "text": "Peeker's advantage is a latency-driven delay where a moving player rounding a corner gets to see a stationary player holding the angle slightly before the stationary player's screen updates with their presence."
         }
       },
       {
         "@type": "Question",
-        "name": "How is angle holding different from flick shooting?",
+        "name": "How do CS2 and Valorant players hold angles?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Flick shooting reacts to targets that appear outside your current crosshair. Angle holding is a defensive mechanic where you already have your crosshair placed exactly where the enemy will appear, minimizing required movement to zero and giving you the first-shot advantage. It is the #1 mechanical skill difference between bronze and gold players in CS2 and Valorant."
+          "text": "Players hold corners by leaving a slight horizontal gap between the corner wall and their crosshair. This offset accommodates their visual reaction delay, allowing them to click without needing to flick when an enemy swings wide."
         }
       },
       {
         "@type": "Question",
-        "name": "Does this trainer help with peeker's advantage in CS2 and Valorant?",
+        "name": "How far should my crosshair be from the wall?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Yes. Peeker's advantage is the network/perception latency disadvantage that the defender faces when an enemy peeks a corner. This drill trains you to compensate by holding tighter angles with your crosshair already placed, reducing the adjustment distance needed and neutralizing the peeker's timing advantage."
+          "text": "If enemies consistently push past your crosshair before you can click, hold wider (further away from the corner). If you shoot early and miss, hold tighter. Adjust the distance to match your reaction latency."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can this drill improve my reaction time and defensive gameplay?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Exposing your brain to surprise, high-speed peeks and penalizing misses and premature clicking conditions you to react to visual movement faster, preventing you from getting caught off guard by wide peeks and making you a more effective defensive anchor."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Which competitive shooters does this drill help?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "This drill directly benefits Valorant defenders holding site angles, CS2 players covering bomb site holds against peeker swings, and Rainbow Six Siege anchors who need fast passive-hold reaction speed against tight-angle peeks."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What skills does this drill improve?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "It improves trigger discipline, peek reaction speed, crosshair-to-corner distance calibration, and visual tracking of fast, variable peeks."
         }
       },
       {
@@ -122,7 +147,15 @@ export default function AngleHoldPage() {
         "name": "How often should I practice crosshair placement?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Crosshair placement is a fundamentals drill. Spend at least 5-10 minutes per session before ranked play. Consistency over several weeks rewires the unconscious habit of always keeping your crosshair at head height, making good placement your default state rather than something you have to think about."
+          "text": "We recommend dedicating 10-15 minutes to crosshair placement and angle holding drills daily before your gaming sessions."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is this drill free?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, this drill is completely free to use and runs directly in any modern browser without requiring any downloads or account registration."
         }
       }
     ]
@@ -154,32 +187,27 @@ export default function AngleHoldPage() {
 
   return (
     <>
-      {/* Breadcrumb Schema */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
-
-      {/* SoftwareApplication Schema */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }}
       />
-
-      {/* FAQPage Schema */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
-
-      {/* HowTo Schema */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-
       <AngleHoldClient />
     </>
   );
 }
-

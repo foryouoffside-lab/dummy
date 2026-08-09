@@ -1,107 +1,38 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
-import { 
-  Target, Zap, Timer, Trophy, 
-  Volume2, VolumeX, Maximize2, Minimize2, Eye,
-  BarChart3, Info, Layers, Circle, Hash, RefreshCw,
-  Users, Share2, XCircle, TrendingUp,
-  GraduationCap, Lightbulb, Brain, RotateCcw,
-  ChevronRight, ArrowRight, Play, LogOut, Search, Flame,
-  Sparkles
+import {
+  Layers, Volume2, VolumeX, Play, RefreshCw, Share2, Users,
+  TrendingUp, Heart, ArrowLeft, Zap, Flame, Trophy, Target
 } from 'lucide-react';
-import useGameEngine from '../../../../../lib/useGameEngine';
-import PlayAgainButton from "../../../../../components/PlayAgainButton";
 
-// ============================================================
-// ZERO-LATENCY AUDIO SYNTHESIZER
-// ============================================================
-class AudioSynthesizer {
-  constructor() {
-    this.ctx = null;
-    this.enabled = true;
-  }
-  
-  init() {
-    if (!this.ctx) {
-      this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-    }
-    if (this.ctx.state === 'suspended') this.ctx.resume();
-  }
+import generateShareCard, { shareScoreCard } from '../../../../../components/ShareScoreCard';
+import { drillAudio } from '../../../../../lib/drillAudio';
+import { getPlayerName } from '../../../../../lib/leaderboard';
+import { getFpsScoreGrade } from '../../../../../lib/scoringEngine';
+import { MAX_LEVEL, getDifficultyProgress, getStartLevel } from '../../../../../lib/drillDifficulty';
+import useDrillFlash from '../../../../../lib/useDrillFlash';
+import useUnexpectedExitGuard from '../../../../../lib/useUnexpectedExitGuard';
+import DrillFooter from '../../../../../components/drill/DrillFooter';
+import DrillCountdown from '../../../../../components/drill/DrillCountdown';
+import DrillAccordion from '../../../../../components/drill/DrillAccordion';
+import DrillFlashOverlay from '../../../../../components/drill/DrillFlashOverlay';
+import FpsStartCard from '../../../../../components/drill/FpsStartCard';
 
-  playSoothingPop() {
-    if (!this.enabled || !this.ctx) return;
-    try {
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-      osc.type = 'sine'; 
-      osc.frequency.setValueAtTime(880, this.ctx.currentTime); 
-      osc.frequency.exponentialRampToValueAtTime(1760, this.ctx.currentTime + 0.1);
-      gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.15);
-      osc.connect(gain);
-      gain.connect(this.ctx.destination);
-      osc.start();
-      osc.stop(this.ctx.currentTime + 0.15);
-    } catch(e) {}
-  }
-
-  playSoftThud() {
-    if (!this.enabled || !this.ctx) return;
-    try {
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-      osc.type = 'sawtooth'; 
-      osc.frequency.setValueAtTime(150, this.ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(50, this.ctx.currentTime + 0.15);
-      gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.15);
-      osc.connect(gain);
-      gain.connect(this.ctx.destination);
-      osc.start();
-      osc.stop(this.ctx.currentTime + 0.15);
-    } catch(e) {}
-  }
-
-  playComboAlert() {
-    if (!this.enabled || !this.ctx) return;
-    try {
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-      osc.type = 'triangle'; 
-      osc.frequency.setValueAtTime(440, this.ctx.currentTime);
-      osc.frequency.setValueAtTime(554.37, this.ctx.currentTime + 0.1);
-      osc.frequency.setValueAtTime(659.25, this.ctx.currentTime + 0.2);
-      osc.frequency.setValueAtTime(880, this.ctx.currentTime + 0.3);
-      gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.5);
-      osc.connect(gain);
-      gain.connect(this.ctx.destination);
-      osc.start();
-      osc.stop(this.ctx.currentTime + 0.5);
-    } catch(e) {}
-  }
-  
-  setEnabled(status) {
-    this.enabled = status;
-  }
-}
-
-const audioSynth = typeof window !== 'undefined' ? new AudioSynthesizer() : null;
-
-// ============================================================
-// LOCAL STORAGE
-// ============================================================
-const STORAGE_KEY = 'skilldrills_divided_attention_v5';
+const DRILL_DURATION = 45;
+const POINTS_PER_HIT = 100;
+const POINTS_PER_LEVEL = 250;
+const ELITE_SCORE = 10000; // Target score for S+ rating (rebalanced after combo removal)
+const STORAGE_KEY = 'skilldrills_divided_attention_v7';
 
 const getSavedData = () => {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { bestScore: 0, highestCombo: 0, highestLevel: 1, totalSessions: 0, totalVisualHits: 0, totalNumberMatches: 0, totalActions: 0 };
-    return JSON.parse(raw);
+    if (!raw) return { bestScore: 0, bestLevel: 1, totalSessions: 0 };
+    return { bestScore: 0, bestLevel: 1, totalSessions: 0, ...JSON.parse(raw) };
   } catch (e) {
-    return { bestScore: 0, highestCombo: 0, highestLevel: 1, totalSessions: 0, totalVisualHits: 0, totalNumberMatches: 0, totalActions: 0 };
+    return { bestScore: 0, bestLevel: 1, totalSessions: 0 };
   }
 };
 
@@ -111,717 +42,625 @@ const saveData = (data) => {
   } catch (e) {}
 };
 
+// Difficulty scaling L1 -> L15
+const getLevelConfig = (level) => {
+  const p = getDifficultyProgress(level); // 0 -> 1 across L1..L15
+  return {
+    ballSpeed: Math.max(700, Math.round(1800 - p * 1100)), // 1800ms -> 700ms
+    numSpeed: Math.max(800, Math.round(2000 - p * 1200)),  // 2000ms -> 800ms
+    ballScale: Math.max(0.6, 1.0 - p * 0.4),               // 1.0 -> 0.6
+    spawnDelayMin: Math.max(120, Math.round(500 - p * 350)), // 500ms -> 120ms
+    spawnDelayMax: Math.max(220, Math.round(700 - p * 420)), // 700ms -> 220ms
+  };
+};
+
 // ============================================================
-// MAIN COMPONENT
+// ACCORDION DATA
 // ============================================================
+const RULES_ITEMS = [
+  { title: "Dual-Task Processing", text: "Process two independent streams simultaneously: track moving targets on the visual canvas AND tap MATCH when even numbers appear in the number stream." },
+  { title: "Visual Target Stream", text: "Tap moving blue targets as soon as they appear before their display timer expires." },
+  { title: "Numerical Match Stream", text: "Numbers (0-9) stream continuously on the side panel. Tap MATCH only when an EVEN number is active." },
+  { title: "Precision & Lives", text: "Missed visual targets, missed even numbers, or false matches trigger a red screen alert and deduct 1 life from your 5 available lives." }
+];
+
+const ABOUT_TEXT = `Divided Attention is a core cognitive drill designed to measure and train multi-channel visual tracking and simultaneous information processing. Based on dual-task psychological paradigms, this exercise forces the brain to allocate attention across two distinct channels at once: spatial motion tracking and numeric categorization.
+
+In fast-paced tactical environments (such as esports, aviation, high-frequency trading, and emergency response), peak performers must process secondary telemetry while maintaining primary spatial awareness. Divided Attention builds cognitive flexibility by testing your ability to rapidly shift focus between spatial targets and symbolic data streams without sacrificing accuracy on either.
+
+By scaling target speeds and shrinking target dimensions as your score rises, the drill pushes prefrontal executive control networks to their absolute limit.`;
+
+const FAQ_ITEMS = [
+  { q: "What is divided attention in psychology?", a: "Divided attention is the cognitive ability to process two or more independent streams of information simultaneously, splitting your mental bandwidth across multiple tasks. It is a core component of executive function and is essential for activities like driving while navigating or reading while listening to instructions." },
+  { q: "What is the difference between divided attention and selective attention?", a: "Selective attention means focusing your full cognitive resources on one task while completely filtering out distractions. Divided attention means allocating resources across two or more tasks simultaneously. In everyday life, you use selective attention when studying in a quiet room and divided attention when walking while talking." },
+  { q: "What is an example of divided attention?", a: "Common examples include: driving a car while holding a conversation, cooking while watching television, and taking notes while listening to a lecture. In each case, your brain must maintain separate cognitive loops for distinct input channels at the same time." },
+  { q: "Can you improve divided attention with training?", a: "Yes. Research in cognitive neuroscience shows that repeated dual-task training expands your brain's bandwidth to handle parallel processing. The key is practicing tasks that use different sensory channels, such as visual-spatial tracking combined with auditory or numerical processing, which avoids bottlenecks in a single sensory pathway." },
+  { q: "What does this divided attention test measure?", a: "This test measures your ability to simultaneously track moving visual targets (visuospatial channel) and identify even or odd numbers (numerical cognition channel). It scores your accuracy in both streams, your response speed, and your resistance to divided-attention errors under time pressure." },
+  { q: "How does dual-task training improve cognitive performance?", a: "Dual-task drills create a processing bottleneck in the prefrontal cortex, forcing your executive network to develop more efficient resource allocation strategies. Over time, this reduces the interference effect between tasks, allowing you to maintain accuracy in both channels with less cognitive fatigue." },
+  { q: "What skills benefit most from divided attention training?", a: "Professionals who benefit most include air traffic controllers, emergency room nurses, competitive esports players (monitoring minimap + targets), sports athletes (tracking ball + opponents simultaneously), and surgeons managing instruments while reading vital signs." },
+  { q: "What is a dual-task paradigm?", a: "A dual-task paradigm is a research and training method where participants must perform two tasks simultaneously. The interference between tasks reveals the cognitive cost of divided attention. This drill implements a visual-numerical dual task, one of the most studied paradigms in attention research." },
+  { q: "Is this divided attention test free to use?", a: "Yes. This divided attention drill on SkillDrills is completely free to play with no registration, downloads, or subscriptions required. It runs entirely in your web browser." },
+  { q: "How does divided attention affect driving safety?", a: "Divided attention is critical for safe driving. You must simultaneously monitor the road ahead, check mirrors, obey traffic signals, and process GPS instructions. Studies show that insufficient divided attention capacity significantly increases collision risk, especially in complex traffic scenarios." }
+];
+
+const RELATED_DRILLS = [
+  { id: "multi-tasking", name: "Multi-Tasking", cat: "Attention", desc: "Track dual independent target streams under speed pressure.", href: "/drills/cognitive/attention/multi-tasking" },
+  { id: "symbol-matching", name: "Symbol Matching", cat: "Processing Speed", desc: "Match rapid symbol pairs under strict time pressure.", href: "/drills/cognitive/processing-speed/symbol-matching" },
+  { id: "concentration-stamina", name: "Concentration Stamina", cat: "Attention", desc: "Sustain continuous visual focus through prolonged high-density sequences.", href: "/drills/cognitive/attention/concentration-stamina" },
+  { id: "distraction-fighter", name: "Distraction Fighter", cat: "Focus", desc: "Filter out high-interference Stroop visual distractors.", href: "/drills/cognitive/focus/distraction-fighter" },
+  { id: "reaction-time", name: "Reaction Time", cat: "Processing Speed", desc: "Train choice reaction speed and visual reflex latency.", href: "/drills/cognitive/processing-speed/reaction-time" },
+  { id: "concentration-grid", name: "Concentration Grid", cat: "Focus", desc: "Scan and tap sequential numbers on expanding grid matrices.", href: "/drills/cognitive/focus/concentration-grid" }
+];
+
 export default function DividedAttentionClient() {
-  
-  // === UI State ===
-  const [showRotateWarning, setShowRotateWarning] = useState(false);
-  const [isMobileLandscape, setIsMobileLandscape] = useState(false);
+  const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
-  const [loading, setLoading] = useState(true);
-  const [isClient, setIsClient] = useState(false);
-  const [localFeedback, setLocalFeedback] = useState({ id: 0, text: '', type: 'success', visible: false });
+  const [openAccordion, setOpenAccordion] = useState(null);
+  const [isMobile, setIsMobile] = useState(false);
+  const [isPortrait, setIsPortrait] = useState(false);
+  const [countdownValue, setCountdownValue] = useState(3);
 
-  // === Game State (Visual Sync) ===
-  const [score, setScore] = useState(0);
+  // Live HUD State
+  const [uiScore, setUiScore] = useState(0);
+  const [uiLevel, setUiLevel] = useState(1);
+  const [lives, setLives] = useState(5);
+  const [uiTimeLeft, setUiTimeLeft] = useState(DRILL_DURATION);
   const [bestScore, setBestScore] = useState(0);
+  const [bestLevel, setBestLevel] = useState(1);
+  const [totalSessions, setTotalSessions] = useState(0);
   const [isNewBest, setIsNewBest] = useState(false);
-  
-  const [visualHits, setVisualHits] = useState(0);
-  const [numberHits, setNumberHits] = useState(0);
-  const [mistakes, setMistakes] = useState(0);
-  
-  const [visualAttempts, setVisualAttempts] = useState(0);
-  const [numberAttempts, setNumberAttempts] = useState(0);
-  
-  const [combo, setCombo] = useState(0);
-  const [highestCombo, setHighestCombo] = useState(0);
-  const [currentLevel, setCurrentLevel] = useState(1);
-  const [highestLevelReached, setHighestLevelReached] = useState(1);
 
+  // Active Game State
   const [currentTarget, setCurrentTarget] = useState(null);
   const [currentNumber, setCurrentNumber] = useState(null);
-  const [ballScaleUI, setBallScaleUI] = useState(1);
+  const [wasMatched, setWasMatched] = useState(true);
+  const [ballScale, setBallScale] = useState(1.0);
 
-  const [localTimeRemaining, setLocalTimeRemaining] = useState(60.0);
-  const [forceStart, setForceStart] = useState(false);
-  
-  // Overall Stats
-  const [sessionStats, setSessionStats] = useState(null);
+  // Analytics
+  const [analytics, setAnalytics] = useState({
+    accuracy: 100,
+    visualHits: 0,
+    numberHits: 0,
+    visualAttempts: 0,
+    numberAttempts: 0,
+    visAcc: 100,
+    numAcc: 100,
+    finalLevel: 1,
+    grade: null
+  });
 
-  // === Absolute Truth Refs (Decoupled to fix "Play Again" bug) ===
-  const mountedRef = useRef(false);
-  const gameContainerRef = useRef(null);
-  const gameActiveRef = useRef(false); // Replaces dependency on engine.gameState for inner loop
-  
-  const scoreRef = useRef(0);
-  const visualHitsRef = useRef(0);
-  const numberHitsRef = useRef(0);
-  const visualAttemptsRef = useRef(0);
-  const numberAttemptsRef = useRef(0);
-  const mistakesRef = useRef(0);
-  
-  const comboRef = useRef(0);
-  const highestComboRef = useRef(0);
-  const levelRef = useRef(1);
-  const highestLevelRef = useRef(1);
-  
-  const localTimeRef = useRef(60.0);
-
-  // Adaptive Scaling Refs
-  const ballSpeedRef = useRef(1800);
-  const numSpeedRef = useRef(2000);
-  const ballScaleRef = useRef(1.0);
-  
-  const currentTargetIdRef = useRef(null);
-  const currentNumberRef = useRef(null);
-  const wasMatchedRef = useRef(true);
-
+  // Engine Refs
+  const containerRef = useRef(null);
+  const bestLevelRunRef = useRef(1);
+  const livesRef = useRef(5);
+  const countdownTimeoutsRef = useRef([]);
+  const timerIntervalRef = useRef(null);
   const ballTimerRef = useRef(null);
   const numTimerRef = useRef(null);
-  const timerIntervalRef = useRef(null);
-  const feedbackTimerRef = useRef(null);
-  
-  // Sync state for UI rendering
-  const syncToUI = useCallback(() => {
-    setScore(scoreRef.current);
-    setVisualHits(visualHitsRef.current);
-    setNumberHits(numberHitsRef.current);
-    setVisualAttempts(visualAttemptsRef.current);
-    setNumberAttempts(numberAttemptsRef.current);
-    setMistakes(mistakesRef.current);
-    setCombo(comboRef.current);
-    setHighestCombo(highestComboRef.current);
-    setCurrentLevel(levelRef.current);
-    setHighestLevelReached(highestLevelRef.current);
-    setBallScaleUI(ballScaleRef.current);
+
+  const engine = useRef({
+    score: 0,
+    level: 1,
+    visualHits: 0,
+    numberHits: 0,
+    visualAttempts: 0,
+    numberAttempts: 0,
+    mistakes: 0,
+    timeLeft: DRILL_DURATION,
+    currentTargetId: null,
+    currentNumber: null,
+    wasMatched: true
+  });
+
+  const { flashes, triggerFlash } = useDrillFlash();
+
+  // Screen/Orientation tracking
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const checkDevice = () => {
+        setIsMobile(window.innerWidth < 768);
+        setIsPortrait(window.innerHeight > window.innerWidth);
+      };
+      checkDevice();
+      window.addEventListener('resize', checkDevice);
+      window.addEventListener('orientationchange', checkDevice);
+
+      const saved = getSavedData();
+      setBestScore(saved.bestScore || 0);
+      setBestLevel(saved.bestLevel || 1);
+      setTotalSessions(saved.totalSessions || 0);
+
+      const handleFs = () => setIsFullscreen(!!document.fullscreenElement);
+      document.addEventListener('fullscreenchange', handleFs);
+
+      return () => {
+        window.removeEventListener('resize', checkDevice);
+        window.removeEventListener('orientationchange', checkDevice);
+        document.removeEventListener('fullscreenchange', handleFs);
+      };
+    }
   }, []);
 
-  // === Game Engine ===
-  const engine = useGameEngine({
-    category: 'cognitive',
-    drillId: 'divided-attention',
-    drillName: 'Divided Attention',
-    totalGameTime: 9999, 
-    lives: 9999, 
-    infiniteLives: true, 
-    sharePath: 'drills/cognitive/attention/divided-attention',
-  });
-  const engineRef = useRef(engine);
-
+  // Sound sync
   useEffect(() => {
-    engineRef.current = engine;
-    if (engine.gameState === 'playing') {
-      setIsNewBest(false);
-    }
-  }, [engine.gameState]);
+    drillAudio.setEnabled(soundEnabled);
+  }, [soundEnabled]);
 
-  // Load Data
+  // Clean timers on unmount
   useEffect(() => {
-    setIsClient(true);
-    mountedRef.current = true;
-    try {
-      const savedData = getSavedData();
-      if (savedData.bestScore) setBestScore(savedData.bestScore);
-    } catch (e) {}
-    setTimeout(() => { if (mountedRef.current) setLoading(false); }, 200);
-
     return () => {
-      mountedRef.current = false;
-      if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
+      countdownTimeoutsRef.current.forEach(clearTimeout);
       if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
       if (ballTimerRef.current) clearTimeout(ballTimerRef.current);
       if (numTimerRef.current) clearTimeout(numTimerRef.current);
     };
   }, []);
 
-  // Screen Guard & Rotate Warning
-  useEffect(() => {
-    const fsHandler = () => setIsFullscreen(!!document.fullscreenElement);
-    document.addEventListener('fullscreenchange', fsHandler);
-    
-    const checkOrientationAndSize = () => {
-      if (typeof window === 'undefined') return;
-      const ua = navigator.userAgent || '';
-      const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(ua) || window.innerWidth < 768;
-      
-      if (!isMobile) { 
-        setShowRotateWarning(false); 
-        setIsMobileLandscape(false);
-        return; 
-      }
-      
-      const isPortrait = window.innerHeight > window.innerWidth;
-      if (isPortrait) {
-          setShowRotateWarning(true);
-          setIsMobileLandscape(false);
-      } else {
-          setShowRotateWarning(false);
-          setIsMobileLandscape(true); 
-      }
-    };
-    
-    checkOrientationAndSize();
-    window.addEventListener('resize', checkOrientationAndSize);
-    window.addEventListener('orientationchange', checkOrientationAndSize);
-    return () => {
-      document.removeEventListener('fullscreenchange', fsHandler);
-      window.removeEventListener('resize', checkOrientationAndSize);
-      window.removeEventListener('orientationchange', checkOrientationAndSize);
-    };
-  }, []);
-
-  const saveStatsLocally = useCallback(() => {
-    const finalScore = scoreRef.current;
-    if (finalScore > bestScore && finalScore > 0) {
-      setIsNewBest(true);
-      setBestScore(finalScore);
-    }
-    
-    const stats = getSavedData();
-    stats.bestScore = Math.max(stats.bestScore, finalScore);
-    stats.highestCombo = Math.max(stats.highestCombo, highestComboRef.current);
-    stats.highestLevel = Math.max(stats.highestLevel, highestLevelRef.current);
-    stats.totalSessions += 1;
-    stats.totalVisualHits += visualHitsRef.current;
-    stats.totalNumberMatches += numberHitsRef.current;
-    stats.totalActions += (visualAttemptsRef.current + numberAttemptsRef.current);
-    
-    saveData(stats);
-    setSessionStats(stats);
-  }, [bestScore]);
-
-  const toggleFullscreen = useCallback(async () => {
-    try {
-      if (!document.fullscreenElement) await gameContainerRef.current?.requestFullscreen();
-      else await document.exitFullscreen();
-    } catch (err) {}
-  }, []);
-
-  const triggerFeedback = useCallback((text, type = 'success') => {
-    setLocalFeedback({ id: Date.now(), text, type, visible: true });
-    if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
-    feedbackTimerRef.current = setTimeout(() => {
-      if (mountedRef.current) setLocalFeedback(prev => ({ ...prev, visible: false }));
-    }, 600);
-  }, []);
-
-  // === DYNAMIC DIFFICULTY SCALING ===
-  const updateDifficulty = useCallback(() => {
-    const newLevel = Math.floor(scoreRef.current / 50) + 1;
-    
-    if (newLevel > levelRef.current) {
-      triggerFeedback(`⚡ LEVEL UP: ${newLevel}!`, 'success');
-      if (audioSynth) audioSynth.playComboAlert();
-    }
-    
-    levelRef.current = newLevel;
-    highestLevelRef.current = Math.max(highestLevelRef.current, newLevel);
-    
-    const progress = Math.min(1, (newLevel - 1) / 15); // Caps around level 16
-    
-    ballSpeedRef.current = Math.max(700, 1800 - (progress * 1100));
-    numSpeedRef.current = Math.max(800, 2000 - (progress * 1200));
-    ballScaleRef.current = Math.max(0.6, 1.0 - (progress * 0.4)); 
-  }, [triggerFeedback]);
-
-  // === CORE MECHANICS ===
-  const applyPenalty = useCallback((reason) => {
-    if (!gameActiveRef.current) return;
-    if (audioSynth) audioSynth.playSoftThud();
-    
-    // Break Combo
-    if (comboRef.current > 0) {
-      triggerFeedback(`Combo Broken!`, 'error');
-    } else {
-      triggerFeedback(`Penalty! -1.5s`, 'error');
-    }
-    
-    comboRef.current = 0;
-    mistakesRef.current += 1;
-    localTimeRef.current -= 1.5;
-    
-    if (reason === 'missed_target') visualAttemptsRef.current += 1;
-    if (['missed_even', 'wrong_match', 'double_click'].includes(reason)) numberAttemptsRef.current += 1;
-    
-    if (localTimeRef.current <= 0) {
-      localTimeRef.current = 0;
-      setLocalTimeRemaining(0);
-      gameActiveRef.current = false;
-      saveStatsLocally();
-      if (typeof engineRef.current?.endGame === 'function') {
-        engineRef.current.endGame();
-      }
-      return;
-    }
-    
-    setLocalTimeRemaining(localTimeRef.current);
-    syncToUI();
-  }, [syncToUI, triggerFeedback, saveStatsLocally]);
-
-  const applyReward = useCallback((type) => {
-    if (!gameActiveRef.current) return;
-    
-    comboRef.current += 1;
-    highestComboRef.current = Math.max(highestComboRef.current, comboRef.current);
-    
-    let bonus = 0;
-    if (comboRef.current > 0 && comboRef.current % 5 === 0) {
-      if (comboRef.current === 5) bonus = 5;
-      else if (comboRef.current === 10) bonus = 15;
-      else if (comboRef.current === 15) bonus = 30;
-      else bonus = 50;
-      
-      triggerFeedback(`🔥 ${comboRef.current} COMBO! +${bonus} Bonus`, 'success');
-      if (audioSynth) audioSynth.playComboAlert();
-    } else {
-      triggerFeedback(`Target! +5 PTS | +2s`, 'success');
-      if (audioSynth) audioSynth.playSoothingPop();
-    }
-    
-    scoreRef.current += (5 + bonus);
-    
-    if (type === 'visual') {
-      visualHitsRef.current += 1;
-      visualAttemptsRef.current += 1;
-    } else {
-      numberHitsRef.current += 1;
-      numberAttemptsRef.current += 1;
-    }
-
-    localTimeRef.current = Math.min(60.0, localTimeRef.current + 2.0);
-    setLocalTimeRemaining(localTimeRef.current);
-
-    updateDifficulty();
-    syncToUI();
-  }, [syncToUI, triggerFeedback, updateDifficulty]);
-
-  const spawnNewBall = useCallback(() => {
+  const handleExitDrill = useCallback(async () => {
+    markIntentionalExit();
+    countdownTimeoutsRef.current.forEach(clearTimeout);
+    countdownTimeoutsRef.current = [];
+    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
     if (ballTimerRef.current) clearTimeout(ballTimerRef.current);
-    if (!gameActiveRef.current) return;
+    if (numTimerRef.current) clearTimeout(numTimerRef.current);
 
-    const id = Date.now() + Math.random();
-    currentTargetIdRef.current = id;
-    
-    setCurrentTarget({
-      id,
-      x: 10 + Math.random() * 80,
-      y: 10 + Math.random() * 80
+    if (document.fullscreenElement) {
+      await document.exitFullscreen().catch(() => {});
+    }
+    setGameState('start');
+  }, []);
+
+  const { markIntentionalExit } = useUnexpectedExitGuard({
+    active: gameState === 'playing' || gameState === 'countdown',
+    onUnexpectedExit: handleExitDrill,
+  });
+
+  const endGame = useCallback(() => {
+    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    if (ballTimerRef.current) clearTimeout(ballTimerRef.current);
+    if (numTimerRef.current) clearTimeout(numTimerRef.current);
+
+    setGameState('gameOver');
+
+    const e = engine.current;
+
+    if (e.currentTargetId !== null) {
+      e.visualAttempts += 1;
+    }
+    if (e.currentNumber !== null && e.currentNumber % 2 === 0 && !e.wasMatched) {
+      e.numberAttempts += 1;
+    }
+
+    const totalActs = e.visualAttempts + e.numberAttempts;
+    const totalHits = e.visualHits + e.numberHits;
+    const acc = totalActs > 0 ? Math.round((totalHits / totalActs) * 100) : 100;
+    const visAccVal = e.visualAttempts > 0 ? Math.round((e.visualHits / e.visualAttempts) * 100) : 100;
+    const numAccVal = e.numberAttempts > 0 ? Math.round((e.numberHits / e.numberAttempts) * 100) : 100;
+
+    const gradeObj = getFpsScoreGrade(e.score, ELITE_SCORE);
+
+    setAnalytics({
+      accuracy: acc,
+      visualHits: e.visualHits,
+      numberHits: e.numberHits,
+      visualAttempts: e.visualAttempts,
+      numberAttempts: e.numberAttempts,
+      visAcc: visAccVal,
+      numAcc: numAccVal,
+      finalLevel: e.level,
+      grade: gradeObj
     });
 
-    ballTimerRef.current = setTimeout(() => {
-      if (gameActiveRef.current && mountedRef.current) {
-        applyPenalty('missed_target');
-        spawnNewBall(); 
-      }
-    }, ballSpeedRef.current);
-  }, [applyPenalty]);
-
-  const spawnNewNumber = useCallback(() => {
-    if (numTimerRef.current) clearTimeout(numTimerRef.current);
-    if (!gameActiveRef.current) return;
-
-    const prevNum = currentNumberRef.current;
-    if (prevNum !== null && prevNum % 2 === 0 && !wasMatchedRef.current) {
-      applyPenalty('missed_even');
+    const isNew = e.score > bestScore;
+    if (isNew) {
+      setIsNewBest(true);
+      setBestScore(e.score);
+    } else {
+      setIsNewBest(false);
     }
+
+    const newBestLevel = Math.max(bestLevel, bestLevelRunRef.current);
+    setBestLevel(newBestLevel);
+
+    setTotalSessions((prev) => {
+      const next = prev + 1;
+      saveData({
+        bestScore: Math.max(bestScore, e.score),
+        bestLevel: newBestLevel,
+        totalSessions: next
+      });
+      return next;
+    });
+
+    drillAudio.playSessionEnd();
+  }, [bestScore, bestLevel]);
+
+  const deductLife = useCallback(() => {
+    livesRef.current = Math.max(0, livesRef.current - 1);
+    setLives(livesRef.current);
+    if (livesRef.current <= 0) {
+      endGame();
+    }
+  }, [endGame]);
+
+  // Spawning logic
+  const spawnBall = useCallback(() => {
+    if (ballTimerRef.current) clearTimeout(ballTimerRef.current);
+    const e = engine.current;
+    const config = getLevelConfig(e.level);
+
+    const id = Date.now() + Math.random();
+    e.currentTargetId = id;
+    const targetObj = {
+      id,
+      x: 15 + Math.random() * 70,
+      y: 15 + Math.random() * 70
+    };
+    setCurrentTarget(targetObj);
+    setBallScale(config.ballScale);
+
+    ballTimerRef.current = setTimeout(() => {
+      // Missed target timeout
+      e.visualAttempts += 1;
+      e.mistakes += 1;
+      triggerFlash();
+      drillAudio.playPenalty();
+      deductLife();
+      if (livesRef.current > 0) {
+        spawnBall();
+      }
+    }, config.ballSpeed);
+  }, [deductLife, triggerFlash]);
+
+  const spawnNumber = useCallback(() => {
+    if (numTimerRef.current) clearTimeout(numTimerRef.current);
+    const e = engine.current;
+    const config = getLevelConfig(e.level);
+
+    if (e.currentNumber !== null && e.currentNumber % 2 === 0 && !e.wasMatched) {
+      // Missed an even number
+      e.numberAttempts += 1;
+      e.mistakes += 1;
+      triggerFlash();
+      drillAudio.playPenalty();
+      deductLife();
+    }
+
+    if (livesRef.current <= 0) return;
 
     let newNum;
     do {
       newNum = Math.floor(Math.random() * 10);
-    } while (newNum === currentNumberRef.current);
+    } while (newNum === e.currentNumber);
 
-    currentNumberRef.current = newNum;
-    wasMatchedRef.current = false;
+    e.currentNumber = newNum;
+    e.wasMatched = false;
     setCurrentNumber(newNum);
+    setWasMatched(false);
 
     numTimerRef.current = setTimeout(() => {
-      if (gameActiveRef.current && mountedRef.current) {
-        spawnNewNumber();
-      }
-    }, numSpeedRef.current);
-  }, [applyPenalty]);
+      spawnNumber();
+    }, config.numSpeed);
+  }, [deductLife, triggerFlash]);
 
-  // === INTERACTION HANDLERS ===
+  // Interaction handlers
   const handleVisualClick = useCallback((id, e) => {
-    if (e) {
-      e.stopPropagation();
-      e.preventDefault();
-      if (e.target.setPointerCapture) e.target.setPointerCapture(e.pointerId);
-    }
+    if (e) e.stopPropagation();
+    const eng = engine.current;
+    if (eng.currentTargetId !== id) return;
 
-    if (!gameActiveRef.current) return;
-    if (currentTargetIdRef.current !== id) return;
+    if (ballTimerRef.current) clearTimeout(ballTimerRef.current);
 
-    currentTargetIdRef.current = null;
+    eng.currentTargetId = null;
     setCurrentTarget(null);
 
-    applyReward('visual');
-    spawnNewBall();
-  }, [spawnNewBall, applyReward]);
+    eng.visualHits += 1;
+    eng.visualAttempts += 1;
+
+    const levelMult = 1 + getDifficultyProgress(eng.level) * 0.5;
+    const pts = Math.round(POINTS_PER_HIT * levelMult);
+    eng.score += pts;
+
+    const rawLevel = Math.floor(eng.score / POINTS_PER_LEVEL) + 1;
+    eng.level = Math.max(eng.level, rawLevel);
+    bestLevelRunRef.current = Math.max(bestLevelRunRef.current, eng.level);
+
+    setUiScore(eng.score);
+    setUiLevel(eng.level);
+    drillAudio.playHit();
+
+    const config = getLevelConfig(eng.level);
+    ballTimerRef.current = setTimeout(spawnBall, config.spawnDelayMin + Math.random() * (config.spawnDelayMax - config.spawnDelayMin));
+  }, [spawnBall]);
 
   const handleNumberCheck = useCallback((e) => {
-    if (e) {
-      e.stopPropagation();
-      e.preventDefault();
-      if (e.target.setPointerCapture) e.target.setPointerCapture(e.pointerId);
-    }
-
-    if (!gameActiveRef.current) return;
-    
-    const num = currentNumberRef.current;
+    if (e) e.stopPropagation();
+    const eng = engine.current;
+    const num = eng.currentNumber;
     if (num === null) return;
 
-    if (wasMatchedRef.current) {
-      applyPenalty('double_click');
+    if (eng.wasMatched) {
+      // Double tap on an already-resolved number
+      eng.numberAttempts += 1;
+      eng.mistakes += 1;
+      triggerFlash();
+      drillAudio.playPenalty();
+      deductLife();
       return;
     }
 
+    eng.wasMatched = true;
+    setWasMatched(true);
+
     if (num % 2 === 0) {
-      wasMatchedRef.current = true; 
-      applyReward('number');
+      eng.numberHits += 1;
+      eng.numberAttempts += 1;
+
+      const levelMult = 1 + getDifficultyProgress(eng.level) * 0.5;
+      const pts = Math.round(POINTS_PER_HIT * levelMult);
+      eng.score += pts;
+
+      const rawLevel = Math.floor(eng.score / POINTS_PER_LEVEL) + 1;
+      eng.level = Math.max(eng.level, rawLevel);
+      bestLevelRunRef.current = Math.max(bestLevelRunRef.current, eng.level);
+
+      setUiScore(eng.score);
+      setUiLevel(eng.level);
+      drillAudio.playHit();
     } else {
-      wasMatchedRef.current = true; 
-      applyPenalty('wrong_match');
+      // Wrong match on odd number
+      eng.numberAttempts += 1;
+      eng.mistakes += 1;
+      triggerFlash();
+      drillAudio.playPenalty();
+      deductLife();
     }
-  }, [applyPenalty, applyReward]);
+  }, [deductLife, triggerFlash]);
 
-  const handleBackgroundClick = useCallback((e) => {
-    if (!gameActiveRef.current) return;
-  }, []);
-
-  // Exit Game
-  const handleExit = useCallback(async () => {
-    if (isFullscreen) {
-      try { await document.exitFullscreen(); } catch (e) {}
-    }
-    gameActiveRef.current = false;
-    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
-    if (ballTimerRef.current) clearTimeout(ballTimerRef.current);
-    if (numTimerRef.current) clearTimeout(numTimerRef.current);
-    
-    if (engineRef.current && engineRef.current.endGame) {
-        engineRef.current.endGame();
-    }
-    setForceStart(true);
-    
-    localTimeRef.current = 60.0;
-    setLocalTimeRemaining(60.0);
-    scoreRef.current = 0;
-    comboRef.current = 0;
-    visualHitsRef.current = 0;
-    numberHitsRef.current = 0;
-    mistakesRef.current = 0;
-    levelRef.current = 1;
-    syncToUI();
-  }, [isFullscreen, syncToUI]);
-
-  // Start sequence
-  const handleStartGame = useCallback(async () => {
-    if (audioSynth) audioSynth.init(); 
-    
-    // 1. Force Stop Everything First
-    gameActiveRef.current = false;
-    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
-    if (ballTimerRef.current) clearTimeout(ballTimerRef.current);
-    if (numTimerRef.current) clearTimeout(numTimerRef.current);
-
-    setForceStart(false);
-    
-    // 2. Reset All Refs
-    localTimeRef.current = 60.0;
-    setLocalTimeRemaining(60.0);
-    scoreRef.current = 0;
-    visualHitsRef.current = 0;
-    numberHitsRef.current = 0;
-    visualAttemptsRef.current = 0;
-    numberAttemptsRef.current = 0;
-    mistakesRef.current = 0;
-    comboRef.current = 0;
-    highestComboRef.current = 0;
-    levelRef.current = 1;
-    highestLevelRef.current = 1;
-    
-    ballSpeedRef.current = 1800;
-    numSpeedRef.current = 2000;
-    ballScaleRef.current = 1.0;
-    
-    currentNumberRef.current = null;
-    currentTargetIdRef.current = null;
-    wasMatchedRef.current = true; 
-    
-    syncToUI();
-    setCurrentNumber(null);
-    setCurrentTarget(null);
-    setLocalFeedback({ id: 0, text: '', type: 'success', visible: false });
-    
-    // 3. UI Fullscreen
+  // Enter Drill
+  const enterDrill = useCallback(async () => {
     try {
-      if (!document.fullscreenElement && gameContainerRef.current) {
-        await gameContainerRef.current.requestFullscreen();
+      if (containerRef.current && !document.fullscreenElement) {
+        await containerRef.current.requestFullscreen();
       }
-    } catch (err) {}
+    } catch (e) {}
 
-    // 4. Activate Engine
-    engineRef.current.startGame();
-    gameActiveRef.current = true;
-    
-    // 5. Start Precise Timer
-    timerIntervalRef.current = setInterval(() => {
-      if (!gameActiveRef.current) {
-        clearInterval(timerIntervalRef.current);
-        return;
-      }
-      localTimeRef.current -= 0.1;
-      if (localTimeRef.current <= 0) {
-        localTimeRef.current = 0;
-        setLocalTimeRemaining(0);
-        gameActiveRef.current = false;
-        clearInterval(timerIntervalRef.current);
-        saveStatsLocally();
-        if (typeof engineRef.current?.endGame === 'function') {
-          engineRef.current.endGame();
+    countdownTimeoutsRef.current.forEach(clearTimeout);
+    countdownTimeoutsRef.current = [];
+    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    if (ballTimerRef.current) clearTimeout(ballTimerRef.current);
+    if (numTimerRef.current) clearTimeout(numTimerRef.current);
+
+    drillAudio.init();
+
+    const saved = getSavedData();
+    const startLevel = getStartLevel(saved.bestLevel);
+    bestLevelRunRef.current = startLevel;
+
+    livesRef.current = 5;
+    setLives(5);
+    setUiScore(0);
+    setUiLevel(startLevel);
+    setUiTimeLeft(DRILL_DURATION);
+
+    engine.current = {
+      score: 0,
+      level: startLevel,
+      visualHits: 0,
+      numberHits: 0,
+      visualAttempts: 0,
+      numberAttempts: 0,
+      mistakes: 0,
+      timeLeft: DRILL_DURATION,
+      currentTargetId: null,
+      currentNumber: null,
+      wasMatched: true
+    };
+
+    setGameState('countdown');
+    setCountdownValue(3);
+    drillAudio.playCountdownTick();
+
+    const t1 = setTimeout(() => {
+      setCountdownValue(2);
+      drillAudio.playCountdownTick();
+    }, 700);
+
+    const t2 = setTimeout(() => {
+      setCountdownValue(1);
+      drillAudio.playCountdownTick();
+    }, 1400);
+
+    const t3 = setTimeout(() => {
+      setCountdownValue('GO');
+      drillAudio.playGo();
+    }, 2100);
+
+    const t4 = setTimeout(() => {
+      setGameState('playing');
+
+      let remaining = DRILL_DURATION;
+      timerIntervalRef.current = setInterval(() => {
+        remaining -= 1;
+        setUiTimeLeft(remaining);
+        if (remaining <= 0) {
+          endGame();
         }
-      } else {
-        setLocalTimeRemaining(localTimeRef.current);
+      }, 1000);
+
+      spawnBall();
+      spawnNumber();
+    }, 2450);
+
+    countdownTimeoutsRef.current = [t1, t2, t3, t4];
+  }, [endGame, spawnBall, spawnNumber]);
+
+  const shareResult = useCallback(async () => {
+    const url = 'https://skilldrills.online/drills/cognitive/attention/divided-attention';
+    try {
+      const canvas = generateShareCard({
+        score: uiScore,
+        bestScore,
+        accuracy: analytics.accuracy,
+        rating: { letter: analytics.grade?.grade || analytics.grade?.letter || 'C', label: analytics.grade?.label || 'Keep Going', emoji: '🎯' },
+        newBest: isNewBest,
+        drillName: 'Divided Attention',
+        playerName: getPlayerName(),
+      });
+      await shareScoreCard(url, canvas);
+    } catch (e) {
+      const text = `🎯 I scored ${uiScore} PTS (Level ${analytics.finalLevel}) on Divided Attention! Dual-task accuracy: ${analytics.accuracy}%. Practice free cognitive focus drills at skilldrills.online! ⚡`;
+      if (typeof navigator !== 'undefined' && navigator.share) {
+        navigator.share({ title: 'Divided Attention Score', text, url }).catch(() => {});
+      } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
+        navigator.clipboard.writeText(`${text} ${url}`);
       }
-    }, 100);
-
-    // 6. Start Loops
-    setTimeout(() => {
-      if (gameActiveRef.current) {
-        spawnNewBall();
-        spawnNewNumber();
-      }
-    }, 300);
-  }, [syncToUI, spawnNewBall, spawnNewNumber, saveStatsLocally]);
-
-  const shareScore = useCallback(() => {
-    const totalActions = visualAttempts + numberAttempts;
-    const finalAcc = totalActions > 0 ? Math.round(((visualHits + numberHits) / totalActions) * 100) : 100;
-    
-    let finalRank = 'Bronze';
-    if (score >= 600 && finalAcc >= 90) finalRank = 'Grandmaster';
-    else if (score >= 450 && finalAcc >= 82) finalRank = 'Master';
-    else if (score >= 350 && finalAcc >= 75) finalRank = 'Diamond';
-    else if (score >= 200 && finalAcc >= 65) finalRank = 'Platinum';
-    else if (score >= 100 && finalAcc >= 55) finalRank = 'Gold';
-    else if (score >= 50) finalRank = 'Silver';
-
-    const text = `🧠 I scored ${score} PTS with ${finalAcc}% accuracy on the Divided Attention Test! Rank: ${finalRank}. Train your split focus: https://skilldrills.online/drills/cognitive/attention/divided-attention`;
-    
-    if (typeof navigator !== 'undefined' && navigator.share) {
-      navigator.share({
-        title: 'My SkillDrills Cognitive Score',
-        text: text,
-        url: 'https://skilldrills.online/drills/cognitive/attention/divided-attention'
-      }).catch(() => {});
-    } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
-      navigator.clipboard.writeText(text);
-      alert('Score card copied to clipboard!');
     }
-  }, [score, visualHits, numberHits, visualAttempts, numberAttempts]);
-
-  if (loading || !isClient) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#050505]">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4 shadow-[0_0_20px_rgba(59,130,246,0.5)]"></div>
-          <p className="text-gray-400 font-medium tracking-widest uppercase text-sm animate-pulse">Loading Dual-Task Engine...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Calculate Accuracies
-  const totalActions = visualAttempts + numberAttempts;
-  const overallAcc = totalActions > 0 ? Math.round(((visualHits + numberHits) / totalActions) * 100) : 100;
-  const visAcc = visualAttempts > 0 ? Math.round((visualHits / visualAttempts) * 100) : 100;
-  const numAcc = numberAttempts > 0 ? Math.round((numberHits / numberAttempts) * 100) : 100;
-
-  // Calculate grade based on score and accuracy
-  let gradeLetter = 'F';
-  if (overallAcc >= 90 && score >= 500) gradeLetter = 'S';
-  else if (overallAcc >= 80 && score >= 350) gradeLetter = 'A';
-  else if (overallAcc >= 70 && score >= 200) gradeLetter = 'B';
-  else if (overallAcc >= 60 && score >= 100) gradeLetter = 'C';
-  else if (overallAcc >= 45 && score >= 50) gradeLetter = 'D';
-
-  let rankName = 'Bronze';
-  let rankColor = 'text-slate-500';
-  if (score >= 600 && overallAcc >= 90) {
-    rankName = 'Grandmaster';
-    rankColor = 'text-fuchsia-400 font-extrabold';
-  } else if (score >= 450 && overallAcc >= 82) {
-    rankName = 'Master';
-    rankColor = 'text-red-400 font-extrabold';
-  } else if (score >= 350 && overallAcc >= 75) {
-    rankName = 'Diamond';
-    rankColor = 'text-cyan-400 font-extrabold';
-  } else if (score >= 200 && overallAcc >= 65) {
-    rankName = 'Platinum';
-    rankColor = 'text-indigo-400 font-extrabold';
-  } else if (score >= 100 && overallAcc >= 55) {
-    rankName = 'Gold';
-    rankColor = 'text-yellow-400 font-extrabold';
-  } else if (score >= 50) {
-    rankName = 'Silver';
-    rankColor = 'text-gray-300 font-extrabold';
-  }
-
-  let diagnostics = "Outstanding divided attention! You effectively balanced spatial tracking and numeric processing.";
-  if (overallAcc < 60) {
-    diagnostics = "Low overall accuracy. Try to stabilize your visual focus; rushing clicks on targets or numbers leads to high penalty rates.";
-  } else if (visAcc < 50 && numAcc > 70) {
-    diagnostics = "Visual neglect detected. You are prioritizing the number panel over moving targets. Try to widen your peripheral vision.";
-  } else if (numAcc < 50 && visAcc > 70) {
-    diagnostics = "Numeric processing bottleneck. You are ignoring the number matching panel to focus on tracking. Practice splitting your focus evenly.";
-  } else if (highestCombo < 8 && score > 100) {
-    diagnostics = "Combo chain broken frequently. Avoid spam clicks. Maintain a steady pace to build combos for massive score multipliers.";
-  }
-
-  const strokeDasharray = 100;
-  const strokeDashoffset = strokeDasharray - overallAcc;
+  }, [uiScore, bestScore, analytics, isNewBest]);
 
   return (
-    <div className="min-h-screen select-none bg-[#050505] text-white selection:bg-transparent font-sans" style={{ WebkitTapHighlightColor: 'transparent' }}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        
-        {/* Breadcrumb */}
+    <div className="min-h-screen bg-[#050508] text-white flex flex-col font-sans select-none">
+      {/* ── HEADER / BREADCRUMB ── */}
+      {!isFullscreen && (
+        <header className="border-b border-white/5 bg-[#080811]/80 backdrop-blur-md sticky top-0 z-50">
+          <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
+            <div className="flex items-center gap-2 text-xs text-slate-400">
+              <Link href="/" className="hover:text-white transition-colors">Home</Link>
+              <span>/</span>
+              <Link href="/drills/cognitive" className="hover:text-white transition-colors">Cognitive</Link>
+              <span>/</span>
+              <span className="text-blue-400 font-medium">Divided Attention</span>
+            </div>
+
+            <button
+              onClick={() => {
+                const next = !soundEnabled;
+                setSoundEnabled(next);
+                drillAudio.setEnabled(next);
+              }}
+              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+              title={soundEnabled ? "Mute Sound" : "Unmute Sound"}
+            >
+              {soundEnabled ? <Volume2 className="w-4 h-4 text-blue-400" /> : <VolumeX className="w-4 h-4 text-red-400" />}
+            </button>
+          </div>
+        </header>
+      )}
+
+      {/* ── MAIN CONTENT AREA ── */}
+      <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
+        {/* Title */}
         {!isFullscreen && (
-          <nav className="mb-4">
-            <ol className="flex flex-wrap items-center gap-2 text-sm">
-              <li><Link href="/" className="text-gray-500 hover:text-gray-300 transition-colors">Home</Link></li>
-              <li className="text-gray-600"><ChevronRight className="w-4 h-4" /></li>
-              <li><Link href="/drills/cognitive" className="text-gray-500 hover:text-gray-300 transition-colors">Cognitive</Link></li>
-              <li className="text-gray-600"><ChevronRight className="w-4 h-4" /></li>
-              <li className="text-gray-500 hover:text-gray-300 transition-colors">Attention</li>
-              <li className="text-gray-600"><ChevronRight className="w-4 h-4" /></li>
-              <li className="text-blue-400 font-medium">Divided Attention Test</li>
-            </ol>
-          </nav>
+          <div className="text-center">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight bg-gradient-to-r from-white via-slate-200 to-blue-400 bg-clip-text text-transparent">
+              DIVIDED ATTENTION
+            </h1>
+            <p className="text-xs text-slate-400 mt-1">
+              Dual-Task Target Tracking & Numerical Match Stream
+            </p>
+          </div>
         )}
-        
-        {/* Header */}
+
+        {/* Live Stat Cards */}
         {!isFullscreen && (
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl shadow-[0_0_20px_rgba(59,130,246,0.3)]">
-                <Layers className="w-7 h-7 text-white" />
-              </div>
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Divided Attention</h1>
-                <p className="text-sm text-gray-400 mt-1 font-medium">Dual-Task Training • Cognitive Flexibility</p>
+          <div className="grid grid-cols-4 gap-2.5 max-w-2xl mx-auto w-full">
+            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
+              <div className="text-lg sm:text-xl font-black text-blue-400 tabular-nums">{uiScore}</div>
+            </div>
+            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
+              <div className={`text-lg sm:text-xl font-black tabular-nums ${uiTimeLeft <= 10 && gameState === 'playing' ? 'text-red-400 animate-pulse' : 'text-white'}`}>
+                {uiTimeLeft}s
               </div>
             </div>
-            
-            <div className="flex gap-2 flex-wrap">
-              {engine.gameState === 'playing' && (
-                <button onClick={(e) => { e.stopPropagation(); handleStartGame(); }} className="p-2.5 rounded-lg border border-gray-700 bg-gray-900 text-gray-400 hover:text-white hover:border-gray-500 transition-all active:scale-95" title="Reset">
-                  <RefreshCw className="w-5 h-5" />
-                </button>
-              )}
-              <button onClick={() => setSoundEnabled(v => !v)} className="p-2.5 rounded-lg border border-gray-700 bg-gray-900 text-gray-400 hover:text-white hover:border-gray-500 transition-all active:scale-95">
-                {soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
-              </button>
-              <button onClick={toggleFullscreen} className="p-2.5 rounded-lg border border-gray-700 bg-gray-900 text-gray-400 hover:text-white hover:border-gray-500 transition-all active:scale-95">
-                {isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
-              </button>
+            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Level</div>
+              <div className="text-lg sm:text-xl font-black text-blue-400 tabular-nums">L{uiLevel}</div>
+            </div>
+            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
+              <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
             </div>
           </div>
         )}
 
-        {/* Dynamic Mobile-Optimized Stats Bar */}
-        <div className="grid grid-cols-4 sm:grid-cols-4 lg:grid-cols-8 gap-1.5 sm:gap-3 mb-2 h-auto py-1">
-          <StatCard icon={<Target className="text-blue-400" />} value={score} label="Score" />
-          <StatCard icon={<Timer className={localTimeRemaining <= 10 ? 'text-red-400 animate-pulse' : 'text-green-400'} />} value={localTimeRemaining.toFixed(1)} label="Time" unit="s" />
-          <StatCard icon={<TrendingUp className="text-indigo-400" />} value={`Lv.${currentLevel}`} label="Level" />
-          <StatCard icon={<Flame className={combo >= 5 ? "text-orange-500 animate-pulse" : "text-orange-300"} />} value={combo} label="Combo" />
-          <StatCard icon={<Circle className="text-cyan-400" />} value={visualHits} label="Targets" />
-          <StatCard icon={<Hash className="text-purple-400" />} value={numberHits} label="Numbers" />
-          <StatCard icon={<XCircle className="text-red-400" />} value={mistakes} label="Errors" />
-          <StatCard icon={<Trophy className="text-yellow-400" />} value={bestScore} label="Best" />
-        </div>
-
-        {/* Dynamic Feedback Popup */}
-        <div className="h-8 mb-2 flex justify-center items-center pointer-events-none">
-          {localFeedback.visible && (
-            <div key={localFeedback.id} className={`animate-in zoom-in-75 fade-in duration-150 px-5 py-1.5 rounded-full text-white font-black tracking-widest text-sm shadow-xl ${localFeedback.type === 'success' ? 'bg-green-500/20 text-green-400 border border-green-500/50 shadow-green-500/20' : 'bg-red-500/20 text-red-400 border border-red-500/50 shadow-red-500/20'}`}>
-              {localFeedback.text}
-            </div>
-          )}
-        </div>
-
-        {/* Game Container: Adaptive Flex Layout */}
-        <div ref={gameContainerRef} 
-          onContextMenu={(e) => { if(gameActiveRef.current) e.preventDefault(); }}
-          className={`relative overflow-hidden flex flex-col sm:flex-row transition-all duration-100 ${
+        {/* Game Stage Container */}
+        <div 
+          ref={containerRef} 
+          className={
             isFullscreen 
-              ? 'fixed inset-0 z-50 w-[100vw] h-[100vh] bg-[#050505]' 
-              : 'rounded-2xl border border-gray-700 bg-[#050505] shadow-[0_0_40px_rgba(0,0,0,0.5)] min-h-[60vh] md:min-h-[500px] md:aspect-video'
-          }`}
-          style={{ 
-            touchAction: gameActiveRef.current ? 'none' : 'auto', 
-            overscrollBehavior: gameActiveRef.current ? 'none' : 'auto'
-          }}>
-          
-          {/* Subtle grid lines for depth */}
-          <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)', backgroundSize: '50px 50px' }} />
+              ? 'fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#050508] flex flex-col items-center justify-center' 
+              : isMobile 
+                ? (isPortrait
+                    ? 'w-full rounded-2xl aspect-[3/4] min-h-[420px] max-h-[76vh] bg-[#080811] border border-white/10 relative overflow-hidden flex flex-col'
+                    : 'w-full rounded-2xl aspect-video min-h-[340px] max-h-[85vh] bg-[#080811] border border-white/10 relative overflow-hidden flex flex-col')
+                : 'w-full rounded-2xl aspect-video min-h-[460px] sm:min-h-[500px] max-h-[88vh] bg-[#080811] border border-white/10 relative overflow-hidden flex flex-col'
+          }
+        >
+          <div className="absolute inset-0 pointer-events-none opacity-20" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
 
-          {/* Time Progress Bar */}
-          {gameActiveRef.current && (
-            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gray-900 z-[60] pointer-events-none">
-              <div 
-                className={`h-full transition-all duration-100 ease-linear ${localTimeRemaining <= 10 ? 'bg-red-500 animate-pulse' : 'bg-blue-500'}`}
-                style={{ width: `${Math.min(100, (localTimeRemaining / 60) * 100)}%` }}
-              />
-            </div>
-          )}
+          {/* Screen Flashes */}
+          <DrillFlashOverlay flashes={flashes} />
 
-          {/* Internal Mobile Rotation Enforcer */}
-          {showRotateWarning && !gameActiveRef.current && (
-            <div className="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-black/95 text-center p-6 backdrop-blur-sm">
-              <div className="animate-bounce mb-6 text-blue-500">
-                <RotateCcw className="w-16 h-16 mx-auto" />
-              </div>
-              <h3 className="text-2xl font-bold text-white mb-3">Rotate Device</h3>
-              <p className="text-sm text-gray-400 max-w-xs mx-auto">Please rotate your device to landscape mode for the full optimal playing experience.</p>
-            </div>
-          )}
-
-          {/* In-Game Controls (Fullscreen) */}
-          {isFullscreen && gameActiveRef.current && (
-            <div className="absolute top-4 right-4 z-[60] flex gap-2">
-              <button onPointerDown={e => e.stopPropagation()} onClick={(e) => { e.stopPropagation(); handleStartGame(); }} className="p-3 bg-black/60 border border-gray-600 rounded-xl text-white hover:bg-gray-800 transition-colors"><RefreshCw className="w-5 h-5" /></button>
-              <button onPointerDown={e => e.stopPropagation()} onClick={(e) => { e.stopPropagation(); setSoundEnabled(v => !v); }} className="p-3 bg-black/60 border border-gray-600 rounded-xl text-white hover:bg-gray-800 transition-colors">{soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}</button>
-              <button onPointerDown={e => e.stopPropagation()} onClick={(e) => { e.stopPropagation(); toggleFullscreen(); }} className="p-3 bg-black/60 border border-gray-600 rounded-xl text-white hover:bg-gray-800 transition-colors"><Minimize2 className="w-5 h-5" /></button>
-            </div>
-          )}
-
-          {/* Combo Multiplier UI Float */}
-          {gameActiveRef.current && combo >= 5 && (
-            <div className="absolute top-4 left-4 z-[60] pointer-events-none animate-in slide-in-from-left-4 fade-in">
-              <div className="bg-orange-500/20 border border-orange-500 text-orange-400 px-4 py-1.5 rounded-full font-black flex items-center gap-2 shadow-[0_0_15px_rgba(249,115,22,0.4)]">
-                <Flame className="w-4 h-4 fill-orange-500" /> {combo}x COMBO
-              </div>
-            </div>
-          )}
-
-          {/* Phase 2: Game Area */}
-          {gameActiveRef.current && (
+          {/* IN-BOX OVERLAY HUD */}
+          {(gameState === 'playing' || gameState === 'countdown') && (
             <>
-              {/* Target Area (Takes available space) */}
-              <div className="relative flex-1 bg-transparent overflow-hidden" onPointerDown={handleBackgroundClick}>
+              {/* Score & Lives - Top Left */}
+              <div className="absolute top-4 left-4 z-30 pointer-events-none flex flex-col items-start gap-0.5">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Score</p>
+                <p className="text-2xl sm:text-3xl font-black text-white tabular-nums leading-tight">{uiScore}</p>
+                <div className="flex items-center gap-1 mt-0.5">
+                  {Array.from({ length: Math.max(0, lives) }).map((_, i) => (
+                    <Heart key={i} className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-red-500 fill-red-500 drop-shadow-[0_0_6px_rgba(239,68,68,0.6)]" />
+                  ))}
+                </div>
+              </div>
+
+              {/* Time Left - Top Right */}
+              <div className="absolute top-4 right-4 z-30 pointer-events-none text-right">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Time Left</p>
+                <p className={`text-2xl sm:text-3xl font-black tabular-nums leading-tight ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>{uiTimeLeft}s</p>
+              </div>
+            </>
+          )}
+
+          {/* IN-GAME HUD SOUND TOGGLE */}
+          {(gameState === 'playing' || gameState === 'countdown') && (
+            <button
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.stopPropagation();
+                setSoundEnabled((v) => {
+                  drillAudio.setEnabled(!v);
+                  return !v;
+                });
+              }}
+              className="absolute bottom-4 right-4 z-40 p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+              title="Toggle Sound"
+            >
+              {soundEnabled ? <Volume2 className="w-4 h-4 text-blue-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
+            </button>
+          )}
+
+          {/* DUAL-TASK GAMEPLAY PLAYING AREA */}
+          {gameState === 'playing' && (
+            <div className="relative w-full h-full flex flex-col sm:flex-row">
+              {/* Target Canvas Area */}
+              <div className="relative flex-1 bg-transparent overflow-hidden">
                 {currentTarget && (
-                  <button 
-                    onPointerDown={(e) => handleVisualClick(currentTarget.id, e)} 
-                    className="absolute z-20 focus:outline-none touch-none bg-transparent border-none"
-                    style={{ left: `${currentTarget.x}%`, top: `${currentTarget.y}%`, transform: `translate(-50%, -50%) scale(${ballScaleUI})` }}>
-                    
-                    <div className="relative flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 hover:scale-110 active:scale-90 transition-transform duration-100 animate-in zoom-in-50 duration-150">
+                  <button
+                    type="button"
+                    onPointerDown={(e) => handleVisualClick(currentTarget.id, e)}
+                    className="absolute z-20 focus:outline-none touch-none bg-transparent border-none cursor-pointer"
+                    style={{
+                      left: `${currentTarget.x}%`,
+                      top: `${currentTarget.y}%`,
+                      transform: `translate(-50%, -50%) scale(${ballScale})`
+                    }}
+                  >
+                    <div className="relative flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 hover:scale-110 active:scale-90 transition-transform duration-100">
                       <div className="absolute inset-0 rounded-full bg-blue-500/40 animate-ping opacity-75" />
                       <div className="absolute inset-0 rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 border-2 border-blue-300 flex items-center justify-center pointer-events-none shadow-[0_0_20px_rgba(59,130,246,0.6)]">
                         <div className="w-[55%] h-[55%] rounded-full border-2 border-white/50 flex items-center justify-center">
@@ -833,431 +672,248 @@ export default function DividedAttentionClient() {
                 )}
               </div>
 
-              {/* Number Panel (Bottom on Mobile, Right on Desktop) */}
-              <div className="w-full sm:w-64 h-[120px] sm:h-full flex-shrink-0 bg-gray-950/95 backdrop-blur-md border-t sm:border-t-0 sm:border-l border-gray-800 z-30 shadow-[-10px_0_30px_rgba(0,0,0,0.5)] flex flex-row sm:flex-col items-center justify-between sm:justify-center p-3 sm:p-6 sm:space-y-8">
-                
+              {/* Number Stream Panel */}
+              <div className="w-full sm:w-64 h-[120px] sm:h-full flex-shrink-0 bg-gray-950/95 backdrop-blur-md border-t sm:border-t-0 sm:border-l border-gray-800 z-30 flex flex-row sm:flex-col items-center justify-between sm:justify-center p-3 sm:p-6 sm:space-y-6">
                 <div className="hidden sm:block text-center pointer-events-none">
-                  <h3 className="text-xl sm:text-2xl font-black text-white tracking-wide uppercase">Match</h3>
-                  <h3 className="text-lg sm:text-xl font-bold text-blue-400 tracking-widest animate-pulse">EVEN</h3>
+                  <h3 className="text-lg font-black text-white uppercase">Match</h3>
+                  <h3 className="text-sm font-bold text-blue-400 tracking-widest animate-pulse">EVEN NUMBERS</h3>
                 </div>
-                
-                <div className="relative flex items-center justify-center w-24 h-24 sm:w-40 sm:h-40 text-5xl sm:text-7xl font-black rounded-2xl bg-black border border-blue-500/30 text-white pointer-events-none overflow-hidden shadow-[inset_0_0_20px_rgba(0,0,0,1)] ml-4 sm:ml-0">
+
+                <div className="relative flex items-center justify-center w-20 h-20 sm:w-32 sm:h-32 text-4xl sm:text-6xl font-black rounded-2xl bg-black border border-blue-500/30 text-white pointer-events-none shadow-[inset_0_0_20px_rgba(0,0,0,1)]">
                   {currentNumber !== null ? (
-                    <span key={currentNumber} className="animate-in slide-in-from-bottom-2 fade-in zoom-in-90 duration-150 block">
+                    <span key={currentNumber} className="animate-in slide-in-from-bottom-2 fade-in duration-150 block">
                       {currentNumber}
                     </span>
                   ) : '?'}
-                  
-                  {wasMatchedRef.current && currentNumber !== null && currentNumber % 2 === 0 && (
+
+                  {wasMatched && currentNumber !== null && currentNumber % 2 === 0 && (
                     <div className="absolute inset-0 rounded-2xl bg-green-500/20 border-2 border-green-500" />
                   )}
                 </div>
-                
-                <div className="flex flex-col items-center mr-4 sm:mr-0 sm:w-full w-32">
-                  <button 
-                    onPointerDown={handleNumberCheck} 
-                    className="w-full py-4 sm:py-5 bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-xl font-black text-xl sm:text-2xl active:scale-95 transition-all hover:from-blue-500 hover:to-indigo-500 border border-blue-400/30 touch-none focus:outline-none shadow-[0_0_20px_rgba(59,130,246,0.3)]">
+
+                <div className="flex flex-col items-center w-28 sm:w-full">
+                  <button
+                    type="button"
+                    onPointerDown={handleNumberCheck}
+                    className="w-full py-3 sm:py-4 bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-xl font-black text-lg sm:text-xl active:scale-95 transition-all hover:from-blue-500 hover:to-indigo-500 border border-blue-400/30 cursor-pointer shadow-[0_0_20px_rgba(59,130,246,0.3)]"
+                  >
                     MATCH
                   </button>
-                  <p className="text-[9px] sm:text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-1.5 sm:mt-2 pointer-events-none">Tap when EVEN</p>
+                  <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest mt-1">Tap when EVEN</p>
                 </div>
               </div>
-            </>
+            </div>
           )}
 
-          {/* Start Screen */}
-          {(!gameActiveRef.current && (engine.gameState === 'start' || forceStart)) && !showRotateWarning && (
-            <div className="absolute inset-0 flex items-center justify-center z-40 bg-black/90 backdrop-blur-sm overflow-y-auto" onPointerDown={e => e.stopPropagation()}>
-              <div className="rounded-3xl p-6 sm:p-8 text-center max-w-sm w-full mx-4 border border-gray-700 bg-gray-900 shadow-2xl max-h-[95vh] overflow-y-auto my-auto">
-                {!isMobileLandscape && (
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl mx-auto flex items-center justify-center mb-6 rotate-3 pointer-events-none shadow-[0_0_30px_rgba(59,130,246,0.3)]">
-                    <Layers className="w-8 h-8 sm:w-10 sm:h-10 text-white -rotate-3" />
-                  </div>
+          {/* START CARD */}
+          {gameState === 'start' && (
+            <FpsStartCard
+              icon={Layers}
+              accent="emerald"
+              title="Divided Attention"
+              subtitle="Dual-Task Stream • Split Focus"
+              rules={[
+                { icon: Target, accent: 'emerald', title: 'Tap Moving Targets (+100 PTS)', text: 'Track and click dynamic visual targets moving across the screen' },
+                { icon: Zap, accent: 'blue', title: 'Match Target on EVEN Numbers', text: 'Simultaneously monitor the secondary number stream and tap when EVEN' },
+              ]}
+              stats={[
+                { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
+                { icon: TrendingUp, label: 'Best Level', value: `Lv. ${bestLevel}`, color: 'text-blue-400', accent: 'blue' },
+              ]}
+              isTouchOnlyDevice={false}
+              onStart={enterDrill}
+            />
+          )}
+
+          {/* COUNTDOWN OVERLAY */}
+          {gameState === 'countdown' && (
+            <DrillCountdown value={countdownValue} subtitle="GET READY" accent="#3b82f6" />
+          )}
+
+          {/* END SCREEN OVERLAY */}
+          {gameState === 'gameOver' && analytics.grade && (
+            <div className="absolute inset-0 z-50 flex bg-neutral-950/98 select-none font-sans" style={{ background: 'rgba(5,5,8,0.97)' }} onPointerDown={e => e.stopPropagation()}>
+              
+              {/* Left 36% Grade Panel */}
+              <div className="w-[36%] flex flex-col items-center justify-center gap-1 border-r border-white/5 px-4" style={{ background: 'radial-gradient(ellipse 260px 200px at 50% 30%, rgba(59,130,246,.12), transparent 70%)' }}>
+                {isNewBest && (
+                  <span className="text-[9.5px] font-bold text-yellow-400 bg-yellow-500/10 border border-yellow-500/25 px-2.5 py-0.5 rounded-full mb-1 animate-pulse">
+                    NEW BEST
+                  </span>
                 )}
-                <h2 className="text-xl sm:text-3xl font-black mb-2 pointer-events-none tracking-tight">Divided Attention</h2>
-                <p className="text-sm sm:text-base mb-8 text-gray-400 leading-relaxed pointer-events-none">Intense dual-task training. Tap moving targets while matching EVEN numbers. Maintain high accuracy to survive.</p>
+                <div className={`text-5xl sm:text-6xl font-black leading-none ${analytics.grade.color}`}>
+                  {analytics.grade.grade || analytics.grade.letter}
+                </div>
+                <div className="text-[10px] uppercase tracking-widest text-slate-500 text-center font-bold mt-1">
+                  {analytics.grade.label}
+                </div>
+                <div className="text-3xl sm:text-4xl font-black text-white mt-2 tabular-nums">
+                  {uiScore}
+                </div>
+                <div className="text-[9px] uppercase tracking-widest text-slate-500">Points</div>
+              </div>
+
+              {/* Right 64% Stats & Actions Panel */}
+              <div className="flex-1 flex flex-col justify-center gap-3 px-6 py-4 min-w-0">
                 
-                <button 
-                  onPointerDown={e => e.stopPropagation()} 
-                  onClick={handleStartGame}
-                  className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-black text-base sm:text-lg hover:brightness-110 transition-all transform hover:scale-[1.02] active:scale-[0.98] animate-pulse hover:animate-none shadow-[0_0_20px_rgba(59,130,246,0.3)] focus:outline-none shrink-0">
-                  <Play className="w-5 h-5 fill-white" />
-                  START DRILL
-                </button>
+                {/* 3 Stat Tiles */}
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
+                    <p className="text-sm sm:text-base font-black text-white">{analytics.accuracy}%</p>
+                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Dual Accuracy</p>
+                  </div>
+                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
+                    <p className="text-sm sm:text-base font-black text-white">{lives}/5</p>
+                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Lives Left</p>
+                  </div>
+                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
+                    <p className="text-sm sm:text-base font-black text-white">Lv. {analytics.finalLevel}</p>
+                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Peak Level</p>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-2">
+                  <button 
+                    type="button"
+                    onClick={enterDrill} 
+                    className="flex-1 py-3 rounded-[13px] bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-xs uppercase tracking-wide cursor-pointer transition-transform active:scale-[0.98] shadow-md flex items-center justify-center gap-1.5"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5" /> Play Again
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={shareResult} 
+                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform" 
+                    title="Share Score"
+                  >
+                    <Share2 className="w-4 h-4" />
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={handleExitDrill} 
+                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform" 
+                    title="Exit Drill"
+                  >
+                    <ArrowLeft className="w-4 h-4 text-red-400" />
+                  </button>
+                </div>
+
               </div>
             </div>
           )}
 
-          {/* End Screen */}
-          {(!gameActiveRef.current && (engine.gameState === 'ended' || localTimeRemaining <= 0)) && !forceStart && (
-            <div className="absolute inset-0 bg-[#05070e]/98 overflow-y-auto p-6 z-[70] select-none scrollbar-thin scroll-smooth backdrop-blur-sm" onPointerDown={e => e.stopPropagation()}>
-              <div className="min-h-full flex flex-col justify-center items-center py-4 w-full">
-                <div className="max-w-md w-full text-center">
-                  {isNewBest && (
-                    <div className="inline-block bg-yellow-500 text-black text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-3 shadow-[0_0_15px_rgba(234,179,8,0.5)] animate-bounce font-mono">
-                      ⭐ NEW PERSONAL BEST!
-                    </div>
-                  )}
-                  
-                  <h2 className="text-xl font-black text-white uppercase tracking-wider mb-1 font-mono">
-                    Drill Complete
-                  </h2>
-                  <p className="text-xs text-slate-550 uppercase tracking-widest mb-6 font-mono">
-                    Peak difficulty reached: Level {highestLevelReached}
-                  </p>
-
-                  <div className="grid grid-cols-3 gap-2.5 mb-6 text-left font-mono">
-                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
-                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Final Score</span>
-                      <span className="text-sm font-black text-white">{score} <span className="text-[8px] text-slate-400 font-normal">PTS</span></span>
-                    </div>
-                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
-                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Accuracy</span>
-                      <span className="text-sm font-black text-white">{overallAcc}%</span>
-                    </div>
-                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
-                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Highest Combo</span>
-                      <span className="text-sm font-black text-orange-400">{highestCombo}x</span>
-                    </div>
-                    
-                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
-                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Visual Acc</span>
-                      <span className="text-sm font-black text-cyan-400">{visAcc}%</span>
-                    </div>
-                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
-                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Number Acc</span>
-                      <span className="text-sm font-black text-indigo-400">{numAcc}%</span>
-                    </div>
-                    <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-xl">
-                      <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Best Score</span>
-                      <span className="text-sm font-black text-yellow-400">{bestScore}</span>
-                    </div>
-                  </div>
-
-                  <div className="bg-[#0b0f19] border border-slate-850 p-3 rounded-xl mb-4 text-left">
-                    <span className={`text-xs font-black block text-center uppercase tracking-widest ${rankColor} mb-2`}>
-                      Rank: {rankName}
-                    </span>
-                    <div className="w-full h-px bg-slate-850 mb-2"></div>
-                    <div className="flex items-center gap-1.5 text-[9px] font-bold text-white uppercase mb-1 font-mono">
-                      <Sparkles className="w-3 h-3 text-yellow-500" /> Diagnostics advice:
-                    </div>
-                    <p className="text-[10px] text-slate-400 leading-normal">
-                      {diagnostics}
-                    </p>
-                  </div>
-
-                  <div className="flex gap-2">
-                    <PlayAgainButton onClick={handleStartGame} colorTheme="blue" />
-                    <button
-                      onClick={shareScore}
-                      className="p-3 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded-xl transition-colors active:scale-95"
-                      title="Share Score"
-                    >
-                      <Share2 className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={handleExit}
-                      className="p-3 bg-red-900/30 border border-red-900/55 hover:bg-red-900/50 text-red-400 rounded-xl transition-colors active:scale-95 flex items-center justify-center"
-                      title="Exit Drill"
-                    >
-                      <LogOut className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
 
-        {/* DRILL RULES & SCORING */}
+        {/* ── ACCORDIONS ── */}
         {!isFullscreen && (
-          <section className="mt-10">
-            <div className="rounded-2xl border border-gray-800 overflow-hidden bg-gray-900 shadow-2xl pointer-events-none">
-              <div className="px-6 py-5 border-b border-gray-800 bg-black/40 flex items-center gap-3">
-                <Info className="w-5 h-5 text-blue-400" /><h2 className="font-bold text-white text-lg tracking-wide">Drill Instructions & Scoring</h2>
+        <div className="[&>div]:!mt-0">
+        <DrillAccordion
+          id="rules"
+          title="Drill Instructions & Scoring System"
+          isOpen={openAccordion === 'rules'}
+          onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {RULES_ITEMS.map((item, i) => (
+              <div key={i} className="bg-black p-4 rounded-xl border border-white/10">
+                <p className="text-sm font-bold text-white mb-1">{item.title}</p>
+                <p className="text-xs text-gray-300 leading-relaxed">{item.text}</p>
               </div>
-              <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-5">
-                  <RuleItem color="green" text="Correct Action" highlight="+5 PTS | +2s" result="Increases Level" />
-                  <RuleItem color="orange" text="Combo System" highlight="Bonus PTS" result="Every 5 Hits" />
-                  <RuleItem color="blue" text="Tap Even Numbers" highlight="0, 2, 4, 6, 8" result="Matches earn rewards" />
-                </div>
-                <div className="space-y-5">
-                  <RuleItem color="red" text="Wrong / Miss" highlight="-1.5s Penalty" result="Breaks Combo" />
-                  <RuleItem color="cyan" text="Level Scaling" highlight="Speed & Size" result="Every 50 Points" />
-                  <RuleItem color="purple" text="Time Limit Capped" highlight="Max 60 Seconds" result="Endless Survival" />
-                </div>
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* ABOUT THIS DRILL */}
-        {!isFullscreen && (
-          <section className="mt-12" aria-label="About this drill">
-            <div className="rounded-2xl border border-gray-800 overflow-hidden bg-gray-900 shadow-xl">
-              <div className="px-6 py-5 border-b border-gray-800 bg-black/40 flex items-center gap-3">
-                <GraduationCap className="w-5 h-5 text-blue-400" />
-                <h2 className="font-bold text-white text-lg tracking-wide">About Divided Attention Test</h2>
-              </div>
-              
-              <div className="p-6 sm:p-8">
-                <p className="text-sm leading-relaxed mb-6 text-gray-300">
-                  This advanced cognitive drill serves as an intense <strong className="text-white font-semibold">Divided Attention Test</strong>, pushing your parallel processing and dual task training capabilities to the limit. By forcing you to actively engage with rapid visual target acquisition while simultaneously calculating numeric parity, it builds the mental framework required for superior <strong className="text-white font-semibold">Cognitive Flexibility</strong> and multitasking training without suffering cognitive degradation.
-                </p>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
-                  <div className="p-5 rounded-xl border border-gray-800 bg-black/40">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center"><Users className="w-4 h-4 text-white" /></div>
-                      <h3 className="text-sm font-bold text-white tracking-tight">Who It's For</h3>
-                    </div>
-                    <p className="text-xs leading-relaxed text-gray-400">Competitive gamers managing maps, professionals juggling fast-paced data streams, and individuals looking for rigorous executive function training to enhance real-world attention control under stress.</p>
-                  </div>
-                  <div className="p-5 rounded-xl border border-gray-800 bg-black/40">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-8 h-8 rounded-lg bg-green-600 flex items-center justify-center"><TrendingUp className="w-4 h-4 text-white" /></div>
-                      <h3 className="text-sm font-bold text-white tracking-tight">Skills Improved</h3>
-                    </div>
-                    <p className="text-xs leading-relaxed text-gray-400">Divided attention, rapid target acquisition, parallel numerical processing, cognitive flexibility, and high-stakes attention training.</p>
-                  </div>
-                  <div className="p-5 rounded-xl border border-gray-800 bg-black/40">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-8 h-8 rounded-lg bg-purple-600 flex items-center justify-center"><BarChart3 className="w-4 h-4 text-white" /></div>
-                      <h3 className="text-sm font-bold text-white tracking-tight">What You'll Track</h3>
-                    </div>
-                    <p className="text-xs leading-relaxed text-gray-400">Net Score, visual vs numeric accuracy percentages, peak combo multipliers, and your absolute maximum cognitive performance level limit.</p>
-                  </div>
-                </div>
-                
-                <div className="p-5 rounded-xl border border-gray-800 bg-black/40 mb-8">
-                  <div className="flex items-center gap-3 mb-4">
-                    <Lightbulb className="w-5 h-5 text-yellow-400" />
-                    <h3 className="text-sm font-bold text-white uppercase tracking-wider">How to Practice Effectively</h3>
-                  </div>
-                  <ul className="text-sm leading-relaxed space-y-3 pl-2 text-gray-400">
-                    <li><strong className="text-gray-200">Peripheral Anchoring:</strong> Avoid hyper-focusing exclusively on the numbers or the visual field. Relax your eyes centrally and use peripheral vision to track the moving spheres while your core focus evaluates the numbers.</li>
-                    <li><strong className="text-gray-200">Rhythm Maintenance:</strong> The stimuli spawn on independent intervals. Establish a mental cadence to parse information streams without freezing when both trigger simultaneously.</li>
-                    <li><strong className="text-gray-200">Survival & Combos:</strong> You must maintain accuracy to add time (+2s) and score (+5 PTS) back to your clock. Build combos (5, 10, 15, 20+) to unlock massive score bonuses. Misses drain the clock (-1.5s) and break combos instantly.</li>
-                  </ul>
-                </div>
-
-                {/* FAQ Section */}
-                <div className="p-5 rounded-xl border border-gray-800 bg-black/40">
-                  <div className="flex items-center gap-3 mb-4">
-                    <Info className="w-5 h-5 text-blue-400" />
-                    <h3 className="text-sm font-bold text-white uppercase tracking-wider">Frequently Asked Questions</h3>
-                  </div>
-                  <div className="space-y-5">
-                    <div>
-                      <h4 className="text-sm font-bold text-gray-200 tracking-tight">How does the difficulty scaling work?</h4>
-                      <p className="text-xs text-gray-400 mt-1.5 leading-relaxed">The engine tracks your cumulative score. Every 50 points increases your Level. Higher levels force the spawn timers to compress and shrink the target geometry, significantly amplifying the dual task training pressure.</p>
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-bold text-gray-200 tracking-tight">Why am I losing time when I don't click anything?</h4>
-                      <p className="text-xs text-gray-400 mt-1.5 leading-relaxed">This is an active survival drill for attention control. Failing to engage with an even number before it changes, or allowing a visual target to despawn untouched, counts as an omission error. This triggers a penalty (-1.5 Seconds and breaks your combo).</p>
-                    </div>
-                  </div>
-                </div>
-                
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* ============================================================ */}
-        {/* RELATED DRILLS */}
-        {/* ============================================================ */}
-        {!isFullscreen && (
-          <section className="mt-14" aria-label="Explore related cognitive drills">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-1 h-5 rounded-full bg-blue-500"></div>
-              <h2 className="text-xs font-bold text-white uppercase tracking-widest font-mono">
-                Explore Related Drills
-              </h2>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <RelatedCard href="/drills/cognitive/attention/selective-attention" title="Selective Attention" desc="Focus entirely on specific data while ignoring noise." color="cyan" icon={<Eye className="w-4 h-4" />} />
-              <RelatedCard href="/drills/cognitive/attention/sustained-attention" title="Concentration Stamina" desc="Maintain focus over extended periods without distraction." color="green" icon={<Timer className="w-4 h-4" />} />
-              <RelatedCard href="/drills/cognitive/focus/concentration-grid" title="Concentration Grid" desc="Search grids linearly under intense time pressure." color="purple" icon={<Search className="w-4 h-4" />} />
-              <RelatedCard href="/drills/cognitive/processing-speed/reaction-time" title="Reaction Time" desc="Raw millisecond reaction testing." color="orange" icon={<Zap className="w-4 h-4" />} />
-            </div>
-          </section>
-        )}
-
-        {/* ============================================================ */}
-        {/* FOOTER */}
-        {/* ============================================================ */}
-        {!isFullscreen && (
-          <footer className="mt-16 bg-gray-950 text-gray-400 rounded-3xl py-12 px-8 border border-gray-800 shadow-xl" role="contentinfo">
-            <div className="max-w-7xl mx-auto">
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8 mb-10">
-                <div>
-                  <h3 className="text-white font-bold mb-4 text-sm tracking-wide">FPS Training</h3>
-                  <ul className="space-y-3 text-sm">
-                    <li><Link href="/drills/fps/flick-shot-training" className="hover:text-white transition-colors">Flick Shot Trainer</Link></li>
-                    <li><Link href="/drills/fps/target-acquisition" className="hover:text-white transition-colors">Target Acquisition</Link></li>
-                    <li><Link href="/drills/fps" className="text-blue-400 hover:text-blue-300 font-medium transition-colors mt-2 block">All 21 FPS Drills →</Link></li>
-                  </ul>
-                </div>
-                <div>
-                  <h3 className="text-white font-bold mb-4 text-sm tracking-wide">Cognitive</h3>
-                  <ul className="space-y-3 text-sm">
-                    <li><Link href="/drills/cognitive/memory/card-matching" className="hover:text-white transition-colors">Memory Games</Link></li>
-                    <li><Link href="/drills/cognitive/attention/divided-attention" className="hover:text-white transition-colors">Divided Attention</Link></li>
-                    <li><Link href="/drills/cognitive" className="text-blue-400 hover:text-blue-300 font-medium transition-colors mt-2 block">All 16 Cognitive Drills →</Link></li>
-                  </ul>
-                </div>
-                <div>
-                  <h3 className="text-white font-bold mb-4 text-sm tracking-wide">Academic</h3>
-                  <ul className="space-y-3 text-sm">
-                    <li><Link href="/drills/academic/writing-speed/typing-test" className="hover:text-white transition-colors">Typing Speed Test</Link></li>
-                    <li><Link href="/drills/academic/reading-speed/speed-reader" className="hover:text-white transition-colors">Speed Reader</Link></li>
-                    <li><Link href="/drills/academic" className="text-blue-400 hover:text-blue-300 font-medium transition-colors mt-2 block">All 12 Academic Drills →</Link></li>
-                  </ul>
-                </div>
-                <div>
-                  <h3 className="text-white font-bold mb-4 text-sm tracking-wide">Visual & Motor</h3>
-                  <ul className="space-y-3 text-sm">
-                    <li><Link href="/drills/visual/reaction-speed/light-reaction" className="hover:text-white transition-colors">Reaction Time Test</Link></li>
-                    <li><Link href="/drills/motor/hand-eye-coordination/aim-trainer" className="hover:text-white transition-colors">Hand-Eye Coordination</Link></li>
-                    <li><Link href="/drills/visual" className="text-blue-400 hover:text-blue-300 font-medium transition-colors mt-2 block">All 14 Visual Drills →</Link></li>
-                  </ul>
-                </div>
-                <div>
-                  <h3 className="text-white font-bold mb-4 text-sm tracking-wide">More Sections</h3>
-                  <ul className="space-y-3 text-sm">
-                    <li><Link href="/drills/memory" className="hover:text-white transition-colors">Memory (15 drills)</Link></li>
-                    <li><Link href="/drills/cognitive" className="hover:text-white transition-colors">Cognitive</Link></li>
-                    <li><Link href="/drills/physical" className="hover:text-white transition-colors">Physical (11 drills)</Link></li>
-                  </ul>
-                </div>
-              </div>
-              
-              <div className="border-t border-gray-800 pt-10 text-center">
-                <div className="flex items-center justify-center gap-3 mb-5">
-                  <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/20">
-                    <Layers className="w-6 h-6 text-white" />
-                  </div>
-                  <span className="text-white font-black text-xl tracking-tight">SkillDrills</span>
-                </div>
-                <p className="text-sm mb-3 font-medium">&copy; 2026 SkillDrills. All rights reserved.</p>
-                <p className="text-xs max-w-2xl mx-auto leading-relaxed mb-8 text-gray-500">
-                  Open-source telemetry training platform. Free forever. No downloads required.
-                </p>
-                
-                <div className="flex items-center justify-center gap-4 flex-wrap mt-6">
-                  <a href="https://youtube.com/@skilldrills.online" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="YouTube">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-                  </a>
-                  <a href="https://www.facebook.com/profile.php?id=61590093843779" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="Facebook">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-                  </a>
-                  <a href="https://x.com/skilldrillss" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="Twitter / X">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-                  </a>
-                  <a href="https://www.instagram.com/skilldrills.online/?__pwa=1" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="Instagram">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
-                  </a>
-                  <a href="https://pinterest.com/skilldrills" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors p-2.5 bg-gray-900 rounded-full hover:bg-gray-800 shadow-md" title="Pinterest">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.372 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738a.36.36 0 0 1 .083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.631-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12 0-6.628-5.373-12-12-12z"/></svg>
-                  </a>
-                </div>
-              </div>
-            </div>
-          </footer>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// === Subcomponents ===
-
-function StatCard({ icon, value, label, unit = '' }) {
-  return (
-    <div className="rounded-xl border border-gray-800 bg-gray-900 p-1.5 sm:p-3 text-center flex flex-col justify-center h-full transition-all duration-300 pointer-events-none">
-      <div className="mb-0.5 sm:mb-1.5 flex justify-center opacity-90 scale-75 sm:scale-100">{icon}</div>
-      <p className="text-sm sm:text-2xl lg:text-3xl font-black tracking-tighter truncate text-white leading-none mt-0.5 sm:mt-0">
-        {value}<span className="text-[10px] sm:text-sm font-bold ml-0.5 text-gray-500">{unit}</span>
-      </p>
-      <p className="text-[8px] sm:text-[10px] font-bold uppercase tracking-widest truncate text-gray-500 mt-1">{label}</p>
-    </div>
-  );
-}
-
-function EndStat({ label, value, color }) {
-  const colors = {
-    cyan: 'text-cyan-400',
-    indigo: 'text-indigo-400',
-    orange: 'text-orange-400',
-    white: 'text-white',
-    red: 'text-red-400',
-    yellow: 'text-yellow-400'
-  };
-  return (
-    <div className="bg-gray-900/50 rounded-xl p-2 sm:p-3 text-center border border-gray-800">
-      <div className="text-gray-400 text-[9px] sm:text-[10px] uppercase font-bold tracking-wider mb-1">{label}</div>
-      <div className={`text-base sm:text-xl font-black ${colors[color] || 'text-white'}`}>{value}</div>
-    </div>
-  );
-}
-
-function RuleItem({ color, text, highlight = '', result }) {
-  const colorMap = { 
-    blue: 'bg-blue-600 text-blue-300 border-blue-500', 
-    cyan: 'bg-cyan-600 text-cyan-300 border-cyan-500', 
-    purple: 'bg-purple-600 text-purple-300 border-purple-500', 
-    green: 'bg-green-600 text-green-300 border-green-500', 
-    red: 'bg-red-600 text-red-300 border-red-500',
-    yellow: 'bg-yellow-600 text-yellow-300 border-yellow-500',
-    orange: 'bg-orange-600 text-orange-300 border-orange-500'
-  };
-  const colors = colorMap[color] || 'bg-slate-600 text-slate-300 border-slate-500';
-  const [bg, txt, border] = colors.split(' ');
-  
-  return (
-    <div className="flex items-center gap-4 bg-[#0b0f19]/40 p-4 rounded-xl border border-slate-800 shadow-sm">
-      <div className={`w-3 h-3 rounded-full ${bg} shadow-lg flex-shrink-0`}></div>
-      <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-        <p className="text-sm font-medium text-slate-300">
-          {text}{highlight && <span className={`font-black ${txt}`}> {highlight}</span>}
-        </p>
-        <div className={`text-xs font-black px-3 py-1.5 rounded-lg bg-[#050811] border ${border} ${txt} whitespace-nowrap shadow-inner tracking-wide text-center sm:text-left`}>
-          {result}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function RelatedCard({ href, title, desc, color, icon }) {
-  const gradients = {
-    blue: 'from-blue-500 to-indigo-500',
-    cyan: 'from-cyan-500 to-teal-500',
-    purple: 'from-purple-500 to-violet-500',
-    rose: 'from-rose-500 to-pink-500',
-    orange: 'from-orange-500 to-amber-500',
-    red: 'from-red-500 to-rose-500',
-    green: 'from-green-500 to-emerald-500'
-  };
-  
-  return (
-    <Link href={href} className={`group relative overflow-hidden rounded-2xl border border-slate-800 bg-[#0b0f19]/40 transition-all duration-300 hover:shadow-[0_0_20px_rgba(168,85,247,0.1)] hover:-translate-y-1 hover:border-blue-500/50`}>
-      <div className={`absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r ${gradients[color] || 'from-blue-500 to-indigo-500'}`}></div>
-      <div className="p-5">
-        <div className="flex items-center gap-3 mb-3">
-          <div className="w-10 h-10 rounded-xl bg-[#050508] border border-slate-700 flex items-center justify-center text-slate-400 group-hover:text-white transition-colors shadow-inner">
-            {icon}
+            ))}
           </div>
+        </DrillAccordion>
+
+        <DrillAccordion
+          id="about"
+          title="About Divided Attention"
+          isOpen={openAccordion === 'about'}
+          onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
+        >
+          <div className="space-y-8">
+            <section>
+              <div className="space-y-4">
+                {ABOUT_TEXT.split('\n\n').map((para, i) => (
+                  <p key={i} className="text-sm leading-relaxed text-gray-300">{para}</p>
+                ))}
+              </div>
+            </section>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                <div className="flex items-center gap-2.5 mb-2">
+                  <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
+                  <h5 className="text-xs font-bold text-white">Who Should Use This?</h5>
+                </div>
+                <p className="text-xs text-gray-300 leading-relaxed">Air traffic controllers, ER nurses, esports players tracking minimap and targets at once, and drivers who need to safely process multiple input streams.</p>
+              </div>
+              <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                <div className="flex items-center gap-2.5 mb-2">
+                  <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
+                  <h5 className="text-xs font-bold text-white">Skills Improved</h5>
+                </div>
+                <p className="text-xs text-gray-300 leading-relaxed">Dual-task capacity, multi-channel visual tracking, numerical cognition, and prefrontal executive resource allocation.</p>
+              </div>
+              <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                <div className="flex items-center gap-2.5 mb-2">
+                  <div className="w-7 h-7 rounded-lg bg-purple-600 flex items-center justify-center"><Layers className="w-3.5 h-3.5 text-white" /></div>
+                  <h5 className="text-xs font-bold text-white">Parallel Processing</h5>
+                </div>
+                <p className="text-xs text-gray-300 leading-relaxed">Track the spatial target stream and the numerical stream at once — reacting to one without letting accuracy on the other channel collapse.</p>
+              </div>
+            </div>
+          </div>
+        </DrillAccordion>
+
+        <DrillAccordion
+          id="faq"
+          title="Frequently Asked Questions"
+          isOpen={openAccordion === 'faq'}
+          onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {FAQ_ITEMS.map((item, i) => (
+              <div key={i} className="bg-[#05060b] border border-gray-800 rounded-xl p-5">
+                <h4 className="text-sm font-bold text-gray-200 mb-2">{item.q}</h4>
+                <p className="text-xs text-gray-400 leading-relaxed">{item.a}</p>
+              </div>
+            ))}
+          </div>
+        </DrillAccordion>
         </div>
-        <h3 className="font-bold text-base mb-1.5 text-white group-hover:text-blue-400 transition-colors tracking-tight">{title}</h3>
-        <p className="text-xs leading-relaxed text-slate-500">{desc}</p>
-        <div className="flex items-center gap-1.5 mt-4 text-blue-400 text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-wider">
-          Start Drill <ArrowRight className="w-3.5 h-3.5" />
-        </div>
-      </div>
-    </Link>
+        )}
+
+        {/* RELATED DRILLS GRID */}
+        {!isFullscreen && (
+          <section className="mt-4">
+            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">
+              Related Cognitive Drills
+            </h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {RELATED_DRILLS.map((drill) => (
+                <Link
+                  key={drill.id}
+                  href={drill.href}
+                  className="group bg-[#0c0c16] border border-white/5 hover:border-blue-500/40 rounded-xl p-3.5 transition-all duration-200 hover:-translate-y-0.5 flex flex-col justify-between"
+                >
+                  <div>
+                    <div className="text-[10px] font-bold text-blue-400 uppercase tracking-wider mb-1">{drill.cat}</div>
+                    <div className="text-xs font-bold text-white group-hover:text-blue-300 transition-colors">{drill.name}</div>
+                    <div className="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">{drill.desc}</div>
+                  </div>
+                  <div className="text-[10px] font-bold text-slate-500 group-hover:text-blue-400 mt-3 flex items-center gap-1 transition-colors">
+                    Train Drill <span>→</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* SITE FOOTER */}
+        {!isFullscreen && <DrillFooter />}
+
+      </main>
+    </div>
   );
 }

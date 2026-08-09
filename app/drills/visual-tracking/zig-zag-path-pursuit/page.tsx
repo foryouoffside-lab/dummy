@@ -1,98 +1,120 @@
 import ZigZagPathPursuitClient from './ZigZagPathPursuitClient';
 
 export const metadata = {
-  title: 'Zig Zag Path Pursuit - Visual Pursuit & Tracking Drill | SkillDrills',
-  description: 'Track target movements along a visible multi-segment zig-zag guide path. Train visual pursuit tracking and coordinate re-acquisition speeds. No sign-up required.',
-  keywords: ['zig zag path pursuit', 'visual tracking drill', 'smooth pursuit eye training', 'saccadic eye movement test', 'visual processing speed', 'foveal tracking', 'esports vision training', 'athletic vision drill'],
+  title: "Zig-Zag Path Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
+  description: "Track target movements along a multi-segment zig-zag guide path. Free browser-based visual tracking drill with customizable speed, duration, and random acceleration.",
+  keywords: [
+    "zig zag path pursuit",
+    "visual tracking drill",
+    "smooth pursuit eye training",
+    "zig zag eye tracking",
+    "saccadic direction shifts",
+    "esports vision training",
+    "athletic vision drill",
+    "ocular motor training",
+    "eye tracking practice online"
+  ],
+  alternates: {
+    canonical: "https://skilldrills.online/drills/visual-tracking/zig-zag-path-pursuit",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
   openGraph: {
-    title: 'Zig Zag Path Pursuit - Visual Pursuit & Tracking Drill | SkillDrills',
-    description: 'Track target movements along a visible multi-segment zig-zag guide path. Train visual pursuit tracking and coordinate re-acquisition speeds. No sign-up required.',
-    type: 'article',
-    url: 'https://skilldrills.online/drills/visual-tracking/zig-zag-path-pursuit',
+    title: "Zig-Zag Path Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
+    description: "Track target movements along a multi-segment zig-zag guide path. Free browser-based visual tracking drill.",
+    url: "https://skilldrills.online/drills/visual-tracking/zig-zag-path-pursuit",
     siteName: 'SkillDrills',
     locale: 'en_US',
-    images: [{
-      url: 'https://skilldrills.online/icons/icon-512x512.png',
-      width: 512,
-      height: 512,
-      alt: 'Zig-Zag Path Pursuit Drill',
-    }],
+    type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Zig Zag Path Pursuit - Visual Pursuit & Tracking Drill | SkillDrills',
-    description: 'Track target movements along a visible multi-segment zig-zag guide path. Train visual pursuit tracking and coordinate re-acquisition speeds. No sign-up required.',
-    images: ['https://skilldrills.online/icons/icon-512x512.png'],
-  },
-  robots: { index: true, follow: true },
-  alternates: {
-    canonical: 'https://skilldrills.online/drills/visual-tracking/zig-zag-path-pursuit',
+    title: "Zig-Zag Path Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
+    description: "Track target movements along a multi-segment zig-zag guide path. Free browser-based visual tracking drill.",
   },
 };
 
 export default function ZigZagPathPursuitPage() {
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "SkillDrills", "item": "https://skilldrills.online/" },
+      { "@type": "ListItem", "position": 2, "name": "Visual Tracking", "item": "https://skilldrills.online/drills/visual-tracking" },
+      { "@type": "ListItem", "position": 3, "name": "Zig-Zag Path Pursuit", "item": "https://skilldrills.online/drills/visual-tracking/zig-zag-path-pursuit" }
+    ]
+  };
+
+  const softwareSchema = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Zig-Zag Path Pursuit Drill",
+    "applicationCategory": "EducationalApplication",
+    "operatingSystem": "Web Browser",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "description": "An interactive web-based visual tracking drill to condition smooth pursuit eye movements across multi-segment zig-zag paths.",
+    "url": "https://skilldrills.online/drills/visual-tracking/zig-zag-path-pursuit",
+    "publisher": {
+      "@type": "Organization",
+      "name": "SkillDrills",
+      "url": "https://skilldrills.online"
+    }
+  };
+
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is the Zig-Zag Path Pursuit drill?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The Zig-Zag Path Pursuit drill conditions visual pursuit accuracy across acute direction changes as a target traverses a multi-segment zig-zag polyline."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Why use the 'Hide Line' setting?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Hiding the zig-zag guide path forces your eyes to anticipate sharp diagonal turns without visual path indicators."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What does the Random Speed feature do?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Random Speed introduces variable segment traversal speeds and abrupt direction reversals, strengthening ocular motor control."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How long should I practice visual tracking daily?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "We recommend 5 to 10 minutes of daily visual tracking training before gaming or athletic practice to warm up ocular muscles and reduce eye fatigue."
+        }
+      }
+    ]
+  };
+
   return (
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "BreadcrumbList",
-            "itemListElement": [
-              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://skilldrills.online" },
-              { "@type": "ListItem", "position": 2, "name": "Drills Hub", "item": "https://skilldrills.online/drills" },
-              { "@type": "ListItem", "position": 3, "name": "Visual Tracking", "item": "https://skilldrills.online/drills/visual-tracking" },
-              { "@type": "ListItem", "position": 4, "name": "Zig-Zag Path Pursuit" }
-            ]
-          })
-        }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
-
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "WebApplication",
-            "name": "Zig-Zag Path Pursuit Drill",
-            "url": "https://skilldrills.online/drills/visual-tracking/zig-zag-path-pursuit",
-            "description": "Track target movements along a visible multi-segment zig-zag guide path.",
-            "applicationCategory": "EducationalApplication",
-            "operatingSystem": "All",
-            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-            "author": { "@type": "Organization", "name": "SkillDrills" },
-            "isAccessibleForFree": true
-          })
-        }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }}
       />
-
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "FAQPage",
-            "mainEntity": [
-              {
-                "@type": "Question",
-                "name": "What is the Zig-Zag Path Pursuit Drill?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "Track target movements along a visible multi-segment zig-zag guide path."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "Who is this drill designed for?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "Competitive gamers, sports athletes, and anyone wanting to improve ocular muscle agility and tracking precision."
-                }
-              }
-            ]
-          })
-        }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
 
       <ZigZagPathPursuitClient />

@@ -12,28 +12,18 @@ import FPSTrackingTrainerWrapper from './FPSTrackingTrainerWrapper';
 //   "best tracking aim trainer"       ~250/mo,  KD ~24%
 //   "reactive tracking scenarios"     ~180/mo,  KD ~16%
 //   "smoothness routine aim"          ~150/mo,  KD ~15%
-// PAA targets: "Should you look at the crosshair or the target when tracking?",
-//   "Why is my tracking aim so shaky?", "Is Aim Lab or KovaaK's better for tracking?",
-//   "How do you practice strafe tracking?", "Does sensitivity matter for tracking aim?",
-//   "How long does it take to improve tracking aim?"
-// Key entities: mouse control, visual tracking, horizontal tracking, ADAD strafing,
-//   input lag, DPI, eDPI, muscle tension, foveal pursuit, motor cortex
 // ============================================================
 
 export const metadata = {
   title: 'FPS Tracking Trainer - Smooth Aim & Strafe Practice | SkillDrills',
   description: 'Train smooth aim and strafe tracking with this free FPS Tracking Trainer. Fix shaky aim, practice reactive tracking scenarios, and improve your target tracking for Apex Legends, Valorant, and CS2. Free online, no download needed.',
   keywords: [
-    // Primary / Head terms
     'fps tracking trainer', 'aim tracking trainer', 'best tracking aim trainer',
-    // Secondary / LSI terms
     'strafe tracking aim', 'aim trainer tracking', 'shaky aim fix',
     'how to track aim', 'reactive tracking scenarios', 'smoothness routine aim',
-    // Long-tail variants
     'how to improve tracking aim', 'why is my tracking aim shaky',
     'how to make aim tracking smoother', 'apex legends tracking routine',
     'strafe tracking drills for fps', 'online mouse tracking trainer',
-    // General
     'free aim trainer browser', 'gaming reflex test', 'hand eye coordination gaming'
   ],
   alternates: {
@@ -47,18 +37,11 @@ export const metadata = {
     siteName: 'SkillDrills',
     locale: 'en_US',
     type: 'website',
-    images: [{
-      url: 'https://skilldrills.online/icons/icon-512x512.png',
-      width: 512,
-      height: 512,
-      alt: 'FPS Tracking Trainer — Smooth Aim & Strafe Practice | SkillDrills',
-    }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'FPS Tracking Trainer - Smooth Aim & Strafe Practice',
     description: 'Fix shaky aim and practice reactive target tracking. Free, browser-based FPS tracking trainer with no downloads.',
-    images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
 };
 
@@ -133,7 +116,7 @@ const faqSchema = {
       "name": "What is FPS tracking training?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "FPS tracking training exercises your eyes and hands to keep your crosshair centered on targets moving along horizontal, vertical, or dynamic paths. It is essential in tracking-heavy shooters like Apex Legends, Overwatch, and Halo."
+        "text": "FPS tracking training exercises your eyes and hands to keep your crosshair centered on targets moving along horizontal, vertical, or dynamic paths."
       }
     },
     {
@@ -141,7 +124,7 @@ const faqSchema = {
       "name": "Should you look at the crosshair or the target when tracking?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Always look at the target (the enemy character model) rather than staring at your crosshair. Staring at the crosshair induces cognitive delay, leading to jerky micro-flicks instead of smooth, continuous tracking."
+        "text": "Always look at the target character model rather than staring at your crosshair. Staring at the crosshair induces cognitive delay."
       }
     },
     {
@@ -149,7 +132,7 @@ const faqSchema = {
       "name": "Why is my tracking aim so shaky?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Shaky tracking aim is primarily caused by excessive physical muscle tension (gripping your mouse too tightly) or having an excessively high mouse sensitivity (which amplifies muscle micro-jitters). Consciously relaxing your arm and lower sensitivity can help resolve shakiness."
+        "text": "Shaky tracking aim is primarily caused by excessive muscle tension (gripping mouse too tightly) or high sensitivity amplifying micro-jitters."
       }
     },
     {
@@ -157,7 +140,7 @@ const faqSchema = {
       "name": "How do I make my aim tracking smoother?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "To improve smoothness: (1) Reduce mouse sensitivity to a range of 30-45 cm per 360-degree turn. (2) Keep your hand and wrist relaxed. (3) Train on specialized smoothness scenarios at slower target speeds, gradually speeding them up as your control improves."
+        "text": "Reduce mouse sensitivity to 30-45 cm per 360, keep hand/wrist relaxed, and practice smooth pursuit drills consistently."
       }
     },
     {
@@ -165,7 +148,7 @@ const faqSchema = {
       "name": "What is the best sensitivity for tracking aim?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "For tracking-heavy games, a low-to-moderate sensitivity is generally best (typically between 30 cm/360 and 45 cm/360, which corresponds to 800 DPI and 1.0 to 1.5 in-game sensitivity in games like Source engine/Apex/CS). This provides mechanical stability to track moving targets smoothly."
+        "text": "For tracking shooters, a low-to-moderate sensitivity between 30 cm/360 and 45 cm/360 provides maximum mechanical stability."
       }
     },
     {
@@ -173,7 +156,7 @@ const faqSchema = {
       "name": "How do you practice strafe tracking?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Use horizontal tracking scenarios. Focus on reacting to the direction changes smoothly rather than predicting when the target will turn. Practicing against targets thatWide-strafe help build smooth ocular pursuit."
+        "text": "Use reactive horizontal scenarios. Focus on reacting smoothly to direction changes rather than predicting turn timing."
       }
     },
     {
@@ -181,7 +164,7 @@ const faqSchema = {
       "name": "Is Aim Lab or Kovaak's better for tracking?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Both are excellent. Kovaak's is favored by competitive players for its massive community scenario library and customization options. Aim Lab is highly popular because it is free, has a user-friendly interface, and provides automated telemetry diagnostics. This browser-based trainer is designed as a free, quick-access alternative to warm up directly in your browser."
+        "text": "Both are great. Kovaak's has huge scenario libraries, while Aim Lab offers telemetry. SkillDrills provides instant free browser access."
       }
     },
     {
@@ -189,7 +172,7 @@ const faqSchema = {
       "name": "How long does it take to improve tracking aim?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Consistent daily practice of 15 to 20 minutes will yield noticeable improvements in smoothness and direction-change reactivity within 2 to 4 weeks. Full mechanical mastery requires months of structured tracking routines."
+        "text": "Daily practice of 15 to 20 minutes yields noticeable improvements in tracking smoothness within 2 to 4 weeks."
       }
     },
     {
@@ -197,7 +180,7 @@ const faqSchema = {
       "name": "Is this FPS tracking trainer free to practice?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes, all aim and reaction drills on SkillDrills are 100% free with no downloads, signups, or pop-up ads. You can practice directly in your browser."
+        "text": "Yes, all aim and reaction drills on SkillDrills are 100% free with no downloads, signups, or pop-up ads."
       }
     },
     {
@@ -205,7 +188,47 @@ const faqSchema = {
       "name": "Does monitor refresh rate affect tracking aim?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes. A higher refresh rate monitor (144Hz, 240Hz, or 360Hz) makes target motion appear smoother and reduces display ghosting, making it significantly easier to track target borders and react quickly to sudden direction changes."
+        "text": "Yes. High refresh rate monitors (144Hz, 240Hz, 360Hz) make target motion smoother and reduce display ghosting."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does this drill improve reflexes?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "By presenting unpredictable horizontal target switches, it teaches the brain to translate visual coordinate changes into precise motor movements."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can this improve gaming performance?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Fast reaction times and high-precision target tracking are critical for winning duels in competitive tournaments."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is this useful for FPS games?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Absolutely. Countering strafing players or tracking targets executing slide-cancels relies heavily on detecting speed transitions."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How is reaction speed measured?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Reaction time is measured in milliseconds (ms) from the moment the target relocates to the moment you successfully click it."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is this suitable for beginners?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. The adaptive level system scales target sizes and duration limits dynamically so players of all skill levels can start training."
       }
     }
   ]
@@ -234,4 +257,3 @@ export default function FPSTrackingTrainerPage() {
     </>
   );
 }
-

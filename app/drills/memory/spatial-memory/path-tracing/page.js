@@ -23,18 +23,11 @@ export const metadata = {
     url: 'https://skilldrills.online/drills/memory/spatial-memory/path-tracing',
     siteName: 'SkillDrills',
     locale: 'en_US',
-    images: [{
-      url: 'https://skilldrills.online/icons/icon-512x512.png',
-      width: 512,
-      height: 512,
-      alt: 'Path Tracing Drill',
-    }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Path Tracing - Sequence Memory | SkillDrills',
     description: 'Train spatial memory with animated dot paths on expanding 3x3 to 7x7 grids. Retrace paths in exact order. No sign-up.',
-    images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
   alternates: {
@@ -70,7 +63,7 @@ export default function PathTracingPage() {
             "@type": "WebApplication",
             "name": "Path Tracing Drill",
             "url": "https://skilldrills.online/drills/memory/spatial-memory/path-tracing",
-            "description": "Free spatial memory drill with animated dot paths on 3x3 to 7x7 grids. Retrace paths in exact order. Instant fail on wrong click. +2 for perfect recall.",
+            "description": "Free spatial memory drill with animated dot paths on 3x3 to 7x7 grids. Retrace paths in exact order, zero negative penalties, clean 45-second timer.",
             "applicationCategory": "EducationalApplication",
             "operatingSystem": "All",
             "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
@@ -92,7 +85,7 @@ export default function PathTracingPage() {
                 "name": "What is the Path Tracing Drill?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "A free spatial sequence exercise. Watch animated dot paths at 500ms intervals, then retrace in exact order. Instant fail on wrong click."
+                  "text": "A free spatial sequence memory exercise. Watch animated dot paths at 500ms intervals, then retrace the exact path sequence on the grid."
                 }
               },
               {
@@ -100,15 +93,31 @@ export default function PathTracingPage() {
                 "name": "How does progressive difficulty work?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Path length = level + 3. Level 1 has 4 dots. Grid expands from 3x3 to 7x7 as paths grow longer. Infinite progression."
+                  "text": "Starts on a 3x3 grid with 3 steps. Clearing rounds adds steps and expands the grid up to 7x7."
                 }
               },
               {
                 "@type": "Question",
-                "name": "Who should use this drill?",
+                "name": "Are there negative score or time penalties?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Students, professionals, gamers (strategy/MOBA), and anyone wanting better sequential spatial memory and route recall."
+                  "text": "No. Tapping a wrong step never deducts score points or reduces remaining timer seconds — the round just replays at the same difficulty."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Does difficulty decrease on mistakes?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "No. The level remains unchanged when a mistake is made, allowing you to master your current level."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "How long does each drill session last?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Each round is timed for exactly 45 seconds of continuous focus."
                 }
               },
               {
@@ -116,7 +125,7 @@ export default function PathTracingPage() {
                 "name": "Do I need to sign up?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "No registration required. This path tracing drill is completely free and works instantly in your browser."
+                  "text": "No registration required. This drill runs directly in your browser with instant response."
                 }
               }
             ]

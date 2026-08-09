@@ -118,7 +118,7 @@ const howToSchema = {
       "@type": "HowToStep",
       "position": 3,
       "name": "Enter the Match",
-      "text": "Press the corresponding number key on your keyboard (1-9) or tap it on the number pad to submit. Speed up to gain bonus time."
+      "text": "Tap the corresponding digit button (1-6) to submit. Each session runs on a fixed 45-second clock, and a wrong tap costs 1 of your 5 lives — losing all 5 ends the run immediately."
     }
   ]
 };
@@ -146,13 +146,11 @@ export const metadata = {
     siteName: 'SkillDrills',
     locale: 'en_US',
     type: 'website',
-    images: [{ url: 'https://skilldrills.online/icons/icon-512x512.png', width: 512, height: 512, alt: "Play Symbol Matching Online" }],
   },
   twitter: {
     card: 'summary_large_image',
     title: "Play Symbol Matching Online | Free Symbol Search Test | SkillDrills",
     description: "Play our free Symbol Matching online game. Challenge your cognitive processing speed, take a symbol search test, and train your visual working memory.",
-    images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
 };
 

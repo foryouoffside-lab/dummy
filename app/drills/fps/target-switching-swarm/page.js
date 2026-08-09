@@ -1,8 +1,8 @@
 import TargetSwitchingSwarmClient from './TargetSwitchingSwarmClient';
 
 export const metadata = {
-  title: "Target Switching Aim Trainer - Swarm Drill | SkillDrills",
-  description: "Improve multi-target transitions with our Target Switching Aim Trainer. Practice rapid flicks, target swarm control, and multi-kill aim online.",
+  title: "Target Switching Trainer — Multi-Target Aim | SkillDrills",
+  description: "Improve multi-target transitions with our free Target Switching Aim Trainer. Practice rapid flicks and multi-kill aim for Valorant, CS2 & Apex.",
   keywords: [
     "target switching aim trainer",
     "target switching swarm drill",
@@ -19,7 +19,11 @@ export const metadata = {
     "cs2 multi target practice",
     "apex aim trainer",
     "multi target flick training",
-    "free multi target aim trainer"
+    "free multi target aim trainer",
+    "cs2 spray transfer trainer",
+    "target acquisition speed",
+    "multi target flick practice",
+    "valorant multi kill aim"
   ],
   alternates: {
     canonical: "https://skilldrills.online/drills/fps/target-switching-swarm",
@@ -29,26 +33,17 @@ export const metadata = {
     follow: true,
   },
   openGraph: {
-    title: "Target Switching Aim Trainer - Swarm Drill | SkillDrills",
-    description: "Improve multi-target transitions with our Target Switching Aim Trainer. Practice rapid flicks, target swarm control, and multi-kill aim online.",
+    title: "Target Switching Trainer — Multi-Target Aim | SkillDrills",
+    description: "Improve multi-target transitions with our free Target Switching Aim Trainer. Practice rapid flicks and multi-kill aim for Valorant, CS2 & Apex.",
     url: "https://skilldrills.online/drills/fps/target-switching-swarm",
     siteName: 'SkillDrills',
     locale: 'en_US',
     type: 'website',
-    images: [
-      {
-        url: 'https://skilldrills.online/icons/icon-512x512.png',
-        width: 512,
-        height: 512,
-        alt: "Target Switching Aim Trainer - Swarm Drill",
-      },
-    ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Target Switching Aim Trainer - Swarm Drill | SkillDrills",
-    description: "Improve multi-target transitions with our Target Switching Aim Trainer. Practice rapid flicks, target swarm control, and multi-kill aim online.",
-    images: ['https://skilldrills.online/icons/icon-512x512.png'],
+    title: "Target Switching Trainer — Multi-Target Aim | SkillDrills",
+    description: "Improve multi-target transitions with our free Target Switching Aim Trainer. Practice rapid flicks and multi-kill aim for Valorant, CS2 & Apex.",
   },
 };
 
@@ -80,6 +75,20 @@ export default function TargetSwitchingSwarmPage() {
     }
   };
 
+  const videoGameSchema = {
+    "@context": "https://schema.org",
+    "@type": "VideoGame",
+    "name": "Target Switching Swarm",
+    "url": "https://skilldrills.online/drills/fps/target-switching-swarm",
+    "description": "A free browser FPS aim trainer for improving rapid target switching, multi-kill sequences, and flick transitions between target swarms.",
+    "gamePlatform": "Web Browser",
+    "genre": ["FPS Training", "Aim Trainer"],
+    "playMode": "SinglePlayer",
+    "applicationCategory": "Game",
+    "operatingSystem": "Web Browser",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+  };
+
   const faqSchema = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
@@ -89,7 +98,7 @@ export default function TargetSwitchingSwarmPage() {
         "name": "What is target switching in FPS aim training?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Target switching is the mechanical skill of rapidly flicking your crosshair from one target to the next and clicking accurately during the transition. Unlike single-target flicking (same position repeatedly), target switching involves continuous movement between different target locations — more closely simulating real multi-kill scenarios in competitive matches."
+          "text": "Target switching is the mechanical skill of rapidly flicking your crosshair from one target to the next and clicking accurately during the transition. It trains continuous movement between different target locations."
         }
       },
       {
@@ -97,7 +106,7 @@ export default function TargetSwitchingSwarmPage() {
         "name": "How does the target swarm format improve multi-kill mechanics?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "The swarm format presents multiple targets simultaneously or in rapid succession, requiring you to engage them in a fluid sequence rather than waiting for each to appear one at a time. This trains the specific challenge of maintaining momentum during a multi-kill — not losing your aim rhythm between kills the way many players do during real match clutches."
+          "text": "The swarm format presents multiple targets simultaneously, requiring you to engage them in a fluid sequence rather than waiting for each to appear one at a time. This maintains momentum during multi-kills."
         }
       },
       {
@@ -105,7 +114,7 @@ export default function TargetSwitchingSwarmPage() {
         "name": "How is target switching different from a standard flick trainer?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "A standard flick trainer presents targets at random positions and you click each independently with no time pressure between them. A target switching trainer presents multiple active targets and measures your ability to transition between them rapidly. It trains the full multi-kill kinematic chain: flick to target A, click, immediately flick to target B, click — with speed and accuracy on each."
+          "text": "A standard flick trainer presents targets one at a time. A target switching trainer presents multiple active targets and measures your ability to transition between them rapidly in sequence."
         }
       },
       {
@@ -113,7 +122,7 @@ export default function TargetSwitchingSwarmPage() {
         "name": "Which games need the best target switching mechanics?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Arena shooters (Quake, Diabotical) require the fastest raw target switching. In team shooters, Valorant with its 5v5 close-range spray duels, CS2 eco and pistol rounds (where multi-kills happen at short range), Apex Legends team wipes, and Overwatch 2 aggressive flanking DPS all demand proficient target switching sequences."
+          "text": "Target switching is essential in Valorant and CS2 for multi-peek entry duels and spray transfers, Apex Legends for team wipes, and Overwatch 2 for DPS aggressive positioning."
         }
       },
       {
@@ -121,7 +130,87 @@ export default function TargetSwitchingSwarmPage() {
         "name": "Should I train target switching at higher or lower sensitivity?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Train target switching at your standard in-game sensitivity. Some players temporarily increase sensitivity slightly to build faster large-movement reflexes, then return to standard for precision refinement. Focus on accuracy across all switch targets equally — it is common to be strong on the first 2 targets but fall off on the 3rd and 4th."
+          "text": "Train target switching at your standard in-game sensitivity. Focus on accuracy across all switch targets equally rather than tapering off on later targets."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Why do I hesitate after eliminating a target?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Hesitation occurs because your brain waits for visual confirmation before searching for the next target. Drills train you to trust your shot and move your eyes to the next target immediately."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is target acquisition speed?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Target acquisition speed is the combined cognitive process of identifying a threat on screen, predicting its path, and executing the flick to engage it."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does target switching help with CS2 spray transfers?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Target switching is the foundation of a spray transfer. Before controlling recoil between targets, your raw crosshair relocation speed must be instantaneous."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is efficient target pathing?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Efficient pathing means eliminating a cluster of targets in an order that requires the least amount of overall mouse movement, reducing total time-to-kill."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Should my eyes move before my crosshair?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Your eyes should snap to the next target the millisecond you click on the current one. Your hand will naturally follow your eye movement."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does target switching help in Apex Legends?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "In Apex Legends, target switching allows you to rapidly transfer fire between multiple squad members pushing your position or flying through the air."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does target switching improve general flicking?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Target switching is essentially chaining multiple dynamic flicks together consecutively without returning to a center resting position."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How often should I practice target switching?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Incorporate 10-15 minutes of pure target switching drills into your daily warm-up routine alongside flicking and tracking exercises."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is this Target Switching Aim Trainer free?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, this Target Switching Aim Trainer is 100% free, runs directly in your web browser using raw hardware pointer lock, and requires no downloads."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What skills does this target switching drill improve?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "This drill improves multi-target transitions, target acquisition speed, flick deceleration, visual processing, pathing efficiency, and multi-kill mechanics."
         }
       }
     ]
@@ -153,32 +242,27 @@ export default function TargetSwitchingSwarmPage() {
 
   return (
     <>
-      {/* Breadcrumb Schema */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
-
-      {/* SoftwareApplication Schema */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }}
       />
-
-      {/* FAQPage Schema */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
-
-      {/* HowTo Schema */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-
       <TargetSwitchingSwarmClient />
     </>
   );
 }
-

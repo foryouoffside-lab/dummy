@@ -2,99 +2,88 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { ArrowLeft, Clock, Play, Brain, Target, Star, Home, ChevronRight, Activity, Cpu, Sparkles } from "lucide-react";
+import { ArrowLeft, Clock, Play, Brain, Target, Star, Home, ChevronRight, Cpu, Sparkles } from "lucide-react";
+import { DRILLS } from "@/lib/drillsRegistry";
+import SiteFooter from "@/components/SiteFooter";
+import Reveal from "@/components/Reveal";
+import StickyMobileCta from "@/components/StickyMobileCta";
+
+const memDrills = DRILLS.filter(d => d.category === 'memory');
 
 const memoryCategories = [
   {
     name: "Short-Term Memory",
     folderName: "short-term-memory",
     icon: Brain,
-    color: "purple",
-    bgColor: "bg-purple-500/10 border-purple-500/20 text-purple-400",
-    textColor: "text-purple-400",
+    color: "indigo",
+    bgColor: "bg-indigo-500/10 border-indigo-500/20 text-indigo-400",
+    textColor: "text-indigo-400",
     description: "Improve your ability to hold information temporarily in conscious awareness",
-    drills: [
-      { name: "Digit Span", folderName: "digit-span", difficulty: "Easy", duration: "60s", description: "Memorize and recall growing sequences of random digits" },
-      { name: "Word Recall", folderName: "word-recall", difficulty: "Medium", duration: "60s", description: "Study word lists then type all words you remember" },
-      { name: "Color Sequence", folderName: "color-sequence", difficulty: "Easy", duration: "60s", description: "Watch and reproduce color patterns in correct order" }
-    ]
+    drills: memDrills.filter(d => ['digit-span', 'word-recall', 'color-sequence'].includes(d.folderName))
   },
   {
     name: "Working Memory",
     folderName: "working-memory",
     icon: Brain,
-    color: "blue",
-    bgColor: "bg-blue-500/10 border-blue-500/20 text-blue-400",
-    textColor: "text-blue-400",
+    color: "indigo",
+    bgColor: "bg-indigo-500/10 border-indigo-500/20 text-indigo-400",
+    textColor: "text-indigo-400",
     description: "Enhance your ability to manipulate and process information mentally",
-    drills: [
-      { name: "3-Back Training", folderName: "n-back", difficulty: "Hard", duration: "60s", description: "Compare current letter with one from 3 steps back" },
-      { name: "Sentence Span", folderName: "sentence-span", difficulty: "Medium", duration: "60s", description: "Read sentences then recall key nouns from each one" }
-    ]
-  },
-  {
-    name: "Long-Term Memory",
-    folderName: "long-term-memory",
-    icon: Brain,
-    color: "teal",
-    bgColor: "bg-teal-500/10 border-teal-500/20 text-teal-400",
-    textColor: "text-teal-400",
-    description: "Build lasting memory associations through structured recall practice",
-    drills: [
-      { name: "Image Association", folderName: "image-association", difficulty: "Easy", duration: "60s", description: "Link emoji items with 5 associated words each" },
-      { name: "Paired Associates", folderName: "paired-associates", difficulty: "Medium", duration: "60s", description: "Learn and recall word pairs across 5 difficulty tiers" }
-    ]
+    drills: memDrills.filter(d => ['n-back'].includes(d.folderName))
   },
   {
     name: "Spatial Memory",
     folderName: "spatial-memory",
     icon: Brain,
-    color: "orange",
-    bgColor: "bg-orange-500/10 border-orange-500/20 text-orange-400",
-    textColor: "text-orange-400",
+    color: "indigo",
+    bgColor: "bg-indigo-500/10 border-indigo-500/20 text-indigo-400",
+    textColor: "text-indigo-400",
     description: "Train your ability to remember positions, paths, and spatial layouts",
-    drills: [
-      { name: "Grid Memorization", folderName: "grid-memorization", difficulty: "Medium", duration: "60s", description: "Memorize lit cell patterns on 4×4 to 5×5 grids" },
-      { name: "Path Tracing", folderName: "path-tracing", difficulty: "Hard", duration: "60s", description: "Watch animated dot paths then retrace in exact order" },
-      { name: "Object Location", folderName: "object-location", difficulty: "Medium", duration: "60s", description: "Remember where emoji objects are placed on expanding grids" }
-    ]
-  },
-  {
-    name: "Associative Memory",
-    folderName: "associative-memory",
-    icon: Brain,
-    color: "violet",
-    bgColor: "bg-violet-500/10 border-violet-500/20 text-violet-400",
-    textColor: "text-violet-400",
-    description: "Strengthen connections between related pieces of information",
-    drills: [
-      { name: "Name-Face Memory", folderName: "name-face", difficulty: "Hard", duration: "60s", description: "Match emoji faces with names and professional roles" },
-      { name: "Concept Linking", folderName: "concept-linking", difficulty: "Medium", duration: "60s", description: "Memorize and recall sequential concept chains" },
-      { name: "Sound Pattern", folderName: "sound-pattern", difficulty: "Medium", duration: "60s", description: "Listen to rhythmic beat patterns then reproduce them" }
-    ]
+    drills: memDrills.filter(d => ['grid-memorization', 'path-tracing', 'object-location'].includes(d.folderName))
   }
 ];
 
+function handleCardMouseMove(e) {
+  const rect = e.currentTarget.getBoundingClientRect();
+  e.currentTarget.style.setProperty('--mx', `${e.clientX - rect.left}px`);
+  e.currentTarget.style.setProperty('--my', `${e.clientY - rect.top}px`);
+}
+
 export default function MemoryClient() {
   const [isClient, setIsClient] = useState(false);
-
-  // Digit Span Calibrator State
-  const [level, setLevel] = useState(4);
-  const [sequence, setSequence] = useState("");
-  const [userInput, setUserInput] = useState("");
-  const [calibState, setCalibState] = useState("idle");
-  const [highScore, setHighScore] = useState(0);
+  const [drillLevels, setDrillLevels] = useState({});
   const canvasRef = useRef(null);
-  const timeoutRef = useRef(null);
 
   useEffect(() => {
     setIsClient(true);
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
   }, []);
+
+  useEffect(() => {
+    if (!isClient) return;
+    try {
+      const levels = {};
+      memDrills.forEach(d => {
+        const keys = [
+          `skilldrills_memory_${d.folderName.replace(/-/g, '_')}_v4`,
+          `skilldrills_memory_${d.folderName.replace(/-/g, '_')}_v3`,
+          `skilldrills_${d.folderName.replace(/-/g, '_')}`,
+        ];
+        for (const k of keys) {
+          const raw = localStorage.getItem(k);
+          if (raw) {
+            try {
+              const parsed = JSON.parse(raw);
+              if (parsed && parsed.bestLevel) {
+                levels[d.folderName] = parsed.bestLevel;
+                break;
+              }
+            } catch (e) {}
+          }
+        }
+      });
+      setDrillLevels(levels);
+    } catch (e) {}
+  }, [isClient]);
 
   // Binary data grid background animation
   useEffect(() => {
@@ -149,46 +138,12 @@ export default function MemoryClient() {
     };
   }, [isClient]);
 
-  const generateSequence = (len) => {
-    let seq = "";
-    for (let i = 0; i < len; i++) {
-      seq += Math.floor(Math.random() * 10).toString();
-    }
-    return seq;
-  };
-
-  const startCalibrator = () => {
-    const seq = generateSequence(level);
-    setSequence(seq);
-    setCalibState("showing");
-    setUserInput("");
-
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    timeoutRef.current = setTimeout(() => {
-      setCalibState("typing");
-    }, level * 800);
-  };
-
-  const checkResponse = () => {
-    if (userInput === sequence) {
-      setCalibState("success");
-      const nextLevel = level + 1;
-      setLevel(nextLevel);
-      if (level > highScore) {
-        setHighScore(level);
-      }
-    } else {
-      setCalibState("fail");
-      setLevel(4);
-    }
-  };
-
   const getDifficultyColor = (difficulty) => {
     switch (difficulty) {
       case "Easy":
         return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
       case "Medium":
-        return "bg-yellow-500/10 text-yellow-400 border-yellow-500/20";
+        return "bg-amber-500/10 text-amber-400 border-amber-500/20";
       case "Hard":
         return "bg-orange-500/10 text-orange-400 border-orange-500/20";
       case "Expert":
@@ -198,45 +153,11 @@ export default function MemoryClient() {
     }
   };
 
-  const getCategoryGradient = (category) => {
-    switch (category) {
-      case "Short-Term Memory":
-        return "from-purple-500 to-pink-500";
-      case "Working Memory":
-        return "from-blue-500 to-cyan-500";
-      case "Long-Term Memory":
-        return "from-teal-500 to-emerald-500";
-      case "Spatial Memory":
-        return "from-orange-500 to-red-500";
-      case "Associative Memory":
-        return "from-violet-500 to-purple-500";
-      default:
-        return "from-indigo-500 to-cyan-500";
-    }
-  };
-
-  const getCategoryCardBorder = (category) => {
-    switch (category) {
-      case "Short-Term Memory":
-        return "hover:border-purple-500/30 hover:shadow-[0_0_20px_rgba(168,85,247,0.15)]";
-      case "Working Memory":
-        return "hover:border-blue-500/30 hover:shadow-[0_0_20px_rgba(59,130,246,0.15)]";
-      case "Long-Term Memory":
-        return "hover:border-teal-500/30 hover:shadow-[0_0_20px_rgba(20,184,166,0.15)]";
-      case "Spatial Memory":
-        return "hover:border-orange-500/30 hover:shadow-[0_0_20px_rgba(249,115,22,0.15)]";
-      case "Associative Memory":
-        return "hover:border-violet-500/30 hover:shadow-[0_0_20px_rgba(139,92,246,0.15)]";
-      default:
-        return "hover:border-indigo-500/30 hover:shadow-[0_0_20px_rgba(99,102,241,0.15)]";
-    }
-  };
-
   const totalDrills = memoryCategories.reduce((acc, cat) => acc + cat.drills.length, 0);
 
   if (!isClient) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#080d1a]">
+      <div className="min-h-screen flex items-center justify-center bg-canvas">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-indigo-400 font-mono tracking-widest uppercase animate-pulse">
@@ -248,16 +169,18 @@ export default function MemoryClient() {
   }
 
   return (
-    <div className="min-h-screen bg-[#080d1a] text-slate-100 font-sans selection:bg-indigo-500/30 selection:text-indigo-300 relative overflow-hidden">
-      {/* Background patterns */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/10 via-slate-950 to-slate-950 pointer-events-none z-0" />
-
+    <div className="min-h-screen bg-canvas text-ink-1 font-sans selection:bg-indigo-500/30 selection:text-indigo-300 relative overflow-hidden">
       <canvas
         style={{ touchAction: "none" }}
         ref={canvasRef}
         className="absolute inset-0 w-full h-full pointer-events-none z-0 opacity-20"
       />
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(18,24,38,0.4)_1px,_transparent_1px),_linear-gradient(90deg,_rgba(18,24,38,0.4)_1px,_transparent_1px)] bg-[size:32px_32px] pointer-events-none z-0" />
+
+      {/* Layered premium background: hub-tinted mesh blobs */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+        <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[1100px] h-[480px] bg-indigo-600/[0.12] rounded-full blur-[150px]" />
+        <div className="absolute top-[30%] -right-40 w-[480px] h-[480px] bg-purple-500/[0.08] rounded-full blur-[140px]" />
+      </div>
 
       {/* SEO Structured Data */}
       <script
@@ -268,8 +191,7 @@ export default function MemoryClient() {
             "@type": "CollectionPage",
             name: "Memory Training Drills - Free Brain Memory Exercises",
             url: "https://skilldrills.online/drills/memory",
-            description:
-              "13 free memory training drills across 5 categories: Short-Term, Working, Long-Term, Spatial, and Associative Memory. No login required.",
+            description: `${totalDrills} free memory training drills across Short-Term, Working, and Spatial Memory.`,
             isPartOf: {
               "@type": "WebSite",
               name: "SkillDrills",
@@ -279,7 +201,7 @@ export default function MemoryClient() {
               "@type": "Thing",
               name: "Memory Training & Cognitive Enhancement",
             },
-            numberOfItems: 13,
+            numberOfItems: totalDrills,
             itemListElement: memoryCategories
               .flatMap((category) =>
                 category.drills.map((drill) => ({
@@ -306,7 +228,7 @@ export default function MemoryClient() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
         {/* Breadcrumb */}
         <nav aria-label="Breadcrumb" className="mb-8">
-          <ol className="flex items-center gap-2 text-xs font-mono text-slate-400 uppercase tracking-wider">
+          <ol className="flex items-center gap-2 text-xs font-mono text-ink-3 uppercase tracking-wider">
             <li>
               <Link
                 href="/"
@@ -316,7 +238,7 @@ export default function MemoryClient() {
                 <span>HQ</span>
               </Link>
             </li>
-            <ChevronRight className="w-3 h-3 text-slate-600" />
+            <ChevronRight className="w-3 h-3 text-hairline-2" />
             <li>
               <Link
                 href="/drills"
@@ -325,241 +247,156 @@ export default function MemoryClient() {
                 Drills
               </Link>
             </li>
-            <ChevronRight className="w-3 h-3 text-slate-600" />
+            <ChevronRight className="w-3 h-3 text-hairline-2" />
             <li>
-              <span
-                className="text-indigo-400 font-bold"
-                aria-current="page"
-              >
-                Memory Sector
+              <span className="text-indigo-400 font-bold" aria-current="page">
+                Memory Hub
               </span>
             </li>
           </ol>
         </nav>
 
-        {/* Header */}
-        <div className="mb-10 bg-slate-900/80 border border-slate-800 rounded-2xl p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden backdrop-blur-xl">
-          <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/5 to-transparent pointer-events-none" />
-          <div className="flex items-start gap-4">
-            <div className="p-4 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl text-indigo-400 shadow-inner shrink-0">
-              <Brain className="w-8 h-8" />
-            </div>
-            <div>
-              <div className="inline-flex items-center gap-1.5 bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider mb-2">
-                <Activity className="w-3 h-3 animate-pulse" />
-                MEMORY STACK CONTROLLER
+        {/* Header with compact inline chip next to H1 */}
+        <Reveal>
+          <div className="mb-8 bg-surface-1 border border-hairline rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden backdrop-blur-xl shadow-xl">
+            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-indigo-500 to-purple-500 opacity-70" />
+            <div className="flex items-start gap-4">
+              <div className="relative p-3.5 bg-indigo-500/10 border border-indigo-500/30 rounded-2xl text-indigo-400 shadow-inner shrink-0">
+                <div className="absolute -inset-2 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-500 opacity-40 blur-lg -z-10" />
+                <Brain className="w-8 h-8" />
               </div>
-              <h1 className="text-3xl font-extrabold text-white tracking-tight mt-1 bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">
-                Memory Sector
-              </h1>
-              <p className="text-slate-400 mt-2 text-sm sm:text-base max-w-xl leading-relaxed">
-                Overclock working memory recall buffers, digit recall thresholds, and spatial layout memory traces.
-              </p>
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-2 self-start md:self-center">
-            <span className="px-2.5 py-1 bg-slate-950 border border-slate-800 text-slate-300 rounded-md text-xs font-mono font-semibold">
-              💾 RAM_STK
-            </span>
-            <span className="px-2.5 py-1 bg-slate-950 border border-slate-800 text-slate-300 rounded-md text-xs font-mono font-semibold">
-              🧬 SYMBOLS
-            </span>
-            <span className="px-2.5 py-1 bg-slate-950 border border-slate-800 text-slate-300 rounded-md text-xs font-mono font-semibold">
-              ⚡ N_BACK
-            </span>
-          </div>
-        </div>
-
-        {/* Telemetry Widgets */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-          <div className="bg-slate-950/80 border border-slate-800 rounded-2xl p-6 flex flex-col justify-between text-center lg:text-left backdrop-blur-md">
-            <div>
-              <div className="flex items-center justify-between mb-4 border-b border-slate-900 pb-3">
-                <span className="text-xs font-mono font-bold uppercase text-slate-400 tracking-widest">
-                  DRILLS_ONLINE
-                </span>
-                <Cpu className="w-4 h-4 text-indigo-400" />
+              <div>
+                <div className="inline-flex items-center gap-2 mb-1">
+                  <h1 className="text-2xl sm:text-4xl font-extrabold text-ink-1 tracking-tight uppercase">
+                    Memory Span &amp; Sequence Recall
+                  </h1>
+                  <span className="px-2.5 py-0.5 rounded-full text-2xs font-mono font-bold bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
+                    {totalDrills} DRILLS ONLINE
+                  </span>
+                </div>
+                <p className="text-ink-2 mt-2 text-sm sm:text-base max-w-xl leading-relaxed">
+                  Train working memory recall buffers, digit recall span, and spatial pattern traces.
+                </p>
               </div>
-              <p className="text-4xl font-extrabold text-white tracking-tight">
-                {totalDrills}
-              </p>
-              <p className="text-[10px] text-slate-500 font-mono uppercase tracking-widest mt-1">
-                Ready for Execution
-              </p>
-            </div>
-            <div className="mt-4 pt-4 border-t border-slate-900 text-xs text-slate-400 leading-relaxed font-mono">
-              Working memory buffers dynamically scale sequence complexity triggers to match retention capacities.
             </div>
           </div>
+        </Reveal>
 
-          {/* Digit Span Calibrator Widget */}
-          <div className="lg:col-span-2 bg-slate-950/80 border border-slate-800 rounded-2xl p-6 relative overflow-hidden flex flex-col justify-between backdrop-blur-md">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 blur-3xl rounded-full pointer-events-none" />
-            <div className="flex items-center justify-between mb-3 text-indigo-400 border-b border-slate-900 pb-3">
-              <div className="flex items-center gap-2">
-                <Activity className="w-5 h-5" />
-                <h3 className="text-sm font-bold uppercase tracking-wider text-white">
-                  Digit Span Memory Calibrator
-                </h3>
-              </div>
-              <span className="text-[10px] text-slate-500 font-mono">
-                CALIB_MODE: {level} DIGITS
-              </span>
-            </div>
-
-            <div className="flex-1 flex flex-col justify-center min-h-[140px] rounded-xl border border-slate-900 bg-slate-950 p-4 relative">
-              {calibState === "idle" && (
-                <div className="text-center">
-                  <p className="text-xs font-mono text-slate-400 mb-4">
-                    Benchmark your sensory buffer stack depth.
-                  </p>
-                  <button
-                    onClick={startCalibrator}
-                    className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-mono text-xs uppercase tracking-wider font-bold px-6 py-2.5 rounded-lg transition shadow-[0_0_15px_rgba(99,102,241,0.3)]"
-                  >
-                    Start Recall Span Check
-                  </button>
-                </div>
-              )}
-
-              {calibState === "showing" && (
-                <div className="text-center">
-                  <p className="text-[10px] font-mono text-indigo-400 uppercase tracking-widest mb-2">
-                    Recall sequence below
-                  </p>
-                  <p className="text-3xl font-extrabold text-white tracking-widest animate-pulse">
-                    {sequence}
-                  </p>
-                </div>
-              )}
-
-              {calibState === "typing" && (
-                <div className="text-center max-w-xs mx-auto">
-                  <p className="text-[10px] font-mono text-slate-400 uppercase tracking-widest mb-3">
-                    Input sequence
-                  </p>
-                  <input
-                    type="text"
-                    value={userInput}
-                    onChange={(e) => setUserInput(e.target.value)}
-                    placeholder="Enter digits..."
-                    className="w-full bg-slate-900 border border-slate-800 focus:border-indigo-500/50 rounded-lg px-4 py-2 text-center text-lg font-mono text-white tracking-widest focus:outline-none transition mb-3"
-                  />
-                  <button
-                    onClick={checkResponse}
-                    className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-mono text-xs font-bold uppercase tracking-wider py-2 rounded-lg transition"
-                  >
-                    SUBMIT
-                  </button>
-                </div>
-              )}
-
-              {calibState === "success" && (
-                <div className="text-center">
-                  <p className="text-emerald-400 font-mono text-xs uppercase tracking-widest mb-2">
-                    SUCCESS // SEQUENCE MATCHED
-                  </p>
-                  <p className="text-sm text-slate-300 mb-4">
-                    Calibrator complexity upgraded to {level} digits.
-                  </p>
-                  <button
-                    onClick={startCalibrator}
-                    className="bg-slate-900 border border-slate-800 text-white font-mono text-xs uppercase tracking-wider px-5 py-2 rounded-lg transition hover:bg-slate-800"
-                  >
-                    Next Tier
-                  </button>
-                </div>
-              )}
-
-              {calibState === "fail" && (
-                <div className="text-center">
-                  <p className="text-rose-500 font-mono text-xs uppercase tracking-widest mb-2">
-                    FAILURE // CONFLICT DETECTED
-                  </p>
-                  <p className="text-sm text-slate-400 mb-4">
-                    Correct sequence was:{" "}
-                    <span className="font-mono text-white font-bold">
-                      {sequence}
-                    </span>
-                  </p>
-                  <button
-                    onClick={startCalibrator}
-                    className="bg-indigo-600 hover:bg-indigo-500 text-white font-mono text-xs font-bold uppercase tracking-wider px-5 py-2 rounded-lg transition"
-                  >
-                    Try Again
-                  </button>
-                </div>
-              )}
+        {/* Start Here Band */}
+        <Reveal className="mb-10">
+          <div className="p-5 rounded-3xl bg-surface-1 backdrop-blur-xl border border-hairline shadow-xl">
+            <h2 className="text-xs font-mono font-bold uppercase tracking-wider text-indigo-400 mb-3">
+              Recommended Start Routines
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <Link
+                href="/drills/memory/short-term-memory/digit-span"
+                className="p-3.5 rounded-xl bg-surface-2 border border-hairline hover:border-indigo-500/40 hover:-translate-y-0.5 active:scale-[0.98] transition-all group"
+              >
+                <p className="text-xs font-bold text-ink-1 group-hover:text-indigo-400 transition-colors">New to Memory Training</p>
+                <p className="text-[10px] text-ink-3 mt-1">Single-digit recall span check</p>
+              </Link>
+              <Link
+                href="/drills/memory/working-memory/n-back"
+                className="p-3.5 rounded-xl bg-surface-2 border border-hairline hover:border-indigo-500/40 hover:-translate-y-0.5 active:scale-[0.98] transition-all group"
+              >
+                <p className="text-xs font-bold text-ink-1 group-hover:text-indigo-400 transition-colors">N-Back Working Memory</p>
+                <p className="text-[10px] text-ink-3 mt-1">2-Back stimulus match test</p>
+              </Link>
+              <Link
+                href="/drills/memory/spatial-memory/grid-memorization"
+                className="p-3.5 rounded-xl bg-surface-2 border border-hairline hover:border-indigo-500/40 hover:-translate-y-0.5 active:scale-[0.98] transition-all group"
+              >
+                <p className="text-xs font-bold text-ink-1 group-hover:text-indigo-400 transition-colors">Full Memory Circuit</p>
+                <p className="text-[10px] text-ink-3 mt-1">Spatial grid pattern &amp; sequence routine</p>
+              </Link>
             </div>
           </div>
-        </div>
+        </Reveal>
 
         {/* Drills Grid by Category */}
-        {memoryCategories.map((category) => {
+        {memoryCategories.filter((category) => category.drills.length > 0).map((category) => {
           const categoryDrills = category.drills;
-          const styles = getCategoryCardBorder(category.name);
-          const gradient = getCategoryGradient(category.name);
 
           return (
-            <div key={category.name} className="mb-14 relative">
-              <div className="flex items-center gap-2 mb-6 border-b border-slate-900 pb-3">
-                <div
-                  className={`w-1 h-6 rounded-full bg-gradient-to-b ${gradient}`}
-                />
-                <h2 className="text-lg font-bold uppercase tracking-wider text-white font-mono">
-                  {category.name}
-                </h2>
-                <span className="px-2 py-0.5 text-[10px] font-mono rounded bg-slate-900 border border-slate-800 text-slate-500">
-                  {categoryDrills.length} DRILL
-                  {categoryDrills.length > 1 ? "S" : ""}
+            <Reveal key={category.name} className="mb-12 relative">
+              <div className="flex items-center gap-2 mb-6 border-b border-hairline pb-3">
+                <div className="w-1 h-6 rounded-full bg-indigo-500" />
+                <h2 className="text-lg font-bold uppercase tracking-wider text-ink-1 font-mono">{category.name}</h2>
+                <span className="px-2 py-0.5 text-2xs font-mono rounded bg-surface-2 border border-hairline text-indigo-400 font-bold">
+                  {categoryDrills.length} DRILL{categoryDrills.length > 1 ? "S" : ""}
                 </span>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {categoryDrills.map((drill, index) => (
+                {categoryDrills.map((drill, index) => {
+                  const bestLevel = drillLevels[drill.folderName];
+                  return (
                   <Link
                     key={index}
                     href={`/drills/memory/${category.folderName}/${drill.folderName}`}
-                    className={`group relative overflow-hidden bg-slate-950/80 border border-slate-900 transition-all duration-300 hover:-translate-y-1 focus:outline-none focus:ring-1 focus:ring-indigo-500/50 ${styles}`}
-                    aria-label={`${drill.name} - ${drill.description}. Difficulty: ${drill.difficulty}. Duration: ${drill.duration}.`}
+                    onMouseMove={handleCardMouseMove}
+                    className="group relative isolate overflow-hidden bg-surface-1 backdrop-blur-xl border border-hairline hover:border-indigo-500/40 rounded-2xl transition-all duration-300 hover:-translate-y-1.5 focus:outline-none focus:ring-1 focus:ring-indigo-500/50 shadow-xl hover:shadow-2xl hover:shadow-indigo-500/10"
                   >
-                    <div className="p-6">
+                    {/* Top accent hairline */}
+                    <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-indigo-500 to-purple-500 opacity-0 group-hover:opacity-70 transition-opacity duration-300" />
+
+                    {/* Cursor-tracked spotlight */}
+                    <span
+                      aria-hidden="true"
+                      className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                      style={{ background: 'radial-gradient(260px circle at var(--mx, 50%) var(--my, 50%), rgba(99,102,241,0.16), transparent 70%)' }}
+                    />
+
+                    {/* Tactical corner brackets */}
+                    <span aria-hidden="true" className="absolute top-2.5 left-2.5 w-3 h-3 border-t-2 border-l-2 border-indigo-500/0 group-hover:border-indigo-500/70 transition-colors duration-300 rounded-tl-sm" />
+                    <span aria-hidden="true" className="absolute top-2.5 right-2.5 w-3 h-3 border-t-2 border-r-2 border-indigo-500/0 group-hover:border-indigo-500/70 transition-colors duration-300 rounded-tr-sm" />
+                    <span aria-hidden="true" className="absolute bottom-2.5 left-2.5 w-3 h-3 border-b-2 border-l-2 border-indigo-500/0 group-hover:border-indigo-500/70 transition-colors duration-300 rounded-bl-sm" />
+                    <span aria-hidden="true" className="absolute bottom-2.5 right-2.5 w-3 h-3 border-b-2 border-r-2 border-indigo-500/0 group-hover:border-indigo-500/70 transition-colors duration-300 rounded-br-sm" />
+
+                    <div className="relative p-6">
                       <div className="flex items-start justify-between mb-4">
-                        <div
-                          className={`p-2.5 rounded-lg border ${category.bgColor}`}
-                        >
+                        <div className="relative p-2.5 rounded-lg border bg-indigo-500/10 border-indigo-500/20 text-indigo-400 group-hover:scale-110 group-hover:border-indigo-500/40 transition-transform">
+                          <div className="absolute -inset-1.5 rounded-xl bg-indigo-500/30 opacity-0 group-hover:opacity-60 blur-md -z-10 transition-opacity" />
                           <Brain className="w-5 h-5" />
                         </div>
-                        <div
-                          className={`px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold tracking-wide border uppercase ${getDifficultyColor(
-                            drill.difficulty
-                          )}`}
-                        >
-                          {drill.difficulty}
+                        <div className="flex items-center gap-1.5">
+                          {bestLevel && (
+                            <div className="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold tracking-wide border border-indigo-500/20 bg-indigo-500/10 text-indigo-400">
+                              Lv. {bestLevel}
+                            </div>
+                          )}
+                          <div
+                            className={`px-2.5 py-0.5 rounded-full text-[9px] font-mono font-bold tracking-wide border uppercase ${getDifficultyColor(
+                              drill.difficulty
+                            )}`}
+                          >
+                            {drill.difficulty}
+                          </div>
                         </div>
                       </div>
 
-                      <h3 className="text-base font-bold text-white mb-2 group-hover:text-indigo-400 transition-colors uppercase tracking-tight font-mono">
+                      <h3 className="text-base font-bold text-ink-1 mb-2 group-hover:text-indigo-400 transition-colors uppercase tracking-tight font-mono">
                         {drill.name}
                       </h3>
 
-                      <p className="text-xs text-slate-400 mb-4 leading-relaxed min-h-[48px]">
+                      <p className="text-xs text-ink-2 mb-4 leading-relaxed min-h-[48px]">
                         {drill.description}
                       </p>
 
-                      <div className="flex items-center gap-4 mb-4 text-[10px] font-mono text-slate-500 border-b border-slate-900 pb-3">
+                      <div className="flex items-center gap-4 mb-4 text-2xs font-mono text-ink-3 border-b border-hairline pb-3">
                         <div className="flex items-center gap-1">
-                          <Clock className="w-3.5 h-3.5" />
+                          <Clock className="w-3.5 h-3.5 text-indigo-400" />
                           <span>{drill.duration}</span>
                         </div>
                         <div className="flex items-center gap-1">
-                          <Cpu className="w-3.5 h-3.5" />
+                          <Cpu className="w-3.5 h-3.5 text-indigo-400" />
                           <span>Memory Bank</span>
                         </div>
                       </div>
 
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">
+                        <span className="text-2xs font-bold text-ink-3 uppercase tracking-widest">
                           {category.name}
                         </span>
                         <div className="flex items-center gap-1 text-indigo-400 group-hover:gap-2 transition-all font-bold text-xs uppercase tracking-widest font-mono">
@@ -569,101 +406,89 @@ export default function MemoryClient() {
                       </div>
                     </div>
                   </Link>
-                ))}
+                  );
+                })}
               </div>
-            </div>
+            </Reveal>
           );
         })}
 
         {/* Benefits Grid */}
-        <div className="bg-slate-950/80 border border-slate-800 rounded-2xl p-8 mt-12 relative overflow-hidden backdrop-blur-md">
-          <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none" />
-          <h3 className="text-lg font-bold uppercase tracking-wider text-white mb-6 flex items-center gap-2 font-mono">
-            <Sparkles className="w-5 h-5 text-indigo-400" />
-            MEMORY STACK IMPROVEMENT VECTORS
-          </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 font-sans">
-            {[
-              {
-                emoji: "💾",
-                title: "Working Buffer",
-                desc: "Augment sensory sequence mapping and pattern retention grids.",
-              },
-              {
-                emoji: "🎯",
-                title: "Spatial Tracing",
-                desc: "Sharpen layout memory recall and path tracking resolution.",
-              },
-              {
-                emoji: "🧬",
-                title: "Recall Streaks",
-                desc: "Build durable concept connections across non-adjacent recall points.",
-              },
-              {
-                emoji: "⚡",
-                title: "N-Back Endurance",
-                desc: "Maximize mental data processing rates under progressive cognitive loads.",
-              },
-            ].map((benefit, i) => (
-              <div
-                key={i}
-                className="bg-slate-900/30 border border-slate-900 hover:border-slate-800 transition rounded-xl p-5"
-              >
-                <h4 className="font-bold text-indigo-400 mb-2 flex items-center gap-2 uppercase text-xs tracking-wider font-mono">
-                  <span className="text-sm">{benefit.emoji}</span>
-                  {benefit.title}
-                </h4>
-                <p className="text-xs text-slate-400 leading-relaxed">
-                  {benefit.desc}
-                </p>
-              </div>
-            ))}
+        <Reveal className="mb-12">
+          <div className="bg-surface-1 border border-hairline rounded-3xl p-8 relative overflow-hidden backdrop-blur-xl shadow-xl">
+            <h3 className="text-lg font-bold uppercase tracking-wider text-ink-1 mb-6 flex items-center gap-2 font-mono">
+              <Sparkles className="w-5 h-5 text-indigo-400" />
+              MEMORY STACK IMPROVEMENT VECTORS
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+              {[
+                {
+                  emoji: "💾",
+                  title: "Working Buffer",
+                  desc: "Augment sensory sequence mapping and pattern retention grids.",
+                },
+                {
+                  emoji: "🎯",
+                  title: "Spatial Tracing",
+                  desc: "Sharpen layout memory recall and path tracking resolution.",
+                },
+                {
+                  emoji: "🧬",
+                  title: "Recall Streaks",
+                  desc: "Build durable concept connections across non-adjacent recall points.",
+                },
+                {
+                  emoji: "⚡",
+                  title: "N-Back Endurance",
+                  desc: "Maximize mental data processing rates under progressive cognitive loads.",
+                },
+              ].map((benefit, i) => (
+                <div key={i} className="bg-surface-2 border border-hairline rounded-xl p-4">
+                  <h4 className="font-bold text-indigo-400 mb-1 flex items-center gap-2 uppercase text-xs tracking-wider font-mono">
+                    <span>{benefit.emoji}</span>
+                    {benefit.title}
+                  </h4>
+                  <p className="text-xs text-ink-2 leading-relaxed">
+                    {benefit.desc}
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+        </Reveal>
 
-        {/* Explore Related Categories */}
-        <div className="mt-16 mb-8 border-t border-slate-900 pt-12">
-          <h2 className="text-lg font-bold tracking-widest text-center text-white font-mono uppercase mb-8">
-            Explore Adjacent Sectors
+        {/* Explore Related Hubs (Fixed 4 unique links - Defect #6) */}
+        <Reveal className="mt-12 mb-8 border-t border-hairline pt-12">
+          <h2 className="text-base font-bold tracking-widest text-center text-ink-1 font-mono uppercase mb-8">
+            Explore Adjacent Hubs
           </h2>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
-            {[
-              {
-                href: "/drills/cognitive",
-                emoji: "🧠",
-                title: "Cognitive Sector",
-                desc: "Focus & reaction speed",
-              },
-              {
-                href: "/drills/academic",
-                emoji: "📚",
-                title: "Academic Hub",
-                desc: "Reading & writing speeds",
-              },
-              {
-                href: "/drills/fps",
-                emoji: "🎮",
-                title: "Tactical Aim",
-                desc: "Target tracking mechanics",
-              },
-            ].map((link, i) => (
-              <Link
-                key={i}
-                href={link.href}
-                className="group bg-slate-950/80 border border-slate-900 rounded-xl p-5 hover:border-indigo-500/40 hover:shadow-[0_0_20px_rgba(99,102,241,0.05)] transition-all duration-200 hover:-translate-y-1 text-center"
-              >
-                <div className="text-2xl mb-2">{link.emoji}</div>
-                <h3 className="font-bold text-slate-200 group-hover:text-indigo-400 transition-colors uppercase text-xs tracking-wider font-mono">
-                  {link.title}
-                </h3>
-                <p className="text-[10px] text-slate-500 uppercase mt-1 font-mono">
-                  {link.desc}
-                </p>
-              </Link>
-            ))}
+            <Link href="/drills/cognitive" className="group bg-surface-1 backdrop-blur-xl border border-hairline rounded-xl p-5 hover:border-violet-500/40 transition-all duration-200 hover:-translate-y-1 text-center">
+              <div className="text-2xl mb-2">🧠</div>
+              <h3 className="font-bold text-ink-1 group-hover:text-violet-400 transition-colors uppercase text-xs font-mono">Cognitive Hub</h3>
+              <p className="text-2xs text-ink-3 uppercase mt-1 font-mono">Focus &amp; decision speed</p>
+            </Link>
+            <Link href="/drills/visual-tracking" className="group bg-surface-1 backdrop-blur-xl border border-hairline rounded-xl p-5 hover:border-cyan-500/40 transition-all duration-200 hover:-translate-y-1 text-center">
+              <div className="text-2xl mb-2">👁️</div>
+              <h3 className="font-bold text-ink-1 group-hover:text-cyan-400 transition-colors uppercase text-xs font-mono">Visual Tracking</h3>
+              <p className="text-2xs text-ink-3 uppercase mt-1 font-mono">Smooth pursuit labs</p>
+            </Link>
+            <Link href="/drills/reaction-speed" className="group bg-surface-1 backdrop-blur-xl border border-hairline rounded-xl p-5 hover:border-amber-500/40 transition-all duration-200 hover:-translate-y-1 text-center">
+              <div className="text-2xl mb-2">⚡</div>
+              <h3 className="font-bold text-ink-1 group-hover:text-amber-400 transition-colors uppercase text-xs font-mono">Reaction Speed</h3>
+              <p className="text-2xs text-ink-3 uppercase mt-1 font-mono">Reflex latency tests</p>
+            </Link>
+            <Link href="/drills/fps" className="group bg-surface-1 backdrop-blur-xl border border-hairline rounded-xl p-5 hover:border-red-500/40 transition-all duration-200 hover:-translate-y-1 text-center">
+              <div className="text-2xl mb-2">🎯</div>
+              <h3 className="font-bold text-ink-1 group-hover:text-red-400 transition-colors uppercase text-xs font-mono">Tactical Aim</h3>
+              <p className="text-2xs text-ink-3 uppercase mt-1 font-mono">Aim &amp; click accuracy</p>
+            </Link>
           </div>
-        </div>
+        </Reveal>
       </div>
+
+      <StickyMobileCta href="/drills/memory/short-term-memory/digit-span" label="Start Memory Drill" categoryName="Memory" />
+      <SiteFooter />
     </div>
   );
 }

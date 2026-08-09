@@ -9,31 +9,18 @@ import ReactionSimulatorWrapper from './ReactionSimulatorWrapper';
 //   "hand eye coordination games"     ~2,900/mo, KD ~48%
 //   "reaction speed test"             ~6,600/mo, KD ~45%
 //   "reflex simulator"                ~390/mo,   KD ~15%
-//   "fps reaction time test"          ~1,300/mo, KD ~38%
-//   "reflex training app"             ~1,600/mo, KD ~35%
-//   "speed reflex training"           ~450/mo,   KD ~22%
-// PAA targets: "What is a good score on a reaction time test?",
-//   "Can you train your reaction time?", "What is the average human reaction time?",
-//   "Does gaming improve reaction time?", "Why is my reaction time so slow?",
-//   "How do you test your reflexes by yourself?"
-// Key entities: falling-target interception, vertical tracking, input latency,
-//   choice reaction time, muscle memory, neuromuscular efficiency, display lag
 // ============================================================
 
 export const metadata = {
   title: 'Reaction Simulator - Free Reflex Training Game Online | SkillDrills',
   description: 'Play this free online Reflex Training Game (Reaction Simulator). Intercept accelerating falling targets before they escape, train vertical visual tracking, and improve your hand-eye coordination. Mobile-friendly, no download needed.',
   keywords: [
-    // Primary / Head terms
     'reaction simulator', 'reflex training game', 'reflex game online',
-    // Secondary / LSI terms
     'reflex simulator', 'hand eye coordination games', 'reaction speed test',
     'fps reaction time test', 'reflex training app', 'speed reflex training',
-    // Long-tail variants
     'falling target reaction game', 'online reflex games free',
     'how to test reflexes at home', 'do reflex training games work',
     'vertical tracking aim trainer', 'mouse speed click trainer',
-    // General
     'free aim trainer browser', 'gaming eye coordination drill', 'low latency reflex test'
   ],
   alternates: {
@@ -47,20 +34,11 @@ export const metadata = {
     siteName: 'SkillDrills',
     locale: 'en_US',
     type: 'website',
-    images: [
-      {
-        url: 'https://skilldrills.online/icons/icon-512x512.png',
-        width: 512,
-        height: 512,
-        alt: 'Reaction Simulator - Free Reflex Training Game Online | SkillDrills',
-      },
-    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Reaction Simulator - Free Reflex Training Game',
     description: 'Intercept falling targets and train vertical tracking. Free browser-based reflex simulator with no downloads.',
-    images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
 };
 
@@ -98,22 +76,22 @@ const educationalSchema = {
   "@type": "EducationalApplication",
   "name": "Reaction Simulator Trainer",
   "description": "Isolates and trains vertical ocular tracking, hand-eye synchronization, rapid interception, and motor response time under high-speed falling waves.",
-  "applicationCategory": "EducationalGame",
-  "operatingSystem": "Web Browser",
-  "isAccessibleForFree": true,
+  "applicationCategory": "EducationalApplication",
+  "operatingSystem": "All",
+  "browserRequirements": "Requires a modern web browser with JavaScript support."
 };
 
 const howToSchema = {
   "@context": "https://schema.org",
   "@type": "HowTo",
-  "name": "How to Train Reflexes with the Reaction Simulator",
-  "description": "Improve vertical visual tracking and rapid click timing against targets falling at varying speeds across dynamic lanes.",
+  "name": "How to Train Vertical Reflexes & Reaction Speed",
+  "description": "Step-by-step instructions on improving your vertical tracking, interception speed, and hand-eye coordination.",
   "step": [
     {
       "@type": "HowToStep",
       "position": 1,
-      "name": "Start the Simulator",
-      "text": "Click the Begin Drill button to start the game board. Adjust target color presets and neon glow toggles to fit your visual preference."
+      "name": "Launch the Simulator",
+      "text": "Press Start Drill to initialize the Reaction Simulator in full screen."
     },
     {
       "@type": "HowToStep",
@@ -131,7 +109,7 @@ const howToSchema = {
       "@type": "HowToStep",
       "position": 4,
       "name": "Intercept Speed Bursts",
-      "text": "At higher levels, prioritize micro-targets, speed bursts, and double drops to sustain your combo and survive the countdown."
+      "text": "At higher levels, prioritize micro-targets and speed bursts to keep your hit rate up and survive the countdown."
     }
   ]
 };
@@ -142,18 +120,10 @@ const faqSchema = {
   "mainEntity": [
     {
       "@type": "Question",
-      "name": "What is the Reaction Simulator reflex training game?",
+      "name": "What is Reaction Simulator (Reflex Interception Drill)?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Reaction Simulator is an online reflex training game where you intercept falling targets before they escape the lower boundary. It trains vertical visual tracking, hand-eye coordination, and rapid clicking reflexes in a browser-based format."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Can you train your reaction time?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes. While genetic baseline limits exist, you can improve your cognitive processing speed, pattern recognition, and muscle memory (neuromuscular efficiency) through repetitive stimulation. This reduces your choice reaction latency."
+        "text": "It is an online reflex training game where targets descend vertically at accelerating speeds, testing your vertical tracking and interception reflexes."
       }
     },
     {
@@ -161,15 +131,15 @@ const faqSchema = {
       "name": "What is a good score on a reaction time test?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "An average score on a simple click-reaction test is around 250ms. Scores below 200ms are considered excellent, and elite competitive gamers often average 150-180ms."
+        "text": "Average human reaction time to visual stimuli is 200-250ms. Elite esports players achieve reaction speeds under 180ms."
       }
     },
     {
       "@type": "Question",
-      "name": "What is the average human reaction time?",
+      "name": "Can you train your reaction time?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "The average reaction time to a visual stimulus is around 250 milliseconds. Auditory reactions are faster, averaging around 170 milliseconds, and tactile (touch) reactions average about 150 milliseconds due to shorter neural path routing."
+        "text": "Yes. Dedicated reflex training improves neuromuscular pathway efficiency, reducing visual processing delay and motor execution latency."
       }
     },
     {
@@ -177,7 +147,7 @@ const faqSchema = {
       "name": "Does gaming improve reaction time?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes. Studies show that playing action-heavy video games (like FPS, arcade, and rhythm games) enhances peripheral vision, spatial attention, and hand-eye response speeds by conditioning fast visual-motor feedback loops."
+        "text": "Research shows competitive gamers process visual information faster and execute choice motor responses with higher precision than non-gamers."
       }
     },
     {
@@ -185,7 +155,7 @@ const faqSchema = {
       "name": "Why is my reaction time slow?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Common factors include fatigue, lack of sleep, distractions, age (reaction speeds decline gradually after peak early-20s), and technical latency (slow monitors, high input-lag mice, or low wireless polling rates adding artificial lag)."
+        "text": "Slow reaction time can be caused by muscle fatigue, high input latency, low refresh rates, lack of sleep, or cognitive distraction."
       }
     },
     {
@@ -193,31 +163,79 @@ const faqSchema = {
       "name": "How do you test your reflexes by yourself?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "You can test reflexes online using browser click tests (like Human Benchmark or this Reaction Simulator), or physically using the ruler drop test (measuring where you catch a dropped ruler) or juggling exercises."
+        "text": "Using online reflex simulators like SkillDrills provides precise millisecond telemetry to measure and track your reaction speed."
       }
     },
     {
       "@type": "Question",
-      "name": "How does this reaction simulator improve FPS aim?",
+      "name": "What is vertical tracking in FPS gaming?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "In FPS games like Valorant, CS2, and Apex Legends, enemies jump, drop from ledges, and move dynamically. This simulator trains your vertical eye tracking and click synchronization, helping you snap onto vertically moving targets."
+        "text": "Vertical tracking is the ability to keep your crosshair centered on targets falling, jumping, or moving along Y-axis paths."
       }
     },
     {
       "@type": "Question",
-      "name": "Does monitor refresh rate affect my reaction simulator score?",
+      "name": "Is this reflex training game free?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes. Higher refresh rate monitors (144Hz+) display target frames faster and smoother, helping you track the exact position of fast-falling targets and reducing visual delay."
+        "text": "Yes, all drills on SkillDrills are 100% free with no signups, downloads, or pop-up ads required."
       }
     },
     {
       "@type": "Question",
-      "name": "Is this reflex game online free?",
+      "name": "Does monitor refresh rate affect reflex scores?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes, the Reaction Simulator is 100% free to play on SkillDrills with no signups, downloads, or registration required."
+        "text": "Yes. Higher refresh rate monitors (144Hz, 240Hz, 360Hz) display target movement with lower input lag and smoother motion."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How often should I practice reflex training?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Daily 5-10 minute warmup sessions improve neuromuscular speed, consistency, and hand-eye coordination over time."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What games benefit from vertical reflex training?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Fast vertical shooters like Apex Legends, Overwatch 2, Fortnite, Halo, and Quake benefit heavily from vertical tracking agility."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can traditional athletes use this for vision training?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Sports vision research shows vertical reflex training enhances spatial interception skills for volleyball, basketball, and tennis."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Should I click targets high up or wait until they drop?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Clicking targets high up gives you more margin for error and builds fast-twitch reaction speed before targets reach the danger line."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does this drill support touchscreens?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes! It features generous touch hitpads and automatic orientation warnings for mobile devices."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does adaptive level difficulty work?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "As your score increases, falling speeds accelerate, targets shrink in size, and spawn intervals shorten."
       }
     }
   ]
@@ -250,4 +268,3 @@ export default function ReactionSimulatorPage() {
     </>
   );
 }
-

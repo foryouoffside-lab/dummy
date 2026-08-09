@@ -1,22 +1,24 @@
 import AwarenessDrillClient from './AwarenessDrillClient';
 
 export const metadata = {
-  title: "180 Flick Aim Trainer - Snap Turn Drill | SkillDrills",
-  description: "Master your reaction speed and spatial awareness with our online 180 Flick Aim Trainer. Practice snap turns, escape flanks, and dominate CS2 & Valorant.",
+  title: "180° Aim Trainer — Snap Turn Awareness | SkillDrills",
+  description: "Master reaction speed and 180° snap turns with our free online 180 Aim Trainer. Practice spatial awareness and dominate CS2 & Valorant.",
   keywords: [
-    "180 flick aim trainer",
+    // Primary
     "180 aim trainer",
-    "180 degree aim training",
-    "180 turn aim drill",
-    "behind you awareness fps",
+    // Secondary
+    "180 flick aim trainer",
     "snap turn aim trainer",
-    "CS2 180 snap",
-    "Valorant 180 turn",
-    "apex legends awareness",
-    "fortnite 180 practice",
-    "free fps aim trainer",
-    "aim trainer browser",
-    "improve game sense fps"
+    "CS2 180 turn practice",
+    "Valorant 180 flick drill",
+    // Long-tail
+    "how to practice 180 flicks",
+    "how to improve behind you awareness fps",
+    "best 180 turn drill for CS2",
+    "free browser 180 aim trainer",
+    "180 degree spin shot training",
+    "flank awareness training fps",
+    "improve turn speed aim trainer"
   ],
   alternates: {
     canonical: "https://skilldrills.online/drills/fps/180-degree-awareness",
@@ -26,26 +28,22 @@ export const metadata = {
     follow: true,
   },
   openGraph: {
-    title: "180 Flick Aim Trainer - Snap Turn Drill | SkillDrills",
-    description: "Master your reaction speed and spatial awareness with our online 180 Flick Aim Trainer. Practice snap turns, escape flanks, and dominate CS2 & Valorant.",
+    title: "180° Aim Trainer — Snap Turn Awareness | SkillDrills",
+    description: "Master reaction speed and 180° snap turns with our free online 180 Aim Trainer. Practice spatial awareness and dominate CS2 & Valorant.",
     url: "https://skilldrills.online/drills/fps/180-degree-awareness",
     siteName: 'SkillDrills',
     locale: 'en_US',
     type: 'website',
-    images: [
-      {
-        url: 'https://skilldrills.online/icons/icon-512x512.png',
-        width: 512,
-        height: 512,
-        alt: "180 Flick Aim Trainer - Snap Turn Drill",
-      },
-    ],
+    // No `images` here on purpose. opengraph-image.js in this folder generates a
+    // proper 1200x630 card at build time and Next injects og:image, its width/height,
+    // and twitter:image automatically. Re-adding a manual images array would put a
+    // second, wrong-shaped candidate back in the tag list — the old 512x512 icon was
+    // square, so `summary_large_image` silently downgraded to a small summary card.
   },
   twitter: {
     card: 'summary_large_image',
-    title: "180 Flick Aim Trainer - Snap Turn Drill | SkillDrills",
-    description: "Master your reaction speed and spatial awareness with our online 180 Flick Aim Trainer. Practice snap turns, escape flanks, and dominate CS2 & Valorant.",
-    images: ['https://skilldrills.online/icons/icon-512x512.png'],
+    title: "180° Aim Trainer — Snap Turn Awareness | SkillDrills",
+    description: "Master reaction speed and 180° snap turns with our free online 180 Aim Trainer. Practice spatial awareness and dominate CS2 & Valorant.",
   },
 };
 
@@ -56,14 +54,14 @@ export default function AwarenessDrillPage() {
     "itemListElement": [
       { "@type": "ListItem", "position": 1, "name": "SkillDrills", "item": "https://skilldrills.online/" },
       { "@type": "ListItem", "position": 2, "name": "FPS Drills", "item": "https://skilldrills.online/drills/fps" },
-      { "@type": "ListItem", "position": 3, "name": "180 Flick Aim Trainer", "item": "https://skilldrills.online/drills/fps/180-degree-awareness" }
+      { "@type": "ListItem", "position": 3, "name": "180° Awareness Pro", "item": "https://skilldrills.online/drills/fps/180-degree-awareness" }
     ]
   };
 
   const softwareSchema = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
-    "name": "180 Flick Aim Trainer",
+    "name": "180° Awareness Pro",
     "applicationCategory": "GameApplication",
     "operatingSystem": "Web Browser",
     "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
@@ -77,48 +75,100 @@ export default function AwarenessDrillPage() {
     }
   };
 
+  const videoGameSchema = {
+    "@context": "https://schema.org",
+    "@type": "VideoGame",
+    "name": "180° Awareness Pro",
+    "gamePlatform": "Web Browser",
+    "genre": ["FPS Training", "Aim Trainer"],
+    "playMode": "SinglePlayer",
+    "applicationCategory": "Game",
+    "url": "https://skilldrills.online/drills/fps/180-degree-awareness",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+  };
+
   const faqSchema = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
     "mainEntity": [
       {
         "@type": "Question",
-        "name": "What is a 180-degree flick shot in FPS games?",
+        "name": "What is FPS awareness training?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "A 180-degree flick shot is a rapid 180° spin followed immediately by an accurate shot on a target behind you. It is a critical mechanical skill in tactical FPS games like CS2 and Valorant, where enemies frequently appear from unexpected directions. This drill trains the full spin-and-shoot motion using raw mouse input."
+          "text": "FPS awareness training involves specific drills designed to improve your ability to detect, process, and react to peripheral visual information and unexpected threats in a 3D gaming environment."
         }
       },
       {
         "@type": "Question",
-        "name": "How does the 180° Awareness drill train spin-shot accuracy?",
+        "name": "How do professional FPS players and esports pros improve awareness?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "The drill spawns targets behind your current field of view, forcing you to execute a full 180-degree mouse sweep and click accurately on the target. This trains both mouse travel distance muscle memory and the snap-deceleration needed to stop precisely on a target after a full spin."
+          "text": "Pros utilize a mix of VOD reviews, dedicated aim trainers with wide field-of-view scenarios, and 180-degree flick drills to build unconscious competence in spatial mapping — the same skill many esports organizations train to maintain peak mechanical performance."
         }
       },
       {
         "@type": "Question",
-        "name": "Does this drill help with behind-you awareness in Valorant and CS2?",
+        "name": "Can awareness drills improve reaction time?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Yes. The drill directly simulates the scenario where you are flanked from behind. Regular practice trains your brain to respond instantly to behind-you threats, building the unconscious muscle memory needed to spin and eliminate the threat before they can react."
+          "text": "Yes, by repeatedly exposing the brain to peripheral stimuli, visual processing speed increases, reducing the cognitive load required to react to flanking enemies."
         }
       },
       {
         "@type": "Question",
-        "name": "Is this different from a regular flick shot trainer?",
+        "name": "How does peripheral vision training help in FPS games?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Yes. Standard flick trainers target enemies within your normal field of view. This drill forces a full 180-degree mouse sweep — a completely different motion involving greater mouse travel, higher inertia control, and different muscle memory patterns than short-range flicks."
+          "text": "Strong peripheral vision lets you notice subtle movements or pixel changes at the edge of your screen without taking your crosshair off your primary angle. Playing with an ultra-wide field of view (FOV) in-game and drilling edge-of-screen spawns like this trainer both reinforce that skill."
         }
       },
       {
         "@type": "Question",
-        "name": "What sensitivity settings should I use for 180-degree flick training?",
+        "name": "How do I stop getting flanked in FPS games?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "There is no single correct sensitivity. Most competitive players practice 180s at their current in-game sensitivity to transfer the exact muscle memory. The drill uses your real hardware mouse input, so simply play at your normal DPI and in-game sensitivity settings."
+          "text": "Improving spatial audio processing and training high-speed 180-degree turnaround flicks will allow you to quickly neutralize flankers before they secure the kill."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is situational awareness in gaming?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Situational awareness is the holistic understanding of game state, audio cues, minimap information, and peripheral visual data to anticipate enemy actions."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does this drill help with CS2, Valorant, and other FPS games?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. In Valorant, quick target acquisition and reacting to utility or flashes off-screen is critical, and in CS2 flicking to an unexpected target on the edge of your monitor can win clutch rounds. Fast-paced shooters like Apex Legends, Overwatch 2, and Call of Duty benefit the same way."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How often should I train 180° awareness?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "For optimal results, implement 10-15 minutes of awareness and wide-flick training into your daily warmup routine before queuing competitive matches."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What skills does this drill improve?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "It targets peripheral detection, audio-spatial translation, saccadic eye movement, large-angle mouse flick consistency, and target acquisition speed as shrinking targets spawn across a wider horizontal plane under time pressure."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is this awareness trainer free, and do I need to sign up?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, this drill is completely free and runs directly in your browser with 1:1 hardware raw input — no registration required."
         }
       }
     ]
@@ -150,25 +200,22 @@ export default function AwarenessDrillPage() {
 
   return (
     <>
-      {/* Breadcrumb Schema */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
-
-      {/* SoftwareApplication Schema */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }}
       />
-
-      {/* FAQPage Schema */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
-
-      {/* HowTo Schema */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
@@ -178,4 +225,3 @@ export default function AwarenessDrillPage() {
     </>
   );
 }
-

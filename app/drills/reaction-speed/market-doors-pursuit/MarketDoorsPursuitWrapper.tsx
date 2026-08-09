@@ -1,12 +1,5 @@
 'use client';
 
-import dynamic from 'next/dynamic';
+import MarketDoorsPursuitClient from './MarketDoorsPursuitClient';
 
-const MarketDoorsPursuitClient = dynamic(
-  () => import('./MarketDoorsPursuitClient'),
-  { ssr: false }
-);
-
-export default function MarketDoorsPursuitWrapper() {
-  return <MarketDoorsPursuitClient />;
-}
+export default MarketDoorsPursuitClient;

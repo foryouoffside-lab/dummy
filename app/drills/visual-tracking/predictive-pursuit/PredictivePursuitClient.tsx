@@ -1,123 +1,101 @@
 'use client';
 
-import { useEffect, useState, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
-import { 
-  Target, Clock, Award, Activity, Play, RefreshCw, 
-  Volume2, VolumeX, Maximize2, Minimize2, Eye, EyeOff, Sun, Moon,
-  Trophy, Info, Check, ArrowRight, Sparkles, Sliders, 
-  HelpCircle, Compass, ShieldAlert, Zap, Share2, Copy, Brain
+import {
+  Play, RefreshCw, Timer, Share2, LogOut, Check, Sun, Moon, Volume2, VolumeX,
+  Target, Trophy, TrendingUp, Zap
 } from 'lucide-react';
 
+import DrillFooter from '../../../../components/drill/DrillFooter';
+import DrillCountdown from '../../../../components/drill/DrillCountdown';
+import DrillAccordion from '../../../../components/drill/DrillAccordion';
+import ZigZagPathPursuitStartCard from '../../../../components/drill/ZigZagPathPursuitStartCard';
+import { drillAudio } from '../../../../lib/drillAudio';
+import { drawTacticalTarget } from '../../../../lib/canvasFx';
+import { generateSessionCard, shareScoreCard } from '../../../../components/ShareScoreCard';
+import { getPlayerName } from '../../../../lib/leaderboard';
+import useUnexpectedExitGuard from '../../../../lib/useUnexpectedExitGuard';
+
+const STORAGE_KEY = 'skilldrills_visual_tracking_predictive_pursuit_v2';
+
+const RELATED_DRILLS = [
+  { id: "constant-slow-pursuit", name: "Constant Slow Pursuit", cat: "Visual Tracking", desc: "Condition smooth pursuit tracking along continuous Lissajous curves.", href: "/drills/visual-tracking/constant-slow-pursuit" },
+  { id: "directional-chaos-pursuit", name: "Directional Chaos Pursuit", cat: "Visual Tracking", desc: "Complex multi-directional visual tracking with sudden direction shifts.", href: "/drills/visual-tracking/directional-chaos-pursuit" },
+  { id: "dynamic-evasion-pursuit", name: "Dynamic Evasion Pursuit", cat: "Visual Tracking", desc: "Re-acquire targets executing rapid evasive directional changes.", href: "/drills/visual-tracking/dynamic-evasion-pursuit" },
+  { id: "180-degree-awareness", name: "180° Awareness Pro", cat: "FPS Awareness", desc: "Master 180-degree snap turn awareness for CS2 & Valorant.", href: "/drills/fps/180-degree-awareness" },
+  { id: "strafe-tracking", name: "Strafe Tracking", cat: "FPS Tracking", desc: "Smooth pursuit tracking against erratic horizontal targets.", href: "/drills/fps/strafe-tracking" },
+  { id: "recoil-control", name: "Recoil Control", cat: "FPS Recoil", desc: "Calibrate pulling pattern compensation for weapons.", href: "/drills/fps/recoil-control" }
+];
+
+const getSavedData = () => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return { totalSessions: 0 };
+    return { totalSessions: 0, ...JSON.parse(raw) };
+  } catch (e) {
+    return { totalSessions: 0 };
+  }
+};
+
+const saveData = (data: { totalSessions: number }) => {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch (e) {}
+};
+
 export default function PredictivePursuitClient() {
-  const [showRotateWarning, setShowRotateWarning] = useState(false);
-  const [warningMessage, setWarningMessage] = useState("Rotate Your Device");
-  const hasBypassedWarningRef = useRef(false);
-  const [isMobileLandscape, setIsMobileLandscape] = useState(false);
+  const [gameState, setGameState] = useState<'start' | 'countdown' | 'playing' | 'gameOver'>('start');
+  const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+  const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
+  const [openAccordion, setOpenAccordion] = useState<string | null>(null);
+  const [isMobile, setIsMobile] = useState<boolean>(false);
+  const [countdownValue, setCountdownValue] = useState<number | string>(3);
+  const [dayMode, setDayMode] = useState<boolean>(false); // Day Mode (White BG) / Night Mode (Dark BG)
 
-  // Viewport Orientation Check for Mobile
-  useEffect(() => {
-    const checkSize = () => {
-      if (typeof window === 'undefined') return;
-      const ua = navigator.userAgent || '';
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
-      if (!isMobile) {
-        setShowRotateWarning(false);
-        return;
-      }
-      const isPortrait = window.innerHeight > window.innerWidth;
-      if (isPortrait) {
-        if (window.innerWidth < 768 && !hasBypassedWarningRef.current) {
-          setShowRotateWarning(true);
-          setWarningMessage("Rotate Your Device");
-          return;
-        }
-      } else {
-        if (window.innerHeight < 320 && !hasBypassedWarningRef.current) {
-          setShowRotateWarning(true);
-          setWarningMessage("Screen height too small. Try entering Fullscreen mode.");
-          return;
-        }
-      }
-      setShowRotateWarning(false);
-    };
-    checkSize();
-    window.addEventListener('resize', checkSize);
-    window.addEventListener('orientationchange', checkSize);
-    return () => {
-      window.removeEventListener('resize', checkSize);
-      window.removeEventListener('orientationchange', checkSize);
-    };
-  }, []);
+  // User Settings States (ALL INITIALLY OFF BY DEFAULT)
+  const [selectedDuration, setSelectedDuration] = useState<number>(60); // 30, 45, 60, 90, 120 seconds
+  const [speedMultiplier, setSpeedMultiplier] = useState<number>(1.0); // 0.5x to 9.0x
+  const [targetSize, setTargetSize] = useState<number>(16); // 10px to 50px
+  const [targetColor, setTargetColor] = useState<string>('#ef4444'); // Default Cyber Red
+  const [mathInvisible, setMathInvisible] = useState<boolean>(false); // OFF initially
+  const [randomSpeed, setRandomSpeed] = useState<boolean>(false); // OFF initially
+  const [trailEffect, setTrailEffect] = useState<boolean>(false); // OFF initially
+  const [glowEffect, setGlowEffect] = useState<boolean>(true); // ON by default — matches barrier-sequence-pursuit's target look
+  const [scanlinesActive, setScanlinesActive] = useState<boolean>(false); // OFF initially
 
-  // Mobile Landscape Full-Viewport Detection
-  useEffect(() => {
-    const checkLandscape = () => {
-      if (typeof window === 'undefined') return;
-      const ua = navigator.userAgent || '';
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
-      if (isMobile && window.innerWidth > window.innerHeight && window.innerWidth >= 480) {
-        setIsMobileLandscape(true);
-      } else {
-        setIsMobileLandscape(false);
-      }
-    };
-    checkLandscape();
-    window.addEventListener('resize', checkLandscape);
-    window.addEventListener('orientationchange', () => setTimeout(checkLandscape, 100));
-    return () => {
-      window.removeEventListener('resize', checkLandscape);
-      window.removeEventListener('orientationchange', checkLandscape);
-    };
-  }, []);
+  // Session Stats
+  const [uiTimeLeft, setUiTimeLeft] = useState<number>(60);
+  const [totalTrials, setTotalTrials] = useState<number>(0);
 
-  const [loading, setLoading] = useState(true);
-  const [dayMode, setDayMode] = useState(false);
-  const [isClient, setIsClient] = useState(false);
-  
-  // ============ USER SETTINGS STATES ============
-  const [speedMultiplier, setSpeedMultiplier] = useState(1.0);
-  const [targetSize, setTargetSize] = useState(15);
-  const [targetColor, setTargetColor] = useState('#ef4444'); // Default Neon Red
-  const [scanlinesActive, setScanlinesActive] = useState(true);
-  const [trailEffect, setTrailEffect] = useState(true);
-  const [glowEffect, setGlowEffect] = useState(true);
-
-  // ============ GAME CONTROL STATES ============
-  const [gameState, setGameState] = useState('start'); // start, playing, gameOver
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const [soundEnabled, setSoundEnabled] = useState(true);
-  const [timeLeft, setTimeLeft] = useState(60);
-  const [totalTrials, setTotalTrials] = useState(0);
-
-  // ============ REFS FOR HIGH PERFORMANCE CANVAS LOOP ============
+  // DOM & Physics Refs
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const animationRef = useRef<number | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const animationRef = useRef<number | null>(null);
+  const countdownTimeoutsRef = useRef<NodeJS.Timeout[]>([]);
   const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const audioCtxRef = useRef<AudioContext | null>(null);
 
-  // Tracking position states in refs to bypass React state latency
   const trackingState = useRef({
-    lastTime: 0,
+    travelT: 0,
+    travel: 0,
+    landed: 0,
     sx: 0,
     sy: 0,
     tx: 0,
     ty: 0,
-    travel: 0,
-    travelT: 0,
-    landed: 0,
     trail: [] as { x: number; y: number }[]
   });
 
-  // Sync React states to ref for rendering loop reading
   const settingsRef = useRef({
     speedMultiplier,
     targetSize,
     targetColor,
-    scanlinesActive,
+    mathInvisible,
+    randomSpeed,
     trailEffect,
-    glowEffect
+    glowEffect,
+    scanlinesActive,
+    dayMode
   });
 
   useEffect(() => {
@@ -125,249 +103,292 @@ export default function PredictivePursuitClient() {
       speedMultiplier,
       targetSize,
       targetColor,
-      scanlinesActive,
+      mathInvisible,
+      randomSpeed,
       trailEffect,
-      glowEffect
+      glowEffect,
+      scanlinesActive,
+      dayMode
     };
-  }, [speedMultiplier, targetSize, targetColor, scanlinesActive, trailEffect, glowEffect]);
+  }, [speedMultiplier, targetSize, targetColor, mathInvisible, randomSpeed, trailEffect, glowEffect, scanlinesActive, dayMode]);
 
-  // Audio cues initialization
-  const initAudio = useCallback(() => {
-    try {
-      if (!audioCtxRef.current) {
-        audioCtxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
-      }
-      if (audioCtxRef.current.state === 'suspended') {
-        audioCtxRef.current.resume();
-      }
-      return audioCtxRef.current;
-    } catch (e) {
-      return null;
+  // Mobile Detection & Saved Stats Loading
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const checkMobile = () => {
+        const ua = navigator.userAgent || '';
+        const mobileCheck = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua) || (window.innerWidth < 768);
+        setIsMobile(mobileCheck);
+      };
+      checkMobile();
+      window.addEventListener('resize', checkMobile);
+
+      const saved = getSavedData();
+      setTotalTrials(saved.totalSessions || 0);
+
+      return () => window.removeEventListener('resize', checkMobile);
     }
   }, []);
 
-  const playSound = useCallback((type: 'start' | 'transition' | 'end') => {
-    if (!soundEnabled) return;
-    try {
-      const ctx = initAudio();
-      if (!ctx) return;
-      const o = ctx.createOscillator();
-      const g = ctx.createGain();
-      o.connect(g);
-      g.connect(ctx.destination);
-      
-      const now = ctx.currentTime;
-      if (type === 'start') {
-        o.frequency.setValueAtTime(440, now);
-        o.frequency.exponentialRampToValueAtTime(880, now + 0.15);
-        g.gain.setValueAtTime(0.08, now);
-        g.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
-        o.start(now);
-        o.stop(now + 0.2);
-      } else if (type === 'transition') {
-        o.frequency.setValueAtTime(587.33, now); // D5 note
-        g.gain.setValueAtTime(0.04, now);
-        g.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
-        o.start(now);
-        o.stop(now + 0.1);
-      } else if (type === 'end') {
-        o.frequency.setValueAtTime(880, now);
-        o.frequency.exponentialRampToValueAtTime(220, now + 0.3);
-        g.gain.setValueAtTime(0.08, now);
-        g.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
-        o.start(now);
-        o.stop(now + 0.4);
-      }
-    } catch (e) {}
-  }, [soundEnabled, initAudio]);
-
-  // Handle Fullscreen Toggle
-  const toggleFullscreen = useCallback(async () => {
-    try {
-      if (!isFullscreen) {
-        const el = containerRef.current;
-        if (el?.requestFullscreen) {
-          await el.requestFullscreen();
-          setIsFullscreen(true);
-        }
-      } else {
-        if (document.fullscreenElement) {
-          await document.exitFullscreen();
-        }
-        setIsFullscreen(false);
-      }
-    } catch (e) {}
-  }, [isFullscreen]);
-
+  // Fullscreen Change Listener
   useEffect(() => {
-    const handleFsChange = () => setIsFullscreen(!!document.fullscreenElement);
-    document.addEventListener('fullscreenchange', handleFsChange);
-    return () => document.removeEventListener('fullscreenchange', handleFsChange);
+    const handleFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
 
-  // Base client component mount
+  // Cleanup Timeouts on Unmount
   useEffect(() => {
-    setIsClient(true);
-    setLoading(false);
-    
-    // Load best score/trials if needed
-    try {
-      const stored = localStorage.getItem('visualTrackingPredictivePursuitClientTrialsCount');
-      if (stored) setTotalTrials(parseInt(stored, 10));
-    } catch (e) {}
-  }, []);
-
-  // Timer Interval Setup
-  useEffect(() => {
-    if (gameState === 'playing' && timeLeft > 0) {
-      timerIntervalRef.current = setInterval(() => {
-        setTimeLeft(p => {
-          if (p <= 1) {
-            setGameState('gameOver');
-            playSound('end');
-            setTotalTrials(prev => {
-              const next = prev + 1;
-              try {
-                localStorage.setItem('visualTrackingPredictivePursuitClientTrialsCount', next.toString());
-              } catch (e) {}
-              return next;
-            });
-            if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
-            return 0;
-          }
-          return p - 1;
-        });
-      }, 1000);
-    }
     return () => {
+      countdownTimeoutsRef.current.forEach(clearTimeout);
       if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
     };
-  }, [gameState, playSound]);
+  }, []);
 
-  // Main high-performance render loop
+  const sharePage = useCallback(async () => {
+    const url = 'https://skilldrills.online/drills/visual-tracking/predictive-pursuit';
+    try {
+      const canvas = generateSessionCard({
+        drillName: 'Predictive Pursuit',
+        badgeText: 'Smooth Pursuit Calibrated',
+        stats: [
+          { label: 'Session Time', value: `${selectedDuration}s` },
+          { label: 'Base Speed', value: `${speedMultiplier.toFixed(1)}x` },
+          { label: 'Math Line', value: mathInvisible ? 'Invisible' : 'Visible' },
+          { label: 'Speed Acceleration', value: randomSpeed ? 'Enabled' : 'Fixed' },
+        ],
+        playerName: getPlayerName(),
+      });
+      await shareScoreCard(url, canvas);
+    } catch (e) {
+      const text = 'Predictive Pursuit — Free Visual Tracking & Gaze Calibration Drill!';
+      if (typeof navigator !== 'undefined' && navigator.share) {
+        try {
+          await navigator.share({ title: 'Predictive Pursuit Drill', text, url });
+        } catch (e) {}
+      } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
+        navigator.clipboard.writeText(url);
+        alert('Drill link copied to clipboard!');
+      }
+    }
+  }, [selectedDuration, speedMultiplier, mathInvisible, randomSpeed]);
+
+  const handleExitDrill = useCallback(async () => {
+    markIntentionalExit();
+    countdownTimeoutsRef.current.forEach(clearTimeout);
+    countdownTimeoutsRef.current = [];
+    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+
+    if (document.fullscreenElement) {
+      await document.exitFullscreen().catch(() => {});
+    }
+    setGameState('start');
+  }, []);
+
+  const { markIntentionalExit } = useUnexpectedExitGuard({
+    active: gameState === 'playing' || gameState === 'countdown',
+    onUnexpectedExit: handleExitDrill,
+  });
+
+  // Complete Drill Session cleanly
+  const endGame = useCallback(() => {
+    if (animationRef.current) cancelAnimationFrame(animationRef.current);
+    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+
+    setGameState('gameOver');
+    // Fullscreen is preserved on result display until user clicks Exit/Return button
+
+    setTotalTrials((prev) => {
+      const next = prev + 1;
+      saveData({ totalSessions: next });
+      return next;
+    });
+    drillAudio.playSessionEnd();
+  }, []);
+
+  // Enter Drill (Auto Fullscreen -> 321GO Countdown with Sound -> Playing)
+  const enterDrill = useCallback(async () => {
+    // 1. Auto Fullscreen on Start
+    try {
+      if (containerRef.current && !document.fullscreenElement) {
+        await containerRef.current.requestFullscreen();
+      }
+    } catch (e) {}
+
+    countdownTimeoutsRef.current.forEach(clearTimeout);
+    countdownTimeoutsRef.current = [];
+    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+
+    drillAudio.init();
+
+    setUiTimeLeft(selectedDuration);
+
+    const cvs = canvasRef.current;
+    const w = cvs ? cvs.width : 800;
+    const h = cvs ? cvs.height : 450;
+    trackingState.current = {
+      travelT: 0,
+      travel: 1.5,
+      landed: 0,
+      sx: w * 0.2,
+      sy: h * 0.5,
+      tx: w * 0.8,
+      ty: h * 0.5,
+      trail: []
+    };
+
+    // Countdown sequence: 3 -> 2 -> 1 -> GO with Audio Cues
+    setGameState('countdown');
+    setCountdownValue(3);
+    drillAudio.playCountdownTick();
+
+    const t1 = setTimeout(() => {
+      setCountdownValue(2);
+      drillAudio.playCountdownTick();
+    }, 700);
+
+    const t2 = setTimeout(() => {
+      setCountdownValue(1);
+      drillAudio.playCountdownTick();
+    }, 1400);
+
+    const t3 = setTimeout(() => {
+      setCountdownValue('GO');
+      drillAudio.playGo();
+    }, 2100);
+
+    const t4 = setTimeout(() => {
+      setGameState('playing');
+
+      // Start 1-second Interval Timer
+      let remaining = selectedDuration;
+      timerIntervalRef.current = setInterval(() => {
+        remaining -= 1;
+        setUiTimeLeft(remaining);
+        if (remaining <= 0) {
+          endGame();
+        }
+      }, 1000);
+
+    }, 2450);
+
+    countdownTimeoutsRef.current = [t1, t2, t3, t4];
+  }, [selectedDuration, endGame]);
+
+  // Canvas Render Loop (Predictive Pursuit Physics)
   useEffect(() => {
     if (gameState !== 'playing') return;
     const cvs = canvasRef.current;
-    if (!cvs) return;
+    const container = containerRef.current;
+    if (!cvs || !container) return;
+
     const ctx = cvs.getContext('2d');
     if (!ctx) return;
 
-    // Responsive Canvas Resize logic
     const updateSize = () => {
-      const ct = containerRef.current;
-      if (!ct) return;
-      const rect = ct.getBoundingClientRect();
-      
-      // Keep exact 16:9 ratio fit
-      const w = rect.width;
-      const h = rect.height;
-      
-      cvs.width = w;
-      cvs.height = h;
-      cvs.style.position = 'absolute';
-      cvs.style.left = `${(rect.width - w) / 2}px`;
-      cvs.style.top = `${(rect.height - h) / 2}px`;
-
-      trackingState.current.sx = w * 0.2;
-      trackingState.current.sy = h / 2;
-      trackingState.current.tx = w * 0.8;
-      trackingState.current.ty = h / 2;
-      trackingState.current.travel = 1.5;
-      trackingState.current.travelT = 0;
-      trackingState.current.landed = 0;
+      if (!container) return;
+      const rect = container.getBoundingClientRect();
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      cvs.width = rect.width * dpr;
+      cvs.height = rect.height * dpr;
+      ctx.scale(dpr, dpr);
     };
 
-    const ro = new ResizeObserver(updateSize);
-    if (containerRef.current) ro.observe(containerRef.current);
-    window.addEventListener('resize', updateSize);
     updateSize();
+    const ro = new ResizeObserver(updateSize);
+    ro.observe(container);
 
-    // Reset physics timing
-    trackingState.current.lastTime = 0;
+    let lastTime = performance.now();
 
-    // Render loop function
     const draw = (ts: number) => {
-      if (!trackingState.current.lastTime) {
-        trackingState.current.lastTime = ts;
+      const deltaTimeMs = ts - lastTime;
+      lastTime = ts;
+      const dt = Math.min(deltaTimeMs / 1000, 0.1);
+
+      const rect = container.getBoundingClientRect();
+      const W = rect.width;
+      const H = rect.height;
+
+      const { speedMultiplier, targetSize, targetColor, mathInvisible, randomSpeed, trailEffect, glowEffect, scanlinesActive, dayMode: isDay } = settingsRef.current;
+
+      // Calculate dynamic speed multiplier with random acceleration if enabled
+      let effectiveSpeed = speedMultiplier;
+      if (randomSpeed) {
+        const sec = ts / 1000;
+        const perturb = 0.5 + 0.4 * Math.sin(sec * 1.7) * Math.cos(sec * 0.9) + 0.3 * Math.sin(sec * 3.2);
+        effectiveSpeed = speedMultiplier * (0.6 + perturb * 1.1);
       }
-      let dt = (ts - trackingState.current.lastTime) / 1000;
-      if (dt > 0.1) dt = 0.016;
-      trackingState.current.lastTime = ts;
 
-      const W = cvs.width;
-      const H = cvs.height;
-      const { speedMultiplier, targetSize, targetColor, scanlinesActive, trailEffect, glowEffect } = settingsRef.current;
-      const scaledDt = dt * speedMultiplier;
+      const scaledDt = dt * effectiveSpeed;
 
-      // Clear background
-      ctx.fillStyle = dayMode ? '#f8fafc' : '#05070f';
+      // Clear Canvas Background (Pure White in Day Mode `#ffffff`, Deep Black in Night Mode `#050508`)
+      ctx.fillStyle = isDay ? '#ffffff' : '#050508';
       ctx.fillRect(0, 0, W, H);
 
-      // Render gridlines
-      ctx.strokeStyle = dayMode ? 'rgba(15, 23, 42, 0.06)' : 'rgba(255, 255, 255, 0.015)';
+      // Render subtle background grid
+      ctx.strokeStyle = isDay ? 'rgba(0, 0, 0, 0.05)' : 'rgba(255, 255, 255, 0.02)';
       ctx.lineWidth = 1;
       const gridSize = 40;
-      for (let xPos = 0; xPos < W; xPos += gridSize) {
-        ctx.beginPath(); ctx.moveTo(xPos, 0); ctx.lineTo(xPos, H); ctx.stroke();
+      for (let x = 0; x < W; x += gridSize) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
       }
-      for (let yPos = 0; yPos < H; yPos += gridSize) {
-        ctx.beginPath(); ctx.moveTo(0, yPos); ctx.lineTo(W, yPos); ctx.stroke();
+      for (let y = 0; y < H; y += gridSize) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
       }
 
-      // Render center level guide line
-        ctx.strokeStyle = '#1e293b';
+      // Render Predicted Trajectory Path Vector ONLY if math is NOT invisible
+      if (!mathInvisible) {
+        ctx.strokeStyle = isDay ? 'rgba(2, 132, 199, 0.45)' : 'rgba(56, 189, 248, 0.22)';
         ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.moveTo(W * 0.1, H / 2);
-        ctx.lineTo(W * 0.9, H / 2);
+        ctx.moveTo(trackingState.current.sx, trackingState.current.sy);
+        ctx.lineTo(trackingState.current.tx, trackingState.current.ty);
         ctx.stroke();
+      }
 
-        // Update predictive timers
-        trackingState.current.travelT += scaledDt;
-        if (trackingState.current.travelT > 2.5) {
-          trackingState.current.travel = 1.5;
-          trackingState.current.travelT = 0;
-          trackingState.current.landed = 0;
-          trackingState.current.tx = W * 0.2 + Math.random() * W * 0.6;
-          trackingState.current.ty = H / 2 + (Math.random() - 0.5) * (H * 0.3);
-          playSound('transition');
-        }
+      // Update Predictive Trajectory State
+      trackingState.current.travelT += scaledDt;
+      const cycleTime = randomSpeed ? 1.8 + Math.random() * 1.2 : 2.2;
 
-        if (trackingState.current.travel > 0) {
-          trackingState.current.travel -= scaledDt;
-          trackingState.current.sx += (trackingState.current.tx - trackingState.current.sx) * scaledDt * 3;
-          trackingState.current.sy += (trackingState.current.ty - trackingState.current.sy) * scaledDt * 3;
-        } else {
-          trackingState.current.landed = 0.3;
-        }
+      if (trackingState.current.travelT > cycleTime) {
+        trackingState.current.travel = 1.5;
+        trackingState.current.travelT = 0;
+        trackingState.current.landed = 0;
+        trackingState.current.tx = targetSize * 2 + Math.random() * (W - targetSize * 4);
+        trackingState.current.ty = H * 0.2 + Math.random() * (H * 0.6);
+      }
 
-        // Render shadow (cyan gaze indicator)
-        if (trackingState.current.travel > 0) {
-          ctx.fillStyle = 'rgba(6, 182, 212, 0.4)';
-          ctx.beginPath();
-          ctx.arc(trackingState.current.sx, trackingState.current.sy, targetSize, 0, Math.PI * 2);
-          ctx.fill();
-        }
+      if (trackingState.current.travel > 0) {
+        trackingState.current.travel -= scaledDt;
+        trackingState.current.sx += (trackingState.current.tx - trackingState.current.sx) * scaledDt * 3.5;
+        trackingState.current.sy += (trackingState.current.ty - trackingState.current.sy) * scaledDt * 3.5;
+      } else {
+        trackingState.current.landed = 0.3;
+      }
 
-        // Render target (glowing focus node)
-        if (trackingState.current.landed > 0) {
-          ctx.shadowColor = targetColor;
-          ctx.shadowBlur = (glowEffect && !dayMode) ? 18 : 0;
+      // Gaze Trail Effect
+      if (trailEffect) {
+        const trail = trackingState.current.trail;
+        trail.push({ x: trackingState.current.sx, y: trackingState.current.sy });
+        if (trail.length > 12) trail.shift();
+
+        for (let i = 0; i < trail.length; i++) {
+          const pt = trail[i];
+          const alpha = ((i + 1) / trail.length) * 0.3;
           ctx.fillStyle = targetColor;
+          ctx.globalAlpha = alpha;
           ctx.beginPath();
-          ctx.arc(trackingState.current.tx, trackingState.current.ty, targetSize, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.shadowBlur = 0;
-
-          ctx.fillStyle = dayMode ? '#0f172a' : '#ffffff';
-          ctx.beginPath();
-          ctx.arc(trackingState.current.tx, trackingState.current.ty, 3, 0, Math.PI * 2);
+          ctx.arc(pt.x, pt.y, targetSize * (0.3 + 0.6 * (i / trail.length)), 0, Math.PI * 2);
           ctx.fill();
         }
+        ctx.globalAlpha = 1.0;
+      }
 
-      // Visual overlay scanlines
+      drawTacticalTarget(ctx, trackingState.current.sx, trackingState.current.sy, targetSize, targetColor, glowEffect);
+
+      // CRT Scanlines Overlay
       if (scanlinesActive) {
-        ctx.fillStyle = dayMode ? 'rgba(0, 0, 0, 0.02)' : 'rgba(255, 255, 255, 0.012)';
+        ctx.fillStyle = isDay ? 'rgba(0, 0, 0, 0.02)' : 'rgba(255, 255, 255, 0.015)';
         for (let i = 0; i < H; i += 4) {
           ctx.fillRect(0, i, W, 1.5);
         }
@@ -380,629 +401,349 @@ export default function PredictivePursuitClient() {
 
     return () => {
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
-      window.removeEventListener('resize', updateSize);
       ro.disconnect();
     };
-  }, [gameState, playSound]);
-
-  // Start visual tracking session
-  const startDrill = useCallback(() => {
-    initAudio();
-    playSound('start');
-    setGameState('playing');
-    setTimeLeft(60);
-    
-    // Reset positions
-    const cvs = canvasRef.current;
-    const w = cvs ? cvs.width : window.innerWidth;
-    const h = cvs ? cvs.height : window.innerHeight;
-    
-    // Default initializations
-    trackingState.current.trail = [];
-    
-    // Auto-fullscreen on start
-    try {
-      if (!document.fullscreenElement) {
-        const el = containerRef.current;
-        if (el?.requestFullscreen) {
-          el.requestFullscreen().then(() => {
-            setIsFullscreen(true);
-          }).catch((err) => {
-            console.warn("Fullscreen request failed:", err);
-          });
-        }
-      }
-    } catch (err) {}
-
-    trackingState.current.sx = w * 0.2;
-      trackingState.current.sy = h / 2;
-      trackingState.current.tx = w * 0.8;
-      trackingState.current.ty = h / 2;
-      trackingState.current.travel = 1.5;
-      trackingState.current.travelT = 0;
-      trackingState.current.landed = 0;
-  }, [initAudio, playSound]);
-
-  // Reset drill configurations
-  const resetDrill = useCallback(() => {
-    if (animationRef.current) cancelAnimationFrame(animationRef.current);
-    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
-    setGameState('start');
-    setTimeLeft(60);
-  }, []);
-
-  const sharePage = useCallback(async () => {
-    if (typeof navigator !== 'undefined' && navigator.share) {
-      try {
-        await navigator.share({
-          title: 'Free Predictive Pursuit Drill | SkillDrills',
-          text: 'Interpolate path trajectory of a moving cyan shadow and execute ballistic gaze shifts to capture solidified targets.',
-          url: 'https://skilldrills.online/drills/visual-tracking/predictive-pursuit'
-        });
-      } catch (e) {}
-    } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
-      navigator.clipboard.writeText('https://skilldrills.online/drills/visual-tracking/predictive-pursuit');
-      alert('Link copied to clipboard!');
-    }
-  }, []);
-
-  const copyPageLink = useCallback(() => {
-    if (typeof navigator !== 'undefined' && navigator.clipboard) {
-      navigator.clipboard.writeText('https://skilldrills.online/drills/visual-tracking/predictive-pursuit');
-      alert('Link copied to clipboard!');
-    }
-  }, []);
+  }, [gameState]);
 
   const colorPresets = [
     { name: 'Cyber Red', value: '#ef4444' },
     { name: 'Emerald Green', value: '#10b981' },
-    { name: 'Neon Blue', value: '#3b82f6' },
-    { name: 'Pure White', value: '#ffffff' },
+    { name: 'Neon Blue', value: '#38bdf8' },
     { name: 'Laser Orange', value: '#f97316' },
-    { name: 'High-Vis Yellow', value: '#eab308' }
+    { name: 'High-Vis Yellow', value: '#eab308' },
+    { name: 'Pure White', value: '#ffffff' }
   ];
 
-  if (loading || !isClient) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#030712]">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-red-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-slate-400 font-mono text-sm uppercase tracking-widest">Initialising Ocular aim engine...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-[#030712] text-slate-100 font-sans selection:bg-red-500/30">
-      <div className="absolute inset-0 bg-gradient-to-b from-blue-955/5 via-transparent to-black/30 pointer-events-none z-0" />
-
-      <div className={`${isFullscreen || isMobileLandscape ? 'w-full h-screen p-0 m-0' : 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6'} relative z-10`}>
-        
-        {/* Navigation Breadcrumbs */}
-        {!isFullscreen && !isMobileLandscape && (
-          <nav aria-label="Breadcrumb" className="mb-5">
-            <ol className="flex items-center gap-2 text-[10px] text-slate-550 uppercase tracking-widest font-mono">
-              <li><Link href="/" className="hover:text-red-400 transition-colors">Home</Link></li>
-              <li><span className="text-slate-755">/</span></li>
-              <li><Link href="/drills" className="hover:text-red-400 transition-colors">Drills Hub</Link></li>
-              <li><span className="text-slate-755">/</span></li>
-              <li><Link href="/drills/visual-tracking" className="hover:text-red-400 transition-colors">Visual Tracking</Link></li>
-              <li><span className="text-slate-755">/</span></li>
-              <li><span className="text-red-400 font-bold">Predictive Pursuit</span></li>
-            </ol>
-          </nav>
-        )}
-
-        {/* Drill Header */}
-        {!isFullscreen && !isMobileLandscape && (
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6 border-b border-slate-900 pb-5">
-            <div className="flex items-center gap-3.5">
-              <div className="p-3 bg-red-950/30 border border-red-500/20 text-red-500 rounded-xl shadow-lg shadow-red-950/20">
-                <Compass className="w-7 h-7" />
-              </div>
-              <div>
-                <h1 className="text-xl sm:text-2xl font-black tracking-tight text-white uppercase bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
-                  Predictive Pursuit
-                </h1>
-                <p className="text-xs text-slate-400 tracking-wider mt-0.5">
-                  Visual Gaze Calibration  -  Advanced Sector
-                </p>
-              </div>
+    <div className="min-h-screen bg-[#050508] text-white flex flex-col font-sans select-none">
+      {/* ── HEADER / BREADCRUMB ── */}
+      {!isFullscreen && (
+        <header className="border-b border-white/5 bg-[#080811]/80 backdrop-blur-md sticky top-0 z-50">
+          <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
+            <div className="flex items-center gap-2 text-xs text-slate-400">
+              <Link href="/" className="hover:text-white transition-colors">Home</Link>
+              <span>/</span>
+              <Link href="/drills/visual-tracking" className="hover:text-white transition-colors">Visual Tracking</Link>
+              <span>/</span>
+              <span className="text-red-400 font-medium">Predictive Pursuit</span>
             </div>
 
-            <div className="flex gap-2">
-              {gameState === 'playing' && (
-                <button 
-                  onClick={resetDrill}
-                  className="p-2.5 rounded-lg border border-slate-800 bg-[#0b0f19] text-slate-400 hover:text-white hover:border-slate-700 transition-all active:scale-95"
-                  title="Reset Drill"
-                >
-                  <RefreshCw className="w-4 h-4" />
-                </button>
-              )}
-              <button 
-                onClick={() => setSoundEnabled(!soundEnabled)}
-                className="p-2.5 rounded-lg border border-slate-800 bg-[#0b0f19] text-slate-400 hover:text-white hover:border-slate-700 transition-all active:scale-95"
-                title="Toggle Audio Cues"
-              >
-                {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
-              </button>
-                            <button 
-                onClick={() => setDayMode(!dayMode)}
-                className="p-2.5 rounded-lg border border-slate-800 bg-[#0b0f19] text-slate-400 hover:text-white hover:border-slate-700 transition-all active:scale-95"
-                title="Toggle Day Mode"
-              >
-                {dayMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-              </button>
-<button 
-                onClick={toggleFullscreen}
-                className="p-2.5 rounded-lg border border-slate-800 bg-[#0b0f19] text-slate-400 hover:text-white hover:border-slate-700 transition-all active:scale-95"
-                title="Toggle Viewport Fullscreen"
-              >
-                {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
-              </button>
+            <button
+              onClick={() => {
+                const next = !soundEnabled;
+                setSoundEnabled(next);
+                drillAudio?.setEnabled?.(next);
+              }}
+              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+              title={soundEnabled ? "Mute Sound" : "Unmute Sound"}
+            >
+              {soundEnabled ? <Volume2 className="w-4 h-4 text-red-400" /> : <VolumeX className="w-4 h-4 text-red-400" />}
+            </button>
+          </div>
+        </header>
+      )}
+
+      {/* ── MAIN CONTENT AREA ── */}
+      <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
+        {/* Title */}
+        {!isFullscreen && (
+          <div className="text-center">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight bg-gradient-to-r from-white via-slate-200 to-red-400 bg-clip-text text-transparent">
+              PREDICTIVE PURSUIT
+            </h1>
+            <p className="text-xs text-slate-400 mt-1">
+              Trajectory Interpolation & Vector Landing Prediction
+            </p>
+          </div>
+        )}
+
+        {/* Live Stat Cards */}
+        {!isFullscreen && (
+          <div className="grid grid-cols-4 gap-2.5 max-w-2xl mx-auto w-full">
+            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Status</div>
+              <div className="text-lg sm:text-xl font-black text-red-400 tabular-nums">
+                {gameState === 'playing' ? 'TRACKING' : gameState === 'gameOver' ? 'COMPLETE' : 'STANDBY'}
+              </div>
+            </div>
+            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time Left</div>
+              <div className={`text-lg sm:text-xl font-black tabular-nums ${uiTimeLeft <= 10 && gameState === 'playing' ? 'text-red-400 animate-pulse' : 'text-white'}`}>
+                {uiTimeLeft}s
+              </div>
+            </div>
+            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Speed</div>
+              <div className="text-lg sm:text-xl font-black text-indigo-400 tabular-nums">{speedMultiplier.toFixed(1)}x</div>
+            </div>
+            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Sessions</div>
+              <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{totalTrials}</div>
             </div>
           </div>
         )}
 
+        {/* Game Stage Container */}
+        <div 
+          ref={containerRef} 
+          className={`relative overflow-hidden flex flex-col transition-all duration-150 select-none border border-white/10 ${
+            dayMode ? 'bg-[#ffffff]' : 'bg-[#080811]'
+          } ${dayMode ? 'text-slate-900' : 'text-white'} ${
+            isFullscreen 
+              ? 'fixed inset-0 z-[100] w-screen h-[100dvh] rounded-none border-none flex flex-col items-center justify-center' 
+              : isMobile 
+                ? 'w-full rounded-2xl aspect-[3/4] min-h-[420px] max-h-[76vh] relative overflow-hidden flex flex-col'
+                : 'w-full rounded-2xl aspect-video min-h-[460px] sm:min-h-[500px] max-h-[88vh] relative overflow-hidden flex flex-col'
+          }`}
+        >
 
+          {/* IN-BOX OVERLAY HUD: ONLY TIMER WHEN PLAYING */}
+          {gameState === 'playing' && (
+            <div className="absolute top-4 right-4 z-30 pointer-events-none text-right">
+              <p className={`text-3xl sm:text-4xl font-black font-sans tabular-nums leading-none ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : (dayMode ? 'text-slate-900' : 'text-white/90')}`}>
+                {uiTimeLeft}s
+              </p>
+            </div>
+          )}
 
-        {/* Dashboard Grid Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
-          
-          {/* Settings Sidebar */}
-          {!isFullscreen && !isMobileLandscape && (
-            <div className="lg:col-span-1 bg-[#0b0f19]/80 border border-slate-900/90 rounded-2xl p-5 backdrop-blur-md shadow-xl flex flex-col justify-between">
-              <div>
-                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest border-b border-slate-850 pb-2 mb-4 flex items-center gap-1.5 font-mono">
-                  <Sliders className="w-3.5 h-3.5 text-red-400" />
-                  DRILL CONFIGS
-                </h3>
+          {/* CANVAS */}
+          <canvas 
+            ref={canvasRef} 
+            className="block absolute top-0 left-0 w-full h-full z-10 pointer-events-none" 
+          />
 
-                {/* Speed Multiplier */}
-                <div className="mb-5">
-                  <div className="flex justify-between items-center mb-1">
-                    <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider font-mono">Target Speed</label>
-                    <span className="text-red-400 font-mono text-xs font-bold">{speedMultiplier.toFixed(1)}x</span>
-                  </div>
-                  <input 
-                    type="range" 
-                    min="0.1" 
-                    max="7.0" 
-                    step="0.1"
-                    value={speedMultiplier} 
-                    onChange={(e) => setSpeedMultiplier(parseFloat(e.target.value))} 
-                    className="w-full h-1 bg-slate-900 rounded-lg appearance-none cursor-pointer accent-red-500 focus:outline-none mb-3" 
-                  />
-                  <div className="grid grid-cols-6 gap-1">
-                    {[0.5, 1.0, 2.0, 3.0, 5.0, 7.0].map((sm) => (
-                      <button
-                        key={sm}
-                        onClick={() => setSpeedMultiplier(sm)}
-                        className={`py-1 rounded text-[9px] font-mono font-bold border transition ${
-                          speedMultiplier === sm
-                            ? 'bg-red-950/40 text-red-400 border-red-500/40 shadow-sm shadow-red-500/5'
-                            : 'bg-slate-950/60 border-slate-905 text-slate-500 hover:text-slate-300'
-                        }`}
-                      >
-                        {sm.toFixed(1)}x
-                      </button>
-                    ))}
-                  </div>
+          {/* START CARD */}
+          {gameState === 'start' && (
+            <ZigZagPathPursuitStartCard
+              selectedDuration={selectedDuration}
+              onDurationChange={setSelectedDuration}
+              speedMultiplier={speedMultiplier}
+              onSpeedChange={setSpeedMultiplier}
+              targetSize={targetSize}
+              onTargetSizeChange={setTargetSize}
+              targetColor={targetColor}
+              onTargetColorChange={setTargetColor}
+              mathInvisible={mathInvisible}
+              onMathInvisibleToggle={() => setMathInvisible(!mathInvisible)}
+              randomSpeed={randomSpeed}
+              onRandomSpeedToggle={() => setRandomSpeed(!randomSpeed)}
+              trailEffect={trailEffect}
+              onTrailEffectToggle={() => setTrailEffect(!trailEffect)}
+              glowEffect={glowEffect}
+              onGlowEffectToggle={() => setGlowEffect(!glowEffect)}
+              scanlinesActive={scanlinesActive}
+              onScanlinesToggle={() => setScanlinesActive(!scanlinesActive)}
+              dayMode={dayMode}
+              onDayModeToggle={() => setDayMode(!dayMode)}
+              isMobile={isMobile}
+              onStart={enterDrill}
+            />
+          )}
+
+          {/* COUNTDOWN OVERLAY */}
+          {gameState === 'countdown' && (
+            <DrillCountdown value={countdownValue} subtitle="GET READY" accent="#ef4444" />
+          )}
+
+          {/* END SCREEN */}
+          {gameState === 'gameOver' && (
+            <div className="absolute inset-0 z-40 flex bg-neutral-950/98 select-none font-sans" style={{ background: 'rgba(5,5,8,0.97)' }} onPointerDown={e => e.stopPropagation()}>
+              
+              {/* Left Panel */}
+              <div className="w-[38%] flex flex-col items-center justify-center gap-2 border-r border-white/5 px-4" style={{ background: 'radial-gradient(ellipse 260px 200px at 50% 30%, rgba(239,68,68,.12), transparent 70%)' }}>
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-red-600 to-rose-600 flex items-center justify-center shadow-[0_0_30px_rgba(239,68,68,0.4)]">
+                  <Check className="w-6 h-6 text-white" />
                 </div>
-
-                {/* Target Size Slider */}
-                <div className="mb-5">
-                  <div className="flex justify-between items-center mb-1">
-                    <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider font-mono">Target Size</label>
-                    <span className="text-red-400 font-mono text-xs font-bold">{targetSize}px</span>
-                  </div>
-                  <input 
-                    type="range" 
-                    min="10" 
-                    max="50" 
-                    step="1"
-                    value={targetSize} 
-                    onChange={(e) => setTargetSize(parseInt(e.target.value, 10))} 
-                    className="w-full h-1 bg-slate-900 rounded-lg appearance-none cursor-pointer accent-red-500 focus:outline-none" 
-                  />
-                  <div className="flex justify-between text-[8px] text-slate-600 font-mono mt-0.5">
-                    <span>MIN</span>
-                    <span>MAX</span>
-                  </div>
+                <div className="text-lg sm:text-2xl font-black text-white text-center tracking-tight leading-tight mt-1">
+                  SESSION COMPLETE
                 </div>
-
-                {/* Presets Color */}
-                <div className="mb-5">
-                  <label className="block text-[10px] text-slate-400 font-bold uppercase tracking-wider font-mono mb-2">Target Color</label>
-                  <div className="flex flex-wrap gap-2">
-                    {colorPresets.map((c) => (
-                      <button
-                        key={c.value}
-                        onClick={() => setTargetColor(c.value)}
-                        className={`w-6 h-6 rounded-full border transition-all relative flex items-center justify-center`}
-                        style={{ backgroundColor: c.value === '#ffffff' ? '#ffffff' : c.value, borderColor: targetColor === c.value ? '#ffffff' : 'transparent' }}
-                        title={c.name}
-                      >
-                        {targetColor === c.value && (
-                          <div className={`w-1.5 h-1.5 rounded-full ${c.value === '#ffffff' ? 'bg-black' : 'bg-white'}`} />
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Display Toggles */}
-                <div className="space-y-3 pt-3 border-t border-slate-900/60 font-mono">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <span className="text-[10px] text-slate-400 font-bold uppercase block">Gaze Trail</span>
-                      <span className="text-[8px] text-slate-600 block">Renders tracking velocity</span>
-                    </div>
-                    <button
-                      onClick={() => setTrailEffect(!trailEffect)}
-                      className={`w-8 h-4 rounded-full p-0.5 transition-colors duration-200 focus:outline-none ${trailEffect ? 'bg-red-500' : 'bg-slate-900'}`}
-                    >
-                      <div className={`w-3 h-3 rounded-full bg-white transition-transform duration-200 ${trailEffect ? 'transform translate-x-4' : ''}`} />
-                    </button>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <span className="text-[10px] text-slate-400 font-bold uppercase block">Neon Glow</span>
-                      <span className="text-[8px] text-slate-600 block">Renders target glow blur</span>
-                    </div>
-                    <button
-                      onClick={() => setGlowEffect(!glowEffect)}
-                      className={`w-8 h-4 rounded-full p-0.5 transition-colors duration-200 focus:outline-none ${glowEffect ? 'bg-red-500' : 'bg-slate-900'}`}
-                    >
-                      <div className={`w-3 h-3 rounded-full bg-white transition-transform duration-200 ${glowEffect ? 'transform translate-x-4' : ''}`} />
-                    </button>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <span className="text-[10px] text-slate-400 font-bold uppercase block">CRT Scanlines</span>
-                      <span className="text-[8px] text-slate-600 block">Esports screen overlay</span>
-                    </div>
-                    <button
-                      onClick={() => setScanlinesActive(!scanlinesActive)}
-                      className={`w-8 h-4 rounded-full p-0.5 transition-colors duration-200 focus:outline-none ${scanlinesActive ? 'bg-red-500' : 'bg-slate-900'}`}
-                    >
-                      <div className={`w-3 h-3 rounded-full bg-white transition-transform duration-200 ${scanlinesActive ? 'transform translate-x-4' : ''}`} />
-                    </button>
-                  </div>
+                <div className="text-[10px] uppercase tracking-widest text-slate-400 text-center font-bold">
+                  Smooth Pursuit Calibrated
                 </div>
               </div>
 
-              {/* Stats Card inside Sidebar */}
-              <div className="mt-6 p-4 bg-slate-950/60 border border-slate-900 rounded-xl font-mono text-xs">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-slate-500 uppercase text-[9px]">Ocular Trials Count</span>
-                  <Trophy className="w-3.5 h-3.5 text-yellow-500" />
+              {/* Right Stats & Actions Panel */}
+              <div className="flex-1 flex flex-col justify-center gap-3 px-6 py-4 min-w-0">
+                
+                {/* 4 Stat Tiles */}
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
+                    <p className="text-sm sm:text-base font-black text-white">{selectedDuration}s</p>
+                    <p className="text-[8px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Session Time</p>
+                  </div>
+                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
+                    <p className="text-sm sm:text-base font-black text-white">{speedMultiplier.toFixed(1)}x</p>
+                    <p className="text-[8px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Base Speed</p>
+                  </div>
+                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
+                    <p className="text-xs sm:text-sm font-black text-white">{mathInvisible ? 'Invisible' : 'Visible'}</p>
+                    <p className="text-[8px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Math Line</p>
+                  </div>
+                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
+                    <p className="text-xs sm:text-sm font-black text-white">{randomSpeed ? 'Enabled' : 'Fixed'}</p>
+                    <p className="text-[8px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Speed Acceleration</p>
+                  </div>
                 </div>
-                <div className="text-white font-black text-base">{totalTrials} Completed</div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-2">
+                  <button 
+                    type="button"
+                    onClick={enterDrill} 
+                    className="flex-1 py-3 rounded-[13px] bg-gradient-to-r from-red-600 to-rose-600 text-white font-bold text-xs uppercase tracking-wide cursor-pointer transition-transform active:scale-[0.98] shadow-md flex items-center justify-center gap-1.5"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5" /> Play Again
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={sharePage} 
+                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform" 
+                    title="Share Score"
+                  >
+                    <Share2 className="w-4 h-4" />
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={handleExitDrill} 
+                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform" 
+                    title="Return to Options"
+                  >
+                    <LogOut className="w-4 h-4 text-red-400" />
+                  </button>
+                </div>
+
               </div>
             </div>
           )}
 
-          {/* Viewport Canvas Wrapper */}
-          <div className={`${isFullscreen ? 'col-span-4' : 'lg:col-span-3'} flex flex-col`}>
-            
-            {/* Viewport HUD */}
-            {!isFullscreen && !isMobileLandscape && (
-              <div className="flex justify-between items-center mb-3 text-xs font-mono">
-                <div className="flex items-center gap-1 bg-[#0b0f19]/60 border border-slate-900 rounded-lg px-3 py-1.5">
-                  <Activity className="w-3.5 h-3.5 text-red-500" />
-                  <span className="text-slate-400 uppercase text-[9px] tracking-wider">Status:</span>
-                  <span className="text-white font-bold">{gameState === 'playing' ? 'CALIBRATING GAZE' : 'STANDBY'}</span>
-                </div>
-
-                <div className="flex items-center gap-1 bg-[#0b0f19]/60 border border-slate-900 rounded-lg px-3 py-1.5">
-                  <Clock className="w-3.5 h-3.5 text-yellow-500" />
-                  <span className="text-slate-400 uppercase text-[9px] tracking-wider">Session Time:</span>
-                  <span className="text-white font-bold">{timeLeft}s</span>
-                </div>
-              </div>
-            )}
-
-            {/* Interactive Viewport Area */}
-            <div 
-              ref={containerRef} 
-              className={
-                isFullscreen 
-                  ? 'fixed inset-0 z-50 bg-[#020306] flex items-center justify-center' 
-                  : isMobileLandscape
-                  ? 'fixed inset-0 z-40 bg-[#020306] flex items-center justify-center'
-                  : 'relative w-full aspect-video min-h-[380px] lg:min-h-[440px] bg-[#020306] border border-slate-900 rounded-2xl flex items-center justify-center shadow-2xl'
-              }
-              style={{ overflow: 'hidden' }}
-            >
-              {/* Orientation Warnings (Inside Drill Box) */}
-              {showRotateWarning && !isMobileLandscape && (
-                <div className="absolute inset-0 z-50 bg-[#05070e]/95 flex flex-col items-center justify-center p-6 text-center select-none">
-                  <div className="animate-bounce mb-4 text-red-500">
-                    <svg className="w-12 h-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                    </svg>
-                  </div>
-                  <h3 className="text-sm font-bold text-white uppercase font-mono tracking-widest mb-1.5">Rotate Your Device</h3>
-                  <p className="text-xs text-slate-400 max-w-xs leading-relaxed mb-6 mx-auto">
-                    Please rotate your mobile device to landscape orientation for a better training experience.
-                  </p>
-                  <div className="flex justify-center">
-                    <button 
-                      onClick={() => {
-                        hasBypassedWarningRef.current = true;
-                        setShowRotateWarning(false);
-                        if (gameState === 'start') {
-                          startDrill();
-                        }
-                      }}
-                      className="px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white font-mono text-[10px] uppercase tracking-wider rounded-lg flex items-center gap-2 transition active:scale-95 shadow-lg font-bold"
-                    >
-                      Continue
-                    </button>
-                  </div>
-                </div>
-              )}
-              
-              {/* Start Overlay Screen */}
-              {gameState === 'start' && (
-                <div className={`absolute inset-0 flex flex-col items-center justify-center p-6 z-30 select-none ${dayMode ? 'bg-[#f1f5f9]/98 text-slate-800' : 'bg-[#05070e]/95 text-slate-100'}`}>
-                  <div className="max-w-md text-center">
-                    <div className="w-14 h-14 mx-auto mb-4 border border-red-500/25 bg-red-500/5 rounded-full flex items-center justify-center shadow-lg shadow-red-950/10">
-                      <Eye className="w-6 h-6 text-red-500" />
-                    </div>
-                    
-                    <h2 className={`text-lg font-black uppercase tracking-wider mb-2 font-mono ${dayMode ? 'text-slate-900' : 'text-white'}`}>
-                      Predictive Pursuit
-                    </h2>
-                    <p className={`text-xs leading-relaxed mb-6 ${dayMode ? 'text-slate-650' : 'text-slate-400'}`}>
-                      Interpolate path trajectory of a moving cyan shadow and execute ballistic gaze shifts to capture solidified targets. Focus your eyes on the moving target. Do not use your head or mouse.
-                    </p>
-
-                    <button
-                      onClick={startDrill}
-                      className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold rounded-xl flex items-center justify-center gap-3 shadow-[0_0_30px_rgba(59,130,246,0.5)] uppercase tracking-widest font-mono transition-all duration-300 active:scale-95 mx-auto"
-                    >
-                      <Play className="w-4 h-4 fill-white" />
-                      Initiate Tracking Trial
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* Game Over Screen */}
-              {gameState === 'gameOver' && (
-                <div className={`absolute inset-0 flex flex-col items-center justify-center p-6 z-30 select-none ${dayMode ? 'bg-[#f1f5f9]/98 text-slate-800' : 'bg-[#05070e]/95 text-slate-100'}`}>
-                  <div className="max-w-md text-center">
-                    <div className="w-14 h-14 mx-auto mb-4 border border-green-500/20 bg-green-500/5 rounded-full flex items-center justify-center shadow-lg shadow-green-950/10">
-                      <Check className="w-6 h-6 text-green-500" />
-                    </div>
-                    
-                    <h2 className={`text-lg font-black uppercase tracking-wider mb-2 font-mono ${dayMode ? 'text-slate-900' : 'text-white'}`}>
-                      Gaze Calibration Complete
-                    </h2>
-                    <p className={`text-xs leading-relaxed mb-6 ${dayMode ? 'text-slate-650' : 'text-slate-400'}`}>
-                      Your ocular muscles have successfully tracked the target across {speedMultiplier.toFixed(1)}x speed configuration. Gaze stabilization completed.
-                    </p>
-
-                    <button
-                      onClick={startDrill}
-                      className="px-6 py-3 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-100 font-bold rounded-lg text-xs flex items-center justify-center gap-2 shadow-lg uppercase tracking-widest font-mono transition-all duration-200 active:scale-95 mx-auto"
-                    >
-                      <Play className="w-4 h-4 fill-white" />
-                      Run Another Trial
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* Rendering Canvas */}
-              {gameState === 'playing' && (
-                <canvas ref={canvasRef} className="block" />
-              )}
-            </div>
-
-            {/* Bottom status tip */}
-            {!isFullscreen && !isMobileLandscape && (
-              <div className="mt-3 text-center text-[10px] text-slate-550 flex items-center justify-center gap-2 font-mono">
-                <Info className="w-3.5 h-3.5 text-slate-550" />
-                <span>Drill is non-interactive. Keep your eyes centered on the target to condition foveal stability.</span>
-              </div>
-            )}
-          </div>
         </div>
 
-        {/* About Section */}
-        {!isFullscreen && !isMobileLandscape && (
-          <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 border-t border-slate-900 pt-8">
-            <div className="md:col-span-2 bg-[#0b0f19]/40 border border-slate-900 p-6 rounded-2xl flex flex-col justify-between">
-              <div>
-                <h3 className="text-xs font-bold text-white uppercase tracking-widest font-mono flex items-center gap-2 mb-3.5">
-                  <Activity className="w-4 h-4 text-red-500" />
-                  ABOUT THIS DRILL: SPORTS-SCIENCE ANALYSIS
-                </h3>
-                <p className="text-xs leading-relaxed text-slate-400 mb-4 font-sans">
-                  Predictive Pursuit targets temporal velocity interpolation. By hiding the actual target and revealing only a trajectory shadow, the visual cortex must mentally project the coordinate path, firing accurate foveal scans to lock the target as it solidifies.
-                </p>
+        {/* ACCORDION SECTION */}
+        {!isFullscreen && (
+          <div className="[&>div]:!mt-0">
+            <DrillAccordion
+              id="rules"
+              title="Drill Instructions & Settings"
+              isOpen={openAccordion === 'rules'}
+              onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <RuleItem num="1" text="Predictive Interpolation" highlight="Pure Visual" result="Predict landing coordinates" />
+                <RuleItem num="2" text="Time Adjusting" highlight={`${selectedDuration}s Duration`} result="Customizable session timer" />
+                <RuleItem num="3" text="Hide Line" highlight={mathInvisible ? "Enabled (Invisible)" : "Disabled (Visible)"} result="Toggle path guide lines" />
+                <RuleItem num="4" text="Random Speed" highlight={randomSpeed ? "Enabled Acceleration" : "Disabled Velocity"} result="Erratic acceleration control" />
               </div>
-            </div>
+            </DrillAccordion>
 
-            <div className="bg-[#0b0f19]/40 border border-slate-905 p-6 rounded-2xl">
-              <h3 className="text-xs font-bold text-white uppercase tracking-widest font-mono flex items-center gap-2 mb-3.5">
-                <Sparkles className="w-4 h-4 text-yellow-500" />
-                TRAINING BENEFITS
-              </h3>
-              <ul className="space-y-3 text-xs text-slate-400 font-mono">
-                <li className="flex items-start gap-2">
-                  <Check className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-                  <span><strong>Velocity Interpolation</strong>: Builds predictive models of target speed and heading.</span>
-                </li>\n                <li className="flex items-start gap-2">
-                  <Check className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-                  <span><strong>Visual Persistence</strong>: Trains eye coordinates to track behind visual occlusions.</span>
-                </li>\n                <li className="flex items-start gap-2">
-                  <Check className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-                  <span><strong>Ballistic Acquisition</strong>: Limits refocus delay when target solidifies.</span>
-                </li>\n
-              </ul>
-            </div>
+            <DrillAccordion
+              id="about"
+              title="About Predictive Pursuit"
+              isOpen={openAccordion === 'about'}
+              onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
+            >
+              <div className="space-y-6 font-sans">
+                <section>
+                  <h4 className="text-base font-bold text-white mb-2">
+                    What Is Predictive Pursuit Training?
+                  </h4>
+                  <p className="text-sm leading-relaxed mb-3 text-gray-300">
+                    <strong>Predictive Pursuit Training</strong> conditions trajectory interpolation by requiring your eyes to predict upcoming target landing coordinates along smooth motion vectors.
+                  </p>
+                  <p className="text-sm leading-relaxed text-gray-300">
+                    By utilizing features like <strong>Hide Line</strong> and <strong>Random Speed Acceleration</strong>, your visual cortex learns to calculate landing coordinates mentally without visual path cues.
+                  </p>
+                </section>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                    <h5 className="text-xs font-bold text-white mb-1.5">Target Audience</h5>
+                    <p className="text-xs text-gray-300 leading-relaxed">Gamers, athletes, and vision training practitioners looking to build predictive tracking.</p>
+                  </div>
+                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                    <h5 className="text-xs font-bold text-white mb-1.5">Mental Interpolation</h5>
+                    <p className="text-xs text-gray-300 leading-relaxed">Teaches eye muscles to calculate future target positions before visual confirmation.</p>
+                  </div>
+                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                    <h5 className="text-xs font-bold text-white mb-1.5">Invisible Line Mode</h5>
+                    <p className="text-xs text-gray-300 leading-relaxed">Hides path lines so tracking relies 100% on real-time visual input.</p>
+                  </div>
+                </div>
+              </div>
+            </DrillAccordion>
+
+            <DrillAccordion
+              id="faq"
+              title="Frequently Asked Questions"
+              isOpen={openAccordion === 'faq'}
+              onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-sans">
+                <FAQItem q="What is the Predictive Pursuit drill?" a="The Predictive Pursuit drill exercises trajectory interpolation by requiring your eyes to predict upcoming target landing coordinates along smooth motion vectors." />
+                <FAQItem q="Why use the 'Hide Line' setting?" a="Hiding trajectory prediction lines forces your visual motor cortex to calculate target landing points mentally without static path guides." />
+                <FAQItem q="What does the Random Speed feature do?" a="Random Speed introduces unpredictable interpolation speeds and variable landing intervals, strengthening eye muscle modulation under erratic speeds." />
+                <FAQItem q="How long should I practice visual tracking daily?" a="We recommend 5 to 10 minutes of daily visual tracking training before gaming or athletic practice to warm up ocular muscles and reduce eye fatigue." />
+              </div>
+            </DrillAccordion>
           </div>
         )}
 
-        {/* Related Drills Section */}
-        {!isFullscreen && !isMobileLandscape && (
-          <section className="mt-8 border-t border-slate-900 pt-8" aria-label="Related training drills">
-            <div className="flex items-center gap-2 mb-6">
-              <div className="w-1 h-6 rounded-full bg-gradient-to-b from-red-500 to-orange-600"></div>
-              <h2 className="text-sm font-bold text-white uppercase tracking-widest font-mono">Explore Related Drills</h2>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-left">
-              <Link href="/drills/visual/tracking-accuracy/pursuit-tracker" className="group relative overflow-hidden rounded-xl border border-slate-900 bg-[#0b0f19]/30 hover:border-red-500/50 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-                <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-red-500 to-orange-500"></div>
-                <div className="p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-8 h-8 rounded-lg bg-red-950/20 border border-red-500/20 flex items-center justify-center">
-                      <Target className="w-4 h-4 text-red-500" />
-                    </div>
-                    <span className="text-[9px] font-mono text-slate-505 uppercase tracking-widest">Visual</span>
+        {/* RELATED DRILLS GRID */}
+        {!isFullscreen && (
+          <section className="mt-4">
+            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">
+              Related Visual Drills
+            </h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {RELATED_DRILLS.map((drill) => (
+                <Link
+                  key={drill.id}
+                  href={drill.href}
+                  className="group bg-[#0c0c16] border border-white/5 hover:border-red-500/40 rounded-xl p-3.5 transition-all duration-200 hover:-translate-y-0.5 flex flex-col justify-between"
+                >
+                  <div>
+                    <div className="text-[10px] font-bold text-red-400 uppercase tracking-wider mb-1">{drill.cat}</div>
+                    <div className="text-xs font-bold text-white group-hover:text-red-300 transition-colors">{drill.name}</div>
+                    <div className="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">{drill.desc}</div>
                   </div>
-                  <h3 className="font-bold text-xs text-white group-hover:text-red-400 transition-colors font-mono uppercase mb-1">Auto-Pursuit</h3>
-                  <p className="text-[10px] leading-relaxed text-slate-405">Keep cursor on moving target with jitter. +1pt every 0.5s tracking.</p>
-                  <div className="flex items-center gap-1 mt-3 text-red-500 text-[9px] font-mono uppercase opacity-0 group-hover:opacity-100 transition-all duration-300">
-                    Start Drill <ArrowRight className="w-3 h-3" />
+                  <div className="text-[10px] font-bold text-slate-500 group-hover:text-red-400 mt-3 flex items-center gap-1 transition-colors">
+                    Train Drill <span>→</span>
                   </div>
-                </div>
-              </Link>
-              <Link href="/drills/visual/tracking-accuracy/moving-target" className="group relative overflow-hidden rounded-xl border border-slate-900 bg-[#0b0f19]/30 hover:border-red-500/50 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-                <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-red-500 to-orange-500"></div>
-                <div className="p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-8 h-8 rounded-lg bg-red-950/20 border border-red-500/20 flex items-center justify-center">
-                      <Compass className="w-4 h-4 text-red-500" />
-                    </div>
-                    <span className="text-[9px] font-mono text-slate-505 uppercase tracking-widest">Visual</span>
-                  </div>
-                  <h3 className="font-bold text-xs text-white group-hover:text-red-400 transition-colors font-mono uppercase mb-1">Kinetic Intercept</h3>
-                  <p className="text-[10px] leading-relaxed text-slate-405">Click fast-moving targets spawning from edges with green cursor feedback.</p>
-                  <div className="flex items-center gap-1 mt-3 text-red-500 text-[9px] font-mono uppercase opacity-0 group-hover:opacity-100 transition-all duration-300">
-                    Start Drill <ArrowRight className="w-3 h-3" />
-                  </div>
-                </div>
-              </Link>
-              <Link href="/drills/academic/reading-speed/rsvp-reader" className="group relative overflow-hidden rounded-xl border border-slate-900 bg-[#0b0f19]/30 hover:border-red-500/50 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-                <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-red-500 to-orange-500"></div>
-                <div className="p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-8 h-8 rounded-lg bg-red-950/20 border border-red-500/20 flex items-center justify-center">
-                      <Zap className="w-4 h-4 text-red-500" />
-                    </div>
-                    <span className="text-[9px] font-mono text-slate-505 uppercase tracking-widest">Academic</span>
-                  </div>
-                  <h3 className="font-bold text-xs text-white group-hover:text-red-400 transition-colors font-mono uppercase mb-1">RSVP Speed Reader</h3>
-                  <p className="text-[10px] leading-relaxed text-slate-405">Rapid Serial Visual Presentation with ORP alignment.</p>
-                  <div className="flex items-center gap-1 mt-3 text-red-500 text-[9px] font-mono uppercase opacity-0 group-hover:opacity-100 transition-all duration-300">
-                    Start Drill <ArrowRight className="w-3 h-3" />
-                  </div>
-                </div>
-              </Link>
-              <Link href="/drills/visual/tracking-accuracy/multiple-targets" className="group relative overflow-hidden rounded-xl border border-slate-900 bg-[#0b0f19]/30 hover:border-red-500/50 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-                <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-red-500 to-orange-500"></div>
-                <div className="p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-8 h-8 rounded-lg bg-red-950/20 border border-red-500/20 flex items-center justify-center">
-                      <Brain className="w-4 h-4 text-red-500" />
-                    </div>
-                    <span className="text-[9px] font-mono text-slate-505 uppercase tracking-widest">Visual</span>
-                  </div>
-                  <h3 className="font-bold text-xs text-white group-hover:text-red-400 transition-colors font-mono uppercase mb-1">Ghost-Link Tracking</h3>
-                  <p className="text-[10px] leading-relaxed text-slate-405">Memorize 2 targets among 11 moving balls then identify after 60s.</p>
-                  <div className="flex items-center gap-1 mt-3 text-red-500 text-[9px] font-mono uppercase opacity-0 group-hover:opacity-100 transition-all duration-300">
-                    Start Drill <ArrowRight className="w-3 h-3" />
-                  </div>
-                </div>
-              </Link>
+                </Link>
+              ))}
             </div>
           </section>
         )}
 
-        {/* Footer */}
-        {!isFullscreen && !isMobileLandscape && (
-          <footer className="mt-16 border-t border-slate-900 bg-[#05070e]/40 text-slate-550 rounded-2xl py-10 px-6" role="contentinfo">
-            <div className="max-w-7xl mx-auto">
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8 mb-8 font-mono text-xs text-left">
-                <div>
-                  <h3 className="text-white font-bold mb-3 uppercase tracking-wider">Visual Training</h3>
-                  <ul className="space-y-2">
-                    <li><Link href="/drills/visual/visual-recognition/difference-spotter" className="hover:text-red-400 transition-colors">Difference Spotter</Link></li>
-                    <li><Link href="/drills/visual/tracking-accuracy/moving-target" className="hover:text-red-400 transition-colors">Kinetic Intercept</Link></li>
-                    <li><Link href="/drills/visual/tracking-accuracy/multiple-targets" className="hover:text-red-400 transition-colors">Ghost-Link Tracking</Link></li>
-                    <li><Link href="/drills/visual" className="text-red-500 hover:text-red-400 transition-colors font-bold">All 14 Visual Drills ?</Link></li>
-                  </ul>
-                </div>
-                <div>
-                  <h3 className="text-white font-bold mb-3 uppercase tracking-wider">Memory</h3>
-                  <ul className="space-y-2">
-                    <li><Link href="/drills/memory/working-memory/n-back" className="hover:text-red-400 transition-colors">3-Back Training</Link></li>
-                    <li><Link href="/drills/memory/short-term-memory/color-sequence" className="hover:text-red-400 transition-colors">Color Sequence</Link></li>
-                    <li><Link href="/drills/memory/spatial-memory/path-tracing" className="hover:text-red-400 transition-colors">Path Tracing</Link></li>
-                    <li><Link href="/drills/memory" className="text-red-500 hover:text-red-400 transition-colors font-bold">All 15 Memory Drills ?</Link></li>
-                  </ul>
-                </div>
-                <div>
-                  <h3 className="text-white font-bold mb-3 uppercase tracking-wider">FPS Training</h3>
-                  <ul className="space-y-2">
-                    <li><Link href="/drills/fps/flick-shot-training" className="hover:text-red-400 transition-colors">Flick Shot Trainer</Link></li>
-                    <li><Link href="/drills/fps/reactive-sphere-tracking" className="hover:text-red-400 transition-colors">Reactive Tracking</Link></li>
-                    <li><Link href="/drills/fps/target-acquisition" className="hover:text-red-400 transition-colors">Target Acquisition</Link></li>
-                    <li><Link href="/drills/fps" className="text-red-500 hover:text-red-400 transition-colors font-bold">All 21 FPS Drills ?</Link></li>
-                  </ul>
-                </div>
-                <div>
-                  <h3 className="text-white font-bold mb-3 uppercase tracking-wider">Cognitive</h3>
-                  <ul className="space-y-2">
-                    <li><Link href="/drills/cognitive/memory/card-matching" className="hover:text-red-400 transition-colors">Memory Games</Link></li>
-                    <li><Link href="/drills/cognitive/attention/divided-attention" className="hover:text-red-400 transition-colors">Attention Drills</Link></li>
-                    <li><Link href="/drills/cognitive" className="text-red-500 hover:text-red-400 transition-colors font-bold">All 16 Cognitive Drills ?</Link></li>
-                  </ul>
-                </div>
-                <div>
-                  <h3 className="text-white font-bold mb-3 uppercase tracking-wider">More Drills</h3>
-                  <ul className="space-y-2">
-                    <li><Link href="/drills/academic" className="hover:text-red-400 transition-colors">Academic (12 drills)</Link></li>
-                    <li><Link href="/drills/cognitive" className="hover:text-red-400 transition-colors">Cognitive</Link></li>
-                    
-                    <li><Link href="/drills/physical" className="hover:text-red-400 transition-colors">Physical (11 drills)</Link></li>
-                  </ul>
-                </div>
-              </div>
-              <div className="border-t border-slate-900 pt-8 text-center">
-                <div className="flex items-center justify-center gap-3 mb-4">
-                  <div className="w-8 h-8 bg-gradient-to-r from-red-600 to-orange-600 rounded-lg flex items-center justify-center">
-                    <Brain className="w-5 h-5 text-white" aria-hidden="true" />
-                  </div>
-                  <span className="text-white font-bold text-lg font-mono tracking-widest">SkillDrills</span>
-                </div>
-                <p className="text-xs mb-2 font-mono">&copy; 2026 SkillDrills. All rights reserved.</p>
-                <p className="text-[10px] max-w-2xl mx-auto leading-relaxed mb-6 font-sans text-slate-700">
-                  Free online Predictive Pursuit drill for visual gaze tracking and foveal stability training. Train foveal pursuit and coordinate re-acquisition speeds under speed configurations. Perfect for gamers, athletes, and attention diagnostics. No registration required. More free drills at skilldrills.online.
-                </p>
-                <div className="flex items-center justify-center gap-5 flex-wrap">
-                  <button onClick={sharePage} className="text-slate-650 hover:text-white transition-colors" title="Share" aria-label="Share page link"><Share2 className="w-4 h-4" /></button>
-                  <button onClick={copyPageLink} className="text-slate-650 hover:text-white transition-colors" title="Copy link" aria-label="Copy page link to clipboard"><Copy className="w-4 h-4" /></button>
-        <a href="https://www.facebook.com/profile.php?id=61590093843779" target="_blank" rel="noopener noreferrer" className="text-slate-650 hover:text-white transition-colors" title="Follow on Facebook" aria-label="Follow SkillDrills on Facebook"><svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a>
-                  <a href="https://x.com/skilldrillss" target="_blank" rel="noopener noreferrer" className="text-slate-650 hover:text-white transition-colors" title="Follow on Twitter" aria-label="Follow SkillDrills on Twitter"><svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
-                  <a href="https://www.instagram.com/skilldrills.online/?__pwa=1" target="_blank" rel="noopener noreferrer" className="text-slate-650 hover:text-white transition-colors" title="Follow on Instagram" aria-label="Follow SkillDrills on Instagram"><svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg></a>
-                  <a href="https://youtube.com/@skilldrills.online" target="_blank" rel="noopener noreferrer" className="text-slate-650 hover:text-white transition-colors" title="Follow on YouTube" aria-label="Follow SkillDrills on YouTube"><svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>
-                  <a href="https://pinterest.com/skilldrills" target="_blank" rel="noopener noreferrer" className="text-slate-650 hover:text-white transition-colors" title="Follow on Pinterest" aria-label="Follow SkillDrills on Pinterest"><svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0C5.373 0 0 5.372 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738.098.119.112.224.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.631-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12 0-6.628-5.373-12-12-12z"/></svg></a>
-                </div>
-              </div>
-            </div>
-          </footer>
-        )}
+        {/* SITE FOOTER */}
+        {!isFullscreen && <DrillFooter />}
+
+      </main>
+    </div>
+  );
+}
+
+// === Subcomponents ===
+function RuleItem({ num, text, highlight = '', result }: { num: string; text: string; highlight?: string; result: string }) {
+  return (
+    <div className="flex items-center gap-4 bg-black p-4 rounded-xl border border-white/10 shadow-sm font-sans">
+      <div className="w-8 h-8 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-white text-base font-black shadow-lg flex-shrink-0">{num}</div>
+      <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <p className="text-sm font-medium text-gray-100 font-sans">
+          {text}{highlight && <span className="font-black text-white"> ({highlight})</span>}
+        </p>
+        <div className="text-xs font-black px-3 py-1.5 rounded-lg bg-[#050811] border border-white/10 text-white whitespace-nowrap shadow-inner tracking-wide text-center sm:text-left">
+          {result}
+        </div>
       </div>
+    </div>
+  );
+}
+
+function FAQItem({ q, a }: { q: string; a: string }) {
+  return (
+    <div className="bg-[#05060b] border border-gray-800 rounded-xl p-5 hover:border-gray-700 transition-colors font-sans">
+      <h4 className="text-sm font-bold text-gray-200 mb-2">{q}</h4>
+      <p className="text-xs text-gray-400 leading-relaxed">{a}</p>
     </div>
   );
 }

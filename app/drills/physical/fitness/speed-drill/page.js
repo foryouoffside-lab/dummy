@@ -2,53 +2,46 @@ import SpeedDrillClient from './SpeedDrillClient';
 
 // ============================================================
 // SEO RESEARCH FINDINGS — speed-drill
-// PRIMARY: "reaction time test"       ~33,100/mo, KD ~35%
-//          "click speed test"         ~27,100/mo, KD ~28%
+// PRIMARY: "speed drill game"         ~2,900/mo, KD ~25%
+//          "rapid tapping trainer"    ~410/mo,   KD ~14%
 // SECONDARY / LSI:
-//   "reflex test"                     ~9,900/mo,  KD ~32%
-//   "reflex training game"            ~210/mo,    KD ~18%
-//   "reaction time trainer"           ~880/mo,    KD ~22%
-// PAA targets: "What is a reaction time test?", "What is a good reaction time?",
-//   "How can I improve my reaction time?", "Does reaction time matter in Valorant and CS2?",
-//   "Is this click speed test free to play?"
+//   "reaction time test"              ~33,100/mo, KD ~35%
+//   "click speed test"                ~27,100/mo, KD ~28%
+//   "target acquisition speed"        ~640/mo,   KD ~18%
+// PAA targets: "What is the Speed Drill reflex exercise?", "How do target mechanics work?",
+//   "How does difficulty scale in Speed Drill?", "What happens when I miss or let a target expire?",
+//   "Is Speed Drill free to play?"
 // ============================================================
 
 export const metadata = {
-  title: 'Reaction Time Test - Free Click Speed & Reflex Trainer | SkillDrills',
-  description: 'Take the free online Reaction Time Test. Improve your click speed, mouse accuracy, and gaming reflexes with this adaptive tracking trainer. No sign-up required.',
+  title: 'Speed Drill — Free Target Acquisition & Rapid Tapping Trainer | SkillDrills',
+  description: 'Test target acquisition speed and rapid tapping in Speed Drill. Click moving, shrinking targets in this free reflex training game.',
   keywords: [
     // Primary / Head terms
-    'reaction time test', 'click speed test',
+    'speed drill game', 'rapid tapping trainer',
     // Secondary / LSI terms
-    'reflex test', 'reflex training game', 'reaction time trainer',
-    'reaction time test online', 'visual reaction test', 'click accuracy test',
+    'reaction time test', 'click speed test', 'target acquisition speed',
+    'free reflex speed test', 'rapid target tracking drill', 'fps movement velocity trainer',
     // Long-tail variants
-    'free online visual reflex test', 'improve clicking reaction time gaming',
-    'mouse precision reaction test browser', 'esports speed and agility click trainer'
+    'free online visual speed drill', 'improve target acquisition speed gaming',
+    'shrinking target speed reaction game', 'esports rapid tapping click trainer'
   ],
   alternates: {
     canonical: 'https://skilldrills.online/drills/physical/fitness/speed-drill',
   },
   robots: { index: true, follow: true },
   openGraph: {
-    title: 'Reaction Time Test - Free Click Speed & Reflex Trainer | SkillDrills',
-    description: 'Test and improve your reaction time, click speed, and mouse accuracy with this free online reflex training game. Features adaptive difficulty and motor telemetry.',
+    title: 'Speed Drill — Free Target Acquisition & Rapid Tapping Trainer | SkillDrills',
+    description: 'Test target acquisition speed and rapid tapping in Speed Drill. Click moving, shrinking targets in this free reflex training game.',
     url: 'https://skilldrills.online/drills/physical/fitness/speed-drill',
     siteName: 'SkillDrills',
     locale: 'en_US',
     type: 'website',
-    images: [{
-      url: 'https://skilldrills.online/icons/icon-512x512.png',
-      width: 512,
-      height: 512,
-      alt: 'Reaction Time Test - Click Speed and Reflex Trainer | SkillDrills',
-    }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Reaction Time Test - Free Click Speed & Reflex Trainer',
-    description: 'Play the ultimate Reaction Time Test online. Improve your gaming reflexes and click speed instantly. No download or sign-up required.',
-    images: ['https://skilldrills.online/icons/icon-512x512.png'],
+    title: 'Speed Drill — Free Target Acquisition & Rapid Tapping Trainer | SkillDrills',
+    description: 'Test target acquisition speed and rapid tapping in Speed Drill. Click moving, shrinking targets in this free reflex training game.',
   },
 };
 
@@ -61,16 +54,16 @@ const breadcrumbSchema = {
     { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://skilldrills.online" },
     { "@type": "ListItem", "position": 2, "name": "Physical Training", "item": "https://skilldrills.online/drills/physical" },
     { "@type": "ListItem", "position": 3, "name": "Fitness", "item": "https://skilldrills.online/drills/physical/fitness" },
-    { "@type": "ListItem", "position": 4, "name": "Reaction Time Test (Speed Drill)", "item": "https://skilldrills.online/drills/physical/fitness/speed-drill" }
+    { "@type": "ListItem", "position": 4, "name": "Speed Drill", "item": "https://skilldrills.online/drills/physical/fitness/speed-drill" }
   ]
 };
 
 const webAppSchema = {
   "@context": "https://schema.org",
-  "@type": "WebApplication",
-  "name": "Reaction Time Test - Free Click Speed & Reflex Trainer | SkillDrills",
+  "@type": "SoftwareApplication",
+  "name": "Speed Drill — Free Target Acquisition & Rapid Tapping Trainer",
   "url": "https://skilldrills.online/drills/physical/fitness/speed-drill",
-  "description": "Free reaction time test and click speed game. Click shrinking, dynamically moving rings before they disappear. Features a 60-second survival loop, level-based difficulty scaling, and professional motor telemetry.",
+  "description": "Free reaction time test and click speed game. Click shrinking, dynamically moving targets before they disappear.",
   "applicationCategory": "EducationalApplication",
   "operatingSystem": "Web Browser",
   "browserRequirements": "Requires a modern web browser with JavaScript support.",
@@ -78,40 +71,20 @@ const webAppSchema = {
   "author": { "@type": "Organization", "name": "SkillDrills", "url": "https://skilldrills.online" },
   "isAccessibleForFree": true,
   "learningResourceType": "Educational Game",
-  "teaches": "Reaction Time, Click Speed, Reflex Evasion, Dynamic Target Tracking, Visual-Motor Coordination"
+  "teaches": "Target Acquisition, Click Speed, Rapid Tapping, Visual Tracking, Neuromuscular Coordination"
 };
 
-const howToSchema = {
+const videoGameSchema = {
   "@context": "https://schema.org",
-  "@type": "HowTo",
-  "name": "How to Play the Reaction Time Test",
-  "description": "A step-by-step guide to testing your reaction speed, click accuracy, and visual processing.",
-  "step": [
-    {
-      "@type": "HowToStep",
-      "position": 1,
-      "name": "Engage the Tracker",
-      "text": "Click the start button to lock your cursor into the raw-input tracking canvas."
-    },
-    {
-      "@type": "HowToStep",
-      "position": 2,
-      "name": "Acquire the Target",
-      "text": "A dynamic ring will spawn and immediately begin shrinking and moving. Track it visually."
-    },
-    {
-      "@type": "HowToStep",
-      "position": 3,
-      "name": "React and Click",
-      "text": "Move your mouse and click inside the glowing center before the outer ring completely collapses. Success grants points and restores 2 seconds to your clock."
-    },
-    {
-      "@type": "HowToStep",
-      "position": 4,
-      "name": "Survive the Scaling",
-      "text": "Missing a target or letting it expire violently deducts 4 seconds. As your score reaches higher levels, the targets will spawn smaller, shrink faster, and move erratically."
-    }
-  ]
+  "@type": "VideoGame",
+  "name": "Speed Drill — Free Target Acquisition & Rapid Tapping Trainer",
+  "url": "https://skilldrills.online/drills/physical/fitness/speed-drill",
+  "description": "Test target acquisition speed and rapid tapping in Speed Drill. Click moving, shrinking targets in this free reflex training game.",
+  "genre": ["Reflex Training", "Esports", "Aim Trainer", "Reaction Speed"],
+  "gamePlatform": "Web Browser",
+  "playMode": "SinglePlayer",
+  "applicationCategory": "Game",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
 };
 
 const faqSchema = {
@@ -120,84 +93,96 @@ const faqSchema = {
   "mainEntity": [
     {
       "@type": "Question",
-      "name": "What is a reaction time test?",
+      "name": "What is the Speed Drill reflex exercise?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "A reaction time test measures how quickly your brain can process a visual stimulus and translate it into a physical motor response (like clicking a mouse)."
+        "text": "Speed Drill is a high-velocity target acquisition exercise that challenges players to click moving, shrinking targets before they vanish. It measures raw reaction speed, click timing, and tracking precision."
       }
     },
     {
       "@type": "Question",
-      "name": "What is a good reaction time?",
+      "name": "How do target mechanics work?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "The average human visual reaction time is around 250 milliseconds (ms). Professional esports athletes often score between 150ms and 180ms. This drill tracks your fastest intercepts in real-time."
+        "text": "Yellow targets spawn with random initial velocities and bounce off canvas borders while shrinking over time. You must acquire and click each target before its radius reaches zero."
       }
     },
     {
       "@type": "Question",
-      "name": "How can I improve my reaction time?",
+      "name": "How does difficulty scale in Speed Drill?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Consistent practice with dynamic tracking games conditions your visual cortex to recognize targets faster and reinforces the neural pathways responsible for executing quick motor responses."
+        "text": "As your score increases, the level rises up to Level 15. Initial target sizes shrink, target movement speed accelerates up to 3.5x, and target shrinking rates increase."
       }
     },
     {
       "@type": "Question",
-      "name": "Does reaction time matter in Valorant and CS2?",
+      "name": "What happens when I miss or let a target expire?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Absolutely. In low time-to-kill (TTK) tactical shooters like Valorant and CS2, the player who processes visual information and clicks accurately first wins the duel. This drill directly simulates that pressure."
+        "text": "Missing a target or letting a target shrink to zero resets your combo multiplier back to 1.0x and triggers a red flash overlay. There are no score deductions or time penalties."
       }
     },
     {
       "@type": "Question",
-      "name": "How does the adaptive difficulty work in this test?",
+      "name": "How long does each session run?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Every 100 points you score increases your Level. Higher levels accelerate the target's random velocity, increase the rate at which the ring shrinks, and reduce the maximum spawning size of the target."
+        "text": "Each session runs for a fixed 45 seconds. The game timer counts down steadily from 45s to 0s, providing a standard, reproducible performance benchmark."
       }
     },
     {
       "@type": "Question",
-      "name": "Why does my clock drain?",
+      "name": "Does Speed Drill improve gaming performance?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Unlike standard aim trainers, this drill actively punishes bad accuracy. Missing a click triggers a penalty, violently draining your master clock by 4 seconds (with no point deductions). You must rely on precise tracking over spastic spamming."
+        "text": "Yes. Rapid target acquisition and micro-burst clicking translate directly to faster time-to-kill (TTK) and sharper flick timing in FPS games like Valorant, CS2, and Apex Legends."
       }
     },
     {
       "@type": "Question",
-      "name": "Why are the targets changing colors?",
+      "name": "What is a good score in Speed Drill?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "This is the engine's adaptive speed radar. As you successfully hit the target and build your level, the engine scales up the target's random velocity. The colors shift from Green &rarr; Orange &rarr; Cyan &rarr; Red to visually warn you of the intense speed."
+        "text": "Scoring 8,000+ points earns a Gold or Platinum grade, while reaching 17,000+ points with 90%+ accuracy places you in the Master tier."
       }
     },
     {
       "@type": "Question",
-      "name": "Is this click speed test free to play?",
+      "name": "Do I need special hardware to practice this drill?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes! The SkillDrills Reaction Time Test is entirely free, open-source, and runs purely in your web browser with zero downloads required."
+        "text": "No special hardware is required. Any standard computer mouse with 1:1 raw input support works ideally with our pointer lock system."
       }
     },
     {
       "@type": "Question",
-      "name": "What is a good score for the Reaction Time Test?",
+      "name": "Is Speed Drill free to play?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "A score of 250+ is Gold tier. 800+ indicates Diamond-level trajectory control, and 1200+ with 90% launch accuracy places you in the Master tier."
+        "text": "Yes, Speed Drill on SkillDrills is 100% free, ad-free, and runs entirely in your web browser with zero downloads."
       }
     },
     {
       "@type": "Question",
-      "name": "How long should I practice my reaction speed daily?",
+      "name": "How often should I practice this drill?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "For optimal cognitive adaptation and motor learning, practicing this drill for 5 to 10 minutes a day is more effective than occasional hour-long sessions."
+        "text": "Practicing 5 to 10 minutes daily is recommended for optimal neuromuscular adaptation and consistent click timing improvement."
       }
     }
+  ]
+};
+
+const howToSchema = {
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "How to Practice the Speed Drill",
+  "description": "Step-by-step instructions to train target acquisition speed using the SkillDrills Speed Drill trainer.",
+  "step": [
+    { "@type": "HowToStep", "name": "Spot the Target", "text": "A yellow target spawns and moves with a bouncing velocity across the canvas." },
+    { "@type": "HowToStep", "name": "Track Its Shrinking Radius", "text": "The target continuously shrinks in size as it moves." },
+    { "@type": "HowToStep", "name": "Click Before It Vanishes", "text": "Acquire and click the target before its radius reaches zero to score." }
   ]
 };
 
@@ -214,11 +199,15 @@ export default function SpeedDrillPage() {
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }}
       />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
       <SpeedDrillClient />
     </>

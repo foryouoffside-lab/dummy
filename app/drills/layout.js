@@ -1,9 +1,14 @@
-﻿export const metadata = {
+﻿import { DRILLS } from '@/lib/drillsRegistry';
+
+export const metadata = {
   title: {
     default: 'Training Drills - SkillDrills',
-    template: '%s | SkillDrills',
+    // '%s' passthrough, not '%s | SkillDrills' — every child page's own title
+    // already includes the "| SkillDrills" suffix, so a template that appends
+    // it again produces "... | SkillDrills | SkillDrills" in the tab/SERP title.
+    template: '%s',
   },
-  description: 'Free interactive training drills for FPS gaming, cognitive skills, memory, typing speed, visual tracking, motor skills, and mental fitness. 135+ drills across 10 categories.',
+  description: `Free interactive training drills for FPS gaming, cognitive skills, memory, hand-eye coordination, visual tracking, and reaction speed. ${DRILLS.length}+ drills across 8 categories.`,
   keywords: [
     'training drills', 'brain training', 'FPS aim trainer', 'cognitive drills',
     'free online drills', 'skill training', 'interactive exercises',
@@ -26,10 +31,9 @@ export default function DrillsLayout({ children }) {
       <section className="sr-only" aria-label="Drills section description">
         <h2>SkillDrills Training Platform</h2>
         <p>
-          Browse 135+ free interactive training drills organized into 10 categories: FPS Gaming, 
-          Cognitive Training, Visual Training, Visual Tracking, Academic Drills, Productivity, Memory Training, 
-          Motor Skills, Physical Training, and Mental Fitness. All drills are free with no 
-          registration required.
+          Browse {DRILLS.length}+ free interactive training drills organized into 8 categories: FPS Gaming,
+          Cognitive Training, Memory Training, Motor Skills, Physical Training, Visual Training,
+          Visual Tracking, and Reaction Speed. All drills are free with no registration required.
         </p>
       </section>
 

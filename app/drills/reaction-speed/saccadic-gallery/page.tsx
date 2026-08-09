@@ -1,4 +1,4 @@
-import SaccadicGalleryClient from './SaccadicGalleryClient';
+import SaccadicGalleryWrapper from './SaccadicGalleryWrapper';
 
 // ============================================================
 // SEO RESEARCH FINDINGS — saccadic-gallery
@@ -8,27 +8,17 @@ import SaccadicGalleryClient from './SaccadicGalleryClient';
 //   "visual tracking exercises"       ~1,300/mo, KD ~30%
 //   "saccadic eye movement training"  ~250/mo,   KD ~22%
 //   "saccadic training online"        ~110/mo,   KD ~9%
-//   "esports vision training"         ~250/mo,   KD ~12%
-//   "saccadic tracking exercises"     ~90/mo,    KD ~15%
-// PAA targets: "What are saccadic eye exercises?", "Who needs saccadic eye exercises?",
-//   "How do you improve saccadic eye movement?", "What is the difference between saccadic and smooth pursuit?"
-// Key entities: ballistic eye sweeps, zig-zag pattern, visual processing speed,
-//   foveal sweeps, ocular coordination, visual cortex, attention shifting
 // ============================================================
 
 export const metadata = {
   title: 'Saccadic Gallery - Online Saccadic Eye Exercises | SkillDrills',
   description: 'Practice saccadic eye exercises online with the free Saccadic Gallery training drill. Improve your eye tracking, visual processing speed, and ballistic eye sweeps. Free, mobile-friendly, and no download needed.',
   keywords: [
-    // Primary / Head terms
     'saccadic eye exercises', 'eye tracking training', 'saccadic gallery',
-    // Secondary / LSI terms
     'visual tracking exercises', 'saccadic eye movement training', 'esports vision training',
     'saccadic training online', 'saccadic tracking exercises', 'ocular coordination training',
-    // Long-tail variants
     'how to improve saccadic eye movement', 'vision therapy exercises online',
     'zig zag eye tracking test', 'ballistic eye sweeps trainer',
-    // General
     'free eye exercises game', 'sports vision drills free', 'cognitive eye warmup'
   ],
   alternates: {
@@ -42,18 +32,11 @@ export const metadata = {
     siteName: 'SkillDrills',
     locale: 'en_US',
     type: 'website',
-    images: [{
-      url: 'https://skilldrills.online/icons/icon-512x512.png',
-      width: 512,
-      height: 512,
-      alt: 'Saccadic Gallery - Online Saccadic Eye Exercises | SkillDrills',
-    }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Saccadic Gallery - Online Saccadic Eye Exercises',
     description: 'Track glowing targets flashing in a zig-zag gallery pattern. Free browser-based saccadic eye trainer with no downloads.',
-    images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
 };
 
@@ -96,25 +79,25 @@ const howToSchema = {
       "@type": "HowToStep",
       "position": 1,
       "name": "Configure and Begin",
-      "text": "Open the Saccadic Gallery drill. Choose your target size, select color preset, and click Begin Drill."
+      "text": "Press Start Drill to launch Saccadic Gallery in full screen mode."
     },
     {
       "@type": "HowToStep",
       "position": 2,
-      "name": "Track target sequence",
-      "text": "Focus your eyes on the sequence of targets as they light up in a zig-zag gallery layout across the viewport."
+      "name": "Track Target Sequence",
+      "text": "Focus your eyes on the sequence of targets as they light up in a gallery layout across the viewport."
     },
     {
       "@type": "HowToStep",
       "position": 3,
-      "name": "Sweep eyes ballisticly",
-      "text": "Shift your focus quickly from one target to the next. Avoid moving your head; let your eye muscles execute the sweep."
+      "name": "Sweep Eyes Ballistically",
+      "text": "Shift your focus quickly from one target to the next. Keep your head still; let your eye muscles execute the sweep."
     },
     {
       "@type": "HowToStep",
       "position": 4,
-      "name": "Tap to eliminate",
-      "text": "Click or tap the active targets as fast as possible to verify focus lock and keep your survival timer alive."
+      "name": "Tap to Eliminate",
+      "text": "Click or tap active targets as fast as possible to verify focus lock and keep your accuracy climbing."
     }
   ]
 };
@@ -125,82 +108,122 @@ const faqSchema = {
   "mainEntity": [
     {
       "@type": "Question",
-      "name": "What is the Saccadic Gallery Drill?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Saccadic Gallery is a sequence-based reflex training game where you track targets flashing in a zig-zag gallery pattern. It trains ballistic eye shifts, focal re-acquisition speeds, and overall visual tracking."
-      }
-    },
-    {
-      "@type": "Question",
       "name": "What are saccadic eye exercises?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Saccadic eye exercises are visual drills designed to improve saccades — the quick, simultaneous movements of both eyes in the same direction. These exercises strengthen eye muscles, improve coordination, and speed up visual information processing."
+        "text": "Saccadic eye exercises train fast voluntary eye movements between visual targets, improving reading speed, vision therapy, and sports tracking."
       }
     },
     {
       "@type": "Question",
-      "name": "Who can benefit from saccadic eye exercises?",
+      "name": "What is a saccade in vision?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Saccadic eye training is highly beneficial for competitive gamers (to scan minimaps/corners), traditional athletes (to scan the playfield), students/professionals (to speed up reading and scanning text), and individuals undergoing vision therapy or cognitive rehabilitation."
+        "text": "A saccade is a quick, simultaneous movement of both eyes between phases of fixation. It is the fastest movement the human body can perform."
       }
     },
     {
       "@type": "Question",
-      "name": "What is the difference between saccadic and smooth pursuit eye movements?",
+      "name": "How does saccadic training help in FPS gaming?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Saccadic eye movements are quick, jumpy movements made when shifting focus between static objects (like scanning lines of text). Smooth pursuit is the slow, continuous movement of the eyes when tracking a single moving target (like tracking a flying bird)."
+        "text": "In games like CS2, Valorant, and Overwatch, targets spawn in different areas of your screen. Fast saccadic eye movements let you acquire enemies instantly."
       }
     },
     {
       "@type": "Question",
-      "name": "How does this training help FPS gamers?",
+      "name": "Can you train saccadic eye movements online?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "In FPS games (like Valorant, CS2, or Call of Duty), players must constantly scan the screen, look at the minimap, check ammo, and re-acquire focus on suddenly appearing enemies. This gallery drill conditions your eyes to execute these sweeps cleanly with minimal response lag."
+        "text": "Yes. Dedicated online vision utilities condition visual search speed, reducing saccadic latency and improving click synchronization."
       }
     },
     {
       "@type": "Question",
-      "name": "Can saccadic eye training improve reading speed?",
+      "name": "Does monitor refresh rate affect saccadic training?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes. Reading requires your eyes to jump from word to word (saccades) and pause briefly to process the meaning (fixation). Saccadic exercises train your ocular muscles to make faster, more accurate jumps and reduce regressions (backtracking), which directly improves reading speed and comprehension."
+        "text": "Yes. High refresh rates (144Hz+) provide smoother target transitions during rapid eye sweeps, reducing visual motion blur."
       }
     },
     {
       "@type": "Question",
-      "name": "How do I practice saccadic eye exercises?",
+      "name": "Is Saccadic Gallery free?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "You can practice online using this Saccadic Gallery drill. Keep your head still and let only your eyes do the work as you shift focus to locate and click targets emerging sequentially across the screen."
+        "text": "Yes, all drills on SkillDrills are 100% free with no signups, downloads, or pop-up ads required."
       }
     },
     {
       "@type": "Question",
-      "name": "Does monitor refresh rate affect saccadic sweeps?",
+      "name": "What is the difference between saccadic and smooth pursuit?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes. Higher refresh rate monitors display target appearances instantly with zero ghosting. This helps your eyes lock onto the exact coordinate of the newly flashed target without visual artifacts."
+        "text": "Saccadic movements are rapid jumps between targets, whereas smooth pursuit involves smoothly tracking a moving object across space."
       }
     },
     {
       "@type": "Question",
-      "name": "Is this eye tracking training free?",
+      "name": "How does level progression work?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes, all eye exercises and reaction drills on SkillDrills are 100% free with no signups, downloads, or pop-up ads. You can practice directly in your browser."
+        "text": "Every 250 points earned levels up the drill, shortening target TTL and shrinking target radius to challenge your foveal accuracy."
       }
     },
     {
       "@type": "Question",
-      "name": "Can I play this saccadic training drill on mobile?",
+      "name": "What happens if I miss a click?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes. The Saccadic Gallery is fully touch-optimized for smartphones and tablets. It recommends landscape mode for an optimal zig-zag visual sweep layout."
+        "text": "Clicking empty background space triggers a red alert flash and a miss is logged against your accuracy — there's no score penalty, so keep going."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can traditional athletes use this drill?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Sports vision specialists use saccadic eye drills to improve peripheral awareness and reaction speed in tennis, baseball, and martial arts."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does this drill support touchscreens and mobile devices?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes! It features generous touch hitpads and automatic orientation warnings for mobile devices."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How often should I practice saccadic eye exercises?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A daily 5-minute session keeps ocular muscles agile, reduces visual fatigue, and sharpens visual scanning reflexes."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Should I move my head or only my eyes?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Keep your head still and move only your eyes. Moving only your eyes conditions true saccadic agility and faster neural processing."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is saccadic latency?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Saccadic latency is the time delay (typically 150-200ms) between the appearance of a visual target and the initiation of an eye jump."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is a good score on Saccadic Gallery?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A score above 5,000 indicates strong ocular reflexes, while scores exceeding 10,000 represent elite saccadic eye speed."
       }
     }
   ]
@@ -225,7 +248,7 @@ export default function SaccadicGalleryPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
-      <SaccadicGalleryClient />
+      <SaccadicGalleryWrapper />
     </>
   );
 }

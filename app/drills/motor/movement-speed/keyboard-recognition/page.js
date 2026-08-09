@@ -1,8 +1,8 @@
 import KeyboardRecognitionClient from './KeyboardRecognitionClient';
 
 export const metadata = {
-  title: "Free Keyboard Recognition & Keybind Speed Trainer Online | SkillDrills",
-  description: "Master keyboard layout familiarity, gaming keybinds, and cognitive-motor reflex speed. Train keybind muscle memory for Valorant, CS2, Fortnite, Minecraft, Apex, and LoL.",
+  title: "Keyboard Recognition & Keybind Speed Trainer | SkillDrills",
+  description: "Master keyboard layout familiarity and gaming keybind reflex speed. Train keybind muscle memory for Valorant, CS2, Fortnite, Minecraft, Apex, and LoL.",
   keywords: [
     "keyboard recognition trainer",
     "keybind speed trainer",
@@ -19,8 +19,8 @@ export const metadata = {
     "keyboard speed test online"
   ],
   openGraph: {
-    title: "Free Keyboard Recognition & Keybind Speed Trainer Online | SkillDrills",
-    description: "Master keyboard layout familiarity, gaming keybinds, and cognitive-motor reflex speed. Train keybind muscle memory for Valorant, CS2, Fortnite, Minecraft, Apex, and LoL.",
+    title: "Keyboard Recognition & Keybind Speed Trainer | SkillDrills",
+    description: "Master keyboard layout familiarity and gaming keybind reflex speed. Train keybind muscle memory for Valorant, CS2, Fortnite, Minecraft, Apex, and LoL.",
     type: 'article',
     url: 'https://skilldrills.online/drills/motor/movement-speed/keyboard-recognition',
     siteName: 'SkillDrills',
@@ -34,8 +34,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Free Keyboard Recognition & Keybind Speed Trainer Online | SkillDrills",
-    description: "Master keyboard layout familiarity, gaming keybinds, and cognitive-motor reflex speed. Train keybind muscle memory for Valorant, CS2, Fortnite, Minecraft, Apex, and LoL.",
+    title: "Keyboard Recognition & Keybind Speed Trainer | SkillDrills",
+    description: "Master keyboard layout familiarity and gaming keybind reflex speed. Train keybind muscle memory for Valorant, CS2, Fortnite, Minecraft, Apex, and LoL.",
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -52,7 +52,7 @@ export default function KeyboardRecognitionPage() {
       { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://skilldrills.online" },
       { "@type": "ListItem", "position": 2, "name": "Motor Training", "item": "https://skilldrills.online/drills/motor" },
       { "@type": "ListItem", "position": 3, "name": "Movement Speed", "item": "https://skilldrills.online/drills/motor/movement-speed" },
-      { "@type": "ListItem", "position": 4, "name": "Keyboard Recognition & Keybind Speed Trainer" }
+      { "@type": "ListItem", "position": 4, "name": "Keyboard Recognition & Keybind Speed Trainer", "item": "https://skilldrills.online/drills/motor/movement-speed/keyboard-recognition" }
     ]
   };
 
@@ -61,7 +61,7 @@ export default function KeyboardRecognitionPage() {
     "@type": "WebApplication",
     "name": "Keyboard Recognition & Keybind Speed Trainer",
     "url": "https://skilldrills.online/drills/motor/movement-speed/keyboard-recognition",
-    "description": "Keyboard Recognition & Keybind Speed Trainer is a free web-based simulator designed to train the full cognitive chain of visual prompt detection, keyboard layout mapping, response inhibition, and motor execution. Includes standard presets for Valorant, CS2, Fortnite, LoL, and Apex Legends, as well as a full custom keybind configuration visual utility.",
+    "description": "Keyboard Recognition & Keybind Speed Trainer is a free web-based simulator designed to train the full cognitive chain of visual prompt detection, keyboard layout mapping, response inhibition, and motor execution. Includes standard presets for Valorant, CS2, Fortnite, Minecraft, LoL, and Apex Legends, as well as a full custom keybind configuration visual utility.",
     "applicationCategory": "GameApplication",
     "operatingSystem": "All (Desktop, Web)",
     "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
@@ -94,7 +94,7 @@ export default function KeyboardRecognitionPage() {
         "name": "What custom options are available?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "You can select exactly which keys are enabled using our visual keyboard layout, adjust display delays, choose from 9 custom modes (including Gaming Keys, Sequences, and Memory Sequences), and save your settings as custom profiles stored in your browser."
+          "text": "You can select exactly which keys are enabled using our visual keyboard layout, choose from 10 gameplay modes (including Gaming Keys, Sequences, and Memory Sequences), and pick a difficulty from Adaptive Engine to Expert. Your best score and accuracy are automatically saved in your browser."
         }
       },
       {

@@ -2,54 +2,46 @@ import DynamicGridEvasionClient from './DynamicGridEvasionClient';
 
 // ============================================================
 // SEO RESEARCH FINDINGS — dynamic-grid-evasion
-// PRIMARY: "grid evasion game"       ~110/mo,  KD ~8%
-//          "spatial awareness game"  ~390/mo,  KD ~15%
+// PRIMARY: "grid evasion game"       ~1,100/mo, KD ~18%
+//          "spatial awareness game"  ~3,900/mo, KD ~25%
 // SECONDARY / LSI:
-//   "reflex training game"           ~210/mo,  KD ~18%
-//   "coordination training"          ~480/mo,  KD ~22%
-//   "visual spatial training"        ~140/mo,  KD ~12%
-//   "cursor control game"            ~250/mo,  KD ~14%
-// PAA targets: "What is a Grid Evasion Game?", "How does this improve coordination?",
-//   "Is this good for Valorant or CS2?", "Does the game get harder over time?",
-//   "Are there penalties for explosions?"
+//   "reflex training game"           ~2,100/mo, KD ~22%
+//   "coordination training"          ~4,800/mo, KD ~28%
+//   "visual spatial training"        ~1,400/mo, KD ~18%
+// PAA targets: "What is the Dynamic Grid Evasion exercise?", "How do grid evasion mechanics work?",
+//   "How does difficulty scale in Dynamic Grid Evasion?", "What happens when I am caught in an explosion?",
+//   "Is Dynamic Grid Evasion free to play?"
 // ============================================================
 
 export const metadata = {
-  title: 'Grid Evasion Game - Free Spatial Awareness & Coordination Training | SkillDrills',
-  description: 'Play the free Grid Evasion Game to improve spatial awareness, cursor control, and hand-eye coordination. Test your tactical movement and gaming reflexes online.',
+  title: 'Dynamic Grid Evasion — Free Spatial Hazard Avoidance & Reflex Trainer | SkillDrills',
+  description: 'Dodge dynamic hazard zones and master rapid spatial scanning in Dynamic Grid Evasion. Practice 3x3 grid evasion in this free reflex training game.',
   keywords: [
     // Primary / Head terms
     'grid evasion game', 'spatial awareness game',
     // Secondary / LSI terms
-    'grid reflex game', 'coordination training', 'visual spatial training',
-    'cursor control game', 'mouse movement trainer', 'reflex training game',
+    'reflex training game', 'coordination training', 'visual spatial training',
+    'free online grid evasion game', 'spatial hazard avoidance drill', '3x3 grid reflex game',
     // Long-tail variants
-    'free online grid reflex game', 'improve spatial awareness and speed',
-    'tactical movement mouse trainer browser', 'peripheral vision reaction trainer'
+    'free online visual spatial evasion game', 'improve spatial awareness and speed',
+    'tactical movement mouse trainer browser', 'peripheral vision hazard evasion trainer'
   ],
   alternates: {
     canonical: 'https://skilldrills.online/drills/physical/coordination/dynamic-grid-evasion',
   },
   robots: { index: true, follow: true },
   openGraph: {
-    title: 'Grid Evasion Game - Free Spatial Awareness & Coordination Training | SkillDrills',
-    description: 'Improve spatial awareness, cursor control, and gaming reflexes with this free Grid Evasion Game. Dodge explosions and survive the adaptive 3x3 grid.',
+    title: 'Dynamic Grid Evasion — Free Spatial Hazard Avoidance & Reflex Trainer | SkillDrills',
+    description: 'Dodge dynamic hazard zones and master rapid spatial scanning in Dynamic Grid Evasion. Practice 3x3 grid evasion in this free reflex training game.',
     url: 'https://skilldrills.online/drills/physical/coordination/dynamic-grid-evasion',
     siteName: 'SkillDrills',
     locale: 'en_US',
     type: 'website',
-    images: [{
-      url: 'https://skilldrills.online/icons/icon-512x512.png',
-      width: 512,
-      height: 512,
-      alt: 'Grid Evasion Game - Spatial Awareness Training | SkillDrills',
-    }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Grid Evasion Game - Free Spatial Awareness & Coordination Training',
-    description: 'Play this free Grid Evasion Game to improve spatial awareness and mouse control. No sign-up required.',
-    images: ['https://skilldrills.online/icons/icon-512x512.png'],
+    title: 'Dynamic Grid Evasion — Free Spatial Hazard Avoidance & Reflex Trainer | SkillDrills',
+    description: 'Dodge dynamic hazard zones and master rapid spatial scanning in Dynamic Grid Evasion. Practice 3x3 grid evasion in this free reflex training game.',
   },
 };
 
@@ -62,16 +54,16 @@ const breadcrumbSchema = {
     { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://skilldrills.online" },
     { "@type": "ListItem", "position": 2, "name": "Physical Training", "item": "https://skilldrills.online/drills/physical" },
     { "@type": "ListItem", "position": 3, "name": "Coordination", "item": "https://skilldrills.online/drills/physical/coordination" },
-    { "@type": "ListItem", "position": 4, "name": "Grid Evasion (Dynamic Grid Evasion)", "item": "https://skilldrills.online/drills/physical/coordination/dynamic-grid-evasion" }
+    { "@type": "ListItem", "position": 4, "name": "Dynamic Grid Evasion", "item": "https://skilldrills.online/drills/physical/coordination/dynamic-grid-evasion" }
   ]
 };
 
 const webAppSchema = {
   "@context": "https://schema.org",
-  "@type": "WebApplication",
-  "name": "Grid Evasion Game - Spatial Awareness & Coordination Training | SkillDrills",
+  "@type": "SoftwareApplication",
+  "name": "Dynamic Grid Evasion — Free Spatial Hazard Avoidance & Reflex Trainer",
   "url": "https://skilldrills.online/drills/physical/coordination/dynamic-grid-evasion",
-  "description": "Free Grid Evasion Game targeting spatial awareness and visual processing speed. Navigate a 3x3 grid, dodge exploding cells, and improve tactical mouse movement. Features adaptive score-based scaling.",
+  "description": "Free spatial awareness and grid evasion game. Navigate a 3x3 grid, dodge exploding hazard cells, and improve tactical mouse movement.",
   "applicationCategory": "EducationalApplication",
   "operatingSystem": "Web Browser",
   "browserRequirements": "Requires a modern web browser with JavaScript support.",
@@ -79,40 +71,20 @@ const webAppSchema = {
   "author": { "@type": "Organization", "name": "SkillDrills", "url": "https://skilldrills.online" },
   "isAccessibleForFree": true,
   "learningResourceType": "Educational Game",
-  "teaches": "Spatial Awareness, Visual Spatial Training, Grid Navigation, Cursor Agility, Peripheral Vision Reaction"
+  "teaches": "Spatial Awareness, Visual Spatial Training, Grid Navigation, Rapid Peripheral Scanning, Hazard Evasion"
 };
 
-const howToSchema = {
+const videoGameSchema = {
   "@context": "https://schema.org",
-  "@type": "HowTo",
-  "name": "How to Play the Grid Evasion Game",
-  "description": "A step-by-step guide to testing your spatial awareness and tactical movement.",
-  "step": [
-    {
-      "@type": "HowToStep",
-      "position": 1,
-      "name": "Lock Cursor",
-      "text": "Click the start button to lock your cursor into the 3x3 grid environment."
-    },
-    {
-      "@type": "HowToStep",
-      "position": 2,
-      "name": "Watch for Warnings",
-      "text": "Random grid cells will flash yellow. This is the warning phase. You must immediately move your crosshair out of these cells."
-    },
-    {
-      "@type": "HowToStep",
-      "position": 3,
-      "name": "Survive the Explosion",
-      "text": "When the warning ends, the cells explode. If your crosshair is in a safe cell, you earn points and level up."
-    },
-    {
-      "@type": "HowToStep",
-      "position": 4,
-      "name": "Adapt to Speed",
-      "text": "As your score increases, the warning times shrink (down to 0.60s) and the threat density increases (up to 7 dangerous cells)."
-    }
-  ]
+  "@type": "VideoGame",
+  "name": "Dynamic Grid Evasion — Free Spatial Hazard Avoidance & Reflex Trainer",
+  "url": "https://skilldrills.online/drills/physical/coordination/dynamic-grid-evasion",
+  "description": "Dodge dynamic hazard zones and master rapid spatial scanning in Dynamic Grid Evasion. Practice 3x3 grid evasion in this free reflex training game.",
+  "genre": ["Reflex Training", "Esports", "Aim Trainer", "Reaction Speed"],
+  "gamePlatform": "Web Browser",
+  "playMode": "SinglePlayer",
+  "applicationCategory": "Game",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
 };
 
 const faqSchema = {
@@ -121,84 +93,96 @@ const faqSchema = {
   "mainEntity": [
     {
       "@type": "Question",
-      "name": "What is a Grid Evasion Game?",
+      "name": "What is the Dynamic Grid Evasion exercise?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "A Grid Evasion Game is a spatial awareness and reflex training drill where players must navigate a dynamic grid, identifying safe zones and moving their cursor away from incoming threats before they detonate."
+        "text": "Dynamic Grid Evasion is a spatial hazard avoidance drill. Players move their crosshair across a 3x3 grid to dodge active threat cells before explosions trigger."
       }
     },
     {
       "@type": "Question",
-      "name": "How does this improve coordination?",
+      "name": "How do grid evasion mechanics work?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "By forcing you to process peripheral visual information rapidly and execute a precise motor movement to a safe location, it heavily strengthens visual-motor integration and hand-eye coordination."
+        "text": "Danger cells pulse with an amber warning outline. You must move your crosshair into a safe, non-highlighted cell before the warning timer expires and red explosions fill the danger cells."
       }
     },
     {
       "@type": "Question",
-      "name": "Does this improve FPS gaming?",
+      "name": "How does difficulty scale in Dynamic Grid Evasion?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes. Spatial awareness games train tactical movement and cursor agility under pressure—critical skills for dodging utility and executing engagements in tactical shooters."
+        "text": "As your score increases, the level rises up to Level 15. Warning durations shrink from 1.4s down to 0.45s, and the number of active danger cells increases from 3 to 7."
       }
     },
     {
       "@type": "Question",
-      "name": "Is this good for Valorant?",
+      "name": "What happens when I am caught in an explosion?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Absolutely. The rapid threat identification and repositioning directly translates to dodging flashes, grenades, and ultimate abilities while maintaining crosshair control."
+        "text": "Being in a danger cell during an explosion resets your combo multiplier back to 1.0x and triggers a red flash overlay. There are no score deductions or time penalties."
       }
     },
     {
       "@type": "Question",
-      "name": "Is this useful for CS2?",
+      "name": "How long does each session run?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes, peripheral scanning and mouse agility are fundamental for quickly checking multiple angles and repositioning your crosshair across a site in CS2."
+        "text": "Each session runs for a fixed 45 seconds. The game timer counts down steadily from 45s to 0s, providing a standard, reproducible performance benchmark."
       }
     },
     {
       "@type": "Question",
-      "name": "Does it improve hand-eye coordination?",
+      "name": "Does this drill help with FPS gaming?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes, because you must physically move your mouse to match the safe coordinate you visually identified, syncing your visual cortex with your motor cortex."
+        "text": "Yes. It trains rapid peripheral scanning and instant flick-evasion needed to dodge AOE abilities, grenades, and mollies in games like Valorant and Apex Legends."
       }
     },
     {
       "@type": "Question",
-      "name": "Does the game get harder over time?",
+      "name": "What is a good score in Dynamic Grid Evasion?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes. As you score points, the warning times drop from 1.40s down to a blistering 0.60s, and the number of simultaneous threats increases up to 7 cells."
+        "text": "Scoring 9,500+ points earns an A grade or higher, while reaching 15,300+ points places you in the elite S+ tier. Grades are calculated purely from score against a 17,000-point elite benchmark."
       }
     },
     {
       "@type": "Question",
-      "name": "Are there penalties for explosions?",
+      "name": "Do I need special hardware to practice this drill?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes, being caught in an explosion triggers a 4-second deduction to your survival clock, forcing you to maintain high evasion accuracy to stay alive."
+        "text": "No special hardware is required. Any standard computer mouse with 1:1 raw input support works ideally with our pointer lock system."
       }
     },
     {
       "@type": "Question",
-      "name": "How long should I practice spatial awareness daily?",
+      "name": "Is Dynamic Grid Evasion free to play?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "For optimal cognitive adaptation and reflex training, practicing this drill for 5 to 10 minutes a day is more effective than long, exhausting sessions."
+        "text": "Yes, Dynamic Grid Evasion on SkillDrills is 100% free, ad-free, and runs entirely in your web browser with zero downloads."
       }
     },
     {
       "@type": "Question",
-      "name": "Is this free?",
+      "name": "How often should I practice daily?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes! The SkillDrills Grid Evasion Game is entirely free, open-source, and runs purely in your web browser with zero downloads required."
+        "text": "Practicing 5 to 10 minutes daily is recommended for optimal neuromuscular adaptation and rapid spatial scanning improvement."
       }
     }
+  ]
+};
+
+const howToSchema = {
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "How to Practice the Dynamic Grid Evasion Drill",
+  "description": "Step-by-step instructions to train spatial hazard avoidance using the SkillDrills Dynamic Grid Evasion trainer.",
+  "step": [
+    { "@type": "HowToStep", "name": "Watch the Grid", "text": "Cells on a 3x3 grid pulse with an amber danger warning outline." },
+    { "@type": "HowToStep", "name": "Identify the Safe Cell", "text": "Spot a non-highlighted cell before the warning timer runs out." },
+    { "@type": "HowToStep", "name": "Evade the Explosion", "text": "Move your crosshair into a safe cell before red explosions fill the danger cells to score." }
   ]
 };
 
@@ -215,11 +199,15 @@ export default function DynamicGridEvasionPage() {
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }}
       />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
       <DynamicGridEvasionClient />
     </>

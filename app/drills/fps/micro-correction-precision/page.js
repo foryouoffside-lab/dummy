@@ -1,8 +1,8 @@
 import MicroCorrectionClient from './MicroCorrectionClient';
 
 export const metadata = {
-  title: "Micro-Adjustment Aim Trainer - Precision Drill | SkillDrills",
-  description: "Refine your headshot accuracy with our Micro-Adjustment Aim Trainer. Eliminate overflicking and improve snap deceleration and precision clicks.",
+  title: "Micro-Correction Aim Trainer | SkillDrills",
+  description: "Refine your headshot accuracy with our Micro-Correction Aim Trainer. Eliminate overflicking and improve snap deceleration and precision clicks.",
   keywords: [
     "micro-adjustment aim training",
     "micro-correction aim practice",
@@ -27,26 +27,17 @@ export const metadata = {
     follow: true,
   },
   openGraph: {
-    title: "Micro-Adjustment Aim Trainer - Precision Drill | SkillDrills",
-    description: "Refine your headshot accuracy with our Micro-Adjustment Aim Trainer. Eliminate overflicking and improve snap deceleration and precision clicks.",
+    title: "Micro-Correction Aim Trainer | SkillDrills",
+    description: "Refine your headshot accuracy with our Micro-Correction Aim Trainer. Eliminate overflicking and improve snap deceleration and precision clicks.",
     url: "https://skilldrills.online/drills/fps/micro-correction-precision",
     siteName: 'SkillDrills',
     locale: 'en_US',
     type: 'website',
-    images: [
-      {
-        url: 'https://skilldrills.online/icons/icon-512x512.png',
-        width: 512,
-        height: 512,
-        alt: "Micro-Adjustment Aim Trainer - Precision Drill",
-      },
-    ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Micro-Adjustment Aim Trainer - Precision Drill | SkillDrills",
-    description: "Refine your headshot accuracy with our Micro-Adjustment Aim Trainer. Eliminate overflicking and improve snap deceleration and precision clicks.",
-    images: ['https://skilldrills.online/icons/icon-512x512.png'],
+    title: "Micro-Correction Aim Trainer | SkillDrills",
+    description: "Refine your headshot accuracy with our Micro-Correction Aim Trainer. Eliminate overflicking and improve snap deceleration and precision clicks.",
   },
 };
 
@@ -57,14 +48,14 @@ export default function MicroCorrectionPage() {
     "itemListElement": [
       { "@type": "ListItem", "position": 1, "name": "SkillDrills", "item": "https://skilldrills.online/" },
       { "@type": "ListItem", "position": 2, "name": "FPS Drills", "item": "https://skilldrills.online/drills/fps" },
-      { "@type": "ListItem", "position": 3, "name": "Micro-Adjustment Aim Trainer", "item": "https://skilldrills.online/drills/fps/micro-correction-precision" }
+      { "@type": "ListItem", "position": 3, "name": "Micro-Correction Aim Trainer", "item": "https://skilldrills.online/drills/fps/micro-correction-precision" }
     ]
   };
 
   const softwareSchema = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
-    "name": "Micro-Adjustment Aim Trainer",
+    "name": "Micro-Correction Aim Trainer",
     "applicationCategory": "GameApplication",
     "operatingSystem": "Web Browser",
     "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
@@ -78,48 +69,142 @@ export default function MicroCorrectionPage() {
     }
   };
 
+  const videoGameSchema = {
+    "@context": "https://schema.org",
+    "@type": "VideoGame",
+    "name": "Micro-Correction Aim Trainer",
+    "url": "https://skilldrills.online/drills/fps/micro-correction-precision",
+    "description": "A free browser FPS drill training micro-corrections, snap deceleration after large flicks, and precision headshot consistency for tactical shooters.",
+    "gamePlatform": "Web Browser",
+    "genre": ["FPS Training", "Aim Trainer"],
+    "playMode": "SinglePlayer",
+    "applicationCategory": "Game",
+    "operatingSystem": "Web Browser",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+  };
+
   const faqSchema = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
     "mainEntity": [
       {
         "@type": "Question",
-        "name": "What is a micro-correction in FPS aiming?",
+        "name": "What is a micro-correction in aiming?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "A micro-correction is the small, precise mouse adjustment made immediately after a large flick to land exactly on a target. Most players overshoot or undershoot during flick shots and then apply a micro-adjustment to correct onto the hitbox. Training micro-corrections reduces the correction distance and makes the final adjustment faster and more accurate."
+          "text": "A micro-correction is a tiny, precise adjustment made to your crosshair position after your initial flick aim lands close to the target. It bridges the gap between a fast flick and a perfect headshot, which is critical in tactical shooters like Valorant and CS2."
         }
       },
       {
         "@type": "Question",
-        "name": "Why do I keep overflicking my targets in Valorant?",
+        "name": "How do I improve headshot accuracy?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Overflicking happens when your flick speed exceeds your deceleration control. Your muscle memory moves fast enough but cannot brake precisely on the target. This drill trains the deceleration phase of the flick — teaching your wrist and arm to recognize the correct stopping point and apply only the micro-adjustment needed rather than a full correction."
+          "text": "Improve headshot accuracy by practicing crosshair placement, training mouse deceleration to stop flicks cleanly, using micro-correction drills to refine your aim on tiny targets, and ensuring target confirmation before clicking."
         }
       },
       {
         "@type": "Question",
-        "name": "How is micro-correction training different from flick training?",
+        "name": "Why do I overflick targets?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Flick training builds speed — how fast you move your crosshair from A to B. Micro-correction training builds precision — how accurately you stop on B after the movement. They are complementary but distinct skills. Pro players practice both: raw flick speed to get close, and micro-correction precision to land on the exact pixel."
+          "text": "Overflicking is caused by poor mouse deceleration control, tensing your muscles, or running an excessively high sensitivity. Training micro-correction helps build the motor control to stop the mouse exactly on target."
         }
       },
       {
         "@type": "Question",
-        "name": "What games benefit most from micro-correction precision training?",
+        "name": "What is mouse deceleration?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Tactical shooters with low TTK benefit most: Valorant (rifles, headshots are instant kills), CS2 (rifle and pistol headshots), Rainbow Six Siege (headshot-only gameplay), FragPunk, and Spectre Divide. In these games, landing the first shot precisely is more important than DPS or spray control."
+          "text": "Mouse deceleration is the mechanical skill of stopping your mouse quickly and stably at the end of a swipe. Developing deceleration control prevents your crosshair from sliding past the enemy model."
         }
       },
       {
         "@type": "Question",
-        "name": "How long until I see improvement in headshot accuracy?",
+        "name": "How do pro Valorant players aim?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Most players notice measurable headshot accuracy improvement within 1-2 weeks of daily 10-15 minute sessions. Full integration into ranked play typically takes 3-4 weeks. Focus on precision over speed during the first two weeks — the speed naturally increases as precision becomes automatic."
+          "text": "Professional Valorant players aim by keeping their crosshair at head-height (crosshair placement), executing clean flicks close to the target, making immediate micro-corrections, and timing their clicks perfectly."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do CS2 players train precision?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "CS2 players train precision using tactical aim drills, practicing counter-strafing timing, refining their crosshair micro-adjustments, and repeating click-timing patterns on static micro-targets."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can micro-correction drills improve aim?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Most players miss targets because their initial flick is slightly off. Micro-correction drills train the brain and hand muscles to automatically adjust and hit the target center, increasing hit consistency."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Why do I miss easy headshots?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Missing headshots is usually due to clicking before your crosshair has fully stopped on the target's center (poor click-timing) or failing to correct a near-miss flick."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is target confirmation?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Target confirmation is the cognitive split-second where your visual cortex registers that the crosshair is locked onto the target model before you trigger your index finger to click/shoot."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is precision aiming?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Precision aiming is the mechanical capacity to hit extremely small targets consistently. It depends on fine motor control of the wrist and fingers, low-friction mouse movements, and disciplined click timing."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How often should I train micro-corrections?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "We recommend training micro-corrections for 10–15 minutes daily as part of your FPS warm-up routine, or up to 30 minutes for a dedicated mechanical accuracy training session."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can this improve flick accuracy?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. By training the deceleration and correction phase, your muscle memory learns to flick close and transition smoothly into a micro-flick adjustment rather than overshooting."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does this help tactical shooters?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Definitely. Tactical shooters like Valorant, CS2, Rainbow Six Siege, Spectre Divide, and FragPunk rely heavily on low-TTK headshots, making micro-adjustments the most common aiming mechanic in gunfights."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is this aim trainer free?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, this Micro-Correction Precision Aim Trainer is 100% free, runs in any desktop browser using raw hardware pointer input, and contains no ads."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What skills does this drill improve?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "This drill improves micro-flicking adjustments, click timing, snap deceleration, target reacquisition speed, headshot precision, and consistency under pressure."
         }
       }
     ]
@@ -163,6 +248,12 @@ export default function MicroCorrectionPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }}
       />
 
+      {/* VideoGame Schema */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }}
+      />
+
       {/* FAQPage Schema */}
       <script
         type="application/ld+json"
@@ -179,4 +270,3 @@ export default function MicroCorrectionPage() {
     </>
   );
 }
-

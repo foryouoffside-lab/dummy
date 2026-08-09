@@ -123,8 +123,8 @@ const howToSchema = {
     {
       "@type": "HowToStep",
       "position": 4,
-      "name": "Build High Combos",
-      "text": "Maintain your accuracy in both channels to build multipliers. Missing targets or matching incorrect numbers breaks your combo."
+      "name": "Protect Your Lives",
+      "text": "You start each session with 5 lives. Missing a target or matching an incorrect number costs one life, so maintain accuracy in both channels to last the full 45 seconds."
     }
   ]
 };
@@ -161,13 +161,11 @@ export const metadata = {
     siteName: 'SkillDrills',
     locale: 'en_US',
     type: 'website',
-    images: [{ url: 'https://skilldrills.online/icons/icon-512x512.png', width: 512, height: 512, alt: "Divided Attention Test – Dual-Task Split Focus Brain Game" }],
   },
   twitter: {
     card: 'summary_large_image',
     title: "Divided Attention Test – Free Dual-Task Split Focus Game | SkillDrills",
     description: "Test and train divided attention online. Track two visual stimulus streams simultaneously in this free dual-task split focus brain game. No sign-up required.",
-    images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
 };
 

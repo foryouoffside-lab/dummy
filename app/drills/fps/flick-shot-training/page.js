@@ -35,20 +35,11 @@ export const metadata = {
     siteName: 'SkillDrills',
     locale: 'en_US',
     type: 'website',
-    images: [
-      {
-        url: 'https://skilldrills.online/icons/icon-512x512.png',
-        width: 512,
-        height: 512,
-        alt: "Flick Shot Trainer - Snap Aim Practice",
-      },
-    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: "Flick Shot Trainer - Snap Aim Practice | SkillDrills",
     description: "Train your snap aim and muscle memory with our online Flick Shot Trainer. Perfect for Valorant, CS2, and Apex Legends players looking to improve speed.",
-    images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
 };
 
@@ -59,14 +50,14 @@ export default function FlickShotPage() {
     "itemListElement": [
       { "@type": "ListItem", "position": 1, "name": "SkillDrills", "item": "https://skilldrills.online/" },
       { "@type": "ListItem", "position": 2, "name": "FPS Drills", "item": "https://skilldrills.online/drills/fps" },
-      { "@type": "ListItem", "position": 3, "name": "Flick Shot Trainer", "item": "https://skilldrills.online/drills/fps/flick-shot-training" }
+      { "@type": "ListItem", "position": 3, "name": "Pro Flick Trainer", "item": "https://skilldrills.online/drills/fps/flick-shot-training" }
     ]
   };
 
   const softwareSchema = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
-    "name": "Flick Shot Trainer",
+    "name": "Pro Flick Trainer",
     "applicationCategory": "GameApplication",
     "operatingSystem": "Web Browser",
     "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
@@ -80,48 +71,157 @@ export default function FlickShotPage() {
     }
   };
 
+  const videoGameSchema = {
+    "@context": "https://schema.org",
+    "@type": "VideoGame",
+    "name": "Pro Flick Trainer",
+    "url": "https://skilldrills.online/drills/fps/flick-shot-training",
+    "description": "A free browser-based FPS aim trainer for improving flick shots, snap aim, and rapid target acquisition for competitive shooters.",
+    "gamePlatform": "Web Browser",
+    "genre": ["FPS Training", "Aim Trainer"],
+    "playMode": "SinglePlayer",
+    "applicationCategory": "Game",
+    "operatingSystem": "Web Browser"
+  };
+
   const faqSchema = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
     "mainEntity": [
       {
         "@type": "Question",
-        "name": "What is a flick shot in FPS games?",
+        "name": "What is flick aim?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "A flick shot is a rapid, large mouse movement that snaps your crosshair from its current position directly onto a target, followed immediately by a click. Unlike tracking shots, flick shots are instantaneous — you move to the target and shoot in a single motion. They are critical in tactical FPS games where standing still and shooting is safer than tracking while moving."
+          "text": "Flick aim is the mechanical ability to quickly snap your crosshair to a target outside of your immediate focus area using a single, swift mouse movement."
         }
       },
       {
         "@type": "Question",
-        "name": "How does this flick shot trainer improve aim?",
+        "name": "How do I improve flick aim?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "The drill presents targets at randomized positions, requiring you to quickly sweep your mouse from your current position and click the target accurately. This directly trains the neural pathway between target detection and motor execution — the exact pathway that determines your flick reaction speed in Valorant and CS2."
+          "text": "Improve flick aim by practicing raw input drills that penalize misses and reward speed, forcing you to map the physical mousepad space to your monitor accurately."
         }
       },
       {
         "@type": "Question",
-        "name": "Is this better than AimLabs for flick shot training?",
+        "name": "What is a good flick accuracy?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "SkillDrills runs entirely in your browser with no download, no account, and no subscription. It uses raw hardware pointer lock input for accurate mouse feel. It is ideal for quick warm-up sessions before ranked play, especially when you want fast access without launching a separate application."
+          "text": "A good baseline flick accuracy is around 70%. Advanced players aim for 80%+, while professional esports players maintain 90%+ precision during high-speed target acquisition."
         }
       },
       {
         "@type": "Question",
-        "name": "How do I improve my flick shot consistency?",
+        "name": "Does flick training help Valorant?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Consistency improves through daily deliberate practice at your actual in-game sensitivity. Avoid randomly changing your DPI or sensitivity during training. Focus on landing each flick as close to center-mass as possible rather than speed alone. After 2-3 weeks of consistent daily training, flick accuracy transfers to real gameplay."
+          "text": "Yes, Valorant heavily relies on crosshair placement and first-shot accuracy. Flick training improves your ability to react and snap to off-angle enemies instantly."
         }
       },
       {
         "@type": "Question",
-        "name": "What sensitivity is best for flick shot training?",
+        "name": "Does flick training help CS2?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Train at your real in-game sensitivity so your muscle memory transfers directly. Most Valorant players train flicks at 400-800 DPI with 0.3-0.5 in-game sensitivity. CS2 players typically train at eDPI values between 400-1000. The best sensitivity is the one you use in real matches."
+          "text": "Absolutely. Counter-Strike requires immense micro and macro flicking, especially with AWPing or reacting to unexpected peekers."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can flick aim be learned?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, flick aim is a physical motor skill. Through repetitive practice with zero hardware acceleration, you develop muscle memory that makes flicking subconscious."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How long should I practice?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Aim for 15-20 minutes of dedicated flick aim training daily before playing competitive matches to optimize muscle memory retention without causing fatigue."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Should I use arm aim?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "For macro-flicks (large distances across the screen), arm aiming is generally preferred as it provides better stability and consistency on low sensitivities."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Should I use wrist aim?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Wrist and fingertip aiming should be used for micro-flicks and fine adjustments once your arm brings the crosshair near the target."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How important is sensitivity?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Sensitivity is crucial. You must find a consistent sensitivity (eDPI) and stick to it so your brain can properly map physical hand movement to virtual crosshair movement."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can aim trainers improve rank?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, aim trainers isolate mechanical flaws. By improving your raw mechanical skill, you win more aim duels, which naturally translates to ranking up."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is target acquisition?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Target acquisition is the combined cognitive and physical process of visually locating an enemy and moving your crosshair onto them."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is snap aiming?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Snap aiming is another term for flicking. It emphasizes the fast, abrupt 'snapping' motion of the crosshair onto a target."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Why do I overshoot targets?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Overshooting usually means your sensitivity is too high, or you haven't built enough stopping power (deceleration control) in your wrist."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do pro players train aim?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Pros use a combination of dedicated aim trainers (like this one), in-game deathmatches, and routine warmup regimens to maintain peak mechanical precision."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does the scoring system work?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Hits grant base points multiplied by your combo multiplier and level multiplier. Misses and timeouts reset your combo multiplier."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does the drill get harder while I'm on a streak?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Beyond the 15-level curve, a live streak 'heat' system shrinks targets and speeds up spawns the longer your hit streak runs, capping out at the same 50-combo streak that maxes your score multiplier. A miss cools the heat back to your level's baseline, so a hot run never gets easier to sustain."
         }
       }
     ]
@@ -153,32 +253,27 @@ export default function FlickShotPage() {
 
   return (
     <>
-      {/* Breadcrumb Schema */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
-
-      {/* SoftwareApplication Schema */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }}
       />
-
-      {/* FAQPage Schema */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
-
-      {/* HowTo Schema */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-
       <ProFlickClient />
     </>
   );
 }
-

@@ -1,22 +1,29 @@
 import AntiZigzagClient from './AntiZigzagClient';
 
 export const metadata = {
-  title: "Anti-Zigzag Movement Trainer - FPS Aim Training | SkillDrills",
-  description: "Master target tracking and movement prediction against unpredictable zig-zag strafing, slides, crouch spam, and fake-outs in modern FPS shooters.",
+  title: "Anti-Zigzag Aim Trainer — Evasive Strafe | SkillDrills",
+  description: "Master reactive tracking against erratic zigzag movement, slide cancels, and desync strafing in Apex Legends, Warzone, and Call of Duty Mobile.",
   keywords: [
-    "anti-zigzag movement trainer",
-    "anti-strafe training",
-    "movement prediction aim trainer",
-    "fps aim training",
-    "target tracking drill",
-    "zig-zag aim trainer",
-    "apex legends tracking practice",
-    "call of duty mobile aim training",
-    "reactive tracking trainer",
-    "mouse control training",
-    "valorant tracking drill",
-    "cs2 tracking practice",
-    "free aim trainer online"
+    "anti zigzag movement trainer",
+    "codm zigzag tracking drill",
+    "evasive strafe tracking aim trainer",
+    "apex legends anti zigzag practice",
+    "warzone slide cancel tracking",
+    "v crossover aiming drill",
+    "desync strafe counter aim trainer",
+    "free anti zigzag tracking drill",
+    "reactive direction swap aim practice",
+    "high ttk tracking trainer",
+    "cod mobile strafe aim trainer",
+    "fps erratic movement drill",
+    "valorant anti strafe trainer",
+    "cs2 anti zigzag practice",
+    "the finals tracking drill",
+    "call of duty anti strafe",
+    "hardware raw input anti zigzag",
+    "continuous strafe tracking aim",
+    "anti overflicking tracking trainer",
+    "fine motor reactive control drill"
   ],
   alternates: {
     canonical: "https://skilldrills.online/drills/fps/anti-zigzag-movement-trainer",
@@ -26,30 +33,21 @@ export const metadata = {
     follow: true,
   },
   openGraph: {
-    title: "Anti-Zigzag Movement Trainer - FPS Aim Training | SkillDrills",
-    description: "Master target tracking and movement prediction against unpredictable zig-zag strafing, slides, crouch spam, and fake-outs in modern FPS shooters.",
+    title: "Anti-Zigzag Aim Trainer — Evasive Strafe | SkillDrills",
+    description: "Master reactive tracking against erratic zigzag movement, slide cancels, and desync strafing in Apex Legends, Warzone, and Call of Duty Mobile.",
     url: "https://skilldrills.online/drills/fps/anti-zigzag-movement-trainer",
     siteName: 'SkillDrills',
     locale: 'en_US',
     type: 'website',
-    images: [
-      {
-        url: 'https://skilldrills.online/icons/icon-512x512.png',
-        width: 512,
-        height: 512,
-        alt: "Anti-Zigzag Movement Trainer - FPS Aim Training",
-      },
-    ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Anti-Zigzag Movement Trainer - FPS Aim Training | SkillDrills",
-    description: "Master target tracking and movement prediction against unpredictable zig-zag strafing, slides, crouch spam, and fake-outs in modern FPS shooters.",
-    images: ['https://skilldrills.online/icons/icon-512x512.png'],
+    title: "Anti-Zigzag Aim Trainer — Evasive Strafe | SkillDrills",
+    description: "Master reactive tracking against erratic zigzag movement, slide cancels, and desync strafing in Apex Legends, Warzone, and Call of Duty Mobile.",
   },
 };
 
-export default function AntiZigzagMovementPage() {
+export default function AntiZigzagPage() {
   const breadcrumbSchema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -67,8 +65,8 @@ export default function AntiZigzagMovementPage() {
     "applicationCategory": "GameApplication",
     "operatingSystem": "Web Browser",
     "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-    "description": "A free browser-based FPS drill designed to train target tracking, reactive aim corrections, and movement prediction against human-like zig-zag movement, slide, jump, and crouch spam patterns.",
-    "genre": "FPS Training / Reactive Tracking",
+    "description": "Master reactive tracking against erratic zigzag movement, slide cancels, and desync strafing.",
+    "genre": "FPS Training / Anti-Zigzag",
     "url": "https://skilldrills.online/drills/fps/anti-zigzag-movement-trainer",
     "publisher": {
       "@type": "Organization",
@@ -77,40 +75,142 @@ export default function AntiZigzagMovementPage() {
     }
   };
 
+  const videoGameSchema = {
+    "@context": "https://schema.org",
+    "@type": "VideoGame",
+    "name": "Anti-Zigzag Movement Trainer",
+    "url": "https://skilldrills.online/drills/fps/anti-zigzag-movement-trainer",
+    "description": "Master reactive tracking against erratic zigzag movement, slide cancels, and desync strafing.",
+    "gamePlatform": "Web Browser",
+    "genre": ["FPS Training", "Aim Trainer"],
+    "playMode": "SinglePlayer",
+    "applicationCategory": "Game",
+    "operatingSystem": "Web Browser",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+  };
+
   const faqSchema = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
     "mainEntity": [
       {
         "@type": "Question",
-        "name": "What is anti-zigzag aim training in FPS games?",
+        "name": "Why do players zigzag in CODM?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Anti-zigzag aim training focuses on tracking targets that change speed and direction erratically. Rather than following smooth paths, targets perform left-right strafes, sudden crouches, jump-strafes, and sliding dashes. This drill develops the player's reactive visual tracking and rapid micro-adjustments to keep their crosshair locked on targets utilizing evasive movement techniques."
+          "text": "It throws off aim assist, desyncs the physical hitbox from the visual character model, and forces you to waste ammunition trying to track wide, unpredictable sweeps."
         }
       },
       {
         "@type": "Question",
-        "name": "Why is zig-zag tracking harder than standard tracking?",
+        "name": "Should I zigzag back during gunfights?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Standard tracking relies on smooth pursuit, where the target's trajectory is predictable. Zig-zag tracking forces the brain into reactive pursuit. When a target suddenly changes direction or accelerates, the player undergoes a visual reaction delay (typically 150-250ms). Training this drill reduces overflicking and improves recovery speed to reacquire the target."
+          "text": "Yes and no. While strafing is vital, excessive zigzagging without proper crosshair alignment will ruin your own aim. Good players balance evasion with precision."
         }
       },
       {
         "@type": "Question",
-        "name": "How does target tracking benefit Apex Legends and CoD: Mobile players?",
+        "name": "Is this drill for touch screen or mouse?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "High time-to-kill (TTK) shooters like Apex Legends, Warzone, and Call of Duty: Mobile require continuous damage application to confirm kills. Skilled opponents use aggressive slide-jumping, crouch spamming, and zig-zag strafing to throw off your aim. Training with human-like movement variables directly builds the muscle memory needed to track these high-speed evasion techniques."
+          "text": "Both. The engine dynamically scales the target sizes and hitboxes depending on whether you are swiping on a mobile device or aiming with a desktop mouse."
         }
       },
       {
         "@type": "Question",
-        "name": "What is the best mouse sensitivity for tracking evasive targets?",
+        "name": "How do I get a higher accuracy score?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Tracking benefit from moderate to low sensitivities (typically between 25cm to 45cm per 360). High sensitivities cause cursor jitter and overflicking, whereas extremely low sensitivities require excessive physical effort to follow rapid 180-degree changes. The universal sensitivity slider on this drill allows you to match your preferred in-game settings."
+          "text": "Stop predicting. Reactive tracking means letting your eyes process the direction change first, then snapping to the target. Predicting leads to over-flicking."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the V-crossover point?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "It's the center of a zigzag strafe path. Instead of chasing the target to each extreme, aim at where the target crosses through the middle of its movement arc."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does the level progression work?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Every 150 points increases the level. Higher levels make targets smaller, faster, and perform more frequent direction changes with less time before escape."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What sensitivity should I use?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "For tracking, moderate to low sensitivity (25–45 cm/360) works best. Use the universal sensitivity slider to match your in-game settings before starting."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Do I need to click to damage the target?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. This drill uses pure dwell-tracking — hold your crosshair inside the target's hitbox and its health drains automatically for as long as you stay locked on. Break contact and the drain pauses until you reacquire it."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What stats does this drill track?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Each run logs your tracking accuracy (frames on-target versus total frames), targets destroyed, targets that escaped, your best combo streak, and the peak level reached — all shown on the results screen after time runs out."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can this improve my Apex Legends tracking?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes significantly. Apex fights require 0.5–2s of continuous tracking to confirm kills. Training reactive tracking against direction changes directly improves your damage output."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What causes the target to escape?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Each target has a lifespan timer (shown as a red arc). If you don't deplete its health before the timer runs out, it escapes and you lose 1 second from your clock."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does the combo multiplier work?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Every full second of unbroken crosshair lock adds +1 to your combo, which raises your score multiplier at fixed thresholds (3, 5, 7, 10, 15, 20, 30, and 50). Losing lock for a full second resets the combo back to zero."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does this help with recoil control?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Indirectly. The reactive micro-adjustments trained here apply to recoil tracking as well. For dedicated recoil training, try the Recoil Control drill."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is this aim trainer free?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, this tracking trainer is 100% free, requires no sign-ups or downloads, and runs natively in modern browsers with hardware-level mouse input."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How often should I train anti-zigzag tracking?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "5–6 sessions per week of 10–15 minutes each. Daily warm-ups before ranked play are ideal for building and maintaining reactive tracking muscle memory."
         }
       }
     ]
@@ -119,23 +219,23 @@ export default function AntiZigzagMovementPage() {
   const howToSchema = {
     "@context": "https://schema.org",
     "@type": "HowTo",
-    "name": "How to Train Anti-Zigzag Tracking",
-    "description": "Step-by-step training routine to counter evasive zig-zag strafes, jumps, and slide movements.",
+    "name": "How to Train Anti-Zigzag Strafe Tracking",
+    "description": "Step-by-step instructions to train reactive tracking against erratic zigzag movement.",
     "step": [
       {
         "@type": "HowToStep",
-        "name": "Anchor Crosshair Center",
-        "text": "Lock your gaze onto the center of the moving target rather than staring at your crosshair. Keeping your hand relaxed reduces muscle-tension jitters."
+        "name": "Adjust Sensitivity",
+        "text": "Set your Universal Sens slider to match your primary game."
       },
       {
         "@type": "HowToStep",
-        "name": "React to Reversals",
-        "text": "When the target suddenly switches directions (fake-outs or burst strafes), avoid wild flicking. Make a controlled micro-adjustment to align your cursor back to the target center."
+        "name": "Aim at V-Crossover Center",
+        "text": "Focus on the center of the target's strafe path rather than over-flicking behind outer sweeps."
       },
       {
         "@type": "HowToStep",
-        "name": "Practice All Modes",
-        "text": "Train in Prediction Mode to build response anticipation, Recovery Mode to train snap reacquisition, and Advanced Movement to master tracking vertical jumps and low slide profiles."
+        "name": "Deplete Health Before Escape",
+        "text": "Maintain continuous fire contact to eliminate targets before their lifespan timer expires."
       }
     ]
   };
@@ -149,6 +249,10 @@ export default function AntiZigzagMovementPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }}
       />
       <script
         type="application/ld+json"

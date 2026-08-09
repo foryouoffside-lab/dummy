@@ -10,30 +10,18 @@ import MarketDoorsPursuitWrapper from './MarketDoorsPursuitWrapper';
 //   "visual tracking exercises"       ~1,300/mo, KD ~30%
 //   "clearing angles"                 ~210/mo,   KD ~12%
 //   "sports vision training"          ~720/mo,   KD ~26%
-//   "eye tracking training"           ~250/mo,   KD ~18%
-//   "checking corners in fps"         ~100/mo,   KD ~10%
-// PAA targets: "What is slicing the pie in tactical shooting?",
-//   "How do you check corners in FPS games?", "What does saccadic eye movement look like?",
-//   "What is the difference between saccadic and smooth pursuit eye movements?",
-//   "What is the angle advantage in FPS games?"
-// Key entities: saccadic sweeps, foveal scanning, spatial awareness, site entry,
-//   geometry advantage, visual re-acquisition, choice response, motor response
 // ============================================================
 
 export const metadata = {
   title: 'Corner Checking Trainer - Saccadic Eye Training Drill | SkillDrills',
   description: 'Train your saccadic eye movements and corner checking reflexes with this free Corner Checking Trainer (Market Doors Pursuit). Improve your angle clearing, master \'slicing the pie\' in FPS games, and boost sports vision speed.',
   keywords: [
-    // Primary / Head terms
     'corner checking trainer', 'saccadic eye movement training', 'corner checking drill',
-    // Secondary / LSI terms
     'slicing the pie shooting', 'saccadic eye exercises', 'clearing angles fps',
     'how to clear corners valorant', 'checking corners in fps', 'visual tracking exercises',
-    // Long-tail variants
     'eye tracking training for gamers', 'sports vision training drills',
     'tactical clearing angles trainer', 'saccadic eye movement dysfunction exercises',
     'prefire corner checking map', 'angle clearing drill online',
-    // General
     'free reflex trainer browser', 'gaming eye coordination test', 'threat checking speed game'
   ],
   alternates: {
@@ -47,20 +35,11 @@ export const metadata = {
     siteName: 'SkillDrills',
     locale: 'en_US',
     type: 'website',
-    images: [
-      {
-        url: 'https://skilldrills.online/icons/icon-512x512.png',
-        width: 512,
-        height: 512,
-        alt: 'Corner Checking Trainer - Saccadic Eye Training Drill | SkillDrills',
-      },
-    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Corner Checking Trainer - Saccadic Eye Training Drill',
     description: 'Improve your angle clearing and master \'slicing the pie\' in FPS games. Free browser-based corner checking and saccadic eye trainer.',
-    images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
 };
 
@@ -98,22 +77,22 @@ const educationalSchema = {
   "@type": "EducationalApplication",
   "name": "Corner Checking Trainer (Market Doors Pursuit)",
   "description": "Isolates and trains foveal scanning, rapid target acquisition, visual pursuit, and hand-eye reaction speed across multiple entry points.",
-  "applicationCategory": "EducationalGame",
-  "operatingSystem": "Web Browser",
-  "isAccessibleForFree": true,
+  "applicationCategory": "EducationalApplication",
+  "operatingSystem": "All",
+  "browserRequirements": "Requires a modern web browser with JavaScript support."
 };
 
 const howToSchema = {
   "@context": "https://schema.org",
   "@type": "HowTo",
-  "name": "How to Train Corner Checking and Saccadic Eye Movements",
-  "description": "Improve horizontal eye sweeps and threat recognition speed against visual targets popping up behind five shifting entry doors.",
+  "name": "How to Train Saccadic Eye Movements & Corner Checking",
+  "description": "Step-by-step instructions on improving your angle clearing, visual scanning, and reaction speed across multiple doorways.",
   "step": [
     {
       "@type": "HowToStep",
       "position": 1,
-      "name": "Start the Drill",
-      "text": "Click the Begin Drill button to enter the interactive viewport. Adjust target color preset to your liking."
+      "name": "Launch the Drill",
+      "text": "Press Start Drill to initialize the Market Doors environment in full screen."
     },
     {
       "@type": "HowToStep",
@@ -131,7 +110,7 @@ const howToSchema = {
       "@type": "HowToStep",
       "position": 4,
       "name": "Maintain a Streak",
-      "text": "Avoid miss clicks or timeouts to prevent losing time. Surpass level thresholds to unlock faster transitions and keep your combo high."
+      "text": "Chain successful hits back to back to level up faster — targets peek quicker and shrink in size the higher you climb."
     }
   ]
 };
@@ -142,82 +121,122 @@ const faqSchema = {
   "mainEntity": [
     {
       "@type": "Question",
-      "name": "What is Market Doors Pursuit (Corner Checking Trainer)?",
+      "name": "What is Corner Checking Trainer (Market Doors Pursuit)?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Market Doors Pursuit is a reaction speed training game designed to improve visual scanning and target acquisition. Players scan five entry points horizontally and react immediately as targets peek out behind doors, simulating entry clears."
+        "text": "It is a visual reflex drill designed to train saccadic eye movements, corner checking, and angle clearing across multiple entry doorways."
       }
     },
     {
       "@type": "Question",
-      "name": "What is saccadic eye movement training?",
+      "name": "What does 'slicing the pie' mean in FPS games?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Saccades are rapid, voluntary jumps made by the eyes to change fixation points. Saccadic eye training exercises these quick visual shifts, improving your foveal scanning, threat checking, and spatial awareness under time pressure."
+        "text": "Slicing the pie is a tactical technique where a player sweeps around a corner incrementally to clear narrow angles one by one."
       }
     },
     {
       "@type": "Question",
-      "name": "How do you check corners in FPS games?",
+      "name": "What are saccadic eye movements?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "To check corners in FPS games, you should clear them sequentially rather than wide-swinging. Sweep your crosshair along the corner edge incrementally, checking angles one by one, keeping your eye focus alert for sudden enemy exposures."
+        "text": "Saccades are rapid, jerky eye movements between points of fixation. Fast saccades allow gamers to scan multiple angles quickly."
       }
     },
     {
       "@type": "Question",
-      "name": "What does 'slicing the pie' mean in tactical shooting?",
+      "name": "How does this drill improve site entry in Valorant and CS2?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Slicing the pie is a tactical entry method where you clear a corner by moving in an orbital arc relative to the corner edge. This allows you to incrementally expose and check narrow sectors of the room, isolating gunfights rather than exposing yourself to multiple angles at once."
+        "text": "Site entries require checking multiple doorways simultaneously. Training saccadic sweeps reduces hesitation when clearing entry points."
       }
     },
     {
       "@type": "Question",
-      "name": "What is the difference between saccadic and smooth pursuit eye movements?",
+      "name": "Why is corner checking important in tactical shooters?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Saccadic movements are rapid, ballistic jumps the eyes make between fixed targets (like checking different corners). Smooth pursuit is the slow, continuous tracking of a single moving object (like tracking a running target across your screen)."
+        "text": "Failing to check a corner often leads to instant elimination by holding defenders. Dedicated practice builds automatic checking habits."
       }
     },
     {
       "@type": "Question",
-      "name": "What is the angle advantage in FPS games?",
+      "name": "Does this drill train choice reaction time?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "The angle advantage (or geometry advantage) dictates that the player standing further away from a corner wall will see the opponent's shoulder/model before the opponent sees them. Standing further back increases your visual reaction window."
+        "text": "Yes. Targets appear randomly in any doorway, forcing your visual cortex to process spatial location and execute immediate taps."
       }
     },
     {
       "@type": "Question",
-      "name": "How does this corner checking drill improve gaming performance?",
+      "name": "How does adaptive level difficulty work?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "It sharpens your visual agility to scan multiple entry points or visual sectors rapidly, stabilizing your eyes and crosshair on emerging targets instead of panicking or lagging behind."
+        "text": "As your score increases, target exposure times shorten, targets shrink in size, and doorway spawn delays speed up."
       }
     },
     {
       "@type": "Question",
-      "name": "Does this help in games like Valorant and CS2?",
+      "name": "Is this corner checking trainer free?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes, deeply. Clearing bomb sites, entry paths, and choke points requires checking multiple doorways and angles sequentially. This drill simulates sweeping entry spots and catching quick peeks instantly."
+        "text": "Yes, all drills on SkillDrills are 100% free with no downloads, signups, or pop-up ads."
       }
     },
     {
       "@type": "Question",
-      "name": "Can I practice saccadic eye exercises on mobile?",
+      "name": "Does monitor refresh rate affect corner checking speed?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes. This game fully supports mobile touch, trackpad, stylus, and mouse controls. It recommends landscape mode for an optimal visual sweep layout."
+        "text": "Higher refresh rate monitors (144Hz+) render doorway target appearances with lower display latency, improving visual re-acquisition."
       }
     },
     {
       "@type": "Question",
-      "name": "Is this eye tracking training free?",
+      "name": "How often should I practice corner checking?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes, all drills on SkillDrills are 100% free with no signups, downloads, or pop-up ads required. You can practice directly in your browser."
+        "text": "A daily 5-10 minute session as part of your FPS pre-game warmup routine conditions consistent saccadic eye sweeps."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What mechanical skills does Market Doors Pursuit train?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "It isolates saccadic eye speed, spatial awareness, choice reaction speed, and crosshair placement at entry angles."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can traditional athletes benefit from saccadic vision training?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Sports vision research shows that saccadic eye training improves peripheral scanning and reaction speed in court/field sports."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Should I look at the doorways or my crosshair?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Focus your eyes directly on the open doorway spaces while allowing your motor reflex to snap the crosshair onto emerging targets."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What games benefit most from corner checking training?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Tactical FPS titles such as CS2, Valorant, Rainbow Six Siege, and Tarkov benefit heavily from disciplined angle clearing."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does this drill support mobile devices?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes! It features touch-optimized hitpads and automatic portrait orientation warnings."
       }
     }
   ]
@@ -250,4 +269,3 @@ export default function MarketDoorsPursuitPage() {
     </>
   );
 }
-

@@ -41,7 +41,7 @@ const faqSchema = {
       "name": "How is the performance score calculated?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "You gain points continuously for every half-second (+1 PTS) that your cursor remains inside the bounds of the moving target."
+        "text": "You earn +5 PTS every time you keep your cursor locked onto the moving target for a full continuous second."
       }
     },
     {
@@ -49,15 +49,31 @@ const faqSchema = {
       "name": "How does difficulty scale?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "As your score increases, the target's base speed increases and the size of the target shrinks, demanding more precise smooth tracking."
+        "text": "As your score and streak increase, the orb's maximum speed rises and its hitbox shrinks slightly — with no hard ceiling on either, so the challenge keeps building the longer you last."
       }
     },
     {
       "@type": "Question",
-      "name": "Is there a score penalty for losing track?",
+      "name": "Are there negative score or time penalties?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "No. When your cursor exits the target, scoring pauses, but you do not lose any accrued points."
+        "text": "No. Losing the target for more than 2 seconds resets your streak, but you never lose accrued score points or remaining timer seconds."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How long does each drill session last?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Each round is timed for exactly 45 seconds of continuous tracking."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do I need to sign up?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No registration required. This drill runs directly in your browser with instant response."
       }
     }
   ]
@@ -111,13 +127,11 @@ export const metadata = {
     siteName: 'SkillDrills',
     locale: 'en_US',
     type: 'website',
-    images: [{ url: 'https://skilldrills.online/icons/icon-512x512.png', width: 512, height: 512, alt: "Smooth Pursuit Tracker" }],
   },
   twitter: {
     card: 'summary_large_image',
     title: "Smooth Pursuit Tracker | Free Visual Aim Training Game | SkillDrills",
     description: "Measure your continuous hand-eye target follow accuracy. Keep your cursor on the unpredictably moving orb to evaluate smooth pursuit speed and coordination.",
-    images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
 };
 

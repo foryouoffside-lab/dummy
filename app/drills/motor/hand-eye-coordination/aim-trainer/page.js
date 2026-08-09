@@ -1,46 +1,49 @@
 import AimTrainerClient from './AimTrainerClient';
 
 export const metadata = {
-  title: "Free Aim Trainer Online - Elite Mouse Accuracy | SkillDrills",
-  description: "Improve mouse accuracy and reflex speed with our free online aim trainer. Train hand-eye coordination for Valorant, CS2, and Apex Legends.",
+  title: "Aim Trainer Elite — Mouse Precision Trainer | SkillDrills",
+  description: "Improve mouse accuracy, reaction speed, and target acquisition with this free FPS aim trainer. Score-based difficulty scaling for Valorant, CS2 & Apex.",
   keywords: [
-    "free aim trainer online",
-    "aim trainer",
-    "aim trainer elite",
-    "aim training game",
-    "mouse accuracy test",
-    "mouse accuracy drill",
-    "fps aim trainer",
-    "valorant aim trainer",
-    "cs2 aim trainer",
-    "hand eye coordination training",
-    "aim practice",
-    "mobile aim trainer",
-    "browser aim trainer"
+    "aim trainer elite online",
+    "free fps aim trainer",
+    "mouse accuracy practice drill",
+    "click accuracy aim trainer",
+    "valorant micro flick trainer",
+    "cs2 headshot accuracy drill",
+    "apex legends target acquisition",
+    "score based difficulty aim trainer",
+    "raw mouse input precision drill",
+    "hand eye coordination aim test",
+    "free online gridshot trainer",
+    "motor skill mouse precision",
+    "fps target acquisition trainer",
+    "the finals click timing drill",
+    "call of duty aim practice",
+    "universal sensitivity aim trainer",
+    "continuous target flick drill",
+    "anti overflicking aim trainer",
+    "fine motor click control drill",
+    "survival difficulty aim trainer"
   ],
+  alternates: {
+    canonical: "https://skilldrills.online/drills/motor/hand-eye-coordination/aim-trainer",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
   openGraph: {
-    title: "Free Aim Trainer Online - Elite Mouse Accuracy | SkillDrills",
-    description: "Improve mouse accuracy and reflex speed with our free online aim trainer. Train hand-eye coordination for Valorant, CS2, and Apex Legends.",
-    type: 'article',
-    url: 'https://skilldrills.online/drills/motor/hand-eye-coordination/aim-trainer',
+    title: "Aim Trainer Elite — Mouse Precision Trainer | SkillDrills",
+    description: "Improve mouse accuracy, reaction speed, and target acquisition with this free FPS aim trainer. Score-based difficulty scaling for Valorant, CS2 & Apex.",
+    url: "https://skilldrills.online/drills/motor/hand-eye-coordination/aim-trainer",
     siteName: 'SkillDrills',
     locale: 'en_US',
-    images: [{
-      url: 'https://skilldrills.online/icons/icon-512x512.png',
-      width: 512,
-      height: 512,
-      alt: 'Free Aim Trainer Online - Elite Mouse Accuracy',
-    }],
+    type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Free Aim Trainer Online - Elite Mouse Accuracy | SkillDrills",
-    description: "Improve mouse accuracy and reflex speed with our free online aim trainer. Train hand-eye coordination for Valorant, CS2, and Apex Legends.",
-    images: ['https://skilldrills.online/icons/icon-512x512.png'],
-  },
-  robots: { index: true, follow: true },
-  alternates: {
-    canonical: 'https://skilldrills.online/drills/motor/hand-eye-coordination/aim-trainer',
+    title: "Aim Trainer Elite — Mouse Precision Trainer | SkillDrills",
+    description: "Improve mouse accuracy, reaction speed, and target acquisition with this free FPS aim trainer. Score-based difficulty scaling for Valorant, CS2 & Apex.",
   },
 };
 
@@ -49,24 +52,41 @@ export default function AimTrainerPage() {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     "itemListElement": [
-      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://skilldrills.online" },
-      { "@type": "ListItem", "position": 2, "name": "Motor Training", "item": "https://skilldrills.online/drills/motor" },
-      { "@type": "ListItem", "position": 3, "name": "Hand-Eye Coordination", "item": "https://skilldrills.online/drills/motor" },
-      { "@type": "ListItem", "position": 4, "name": "Aim Trainer Elite" }
+      { "@type": "ListItem", "position": 1, "name": "SkillDrills", "item": "https://skilldrills.online/" },
+      { "@type": "ListItem", "position": 2, "name": "Motor Drills", "item": "https://skilldrills.online/drills/motor" },
+      { "@type": "ListItem", "position": 3, "name": "Aim Trainer Elite", "item": "https://skilldrills.online/drills/motor/hand-eye-coordination/aim-trainer" }
     ]
   };
 
   const softwareSchema = {
     "@context": "https://schema.org",
-    "@type": "WebApplication",
-    "name": "Aim Trainer Elite - Free Aim Trainer Online",
-    "url": "https://skilldrills.online/drills/motor/hand-eye-coordination/aim-trainer",
-    "description": "Aim Trainer Elite is a free aim trainer online that improves mouse and touch accuracy. Features a time-based survival system where hits add time and misses deduct time. Perfect for Valorant, CS2, and general hand-eye coordination training.",
+    "@type": "SoftwareApplication",
+    "name": "Aim Trainer Elite",
     "applicationCategory": "GameApplication",
-    "operatingSystem": "All (Desktop, Mobile, Tablet)",
+    "operatingSystem": "Web Browser",
     "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-    "author": { "@type": "Organization", "name": "SkillDrills" },
-    "isAccessibleForFree": true
+    "description": "Improve mouse accuracy, reaction speed, and target acquisition with score-based difficulty scaling.",
+    "genre": "FPS Training / Motor Precision",
+    "url": "https://skilldrills.online/drills/motor/hand-eye-coordination/aim-trainer",
+    "publisher": {
+      "@type": "Organization",
+      "name": "SkillDrills",
+      "url": "https://skilldrills.online"
+    }
+  };
+
+  const videoGameSchema = {
+    "@context": "https://schema.org",
+    "@type": "VideoGame",
+    "name": "Aim Trainer Elite",
+    "url": "https://skilldrills.online/drills/motor/hand-eye-coordination/aim-trainer",
+    "description": "Improve mouse accuracy, reaction speed, and target acquisition with score-based difficulty scaling.",
+    "gamePlatform": "Web Browser",
+    "genre": ["FPS Training", "Aim Trainer"],
+    "playMode": "SinglePlayer",
+    "applicationCategory": "Game",
+    "operatingSystem": "Web Browser",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
   };
 
   const faqSchema = {
@@ -78,63 +98,119 @@ export default function AimTrainerPage() {
         "name": "What is Aim Trainer Elite?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Aim Trainer Elite is a free aim trainer online designed to improve mouse and touch accuracy through an adaptive, time-based survival mode. You click moving targets to build your score while managing a strict countdown timer."
+          "text": "Aim Trainer Elite is a dynamic target acquisition drill designed to test and refine your mouse accuracy, target acquisition speed, and click timing."
         }
       },
       {
         "@type": "Question",
-        "name": "How does this improve aiming?",
+        "name": "How does this aim trainer improve mouse precision?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "By forcing you to acquire and click dynamic targets under time pressure, it isolates and trains hand-eye coordination, reaction speed, and raw mechanical precision."
+          "text": "By spawning targets that dynamically shrink, move, and expire, the drill conditions fine motor control and rapid eye-to-hand target acquisition."
         }
       },
       {
         "@type": "Question",
-        "name": "Does it help Valorant?",
+        "name": "Does this help Valorant and CS2 aim?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Yes, it heavily improves first-shot accuracy, micro-flicking, and fast crosshair placement recovery—all of which are crucial for winning duels in tactical shooters like Valorant."
+          "text": "Yes, micro-flicking and clicking small targets directly translates to first-shot headshot precision in tactical shooters like Valorant and CS2."
         }
       },
       {
         "@type": "Question",
-        "name": "Does it help CS2?",
+        "name": "How does score-based difficulty scaling work?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Absolutely. CS2 requires pinpoint precision and extremely fast reaction times. This drill trains the exact mechanical muscle memory needed for crisp headshots and fast target acquisition."
+          "text": "As your score increases, the game engine automatically advances your level from 1 to 15, reducing target sizes and increasing movement speed."
         }
       },
       {
         "@type": "Question",
-        "name": "Does it improve reaction time?",
+        "name": "What happens when a target times out?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Yes. Targets have limited lifespans and move unpredictably. Tracking and clicking them before they time out forces your brain to process visual stimuli and execute motor commands much faster."
+          "text": "When a target expires before you click it, your combo streak resets and a red error flash triggers without point loss."
         }
       },
       {
         "@type": "Question",
-        "name": "Why does difficulty increase?",
+        "name": "How is tracking accuracy calculated?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "The drill features a score-based progression system. As your score increases, you advance through levels where targets become smaller, move faster, and adopt more erratic trajectories to continuously push your limits."
+          "text": "Accuracy is calculated as the ratio of successful target hits divided by total clicks, displayed as a percentage on the result dashboard."
         }
       },
       {
         "@type": "Question",
-        "name": "How does the time system work?",
+        "name": "Can I play this aim trainer on mobile devices?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "You start with 60 seconds on the clock. A correct hit grants +10 Score and adds +1 second to your timer. However, a miss-click or a target timeout penalizes you by deducting -1 second. Your score never decreases, but your survival depends on your accuracy."
+          "text": "This drill requires pointer-lock mouse input for crosshair control, so it is not playable on touch-only phones or tablets. Use a desktop or laptop with a mouse for the full experience."
         }
       },
       {
         "@type": "Question",
-        "name": "Can I play on mobile?",
+        "name": "Does this trainer support universal mouse sensitivity?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Yes! Aim Trainer Elite is fully responsive and supports touch input across mobile devices and tablets. Target sizes automatically scale based on your screen size. Landscape mode is recommended for the best experience."
+          "text": "Yes, you can adjust the Universal Sens slider to calibrate raw input cm/360 sensitivity before starting your session."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the best way to practice with Aim Trainer Elite?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Focus on accuracy first before building speed. Rushed clicks reset your combo, while clean centered clicks build combo multipliers."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How often should I warm up with this aim trainer?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "A 10-15 minute session before playing competitive matches helps prime your motor cortex and eye-hand coordination."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is this aim trainer completely free?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, Aim Trainer Elite is 100% free, requires no downloads or account registration, and runs natively in any modern web browser."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is combo scaling in this drill?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Sustaining consecutive hits without missing or letting targets expire builds combo multipliers up to 3.0x bonus points per hit."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does this help with reaction speed?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, fast-expiring targets at higher difficulty levels train your brain to register target locations and execute click commands faster."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What causes missed clicks?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Missed clicks occur when you fire before your crosshair is fully centered over the target hitbox, or when you over-flick past the target edge."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does the 45-second session timer work?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Each session runs for a fixed 45 seconds, giving you a standardized time window to score maximum points and benchmark your performance."
         }
       }
     ]
@@ -143,53 +219,49 @@ export default function AimTrainerPage() {
   const howToSchema = {
     "@context": "https://schema.org",
     "@type": "HowTo",
-    "name": "How to Use the Free Aim Trainer",
-    "description": "Step-by-step instructions to train mouse accuracy, speed, and flicking mechanics.",
+    "name": "How to Train Aim Precision and Target Acquisition",
+    "description": "Step-by-step instructions to train mouse accuracy and click timing.",
     "step": [
       {
         "@type": "HowToStep",
-        "name": "Start the trainer session",
-        "text": "Click the Start button. Prepare for targets to spawn at random points on the training canvas."
+        "name": "Adjust Sensitivity",
+        "text": "Set your Universal Sens slider to match your primary game."
       },
       {
         "@type": "HowToStep",
-        "name": "Acquire targets sequentially",
-        "text": "Flick your cursor to the center of each spawned target. Tap or click to destroy them before they fade out."
+        "name": "Acquire Target Circles",
+        "text": "Click target circles as soon as they spawn across the grid area."
       },
       {
         "@type": "HowToStep",
-        "name": "Maintain accuracy for time bonus",
-        "text": "Avoid miss-clicks. Correct hits add valuable time, whereas misses or timeouts deduct time, testing your target pacing."
+        "name": "Maintain Combos",
+        "text": "Sustain consecutive accurate hits without missing to build 3.0x score multipliers."
       }
     ]
   };
 
   return (
     <>
-      {/* Breadcrumb Schema */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
-
-      {/* SoftwareApplication Schema */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }}
       />
-
-      {/* FAQPage Schema */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
-
-      {/* HowTo Schema */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-
       <AimTrainerClient />
     </>
   );

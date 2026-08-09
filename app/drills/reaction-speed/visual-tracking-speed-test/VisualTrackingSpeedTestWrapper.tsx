@@ -1,12 +1,5 @@
 'use client';
 
-import dynamic from 'next/dynamic';
+import VisualTrackingSpeedTestClient from './VisualTrackingSpeedTestClient';
 
-const VisualTrackingSpeedTestClient = dynamic(
-  () => import('./VisualTrackingSpeedTestClient'),
-  { ssr: false }
-);
-
-export default function VisualTrackingSpeedTestWrapper() {
-  return <VisualTrackingSpeedTestClient />;
-}
+export default VisualTrackingSpeedTestClient;

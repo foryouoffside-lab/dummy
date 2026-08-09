@@ -1,25 +1,29 @@
 import StrafeTrackingClient from './StrafeTrackingClient';
 
 export const metadata = {
-  title: "Strafe Tracking Aim Trainer - Horizontal FPS Drill | SkillDrills",
-  description: "Improve your horizontal mouse smoothness with our Strafe Tracking Aim Trainer. Practice tracking side-to-side moving targets for Apex and Valorant.",
+  title: "Strafe Tracking Aim Trainer | SkillDrills",
+  description: "Master reactive tracking aim, counter-strafe reading, and smooth wrist glides for competitive shooters like Apex Legends, Overwatch 2, Valorant & CS2.",
   keywords: [
     "strafe tracking aim trainer",
-    "horizontal tracking trainer",
-    "strafe tracking practice",
-    "ADAD strafe tracking",
-    "movement tracking practice",
-    "Apex strafe tracker",
-    "tracking aim trainer",
-    "side to side tracking fps",
-    "fps tracking practice",
-    "mouse smoothness trainer",
-    "reactive strafe tracking",
-    "aim tracking game",
-    "crosshair tracking drill",
-    "apex legends aim trainer",
-    "overwatch tracking practice",
-    "valorant tracking drill"
+    "reactive tracking practice fps",
+    "adad strafe tracking drill",
+    "apex legends tracking trainer",
+    "overwatch 2 aim tracking",
+    "aim smoothness trainer",
+    "counter strafe reading drill",
+    "tracking aim accuracy tool",
+    "high ttk aim trainer",
+    "free tracking aim trainer",
+    "overtracking fix aim drill",
+    "undertracking fix aim practice",
+    "wrist glide smoothness trainer",
+    "fps movement tracking drill",
+    "valorant tracking practice",
+    "cs2 strafe tracking drill",
+    "the finals aim tracking",
+    "call of duty tracking trainer",
+    "hardware raw input tracking aim",
+    "directional reading aim drill"
   ],
   alternates: {
     canonical: "https://skilldrills.online/drills/fps/strafe-tracking",
@@ -29,26 +33,17 @@ export const metadata = {
     follow: true,
   },
   openGraph: {
-    title: "Strafe Tracking Aim Trainer - Horizontal FPS Drill | SkillDrills",
-    description: "Improve your horizontal mouse smoothness with our Strafe Tracking Aim Trainer. Practice tracking side-to-side moving targets for Apex and Valorant.",
+    title: "Strafe Tracking Aim Trainer | SkillDrills",
+    description: "Master reactive tracking aim, counter-strafe reading, and smooth wrist glides for competitive shooters like Apex Legends, Overwatch 2, Valorant & CS2.",
     url: "https://skilldrills.online/drills/fps/strafe-tracking",
     siteName: 'SkillDrills',
     locale: 'en_US',
     type: 'website',
-    images: [
-      {
-        url: 'https://skilldrills.online/icons/icon-512x512.png',
-        width: 512,
-        height: 512,
-        alt: "Strafe Tracking Aim Trainer - Horizontal FPS Drill",
-      },
-    ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Strafe Tracking Aim Trainer - Horizontal FPS Drill | SkillDrills",
-    description: "Improve your horizontal mouse smoothness with our Strafe Tracking Aim Trainer. Practice tracking side-to-side moving targets for Apex and Valorant.",
-    images: ['https://skilldrills.online/icons/icon-512x512.png'],
+    title: "Strafe Tracking Aim Trainer | SkillDrills",
+    description: "Master reactive tracking aim, counter-strafe reading, and smooth wrist glides for competitive shooters like Apex Legends, Overwatch 2, Valorant & CS2.",
   },
 };
 
@@ -70,8 +65,8 @@ export default function StrafeTrackingPage() {
     "applicationCategory": "GameApplication",
     "operatingSystem": "Web Browser",
     "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-    "description": "A free browser FPS drill training horizontal strafe tracking, mouse smoothness, and counter-strafe reading against side-to-side moving targets.",
-    "genre": "FPS Training / Strafe Tracking",
+    "description": "Master reactive tracking aim, counter-strafe reading, and smooth wrist glides for competitive FPS games.",
+    "genre": "FPS Training / Reactive Tracking",
     "url": "https://skilldrills.online/drills/fps/strafe-tracking",
     "publisher": {
       "@type": "Organization",
@@ -80,48 +75,142 @@ export default function StrafeTrackingPage() {
     }
   };
 
+  const videoGameSchema = {
+    "@context": "https://schema.org",
+    "@type": "VideoGame",
+    "name": "Strafe Tracking",
+    "url": "https://skilldrills.online/drills/fps/strafe-tracking",
+    "description": "Master reactive tracking aim, counter-strafe reading, and smooth wrist glides for competitive FPS games.",
+    "gamePlatform": "Web Browser",
+    "genre": ["FPS Training", "Aim Trainer"],
+    "playMode": "SinglePlayer",
+    "applicationCategory": "Game",
+    "operatingSystem": "Web Browser",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+  };
+
   const faqSchema = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
     "mainEntity": [
       {
         "@type": "Question",
-        "name": "What is strafe tracking in FPS games?",
+        "name": "What is tracking aim in FPS games?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Strafe tracking is the ability to keep your crosshair on an enemy who is moving side-to-side (strafing). Unlike smooth arcing targets, strafing targets move horizontally at consistent speed in one direction before changing. This requires your mouse to match the enemy's horizontal velocity exactly, without drifting or over-correcting, making it one of the most common skill differentials between rank tiers."
+          "text": "Tracking aim is the mechanical ability to keep your crosshair continuously locked onto an opponent moving in a 3D environment, which is highly critical in games with a high time-to-kill (TTK)."
         }
       },
       {
         "@type": "Question",
-        "name": "Why is strafe tracking harder than smooth tracking?",
+        "name": "How is tracking different from flicking?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Strafe tracking appears simpler because targets move linearly rather than in curves. However, the challenge is in matching velocity precisely without over-tracking, and then reacting instantly when the strafe direction reverses. Any velocity mismatch causes your crosshair to slide ahead of or behind the target, causing misses that feel frustrating and inexplicable."
+          "text": "Flicking requires rapid muscle memory snaps to hit a target and reset, while tracking requires continuous visual pursuit, direction change recognition, and smooth speed adjustment."
         }
       },
       {
         "@type": "Question",
-        "name": "How does strafe tracking training improve my Apex Legends gunfights?",
+        "name": "How do I improve reactive tracking?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Apex Legends enemies use horizontal strafing as their primary evasion mechanic during open-field gunfights at medium range. Improving strafe tracking directly increases your damage output in these engagements — you spend more time on-target per trigger pull, increasing damage per bullet and securing kills faster than opponents with weaker tracking."
+          "text": "Improve reactive tracking by practicing against fast, unpredictable strafe speeds. Learn to read momentum changes without over-predicting or tensing your wrist."
         }
       },
       {
         "@type": "Question",
-        "name": "Is strafe tracking the same as smooth pursuit tracking?",
+        "name": "Why do I overtrack targets?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "No. Smooth pursuit tracks targets on curved, arcing paths requiring velocity prediction and arc following. Strafe tracking follows linear horizontal movement with sudden direction reversals requiring reaction to the reversal point. The muscle memory patterns are different — strafe tracking uses wider, more responsive horizontal arm sweeps."
+          "text": "Overtracking happens when your crosshair moves faster than the target during a direction swap, which is often caused by predictive aiming or excessive mouse acceleration."
         }
       },
       {
         "@type": "Question",
-        "name": "What sensitivity should I use for strafe tracking training?",
+        "name": "What causes shaky aim during tracking?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Train at your actual in-game sensitivity. For strafe tracking specifically, many coaches recommend training slightly lower sensitivity than your default to develop greater velocity control and smoothness, then returning to your normal sensitivity for ranked play. This helps your arm learn the slower, more deliberate movement needed for precise strafe tracking."
+          "text": "Shaky aim is caused by excessive wrist tension, inappropriate mouse grip, or too high sensitivity. Smoothness aim drills help condition your hand to glide without micro-jitters."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How much should I practice tracking?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "We recommend practicing tracking for 10-15 minutes daily as a pre-game warmup routine to establish muscle memory consistency."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is tracking more important than flicking?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "It depends on the game. Tracking is primary in high-TTK games (Apex Legends, Overwatch 2, The Finals), whereas flicking is more critical in tactical, low-TTK shooters (Valorant, CS2)."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can tracking improve Apex Legends aim?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Gunfights in Apex Legends require landing full automatic magazines on dodging enemies. Consistent tracking practice is the single best way to improve Apex aim."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can tracking improve Overwatch 2 aim?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Target tracking is critical for heroes like Soldier: 76, Tracer, Zarya, and Sombra who rely on smooth pursuit and direction change recognition to maximize damage output."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is counter-strafe reading?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Counter-strafe reading is your neurological speed in registering when an enemy reverses their horizontal direction, allowing you to re-align your crosshair with minimal lag."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is aim smoothness?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Smoothness refers to moving your mouse at a constant, matching speed to the target without micro-corrections, jitters, or abrupt jerking movements."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do professional players train tracking?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Pros use specialized software aim trainers to practice isolating horizontal sweeps, vertical tracking, and reaction speed under variable speeds."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What sensitivity is best for tracking?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "A moderate-to-low sensitivity (e.g., 25cm to 45cm per 360 rotation) is generally best for tracking, as it provides enough physical space to make smooth micro-adjustments."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can this drill improve mouse control?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Keeping your crosshair on dodging targets forces your wrist and fingers to build subtle motor-control adjustments, optimizing mouse handling."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How long does it take to improve tracking?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Most players notice improvements in crosshair smoothness and reaction time after 2 weeks of daily, focused 10-minute training sessions."
         }
       }
     ]
@@ -130,55 +219,50 @@ export default function StrafeTrackingPage() {
   const howToSchema = {
     "@context": "https://schema.org",
     "@type": "HowTo",
-    "name": "How to Train Strafe Tracking",
-    "description": "Step-by-step instructions to master horizontal target following and counter-strafe reading.",
+    "name": "How to Train Strafe Tracking Aim",
+    "description": "Step-by-step instructions to train reactive tracking aim and counter-strafe reading.",
     "step": [
       {
         "@type": "HowToStep",
-        "name": "Engage side-to-side tracking",
-        "text": "Center your crosshair on the strafing target. Match its linear horizontal direction."
+        "name": "Calibrate Sensitivity",
+        "text": "Set your Universal Sens to match your main game sensitivity."
       },
       {
         "@type": "HowToStep",
-        "name": "React to strafe reversals",
-        "text": "Keep your eyes focused on the target's hips or center. The instant it pauses and reverses, switch your mouse sweep direction immediately."
+        "name": "Lock Crosshair on Target",
+        "text": "Keep your crosshair centered on the strafing target continuously to build combo multipliers."
       },
       {
         "@type": "HowToStep",
-        "name": "Maintain mouse smoothness",
-        "text": "Avoid jittery corrections or sudden flicks during linear segments. Keep your velocity constant to match the target speed."
+        "name": "React to Direction Swaps",
+        "text": "Smoothly transition your crosshair when the target changes direction without over-predicting."
       }
     ]
   };
 
   return (
     <>
-      {/* Breadcrumb Schema */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
-
-      {/* SoftwareApplication Schema */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }}
       />
-
-      {/* FAQPage Schema */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema) }}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
-
-      {/* HowTo Schema */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-
       <StrafeTrackingClient />
     </>
   );
 }
-

@@ -1,8 +1,8 @@
 import GridMemorizationClient from './GridMemorizationClient';
 
 export const metadata = {
-  title: 'Grid Memorization - Spatial Memory | SkillDrills',
-  description: 'Train spatial memory with progressive 4x4 to 5x5 grids. 5-second memorization, then tap all lit cells. Instant fail on wrong click. No sign-up.',
+  title: 'Grid Memorization Pro - Spatial Memory Test & Drill | SkillDrills',
+  description: 'Train spatial memory with progressive 4x4 to 5x5 grids. 1.5-second memorization of illuminated cells, zero negative penalties, 45-second session. Free online tool.',
   keywords: [
     'grid memorization', 'spatial memory', 'visual pattern memory',
     'grid pattern recall', 'spatial recall drill', 'visual spatial memory',
@@ -17,24 +17,17 @@ export const metadata = {
     'grid memory exercise', 'spatial recall practice', 'grid recognition drill',
   ],
   openGraph: {
-    title: 'Grid Memorization - Spatial Memory | SkillDrills',
-    description: 'Train spatial memory with progressive 4x4 to 5x5 grids. 5-second memorization, then tap all lit cells. Instant fail on wrong click. No sign-up.',
+    title: 'Grid Memorization Pro - Spatial Memory Test & Drill | SkillDrills',
+    description: 'Train spatial memory with progressive 4x4 to 5x5 grids. 1.5-second pattern memorization, zero penalties. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/memory/spatial-memory/grid-memorization',
     siteName: 'SkillDrills',
     locale: 'en_US',
-    images: [{
-      url: 'https://skilldrills.online/icons/icon-512x512.png',
-      width: 512,
-      height: 512,
-      alt: 'Grid Memorization Drill',
-    }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Grid Memorization - Spatial Memory | SkillDrills',
-    description: 'Train spatial memory with progressive 4x4 to 5x5 grids. 5-second memorization, then tap all lit cells. Instant fail on wrong click. No sign-up.',
-    images: ['https://skilldrills.online/icons/icon-512x512.png'],
+    title: 'Grid Memorization Pro - Spatial Memory Test & Drill | SkillDrills',
+    description: 'Train spatial memory with progressive 4x4 to 5x5 grids. 1.5s pattern memorization, zero penalties. Free.',
   },
   robots: { index: true, follow: true },
   alternates: {
@@ -56,7 +49,7 @@ export default function GridMemorizationPage() {
               { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://skilldrills.online" },
               { "@type": "ListItem", "position": 2, "name": "Memory Training", "item": "https://skilldrills.online/drills/memory" },
               { "@type": "ListItem", "position": 3, "name": "Spatial Memory", "item": "https://skilldrills.online/drills/memory/spatial-memory" },
-              { "@type": "ListItem", "position": 4, "name": "Grid Memorization" }
+              { "@type": "ListItem", "position": 4, "name": "Grid Memorization Pro" }
             ]
           })
         }}
@@ -68,9 +61,9 @@ export default function GridMemorizationPage() {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "WebApplication",
-            "name": "Grid Memorization Drill",
+            "name": "Grid Memorization Pro Drill",
             "url": "https://skilldrills.online/drills/memory/spatial-memory/grid-memorization",
-            "description": "Free spatial memory drill with progressive 4x4 to 5x5 grids. 5-second memorization of lit cells, instant fail on wrong click. +3 points for perfect recall.",
+            "description": "Free spatial memory drill with progressive 4x4 to 5x5 grids. 1.5-second memorization of illuminated pattern cells, zero negative penalties, clean 45-second timer.",
             "applicationCategory": "EducationalApplication",
             "operatingSystem": "All",
             "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
@@ -89,10 +82,10 @@ export default function GridMemorizationPage() {
             "mainEntity": [
               {
                 "@type": "Question",
-                "name": "What is the Grid Memorization Drill?",
+                "name": "What is the Grid Memorization Pro Drill?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "A free spatial memory exercise. Memorize illuminated cells on a grid for 5 seconds, then tap them all back. Instant fail on wrong click."
+                  "text": "A free spatial working memory exercise. Memorize illuminated cells on a grid for 1.5 seconds, then tap all pattern cells back."
                 }
               },
               {
@@ -100,15 +93,23 @@ export default function GridMemorizationPage() {
                 "name": "How does progressive difficulty work?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Start at 4x4 grid with 5 lit cells. Perfect recall adds +1 cell up to 9. Then graduate to 5x5 grid, again 5-9 cells."
+                  "text": "Start at a 4x4 grid with 5 lit cells. Clearing rounds adds 1 cell up to 7, then upgrades to a 5x5 grid starting again at 5 cells and scaling toward 12."
                 }
               },
               {
                 "@type": "Question",
-                "name": "Who should use this drill?",
+                "name": "Are there negative score or time penalties?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Students (STEM), designers, engineers, gamers (map memory), architects, and anyone wanting better spatial working memory."
+                  "text": "No. Tapping a wrong cell never deducts score points or reduces remaining timer seconds — the round just replays at the same difficulty."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "How long does each drill session last?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Each round is timed for exactly 45 seconds of continuous focus."
                 }
               },
               {
@@ -116,7 +117,7 @@ export default function GridMemorizationPage() {
                 "name": "Do I need to sign up?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "No registration required. This grid memorization drill is completely free and works instantly in your browser."
+                  "text": "No registration required. This drill runs directly in your browser with instant response."
                 }
               }
             ]

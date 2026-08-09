@@ -1,12 +1,5 @@
 'use client';
 
-import dynamic from 'next/dynamic';
+import ReactionTimeTestClient from './ReactionTimeTestClient';
 
-const ReactionTimeTestClient = dynamic(
-  () => import('./ReactionTimeTestClient'),
-  { ssr: false }
-);
-
-export default function ReactionTimeTestWrapper() {
-  return <ReactionTimeTestClient />;
-}
+export default ReactionTimeTestClient;

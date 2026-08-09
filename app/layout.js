@@ -1,14 +1,19 @@
-﻿import './../styles/globals.css';
+import './../styles/globals.css';
 import { Inter } from 'next/font/google';
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import SiteHeader from '@/components/SiteHeader';
+import { DRILLS } from '@/lib/drillsRegistry';
 
-const inter = Inter({ 
+const totalDrillsCount = DRILLS?.length || 113;
+
+const inter = Inter({
   subsets: ['latin'],
   display: 'swap',
   preload: true,
   fallback: ['system-ui', 'arial'],
   adjustFontFallback: true,
+  variable: '--font-inter',
 });
 
 export const metadata = {
@@ -16,7 +21,7 @@ export const metadata = {
     default: 'SkillDrills - Free FPS Aim Trainer & Cognitive Brain Training Platform',
     template: '%s',
   },
-  description: 'Master your mind and mechanics with 135+ free online training drills. Improve FPS aim, reaction time, memory, focus, typing speed, and cognitive skills. No sign-up required. Practice directly in your browser.',
+  description: `Master your mind and mechanics with ${totalDrillsCount} free online training drills. Improve FPS aim, reaction time, memory, focus, typing speed, and cognitive skills. No sign-up required. Practice directly in your browser.`,
   keywords: [
     'free aim trainer', 'FPS aim trainer', 'aim trainer online', 'flick shot training',
     'tracking aim trainer', 'reaction time test', 'headshot trainer', 'mouse accuracy trainer',
@@ -50,7 +55,7 @@ export const metadata = {
   },
   openGraph: {
     title: 'SkillDrills - Free FPS Aim Trainer & Cognitive Brain Training Platform',
-    description: 'Master your mind and mechanics. 135+ free drills for FPS gaming, cognitive enhancement, memory, typing speed, and mental fitness. No sign-up, instant browser access.',
+    description: `Master your mind and mechanics. ${totalDrillsCount} free drills for FPS gaming, cognitive enhancement, memory, typing speed, and mental fitness. No sign-up, instant browser access.`,
     url: 'https://skilldrills.online',
     siteName: 'SkillDrills',
     images: [{
@@ -65,7 +70,7 @@ export const metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'SkillDrills - Free FPS Aim & Brain Training',
-    description: '135+ free drills. FPS aim trainer, brain games, memory exercises, typing tests. No sign-up.',
+    description: `${totalDrillsCount} free drills. FPS aim trainer, brain games, memory exercises, typing tests. No sign-up.`,
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: {
@@ -102,7 +107,7 @@ export const viewport = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className="scroll-smooth">
+    <html lang="en" className={`scroll-smooth ${inter.variable}`}>
       <head>
         {/* DNS Prefetch for faster connections */}
         <link rel="dns-prefetch" href="//fonts.googleapis.com" />
@@ -115,8 +120,8 @@ export default function RootLayout({ children }) {
         <link rel="preconnect" href="https://cdn.vercel-insights.com" crossOrigin="anonymous" />
         
         {/* Favicon & Icons */}
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-        <link rel="shortcut icon" href="/favicon.svg" />
+        <link rel="icon" type="image/png" href="/icons/icon-192x192.png" />
+        <link rel="shortcut icon" href="/icons/icon-192x192.png" />
         <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-192x192.png" />
         
         {/* PWA */}
@@ -138,6 +143,7 @@ export default function RootLayout({ children }) {
         <meta name="rating" content="general" />
       </head>
       <body className={`${inter.className} antialiased`}>
+        <SiteHeader />
         <main id="main-content">
           {children}
         </main>
@@ -155,7 +161,7 @@ export default function RootLayout({ children }) {
               "name": "SkillDrills",
               "url": "https://skilldrills.online",
               "logo": "https://skilldrills.online/icons/icon-512x512.png",
-              "description": "Free online platform with 135+ training drills for FPS gaming skills, cognitive enhancement, brain training, memory improvement, typing speed, and mental fitness.",
+              "description": `Free online platform with ${totalDrillsCount} training drills for FPS gaming skills, cognitive enhancement, brain training, memory improvement, typing speed, and mental fitness.`,
               "email": "support@skilldrills.online",
               "foundingDate": "2026",
               "slogan": "Master Your Mind & Mechanics",
@@ -204,12 +210,12 @@ export default function RootLayout({ children }) {
               "hasPart": [
                 { "@type": "SiteNavigationElement", "position": 1, "name": "FPS Training", "url": "https://skilldrills.online/drills/fps" },
                 { "@type": "SiteNavigationElement", "position": 2, "name": "Cognitive Training", "url": "https://skilldrills.online/drills/cognitive" },
-                { "@type": "SiteNavigationElement", "position": 3, "name": "Academic Drills", "url": "https://skilldrills.online/drills/academic" },
-                { "@type": "SiteNavigationElement", "position": 4, "name": "Memory Games", "url": "https://skilldrills.online/drills/memory" },
-                { "@type": "SiteNavigationElement", "position": 5, "name": "Visual Training", "url": "https://skilldrills.online/drills/visual" },
-                { "@type": "SiteNavigationElement", "position": 6, "name": "Visual Tracking", "url": "https://skilldrills.online/drills/visual-tracking" },
-                { "@type": "SiteNavigationElement", "position": 7, "name": "Motor Skills", "url": "https://skilldrills.online/drills/motor" },
-                { "@type": "SiteNavigationElement", "position": 8, "name": "Physical Training", "url": "https://skilldrills.online/drills/physical" }
+                { "@type": "SiteNavigationElement", "position": 3, "name": "Memory Games", "url": "https://skilldrills.online/drills/memory" },
+                { "@type": "SiteNavigationElement", "position": 4, "name": "Visual Training", "url": "https://skilldrills.online/drills/visual" },
+                { "@type": "SiteNavigationElement", "position": 5, "name": "Visual Tracking", "url": "https://skilldrills.online/drills/visual-tracking" },
+                { "@type": "SiteNavigationElement", "position": 6, "name": "Motor Skills", "url": "https://skilldrills.online/drills/motor" },
+                { "@type": "SiteNavigationElement", "position": 7, "name": "Physical Training", "url": "https://skilldrills.online/drills/physical" },
+                { "@type": "SiteNavigationElement", "position": 8, "name": "Reaction Speed", "url": "https://skilldrills.online/drills/reaction-speed" }
               ]
             })
           }}

@@ -9,29 +9,17 @@ import ReflexTrainingDrillWrapper from './ReflexTrainingDrillWrapper';
 //   "reflex game online"              ~1,000/mo, KD ~25%
 //   "hand eye coordination gaming"    ~590/mo,   KD ~18%
 //   "aim reflex trainer"              ~150/mo,   KD ~10%
-//   "sports vision training"          ~720/mo,   KD ~26%
-//   "fast reflex training"            ~120/mo,   KD ~12%
-//   "visual tracking drill"           ~110/mo,   KD ~9%
-// PAA targets: "What is a reflex training drill?", "Can you train your reflexes online?",
-//   "How does target acquisition improve gaming?", "What is the difference between reflexes and reactions?",
-//   "Is this reflex trainer free?"
-// Key entities: target acquisition, visual scanning, hand-eye alignment,
-//   reflex response, cognitive concentration, foveal pursuit, motor cortex
 // ============================================================
 
 export const metadata = {
-  title: 'Reflex Training Drill - Target Acquisition Reflex Game | SkillDrills',
-  description: 'Improve your target acquisition and click response with this free Reflex Training Drill. Track and hit fast-dashing targets, calibrate your hand-eye coordination, and reduce your reaction latency online. Free, no download needed.',
+  title: 'Reflex Training Drill - Multi-Target Burst Reflex Game | SkillDrills',
+  description: 'Improve your divided attention and click response with this free Reflex Training Drill. Multiple targets flash on screen at once — clear the whole burst, calibrate your hand-eye coordination, and reduce your reaction latency online. Free, no download needed.',
   keywords: [
-    // Primary / Head terms
-    'reflex training drill', 'target acquisition trainer', 'aim reflex trainer',
-    // Secondary / LSI terms
+    'reflex training drill', 'multi target reflex trainer', 'aim reflex trainer',
     'reflex training game', 'reflex game online', 'hand eye coordination gaming',
-    'fast reflex training', 'visual tracking drill', 'esports reaction training',
-    // Long-tail variants
-    'how to improve target acquisition aim', 'online reflex games free',
-    'tactical target acquisition trainer', 'dashing target tracking game',
-    // General
+    'fast reflex training', 'divided attention training', 'esports reaction training',
+    'how to improve divided attention gaming', 'online reflex games free',
+    'multi target acquisition trainer', 'burst reflex game',
     'free aim trainer browser', 'gaming hand eye coordination test', 'low latency reaction tool'
   ],
   alternates: {
@@ -39,26 +27,17 @@ export const metadata = {
   },
   robots: { index: true, follow: true },
   openGraph: {
-    title: 'Reflex Training Drill - Target Acquisition Reflex Game | SkillDrills',
-    description: 'Improve your target acquisition and click response with this free Reflex Training Drill. Track and hit fast-dashing targets and reduce your reaction latency.',
+    title: 'Reflex Training Drill - Multi-Target Burst Reflex Game | SkillDrills',
+    description: 'Improve your divided attention and click response with this free Reflex Training Drill. Multiple targets flash on screen at once — clear the whole burst before time runs out.',
     url: 'https://skilldrills.online/drills/reaction-speed/reflex-training-drill',
     siteName: 'SkillDrills',
     locale: 'en_US',
     type: 'website',
-    images: [
-      {
-        url: 'https://skilldrills.online/icons/icon-512x512.png',
-        width: 512,
-        height: 512,
-        alt: 'Reflex Training Drill - Target Acquisition Reflex Game | SkillDrills',
-      },
-    ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Reflex Training Drill - Target Acquisition Reflex Game',
-    description: 'Improve your target acquisition and click response. Free browser-based reflex training drill with no downloads.',
-    images: ['https://skilldrills.online/icons/icon-512x512.png'],
+    title: 'Reflex Training Drill - Multi-Target Burst Reflex Game',
+    description: 'Improve your divided attention and click response. Free browser-based multi-target burst reflex drill with no downloads.',
   },
 };
 
@@ -78,9 +57,9 @@ const breadcrumbSchema = {
 const webAppSchema = {
   "@context": "https://schema.org",
   "@type": "WebApplication",
-  "name": "Reflex Training Drill — Target Acquisition Reflex Game | SkillDrills",
+  "name": "Reflex Training Drill — Multi-Target Burst Reflex Game | SkillDrills",
   "url": "https://skilldrills.online/drills/reaction-speed/reflex-training-drill",
-  "description": "Train reaction speed, reflexes, foveal scanning, and visual target acquisition. A free device-adaptive reaction simulator for mobile, tablet, and desktop.",
+  "description": "Train reaction speed, divided attention, and simultaneous multi-target acquisition. A free device-adaptive burst reflex simulator for mobile, tablet, and desktop.",
   "applicationCategory": "EducationalApplication",
   "operatingSystem": "All",
   "browserRequirements": "Requires a modern web browser with JavaScript support.",
@@ -88,48 +67,47 @@ const webAppSchema = {
   "author": { "@type": "Organization", "name": "SkillDrills", "url": "https://skilldrills.online" },
   "isAccessibleForFree": true,
   "learningResourceType": "Educational Game",
-  "teaches": "Reflex Training, Target Acquisition, Visual Scanning, Hand-Eye Coordination, Reflex Response"
+  "teaches": "Reflex Training, Divided Attention, Multi-Target Acquisition, Hand-Eye Coordination, Reflex Response"
 };
 
 const educationalSchema = {
   "@context": "https://schema.org",
   "@type": "EducationalApplication",
-  "name": "Reflex Training Drill (Target Acquisition Trainer)",
-  "description": "Isolates and trains target tracking and motor reaction speed, visual pursuit coordination, and hand-eye alignment.",
+  "name": "Reflex Training Drill (Multi-Target Burst Trainer)",
+  "description": "Isolates and trains simultaneous multi-target acquisition, divided attention, motor reaction speed, and hand-eye alignment.",
   "applicationCategory": "EducationalGame",
-  "operatingSystem": "Web Browser",
-  "isAccessibleForFree": true,
+  "operatingSystem": "Web Browser"
 };
 
 const howToSchema = {
   "@context": "https://schema.org",
   "@type": "HowTo",
-  "name": "How to Train Target Acquisition and Reflexes",
-  "description": "Improve target acquisition reaction speed and motor reflexes against sudden dashing visual targets.",
+  "name": "How to Train Multi-Target Burst & Divided Attention Reflexes",
+  "description": "Step-by-step instructions on improving your simultaneous target acquisition and click response speed.",
   "step": [
     {
       "@type": "HowToStep",
       "position": 1,
-      "name": "Launch the Trial",
-      "text": "Hit the Begin Reflex Trial button to enter the interactive viewport. Adjust target color presets to your liking."
+      "name": "Launch the Drill",
+      "text": "Press Start Drill to initialize the Reflex Training Drill in full screen."
     },
     {
       "@type": "HowToStep",
       "position": 2,
-      "name": "Track Target Dash Movement",
-      "text": "Keep your eyes on the target core as it moves along its ease-out dash trajectory."
+      "name": "Scan the Burst",
+      "text": "Keep your eyes alert to every target flashing on screen at once — watch each one's countdown ring."
     },
     {
       "@type": "HowToStep",
       "position": 3,
       "name": "React and Click",
-      "text": "Click or tap the target core before its lifespan duration limit expires and triggers a timeout."
+      "text": "Click or tap each target's center before its individual timeout expires, prioritizing whichever is closest to disappearing."
     },
     {
       "@type": "HowToStep",
       "position": 4,
-      "name": "Build Streak Combos",
-      "text": "Maintain high accuracy and consecutive hits to level up and challenge higher target speeds, which prevents time deductions."
+      "name": "Climb the Levels",
+      "text": "Maintain high accuracy and consecutive hits to level up and face larger simultaneous target bursts."
     }
   ]
 };
@@ -140,82 +118,122 @@ const faqSchema = {
   "mainEntity": [
     {
       "@type": "Question",
-      "name": "What is the Reflex Training Drill (Target Acquisition Trainer)?",
+      "name": "What is a reflex training drill?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "The Reflex Training Drill is an online visual reaction game designed to improve target acquisition. By presenting unpredictable target dashes, it trains your brain to quickly translate visual coordinate changes into precise clicking actions."
+        "text": "It is an interactive vision utility where several targets flash on screen at once and you must tap every one before it times out, measuring divided-attention reflex speed."
       }
     },
     {
       "@type": "Question",
-      "name": "Can you train your reflexes online?",
+      "name": "What is divided attention in gaming?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes. While your genetic nerve speed is mostly fixed, online reaction tests and training drills condition your visual processing, decision speed, and motor cortex pathway efficiency. Repetitive practice reduces your visual-motor response latency by up to 20%."
+        "text": "Divided attention is the ability to process and react to multiple simultaneous stimuli instead of tracking a single target — critical when several enemies or events appear at once."
       }
     },
     {
       "@type": "Question",
-      "name": "How does target acquisition affect gaming aim?",
+      "name": "Can you train divided attention and multi-target reflexes?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Target acquisition is the phase where you identify a target, snap your crosshair onto it, and fire. Fast target acquisition reduces the time you take to hit enemies, giving you a massive advantage in tactical shooters where milliseconds decide fights."
+        "text": "Yes. Repeated exposure to simultaneous stimuli strengthens parallel visual processing and reduces the tunnel-vision effect of fixating on one target."
       }
     },
     {
       "@type": "Question",
-      "name": "What is the difference between a reflex and a reaction?",
+      "name": "How does this drill differ from single-target reaction tests?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "A reflex is an automatic, involuntary neural response processed directly by the spinal cord (such as flinching). A reaction is a conscious, voluntary response requiring the brain to process a stimulus (like seeing a target) and execute a motor action (like clicking)."
+        "text": "Single-target tests present one stimulus at a time. This drill spawns 2 to 5 targets simultaneously, so you must scan and clear a full burst under a shared time limit."
       }
     },
     {
       "@type": "Question",
-      "name": "Does this aim trainer help in FPS games like Valorant and CS2?",
+      "name": "Does monitor refresh rate affect burst reflex scores?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes. In games like Valorant and CS2, targets often move quickly from behind cover or execute rapid dashes. Training your target acquisition helps you react to these sudden movement changes and secure clean hits."
+        "text": "Yes. Higher refresh rate monitors (144Hz, 240Hz, 360Hz) render each target's countdown ring more smoothly, helping you triage the burst with less input lag."
       }
     },
     {
       "@type": "Question",
-      "name": "How is reaction speed measured in this drill?",
+      "name": "Is this reflex trainer free?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Reaction speed is measured in milliseconds (ms) from the moment the target spawns or relocates to the moment you successfully click or tap the target center."
+        "text": "Yes, all drills on SkillDrills are 100% free with no signups, downloads, or pop-up ads required."
       }
     },
     {
       "@type": "Question",
-      "name": "How often should I practice reflex training?",
+      "name": "What games benefit from multi-target burst training?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "We recommend practicing for 5 to 10 minutes daily. Short, consistent daily sessions serve as a great reflex warmup and are highly effective for reinforcing neuroplasticity."
+        "text": "Fast arena shooters, battle royales (Apex Legends, Overwatch 2, Fortnite), and tactical shooters (Valorant, CS2) where multiple enemies can appear at once benefit heavily."
       }
     },
     {
       "@type": "Question",
-      "name": "Does monitor refresh rate affect target acquisition?",
+      "name": "How does level progression work?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes. Higher refresh rate monitors (144Hz, 240Hz, or 360Hz) show target movements much smoother with reduced motion blur. This allows your visual cortex to scan and track target borders much easier."
+        "text": "Every 250 points earned levels up the drill, adding more simultaneous burst targets (up to 5), shrinking their radius, and tightening each target's timeout."
       }
     },
     {
       "@type": "Question",
-      "name": "Is this reflex training game free to play?",
+      "name": "What happens if I miss a click?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes, all reaction and aim training games on SkillDrills are 100% free with no signups, downloads, or pop-up ads required. You can play directly in your browser."
+        "text": "Clicking empty background space triggers a red alert flash and a miss is logged against your accuracy — there's no score penalty, so keep going."
       }
     },
     {
       "@type": "Question",
-      "name": "Can I play this reflex drill on mobile?",
+      "name": "Can traditional athletes use this drill?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes. The simulator is fully touch-optimized for smartphones and tablets. It dynamically scales to fit your screen size and supports high-accuracy stylus and touch inputs."
+        "text": "Yes. Sports vision research shows multi-object tracking and divided-attention drills enhance spatial awareness for tennis, hockey, and martial arts."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does this drill support touchscreens and mobile devices?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes! It features generous touch hitpads and automatic orientation warnings for mobile devices."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How often should I practice divided attention reflexes?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A daily 5-10 minute session warms up your eye-hand coordination and maintains optimal visual alertness across multiple stimuli."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Which target should I clear first in a burst?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Watch the depleting countdown ring around each target and prioritize whichever is closest to timing out, not just the nearest one to your cursor."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does mouse DPI affect burst reflex performance?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Using a comfortable mouse DPI (400-1600 DPI) ensures smooth, quick cursor jumps between the multiple targets in a burst."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is a good score on this drill?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A score above 5,000 indicates strong divided-attention reflexes, while scores exceeding 10,000 represent elite multi-target acquisition speed."
       }
     }
   ]
@@ -248,4 +266,3 @@ export default function ReflexTrainingDrillPage() {
     </>
   );
 }
-

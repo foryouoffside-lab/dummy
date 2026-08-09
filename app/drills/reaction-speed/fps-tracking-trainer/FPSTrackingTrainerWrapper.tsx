@@ -1,12 +1,5 @@
 'use client';
 
-import dynamic from 'next/dynamic';
+import FPSTrackingTrainerClient from './FPSTrackingTrainerClient';
 
-const FPSTrackingTrainerClient = dynamic(
-  () => import('./FPSTrackingTrainerClient'),
-  { ssr: false }
-);
-
-export default function FPSTrackingTrainerWrapper() {
-  return <FPSTrackingTrainerClient />;
-}
+export default FPSTrackingTrainerClient;

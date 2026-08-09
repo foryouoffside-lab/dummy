@@ -23,18 +23,11 @@ export const metadata = {
     url: 'https://skilldrills.online/drills/memory/short-term-memory/color-sequence',
     siteName: 'SkillDrills',
     locale: 'en_US',
-    images: [{
-      url: 'https://skilldrills.online/icons/icon-512x512.png',
-      width: 512,
-      height: 512,
-      alt: 'Color Sequence Drill',
-    }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Color Sequence - Short-Term Memory | SkillDrills',
     description: 'Train visual memory with 6 vibrant colors and progressive sequences. Watch patterns play, then tap colors in order. No sign-up.',
-    images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
   alternates: {
@@ -92,7 +85,7 @@ export default function ColorSequencePage() {
                 "name": "What is the Color Sequence Drill?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "A free visual memory exercise with 6 colors. Watch sequences play at 1-second intervals, then tap colors in exact order. Green/red feedback dots."
+                  "text": "A free visual memory exercise with 6 vibrant colors. Watch sequences play, then tap colors in exact order."
                 }
               },
               {
@@ -100,7 +93,15 @@ export default function ColorSequencePage() {
                 "name": "How does progressive difficulty work?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Sequence length = level + 2. Level 1 has 3 colors, Level 2 has 4, and so on. Correct sequences advance levels. Penalties reset the current sequence."
+                  "text": "Sequence length = level + 2. Level 1 has 3 colors, Level 2 has 4, and so on as you complete rounds."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Are there negative score or time penalties?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "No. Incorrect taps or timeouts never deduct score points or reduce remaining timer seconds — they only drop your difficulty level by 1 (this drill adapts to your skill, so that's intentional, not a penalty)."
                 }
               },
               {
@@ -108,7 +109,7 @@ export default function ColorSequencePage() {
                 "name": "Who should use this drill?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Children developing memory skills, adults maintaining cognitive function, seniors exercising recall. Accessible for all ages."
+                  "text": "Students developing memory skills, adults maintaining cognitive function, and gamers training visual recall speed."
                 }
               },
               {
@@ -116,7 +117,15 @@ export default function ColorSequencePage() {
                 "name": "Do I need to sign up?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "No registration required. This color sequence drill is completely free and works instantly in your browser."
+                  "text": "No registration required. This drill runs directly in your browser with instant response."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "How long does each drill session last?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Each round is timed for exactly 45 seconds of continuous focus."
                 }
               }
             ]

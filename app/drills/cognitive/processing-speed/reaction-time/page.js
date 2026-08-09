@@ -100,25 +100,25 @@ const howToSchema = {
   "@context": "https://schema.org",
   "@type": "HowTo",
   "name": "How to Test and Train Reaction Speed",
-  "description": "Improve your motor latency, hand-eye coordination, and selective attention by targeting active nodes while ignoring distractors.",
+  "description": "Improve your choice reaction speed and cognitive flexibility by tapping the correct color target as the active rule dynamically switches.",
   "step": [
     {
       "@type": "HowToStep",
       "position": 1,
-      "name": "Press Start Drill",
-      "text": "Start the timer-attack. Red targets and blue distractors will immediately begin to spawn on the grid."
+      "name": "Check the Active Rule",
+      "text": "A RED and a BLUE target both appear on screen. The rule banner at the top shows which color ('TAP RED' or 'TAP BLUE') is currently correct."
     },
     {
       "@type": "HowToStep",
       "position": 2,
-      "name": "Tap the Red Target",
-      "text": "Quickly tap or click on the active RED target to score +5 PTS and gain +2 seconds on the clock."
+      "name": "Tap the Correct Target",
+      "text": "Tap only the target matching the active rule to score +100 PTS. As you level up, the rule dynamically switches between RED and BLUE."
     },
     {
       "@type": "HowToStep",
       "position": 3,
-      "name": "Avoid Blue Distractors",
-      "text": "Do not tap on the blue distractors or the background. Tapping them or timing out will deduct 1 second from your clock."
+      "name": "Keep Up the Pace",
+      "text": "Each session runs on a fixed 45-second clock. Tapping the wrong target or letting one expire never costs points or time — it's simply logged as a miss, so stay focused for the full run."
     }
   ]
 };
@@ -146,13 +146,11 @@ export const metadata = {
     siteName: 'SkillDrills',
     locale: 'en_US',
     type: 'website',
-    images: [{ url: 'https://skilldrills.online/icons/icon-512x512.png', width: 512, height: 512, alt: "Free Reaction Time Test" }],
   },
   twitter: {
     card: 'summary_large_image',
     title: "Free Reaction Time Test | Online Neuro Speed & Reflex Trainer | SkillDrills",
     description: "Test your reaction speed for free with our online neuro speed test. Assess your reflexes, compare against human benchmarks, and train your cognitive response.",
-    images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
 };
 

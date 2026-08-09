@@ -1,16 +1,20 @@
 import VisualTrackingDrillsClient from './VisualTrackingDrillsClient';
+import { DRILLS } from '../../../lib/drillsRegistry';
+
+const trackingDrills = DRILLS.filter((d) => d.category === 'visual-tracking');
+const trackingDrillCount = trackingDrills.length;
 
 export const metadata = {
-  title: 'Free Eye Tracking Training Online - 17 Smooth Pursuit Drills | SkillDrills',
-  description: 'Free eye tracking training online. 17 smooth pursuit eye movement drills. Train your gaze for sports, gaming, and vision therapy. No sign-up required.',
+  title: `Free Eye Tracking Training Online - ${trackingDrillCount} Smooth Pursuit Drills | SkillDrills`,
+  description: `Free eye tracking training online. ${trackingDrillCount} smooth pursuit eye movement drills. Train your gaze for sports, gaming, and vision therapy. No sign-up required.`,
   keywords: [
     'eye tracking training online', 'free eye tracking training', 'eye tracking exercises',
     'smooth pursuit eye movement', 'smooth pursuit training', 'pursuit eye training',
     'eye tracking game', 'gaze tracking training', 'eye movement training',
     'visual tracking exercises', 'eye coordination training', 'eye agility training',
-    'circular pursuit eye drill', 'infinity pursuit eye', 'sine wave pursuit',
+    'infinity pursuit eye', 'sine wave pursuit',
     'peripheral ping pursuit', 'predictive pursuit drill', 'staircase step eye',
-    'split screen tracking', 'strobe prediction pursuit', 'slow precision tracking',
+    'split screen tracking', 'strobe prediction pursuit', 'constant slow pursuit',
     'sports vision training', 'athlete eye training', 'esports eye training',
     'gaming eye tracking', 'fps eye movement training', 'baseball vision training',
     'vision therapy exercises online', 'convergence eye training', 'gaze stability',
@@ -18,8 +22,8 @@ export const metadata = {
     'browser eye tracking game', 'no download eye training', 'skilldrills visual tracking',
   ],
   openGraph: {
-    title: 'Free Eye Tracking Training Online - 17 Smooth Pursuit Drills | SkillDrills',
-    description: 'Free eye tracking training online. 17 smooth pursuit drills for sports, gaming, and vision therapy. No sign-up.',
+    title: `Free Eye Tracking Training Online - ${trackingDrillCount} Smooth Pursuit Drills | SkillDrills`,
+    description: `Free eye tracking training online. ${trackingDrillCount} smooth pursuit drills for sports, gaming, and vision therapy. No sign-up.`,
     type: 'website',
     url: 'https://skilldrills.online/drills/visual-tracking',
     siteName: 'SkillDrills',
@@ -28,8 +32,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Free Eye Tracking Training Online - 17 Smooth Pursuit Drills | SkillDrills',
-    description: 'Free eye tracking training online. 17 smooth pursuit drills. No sign-up.',
+    title: `Free Eye Tracking Training Online - ${trackingDrillCount} Smooth Pursuit Drills | SkillDrills`,
+    description: `Free eye tracking training online. ${trackingDrillCount} smooth pursuit drills. No sign-up.`,
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -42,23 +46,15 @@ export default function VisualTrackingDrillsPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         "@context": "https://schema.org",
         "@type": "CollectionPage",
-        "name": "Free Eye Tracking Training Online - 17 Smooth Pursuit Drills",
+        "name": `Free Eye Tracking Training Online - ${trackingDrillCount} Smooth Pursuit Drills`,
         "url": "https://skilldrills.online/drills/visual-tracking",
-        "description": "17 free eye tracking training drills online. Smooth pursuit exercises (circular, sine-wave, infinity, staircase, predictive). No sign-up required.",
+        "description": `${trackingDrillCount} free eye tracking training drills online. Smooth pursuit exercises (sine-wave, infinity, staircase, predictive, and more). No sign-up required.`,
         "author": { "@type": "Organization", "name": "SkillDrills" },
-        "hasPart": [
-          { "@type": "WebApplication", "name": "Circular Pursuit Eye Tracking", "url": "https://skilldrills.online/drills/visual-tracking/circular-pursuit" },
-          { "@type": "WebApplication", "name": "Sine-Wave Smooth Pursuit", "url": "https://skilldrills.online/drills/visual-tracking/sine-wave-pursuit" },
-          { "@type": "WebApplication", "name": "Infinity Pursuit Eye Drill", "url": "https://skilldrills.online/drills/visual-tracking/infinity-pursuit" },
-          { "@type": "WebApplication", "name": "Predictive Pursuit Tracking", "url": "https://skilldrills.online/drills/visual-tracking/predictive-pursuit" },
-          { "@type": "WebApplication", "name": "Peripheral Ping Pursuit", "url": "https://skilldrills.online/drills/visual-tracking/peripheral-ping-pursuit" },
-          { "@type": "WebApplication", "name": "Slow Precision Eye Tracking", "url": "https://skilldrills.online/drills/visual-tracking/slow-precision-tracking" },
-          { "@type": "WebApplication", "name": "Split-Screen Dual Tracking", "url": "https://skilldrills.online/drills/visual-tracking/split-screen-tracking" },
-          { "@type": "WebApplication", "name": "Directional Chaos Pursuit", "url": "https://skilldrills.online/drills/visual-tracking/directional-chaos-pursuit" },
-          { "@type": "WebApplication", "name": "Dynamic Evasion Pursuit", "url": "https://skilldrills.online/drills/visual-tracking/dynamic-evasion-pursuit" },
-          { "@type": "WebApplication", "name": "Staircase Step Eye Drill", "url": "https://skilldrills.online/drills/visual-tracking/staircase-step" },
-          { "@type": "WebApplication", "name": "Strobe Prediction Pursuit", "url": "https://skilldrills.online/drills/visual-tracking/strobe-prediction-pursuit" }
-        ]
+        "hasPart": trackingDrills.map((drill) => ({
+          "@type": "WebApplication",
+          "name": drill.name,
+          "url": `https://skilldrills.online${drill.href}`
+        }))
       })}} />
       <VisualTrackingDrillsClient />
     </>

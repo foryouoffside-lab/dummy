@@ -1,24 +1,5 @@
 import BarrierSequencePursuitWrapper from './BarrierSequencePursuitWrapper';
 
-// ============================================================
-// SEO RESEARCH FINDINGS — barrier-sequence-pursuit
-// PRIMARY: "jiggle peek trainer" — high-intent gamer search, low KD
-//          "cover peeking reflex drill" — exact concept match
-// SECONDARY / LSI:
-//   "peeker's advantage"              ~5,400/mo, KD ~32%
-//   "crosshair placement valorant"     ~4,200/mo, KD ~36%
-//   "jiggle peek"                     ~1,900/mo, KD ~22%
-//   "how to peek in valorant"          ~1,200/mo, KD ~25%
-//   "esports vision training"         ~250/mo,   KD ~12%
-//   "Valorant angle holding"          ~150/mo,   KD ~10%
-//   "corner peeking trainer"          ~50/mo,    KD ~4%
-// PAA targets: "What is peeker's advantage?", "Should you hold close or wide angles?",
-//   "How do you counter a jiggle peek?", "Is esports vision training actually effective?",
-//   "How can I improve my reaction time for FPS gaming?", "Why do I keep losing fights when holding angles?"
-// Key entities: geometry advantage, dynamic visual acuity, peripheral vision, angle isolation,
-//   foveal re-acquisition, visual scanning, response delay, target tracking
-// ============================================================
-
 export const metadata = {
   title: 'Jiggle Peek Trainer - Cover Peeking Reflex Drill | SkillDrills',
   description: 'Train your angle holding and jiggle peek defense with this free Cover Peeking Reflex Drill (Barrier Sequence Pursuit). Improve reaction speed against peeker\'s advantage, optimize visual scanning, and build esports-level target recognition.',
@@ -45,20 +26,11 @@ export const metadata = {
     siteName: 'SkillDrills',
     locale: 'en_US',
     type: 'website',
-    images: [
-      {
-        url: 'https://skilldrills.online/icons/icon-512x512.png',
-        width: 512,
-        height: 512,
-        alt: 'Jiggle Peek Trainer - Cover Peeking Reflex Drill | SkillDrills',
-      },
-    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Jiggle Peek Trainer - Cover Peeking Reflex Drill',
     description: 'Improve reaction speed against peeker\'s advantage and optimize visual scanning. Free browser-based jiggle peek trainer.',
-    images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
 };
 
@@ -111,13 +83,13 @@ const howToSchema = {
       "@type": "HowToStep",
       "position": 1,
       "name": "Launch the Drill",
-      "text": "Hit the Begin Drill button to enter the interactive viewport. Adjust target color preset to your preference."
+      "text": "Hit the Start Drill button to enter full-screen interactive training mode."
     },
     {
       "@type": "HowToStep",
       "position": 2,
       "name": "Monitor Cover Barriers",
-      "text": "Keep your gaze centered to monitor all 4 cover barriers simultaneously using peripheral awareness and visual scanning."
+      "text": "Keep your gaze centered to monitor all cover barriers simultaneously using peripheral awareness and visual scanning."
     },
     {
       "@type": "HowToStep",
@@ -128,8 +100,8 @@ const howToSchema = {
     {
       "@type": "HowToStep",
       "position": 4,
-      "name": "Avoid Double Penalties",
-      "text": "Do not click the background or miss. Build combos to prolong your session survival time and level up."
+      "name": "Chain Consistent Hits",
+      "text": "Avoid clicking empty space or missing. Consistent hits raise your level, making targets peek faster and shrink in size."
     }
   ]
 };
@@ -143,7 +115,7 @@ const faqSchema = {
       "name": "What is Barrier Sequence Pursuit (Jiggle Peek Trainer)?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Barrier Sequence Pursuit is a reflex aim drill that isolates cover-peeking detection. By spawning targets behind shifting cover barriers, it tests your visual re-acquisition speed and trains your defense against jiggle-peeking opponents."
+        "text": "Barrier Sequence Pursuit is a reflex aim drill that isolates cover-peeking detection. Targets spawn behind cover barriers, testing visual re-acquisition speed and angle defense."
       }
     },
     {
@@ -151,7 +123,7 @@ const faqSchema = {
       "name": "What is peeker's advantage in gaming?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Peeker's advantage is a networking and visual phenomenon in online multiplayer games where a moving player peeking around a corner sees a stationary defending player before the defender sees them. This drill trains your reflexes to minimize your response latency and counter this latency advantage."
+        "text": "Peeker's advantage is a networking phenomenon where a moving peeker sees a holding defender before the defender sees them. This drill trains quick reaction speed to counter it."
       }
     },
     {
@@ -159,7 +131,7 @@ const faqSchema = {
       "name": "How do you counter a jiggle peek?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Countering a jiggle peek requires high visual scanning and anticipation. You must place your crosshair slightly off the corner to account for the opponent's movement width, keep a relaxed focus, and click the instant the target breaks cover. This drill builds that exact spatial-motor muscle memory."
+        "text": "Countering a jiggle peek requires high visual scanning. You must place your crosshair slightly off the corner and click the instant the target breaks cover."
       }
     },
     {
@@ -167,39 +139,7 @@ const faqSchema = {
       "name": "Does this help FPS gaming?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes. In tactical shooters like Valorant, CS2, and Rainbow Six Siege, players frequently peek from behind boxes and walls. This drill directly translates to catching quick peeks, holding angles, and adjusting your crosshair placement dynamically."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Does this improve visual processing speed?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Absolutely. By scaling target exposure times down to fractions of a second, this drill forces your visual cortex to identify targets and execute motor commands with very short exposure windows."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Is esports vision training actually effective?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes, research indicates that targeted vision training improves dynamic visual acuity, peripheral awareness, and contrast sensitivity. Training eye coordination and eye sweep movements (saccades) allows competitive gamers to process visual information faster."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Should you hold close or wide angles when defending a corner?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "If you have fast reaction time or expect the enemy to run past the corner (wide swing), you should place your crosshair wide. If you expect a jiggle peek or slow shift-walk, you should place your crosshair closer to the wall. This drill forces you to react to both tight and wide peeks."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Why do I keep losing fights when holding angles?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Losing angle fights is often caused by static crosshair placement, poor positioning (standing too close to the wall, which gives the enemy a geometric advantage), or slow reaction times. Using a corner peeking trainer helps you build active target re-acquisition and faster click response."
+        "text": "Yes. In games like Valorant and CS2, players frequently peek from behind boxes. This drill translates directly to angle holding and reactive clicking."
       }
     },
     {
@@ -207,15 +147,31 @@ const faqSchema = {
       "name": "How does adaptive difficulty work?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "As your score climbs, targets shrink in size, peeks occur faster, exposure duration decreases, and barrier cycle timing becomes completely unpredictable to keep your brain challenged."
+        "text": "As your score climbs, targets shrink in size, peeks occur faster, exposure duration decreases, and barrier cycle timing becomes completely unpredictable."
       }
     },
     {
       "@type": "Question",
-      "name": "How often should I train reaction speed?",
+      "name": "What mechanical skills does cover peeking pursuit improve?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "For optimal results, practice for 5-10 minutes daily as a cognitive warmup or reflex conditioning routine to establish consistent neurological performance and reduce eye strain."
+        "text": "It targets peripheral detection, saccadic eye movement, target re-acquisition speed, and reflexive click accuracy under time pressure."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is this jiggle peek trainer free?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, this drill is completely free and runs directly in your web browser with 1:1 hardware raw input and mobile touch support."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What games benefit from jiggle peek defense training?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Fast-paced tactical shooters like CS2, Valorant, Rainbow Six Siege, and Apex Legends benefit heavily from enhanced angle defense and cover tracking."
       }
     }
   ]
@@ -248,4 +204,3 @@ export default function BarrierSequencePursuitPage() {
     </>
   );
 }
-

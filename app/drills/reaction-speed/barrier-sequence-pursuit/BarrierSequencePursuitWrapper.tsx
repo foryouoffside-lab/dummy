@@ -1,12 +1,5 @@
 'use client';
 
-import dynamic from 'next/dynamic';
+import BarrierSequencePursuitClient from './BarrierSequencePursuitClient';
 
-const BarrierSequencePursuitClient = dynamic(
-  () => import('./BarrierSequencePursuitClient'),
-  { ssr: false }
-);
-
-export default function BarrierSequencePursuitWrapper() {
-  return <BarrierSequencePursuitClient />;
-}
+export default BarrierSequencePursuitClient;

@@ -163,13 +163,11 @@ export const metadata = {
     siteName: 'SkillDrills',
     locale: 'en_US',
     type: 'website',
-    images: [{ url: 'https://skilldrills.online/icons/icon-512x512.png', width: 512, height: 512, alt: "Concentration Stamina Test – Mental Focus Endurance Game" }],
   },
   twitter: {
     card: 'summary_large_image',
     title: "Free Focus Test Online: Measure Your Concentration & Attention Span | SkillDrills",
     description: "Worried about your attention span? Take our free focus test online to measure your concentration levels, challenge your brain, and see how you score against the average!",
-    images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
 };
 

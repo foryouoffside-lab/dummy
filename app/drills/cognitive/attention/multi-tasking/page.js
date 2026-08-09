@@ -124,7 +124,7 @@ const howToSchema = {
       "@type": "HowToStep",
       "position": 4,
       "name": "Survive the Speed Scaling",
-      "text": "Every correct hit adds time (+7s) to your clock. Avoid errors and build combos to level up and push your score limit."
+      "text": "You have a fixed 45-second session. Stream speed and target divergence increase as your score climbs, so stay accurate on both channels to push your score higher before time runs out."
     }
   ]
 };
@@ -157,13 +157,11 @@ export const metadata = {
     siteName: 'SkillDrills',
     locale: 'en_US',
     type: 'website',
-    images: [{ url: 'https://skilldrills.online/icons/icon-512x512.png', width: 512, height: 512, alt: "Multitasking Test – Dual-Task Cognitive Flexibility Game" }],
   },
   twitter: {
     card: 'summary_large_image',
     title: "Multitasking Test | Dual Target Flow Brain Training | SkillDrills",
     description: "Take our free online multitasking test. Challenge your brain with dual-target tracking and improve cognitive flexibility. No sign-up required.",
-    images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
 };
 

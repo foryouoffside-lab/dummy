@@ -81,7 +81,7 @@ const faqSchema = {
     {
       "@type": "Question",
       "name": "How does this distraction fighter game work?",
-      "acceptedAnswer": { "@type": "Answer", "text": "The game presents a primary target task while simultaneously spawning deceptive visual distractors. You must successfully complete your primary task while resisting clicking or responding to the distractors. Each successful distractor resistance builds your inhibitory control score, while each distractor click counts as an impulse control failure." }
+      "acceptedAnswer": { "@type": "Answer", "text": "A color word flashes on screen printed in a conflicting ink color (e.g. the word 'BLUE' printed in red ink). You must tap the button matching the ink color, not the word's meaning, suppressing the automatic urge to read the word aloud. Each correct ink-color tap builds your score, while a wrong tap or a timed-out trial counts as an impulse control failure." }
     },
     {
       "@type": "Question",
@@ -118,13 +118,13 @@ const howToSchema = {
       "@type": "HowToStep",
       "position": 3,
       "name": "Avoid Impulse Tapping",
-      "text": "Do not rush. Incorrect selections or timeouts do not deduct points but will penalize your timer by -1.5 seconds."
+      "text": "Do not rush. Incorrect selections or timeouts never deduct points or reduce your remaining time — but they do cost 1 of your 5 lives, and losing all 5 ends the run immediately."
     },
     {
       "@type": "HowToStep",
       "position": 4,
       "name": "Scale Difficulty with Milestones",
-      "text": "Every 50 points earned increases your Level, shrinking the target visual duration window down to a minimum of 600ms."
+      "text": "Every 250 points earned increases your Level, shrinking the trial time window down to a minimum of 380ms."
     }
   ]
 };
@@ -164,13 +164,11 @@ export const metadata = {
     siteName: 'SkillDrills',
     locale: 'en_US',
     type: 'website',
-    images: [{ url: 'https://skilldrills.online/icons/icon-512x512.png', width: 512, height: 512, alt: "Distraction Fighter – Stroop Test & Inhibitory Control Game" }],
   },
   twitter: {
     card: 'summary_large_image',
     title: "Ignore Distractions Game: Free Online Focus & Attention Training | SkillDrills",
     description: "Train your brain to block out noise! Play our free online focus games designed to improve your selective attention, ignore distractions, and boost your daily productivity.",
-    images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
 };
 

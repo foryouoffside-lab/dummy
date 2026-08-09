@@ -17,32 +17,32 @@ export const metadata = {
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-canvas px-4">
       <div className="text-center max-w-md">
-        <h1 className="text-7xl font-extrabold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-4">
+        <h1 className="text-7xl font-extrabold bg-gradient-to-r from-blue-500 to-indigo-500 bg-clip-text text-transparent mb-4">
           404
         </h1>
-        <h2 className="text-2xl font-semibold text-gray-900 mb-2">Page Not Found</h2>
-        <p className="text-gray-600 mb-8">
+        <h2 className="text-2xl font-semibold text-ink-1 mb-2">Page Not Found</h2>
+        <p className="text-ink-2 mb-8">
           The drill page you&apos;re looking for doesn&apos;t exist or has been moved.<br />
           Explore our free training drills below.
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <Link 
+          <Link
             href="/"
             className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all transform hover:scale-[1.02]"
           >
             Go Home
           </Link>
-          <Link 
+          <Link
             href="/drills/fps"
-            className="px-6 py-3 bg-white text-gray-700 rounded-lg font-semibold border border-gray-300 hover:border-gray-400 hover:bg-gray-50 transition-all"
+            className="px-6 py-3 bg-surface-1 text-ink-1 rounded-lg font-semibold border border-hairline hover:border-hairline-2 hover:bg-surface-2 transition-all"
           >
             FPS Drills
           </Link>
-          <Link 
+          <Link
             href="/drills/cognitive"
-            className="px-6 py-3 bg-white text-gray-700 rounded-lg font-semibold border border-gray-300 hover:border-gray-400 hover:bg-gray-50 transition-all"
+            className="px-6 py-3 bg-surface-1 text-ink-1 rounded-lg font-semibold border border-hairline hover:border-hairline-2 hover:bg-surface-2 transition-all"
           >
             Cognitive Drills
           </Link>

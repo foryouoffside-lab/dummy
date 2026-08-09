@@ -1,10 +1,10 @@
-﻿@tailwind base;
+@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   body {
-    @apply bg-gray-50 text-gray-900;
+    @apply bg-canvas text-ink-1 font-sans antialiased selection:bg-blue-500/20 selection:text-blue-400;
   }
 }
 
@@ -12,8 +12,72 @@
   .drill-container {
     @apply max-w-6xl mx-auto px-4 py-8;
   }
-  
+
   .drill-card {
-    @apply bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300;
+    @apply bg-surface-1 border border-hairline rounded-xl transition-all duration-200 hover:border-hairline-2 active:scale-[0.98];
+  }
+
+  /* Design System Elevation Steps */
+  .card-e0 {
+    @apply bg-surface-1 border border-hairline transition-all duration-150;
+  }
+  .card-e1 {
+    @apply bg-surface-1 border border-hairline-2 -translate-y-0.5 shadow-lg transition-all duration-150;
+  }
+  .card-e2 {
+    @apply bg-surface-2 border border-hairline-2 translate-y-0 active:scale-[0.98] transition-all duration-75;
+  }
+
+  /* Typography Registers */
+  .text-display {
+    @apply text-3xl sm:text-5xl lg:text-6xl font-black text-ink-1 uppercase tracking-tight leading-none;
+  }
+  .text-heading {
+    @apply text-xl sm:text-2xl lg:text-3xl font-bold text-ink-1 tracking-tight;
+  }
+  .text-body {
+    @apply text-sm sm:text-base text-ink-2 leading-relaxed font-normal;
+  }
+  .text-data {
+    @apply font-mono text-2xs sm:text-xs font-bold text-ink-3 uppercase tracking-widest;
   }
 }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   GAMEPLAY JUICE — reusable adrenaline FX (screen shake, hit flash, danger vignette)
+   Any drill can trigger these by toggling a key/class; not scoped to one drill.
+   ───────────────────────────────────────────────────────────────────────────── */
+@keyframes fxShakeSoft { 0%,100%{transform:translate(0,0);} 20%{transform:translate(-3px,2px);} 40%{transform:translate(3px,-2px);} 60%{transform:translate(-2px,-2px);} 80%{transform:translate(2px,2px);} }
+@keyframes fxShakeHard { 0%,100%{transform:translate(0,0) rotate(0);} 15%{transform:translate(-8px,4px) rotate(-0.6deg);} 30%{transform:translate(7px,-5px) rotate(0.6deg);} 45%{transform:translate(-6px,-3px) rotate(-0.4deg);} 60%{transform:translate(6px,4px) rotate(0.4deg);} 75%{transform:translate(-4px,2px) rotate(-0.2deg);} 90%{transform:translate(3px,-2px) rotate(0.2deg);} }
+.fx-shake-soft-a, .fx-shake-soft-b { animation: fxShakeSoft .28s ease-in-out; }
+.fx-shake-hard-a, .fx-shake-hard-b { animation: fxShakeHard .4s ease-in-out; }
+
+@keyframes fxFlash { 0%{opacity:1;} 100%{opacity:0;} }
+.fx-flash { position:absolute; inset:0; pointer-events:none; z-index:55; animation: fxFlash .45s ease-out forwards; }
+.fx-flash-red { background:radial-gradient(ellipse at 50% 50%, rgba(239,68,68,.5), transparent 70%); }
+.fx-flash-gold { background:radial-gradient(ellipse at 50% 50%, rgba(250,204,21,.45), transparent 70%); }
+.fx-flash-cyan { background:radial-gradient(ellipse at 50% 50%, rgba(34,211,238,.35), transparent 70%); }
+
+@keyframes fxVignettePulse { 0%,100%{opacity:var(--v-min,.12);} 50%{opacity:var(--v-max,.35);} }
+.fx-vignette { position:absolute; inset:0; pointer-events:none; z-index:35; background:radial-gradient(ellipse 120% 90% at 50% 50%, transparent 55%, rgba(239,68,68,.9) 130%); animation: fxVignettePulse 1.1s ease-in-out infinite; }
+
+@keyframes fxPop { 0%{transform:scale(.4); opacity:1;} 100%{transform:scale(2.6); opacity:0;} }
+.fx-pop { position:absolute; border-radius:9999px; pointer-events:none; animation: fxPop .5s ease-out forwards; }
+
+@keyframes fxShrinkW { from{width:100%;} to{width:0%;} }
+.fx-shrink { animation-name: fxShrinkW; animation-timing-function: linear; animation-fill-mode: forwards; }
+
+/* entrance juice — this repo has no tailwindcss-animate plugin installed, so the
+   `animate-in fade-in zoom-in-*` utility soup seen elsewhere in the codebase is a
+   silent no-op; these are real keyframes for the same effect. */
+@keyframes fxPopIn { 0%{opacity:0; transform:scale(.5);} 70%{opacity:1; transform:scale(1.08);} 100%{opacity:1; transform:scale(1);} }
+.fx-pop-in { animation: fxPopIn .18s cubic-bezier(.34,1.56,.64,1) both; }
+@keyframes fxFadeSlideUp { 0%{opacity:0; transform:translateY(8px);} 100%{opacity:1; transform:translateY(0);} }
+.fx-fade-up { animation: fxFadeSlideUp .18s ease-out both; }
+@keyframes fxFadeIn { from{opacity:0;} to{opacity:1;} }
+.fx-fade-in { animation: fxFadeIn .18s ease-out both; }
+
+/* score popup — the floating "+N" near a scored action, replacing text-banner
+   combo/clear announcements across every drill. */
+@keyframes fxScorePopup { 0%{opacity:1; transform:translateY(0);} 100%{opacity:0; transform:translateY(-38px);} }
+.fx-score-popup { animation: fxScorePopup .9s ease-out forwards; }

@@ -54,6 +54,30 @@ const faqSchema = {
     },
     {
       "@type": "Question",
+      "name": "Are there negative score penalties?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. Selecting a wrong ball costs zero points — you only earn +20 PTS per correctly identified target, and the engine enforces a strict minimum score floor of 0."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do collisions work?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The engine runs a custom 2D elastic collision loop where balls perfectly exchange momentum vectors upon impact."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How long does each session last?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Session tracking duration is configurable from 15 to 60 seconds."
+      }
+    },
+    {
+      "@type": "Question",
       "name": "Do I need to sign up?",
       "acceptedAnswer": {
         "@type": "Answer",
@@ -111,13 +135,11 @@ export const metadata = {
     siteName: 'SkillDrills',
     locale: 'en_US',
     type: 'website',
-    images: [{ url: 'https://skilldrills.online/icons/icon-512x512.png', width: 512, height: 512, alt: "Multiple Object Tracking Test" }],
   },
   twitter: {
     card: 'summary_large_image',
     title: "Multiple Object Tracking Test | Free Visual Attention Game | SkillDrills",
     description: "Measure your divided attention and visual memory. Track multiple target balls among moving distractors and identify them in this free online MOT cognitive test.",
-    images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
 };
 
