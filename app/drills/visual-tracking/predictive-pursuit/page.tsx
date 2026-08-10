@@ -2,7 +2,7 @@ import PredictivePursuitClient from './PredictivePursuitClient';
 
 export const metadata = {
   title: "Predictive Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
-  description: "Interpolate path trajectory of a moving target node and execute predictive gaze shifts. Free browser-based visual tracking drill with customizable speed, duration, and random acceleration.",
+  description: "Interpolate path trajectory of a moving target node and execute predictive gaze shifts. Builds anticipatory tracking ahead of the target's actual position.",
   keywords: [
     "predictive pursuit",
     "visual tracking drill",

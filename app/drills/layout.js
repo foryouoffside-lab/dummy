@@ -1,4 +1,5 @@
 ﻿import { DRILLS } from '@/lib/drillsRegistry';
+import DrillBreadcrumb from '@/components/drill/DrillBreadcrumb';
 
 export const metadata = {
   title: {
@@ -38,6 +39,7 @@ export default function DrillsLayout({ children }) {
       </section>
 
       <main id="drills-main-content" role="main">
+        <DrillBreadcrumb />
         {children}
       </main>
     </>

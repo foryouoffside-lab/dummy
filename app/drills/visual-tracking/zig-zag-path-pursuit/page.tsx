@@ -2,7 +2,7 @@ import ZigZagPathPursuitClient from './ZigZagPathPursuitClient';
 
 export const metadata = {
   title: "Zig-Zag Path Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
-  description: "Track target movements along a multi-segment zig-zag guide path. Free browser-based visual tracking drill with customizable speed, duration, and random acceleration.",
+  description: "Track target movements along a multi-segment zig-zag guide path. Builds gaze accuracy through sharp directional corners.",
   keywords: [
     "zig zag path pursuit",
     "visual tracking drill",

@@ -2,7 +2,7 @@ import GhostingSuppressPursuitClient from './GhostingSuppressPursuitClient';
 
 export const metadata = {
   title: "Ghosting Suppress Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
-  description: "Train foveal tracking precision by suppressing motion ghosting artifacts and visual lag. Free browser-based visual tracking drill with customizable speed, duration, and random acceleration.",
+  description: "Train foveal tracking precision by suppressing motion ghosting artifacts and visual lag. Sharpens fixation stability against blur and afterimage drift.",
   keywords: [
     "ghosting suppress pursuit",
     "visual tracking drill",

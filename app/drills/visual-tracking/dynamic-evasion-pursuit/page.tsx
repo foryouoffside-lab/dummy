@@ -2,7 +2,7 @@ import DynamicEvasionPursuitClient from './DynamicEvasionPursuitClient';
 
 export const metadata = {
   title: "Dynamic Evasion Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
-  description: "Train fast-reaction visual pursuit tracking against rapid evasive directional changes. Free browser-based visual tracking drill with customizable speed, duration, and random acceleration.",
+  description: "Train fast-reaction visual pursuit tracking against rapid evasive directional changes. Sharpens gaze reaction speed against sudden evasive turns.",
   keywords: [
     "dynamic evasion pursuit",
     "visual tracking drill",

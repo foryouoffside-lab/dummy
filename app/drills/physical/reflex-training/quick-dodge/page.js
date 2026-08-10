@@ -16,7 +16,7 @@ import QuickDodgeClient from './QuickDodgeClient';
 
 export const metadata = {
   title: 'Reflex Game Online - Free Dodge Challenge & Mouse Training | SkillDrills',
-  description: 'Train reflexes, mouse control, spatial awareness and survival skills in this free browser dodge game. Dodge increasingly aggressive homing enemies and build huge streaks.',
+  description: 'Train reflexes, mouse control, and spatial awareness in this free browser dodge game. Dodge aggressive homing enemies and build huge streaks.',
   keywords: [
     // Primary / Head terms
     'reflex game online', 'dodge game',

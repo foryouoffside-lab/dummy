@@ -2,7 +2,7 @@ import StrobePredictionPursuitClient from './StrobePredictionPursuitClient';
 
 export const metadata = {
   title: "Strobe Prediction Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
-  description: "Predict target locations during cyclic strobe occlusion intervals. Free browser-based visual tracking drill with customizable speed, duration, and random acceleration.",
+  description: "Predict target locations during cyclic strobe occlusion intervals. Trains gaze prediction through brief target occlusion.",
   keywords: [
     "strobe prediction pursuit",
     "visual tracking drill",

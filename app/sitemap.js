@@ -33,19 +33,23 @@ const CATEGORY_PRIORITY = {
   'visual-tracking': 0.85,
 };
 
-export default async function sitemap() {
-  const today = new Date().toISOString().split('T')[0];
+// Bump this only when real site content actually changes (a drill added/edited,
+// copy rewritten, etc). Do NOT compute this from the current date at build time —
+// a lastModified that's always "today" gets discounted by search engines as a
+// meaningless freshness signal.
+const SITE_CONTENT_UPDATED = '2026-08-10';
 
+export default async function sitemap() {
   const categoryEntries = categoryPages.map((page) => ({
     url: `${BASE_URL}${page.path}`,
-    lastModified: today,
+    lastModified: SITE_CONTENT_UPDATED,
     changeFrequency: page.changefreq,
     priority: page.priority,
   }));
 
   const drillEntries = DRILLS.map((drill) => ({
     url: `${BASE_URL}${drill.href}`,
-    lastModified: today,
+    lastModified: SITE_CONTENT_UPDATED,
     changeFrequency: 'weekly',
     priority: CATEGORY_PRIORITY[drill.category] ?? 0.85,
   }));

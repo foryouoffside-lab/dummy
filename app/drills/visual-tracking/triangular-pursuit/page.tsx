@@ -2,7 +2,7 @@ import TriangularPursuitClient from './TriangularPursuitClient';
 
 export const metadata = {
   title: "Triangular Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
-  description: "Track target transitions along a triangular vector path. Free browser-based visual tracking drill with customizable speed, duration, and random acceleration.",
+  description: "Track target transitions along a triangular vector path. Builds smooth pursuit through sharp triangular direction changes.",
   keywords: [
     "triangular pursuit",
     "visual tracking drill",

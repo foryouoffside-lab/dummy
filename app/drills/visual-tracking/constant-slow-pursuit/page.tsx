@@ -2,7 +2,7 @@ import ConstantSlowPursuitClient from './ConstantSlowPursuitClient';
 
 export const metadata = {
   title: "Constant Slow Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
-  description: "Train smooth pursuit eye movements along a continuous Lissajous curve. Free browser-based visual tracking drill with customizable speed, duration, and random acceleration.",
+  description: "Train smooth pursuit eye movements along a continuous Lissajous curve. Adjustable speed and duration build steady low-velocity gaze control.",
   keywords: [
     "constant slow pursuit",
     "visual tracking drill",

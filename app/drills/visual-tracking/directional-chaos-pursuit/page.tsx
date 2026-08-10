@@ -2,7 +2,7 @@ import DirectionalChaosPursuitClient from './DirectionalChaosPursuitClient';
 
 export const metadata = {
   title: "Directional Chaos Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
-  description: "Track a bouncing target subjected to continuous chaotic velocity nudges. Free browser-based visual tracking drill with customizable speed, duration, and random acceleration.",
+  description: "Track a bouncing target subjected to continuous chaotic velocity nudges. Trains gaze recovery from unpredictable, erratic motion.",
   keywords: [
     "directional chaos pursuit",
     "visual tracking drill",

@@ -2,7 +2,7 @@ import SpatialShiftPursuitClient from './SpatialShiftPursuitClient';
 
 export const metadata = {
   title: "Spatial Shift Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
-  description: "Track a bouncing target undergoing randomized spatial shifts in speed and direction. Free browser-based visual tracking drill with customizable speed, duration, and random acceleration.",
+  description: "Track a bouncing target undergoing randomized spatial shifts in speed and direction. Builds adaptive tracking against sudden trajectory changes.",
   keywords: [
     "spatial shift pursuit",
     "visual tracking drill",

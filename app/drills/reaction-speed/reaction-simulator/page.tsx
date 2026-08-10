@@ -13,7 +13,7 @@ import ReactionSimulatorWrapper from './ReactionSimulatorWrapper';
 
 export const metadata = {
   title: 'Reaction Simulator - Free Reflex Training Game Online | SkillDrills',
-  description: 'Play this free online Reflex Training Game (Reaction Simulator). Intercept accelerating falling targets before they escape, train vertical visual tracking, and improve your hand-eye coordination. Mobile-friendly, no download needed.',
+  description: 'Free online Reflex Training Game (Reaction Simulator). Intercept falling targets, train vertical tracking, and sharpen hand-eye coordination.',
   keywords: [
     'reaction simulator', 'reflex training game', 'reflex game online',
     'reflex simulator', 'hand eye coordination games', 'reaction speed test',

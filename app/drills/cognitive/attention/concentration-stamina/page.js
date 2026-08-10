@@ -131,7 +131,7 @@ const howToSchema = {
 
 export const metadata = {
   title: "Free Focus Test Online: Measure Your Concentration & Attention Span | SkillDrills",
-  description: "Worried about your attention span? Take our free focus test online to measure your concentration levels, challenge your brain, and see how you score against the average!",
+  description: "Take our free focus test online to measure your concentration levels, challenge your brain, and see how you score against the average.",
   keywords: [
     "focus test online",
     "concentration test online",

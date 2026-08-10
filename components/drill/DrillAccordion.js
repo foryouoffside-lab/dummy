@@ -20,7 +20,7 @@ export default function DrillAccordion({ id, title, subtitle = null, icon: Icon 
             </div>
           )}
           <div>
-            <h3 className="text-lg font-bold text-white tracking-tight">{title}</h3>
+            <h2 className="text-lg font-bold text-white tracking-tight">{title}</h2>
             {subtitle && <p className="text-xs text-gray-300 mt-0.5">{subtitle}</p>}
           </div>
         </div>

@@ -2,7 +2,7 @@ import StaircaseStepClient from './StaircaseStepClient';
 
 export const metadata = {
   title: "Vertical Zig-Zag Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
-  description: "Track target movements along a vertical multi-segment zig-zag polyline. Free browser-based visual tracking drill with customizable speed, duration, and random acceleration.",
+  description: "Track target movements along a vertical multi-segment zig-zag polyline. Builds vertical gaze accuracy through sharp directional steps.",
   keywords: [
     "vertical zig zag pursuit",
     "visual tracking drill",

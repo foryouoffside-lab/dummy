@@ -2,7 +2,7 @@ import SineWavePursuitClient from './SineWavePursuitClient';
 
 export const metadata = {
   title: "Sine Wave Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
-  description: "Track target oscillations along a horizontal sine wave curve. Free browser-based visual tracking drill with customizable speed, duration, and random acceleration.",
+  description: "Track target oscillations along a horizontal sine wave curve. Builds smooth pursuit through continuous rhythmic motion.",
   keywords: [
     "sine wave pursuit",
     "visual tracking drill",

@@ -2,7 +2,7 @@ import MomentumTeleportPursuitClient from './MomentumTeleportPursuitClient';
 
 export const metadata = {
   title: "Momentum Teleport Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
-  description: "Predict target direction after coordinates instantly teleport while maintaining velocity momentum. Free browser-based visual tracking drill with customizable speed, duration, and random acceleration.",
+  description: "Predict target direction after coordinates instantly teleport while maintaining velocity momentum. Sharpens anticipatory tracking after sudden position jumps.",
   keywords: [
     "momentum teleport pursuit",
     "visual tracking drill",

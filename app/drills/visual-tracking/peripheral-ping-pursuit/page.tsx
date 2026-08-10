@@ -2,7 +2,7 @@ import PeripheralPingPursuitClient from './PeripheralPingPursuitClient';
 
 export const metadata = {
   title: "Peripheral Ping Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
-  description: "Fixate on center crosshairs while detecting transient targets spawning in your peripheral view. Free browser-based visual tracking drill with customizable speed, duration, and random acceleration.",
+  description: "Fixate on center crosshairs while detecting transient targets spawning in your peripheral view. Trains peripheral awareness without breaking central fixation.",
   keywords: [
     "peripheral ping pursuit",
     "visual tracking drill",

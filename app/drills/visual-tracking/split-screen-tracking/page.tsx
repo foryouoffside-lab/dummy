@@ -2,7 +2,7 @@ import SplitScreenTrackingClient from './SplitScreenTrackingClient';
 
 export const metadata = {
   title: "Split-Screen Tracking — Visual Tracking & Gaze Calibration Drill | SkillDrills",
-  description: "Condition divided attention by tracking dual targets moving along vertical and horizontal axes. Free browser-based visual tracking drill with customizable speed, duration, and random acceleration.",
+  description: "Condition divided attention by tracking dual targets moving along vertical and horizontal axes. Builds split-attention tracking across two simultaneous targets.",
   keywords: [
     "split screen tracking",
     "visual tracking drill",

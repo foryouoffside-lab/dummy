@@ -2,7 +2,7 @@ import InfinityPursuitClient from './InfinityPursuitClient';
 
 export const metadata = {
   title: "Infinity Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
-  description: "Track a target moving along a continuous figure-8 Lemniscate path. Free browser-based visual tracking drill with customizable speed, duration, and random acceleration.",
+  description: "Track a target moving along a continuous figure-8 Lemniscate path. Trains smooth pursuit through continuous curve reversals.",
   keywords: [
     "infinity pursuit",
     "visual tracking drill",
