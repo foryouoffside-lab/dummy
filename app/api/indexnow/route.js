@@ -44,17 +44,35 @@ export async function POST(request) {
 
     // Validate URLs
     if (!urls || !Array.isArray(urls) || urls.length === 0) {
-      return Response.json({ 
+      return Response.json({
         error: 'URLs array required',
         example: { urls: ['/drills/fps/flick-shot-training', '/drills/memory/working-memory/n-back'] }
       }, { status: 400 });
     }
 
-    // Convert to full URLs
+    // Cap payload size (matches the 100/batch the internal notify-indexnow script uses)
+    if (urls.length > 100) {
+      return Response.json({
+        error: 'Too many URLs',
+        message: 'Submit at most 100 URLs per request',
+      }, { status: 400 });
+    }
+
+    // Convert to full URLs, rejecting anything that doesn't resolve to our own origin
+    // (this payload gets relayed to Bing/Yandex/Seznam/Naver under our host identity)
     const fullUrls = urls.map(url => {
       if (url.startsWith('http')) return url;
       return `${BASE_URL}${url.startsWith('/') ? url : '/' + url}`;
     });
+
+    const invalidUrl = fullUrls.find(url => !url.startsWith(BASE_URL));
+    if (invalidUrl) {
+      return Response.json({
+        error: 'Invalid URL origin',
+        message: `All URLs must belong to ${BASE_URL}`,
+        invalidUrl,
+      }, { status: 400 });
+    }
 
     // Deduplicate URLs
     const uniqueUrls = [...new Set(fullUrls)];
