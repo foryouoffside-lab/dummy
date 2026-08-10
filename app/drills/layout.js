@@ -16,7 +16,7 @@ export const metadata = {
   ],
   openGraph: {
     title: 'Training Drills | SkillDrills',
-    description: '135+ free interactive drills for gaming, cognitive, and motor skills training.',
+    description: `${DRILLS.length}+ free interactive drills for gaming, cognitive, and motor skills training.`,
     type: 'website',
   },
   robots: {

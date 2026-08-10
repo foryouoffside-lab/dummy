@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import SiteFooter from '@/components/SiteFooter';
 import Reveal from '@/components/Reveal';
+import DrillGlobalSettings from '@/components/drill/DrillGlobalSettings';
 import { DRILLS, DESKTOP_ONLY_CATEGORIES } from '@/lib/drillsRegistry';
 
 const categoryData = [
@@ -142,7 +143,7 @@ export default function DrillsDirectoryClient() {
   const [selectedGoal, setSelectedGoal] = useState('all');
   const [isMobile, setIsMobile] = useState(false);
 
-  const totalDrills = DRILLS?.length || 113;
+  const totalDrills = DRILLS.length;
 
   // Detect mobile viewport so desktop-only categories can be pushed to the end
   useEffect(() => {
@@ -226,6 +227,11 @@ export default function DrillsDirectoryClient() {
           </div>
         </Reveal>
 
+        {/* Universal Session Settings (sound / red flash / target timeouts) */}
+        <Reveal className="max-w-2xl mx-auto mb-10">
+          <DrillGlobalSettings />
+        </Reveal>
+
         {/* Goal Picker Pills Bar (Horizontal scrollable on mobile) */}
         <Reveal className="mb-12">
           <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none justify-start sm:justify-center">
@@ -255,7 +261,7 @@ export default function DrillsDirectoryClient() {
         </Reveal>
 
         {/* Category Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-20">
           {sortedCategories.map((cat, idx) => {
             const Icon = cat.icon;
             const catDrillsCount = DRILLS.filter(d => d.category === cat.cat).length;
@@ -282,12 +288,17 @@ export default function DrillsDirectoryClient() {
                   />
 
                   <div className="relative">
-                    <div className="flex items-center justify-between mb-5">
-                      <div className={`relative w-13 h-13 rounded-2xl bg-gradient-to-br ${cat.color} flex items-center justify-center text-white shadow-lg group-hover:scale-105 transition-transform duration-300`}>
-                        <div className={`absolute -inset-1.5 rounded-2xl bg-gradient-to-br ${cat.color} opacity-40 blur-md -z-10 group-hover:opacity-70 transition-opacity`} />
-                        <Icon className="w-6 h-6" />
+                    <div className="flex items-center justify-between mb-5 gap-3">
+                      <div className="flex items-center gap-3.5 min-w-0">
+                        <div className={`relative shrink-0 w-13 h-13 rounded-2xl bg-gradient-to-br ${cat.color} flex items-center justify-center text-white shadow-lg group-hover:scale-105 transition-transform duration-300`}>
+                          <div className={`absolute -inset-1.5 rounded-2xl bg-gradient-to-br ${cat.color} opacity-40 blur-md -z-10 group-hover:opacity-70 transition-opacity`} />
+                          <Icon className="w-6 h-6" />
+                        </div>
+                        <h2 className={`text-xl font-bold text-ink-1 transition-colors group-hover:${cat.accent} truncate`}>
+                          {cat.name}
+                        </h2>
                       </div>
-                      <div className="flex flex-col items-end gap-1.5">
+                      <div className="flex flex-col items-end gap-1.5 shrink-0">
                         {isDesktopOnly && (
                           <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-red-500/10 text-red-400 border border-red-500/20">
                             Desktop Only
@@ -298,10 +309,6 @@ export default function DrillsDirectoryClient() {
                         </span>
                       </div>
                     </div>
-
-                    <h2 className={`text-xl font-bold text-ink-1 mb-2 transition-colors group-hover:${cat.accent}`}>
-                      {cat.name}
-                    </h2>
 
                     <p className="text-xs text-ink-2 leading-relaxed mb-3.5 line-clamp-2">
                       {cat.description}

@@ -89,34 +89,18 @@ export default function SteadyHandPage() {
             "mainEntity": [
               {
                 "@type": "Question",
-                "name": "What is this steady hand game?",
+                "name": "Why does my cursor teleport back?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "A free steady hand game and mouse path tracing drill. Trace a winding corridor with cursor. 15pts per completed lap. Corridor shrinks from 50px to 12px width with streak. 30-second lap time limit. Best free hand steadiness game online."
+                  "text": "If your crosshair deviates from the exact glowing cyan line, it is an instant failure. The engine continuously runs a mathematical check between your mouse coordinates and the line, penalizing you and resetting your crosshair to the starting safe zone."
                 }
               },
               {
                 "@type": "Question",
-                "name": "How does corridor shrinking work in this steady hand game?",
+                "name": "How should I grip the mouse?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Corridor starts at 50px wide. Each completed lap shrinks by 2px down to a minimum of 12px. Failure resets corridor to 50px. The longer your streak, the narrower the path — demanding increasingly precise hand steadiness."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "Who should play this steady hand game?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "Gamers wanting smoother mouse control, digital artists needing hand steadiness, medical professionals training fine motor precision, and occupational therapy patients improving cursor stability."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "Do I need to sign up for this steady hand game?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "No registration required. This free steady hand game and mouse path tracing drill works instantly in your browser — no downloads needed."
+                  "text": "Hold the mouse with a relaxed grip. Tensing your muscles will cause micro-jitters, pushing your crosshair off the tracking line. Smooth, flowing motions are key."
                 }
               }
             ]

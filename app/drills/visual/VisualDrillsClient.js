@@ -12,10 +12,13 @@ import {
   Sparkles
 } from 'lucide-react';
 import { DRILLS } from '@/lib/drillsRegistry';
+import { getDifficultyRank } from '@/lib/scoringEngine';
 import SiteFooter from '@/components/SiteFooter';
 import Reveal from '@/components/Reveal';
 
 import StickyMobileCta from '@/components/StickyMobileCta';
+import DrillLoading from '@/components/DrillLoading';
+import ResetDrillButton from '@/components/drill/ResetDrillButton';
 
 const FOLDER_TO_STORAGE_KEY = {
   'visual-search': 'skilldrills_visual_search_v4',
@@ -131,14 +134,7 @@ export default function VisualDrillsClient() {
   const totalDrills = drills.length;
 
   if (!isClient) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-canvas">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-fuchsia-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-fuchsia-400 font-mono tracking-widest uppercase animate-pulse">Initializing Visual Gateway...</p>
-        </div>
-      </div>
-    );
+    return <DrillLoading />;
   }
 
   return (
@@ -253,7 +249,7 @@ export default function VisualDrillsClient() {
         {/* Sectors Grid */}
         <div className="space-y-12">
           {categories.map((category) => {
-            const categoryDrills = drills.filter(d => d.subcategory === category.toLowerCase().replace(/\s+/g, '-'));
+            const categoryDrills = drills.filter(d => d.subcategory === category.toLowerCase().replace(/\s+/g, '-')).sort((a, b) => getDifficultyRank(a.difficulty) - getDifficultyRank(b.difficulty));
             if (categoryDrills.length === 0) return null;
             
             const styles = getCategoryStyles(category);
@@ -283,6 +279,12 @@ export default function VisualDrillsClient() {
                   {categoryDrills.map((drill) => {
                     const drillPath = drill.href;
                     const bestLevel = drillLevels[drill.folderName];
+                    const resetOverride = FOLDER_TO_STORAGE_KEY[drill.folderName];
+                    const storageKeys = resetOverride ? [resetOverride] : [
+                      `skilldrills_visual_${drill.folderName.replace(/-/g, '_')}_v4`,
+                      `skilldrills_visual_${drill.folderName.replace(/-/g, '_')}_v3`,
+                      `skilldrills_${drill.folderName.replace(/-/g, '_')}`,
+                    ];
 
                     return (
                       <Link
@@ -317,6 +319,15 @@ export default function VisualDrillsClient() {
                               <Eye className={`w-5 h-5 ${styles.text}`} />
                             </div>
                             <div className="flex items-center gap-1.5">
+                              <ResetDrillButton
+                                storageKeys={storageKeys}
+                                drillName={drill.name}
+                                onReset={() => setDrillLevels((prev) => {
+                                  const next = { ...prev };
+                                  delete next[drill.folderName];
+                                  return next;
+                                })}
+                              />
                               {bestLevel && (
                                 <span className={`px-2 py-0.5 text-[9px] font-mono font-bold rounded-full border border-fuchsia-500/20 bg-fuchsia-500/10 ${styles.text}`}>
                                   Lv. {bestLevel}

@@ -80,10 +80,34 @@ export default function DistanceJudgmentPage() {
             "mainEntity": [
               {
                 "@type": "Question",
-                "name": "What is the Distance Judgment Pro Drill?",
+                "name": "What is Distance Judgment Pro?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "A free stereoscopic depth perception exercise. Intercept an approaching 3D sphere at target ring depth."
+                  "text": "A 3D depth perception exercise. Tap when the approaching 3D sphere perfectly matches the depth ring size."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "How does progressive difficulty work?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "As your score increases, sphere approach speed accelerates from 2200ms down to 500ms and target depth windows become narrower."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Are there negative score or time penalties?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "No. A missed tap never deducts score points or reduces remaining timer seconds — the screen just flashes red and the next sphere approaches."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "How long does each drill session last?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Each round is timed for exactly 45 seconds of continuous focus."
                 }
               },
               {
@@ -96,34 +120,10 @@ export default function DistanceJudgmentPage() {
               },
               {
                 "@type": "Question",
-                "name": "How does progressive difficulty work?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "As your streak increases, the sphere's approach time shortens from 2200ms toward a 650ms floor, with random timing jitter layered on top at higher levels so the rhythm can't be fully memorized."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "Are there negative score or time penalties?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "No. Far misses never deduct score points or reduce remaining timer seconds — you simply wait for the next sphere."
-                }
-              },
-              {
-                "@type": "Question",
                 "name": "Does difficulty decrease on mistakes?",
                 "acceptedAnswer": {
                   "@type": "Answer",
                   "text": "No. The level remains unchanged when a mistake is made, allowing you to master your current level."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "How long does each drill session last?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "Each round is timed for exactly 45 seconds of continuous focus."
                 }
               },
               {

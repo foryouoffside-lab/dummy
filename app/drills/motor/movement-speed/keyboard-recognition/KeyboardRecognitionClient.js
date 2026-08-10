@@ -1,17 +1,20 @@
 'use client';
+import { isIdleFrameSkippable } from '@/lib/performance';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import {
   AlertCircle, ArrowRight, ChevronRight, Cpu,
   GraduationCap, Lightbulb, Play, RefreshCw, Target,
-  Timer, Trophy, Volume2, VolumeX, Zap, Share2,
+  Timer, Trophy, Volume2, VolumeX, Zap, ZapOff, Share2,
   Keyboard, Settings, LogOut, Award, Flame, TrendingUp
 } from 'lucide-react';
 
 import generateShareCard, { shareScoreCard } from '@/components/ShareScoreCard';
 import { getPlayerName } from '@/lib/leaderboard';
 import { drillAudio } from '@/lib/drillAudio';
+import { drillFlash } from '@/lib/drillFlash';
+import { drillTimeout } from '@/lib/drillTimeout';
 import { getComboMultiplier } from '@/lib/scoringEngine';
 import useUnexpectedExitGuard from '@/lib/useUnexpectedExitGuard';
 import DrillFooter from '@/components/drill/DrillFooter';
@@ -164,7 +167,7 @@ const FAQ_ITEMS = [
 const RELATED_DRILLS = [
   { id: "finger-sequencing", name: "Sequence Aim Trainer", cat: "Motor Speed", desc: "Train multi-target ordered clicking and finger dexterity under time pressure.", href: "/drills/motor/movement-speed/finger-sequencing" },
   { id: "rapid-tapping", name: "Rapid Tapping Test", cat: "Motor Speed", desc: "Test finger tapping velocity and neuromuscular speed.", href: "/drills/motor/movement-speed/rapid-tapping" },
-  { id: "gesture-speed", name: "Gesture Speed Test", cat: "Motor Speed", desc: "Flick to gate within 350ms then return to center.", href: "/drills/motor/movement-speed/gesture-speed" },
+  { id: "drag-and-drop", name: "Drag & Drop Precision", cat: "Motor Coordination", desc: "Master mouse spatial drag control and release timing.", href: "/drills/motor/hand-eye-coordination/drag-and-drop" },
   { id: "aim-trainer", name: "Aim Trainer Elite", cat: "Motor Coordination", desc: "Dynamic targets that shrink with streak and lives system.", href: "/drills/motor/hand-eye-coordination/aim-trainer" },
   { id: "steady-hand", name: "Steady Hand Trainer", cat: "Motor Control", desc: "Trace a winding path corridor with shrinking width on streak.", href: "/drills/motor/precision-control/steady-hand" },
   { id: "tracing", name: "Tracing Control", cat: "Motor Control", desc: "Precision cursor tracking and path stability trainer.", href: "/drills/motor/precision-control/tracing" }
@@ -177,6 +180,7 @@ export default function KeyboardRecognitionClient() {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [flashEnabled, setFlashEnabled] = useState(true);
   const [openAccordion, setOpenAccordion] = useState(null);
   const [isTouchOnlyDevice, setIsTouchOnlyDevice] = useState(false);
   const [countdownValue, setCountdownValue] = useState(3);
@@ -219,6 +223,7 @@ export default function KeyboardRecognitionClient() {
   });
 
   const triggerFlash = useCallback(() => {
+    if (!drillFlash.isEnabled()) return;
     const id = Date.now() + Math.random();
     setFlashes((f) => [...f, { id }]);
     setTimeout(() => setFlashes((f) => f.filter((x) => x.id !== id)), 480);
@@ -226,6 +231,8 @@ export default function KeyboardRecognitionClient() {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      setSoundEnabled(drillAudio.isEnabled());
+      setFlashEnabled(drillFlash.isEnabled());
       const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
       const isTouchCapable = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
       setIsTouchOnlyDevice(isTouchCapable && !hasFinePointer);
@@ -241,10 +248,6 @@ export default function KeyboardRecognitionClient() {
       if (engine.current.promptTimer) clearTimeout(engine.current.promptTimer);
     };
   }, []);
-
-  useEffect(() => {
-    drillAudio.setEnabled(soundEnabled);
-  }, [soundEnabled]);
 
   useEffect(() => {
     const handleFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
@@ -382,6 +385,11 @@ export default function KeyboardRecognitionClient() {
   const handlePromptTimeout = useCallback(() => {
     const e = engine.current;
     if (!gameActiveRef.current || !e.activePrompt) return;
+
+    if (!drillTimeout.isEnabled()) {
+      e.promptTimer = setTimeout(() => handlePromptTimeout(), e.promptDuration || 2000);
+      return;
+    }
 
     setPromptStatus('incorrect');
     setTimeout(() => setPromptStatus('neutral'), 180);
@@ -632,6 +640,10 @@ export default function KeyboardRecognitionClient() {
     let lastTime = performance.now();
 
     const loop = (time) => {
+      if (isIdleFrameSkippable(gameState === 'playing', time, lastTime)) {
+        animationRef.current = requestAnimationFrame(loop);
+        return;
+      }
       const deltaTimeMs = time - lastTime;
       lastTime = time;
       const dt = Math.min(deltaTimeMs / 1000, 0.1);
@@ -701,17 +713,30 @@ export default function KeyboardRecognitionClient() {
               <span className="text-emerald-400 font-medium">Keyboard Recognition Pro</span>
             </div>
 
-            <button
-              onClick={() => {
-                const next = !soundEnabled;
-                setSoundEnabled(next);
-                drillAudio?.setEnabled?.(next);
-              }}
-              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-              title={soundEnabled ? "Mute Sound" : "Unmute Sound"}
-            >
-              {soundEnabled ? <Volume2 className="w-4 h-4 text-emerald-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
-            </button>
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => {
+                  const next = !soundEnabled;
+                  setSoundEnabled(next);
+                  drillAudio?.setEnabled?.(next);
+                }}
+                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title={soundEnabled ? "Mute Sound" : "Unmute Sound"}
+              >
+                {soundEnabled ? <Volume2 className="w-4 h-4 text-emerald-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
+              </button>
+              <button
+                onClick={() => {
+                  const next = !flashEnabled;
+                  setFlashEnabled(next);
+                  drillFlash?.setEnabled?.(next);
+                }}
+                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title={flashEnabled ? "Disable Miss Flash" : "Enable Miss Flash"}
+              >
+                {flashEnabled ? <Zap className="w-4 h-4 text-red-400" /> : <ZapOff className="w-4 h-4 text-red-400" />}
+              </button>
+            </div>
           </div>
         </header>
       )}
@@ -781,22 +806,38 @@ export default function KeyboardRecognitionClient() {
             </>
           )}
 
-          {/* IN-GAME HUD SOUND TOGGLE */}
+          {/* IN-GAME HUD SOUND + FLASH TOGGLES */}
           {(gameState === 'playing' || gameState === 'countdown') && (
-            <button
-              onPointerDown={(e) => e.stopPropagation()}
-              onClick={(e) => {
-                e.stopPropagation();
-                setSoundEnabled((v) => {
-                  drillAudio.setEnabled(!v);
-                  return !v;
-                });
-              }}
-              className="absolute bottom-4 right-4 z-40 p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-              title="Toggle Sound"
-            >
-              {soundEnabled ? <Volume2 className="w-4 h-4 text-emerald-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
-            </button>
+            <div className="absolute bottom-4 right-4 z-40 flex items-center gap-2">
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setFlashEnabled((v) => {
+                    drillFlash.setEnabled(!v);
+                    return !v;
+                  });
+                }}
+                className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title="Toggle Miss Flash"
+              >
+                {flashEnabled ? <Zap className="w-4 h-4 text-red-400" /> : <ZapOff className="w-4 h-4 text-slate-500" />}
+              </button>
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSoundEnabled((v) => {
+                    drillAudio.setEnabled(!v);
+                    return !v;
+                  });
+                }}
+                className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title="Toggle Sound"
+              >
+                {soundEnabled ? <Volume2 className="w-4 h-4 text-emerald-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
+              </button>
+            </div>
           )}
 
           {/* PROMPT DISPLAY AREA */}
@@ -881,7 +922,7 @@ export default function KeyboardRecognitionClient() {
 
           {/* COUNTDOWN OVERLAY */}
           {gameState === 'countdown' && (
-            <DrillCountdown value={countdownValue} subtitle="GET READY" accent="#ef4444" />
+            <DrillCountdown value={countdownValue} subtitle="GET READY" />
           )}
 
           {/* END SCREEN */}

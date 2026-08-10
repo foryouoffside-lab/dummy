@@ -4,9 +4,12 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Brain, Target, Star, Clock, Play, Eye, Zap, Home, ChevronRight, Cpu, Sparkles } from "lucide-react";
 import { DRILLS } from "@/lib/drillsRegistry";
+import { getDifficultyRank } from "@/lib/scoringEngine";
 import SiteFooter from "@/components/SiteFooter";
 import Reveal from "@/components/Reveal";
 import StickyMobileCta from "@/components/StickyMobileCta";
+import DrillLoading from "@/components/DrillLoading";
+import ResetDrillButton from "@/components/drill/ResetDrillButton";
 
 const cogDrills = DRILLS.filter(d => d.category === 'cognitive');
 
@@ -30,7 +33,7 @@ const cognitiveCategories = [
     bgColor: "bg-violet-500/10 border-violet-500/20 text-violet-400",
     textColor: "text-violet-400",
     description: "Train divided, selective, and sustained attention with structured focus challenges.",
-    drills: cogDrills.filter(d => ['divided-attention', 'multi-tasking', 'concentration-stamina'].includes(d.folderName))
+    drills: cogDrills.filter(d => ['divided-attention', 'multi-tasking', 'concentration-stamina'].includes(d.folderName)).sort((a, b) => getDifficultyRank(a.difficulty) - getDifficultyRank(b.difficulty))
   },
   {
     name: "Focus & Concentration",
@@ -40,7 +43,7 @@ const cognitiveCategories = [
     bgColor: "bg-purple-500/10 border-purple-500/20 text-purple-400",
     textColor: "text-purple-400",
     description: "Build deep work stamina, resist distractions, and stay lock-in ready.",
-    drills: cogDrills.filter(d => ['concentration-grid', 'distraction-fighter'].includes(d.folderName))
+    drills: cogDrills.filter(d => ['concentration-grid', 'distraction-fighter'].includes(d.folderName)).sort((a, b) => getDifficultyRank(a.difficulty) - getDifficultyRank(b.difficulty))
   },
   {
     name: "Processing Speed",
@@ -50,7 +53,7 @@ const cognitiveCategories = [
     bgColor: "bg-purple-500/10 border-purple-500/20 text-purple-400",
     textColor: "text-purple-400",
     description: "Reaction time tests, cognitive flexibility, and symbol matching exercises.",
-    drills: cogDrills.filter(d => ['reaction-time', 'symbol-matching', 'rsvp-reader'].includes(d.folderName))
+    drills: cogDrills.filter(d => ['reaction-time', 'symbol-matching', 'rsvp-reader'].includes(d.folderName)).sort((a, b) => getDifficultyRank(a.difficulty) - getDifficultyRank(b.difficulty))
   },
 ];
 
@@ -177,14 +180,7 @@ export default function CognitiveHubClient() {
   const totalDrills = cognitiveCategories.reduce((acc, cat) => acc + cat.drills.length, 0);
 
   if (!isClient) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-canvas">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-violet-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-violet-400 font-mono tracking-widest uppercase animate-pulse">Initializing Cognitive Core...</p>
-        </div>
-      </div>
-    );
+    return <DrillLoading />;
   }
 
   return (
@@ -311,6 +307,7 @@ export default function CognitiveHubClient() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {category.drills.map((drill, index) => {
                   const bestLevel = drillLevels[drill.folderName];
+                  const storageKeys = [FOLDER_TO_STORAGE_KEY[drill.folderName]].filter(Boolean);
                   return (
                   <Link
                     key={index}
@@ -341,6 +338,15 @@ export default function CognitiveHubClient() {
                           <CategoryIcon className="w-5 h-5" />
                         </div>
                         <div className="flex items-center gap-1.5">
+                          <ResetDrillButton
+                            storageKeys={storageKeys}
+                            drillName={drill.name}
+                            onReset={() => setDrillLevels((prev) => {
+                              const next = { ...prev };
+                              delete next[drill.folderName];
+                              return next;
+                            })}
+                          />
                           {bestLevel && (
                             <div className="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold tracking-wide border border-violet-500/20 bg-violet-500/10 text-violet-400">
                               Lv. {bestLevel}

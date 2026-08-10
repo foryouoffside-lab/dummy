@@ -3,11 +3,12 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import {
-  Brain, Volume2, VolumeX, Eye, Zap, Heart,
+  Brain, Volume2, VolumeX, Eye, Zap, ZapOff, Heart,
   Share2, ArrowLeft, RefreshCw, Layers, Users, TrendingUp, Repeat, Flame, Trophy, Target
 } from 'lucide-react';
 
 import { drillAudio } from '../../../../../lib/drillAudio';
+import { drillFlash } from '../../../../../lib/drillFlash';
 import { getPlayerName } from '../../../../../lib/leaderboard';
 import { getFpsScoreGrade } from '../../../../../lib/scoringEngine';
 import { getDifficultyProgress, getStartLevel } from '../../../../../lib/drillDifficulty';
@@ -95,6 +96,7 @@ const RELATED_DRILLS = [
 export default function ConcentrationStaminaClient() {
   const [phase, setPhase] = useState('start'); // 'start' | 'countdown' | 'playing' | 'ended'
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [flashEnabled, setFlashEnabled] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const [isPortrait, setIsPortrait] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -460,17 +462,30 @@ export default function ConcentrationStaminaClient() {
             <span className="text-indigo-400 font-medium">Concentration Stamina</span>
           </div>
 
-          <button
-            onClick={() => {
-              const next = !soundEnabled;
-              setSoundEnabled(next);
-              drillAudio.setEnabled(next);
-            }}
-            className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-            title={soundEnabled ? "Mute Sound" : "Unmute Sound"}
-          >
-            {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4 text-red-400" />}
-          </button>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => {
+                const next = !soundEnabled;
+                setSoundEnabled(next);
+                drillAudio.setEnabled(next);
+              }}
+              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+              title={soundEnabled ? "Mute Sound" : "Unmute Sound"}
+            >
+              {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4 text-red-400" />}
+            </button>
+            <button
+              onClick={() => {
+                const next = !flashEnabled;
+                setFlashEnabled(next);
+                drillFlash.setEnabled(next);
+              }}
+              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+              title={flashEnabled ? "Disable Miss Flash" : "Enable Miss Flash"}
+            >
+              {flashEnabled ? <Zap className="w-4 h-4 text-red-400" /> : <ZapOff className="w-4 h-4 text-red-400" />}
+            </button>
+          </div>
         </div>
       </header>
       )}
@@ -565,7 +580,7 @@ export default function ConcentrationStaminaClient() {
           {phase === 'start' && (
             <FpsStartCard
               icon={Brain}
-              accent="emerald"
+              accent="indigo"
               title="Concentration Stamina"
               subtitle="Category Rule Switching CPT"
               rules={[
@@ -583,24 +598,40 @@ export default function ConcentrationStaminaClient() {
 
           {/* COUNTDOWN OVERLAY */}
           {phase === 'countdown' && (
-            <DrillCountdown value={countdownValue} subtitle="GET READY" accent="#818cf8" />
+            <DrillCountdown value={countdownValue} subtitle="GET READY" />
           )}
 
-          {/* IN-GAME HUD SOUND TOGGLE (header's toggle is hidden while fullscreen) */}
+          {/* IN-GAME HUD SOUND + FLASH TOGGLES (header's toggle is hidden while fullscreen) */}
           {(phase === 'playing' || phase === 'countdown') && (
-            <button
-              onPointerDown={(e) => e.stopPropagation()}
-              onClick={(e) => {
-                e.stopPropagation();
-                const next = !soundEnabled;
-                setSoundEnabled(next);
-                drillAudio.setEnabled(next);
-              }}
-              className="absolute bottom-4 right-4 z-40 p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-              title="Toggle Sound"
-            >
-              {soundEnabled ? <Volume2 className="w-4 h-4 text-indigo-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
-            </button>
+            <div className="absolute bottom-4 right-4 z-40 flex items-center gap-2">
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setFlashEnabled((v) => {
+                    drillFlash.setEnabled(!v);
+                    return !v;
+                  });
+                }}
+                className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title="Toggle Miss Flash"
+              >
+                {flashEnabled ? <Zap className="w-4 h-4 text-red-400" /> : <ZapOff className="w-4 h-4 text-slate-500" />}
+              </button>
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const next = !soundEnabled;
+                  setSoundEnabled(next);
+                  drillAudio.setEnabled(next);
+                }}
+                className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title="Toggle Sound"
+              >
+                {soundEnabled ? <Volume2 className="w-4 h-4 text-indigo-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
+              </button>
+            </div>
           )}
 
           {/* PLAYING CANVAS/SURFACE */}

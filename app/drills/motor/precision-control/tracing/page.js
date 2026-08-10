@@ -89,34 +89,18 @@ export default function TracingPage() {
             "mainEntity": [
               {
                 "@type": "Question",
-                "name": "What is this mouse tracing game?",
+                "name": "Why does the wave keep moving?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "A free mouse tracing game and wave tracking precision drill. Follow a continuously scrolling red filament within a 20px tolerance band. The wave never stops moving, so you must keep pace with your raw mouse input to stay locked on. Best free mouse tracking game for flow-state endurance training."
+                  "text": "The continuous motion mimics tracking smooth dynamic targets in tactical games. Re-acquiring target alignment under motion trains rapid adaptive crosshair recentering."
                 }
               },
               {
                 "@type": "Question",
-                "name": "What happens when I drift off the wave in this tracing game?",
+                "name": "How is Flow Integrity calculated?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "The wave keeps scrolling — it never stops or pauses. Your flow meter decreases while you're off the filament, and your hit streak resets. Re-acquire the wave quickly to stop the flow drain and earn a re-engagement bonus. No score penalties — this mouse tracing game focuses on positive recovery, not punishment."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "Does the wave get harder over time in this mouse tracking game?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "Yes — the wave's scroll speed ramps up smoothly across the 45-second session, roughly doubling by the end. This keeps the drill adaptive: the better and longer you track, the faster you need to react to stay locked on."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "Do I need to sign up for this mouse tracing game?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "No registration required. This free mouse tracing game and wave tracking drill works instantly in your browser — no downloads needed."
+                  "text": "Flow Integrity is a 0-100 meter that rises while your crosshair stays aligned on the wave and drains when you drift off, tracked across your 45-second session."
                 }
               }
             ]

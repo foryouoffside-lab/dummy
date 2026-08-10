@@ -81,18 +81,18 @@ export default function EntropicGridPage() {
             "mainEntity": [
               {
                 "@type": "Question",
-                "name": "What is the Entropic Grid Pro Drill?",
+                "name": "What is the Entropic Grid Drill?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "A free visual search and concentration grid test. Find target 2-character codes in a 100-cell grid while background cells continuously regenerate."
+                  "text": "A free visual search and concentration exercise. Find target 2-character codes on a 100-cell grid while entropy noise continuously reshuffles background cells."
                 }
               },
               {
                 "@type": "Question",
-                "name": "How does entropy noise work?",
+                "name": "How does progressive difficulty work?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Every 700ms, random non-target cells have their characters regenerated. This forces your brain to filter out dynamic visual noise while maintaining search focus."
+                  "text": "Every 5 targets found you level up, the target code swaps to a new 12-second cycle, and the number of guaranteed live target cells on the grid grows (up to 6)."
                 }
               },
               {
@@ -100,7 +100,23 @@ export default function EntropicGridPage() {
                 "name": "Are there negative score or time penalties?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "No. Tapping an incorrect cell never deducts score points or reduces remaining timer seconds — the cell just flashes red and you keep scanning."
+                  "text": "No. Tapping a wrong cell never deducts score points or reduces remaining timer seconds — the cell just flashes red and you keep scanning."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Does difficulty decrease on mistakes?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "No. Your level only ever goes up — a mistake never takes you back down, so you can safely master your current grid size."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "How long does each drill session last?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Each round is timed for exactly 45 seconds of continuous focus."
                 }
               },
               {
@@ -108,7 +124,7 @@ export default function EntropicGridPage() {
                 "name": "Do I need to sign up?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "No registration required. This drill is completely free and works instantly in your browser."
+                  "text": "No registration required. This drill runs directly in your browser with instant response."
                 }
               }
             ]

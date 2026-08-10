@@ -4,11 +4,13 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import {
   Volume2, VolumeX,
-  Play, RefreshCw, Share2, ArrowLeft, ShieldCheck, Users, TrendingUp, Brain, Heart, Flame, Trophy, Target, Zap
+  Play, RefreshCw, Share2, ArrowLeft, ShieldCheck, Users, TrendingUp, Brain, Heart, Flame, Trophy, Target, Zap, ZapOff
 } from 'lucide-react';
 
 import generateShareCard, { shareScoreCard } from '../../../../../components/ShareScoreCard';
 import { drillAudio } from '../../../../../lib/drillAudio';
+import { drillFlash } from '../../../../../lib/drillFlash';
+import { drillTimeout } from '../../../../../lib/drillTimeout';
 import { getPlayerName } from '../../../../../lib/leaderboard';
 import { getFpsScoreGrade } from '../../../../../lib/scoringEngine';
 import { getDifficultyProgress, getStartLevel } from '../../../../../lib/drillDifficulty';
@@ -100,6 +102,7 @@ export default function DistractionFighterClient() {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [flashEnabled, setFlashEnabled] = useState(true);
   const [openAccordion, setOpenAccordion] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
   const [isPortrait, setIsPortrait] = useState(false);
@@ -150,6 +153,8 @@ export default function DistractionFighterClient() {
   // Screen/Orientation tracking
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      setSoundEnabled(drillAudio.isEnabled());
+      setFlashEnabled(drillFlash.isEnabled());
       const checkDevice = () => {
         setIsMobile(window.innerWidth < 768);
         setIsPortrait(window.innerHeight > window.innerWidth);
@@ -173,11 +178,6 @@ export default function DistractionFighterClient() {
       };
     }
   }, []);
-
-  // Sound sync
-  useEffect(() => {
-    drillAudio.setEnabled(soundEnabled);
-  }, [soundEnabled]);
 
   // Clean timers on unmount
   useEffect(() => {
@@ -277,7 +277,11 @@ export default function DistractionFighterClient() {
     const shuffled = Array.from(choices).sort(() => Math.random() - 0.5);
     setOptions(shuffled);
 
-    trialTimerRef.current = setTimeout(() => {
+    trialTimerRef.current = setTimeout(function checkTrialExpiry() {
+      if (!drillTimeout.isEnabled()) {
+        trialTimerRef.current = setTimeout(checkTrialExpiry, config.ttl);
+        return;
+      }
       // Trial timeout miss
       e.timeouts += 1;
       e.lives -= 1;
@@ -433,17 +437,30 @@ export default function DistractionFighterClient() {
             <span className="text-rose-400 font-medium">Distraction Fighter</span>
           </div>
 
-          <button
-            onClick={() => {
-              const next = !soundEnabled;
-              setSoundEnabled(next);
-              drillAudio.setEnabled(next);
-            }}
-            className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-            title={soundEnabled ? "Mute Sound" : "Unmute Sound"}
-          >
-            {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4 text-red-400" />}
-          </button>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => {
+                const next = !soundEnabled;
+                setSoundEnabled(next);
+                drillAudio.setEnabled(next);
+              }}
+              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+              title={soundEnabled ? "Mute Sound" : "Unmute Sound"}
+            >
+              {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4 text-red-400" />}
+            </button>
+            <button
+              onClick={() => {
+                const next = !flashEnabled;
+                setFlashEnabled(next);
+                drillFlash.setEnabled(next);
+              }}
+              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+              title={flashEnabled ? "Disable Miss Flash" : "Enable Miss Flash"}
+            >
+              {flashEnabled ? <Zap className="w-4 h-4 text-red-400" /> : <ZapOff className="w-4 h-4 text-red-400" />}
+            </button>
+          </div>
         </div>
       </header>
       )}
@@ -559,7 +576,7 @@ export default function DistractionFighterClient() {
           {gameState === 'start' && (
             <FpsStartCard
               icon={ShieldCheck}
-              accent="emerald"
+              accent="red"
               title="Distraction Fighter"
               subtitle="Stroop Interference • Executive Focus"
               rules={[
@@ -577,7 +594,7 @@ export default function DistractionFighterClient() {
 
           {/* COUNTDOWN OVERLAY */}
           {gameState === 'countdown' && (
-            <DrillCountdown value={countdownValue} subtitle="GET READY" accent="#fb7185" />
+            <DrillCountdown value={countdownValue} subtitle="GET READY" />
           )}
 
           {/* END SCREEN */}

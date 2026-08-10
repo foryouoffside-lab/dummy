@@ -4,11 +4,13 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { 
   Target, Volume2, VolumeX,
-  Play, RefreshCw, Share2, LogOut, ArrowLeft, Users, TrendingUp, Zap, Flame, Trophy
+  Play, RefreshCw, Share2, LogOut, ArrowLeft, Users, TrendingUp, Zap, ZapOff, Flame, Trophy
 } from 'lucide-react';
 
 import generateShareCard, { shareScoreCard } from '../../../../../components/ShareScoreCard';
 import { drillAudio } from '../../../../../lib/drillAudio';
+import { drillFlash } from '../../../../../lib/drillFlash';
+import { drillTimeout } from '../../../../../lib/drillTimeout';
 import { getPlayerName } from '../../../../../lib/leaderboard';
 import { getFpsScoreGrade } from '../../../../../lib/scoringEngine';
 import { getDifficultyProgress, getStartLevel } from '../../../../../lib/drillDifficulty';
@@ -90,6 +92,7 @@ export default function EliteNeuroSwitchClient() {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [flashEnabled, setFlashEnabled] = useState(true);
   const [openAccordion, setOpenAccordion] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
   const [isPortrait, setIsPortrait] = useState(false);
@@ -144,6 +147,8 @@ export default function EliteNeuroSwitchClient() {
   // Screen/Orientation tracking
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      setSoundEnabled(drillAudio.isEnabled());
+      setFlashEnabled(drillFlash.isEnabled());
       const checkDevice = () => {
         setIsMobile(window.innerWidth < 768);
         setIsPortrait(window.innerHeight > window.innerWidth);
@@ -167,11 +172,6 @@ export default function EliteNeuroSwitchClient() {
       };
     }
   }, []);
-
-  // Sound sync
-  useEffect(() => {
-    drillAudio.setEnabled(soundEnabled);
-  }, [soundEnabled]);
 
   // Clean timers on unmount
   useEffect(() => {
@@ -273,7 +273,11 @@ export default function EliteNeuroSwitchClient() {
     setRedTarget({ x: rx, y: ry });
     setBlueTarget({ x: bx, y: by });
 
-    trialTimerRef.current = setTimeout(() => {
+    trialTimerRef.current = setTimeout(function checkTrialExpiry() {
+      if (!drillTimeout.isEnabled()) {
+        trialTimerRef.current = setTimeout(checkTrialExpiry, config.ttl);
+        return;
+      }
       // Timeout miss
       e.misses += 1;
       triggerFlash();
@@ -428,17 +432,30 @@ export default function EliteNeuroSwitchClient() {
             <span className="text-red-400 font-medium">Reaction Time</span>
           </div>
 
-          <button
-            onClick={() => {
-              const next = !soundEnabled;
-              setSoundEnabled(next);
-              drillAudio.setEnabled(next);
-            }}
-            className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-            title={soundEnabled ? "Mute Sound" : "Unmute Sound"}
-          >
-            {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4 text-red-400" />}
-          </button>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => {
+                const next = !soundEnabled;
+                setSoundEnabled(next);
+                drillAudio.setEnabled(next);
+              }}
+              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+              title={soundEnabled ? "Mute Sound" : "Unmute Sound"}
+            >
+              {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4 text-red-400" />}
+            </button>
+            <button
+              onClick={() => {
+                const next = !flashEnabled;
+                setFlashEnabled(next);
+                drillFlash.setEnabled(next);
+              }}
+              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+              title={flashEnabled ? "Disable Miss Flash" : "Enable Miss Flash"}
+            >
+              {flashEnabled ? <Zap className="w-4 h-4 text-red-400" /> : <ZapOff className="w-4 h-4 text-red-400" />}
+            </button>
+          </div>
         </div>
       </header>
       )}
@@ -565,7 +582,7 @@ export default function EliteNeuroSwitchClient() {
           {gameState === 'start' && (
             <FpsStartCard
               icon={Target}
-              accent="emerald"
+              accent="red"
               title="Reaction Time"
               subtitle="Choice Discrimination • Reflex Latency"
               rules={[
@@ -583,7 +600,7 @@ export default function EliteNeuroSwitchClient() {
 
           {/* COUNTDOWN OVERLAY */}
           {gameState === 'countdown' && (
-            <DrillCountdown value={countdownValue} subtitle="GET READY" accent="#f87171" />
+            <DrillCountdown value={countdownValue} subtitle="GET READY" />
           )}
 
           {/* END SCREEN */}

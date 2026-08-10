@@ -32,7 +32,7 @@ export default function SiteHeader() {
   const searchRef = useRef(null);
   const inputRef = useRef(null);
 
-  const totalDrillsCount = DRILLS?.length || 113;
+  const totalDrillsCount = DRILLS.length;
 
   // Header is limited to hub/category landing pages — hide it on individual drill pages
   const isDrillPage = DRILL_HREFS.has(pathname);

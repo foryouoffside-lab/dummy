@@ -1,4 +1,5 @@
 'use client';
+import { isIdleFrameSkippable } from '@/lib/performance';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
@@ -8,13 +9,14 @@ import {
   Eye, GraduationCap, RefreshCw, Target,
   Timer, TrendingUp, Trophy, Volume2, VolumeX,
   Flame, Share2, LogOut,
-  Award, Shield, Users, Zap, Waves,
+  Award, Shield, Users, Zap, ZapOff, Waves,
   Wind, Focus
 } from 'lucide-react';
 
 import generateShareCard, { shareScoreCard } from '../../../../components/ShareScoreCard';
 import { getPlayerName } from '../../../../lib/leaderboard';
 import { drillAudio } from '../../../../lib/drillAudio';
+import { drillFlash } from '../../../../lib/drillFlash';
 import { getStartLevel, getDifficultyProgress, getComboBonusLevel } from '../../../../lib/drillDifficulty';
 import { getComboMultiplier, getFpsScoreGrade } from '../../../../lib/scoringEngine';
 import { createBackdropCache, getCanvasDpr, drawPulseRing, drawTacticalTarget } from '../../../../lib/canvasFx';
@@ -116,7 +118,7 @@ const FAQ_ITEMS = [
 
 const RELATED_DRILLS = [
   { id: "pro-smooth-pursuit", name: "Pro Smooth Pursuit", cat: "FPS Tracking", desc: "Lissajous curve tracking and smooth arm glide.", href: "/drills/fps/pro-smooth-pursuit" },
-  { id: "reactive-sphere-tracking", name: "Reactive Sphere", cat: "FPS Tracking", desc: "Track targets performing rapid direction swaps.", href: "/drills/fps/reactive-sphere-tracking" },
+  { id: "vertical-air-track", name: "Vertical Air Track", cat: "FPS Tracking", desc: "Vertical axis mouse control and prediction trainer.", href: "/drills/fps/vertical-air-track" },
   { id: "strafe-tracking", name: "Strafe Tracking", cat: "FPS Tracking", desc: "Master ADAD movement reading and horizontal tracking.", href: "/drills/fps/strafe-tracking" },
   { id: "180-degree-awareness", name: "180° Awareness Pro", cat: "FPS Awareness", desc: "Macro flicks under a forced 180-degree turn.", href: "/drills/fps/180-degree-awareness" },
   { id: "flick-shot-training", name: "Pro Flick Trainer", cat: "FPS Flicking", desc: "Snap to targets in time-attack mode.", href: "/drills/fps/flick-shot-training" },
@@ -131,6 +133,7 @@ export default function FlowStateClient() {
   const [countdownValue, setCountdownValue] = useState(3);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [flashEnabled, setFlashEnabled] = useState(true);
   const [pointerLocked, setPointerLocked] = useState(false);
   const [openAccordion, setOpenAccordion] = useState(null);
   const [isTouchOnlyDevice, setIsTouchOnlyDevice] = useState(false);
@@ -189,11 +192,9 @@ export default function FlowStateClient() {
   }, []);
 
   useEffect(() => {
-    drillAudio.setEnabled(soundEnabled);
-  }, [soundEnabled]);
-
-  useEffect(() => {
     if (typeof window !== 'undefined') {
+      setSoundEnabled(drillAudio.isEnabled());
+      setFlashEnabled(drillFlash.isEnabled());
       const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
       const isTouchCapable = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
       setIsTouchOnlyDevice(isTouchCapable && !hasFinePointer);
@@ -211,6 +212,7 @@ export default function FlowStateClient() {
   }, [universalSens, gameState]);
 
   const triggerFlash = useCallback(() => {
+    if (!drillFlash.isEnabled()) return;
     const id = Date.now() + Math.random();
     setFlashes((f) => [...f, { id }]);
     setTimeout(() => setFlashes((f) => f.filter((x) => x.id !== id)), 480);
@@ -471,6 +473,10 @@ export default function FlowStateClient() {
     let lastTime = performance.now();
 
     const loop = (time) => {
+      if (isIdleFrameSkippable(gameState === 'playing', time, lastTime)) {
+        animationRef.current = requestAnimationFrame(loop);
+        return;
+      }
       const deltaTimeMs = time - lastTime;
       lastTime = time;
       const dt = Math.min(deltaTimeMs / 1000, 0.1);
@@ -678,17 +684,30 @@ export default function FlowStateClient() {
               <span className="text-cyan-400 font-medium">Flow State Trainer</span>
             </div>
 
-            <button
-              onClick={() => {
-                const next = !soundEnabled;
-                setSoundEnabled(next);
-                drillAudio?.setEnabled?.(next);
-              }}
-              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-              title={soundEnabled ? "Mute Sound" : "Unmute Sound"}
-            >
-              {soundEnabled ? <Volume2 className="w-4 h-4 text-cyan-400" /> : <VolumeX className="w-4 h-4 text-cyan-400" />}
-            </button>
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => {
+                  const next = !soundEnabled;
+                  setSoundEnabled(next);
+                  drillAudio?.setEnabled?.(next);
+                }}
+                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title={soundEnabled ? "Mute Sound" : "Unmute Sound"}
+              >
+                {soundEnabled ? <Volume2 className="w-4 h-4 text-cyan-400" /> : <VolumeX className="w-4 h-4 text-cyan-400" />}
+              </button>
+              <button
+                onClick={() => {
+                  const next = !flashEnabled;
+                  setFlashEnabled(next);
+                  drillFlash?.setEnabled?.(next);
+                }}
+                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title={flashEnabled ? "Disable Miss Flash" : "Enable Miss Flash"}
+              >
+                {flashEnabled ? <Zap className="w-4 h-4 text-red-400" /> : <ZapOff className="w-4 h-4 text-red-400" />}
+              </button>
+            </div>
           </div>
         </header>
       )}
@@ -759,22 +778,38 @@ export default function FlowStateClient() {
           )}
 
           {(gameState === 'playing' || gameState === 'countdown') && (
-            <button 
-              onPointerDown={(e) => e.stopPropagation()}
-              onClick={(e) => {
-                e.stopPropagation();
-                setSoundEnabled(v => !v);
-              }} 
-              className="absolute bottom-4 right-4 z-40 p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer" 
-              title="Toggle Sound"
-            >
-              {soundEnabled ? <Volume2 className="w-4 h-4 text-cyan-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
-            </button>
+            <div className="absolute bottom-4 right-4 z-40 flex items-center gap-2">
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setFlashEnabled((v) => {
+                    drillFlash.setEnabled(!v);
+                    return !v;
+                  });
+                }}
+                className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title="Toggle Miss Flash"
+              >
+                {flashEnabled ? <Zap className="w-4 h-4 text-red-400" /> : <ZapOff className="w-4 h-4 text-slate-500" />}
+              </button>
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSoundEnabled(v => !v);
+                }}
+                className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title="Toggle Sound"
+              >
+                {soundEnabled ? <Volume2 className="w-4 h-4 text-cyan-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
+              </button>
+            </div>
           )}
 
           {/* Countdown Overlay */}
           {gameState === 'countdown' && (
-            <DrillCountdown value={countdownValue} subtitle="GET READY" accent="#ef4444" />
+            <DrillCountdown value={countdownValue} subtitle="GET READY" />
           )}
 
           {/* Pause Overlay */}

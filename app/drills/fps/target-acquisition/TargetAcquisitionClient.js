@@ -1,4 +1,5 @@
 'use client';
+import { isIdleFrameSkippable } from '@/lib/performance';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
@@ -6,12 +7,13 @@ import Link from 'next/link';
 import {
   AlertCircle, ArrowRight, ChevronRight, Eye, Flame,
   RefreshCw, Target, Timer, TrendingUp, Trophy,
-  Volume2, VolumeX, Zap, Share2, Users, LogOut, Award
+  Volume2, VolumeX, Zap, ZapOff, Share2, Users, LogOut, Award
 } from 'lucide-react';
 
 import generateShareCard, { shareScoreCard } from '../../../../components/ShareScoreCard';
 import { getPlayerName } from '../../../../lib/leaderboard';
 import { drillAudio } from '../../../../lib/drillAudio';
+import { drillFlash } from '../../../../lib/drillFlash';
 import { getStartLevel, getDifficultyProgress, getComboBonusLevel } from '../../../../lib/drillDifficulty';
 import { getComboMultiplier, getFpsScoreGrade } from '../../../../lib/scoringEngine';
 import { createBackdropCache, getCanvasDpr, drawPulseRing } from '../../../../lib/canvasFx';
@@ -42,11 +44,43 @@ const saveData = (data) => {
   } catch (e) {}
 };
 
+// ============================================================
+// ACCORDION DATA
+// ============================================================
+const RULES_ITEMS = [
+  { title: "Correct Target Hit (+100 PTS × Combo × Level)", text: "Click the brightest target first. Builds combo and overall score." },
+  { title: "Set Cleared Bonus (+400 PTS × Level)", text: "Clearing all targets in a set spawns the next target set." },
+  { title: "Level Progression (Every 300 PTS)", text: "Target count and opacity delta scale as level increases." },
+  { title: "Wrong Click / Miss Penalty", text: "Clicking the wrong target or missing resets your combo with a red flash." }
+];
+
+const FAQ_ITEMS = [
+  { q: "What is target acquisition in FPS games?", a: "Target acquisition is the combined process of visually detecting a threat, identifying it as an enemy (not a teammate), deciding to engage, and getting your crosshair on the target fast enough to fire first. It involves both cognitive processing (recognition and decision) and mechanical execution (crosshair movement). This is the skill that separates players who see enemies fast from those who react slowly." },
+  { q: "How does target acquisition differ from reaction time?", a: "Reaction time measures the gap between stimulus appearance and your click. Target acquisition includes reaction time but adds the prior cognitive steps: visual scan → target detection → threat confirmation → aim → shoot. Better target acquisition means your brain identifies threats faster, giving your mechanical aim more time to respond accurately." },
+  { q: "Why do some players always seem to see enemies before others?", a: "Players with trained target acquisition have learned unconscious threat pattern recognition — their visual system has been trained to flag enemy silhouettes, color cues, and movement patterns faster than untrained players. This creates the illusion that they see first when actually their brain is processing the same visual information faster and more efficiently." },
+  { q: "How does this help in Valorant compared to other drills?", a: "Valorant's round-based structure means you often peek corners or angles with partial information. Fast target acquisition is critical for winning the split-second timing battle when two players simultaneously come into view of each other. This drill specifically trains the speed of the visual identification → aim decision → click sequence." },
+  { q: "What cognitive skills does target acquisition training improve?", a: "Target acquisition training improves visual processing speed (how fast your eyes register a target), pattern recognition (identifying enemy silhouettes), selective attention (filtering enemies from background), and decision speed (choosing to engage). Together these create the faster perception that high-rank players possess." },
+  { q: "Can target acquisition be trained independently of mechanical aim?", a: "Yes, target acquisition isolates the visual identification and decision phase of aim. Training target acquisition helps your brain recognize threat patterns faster, allowing your existing mechanical aim to execute with higher confidence." },
+  { q: "How does target acquisition impact CS2 and tactical shooters?", a: "In CS2, time-to-kill is extremely fast. Spotting a target's head pixel a fraction of a second earlier grants the critical advantage needed to secure first-bullet headshots." },
+  { q: "What is the optimal daily target acquisition training routine?", a: "We recommend 10 to 15 minutes of target acquisition drills at the start of your gaming session to warm up visual processing speed before entering competitive matches." }
+];
+
+const RELATED_DRILLS = [
+  { id: "180-degree-awareness", name: "180° Awareness Pro", cat: "FPS Awareness", desc: "Master 180-degree snap turns and peripheral threat detection.", href: "/drills/fps/180-degree-awareness" },
+  { id: "target-switching-swarm", name: "Target Switching Swarm", cat: "FPS Switching", desc: "Train multi-target flick switching under high density.", href: "/drills/fps/target-switching-swarm" },
+  { id: "target-prioritization", name: "Target Prioritization", cat: "FPS Strategy", desc: "Evaluate threat distances and prioritize high-risk targets.", href: "/drills/fps/target-prioritization" },
+  { id: "flick-shot-training", name: "Pro Flick Trainer", cat: "FPS Flicking", desc: "Snap to targets in time-attack mode with precision flicking.", href: "/drills/fps/flick-shot-training" },
+  { id: "micro-correction-precision", name: "Micro Flicks", cat: "FPS Precision", desc: "Optimize tight-angle crosshair micro corrections.", href: "/drills/fps/micro-correction-precision" },
+  { id: "instant-response", name: "Instant Response", cat: "FPS Reaction", desc: "Train raw single-stimulus reflex acquisition.", href: "/drills/fps/instant-response" }
+];
+
+
 
 export default function TargetAcquisitionClient() {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [flashEnabled, setFlashEnabled] = useState(true);
   const [pointerLocked, setPointerLocked] = useState(false);
   const [universalSens, setUniversalSens] = useState(1.0);
   const [openAccordion, setOpenAccordion] = useState(null);
@@ -91,6 +125,7 @@ export default function TargetAcquisitionClient() {
   const cmPer360 = (30 / universalSens).toFixed(1);
 
   const triggerFlash = useCallback(() => {
+    if (!drillFlash.isEnabled()) return;
     const id = Date.now() + Math.random();
     setFlashes((f) => [...f, { id }]);
     setTimeout(() => setFlashes((f) => f.filter((x) => x.id !== id)), 480);
@@ -99,6 +134,8 @@ export default function TargetAcquisitionClient() {
   // Touch Device Detection & Initial Storage Loading
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      setSoundEnabled(drillAudio.isEnabled());
+      setFlashEnabled(drillFlash.isEnabled());
       const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
       const isTouchCapable = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
       setIsTouchOnlyDevice(isTouchCapable && !hasFinePointer);
@@ -126,8 +163,7 @@ export default function TargetAcquisitionClient() {
     if (gameState !== 'playing') {
       try { localStorage.setItem('targetacq_sens', universalSens.toString()); } catch (e) {}
     }
-    drillAudio.setEnabled(soundEnabled);
-  }, [universalSens, gameState, soundEnabled]);
+  }, [universalSens, gameState]);
 
   // Fullscreen change listener
   useEffect(() => {
@@ -172,7 +208,7 @@ export default function TargetAcquisitionClient() {
     const p = getDifficultyProgress(level); // 0 -> 1 across L1..L15
     return {
       count:        Math.round(2 + p * 4),    // 2 -> 6 targets
-      radius:       32 - p * 18,              // 32 -> 14 px
+      radius:       Math.max(14, 32 - p * 18), // 32 -> 14 px floor
       opacityDelta: 0.45 - p * 0.40,          // 0.45 -> 0.05  (the primary discrimination axis)
       margin:       120 - p * 90,             // 120 -> 30 px
       hitPad:       10 - p * 6,               // 10 -> 4 px
@@ -504,6 +540,10 @@ export default function TargetAcquisitionClient() {
     let lastTime = performance.now();
 
     const loop = (time) => {
+      if (isIdleFrameSkippable(gameState === 'playing', time, lastTime)) {
+        animationRef.current = requestAnimationFrame(loop);
+        return;
+      }
       const deltaTimeMs = time - lastTime;
       lastTime = time;
       const dt = Math.min(deltaTimeMs / 1000, 0.1); 
@@ -677,69 +717,94 @@ export default function TargetAcquisitionClient() {
     }
   }, [uiScore, bestScore, analytics, isNewBest]);
 
-  const accuracy = analytics.accuracy;
+  const accuracy = gameState === 'gameOver' ? analytics.accuracy : (engine.current.totalClicks > 0 ? Math.round((engine.current.correctHits / engine.current.totalClicks) * 100) : 100);
 
   return (
-    <div className="min-h-screen select-none bg-black text-white font-sans">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        
-        {/* BREADCRUMB NAV */}
-        {!isFullscreen && (
-          <nav className="mb-3">
-            <ol className="flex flex-wrap items-center gap-2 text-sm">
-              <li><Link href="/" className="text-gray-500 hover:text-gray-300 transition-colors">Home</Link></li>
-              <li className="text-gray-600"><ChevronRight className="w-4 h-4" /></li>
-              <li><Link href="/drills/fps" className="text-gray-500 hover:text-gray-300 transition-colors">FPS</Link></li>
-              <li className="text-gray-600"><ChevronRight className="w-4 h-4" /></li>
-              <li className="text-amber-400 font-medium">Target Acquisition Pro</li>
-            </ol>
-          </nav>
-        )}
+    <div className="min-h-screen bg-[#050508] text-white flex flex-col font-sans select-none">
+      {/* ── HEADER / BREADCRUMB ── */}
+      {!isFullscreen && (
+        <header className="border-b border-white/5 bg-[#080811]/80 backdrop-blur-md sticky top-0 z-50">
+          <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
+            <div className="flex items-center gap-2 text-xs text-slate-400">
+              <Link href="/" className="hover:text-white transition-colors">Home</Link>
+              <span>/</span>
+              <Link href="/drills/fps" className="hover:text-white transition-colors">FPS</Link>
+              <span>/</span>
+              <span className="text-amber-400 font-medium">Target Acquisition Pro</span>
+            </div>
 
-        {/* CENTERED PAGE HEADING */}
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => {
+                  const next = !soundEnabled;
+                  setSoundEnabled(next);
+                  drillAudio?.setEnabled?.(next);
+                }}
+                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title={soundEnabled ? "Mute Sound" : "Unmute Sound"}
+              >
+                {soundEnabled ? <Volume2 className="w-4 h-4 text-amber-400" /> : <VolumeX className="w-4 h-4 text-amber-400" />}
+              </button>
+              <button
+                onClick={() => {
+                  const next = !flashEnabled;
+                  setFlashEnabled(next);
+                  drillFlash?.setEnabled?.(next);
+                }}
+                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title={flashEnabled ? "Disable Miss Flash" : "Enable Miss Flash"}
+              >
+                {flashEnabled ? <Zap className="w-4 h-4 text-red-400" /> : <ZapOff className="w-4 h-4 text-red-400" />}
+              </button>
+            </div>
+          </div>
+        </header>
+      )}
+
+      {/* ── MAIN CONTENT AREA ── */}
+      <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
+        {/* Title */}
         {!isFullscreen && (
-          <div className="text-center mb-4">
-            <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-white font-sans">
-              Target Acquisition Pro
+          <div className="text-center">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight bg-gradient-to-r from-white via-slate-200 to-amber-400 bg-clip-text text-transparent">
+              TARGET ACQUISITION PRO
             </h1>
+            <p className="text-xs text-slate-400 mt-1">
+              Hardware Raw Input • Endless Level Progression
+            </p>
           </div>
         )}
 
-        {/* 4-STAT CARD ROW */}
+        {/* Live Stat Cards */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 gap-1.5 sm:gap-2.5 mb-3">
-            <StatCard 
-              icon={<Trophy className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400" />} 
-              value={uiScore} 
-              label="Score" 
-            />
-            <StatCard 
-              icon={<Timer className={`w-4 h-4 sm:w-5 sm:h-5 ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-amber-400'}`} />} 
-              value={uiTimeLeft} 
-              label="Time" 
-              unit="s"
-            />
-            <StatCard 
-              icon={<Target className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" />} 
-              value={`${accuracy}%`} 
-              label="Accuracy" 
-            />
-            <StatCard 
-              icon={<Award className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" />} 
-              value={bestScore} 
-              label="Best Score" 
-            />
+          <div className="grid grid-cols-4 gap-2.5 max-w-2xl mx-auto w-full">
+            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
+              <div className="text-lg sm:text-xl font-black text-white tabular-nums">{uiScore}</div>
+            </div>
+            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
+              <div className={`text-lg sm:text-xl font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>{uiTimeLeft}s</div>
+            </div>
+            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Accuracy</div>
+              <div className="text-lg sm:text-xl font-black text-blue-400 tabular-nums">{accuracy}%</div>
+            </div>
+            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
+              <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
+            </div>
           </div>
         )}
 
-        {/* DRILL BOX CONTAINER */}
+        {/* Game Stage Container */}
         <div 
           ref={containerRef} 
           onContextMenu={(e) => { if (gameActiveRef.current) e.preventDefault(); }}
-          className={`relative overflow-hidden flex flex-col transition-all duration-150 select-none bg-[#050508] text-white ${
+          className={`relative overflow-hidden flex flex-col transition-all duration-150 select-none bg-[#080811] text-white ${
             isFullscreen 
-              ? 'fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#050508] rounded-none border-none' 
-              : 'w-full rounded-2xl border border-white/10 bg-[#050508] shadow-[0_0_40px_rgba(0,0,0,0.9)] aspect-video min-h-[460px] sm:min-h-[500px] max-h-[88vh]'
+              ? 'fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#080811] rounded-none border-none flex flex-col items-center justify-center' 
+              : 'w-full rounded-2xl bg-[#080811] aspect-video min-h-[460px] sm:min-h-[500px] max-h-[88vh] relative overflow-hidden flex flex-col'
           }`}
           style={{ touchAction: gameActiveRef.current ? 'none' : 'auto' }}
         >
@@ -762,22 +827,38 @@ export default function TargetAcquisitionClient() {
             </>
           )}
 
-          {/* IN-GAME HUD SOUND TOGGLE */}
+          {/* IN-GAME HUD SOUND + FLASH TOGGLES */}
           {(gameState === 'playing' || gameState === 'countdown') && (
-            <button
-              onPointerDown={(e) => e.stopPropagation()}
-              onClick={(e) => {
-                e.stopPropagation();
-                setSoundEnabled((v) => {
-                  drillAudio.setEnabled(!v);
-                  return !v;
-                });
-              }}
-              className="absolute bottom-4 right-4 z-40 p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-              title="Toggle Sound"
-            >
-              {soundEnabled ? <Volume2 className="w-4 h-4 text-amber-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
-            </button>
+            <div className="absolute bottom-4 right-4 z-40 flex items-center gap-2">
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setFlashEnabled((v) => {
+                    drillFlash.setEnabled(!v);
+                    return !v;
+                  });
+                }}
+                className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title="Toggle Miss Flash"
+              >
+                {flashEnabled ? <Zap className="w-4 h-4 text-red-400" /> : <ZapOff className="w-4 h-4 text-slate-500" />}
+              </button>
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSoundEnabled((v) => {
+                    drillAudio.setEnabled(!v);
+                    return !v;
+                  });
+                }}
+                className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title="Toggle Sound"
+              >
+                {soundEnabled ? <Volume2 className="w-4 h-4 text-amber-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
+              </button>
+            </div>
           )}
 
           {/* PAUSE OVERLAY IF POINTER LOCK LOST DURING PLAY */}
@@ -809,7 +890,7 @@ export default function TargetAcquisitionClient() {
               icon={Target}
               accent="amber"
               title="Target Acquisition Pro"
-              subtitle="Visual Discrimination & Luminal Sorting • 15 Levels"
+              subtitle="Hardware Raw Input • Endless Level Progression"
               rules={[
                 { icon: Target, accent: 'amber', title: 'Objective', text: 'Click Brightest Target First' },
                 { icon: AlertCircle, accent: 'red', title: 'Failure Rule', text: 'Wrong Click Resets Combo' },
@@ -825,9 +906,9 @@ export default function TargetAcquisitionClient() {
             />
           )}
 
-          {/* COUNTDOWN OVERLAY (3-2-1-GO) */}
+          {/* COUNTDOWN OVERLAY */}
           {gameState === 'countdown' && (
-            <DrillCountdown value={countdownValue} subtitle="GET READY" accent="#f59e0b" />
+            <DrillCountdown value={countdownValue} subtitle="GET READY" />
           )}
 
           {/* END SCREEN */}
@@ -906,176 +987,119 @@ export default function TargetAcquisitionClient() {
 
         </div>
 
-        {/* ACCORDION 1: INSTRUCTIONS & SCORING */}
+        {/* ── ACCORDIONS ── */}
         {!isFullscreen && (
           <div className="[&>div]:!mt-0">
-          <DrillAccordion
-            id="rules"
-            title="Drill Instructions &amp; Scoring System"
-            isOpen={openAccordion === 'rules'}
-            onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
-          >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <RuleItem num="1" text="Correct Target Hit" highlight="+100 PTS × Combo × Level" result="Builds combo & score" />
-              <RuleItem num="2" text="Set Cleared Bonus" highlight="+400 PTS × Level" result="Spawns next target set" />
-              <RuleItem num="3" text="Level Progression" highlight="Every 300 PTS" result="Target count & delta scale" />
-              <RuleItem num="4" text="Wrong Click / Miss" highlight="Resets Combo" result="Red flash penalty" />
-            </div>
-          </DrillAccordion>
-          </div>
-        )}
-
-        {/* ACCORDION 2: ABOUT TARGET ACQUISITION PRO */}
-        {!isFullscreen && (
-          <div className="[&>div]:!mt-0">
-          <DrillAccordion
-            id="about"
-            title="About Target Acquisition Pro"
-            isOpen={openAccordion === 'about'}
-            onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
-          >
-            <section>
-              <h4 className="text-base font-bold text-white mb-2 flex items-center gap-2">
-                <Eye className="w-4 h-4 text-blue-400" /> What Is Target Acquisition Training?
-              </h4>
-              <p className="text-sm leading-relaxed mb-3">
-                <strong>Target Acquisition Training</strong> isolates the cognitive phase of aim: visually scanning a scene, recognizing threat priorities, and executing precise crosshair snaps to the primary target. In tactical shooters like CS2 and Valorant, enemies rarely present themselves in isolation. Winning engagements requires sorting through visual clutter, identifying who to shoot first, and firing before your opponent reacts.
-              </p>
-              <p className="text-sm leading-relaxed">
-                By conditioning your visual cortex to perform high-speed <strong>luminance sorting</strong> under strict time pressure, this drill narrows your visual discrimination latency, ensuring your mechanical flicks are guided by fast, decisive threat recognition.
-              </p>
-            </section>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
-                <div className="flex items-center gap-2.5 mb-2">
-                  <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
-                  <h5 className="text-xs font-bold text-white">Who Should Use This?</h5>
-                </div>
-                <p className="text-xs text-gray-300 leading-relaxed">Tactical shooter players, entry fraggers, and gamers who hesitate when multiple enemies appear on screen simultaneously.</p>
+            <DrillAccordion
+              id="rules"
+              title="Drill Instructions & Scoring System"
+              isOpen={openAccordion === 'rules'}
+              onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {RULES_ITEMS.map((item, i) => (
+                  <div key={i} className="bg-black p-4 rounded-xl border border-white/10">
+                    <p className="text-sm font-bold text-white mb-1">{item.title}</p>
+                    <p className="text-xs text-gray-300 leading-relaxed">{item.text}</p>
+                  </div>
+                ))}
               </div>
-              <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
-                <div className="flex items-center gap-2.5 mb-2">
-                  <div className="w-7 h-7 rounded-lg bg-amber-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
-                  <h5 className="text-xs font-bold text-white">Benefits of Discrimination</h5>
-                </div>
-                <p className="text-xs text-gray-300 leading-relaxed">Reduces target switching hesitation, eliminates panic clicking, and trains consistent first-shot accuracy on subtle enemy pixels.</p>
-              </div>
-              <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
-                <div className="flex items-center gap-2.5 mb-2">
-                  <div className="w-7 h-7 rounded-lg bg-orange-600 flex items-center justify-center"><Zap className="w-3.5 h-3.5 text-white" /></div>
-                  <h5 className="text-xs font-bold text-white">15-Level Scaling</h5>
-                </div>
-                <p className="text-xs text-gray-300 leading-relaxed">As you level up, target size shrinks, target counts grow up to 6 on screen, and the opacity delta tightens to a challenging 5% difference.</p>
-              </div>
-            </div>
+            </DrillAccordion>
 
-          </DrillAccordion>
-          </div>
-        )}
+            <DrillAccordion
+              id="about"
+              title="About Target Acquisition Pro"
+              isOpen={openAccordion === 'about'}
+              onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
+            >
+              <div className="space-y-8">
+                <section>
+                  <h4 className="text-base font-bold text-white mb-2 flex items-center gap-2">
+                    <Eye className="w-4 h-4 text-amber-400" /> What Is Target Acquisition Training?
+                  </h4>
+                  <p className="text-sm leading-relaxed mb-3 text-gray-300">
+                    <strong>Target Acquisition Training</strong> isolates the cognitive phase of aim: visually scanning a scene, recognizing threat priorities, and executing precise crosshair snaps to the primary target. In tactical shooters like CS2 and Valorant, enemies rarely present themselves in isolation. Winning engagements requires sorting through visual clutter, identifying who to shoot first, and firing before your opponent reacts.
+                  </p>
+                  <p className="text-sm leading-relaxed text-gray-300">
+                    By conditioning your visual cortex to perform high-speed <strong>luminance sorting</strong> under strict time pressure, this drill narrows your visual discrimination latency, ensuring your mechanical flicks are guided by fast, decisive threat recognition.
+                  </p>
+                </section>
 
-        {/* ACCORDION 3: FAQ — its own top-level section.
-            It used to be nested INSIDE the About accordion, so a reader had to open
-            About and then scroll to reach it. This section carries the FAQPage
-            schema, so it earns its own entry point. */}
-        {!isFullscreen && (
-          <div className="[&>div]:!mt-0">
-          <DrillAccordion
-            id="faq"
-            title="Frequently Asked Questions"
-            isOpen={openAccordion === 'faq'}
-            onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
-          >
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                    <div className="flex items-center gap-2.5 mb-2">
+                      <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
+                      <h5 className="text-xs font-bold text-white">Who Should Use This?</h5>
+                    </div>
+                    <p className="text-xs text-gray-300 leading-relaxed">Tactical shooter players, entry fraggers, and gamers who hesitate when multiple enemies appear on screen simultaneously.</p>
+                  </div>
+                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                    <div className="flex items-center gap-2.5 mb-2">
+                      <div className="w-7 h-7 rounded-lg bg-amber-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
+                      <h5 className="text-xs font-bold text-white">Benefits of Discrimination</h5>
+                    </div>
+                    <p className="text-xs text-gray-300 leading-relaxed">Reduces target switching hesitation, eliminates panic clicking, and trains consistent first-shot accuracy on subtle enemy pixels.</p>
+                  </div>
+                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                    <div className="flex items-center gap-2.5 mb-2">
+                      <div className="w-7 h-7 rounded-lg bg-orange-600 flex items-center justify-center"><Zap className="w-3.5 h-3.5 text-white" /></div>
+                      <h5 className="text-xs font-bold text-white">15-Level Scaling</h5>
+                    </div>
+                    <p className="text-xs text-gray-300 leading-relaxed">As you level up, target size shrinks, target counts grow up to 6 on screen, and the opacity delta tightens to a challenging 5% difference.</p>
+                  </div>
+                </div>
+              </div>
+            </DrillAccordion>
+
+            <DrillAccordion
+              id="faq"
+              title="Frequently Asked Questions"
+              isOpen={openAccordion === 'faq'}
+              onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
+            >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FAQItem q="What is target acquisition in FPS games?" a="Target acquisition is the combined process of visually detecting a threat, identifying it as an enemy (not a teammate), deciding to engage, and getting your crosshair on the target fast enough to fire first. It involves both cognitive processing (recognition and decision) and mechanical execution (crosshair movement). This is the skill that separates players who see enemies fast from those who react slowly." />
-                <FAQItem q="How does target acquisition differ from reaction time?" a="Reaction time measures the gap between stimulus appearance and your click. Target acquisition includes reaction time but adds the prior cognitive steps: visual scan → target detection → threat confirmation → aim → shoot. Better target acquisition means your brain identifies threats faster, giving your mechanical aim more time to respond accurately." />
-                <FAQItem q="Why do some players always seem to see enemies before others?" a="Players with trained target acquisition have learned unconscious threat pattern recognition — their visual system has been trained to flag enemy silhouettes, color cues, and movement patterns faster than untrained players. This creates the illusion that they see first when actually their brain is processing the same visual information faster and more efficiently." />
-                <FAQItem q="How does this help in Valorant compared to other drills?" a="Valorant's round-based structure means you often peek corners or angles with partial information. Fast target acquisition is critical for winning the split-second timing battle when two players simultaneously come into view of each other. This drill specifically trains the speed of the visual identification → aim decision → click sequence." />
-                <FAQItem q="What cognitive skills does target acquisition training improve?" a="Target acquisition training improves visual processing speed (how fast your eyes register a target), pattern recognition (identifying enemy silhouettes), selective attention (filtering enemies from background), and decision speed (choosing to engage). Together these create the faster perception that high-rank players possess." />
-                <FAQItem q="Can target acquisition be trained independently of mechanical aim?" a="Yes, target acquisition isolates the visual identification and decision phase of aim. Training target acquisition helps your brain recognize threat patterns faster, allowing your existing mechanical aim to execute with higher confidence." />
-                <FAQItem q="How does target acquisition impact CS2 and tactical shooters?" a="In CS2, time-to-kill is extremely fast. Spotting a target's head pixel a fraction of a second earlier grants the critical advantage needed to secure first-bullet headshots." />
-                <FAQItem q="What is the optimal daily target acquisition training routine?" a="We recommend 10 to 15 minutes of target acquisition drills at the start of your gaming session to warm up visual processing speed before entering competitive matches." />
+                {FAQ_ITEMS.map((item, i) => (
+                  <div key={i} className="bg-[#05060b] border border-gray-800 rounded-xl p-5">
+                    <h4 className="text-sm font-bold text-gray-200 mb-2">{item.q}</h4>
+                    <p className="text-xs text-gray-400 leading-relaxed">{item.a}</p>
+                  </div>
+                ))}
               </div>
-          </DrillAccordion>
+            </DrillAccordion>
           </div>
         )}
 
-        {/* RELATED DRILLS GRID */}
+        {/* ── RELATED FPS DRILLS ── */}
         {!isFullscreen && (
-          <div className="mt-12 pt-8 border-t border-gray-800 font-sans">
-            <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-              <Zap className="w-5 h-5 text-amber-400" /> Related FPS Drills
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              <RelatedCard href="/drills/fps/180-degree-awareness" title="180° Awareness Pro" desc="Master 180-degree snap turns and peripheral threat detection." />
-              <RelatedCard href="/drills/fps/target-switching-swarm" title="Target Switching Swarm" desc="Train multi-target flick switching under high density." />
-              <RelatedCard href="/drills/fps/target-prioritization" title="Target Prioritization" desc="Evaluate threat distances and prioritize high-risk targets." />
-              <RelatedCard href="/drills/fps/flick-shot-training" title="Pro Flick Trainer" desc="Snap to targets in time-attack mode with precision flicking." />
-              <RelatedCard href="/drills/fps/micro-correction-precision" title="Micro Flicks" desc="Optimize tight-angle crosshair micro corrections." />
-              <RelatedCard href="/drills/fps/instant-response" title="Instant Response" desc="Train raw single-stimulus reflex acquisition." />
+          <section className="mt-4">
+            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3 font-sans">
+              Related FPS Drills
+            </h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {RELATED_DRILLS.map((drill) => (
+                <Link
+                  key={drill.id}
+                  href={drill.href}
+                  className="group bg-[#0c0c16] border border-white/5 hover:border-amber-500/40 rounded-xl p-3.5 transition-all duration-200 hover:-translate-y-0.5 flex flex-col justify-between"
+                >
+                  <div>
+                    <div className="text-[10px] font-bold text-amber-400 uppercase tracking-wider mb-1">{drill.cat}</div>
+                    <div className="text-xs font-bold text-white group-hover:text-amber-300 transition-colors">{drill.name}</div>
+                    <div className="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">{drill.desc}</div>
+                  </div>
+                  <div className="text-[10px] font-bold text-slate-500 group-hover:text-amber-400 mt-3 flex items-center gap-1 transition-colors">
+                    Train Drill <span>→</span>
+                  </div>
+                </Link>
+              ))}
             </div>
-          </div>
+          </section>
         )}
 
-        {/* SITE FOOTER */}
+        {/* ── FOOTER ── */}
         {!isFullscreen && <DrillFooter />}
 
-      </div>
-    </div>
-  );
-}
-
-// === Subcomponents ===
-function StatCard({ icon, value, label, unit = '', accentColor = 'border-white/10' }) {
-  return (
-    <div className={`rounded-xl border ${accentColor} bg-black backdrop-blur-md p-1.5 sm:p-2.5 text-center flex flex-col items-center justify-center transition-all duration-300 shadow-md hover:-translate-y-0.5 pointer-events-none font-sans`}>
-      <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-black border border-white/10 flex items-center justify-center mb-1 shadow-inner">
-        {icon}
-      </div>
-      <p className="text-xs sm:text-lg lg:text-xl font-black tracking-tight text-white leading-none truncate w-full font-sans font-mono tabular-nums">
-        {value}<span className="text-[9px] sm:text-xs font-semibold ml-0.5 text-gray-400 font-sans">{unit}</span>
-      </p>
-      <p className="text-[8px] sm:text-[9.5px] font-bold uppercase tracking-wider text-gray-400 mt-1 truncate w-full">{label}</p>
-    </div>
-  );
-}
-
-function RuleItem({ num, text, highlight = '', result }) {
-  return (
-    <div className="flex items-center gap-4 bg-black p-4 rounded-xl border border-white/10 shadow-sm">
-      <div className="w-8 h-8 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-white text-base font-black shadow-lg flex-shrink-0">{num}</div>
-      <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-        <p className="text-sm font-medium text-gray-100 font-sans">
-          {text}{highlight && <span className="font-black font-sans text-white"> {highlight}</span>}
-        </p>
-        <div className="text-xs font-black px-3 py-1.5 rounded-lg bg-[#050811] border border-white/10 text-white whitespace-nowrap shadow-inner tracking-wide text-center sm:text-left">
-          {result}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function RelatedCard({ href, title, desc }) {
-  return (
-    <Link href={href} className="group p-5 bg-black rounded-2xl border border-gray-800 hover:border-amber-500/50 hover:bg-white/[0.02] transition-all flex flex-col justify-between">
-      <div>
-        <h4 className="font-bold text-white group-hover:text-amber-400 transition-colors mb-1 text-base">{title}</h4>
-        <p className="text-xs text-gray-400 leading-relaxed line-clamp-2">{desc}</p>
-      </div>
-      <div className="flex items-center gap-1 mt-4 text-xs text-amber-400 font-bold font-mono">
-        <span>TRY DRILL</span>
-        <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-      </div>
-    </Link>
-  );
-}
-
-function FAQItem({ q, a }) {
-  return (
-    <div className="bg-[#05060b] border border-gray-800 rounded-xl p-5 hover:border-gray-700 transition-colors">
-      <h4 className="text-sm font-bold text-gray-200 mb-2">{q}</h4>
-      <p className="text-xs text-gray-200 leading-relaxed">{a}</p>
+      </main>
     </div>
   );
 }

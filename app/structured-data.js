@@ -2,9 +2,11 @@
 // Reusable SEO schema components for all SkillDrills pages
 // Creates rich results in Google: breadcrumbs, FAQs, how-to steps, app badges
 
+import { DRILLS } from '@/lib/drillsRegistry';
+
 const BASE_URL = 'https://skilldrills.online';
 const ORG_NAME = 'SkillDrills';
-const ORG_DESCRIPTION = 'Free online training platform with 135+ interactive drills for FPS gaming skills, cognitive enhancement, brain training, memory improvement, typing speed, visual tracking, and mental fitness.';
+const ORG_DESCRIPTION = `Free online training platform with ${DRILLS.length}+ interactive drills for FPS gaming skills, cognitive enhancement, brain training, memory improvement, typing speed, visual tracking, and mental fitness.`;
 const TODAY = new Date().toISOString().split('T')[0];
 
 // ============================================

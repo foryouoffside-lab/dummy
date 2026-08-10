@@ -81,7 +81,7 @@ export default function ChromaSyncPage() {
             "mainEntity": [
               {
                 "@type": "Question",
-                "name": "What is the Go/No-Go Pro Drill?",
+                "name": "What is the Go/No-Go Drill?",
                 "acceptedAnswer": {
                   "@type": "Answer",
                   "text": "A free response inhibition task. React instantly to Green 'GO' targets while suppressing motor actions when Red 'STOP' targets spawn."
@@ -89,10 +89,10 @@ export default function ChromaSyncPage() {
               },
               {
                 "@type": "Question",
-                "name": "Why is Go/No-Go training effective?",
+                "name": "How does progressive difficulty work?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "It builds prefrontal executive control and trigger discipline by strengthening motor response suppression under split-second time limits."
+                  "text": "Every 900 points earned you level up, and signal flash windows accelerate from 600ms down to 350ms, challenging your impulse control boundaries."
                 }
               },
               {
@@ -105,10 +105,34 @@ export default function ChromaSyncPage() {
               },
               {
                 "@type": "Question",
+                "name": "What happens if I run out of lives?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "You start each run with 5 lives. Every wrong click on a red NO-GO signal costs 1 life; missing a green GO signal (timeout) costs no life at all. Reach 0 lives and the drill ends immediately, even if time remains."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Does difficulty decrease on mistakes?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "No. Your level only ever goes up — a mistake never takes you back down, so you can safely master your current level."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "How long does each drill session last?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Each round is timed for exactly 45 seconds, or until your 5 lives run out — whichever comes first."
+                }
+              },
+              {
+                "@type": "Question",
                 "name": "Do I need to sign up?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "No registration required. This drill is completely free and works instantly in your browser."
+                  "text": "No registration required. This drill runs directly in your browser with instant response."
                 }
               }
             ]

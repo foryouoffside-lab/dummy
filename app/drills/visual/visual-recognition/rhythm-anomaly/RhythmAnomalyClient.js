@@ -7,13 +7,15 @@ import {
   Activity, AlertCircle, ArrowRight, Award, Brain, ChevronRight,
   Eye, GraduationCap, Play, RefreshCw, RotateCw, Target,
   Timer, TrendingUp, Trophy, Volume2, VolumeX,
-  Zap, Users, Sparkles, Share2, LogOut, CheckCircle, XCircle,
+  Zap, ZapOff, Users, Sparkles, Share2, LogOut, CheckCircle, XCircle,
   Grid3X3, Search, AlertTriangle
 } from 'lucide-react';
 
 import generateShareCard, { shareScoreCard } from '../../../../../components/ShareScoreCard';
 import { getPlayerName } from '../../../../../lib/leaderboard';
 import { drillAudio } from '../../../../../lib/drillAudio';
+import { drillFlash } from '../../../../../lib/drillFlash';
+import { drillTimeout } from '../../../../../lib/drillTimeout';
 import { getFpsScoreGrade } from '../../../../../lib/scoringEngine';
 import useDrillFlash from '../../../../../lib/useDrillFlash';
 import useUnexpectedExitGuard from '../../../../../lib/useUnexpectedExitGuard';
@@ -96,6 +98,7 @@ export default function RhythmAnomalyClient() {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [flashEnabled, setFlashEnabled] = useState(true);
   const [openAccordion, setOpenAccordion] = useState(null);
   const [countdownValue, setCountdownValue] = useState(3);
   const { flashes, triggerFlash } = useDrillFlash();
@@ -166,14 +169,12 @@ export default function RhythmAnomalyClient() {
   // Storage loading & sound init
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      setSoundEnabled(drillAudio.isEnabled());
+      setFlashEnabled(drillFlash.isEnabled());
       const saved = getSavedData();
       setBestScore(saved.bestScore || 0);
     }
   }, []);
-
-  useEffect(() => {
-    drillAudio?.setEnabled?.(soundEnabled);
-  }, [soundEnabled]);
 
   // Fullscreen change listener
   useEffect(() => {
@@ -457,7 +458,7 @@ export default function RhythmAnomalyClient() {
       }
 
       // Handle Timeout check
-      if (now - anomalySpawnTimeRef.current > timeoutLimitRef.current) {
+      if (drillTimeout.isEnabled() && now - anomalySpawnTimeRef.current > timeoutLimitRef.current) {
         handlePenalty('timeout');
       }
 
@@ -614,17 +615,30 @@ export default function RhythmAnomalyClient() {
               <span className="text-purple-400 font-medium">Rhythm Anomaly</span>
             </div>
 
-            <button
-              onClick={() => {
-                const next = !soundEnabled;
-                setSoundEnabled(next);
-                drillAudio?.setEnabled?.(next);
-              }}
-              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-              title={soundEnabled ? "Mute Sound" : "Unmute Sound"}
-            >
-              {soundEnabled ? <Volume2 className="w-4 h-4 text-purple-400" /> : <VolumeX className="w-4 h-4 text-red-400" />}
-            </button>
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => {
+                  const next = !soundEnabled;
+                  setSoundEnabled(next);
+                  drillAudio?.setEnabled?.(next);
+                }}
+                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title={soundEnabled ? "Mute Sound" : "Unmute Sound"}
+              >
+                {soundEnabled ? <Volume2 className="w-4 h-4 text-purple-400" /> : <VolumeX className="w-4 h-4 text-red-400" />}
+              </button>
+              <button
+                onClick={() => {
+                  const next = !flashEnabled;
+                  setFlashEnabled(next);
+                  drillFlash.setEnabled(next);
+                }}
+                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title={flashEnabled ? "Disable Miss Flash" : "Enable Miss Flash"}
+              >
+                {flashEnabled ? <Zap className="w-4 h-4 text-red-400" /> : <ZapOff className="w-4 h-4 text-red-400" />}
+              </button>
+            </div>
           </div>
         </header>
       )}
@@ -699,22 +713,38 @@ export default function RhythmAnomalyClient() {
               </>
             )}
 
-            {/* IN-GAME HUD SOUND TOGGLE */}
+            {/* IN-GAME HUD SOUND + FLASH TOGGLES */}
             {(gameState === 'playing' || gameState === 'countdown') && (
-              <button
-                onPointerDown={(e) => e.stopPropagation()}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setSoundEnabled((v) => {
-                    drillAudio?.setEnabled?.(!v);
-                    return !v;
-                  });
-                }}
-                className="absolute bottom-4 right-4 z-40 p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-                title="Toggle Sound"
-              >
-                {soundEnabled ? <Volume2 className="w-4 h-4 text-purple-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
-              </button>
+              <div className="absolute bottom-4 right-4 z-40 flex items-center gap-2">
+                <button
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setFlashEnabled((v) => {
+                      drillFlash.setEnabled(!v);
+                      return !v;
+                    });
+                  }}
+                  className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                  title="Toggle Miss Flash"
+                >
+                  {flashEnabled ? <Zap className="w-4 h-4 text-red-400" /> : <ZapOff className="w-4 h-4 text-slate-500" />}
+                </button>
+                <button
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSoundEnabled((v) => {
+                      drillAudio?.setEnabled?.(!v);
+                      return !v;
+                    });
+                  }}
+                  className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                  title="Toggle Sound"
+                >
+                  {soundEnabled ? <Volume2 className="w-4 h-4 text-purple-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
+                </button>
+              </div>
             )}
 
             {/* CANVAS GAMEPLAY AREA */}
@@ -755,7 +785,7 @@ export default function RhythmAnomalyClient() {
 
             {/* COUNTDOWN OVERLAY */}
             {gameState === 'countdown' && (
-              <DrillCountdown value={countdownValue} subtitle="GET READY" accent="#a855f7" />
+              <DrillCountdown value={countdownValue} subtitle="GET READY" />
             )}
 
             {/* END SCREEN (RESULT GRADES MODAL) */}

@@ -157,6 +157,36 @@ const ACCENTS = {
     buttonGradient: 'from-emerald-500 to-green-600',
     buttonGlow: 'shadow-[0_0_20px_rgba(34,197,94,.3)]',
   },
+  fuchsia: {
+    badgeGradient: 'from-fuchsia-600 to-purple-600',
+    badgeGlow: 'shadow-[0_0_28px_rgba(217,70,239,.4)]',
+    ring: 'border-fuchsia-500/20',
+    ringInner: 'border-fuchsia-500/10',
+    ambient: 'rgba(217,70,239,.18)',
+    subtitleText: 'text-fuchsia-400/80',
+    chipBg: 'bg-fuchsia-500/10',
+    chipBorder: 'border-fuchsia-500/20',
+    chipText: 'text-fuchsia-400',
+    barGradient: 'from-fuchsia-400 to-purple-600',
+    sliderAccent: 'accent-fuchsia-500',
+    buttonGradient: 'from-fuchsia-600 to-purple-600',
+    buttonGlow: 'shadow-[0_0_20px_rgba(217,70,239,.3)]',
+  },
+  pink: {
+    badgeGradient: 'from-pink-600 to-rose-600',
+    badgeGlow: 'shadow-[0_0_28px_rgba(236,72,153,.4)]',
+    ring: 'border-pink-500/20',
+    ringInner: 'border-pink-500/10',
+    ambient: 'rgba(236,72,153,.18)',
+    subtitleText: 'text-pink-400/80',
+    chipBg: 'bg-pink-500/10',
+    chipBorder: 'border-pink-500/20',
+    chipText: 'text-pink-400',
+    barGradient: 'from-pink-400 to-rose-600',
+    sliderAccent: 'accent-pink-500',
+    buttonGradient: 'from-pink-600 to-rose-600',
+    buttonGlow: 'shadow-[0_0_20px_rgba(236,72,153,.3)]',
+  },
   slate: {
     badgeGradient: 'from-slate-500 to-slate-700',
     badgeGlow: 'shadow-[0_0_28px_rgba(148,163,184,.35)]',
@@ -178,21 +208,6 @@ function getAccent(name) {
   return ACCENTS[name] || ACCENTS.emerald;
 }
 
-function RuleRow({ icon: Icon, accent = 'emerald', title }) {
-  const a = getAccent(accent);
-  return (
-    <div className="relative flex items-center gap-2.5 bg-white/[0.03] border border-white/5 rounded-xl pl-3.5 pr-3 py-2.5 text-left overflow-hidden">
-      <div className={`absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b ${a.barGradient}`} />
-      <div className={`w-8 h-8 rounded-lg ${a.chipBg} border ${a.chipBorder} flex items-center justify-center flex-shrink-0`}>
-        {Icon && <Icon className={`w-4 h-4 ${a.chipText}`} />}
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-[11.5px] font-bold text-white leading-tight">{title}</p>
-      </div>
-    </div>
-  );
-}
-
 /**
  * Universal premium FPS drill start card — extracted from 180° Awareness Pro
  * so every FPS drill can share one look instead of hand-rolling its own modal.
@@ -203,7 +218,6 @@ function RuleRow({ icon: Icon, accent = 'emerald', title }) {
  * @param {keyof ACCENTS} accent - card-wide theme (badge, subtitle, slider, button)
  * @param {string} title
  * @param {string} subtitle
- * @param {Array<{icon, accent, title}>} rules - instructional rows, each independently themed
  * @param {{value:number, onChange:(v:number)=>void, cmPer360:string}|null} sensitivity - omit to hide the slider block
  * @param {boolean} isTouchOnlyDevice
  * @param {() => void} onStart
@@ -213,7 +227,6 @@ export default function FpsStartCard({
   accent = 'emerald',
   title,
   subtitle,
-  rules = [],
   sensitivity = null,
   isTouchOnlyDevice = false,
   onStart,
@@ -251,12 +264,6 @@ export default function FpsStartCard({
               <p className={`text-[10px] ${a.subtitleText} uppercase tracking-[0.15em] font-semibold mt-1`}>{subtitle}</p>
             )}
           </div>
-
-          {rules.length > 0 && (
-            <div className="flex flex-col gap-1.5 mt-0.5">
-              {rules.map((rule, i) => <RuleRow key={i} {...rule} />)}
-            </div>
-          )}
 
           {sensitivity && (
             <div className="bg-black/40 border border-white/5 p-3 rounded-xl text-left text-xs mt-0.5">

@@ -5,12 +5,14 @@ import Link from 'next/link';
 import {
   Volume2, VolumeX,
   Play, RefreshCw, Target,
-  Share2, LogOut, Eye, Users, TrendingUp, Zap, Trophy
+  Share2, LogOut, Eye, Users, TrendingUp, Zap, ZapOff, Trophy
 } from 'lucide-react';
 
 import generateShareCard, { shareScoreCard } from '../../../../components/ShareScoreCard';
 import { getPlayerName } from '../../../../lib/leaderboard';
 import { drillAudio } from '../../../../lib/drillAudio';
+import { drillFlash } from '../../../../lib/drillFlash';
+import { drillTimeout } from '../../../../lib/drillTimeout';
 import { getFpsScoreGrade } from '../../../../lib/scoringEngine';
 import { getDifficultyProgress, getStartLevel } from '../../../../lib/drillDifficulty';
 import useDrillFlash from '../../../../lib/useDrillFlash';
@@ -71,7 +73,8 @@ type FallingTarget = { id: number; x: number; y: number; radius: number; vy: num
 export default function ReactionSimulatorClient() {
   const [gameState, setGameState] = useState<'start' | 'countdown' | 'playing' | 'gameOver'>('start');
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
-  const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [flashEnabled, setFlashEnabled] = useState(true);
   const [openAccordion, setOpenAccordion] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState<boolean>(false);
   const [isPortrait, setIsPortrait] = useState<boolean>(false);
@@ -124,6 +127,8 @@ export default function ReactionSimulatorClient() {
   // Mobile Detection & Device Orientation Tracking
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      setSoundEnabled(drillAudio.isEnabled());
+      setFlashEnabled(drillFlash.isEnabled());
       const checkDeviceAndOrientation = () => {
         const ua = navigator.userAgent || '';
         const hasTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
@@ -149,11 +154,6 @@ export default function ReactionSimulatorClient() {
       };
     }
   }, []);
-
-  // Sound sync
-  useEffect(() => {
-    drillAudio.setEnabled(soundEnabled);
-  }, [soundEnabled]);
 
   // Fullscreen Listener
   useEffect(() => {
@@ -496,6 +496,11 @@ export default function ReactionSimulatorClient() {
         t.y += t.vy * dt;
 
         // Target Escaped Bottom Boundary -> Timeout / Penalty
+        if (!drillTimeout.isEnabled() && t.y > H + t.radius) {
+          t.y = H + t.radius;
+          continue;
+        }
+
         if (t.y > H + t.radius) {
           e.targets.splice(i, 1);
           e.timeouts += 1;
@@ -638,17 +643,30 @@ export default function ReactionSimulatorClient() {
               <span className="text-red-400 font-medium">Reaction Simulator</span>
             </div>
 
-            <button
-              onClick={() => {
-                const next = !soundEnabled;
-                setSoundEnabled(next);
-                drillAudio.setEnabled(next);
-              }}
-              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-              title={soundEnabled ? "Mute Sound" : "Unmute Sound"}
-            >
-              {soundEnabled ? <Volume2 className="w-4 h-4 text-emerald-400" /> : <VolumeX className="w-4 h-4 text-red-400" />}
-            </button>
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => {
+                  const next = !soundEnabled;
+                  setSoundEnabled(next);
+                  drillAudio.setEnabled(next);
+                }}
+                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title={soundEnabled ? "Mute Sound" : "Unmute Sound"}
+              >
+                {soundEnabled ? <Volume2 className="w-4 h-4 text-emerald-400" /> : <VolumeX className="w-4 h-4 text-red-400" />}
+              </button>
+              <button
+                onClick={() => {
+                  const next = !flashEnabled;
+                  setFlashEnabled(next);
+                  drillFlash.setEnabled(next);
+                }}
+                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title={flashEnabled ? "Disable Miss Flash" : "Enable Miss Flash"}
+              >
+                {flashEnabled ? <Zap className="w-4 h-4 text-red-400" /> : <ZapOff className="w-4 h-4 text-red-400" />}
+              </button>
+            </div>
           </div>
         </header>
       )}
@@ -721,22 +739,38 @@ export default function ReactionSimulatorClient() {
             </>
           )}
 
-          {/* IN-GAME HUD SOUND TOGGLE */}
+          {/* IN-GAME HUD SOUND + FLASH TOGGLES */}
           {(gameState === 'playing' || gameState === 'countdown') && (
-            <button
-              onPointerDown={(e) => e.stopPropagation()}
-              onClick={(e) => {
-                e.stopPropagation();
-                setSoundEnabled((v) => {
-                  drillAudio.setEnabled(!v);
-                  return !v;
-                });
-              }}
-              className="absolute bottom-4 right-4 z-40 p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-              title="Toggle Sound"
-            >
-              {soundEnabled ? <Volume2 className="w-4 h-4 text-red-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
-            </button>
+            <div className="absolute bottom-4 right-4 z-40 flex items-center gap-2">
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setFlashEnabled((v) => {
+                    drillFlash.setEnabled(!v);
+                    return !v;
+                  });
+                }}
+                className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title="Toggle Miss Flash"
+              >
+                {flashEnabled ? <Zap className="w-4 h-4 text-red-400" /> : <ZapOff className="w-4 h-4 text-slate-500" />}
+              </button>
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSoundEnabled((v) => {
+                    drillAudio.setEnabled(!v);
+                    return !v;
+                  });
+                }}
+                className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title="Toggle Sound"
+              >
+                {soundEnabled ? <Volume2 className="w-4 h-4 text-red-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
+              </button>
+            </div>
           )}
 
           {/* CANVAS */}
@@ -768,7 +802,7 @@ export default function ReactionSimulatorClient() {
 
           {/* COUNTDOWN OVERLAY */}
           {gameState === 'countdown' && (
-            <DrillCountdown value={countdownValue} subtitle="GET READY" accent="#ef4444" />
+            <DrillCountdown value={countdownValue} subtitle="GET READY" />
           )}
 
           {/* END SCREEN */}

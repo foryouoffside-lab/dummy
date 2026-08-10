@@ -1,4 +1,5 @@
 'use client';
+import { isIdleFrameSkippable } from '@/lib/performance';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
@@ -6,13 +7,15 @@ import Link from 'next/link';
 import {
   Activity, AlertCircle, ArrowRight, ChevronRight, Eye,
   Flame, RefreshCw, Target, Timer, TrendingUp,
-  Trophy, Volume2, VolumeX, Zap, Share2,
+  Trophy, Volume2, VolumeX, Zap, ZapOff, Share2,
   Users, LogOut, Award
 } from 'lucide-react';
 
 import generateShareCard, { shareScoreCard } from '../../../../components/ShareScoreCard';
 import { getPlayerName } from '../../../../lib/leaderboard';
 import { drillAudio } from '../../../../lib/drillAudio';
+import { drillFlash } from '../../../../lib/drillFlash';
+import { drillTimeout } from '../../../../lib/drillTimeout';
 import { getStartLevel, getDifficultyProgress, getComboBonusLevel } from '../../../../lib/drillDifficulty';
 import { getComboMultiplier, getFpsScoreGrade } from '../../../../lib/scoringEngine';
 import { createBackdropCache, getCanvasDpr, drawPulseRing, drawTacticalTarget } from '../../../../lib/canvasFx';
@@ -119,6 +122,7 @@ export default function InstantResponseClient() {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [flashEnabled, setFlashEnabled] = useState(true);
   const [pointerLocked, setPointerLocked] = useState(false);
   const [openAccordion, setOpenAccordion] = useState(null);
   const [isTouchOnlyDevice, setIsTouchOnlyDevice] = useState(false);
@@ -160,6 +164,7 @@ export default function InstantResponseClient() {
   });
 
   const triggerFlash = useCallback(() => {
+    if (!drillFlash.isEnabled()) return;
     const id = Date.now() + Math.random();
     setFlashes((f) => [...f, { id }]);
     setTimeout(() => setFlashes((f) => f.filter((x) => x.id !== id)), 480);
@@ -168,6 +173,9 @@ export default function InstantResponseClient() {
   // Touch Device Detection & Initial Storage Loading
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      setSoundEnabled(drillAudio.isEnabled());
+      setFlashEnabled(drillFlash.isEnabled());
+
       const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
       const isTouchCapable = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
       setIsTouchOnlyDevice(isTouchCapable && !hasFinePointer);
@@ -185,10 +193,6 @@ export default function InstantResponseClient() {
       countdownTimeoutsRef.current.forEach(clearTimeout);
     };
   }, []);
-
-  useEffect(() => {
-    drillAudio.setEnabled(soundEnabled);
-  }, [soundEnabled]);
 
   // Fullscreen change listener
   useEffect(() => {
@@ -232,7 +236,7 @@ export default function InstantResponseClient() {
     const p = getDifficultyProgress(level); // 0 -> 1 across L1..L15
     return {
       flashWindow:   Math.max(200, 550 - p * 350),   // 550 -> 200 ms
-      targetRadius:  35  - p * 15,                   // 35 -> 20 px
+      targetRadius:  35,                             // fixed — difficulty comes from timing, not target size
       idleMin:       700 - p * 300,                  // 700 -> 400 ms
       idleMax:       2200 - p * 900,                 // 2200 -> 1300 ms
       hitPad:        10  - p * 6,                    // 10 -> 4 px
@@ -528,6 +532,10 @@ export default function InstantResponseClient() {
     let lastTime = performance.now();
 
     const loop = (time) => {
+      if (isIdleFrameSkippable(gameState === 'playing', time, lastTime)) {
+        animationRef.current = requestAnimationFrame(loop);
+        return;
+      }
       const deltaTimeMs = time - lastTime;
       lastTime = time;
       const dt = Math.min(deltaTimeMs / 1000, 0.1); 
@@ -561,7 +569,7 @@ export default function InstantResponseClient() {
         if (e.target.isExposed) {
           const age = time - e.target.exposeStartTime;
 
-          if (age >= e.target.flashWindow) {
+          if (drillTimeout.isEnabled() && age >= e.target.flashWindow) {
             e.target.isExposed = false;
 
             if (!e.target.isFeint) {
@@ -729,17 +737,30 @@ export default function InstantResponseClient() {
               <span className="text-emerald-400 font-medium">Instant Response Pro</span>
             </div>
 
-            <button
-              onClick={() => {
-                const next = !soundEnabled;
-                setSoundEnabled(next);
-                drillAudio?.setEnabled?.(next);
-              }}
-              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-              title={soundEnabled ? "Mute Sound" : "Unmute Sound"}
-            >
-              {soundEnabled ? <Volume2 className="w-4 h-4 text-emerald-400" /> : <VolumeX className="w-4 h-4 text-red-400" />}
-            </button>
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => {
+                  const next = !soundEnabled;
+                  setSoundEnabled(next);
+                  drillAudio?.setEnabled?.(next);
+                }}
+                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title={soundEnabled ? "Mute Sound" : "Unmute Sound"}
+              >
+                {soundEnabled ? <Volume2 className="w-4 h-4 text-emerald-400" /> : <VolumeX className="w-4 h-4 text-red-400" />}
+              </button>
+              <button
+                onClick={() => {
+                  const next = !flashEnabled;
+                  setFlashEnabled(next);
+                  drillFlash?.setEnabled?.(next);
+                }}
+                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title={flashEnabled ? "Disable Miss Flash" : "Enable Miss Flash"}
+              >
+                {flashEnabled ? <Zap className="w-4 h-4 text-red-400" /> : <ZapOff className="w-4 h-4 text-red-400" />}
+              </button>
+            </div>
           </div>
         </header>
       )}
@@ -810,22 +831,38 @@ export default function InstantResponseClient() {
             </>
           )}
 
-          {/* IN-GAME HUD SOUND TOGGLE */}
+          {/* IN-GAME HUD SOUND + FLASH TOGGLES */}
           {(gameState === 'playing' || gameState === 'countdown') && (
-            <button
-              onPointerDown={(e) => e.stopPropagation()}
-              onClick={(e) => {
-                e.stopPropagation();
-                setSoundEnabled((v) => {
-                  drillAudio.setEnabled(!v);
-                  return !v;
-                });
-              }}
-              className="absolute bottom-4 right-4 z-40 p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-              title="Toggle Sound"
-            >
-              {soundEnabled ? <Volume2 className="w-4 h-4 text-emerald-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
-            </button>
+            <div className="absolute bottom-4 right-4 z-40 flex items-center gap-2">
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setFlashEnabled((v) => {
+                    drillFlash.setEnabled(!v);
+                    return !v;
+                  });
+                }}
+                className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title="Toggle Miss Flash"
+              >
+                {flashEnabled ? <Zap className="w-4 h-4 text-red-400" /> : <ZapOff className="w-4 h-4 text-slate-500" />}
+              </button>
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSoundEnabled((v) => {
+                    drillAudio.setEnabled(!v);
+                    return !v;
+                  });
+                }}
+                className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title="Toggle Sound"
+              >
+                {soundEnabled ? <Volume2 className="w-4 h-4 text-emerald-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
+              </button>
+            </div>
           )}
 
           {/* PAUSE OVERLAY IF POINTER LOCK LOST DURING PLAY */}
@@ -874,7 +911,7 @@ export default function InstantResponseClient() {
 
           {/* COUNTDOWN OVERLAY */}
           {gameState === 'countdown' && (
-            <DrillCountdown value={countdownValue} subtitle="GET READY" accent="#00ff88" />
+            <DrillCountdown value={countdownValue} subtitle="GET READY" />
           )}
 
           {/* END SCREEN */}

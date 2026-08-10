@@ -4,11 +4,13 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import {
   Layers, Volume2, VolumeX, Play, RefreshCw, Share2, Users,
-  TrendingUp, Heart, ArrowLeft, Zap, Flame, Trophy, Target
+  TrendingUp, Heart, ArrowLeft, Zap, ZapOff, Flame, Trophy, Target
 } from 'lucide-react';
 
 import generateShareCard, { shareScoreCard } from '../../../../../components/ShareScoreCard';
 import { drillAudio } from '../../../../../lib/drillAudio';
+import { drillFlash } from '../../../../../lib/drillFlash';
+import { drillTimeout } from '../../../../../lib/drillTimeout';
 import { getPlayerName } from '../../../../../lib/leaderboard';
 import { getFpsScoreGrade } from '../../../../../lib/scoringEngine';
 import { MAX_LEVEL, getDifficultyProgress, getStartLevel } from '../../../../../lib/drillDifficulty';
@@ -96,6 +98,7 @@ export default function DividedAttentionClient() {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [flashEnabled, setFlashEnabled] = useState(true);
   const [openAccordion, setOpenAccordion] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
   const [isPortrait, setIsPortrait] = useState(false);
@@ -158,6 +161,8 @@ export default function DividedAttentionClient() {
   // Screen/Orientation tracking
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      setSoundEnabled(drillAudio.isEnabled());
+      setFlashEnabled(drillFlash.isEnabled());
       const checkDevice = () => {
         setIsMobile(window.innerWidth < 768);
         setIsPortrait(window.innerHeight > window.innerWidth);
@@ -181,11 +186,6 @@ export default function DividedAttentionClient() {
       };
     }
   }, []);
-
-  // Sound sync
-  useEffect(() => {
-    drillAudio.setEnabled(soundEnabled);
-  }, [soundEnabled]);
 
   // Clean timers on unmount
   useEffect(() => {
@@ -300,7 +300,11 @@ export default function DividedAttentionClient() {
     setCurrentTarget(targetObj);
     setBallScale(config.ballScale);
 
-    ballTimerRef.current = setTimeout(() => {
+    ballTimerRef.current = setTimeout(function checkBallExpiry() {
+      if (!drillTimeout.isEnabled()) {
+        ballTimerRef.current = setTimeout(checkBallExpiry, config.ballSpeed);
+        return;
+      }
       // Missed target timeout
       e.visualAttempts += 1;
       e.mistakes += 1;
@@ -318,7 +322,7 @@ export default function DividedAttentionClient() {
     const e = engine.current;
     const config = getLevelConfig(e.level);
 
-    if (e.currentNumber !== null && e.currentNumber % 2 === 0 && !e.wasMatched) {
+    if (e.currentNumber !== null && e.currentNumber % 2 === 0 && !e.wasMatched && drillTimeout.isEnabled()) {
       // Missed an even number
       e.numberAttempts += 1;
       e.mistakes += 1;
@@ -533,17 +537,30 @@ export default function DividedAttentionClient() {
               <span className="text-blue-400 font-medium">Divided Attention</span>
             </div>
 
-            <button
-              onClick={() => {
-                const next = !soundEnabled;
-                setSoundEnabled(next);
-                drillAudio.setEnabled(next);
-              }}
-              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-              title={soundEnabled ? "Mute Sound" : "Unmute Sound"}
-            >
-              {soundEnabled ? <Volume2 className="w-4 h-4 text-blue-400" /> : <VolumeX className="w-4 h-4 text-red-400" />}
-            </button>
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => {
+                  const next = !soundEnabled;
+                  setSoundEnabled(next);
+                  drillAudio.setEnabled(next);
+                }}
+                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title={soundEnabled ? "Mute Sound" : "Unmute Sound"}
+              >
+                {soundEnabled ? <Volume2 className="w-4 h-4 text-blue-400" /> : <VolumeX className="w-4 h-4 text-red-400" />}
+              </button>
+              <button
+                onClick={() => {
+                  const next = !flashEnabled;
+                  setFlashEnabled(next);
+                  drillFlash.setEnabled(next);
+                }}
+                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title={flashEnabled ? "Disable Miss Flash" : "Enable Miss Flash"}
+              >
+                {flashEnabled ? <Zap className="w-4 h-4 text-red-400" /> : <ZapOff className="w-4 h-4 text-red-400" />}
+              </button>
+            </div>
           </div>
         </header>
       )}
@@ -626,22 +643,38 @@ export default function DividedAttentionClient() {
             </>
           )}
 
-          {/* IN-GAME HUD SOUND TOGGLE */}
+          {/* IN-GAME HUD SOUND + FLASH TOGGLES */}
           {(gameState === 'playing' || gameState === 'countdown') && (
-            <button
-              onPointerDown={(e) => e.stopPropagation()}
-              onClick={(e) => {
-                e.stopPropagation();
-                setSoundEnabled((v) => {
-                  drillAudio.setEnabled(!v);
-                  return !v;
-                });
-              }}
-              className="absolute bottom-4 right-4 z-40 p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-              title="Toggle Sound"
-            >
-              {soundEnabled ? <Volume2 className="w-4 h-4 text-blue-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
-            </button>
+            <div className="absolute bottom-4 right-4 z-40 flex items-center gap-2">
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setFlashEnabled((v) => {
+                    drillFlash.setEnabled(!v);
+                    return !v;
+                  });
+                }}
+                className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title="Toggle Miss Flash"
+              >
+                {flashEnabled ? <Zap className="w-4 h-4 text-red-400" /> : <ZapOff className="w-4 h-4 text-slate-500" />}
+              </button>
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSoundEnabled((v) => {
+                    drillAudio.setEnabled(!v);
+                    return !v;
+                  });
+                }}
+                className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title="Toggle Sound"
+              >
+                {soundEnabled ? <Volume2 className="w-4 h-4 text-blue-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
+              </button>
+            </div>
           )}
 
           {/* DUAL-TASK GAMEPLAY PLAYING AREA */}
@@ -661,12 +694,27 @@ export default function DividedAttentionClient() {
                     }}
                   >
                     <div className="relative flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 hover:scale-110 active:scale-90 transition-transform duration-100">
-                      <div className="absolute inset-0 rounded-full bg-blue-500/40 animate-ping opacity-75" />
-                      <div className="absolute inset-0 rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 border-2 border-blue-300 flex items-center justify-center pointer-events-none shadow-[0_0_20px_rgba(59,130,246,0.6)]">
-                        <div className="w-[55%] h-[55%] rounded-full border-2 border-white/50 flex items-center justify-center">
-                          <div className="w-[40%] h-[40%] rounded-full bg-white" />
-                        </div>
-                      </div>
+                      {/* Outer pulse ring */}
+                      <div className="absolute -inset-2 rounded-full border border-[#3b82f6]/50 animate-ping opacity-60 pointer-events-none" />
+
+                      {/* Tactical Target SVG matching 180-degree-awareness */}
+                      <svg className="w-full h-full drop-shadow-[0_0_12px_rgba(59,130,246,0.6)] pointer-events-none" viewBox="0 0 100 100">
+                        {/* Ghost outer ring */}
+                        <circle cx="50" cy="50" r="46" fill="none" stroke="#3b82f6" strokeWidth="1.5" opacity="0.25" />
+                        {/* Tactical outer ring */}
+                        <circle cx="50" cy="50" r="40" fill="none" stroke="#3b82f6" strokeWidth="2.5" opacity="0.6" />
+                        {/* Outer crosshair ticks */}
+                        <line x1="50" y1="4" x2="50" y2="10" stroke="#3b82f6" strokeWidth="2" opacity="0.7" />
+                        <line x1="50" y1="90" x2="50" y2="96" stroke="#3b82f6" strokeWidth="2" opacity="0.7" />
+                        <line x1="4" y1="50" x2="10" y2="50" stroke="#3b82f6" strokeWidth="2" opacity="0.7" />
+                        <line x1="90" y1="50" x2="96" y2="50" stroke="#3b82f6" strokeWidth="2" opacity="0.7" />
+                        {/* Filled body */}
+                        <circle cx="50" cy="50" r="32" fill="#3b82f6" opacity="0.85" />
+                        {/* Inner highlight sheen */}
+                        <circle cx="50" cy="50" r="22" fill="none" stroke="#ffffff" strokeWidth="2" opacity="0.4" />
+                        {/* Bright white core dot */}
+                        <circle cx="50" cy="50" r="7" fill="#ffffff" />
+                      </svg>
                     </div>
                   </button>
                 )}
@@ -709,11 +757,11 @@ export default function DividedAttentionClient() {
           {gameState === 'start' && (
             <FpsStartCard
               icon={Layers}
-              accent="emerald"
+              accent="blue"
               title="Divided Attention"
               subtitle="Dual-Task Stream • Split Focus"
               rules={[
-                { icon: Target, accent: 'emerald', title: 'Tap Moving Targets (+100 PTS)', text: 'Track and click dynamic visual targets moving across the screen' },
+                { icon: Target, accent: 'blue', title: 'Tap Moving Targets (+100 PTS)', text: 'Track and click dynamic visual targets moving across the screen' },
                 { icon: Zap, accent: 'blue', title: 'Match Target on EVEN Numbers', text: 'Simultaneously monitor the secondary number stream and tap when EVEN' },
               ]}
               stats={[
@@ -727,7 +775,7 @@ export default function DividedAttentionClient() {
 
           {/* COUNTDOWN OVERLAY */}
           {gameState === 'countdown' && (
-            <DrillCountdown value={countdownValue} subtitle="GET READY" accent="#3b82f6" />
+            <DrillCountdown value={countdownValue} subtitle="GET READY" />
           )}
 
           {/* END SCREEN OVERLAY */}

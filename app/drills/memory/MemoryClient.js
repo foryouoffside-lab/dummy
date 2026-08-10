@@ -4,9 +4,12 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { ArrowLeft, Clock, Play, Brain, Target, Star, Home, ChevronRight, Cpu, Sparkles } from "lucide-react";
 import { DRILLS } from "@/lib/drillsRegistry";
+import { getDifficultyRank } from "@/lib/scoringEngine";
 import SiteFooter from "@/components/SiteFooter";
 import Reveal from "@/components/Reveal";
 import StickyMobileCta from "@/components/StickyMobileCta";
+import DrillLoading from "@/components/DrillLoading";
+import ResetDrillButton from "@/components/drill/ResetDrillButton";
 
 const memDrills = DRILLS.filter(d => d.category === 'memory');
 
@@ -19,7 +22,7 @@ const memoryCategories = [
     bgColor: "bg-indigo-500/10 border-indigo-500/20 text-indigo-400",
     textColor: "text-indigo-400",
     description: "Improve your ability to hold information temporarily in conscious awareness",
-    drills: memDrills.filter(d => ['digit-span', 'word-recall', 'color-sequence'].includes(d.folderName))
+    drills: memDrills.filter(d => ['digit-span', 'word-recall', 'color-sequence'].includes(d.folderName)).sort((a, b) => getDifficultyRank(a.difficulty) - getDifficultyRank(b.difficulty))
   },
   {
     name: "Working Memory",
@@ -29,7 +32,7 @@ const memoryCategories = [
     bgColor: "bg-indigo-500/10 border-indigo-500/20 text-indigo-400",
     textColor: "text-indigo-400",
     description: "Enhance your ability to manipulate and process information mentally",
-    drills: memDrills.filter(d => ['n-back'].includes(d.folderName))
+    drills: memDrills.filter(d => ['n-back'].includes(d.folderName)).sort((a, b) => getDifficultyRank(a.difficulty) - getDifficultyRank(b.difficulty))
   },
   {
     name: "Spatial Memory",
@@ -39,7 +42,7 @@ const memoryCategories = [
     bgColor: "bg-indigo-500/10 border-indigo-500/20 text-indigo-400",
     textColor: "text-indigo-400",
     description: "Train your ability to remember positions, paths, and spatial layouts",
-    drills: memDrills.filter(d => ['grid-memorization', 'path-tracing', 'object-location'].includes(d.folderName))
+    drills: memDrills.filter(d => ['grid-memorization', 'path-tracing', 'object-location'].includes(d.folderName)).sort((a, b) => getDifficultyRank(a.difficulty) - getDifficultyRank(b.difficulty))
   }
 ];
 
@@ -156,16 +159,7 @@ export default function MemoryClient() {
   const totalDrills = memoryCategories.reduce((acc, cat) => acc + cat.drills.length, 0);
 
   if (!isClient) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-canvas">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-indigo-400 font-mono tracking-widest uppercase animate-pulse">
-            Initializing Memory Matrix...
-          </p>
-        </div>
-      </div>
-    );
+    return <DrillLoading />;
   }
 
   return (
@@ -331,6 +325,11 @@ export default function MemoryClient() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {categoryDrills.map((drill, index) => {
                   const bestLevel = drillLevels[drill.folderName];
+                  const storageKeys = [
+                    `skilldrills_memory_${drill.folderName.replace(/-/g, '_')}_v4`,
+                    `skilldrills_memory_${drill.folderName.replace(/-/g, '_')}_v3`,
+                    `skilldrills_${drill.folderName.replace(/-/g, '_')}`,
+                  ];
                   return (
                   <Link
                     key={index}
@@ -361,6 +360,15 @@ export default function MemoryClient() {
                           <Brain className="w-5 h-5" />
                         </div>
                         <div className="flex items-center gap-1.5">
+                          <ResetDrillButton
+                            storageKeys={storageKeys}
+                            drillName={drill.name}
+                            onReset={() => setDrillLevels((prev) => {
+                              const next = { ...prev };
+                              delete next[drill.folderName];
+                              return next;
+                            })}
+                          />
                           {bestLevel && (
                             <div className="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold tracking-wide border border-indigo-500/20 bg-indigo-500/10 text-indigo-400">
                               Lv. {bestLevel}

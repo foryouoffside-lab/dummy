@@ -6,12 +6,14 @@ import Link from 'next/link';
 import {
   Volume2, VolumeX,
   Play, RefreshCw, Target,
-  Share2, ArrowLeft, RotateCw, Eye, Users, TrendingUp, Zap, Brain, Crosshair, Heart, Trophy
+  Share2, ArrowLeft, RotateCw, Eye, Users, TrendingUp, Zap, ZapOff, Brain, Crosshair, Heart, Trophy
 } from 'lucide-react';
 
 import generateShareCard, { shareScoreCard } from '../../../../../../components/ShareScoreCard';
 import { getPlayerName } from '../../../../../../lib/leaderboard';
 import { drillAudio } from '../../../../../../lib/drillAudio';
+import { drillFlash } from '../../../../../../lib/drillFlash';
+import { drillTimeout } from '../../../../../../lib/drillTimeout';
 import { getFpsScoreGrade } from '../../../../../../lib/scoringEngine';
 import { MAX_LEVEL } from '../../../../../../lib/drillDifficulty';
 import { getCanvasDpr } from '../../../../../../lib/canvasFx';
@@ -166,6 +168,7 @@ export default function ChromaSyncClient() {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [flashEnabled, setFlashEnabled] = useState(true);
   const [openAccordion, setOpenAccordion] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
   const [isPortrait, setIsPortrait] = useState(false);
@@ -272,15 +275,13 @@ export default function ChromaSyncClient() {
   // Storage loading & sound init
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      setSoundEnabled(drillAudio.isEnabled());
+      setFlashEnabled(drillFlash.isEnabled());
       const saved = getSavedData();
       setBestScore(saved.bestScore || 0);
       setBestLevel(saved.bestLevel || 1);
     }
   }, []);
-
-  useEffect(() => {
-    drillAudio?.setEnabled?.(soundEnabled);
-  }, [soundEnabled]);
 
   // Fullscreen change listener
   useEffect(() => {
@@ -409,7 +410,7 @@ export default function ChromaSyncClient() {
 
           setUiScore(e.score);
           drillAudio?.playHit?.();
-        } else if (currentTypeRef.current === 'GO' && !hasRespondedRef.current) {
+        } else if (currentTypeRef.current === 'GO' && !hasRespondedRef.current && drillTimeout.isEnabled()) {
           // Missed GO signal (timeout / omission error): NO score, time, or
           // life penalty for letting a GO signal expire.
           const e = engine.current;
@@ -641,17 +642,30 @@ export default function ChromaSyncClient() {
               <span className="text-emerald-400 font-medium">Go/No-Go Pro</span>
             </div>
 
-            <button
-              onClick={() => {
-                const next = !soundEnabled;
-                setSoundEnabled(next);
-                drillAudio.setEnabled(next);
-              }}
-              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-              title={soundEnabled ? "Mute Sound" : "Unmute Sound"}
-            >
-              {soundEnabled ? <Volume2 className="w-4 h-4 text-emerald-400" /> : <VolumeX className="w-4 h-4 text-red-400" />}
-            </button>
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => {
+                  const next = !soundEnabled;
+                  setSoundEnabled(next);
+                  drillAudio.setEnabled(next);
+                }}
+                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title={soundEnabled ? "Mute Sound" : "Unmute Sound"}
+              >
+                {soundEnabled ? <Volume2 className="w-4 h-4 text-emerald-400" /> : <VolumeX className="w-4 h-4 text-red-400" />}
+              </button>
+              <button
+                onClick={() => {
+                  const next = !flashEnabled;
+                  setFlashEnabled(next);
+                  drillFlash.setEnabled(next);
+                }}
+                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title={flashEnabled ? "Disable Miss Flash" : "Enable Miss Flash"}
+              >
+                {flashEnabled ? <Zap className="w-4 h-4 text-red-400" /> : <ZapOff className="w-4 h-4 text-red-400" />}
+              </button>
+            </div>
           </div>
         </header>
       )}
@@ -743,22 +757,38 @@ export default function ChromaSyncClient() {
             </>
           )}
 
-          {/* IN-GAME HUD SOUND TOGGLE */}
+          {/* IN-GAME HUD SOUND + FLASH TOGGLES */}
           {gameState === 'playing' && (
-            <button
-              onPointerDown={(e) => e.stopPropagation()}
-              onClick={(e) => {
-                e.stopPropagation();
-                setSoundEnabled((v) => {
-                  drillAudio.setEnabled(!v);
-                  return !v;
-                });
-              }}
-              className="absolute bottom-4 right-4 z-40 p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-              title="Toggle Sound"
-            >
-              {soundEnabled ? <Volume2 className="w-4 h-4 text-emerald-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
-            </button>
+            <div className="absolute bottom-4 right-4 z-40 flex items-center gap-2">
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setFlashEnabled((v) => {
+                    drillFlash.setEnabled(!v);
+                    return !v;
+                  });
+                }}
+                className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title="Toggle Miss Flash"
+              >
+                {flashEnabled ? <Zap className="w-4 h-4 text-red-400" /> : <ZapOff className="w-4 h-4 text-slate-500" />}
+              </button>
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSoundEnabled((v) => {
+                    drillAudio.setEnabled(!v);
+                    return !v;
+                  });
+                }}
+                className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title="Toggle Sound"
+              >
+                {soundEnabled ? <Volume2 className="w-4 h-4 text-emerald-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
+              </button>
+            </div>
           )}
 
           {/* GAMEPLAY AREA */}
@@ -796,7 +826,7 @@ export default function ChromaSyncClient() {
 
           {/* COUNTDOWN OVERLAY */}
           {gameState === 'countdown' && (
-            <DrillCountdown value={countdownValue} subtitle="GET READY" accent="#10b981" />
+            <DrillCountdown value={countdownValue} subtitle="GET READY" />
           )}
 
           {/* END SCREEN */}

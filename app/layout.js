@@ -5,7 +5,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import SiteHeader from '@/components/SiteHeader';
 import { DRILLS } from '@/lib/drillsRegistry';
 
-const totalDrillsCount = DRILLS?.length || 113;
+const totalDrillsCount = DRILLS.length;
 
 const inter = Inter({
   subsets: ['latin'],

@@ -1,4 +1,5 @@
 'use client';
+import { isIdleFrameSkippable } from '@/lib/performance';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
@@ -7,13 +8,15 @@ import {
   Activity, AlertCircle, ArrowRight, ChevronRight, Crosshair,
   Eye, GraduationCap, Play, RefreshCw, Target,
   Timer, TrendingUp, Trophy, Volume2, VolumeX,
-  Zap, Users, Share2, Sliders,
+  Zap, ZapOff, Users, Share2, Sliders,
   LogOut, Award, ShieldAlert, BarChart3, Info, Lightbulb, Flame, Star
 } from 'lucide-react';
 
 import generateShareCard, { shareScoreCard } from '../../../../../components/ShareScoreCard';
 import { getPlayerName } from '../../../../../lib/leaderboard';
 import { drillAudio } from '../../../../../lib/drillAudio';
+import { drillFlash } from '../../../../../lib/drillFlash';
+import { drillTimeout } from '../../../../../lib/drillTimeout';
 import { MAX_LEVEL, getStartLevel, getNextLevel, getDifficultyProgress } from '../../../../../lib/drillDifficulty';
 import { getComboMultiplier, getFpsScoreGrade } from '../../../../../lib/scoringEngine';
 import { createBackdropCache, getCanvasDpr, drawPulseRing, drawTacticalTarget } from '../../../../../lib/canvasFx';
@@ -68,7 +71,12 @@ const FAQ_ITEMS = [
   { q: "What is a reflex test?", a: "A reflex test measures the speed and accuracy of your neuromuscular response to sudden visual stimuli, filtering out decoy targets." },
   { q: "How does target recognition improve gaming?", a: "In competitive FPS games like Valorant or CS2, you must rapidly distinguish between enemies, teammates, and utility (like flashes)." },
   { q: "Why are there red decoy balls?", a: "The red decoys test your impulse control. Pure reaction speed is useless if you shoot the wrong target." },
-  { q: "How does adaptive difficulty work?", a: "As your score increases, level rises up to Level 15. Falling velocity accelerates, radiuses shrink, and decoy probability increases." }
+  { q: "How does adaptive difficulty work?", a: "As your score increases, level rises up to Level 15. Falling velocity accelerates, radiuses shrink, and decoy probability increases." },
+  { q: "What happens when I miss or hit a decoy?", a: "Missing a green target or clicking a red decoy resets your combo multiplier back to 1.0x and triggers a red flash overlay. There are no score deductions or time penalties." },
+  { q: "How long does each session run?", a: "Each session runs for a fixed 45 seconds. The game timer counts down steadily from 45s to 0s, providing a standard, reproducible performance benchmark." },
+  { q: "What is impulse control training?", a: "Impulse control training conditions your brain to suppress an automatic physical reaction (clicking) until your visual cortex verifies the stimulus is correct (green vs red)." },
+  { q: "Is this reflex game free to play?", a: "Yes! The SkillDrills Reflex Test is entirely free, open-source, and runs purely in your web browser with zero downloads required." },
+  { q: "How long should I practice reflex training daily?", a: "For optimal cognitive adaptation and motor learning, practicing this drill for 5 to 10 minutes a day is more effective than occasional hour-long sessions." }
 ];
 
 const RELATED_DRILLS = [
@@ -86,6 +94,7 @@ export default function DropCatchClient() {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [flashEnabled, setFlashEnabled] = useState(true);
   const [pointerLocked, setPointerLocked] = useState(false);
   const [universalSens, setUniversalSens] = useState(1.0);
   const [openAccordion, setOpenAccordion] = useState(null);
@@ -130,6 +139,7 @@ export default function DropCatchClient() {
   const cmPer360 = (30 / universalSens).toFixed(1);
 
   const triggerFlash = useCallback(() => {
+    if (!drillFlash.isEnabled()) return;
     const id = Date.now() + Math.random();
     setFlashes((f) => [...f, { id }]);
     setTimeout(() => setFlashes((f) => f.filter((x) => x.id !== id)), 480);
@@ -137,6 +147,8 @@ export default function DropCatchClient() {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      setSoundEnabled(drillAudio.isEnabled());
+      setFlashEnabled(drillFlash.isEnabled());
       const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
       const isTouchCapable = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
       setIsTouchOnlyDevice(isTouchCapable && !hasFinePointer);
@@ -163,8 +175,7 @@ export default function DropCatchClient() {
     if (gameState !== 'playing') {
       try { localStorage.setItem('dropCatch_sens', universalSens.toString()); } catch (e) {}
     }
-    drillAudio.setEnabled(soundEnabled);
-  }, [universalSens, gameState, soundEnabled]);
+  }, [universalSens, gameState]);
 
   useEffect(() => {
     const handleFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
@@ -466,6 +477,10 @@ export default function DropCatchClient() {
     let lastTime = performance.now();
 
     const loop = (time) => {
+      if (isIdleFrameSkippable(gameState === 'playing', time, lastTime)) {
+        animationRef.current = requestAnimationFrame(loop);
+        return;
+      }
       const deltaTimeMs = time - lastTime;
       lastTime = time;
       const dt = Math.min(deltaTimeMs / 1000, 0.1);
@@ -501,6 +516,11 @@ export default function DropCatchClient() {
         for (let i = e.balls.length - 1; i >= 0; i--) {
           const b = e.balls[i];
           b.y += b.speed * dt;
+
+          if (!drillTimeout.isEnabled() && b.y - b.r > h) {
+            b.y = h + b.r;
+            continue;
+          }
 
           if (b.y - b.r > h) {
             if (!b.isFake) {
@@ -633,17 +653,30 @@ export default function DropCatchClient() {
               <span className="text-emerald-400 font-medium">Reflex Drop Catch</span>
             </div>
 
-            <button
-              onClick={() => {
-                const next = !soundEnabled;
-                setSoundEnabled(next);
-                drillAudio?.setEnabled?.(next);
-              }}
-              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-              title={soundEnabled ? "Mute Sound" : "Unmute Sound"}
-            >
-              {soundEnabled ? <Volume2 className="w-4 h-4 text-emerald-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
-            </button>
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => {
+                  const next = !soundEnabled;
+                  setSoundEnabled(next);
+                  drillAudio?.setEnabled?.(next);
+                }}
+                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title={soundEnabled ? "Mute Sound" : "Unmute Sound"}
+              >
+                {soundEnabled ? <Volume2 className="w-4 h-4 text-emerald-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
+              </button>
+              <button
+                onClick={() => {
+                  const next = !flashEnabled;
+                  setFlashEnabled(next);
+                  drillFlash?.setEnabled?.(next);
+                }}
+                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title={flashEnabled ? "Disable Miss Flash" : "Enable Miss Flash"}
+              >
+                {flashEnabled ? <Zap className="w-4 h-4 text-red-400" /> : <ZapOff className="w-4 h-4 text-red-400" />}
+              </button>
+            </div>
           </div>
         </header>
       )}
@@ -713,22 +746,38 @@ export default function DropCatchClient() {
             </>
           )}
 
-          {/* IN-GAME HUD SOUND TOGGLE */}
+          {/* IN-GAME HUD SOUND + FLASH TOGGLES */}
           {(gameState === 'playing' || gameState === 'countdown') && (
-            <button
-              onPointerDown={(e) => e.stopPropagation()}
-              onClick={(e) => {
-                e.stopPropagation();
-                setSoundEnabled((v) => {
-                  drillAudio.setEnabled(!v);
-                  return !v;
-                });
-              }}
-              className="absolute bottom-4 right-4 z-40 p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-              title="Toggle Sound"
-            >
-              {soundEnabled ? <Volume2 className="w-4 h-4 text-emerald-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
-            </button>
+            <div className="absolute bottom-4 right-4 z-40 flex items-center gap-2">
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setFlashEnabled((v) => {
+                    drillFlash.setEnabled(!v);
+                    return !v;
+                  });
+                }}
+                className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title="Toggle Miss Flash"
+              >
+                {flashEnabled ? <Zap className="w-4 h-4 text-red-400" /> : <ZapOff className="w-4 h-4 text-slate-500" />}
+              </button>
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSoundEnabled((v) => {
+                    drillAudio.setEnabled(!v);
+                    return !v;
+                  });
+                }}
+                className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title="Toggle Sound"
+              >
+                {soundEnabled ? <Volume2 className="w-4 h-4 text-emerald-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
+              </button>
+            </div>
           )}
 
           <canvas 
@@ -760,7 +809,7 @@ export default function DropCatchClient() {
 
           {/* COUNTDOWN OVERLAY */}
           {gameState === 'countdown' && (
-            <DrillCountdown value={countdownValue} subtitle="GET READY" accent="#ef4444" />
+            <DrillCountdown value={countdownValue} subtitle="GET READY" />
           )}
 
           {/* END SCREEN */}

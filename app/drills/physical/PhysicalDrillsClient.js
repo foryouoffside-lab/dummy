@@ -8,9 +8,13 @@ import {
   Home, ChevronRight, Cpu, Sparkles
 } from 'lucide-react';
 import { DRILLS } from '@/lib/drillsRegistry';
+import { getDifficultyRank } from '@/lib/scoringEngine';
 import SiteFooter from '@/components/SiteFooter';
 import Reveal from '@/components/Reveal';
 import StickyMobileCta from '@/components/StickyMobileCta';
+import DrillLoading from '@/components/DrillLoading';
+import ResetDrillButton from '@/components/drill/ResetDrillButton';
+import { isIdleFrameSkippable } from '@/lib/performance';
 
 const physDrills = DRILLS.filter(d => d.category === 'physical');
 
@@ -70,6 +74,7 @@ export default function PhysicalDrillsClient() {
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     let animationFrameId;
+    let lastTime = performance.now();
 
     const resize = () => {
       canvas.width = canvas.offsetWidth;
@@ -90,9 +95,14 @@ export default function PhysicalDrillsClient() {
       });
     }
 
-    const draw = () => {
+    const draw = (time) => {
+      if (isIdleFrameSkippable(false, time, lastTime)) {
+        animationFrameId = requestAnimationFrame(draw);
+        return;
+      }
+      lastTime = time;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
+
       streams.forEach((s) => {
         ctx.strokeStyle = `rgba(251, 113, 133, ${s.opacity})`;
         ctx.lineWidth = 1.5;
@@ -112,7 +122,7 @@ export default function PhysicalDrillsClient() {
 
       animationFrameId = requestAnimationFrame(draw);
     };
-    draw();
+    animationFrameId = requestAnimationFrame(draw);
 
     return () => {
       cancelAnimationFrame(animationFrameId);
@@ -129,7 +139,7 @@ export default function PhysicalDrillsClient() {
       bgColor: 'bg-rose-500/10 border-rose-500/20 text-rose-400',
       textColor: 'text-rose-400',
       description: 'Improve stability, equilibrium, and motor control',
-      drills: physDrills.filter(d => ['stability-challenge'].includes(d.folderName))
+      drills: physDrills.filter(d => ['stability-challenge'].includes(d.folderName)).sort((a, b) => getDifficultyRank(a.difficulty) - getDifficultyRank(b.difficulty))
     },
     { 
       name: 'Coordination', 
@@ -139,7 +149,7 @@ export default function PhysicalDrillsClient() {
       bgColor: 'bg-rose-500/10 border-rose-500/20 text-rose-400',
       textColor: 'text-rose-400',
       description: 'Improve bilateral coordination and motor patterning',
-      drills: physDrills.filter(d => ['complex-pattern', 'cross-body-movement', 'dynamic-grid-evasion'].includes(d.folderName))
+      drills: physDrills.filter(d => ['complex-pattern', 'cross-body-movement', 'dynamic-grid-evasion'].includes(d.folderName)).sort((a, b) => getDifficultyRank(a.difficulty) - getDifficultyRank(b.difficulty))
     },
     { 
       name: 'Fitness', 
@@ -149,7 +159,7 @@ export default function PhysicalDrillsClient() {
       bgColor: 'bg-orange-500/10 border-orange-500/20 text-orange-400',
       textColor: 'text-orange-400',
       description: 'Build agility, speed, and precision movement skills',
-      drills: physDrills.filter(d => ['agility-ladder', 'jump-sequence', 'speed-drill'].includes(d.folderName))
+      drills: physDrills.filter(d => ['agility-ladder', 'jump-sequence', 'speed-drill'].includes(d.folderName)).sort((a, b) => getDifficultyRank(a.difficulty) - getDifficultyRank(b.difficulty))
     },
     { 
       name: 'Reflex Training', 
@@ -159,7 +169,7 @@ export default function PhysicalDrillsClient() {
       bgColor: 'bg-rose-500/10 border-rose-500/20 text-rose-400',
       textColor: 'text-rose-400',
       description: 'Enhance reaction speed, evasion, and impulse control',
-      drills: physDrills.filter(d => ['drop-catch', 'quick-dodge', 'reaction-chain', 'peripheral-threat-sweeper'].includes(d.folderName))
+      drills: physDrills.filter(d => ['drop-catch', 'quick-dodge', 'reaction-chain', 'peripheral-threat-sweeper'].includes(d.folderName)).sort((a, b) => getDifficultyRank(a.difficulty) - getDifficultyRank(b.difficulty))
     }
   ];
 
@@ -176,14 +186,7 @@ export default function PhysicalDrillsClient() {
   const totalDrills = categories.reduce((acc, cat) => acc + cat.drills.length, 0);
 
   if (!isClient) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-canvas">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-rose-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-rose-400 font-mono tracking-widest uppercase animate-pulse">Initializing Kinetic Core...</p>
-        </div>
-      </div>
-    );
+    return <DrillLoading />;
   }
 
   return (
@@ -343,6 +346,12 @@ export default function PhysicalDrillsClient() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {categoryDrills.map((drill, index) => {
                   const bestLevel = drillLevels[drill.folderName];
+                  const resetOverride = FOLDER_TO_STORAGE_KEY[drill.folderName];
+                  const storageKeys = resetOverride ? [resetOverride] : [
+                    `skilldrills_physical_${drill.folderName.replace(/-/g, '_')}_v3`,
+                    `skilldrills_physical_${drill.folderName.replace(/-/g, '_')}_v2`,
+                    `skilldrills_${drill.folderName.replace(/-/g, '_')}`,
+                  ];
                   return (
                     <Link
                       key={index}
@@ -373,6 +382,15 @@ export default function PhysicalDrillsClient() {
                             <Icon className="w-5 h-5" />
                           </div>
                           <div className="flex items-center gap-1.5">
+                            <ResetDrillButton
+                              storageKeys={storageKeys}
+                              drillName={drill.name}
+                              onReset={() => setDrillLevels((prev) => {
+                                const next = { ...prev };
+                                delete next[drill.folderName];
+                                return next;
+                              })}
+                            />
                             {bestLevel && (
                               <div className="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold tracking-wide border border-rose-500/20 bg-rose-500/10 text-rose-400">
                                 Lv. {bestLevel}

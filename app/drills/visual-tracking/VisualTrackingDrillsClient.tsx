@@ -17,6 +17,7 @@ import { DRILLS } from '@/lib/drillsRegistry';
 import SiteFooter from '@/components/SiteFooter';
 import Reveal from '@/components/Reveal';
 import StickyMobileCta from '@/components/StickyMobileCta';
+import DrillLoading from '@/components/DrillLoading';
 
 function handleCardMouseMove(e: MouseEvent<HTMLAnchorElement>) {
   const rect = e.currentTarget.getBoundingClientRect();
@@ -107,14 +108,7 @@ export default function VisualTrackingDrillsClient() {
   };
 
   if (!isClient) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-canvas">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-cyan-400 font-mono tracking-widest uppercase animate-pulse">Initializing Pursuit Engine...</p>
-        </div>
-      </div>
-    );
+    return <DrillLoading />;
   }
 
   return (

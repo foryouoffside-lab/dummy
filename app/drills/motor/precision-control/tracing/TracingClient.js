@@ -1,16 +1,18 @@
 'use client';
+import { isIdleFrameSkippable } from '@/lib/performance';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 
 import {
   Activity, AlertCircle, ArrowRight, BarChart3, Flame, RefreshCw, Target,
-  Timer, TrendingUp, Trophy, Zap, Users, Share2, LogOut, Volume2, VolumeX
+  Timer, TrendingUp, Trophy, Zap, ZapOff, Users, Share2, LogOut, Volume2, VolumeX
 } from 'lucide-react';
 
 import generateShareCard, { shareScoreCard } from '@/components/ShareScoreCard';
 import { getPlayerName } from '@/lib/leaderboard';
 import { drillAudio } from '@/lib/drillAudio';
+import { drillFlash } from '@/lib/drillFlash';
 import useUnexpectedExitGuard from '@/lib/useUnexpectedExitGuard';
 import DrillFooter from '@/components/drill/DrillFooter';
 import DrillCountdown from '@/components/drill/DrillCountdown';
@@ -21,12 +23,30 @@ import FpsStartCard from '@/components/drill/FpsStartCard';
 // CORE DRILL LOGIC VARIABLES
 // ============================================================
 const DRILL_DURATION = 45;
-const tolerance = 20;
-const baseSpeed = 3.6;
+const tolerance = 22;
+const baseSpeed = 2.2;
 
-function getY(x, cvsHeight, offset) {
-  const xPos = (x + offset) * 0.0035;
-  return (cvsHeight / 2) + Math.sin(xPos * 4.5) * 120 + Math.sin(xPos * 9.0) * 35;
+/**
+ * Calculates smooth progressive wave Y position for a given screen X coordinate.
+ * Wavelength remains constant across screen width so the curve never collapses or clusters over time.
+ * Frequency, speed, and amplitude scale smoothly as session time progresses.
+ */
+function getWaveY(xOnScreen, cvsWidth, cvsHeight, scrollOffset, progress = 0) {
+  const worldX = xOnScreen + scrollOffset;
+  
+  // Wavelength: 520px main wave cycle for a smooth, wide tracking path across the canvas
+  const mainFreq = (Math.PI * 2) / 520;
+  const harmonicFreq = mainFreq * 2.2;
+  
+  // Smooth progressive amplitude scaling
+  const mainAmp = 90 + progress * 35; // 90px -> 125px vertical span
+  const harmonicAmp = 8 + progress * 24; // 8px -> 32px secondary curve
+
+  const mainWave = Math.sin(worldX * mainFreq) * mainAmp;
+  const harmonicWave = Math.sin(worldX * harmonicFreq + 0.8) * harmonicAmp;
+
+  const centerY = cvsHeight / 2;
+  return centerY + mainWave + harmonicWave;
 }
 
 function getGradeForFlow(peakFlow, totalScore) {
@@ -51,6 +71,7 @@ export default function FineMotorClient() {
   const [openAccordion, setOpenAccordion] = useState(null);
   const [countdownValue, setCountdownValue] = useState(3);
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [flashEnabled, setFlashEnabled] = useState(true);
 
   // === Gameplay State ===
   const [score, setScore] = useState(0);
@@ -59,6 +80,7 @@ export default function FineMotorClient() {
   const [isNewBest, setIsNewBest] = useState(false);
   const [feedback, setFeedback] = useState('');
   const [feedbackType, setFeedbackType] = useState('success');
+  const [flashes, setFlashes] = useState([]);
 
   // Real-time HUD State
   const [flowState, setFlowState] = useState(100);
@@ -107,14 +129,15 @@ export default function FineMotorClient() {
       const savedBest = localStorage.getItem('waveTracing_bestScore');
       if (savedBest) setBestScore(parseInt(savedBest, 10));
     } catch {}
+    setSoundEnabled(drillAudio.isEnabled());
+    setFlashEnabled(drillFlash.isEnabled());
   }, []);
 
   useEffect(() => {
     if (gameState !== 'playing') {
       try { localStorage.setItem('waveTracing_sens', universalSens.toString()); } catch {}
     }
-    drillAudio.setEnabled(soundEnabled);
-  }, [universalSens, gameState, soundEnabled]);
+  }, [universalSens, gameState]);
 
   const showFeedback = useCallback((msg, type = 'success') => {
     setFeedback(msg);
@@ -123,6 +146,13 @@ export default function FineMotorClient() {
     feedbackTimerRef.current = setTimeout(() => {
       setFeedback('');
     }, 1200);
+  }, []);
+
+  const triggerFlash = useCallback(() => {
+    if (!drillFlash.isEnabled()) return;
+    const id = Date.now() + Math.random();
+    setFlashes((f) => [...f, { id }]);
+    setTimeout(() => setFlashes((f) => f.filter((x) => x.id !== id)), 480);
   }, []);
 
   // === Core Game Management ===
@@ -223,7 +253,7 @@ export default function FineMotorClient() {
 
       const pts = [];
       for (let i = 0; i <= width; i++) {
-        pts.push(getY(i, height, offsetRef.current));
+        pts.push(getWaveY(i, width, height, offsetRef.current, 0));
       }
       pointsRef.current = pts;
     }
@@ -319,7 +349,7 @@ export default function FineMotorClient() {
           if (pointsRef.current.length === 0) {
             const pts = [];
             for (let i = 0; i <= width; i++) {
-              pts.push(getY(i, height, offsetRef.current));
+              pts.push(getWaveY(i, width, height, offsetRef.current, 0));
             }
             pointsRef.current = pts;
           }
@@ -365,6 +395,7 @@ export default function FineMotorClient() {
         } else {
           if (!isOffPathRef.current) {
             showFeedback("OFF PATH!", "warning");
+            triggerFlash();
           }
           isOffPathRef.current = true;
           streakRef.current = 0;
@@ -379,17 +410,25 @@ export default function FineMotorClient() {
         setScore(scoreRef.current);
       }
 
-      // Dynamic speed scaling: smooth increase from 3.6 to 7.2 as time progresses
+      // Dynamic speed & progressive wave scaling: smooth increase from 2.2 to 3.8 as time progresses
       const progress = Math.min(1, globalTimeRef.current / DRILL_DURATION);
-      currentSpeedRef.current = baseSpeed + progress * 3.6;
+      currentSpeedRef.current = baseSpeed + progress * 1.6;
 
       offsetRef.current += currentSpeedRef.current;
       globalTimeRef.current += dt;
-      points.shift();
-      points.push(getY(cvs.width + offsetRef.current, cvs.height, offsetRef.current));
+
+      const pts = [];
+      for (let i = 0; i <= cvs.width; i++) {
+        pts.push(getWaveY(i, cvs.width, cvs.height, offsetRef.current, progress));
+      }
+      pointsRef.current = pts;
     };
 
     const loop = (time) => {
+      if (isIdleFrameSkippable(gameState === 'playing', time, lastTime)) {
+        animationRef.current = requestAnimationFrame(loop);
+        return;
+      }
       const dt = Math.min(0.033, (time - lastTime) / 1000); 
       lastTime = time;
       
@@ -460,7 +499,7 @@ export default function FineMotorClient() {
       cancelAnimationFrame(animationRef.current);
       resizeObserver.disconnect();
     };
-  }, [gameState, pointerLocked, showFeedback]);
+  }, [gameState, pointerLocked, showFeedback, triggerFlash]);
 
   return (
     <div className="min-h-screen bg-[#050508] text-white flex flex-col font-sans select-none">
@@ -476,17 +515,30 @@ export default function FineMotorClient() {
               <span className="text-rose-400 font-medium">Wave Tracing</span>
             </div>
 
-            <button
-              onClick={() => {
-                const next = !soundEnabled;
-                setSoundEnabled(next);
-                drillAudio?.setEnabled?.(next);
-              }}
-              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-              title={soundEnabled ? "Mute Sound" : "Unmute Sound"}
-            >
-              {soundEnabled ? <Volume2 className="w-4 h-4 text-rose-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
-            </button>
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => {
+                  const next = !soundEnabled;
+                  setSoundEnabled(next);
+                  drillAudio?.setEnabled?.(next);
+                }}
+                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title={soundEnabled ? "Mute Sound" : "Unmute Sound"}
+              >
+                {soundEnabled ? <Volume2 className="w-4 h-4 text-rose-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
+              </button>
+              <button
+                onClick={() => {
+                  const next = !flashEnabled;
+                  setFlashEnabled(next);
+                  drillFlash?.setEnabled?.(next);
+                }}
+                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title={flashEnabled ? "Disable Miss Flash" : "Enable Miss Flash"}
+              >
+                {flashEnabled ? <Zap className="w-4 h-4 text-red-400" /> : <ZapOff className="w-4 h-4 text-red-400" />}
+              </button>
+            </div>
           </div>
         </header>
       )}
@@ -545,6 +597,11 @@ export default function FineMotorClient() {
               : 'w-full rounded-2xl bg-[#080811] aspect-video min-h-[460px] sm:min-h-[500px] max-h-[88vh] relative overflow-hidden flex flex-col'
           }`}
         >
+          {/* DOM Flash Overlay */}
+          {flashes.map((f) => (
+            <div key={f.id} className="fx-flash fx-flash-red" />
+          ))}
+
           {/* IN-BOX OVERLAY HUD: Score on Left, Time on Right */}
           {(gameState === 'playing' || gameState === 'countdown') && (
             <>
@@ -559,22 +616,38 @@ export default function FineMotorClient() {
             </>
           )}
 
-          {/* IN-GAME HUD SOUND TOGGLE */}
+          {/* IN-GAME HUD SOUND + FLASH TOGGLES */}
           {(gameState === 'playing' || gameState === 'countdown') && (
-            <button
-              onPointerDown={(e) => e.stopPropagation()}
-              onClick={(e) => {
-                e.stopPropagation();
-                setSoundEnabled((v) => {
-                  drillAudio.setEnabled(!v);
-                  return !v;
-                });
-              }}
-              className="absolute bottom-4 right-4 z-40 p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-              title="Toggle Sound"
-            >
-              {soundEnabled ? <Volume2 className="w-4 h-4 text-rose-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
-            </button>
+            <div className="absolute bottom-4 right-4 z-40 flex items-center gap-2">
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setFlashEnabled((v) => {
+                    drillFlash.setEnabled(!v);
+                    return !v;
+                  });
+                }}
+                className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title="Toggle Miss Flash"
+              >
+                {flashEnabled ? <Zap className="w-4 h-4 text-red-400" /> : <ZapOff className="w-4 h-4 text-slate-500" />}
+              </button>
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSoundEnabled((v) => {
+                    drillAudio.setEnabled(!v);
+                    return !v;
+                  });
+                }}
+                className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title="Toggle Sound"
+              >
+                {soundEnabled ? <Volume2 className="w-4 h-4 text-rose-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
+              </button>
+            </div>
           )}
 
           {/* Paused Overlay */}
@@ -605,7 +678,7 @@ export default function FineMotorClient() {
           {gameState === 'start' && (
             <FpsStartCard
               icon={Activity}
-              accent="redOrange"
+              accent="red"
               title="Wave Tracing Trainer"
               subtitle="Raw Input Continuous Tracking • 45s Timer"
               rules={[
@@ -625,7 +698,7 @@ export default function FineMotorClient() {
 
           {/* COUNTDOWN OVERLAY */}
           {gameState === 'countdown' && (
-            <DrillCountdown value={countdownValue} subtitle="GET READY" accent="#f43f5e" />
+            <DrillCountdown value={countdownValue} subtitle="GET READY" />
           )}
 
           {/* END SCREEN */}

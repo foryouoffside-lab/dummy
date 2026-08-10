@@ -1,4 +1,5 @@
 'use client';
+import { isIdleFrameSkippable } from '@/lib/performance';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
@@ -7,14 +8,16 @@ import {
   Activity, AlertCircle, ArrowRight, Brain, ChevronRight, Crosshair,
   Eye, Flame, GraduationCap, RefreshCw, Target,
   Timer, TrendingUp, Trophy, Volume2, VolumeX,
-  Zap, Users, Share2, LogOut, Award, ShieldAlert
+  Zap, ZapOff, Users, Share2, LogOut, Award, ShieldAlert
 } from 'lucide-react';
 
 import generateShareCard, { shareScoreCard } from '../../../../../components/ShareScoreCard';
 import { getPlayerName } from '../../../../../lib/leaderboard';
 import { drillAudio } from '../../../../../lib/drillAudio';
+import { drillFlash } from '../../../../../lib/drillFlash';
+import { drillTimeout } from '../../../../../lib/drillTimeout';
 import { getFpsScoreGrade } from '../../../../../lib/scoringEngine';
-import { createBackdropCache, getCanvasDpr } from '../../../../../lib/canvasFx';
+import { createBackdropCache, getCanvasDpr, drawTacticalTarget } from '../../../../../lib/canvasFx';
 import useUnexpectedExitGuard from '../../../../../lib/useUnexpectedExitGuard';
 import DrillFooter from '../../../../../components/drill/DrillFooter';
 import DrillCountdown from '../../../../../components/drill/DrillCountdown';
@@ -60,7 +63,10 @@ const FAQ_ITEMS = [
   { q: "What skills does this reflex drill improve?", a: "It trains kinetic brake control, hand-eye coordination, motor inhibition (stopping on a dime), and prevents over-flicking or spastic aiming in high-speed gaming." },
   { q: "How long does each round last?", a: "Each round lasts 45 seconds focused duration." },
   { q: "Why do targets change colors?", a: "As you level up, node velocities accelerate from 600px/s up to 1800px/s. Node colors shift from Green -> Orange -> Red to visually warn you of higher speeds." },
-  { q: "How does the combo multiplier work?", a: "Chaining successful arrests increases your combo multiplier up to 3.0x. Maintaining high combos is the key to scaling score quickly." }
+  { q: "How does the combo multiplier work?", a: "Chaining successful arrests increases your combo multiplier up to 3.0x. Maintaining high combos is the key to scaling score quickly." },
+  { q: "Does this game help with Valorant or CS2 aim?", a: "Yes, it directly trains snap deceleration. In tactical shooters, you must stop moving your mouse and character to achieve perfect first-shot accuracy. This drill builds that muscle memory." },
+  { q: "Do I need to sign up for this mouse precision test?", a: "No registration required. This free mouse precision and reflex game works instantly in your browser — no downloads needed." },
+  { q: "Is this reflex game free to play?", a: "Yes, the Reaction Chain drill on SkillDrills is 100% free, ad-free, and runs entirely in your web browser." }
 ];
 
 const RELATED_DRILLS = [
@@ -79,6 +85,7 @@ export default function ReactionChainClient() {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [flashEnabled, setFlashEnabled] = useState(true);
   const [pointerLocked, setPointerLocked] = useState(false);
   const [universalSens, setUniversalSens] = useState(1.0);
   const [openAccordion, setOpenAccordion] = useState(null);
@@ -138,6 +145,7 @@ export default function ReactionChainClient() {
   const cmPer360 = (30 / universalSens).toFixed(1);
 
   const triggerFlash = useCallback(() => {
+    if (!drillFlash.isEnabled()) return;
     const id = Date.now() + Math.random();
     setFlashes((f) => [...f, { id }]);
     setTimeout(() => setFlashes((f) => f.filter((x) => x.id !== id)), 480);
@@ -146,6 +154,8 @@ export default function ReactionChainClient() {
   // Touch Device Detection & Initial Storage Loading
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      setSoundEnabled(drillAudio.isEnabled());
+      setFlashEnabled(drillFlash.isEnabled());
       const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
       const isTouchCapable = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
       setIsTouchOnlyDevice(isTouchCapable && !hasFinePointer);
@@ -173,8 +183,7 @@ export default function ReactionChainClient() {
     if (gameState !== 'playing') {
       try { localStorage.setItem('reactionChain_sens_opt', universalSens.toString()); } catch (e) {}
     }
-    drillAudio.setEnabled(soundEnabled);
-  }, [universalSens, gameState, soundEnabled]);
+  }, [universalSens, gameState]);
 
   // Fullscreen change listener
   useEffect(() => {
@@ -511,6 +520,10 @@ export default function ReactionChainClient() {
     let lastTime = performance.now();
 
     const loop = (time) => {
+      if (isIdleFrameSkippable(gameState === 'playing', time, lastTime)) {
+        animationRef.current = requestAnimationFrame(loop);
+        return;
+      }
       const deltaTimeMs = time - lastTime;
       lastTime = time;
       const dt = Math.min(deltaTimeMs / 1000, 0.033);
@@ -569,7 +582,15 @@ export default function ReactionChainClient() {
           }
 
           const padding = 150;
-          if (node.x < -padding || node.x > w + padding || node.y < -padding || node.y > h + padding) {
+          const outOfBounds = node.x < -padding || node.x > w + padding || node.y < -padding || node.y > h + padding;
+          if (outOfBounds && !drillTimeout.isEnabled()) {
+            node.x = Math.max(-padding, Math.min(w + padding, node.x));
+            node.y = Math.max(-padding, Math.min(h + padding, node.y));
+            node.vx *= -1;
+            node.vy *= -1;
+            continue;
+          }
+          if (outOfBounds) {
             applyPenalty(i);
             break;
           }
@@ -594,24 +615,19 @@ export default function ReactionChainClient() {
         ctx.fillRect(0, 0, w, h);
       }
 
-      // TARGET NODES DRAWING (WITHOUT GLOW)
+      // TARGET NODES DRAWING
       const currentVelocity = e.baseSpeed;
       e.nodes.forEach((node) => {
         const speedIntensity = Math.min(1, (currentVelocity - 600) / 1000);
-
-        ctx.beginPath();
-        ctx.arc(node.x, node.y, node.r, 0, Math.PI * 2);
-
+        let nodeColor = '#10b981';
         if (speedIntensity > 0.5) {
           const g = Math.floor(255 * (1 - speedIntensity));
-          ctx.fillStyle = `rgb(255, ${g}, 0)`;
-          ctx.strokeStyle = `rgb(255, ${g}, 0)`;
-        } else {
-          ctx.fillStyle = '#10b981';
-          ctx.strokeStyle = '#10b981';
+          nodeColor = `rgb(255, ${g}, 0)`;
+        } else if (e.combo >= 10) {
+          nodeColor = '#38bdf8';
         }
 
-        ctx.fill();
+        drawTacticalTarget(ctx, node.x, node.y, node.r, nodeColor, false);
 
         // Trailing Line
         const angle = Math.atan2(node.vy, node.vx);
@@ -619,6 +635,7 @@ export default function ReactionChainClient() {
         ctx.moveTo(node.x, node.y);
         ctx.lineTo(node.x - Math.cos(angle) * 20, node.y - Math.sin(angle) * 20);
         ctx.lineWidth = 3;
+        ctx.strokeStyle = nodeColor;
         ctx.stroke();
 
         // Outer Radar Ring
@@ -729,17 +746,30 @@ export default function ReactionChainClient() {
               <span className="text-emerald-400 font-medium">Reaction Chain</span>
             </div>
 
-            <button
-              onClick={() => {
-                const next = !soundEnabled;
-                setSoundEnabled(next);
-                drillAudio?.setEnabled?.(next);
-              }}
-              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-              title={soundEnabled ? "Mute Sound" : "Unmute Sound"}
-            >
-              {soundEnabled ? <Volume2 className="w-4 h-4 text-emerald-400" /> : <VolumeX className="w-4 h-4 text-emerald-400" />}
-            </button>
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => {
+                  const next = !soundEnabled;
+                  setSoundEnabled(next);
+                  drillAudio?.setEnabled?.(next);
+                }}
+                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title={soundEnabled ? "Mute Sound" : "Unmute Sound"}
+              >
+                {soundEnabled ? <Volume2 className="w-4 h-4 text-emerald-400" /> : <VolumeX className="w-4 h-4 text-emerald-400" />}
+              </button>
+              <button
+                onClick={() => {
+                  const next = !flashEnabled;
+                  setFlashEnabled(next);
+                  drillFlash?.setEnabled?.(next);
+                }}
+                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title={flashEnabled ? "Disable Miss Flash" : "Enable Miss Flash"}
+              >
+                {flashEnabled ? <Zap className="w-4 h-4 text-red-400" /> : <ZapOff className="w-4 h-4 text-red-400" />}
+              </button>
+            </div>
           </div>
         </header>
       )}
@@ -810,22 +840,38 @@ export default function ReactionChainClient() {
             </>
           )}
 
-          {/* IN-GAME HUD SOUND TOGGLE */}
+          {/* IN-GAME HUD SOUND + FLASH TOGGLES */}
           {(gameState === 'playing' || gameState === 'countdown') && (
-            <button
-              onPointerDown={(e) => e.stopPropagation()}
-              onClick={(e) => {
-                e.stopPropagation();
-                setSoundEnabled((v) => {
-                  drillAudio.setEnabled(!v);
-                  return !v;
-                });
-              }}
-              className="absolute bottom-4 right-4 z-40 p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-              title="Toggle Sound"
-            >
-              {soundEnabled ? <Volume2 className="w-4 h-4 text-emerald-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
-            </button>
+            <div className="absolute bottom-4 right-4 z-40 flex items-center gap-2">
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setFlashEnabled((v) => {
+                    drillFlash.setEnabled(!v);
+                    return !v;
+                  });
+                }}
+                className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title="Toggle Miss Flash"
+              >
+                {flashEnabled ? <Zap className="w-4 h-4 text-red-400" /> : <ZapOff className="w-4 h-4 text-slate-500" />}
+              </button>
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSoundEnabled((v) => {
+                    drillAudio.setEnabled(!v);
+                    return !v;
+                  });
+                }}
+                className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title="Toggle Sound"
+              >
+                {soundEnabled ? <Volume2 className="w-4 h-4 text-emerald-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
+              </button>
+            </div>
           )}
 
           {/* PAUSE OVERLAY IF POINTER LOCK LOST DURING PLAY */}
@@ -875,7 +921,7 @@ export default function ReactionChainClient() {
 
           {/* COUNTDOWN OVERLAY */}
           {gameState === 'countdown' && (
-            <DrillCountdown value={countdownValue} subtitle="GET READY" accent="#10b981" />
+            <DrillCountdown value={countdownValue} subtitle="GET READY" />
           )}
 
           {/* END SCREEN */}

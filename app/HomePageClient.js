@@ -164,7 +164,7 @@ const audienceData = [
 export default function HomePageClient() {
   const [profile, setProfile] = useState(null);
 
-  const totalDrillsCount = DRILLS?.length || 113;
+  const totalDrillsCount = DRILLS.length;
   const totalCategoriesCount = categoryConfigs.length;
 
   useEffect(() => {

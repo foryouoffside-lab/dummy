@@ -7,9 +7,12 @@ import {
   Gamepad2, Home, ChevronRight, Cpu, Sparkles
 } from "lucide-react";
 import { DRILLS } from '@/lib/drillsRegistry';
+import { getDifficultyRank } from '@/lib/scoringEngine';
 import SiteFooter from '@/components/SiteFooter';
 import Reveal from '@/components/Reveal';
 import StickyMobileCta from '@/components/StickyMobileCta';
+import DrillLoading from '@/components/DrillLoading';
+import ResetDrillButton from '@/components/drill/ResetDrillButton';
 
 // Mapping: drill folderName → actual localStorage STORAGE_KEY, for drills whose
 // key doesn't match the generic `skilldrills_fps_${folderName}_v2` guess below.
@@ -28,7 +31,6 @@ const FOLDER_TO_DRILL_ID = {
   'strafe-tracking': 'strafe-tracking',
   'pro-smooth-pursuit': 'pro-smooth-pursuit',
   'vertical-air-track': 'vertical-air-track',
-  'reactive-sphere-tracking': 'reactive-sphere-tracking',
   'recoil-control': 'recoil-control',
   'target-switching-swarm': 'target-switching-swarm',
   'target-prioritization': 'target-prioritization',
@@ -52,7 +54,7 @@ const fpsCategories = [
     bgColor: "bg-red-500/10 border-red-500/20 text-red-400",
     textColor: "text-red-400",
     description: "Master flick shots, precision clicking, and cognitive prioritization",
-    drills: fpsDrills.filter(d => ['flick-shot-training', 'target-acquisition', 'micro-correction-precision', 'target-prioritization', 'target-switching-swarm'].includes(d.folderName))
+    drills: fpsDrills.filter(d => ['flick-shot-training', 'target-acquisition', 'micro-correction-precision', 'target-prioritization', 'target-switching-swarm'].includes(d.folderName)).sort((a, b) => getDifficultyRank(a.difficulty) - getDifficultyRank(b.difficulty))
   },
   {
     name: "Tracking & Switching",
@@ -62,7 +64,7 @@ const fpsCategories = [
     bgColor: "bg-red-500/10 border-red-500/20 text-red-400",
     textColor: "text-red-400",
     description: "Smooth aim, reactive tracking, and multi-target flick-switching",
-    drills: fpsDrills.filter(d => ['strafe-tracking', 'reactive-sphere-tracking', 'pro-smooth-pursuit', 'vertical-air-track', 'anti-strafe-jitter-duel', 'anti-zigzag-movement-trainer'].includes(d.folderName))
+    drills: fpsDrills.filter(d => ['strafe-tracking', 'pro-smooth-pursuit', 'vertical-air-track', 'anti-strafe-jitter-duel', 'anti-zigzag-movement-trainer'].includes(d.folderName)).sort((a, b) => getDifficultyRank(a.difficulty) - getDifficultyRank(b.difficulty))
   },
   {
     name: "Movement & Recoil",
@@ -72,7 +74,7 @@ const fpsCategories = [
     bgColor: "bg-orange-500/10 border-orange-500/20 text-orange-400",
     textColor: "text-orange-400",
     description: "Strafing-shooting synchronization, cover peeking, and spray patterns",
-    drills: fpsDrills.filter(d => ['recoil-control', 'angle-hold-trainer'].includes(d.folderName))
+    drills: fpsDrills.filter(d => ['recoil-control', 'angle-hold-trainer'].includes(d.folderName)).sort((a, b) => getDifficultyRank(a.difficulty) - getDifficultyRank(b.difficulty))
   },
   {
     name: "Reflex & Awareness",
@@ -82,7 +84,7 @@ const fpsCategories = [
     bgColor: "bg-red-500/10 border-red-500/20 text-red-400",
     textColor: "text-red-400",
     description: "Instant reflex response, extreme-speed prediction, and peripheral vision",
-    drills: fpsDrills.filter(d => ['instant-response', '180-degree-awareness', 'flow-state'].includes(d.folderName))
+    drills: fpsDrills.filter(d => ['instant-response', '180-degree-awareness', 'flow-state'].includes(d.folderName)).sort((a, b) => getDifficultyRank(a.difficulty) - getDifficultyRank(b.difficulty))
   }
 ];
 
@@ -150,18 +152,13 @@ export default function FPSHubClient() {
     "isPartOf": { "@type": "WebSite", "name": "SkillDrills", "url": "https://skilldrills.online" },
     "about": { "@type": "Thing", "name": "FPS Gaming Aim Training" },
     "numberOfItems": totalDrills,
-    "itemListElement": fpsCategories.flatMap(cat => 
-      cat.drills.map(drill => ({
-        ...drill,
-        categoryFolder: cat.folderName
-      }))
-    ).map((drill, index) => ({
+    "itemListElement": fpsCategories.flatMap(cat => cat.drills).map((drill, index) => ({
       "@type": "ListItem",
       "position": index + 1,
       "item": {
         "@type": "WebApplication",
         "name": drill.name,
-        "url": `https://skilldrills.online/drills/${drill.categoryFolder}/${drill.folderName}`,
+        "url": `https://skilldrills.online${drill.href}`,
         "description": drill.description,
         "applicationCategory": "GameApplication",
         "operatingSystem": "Web"
@@ -170,14 +167,7 @@ export default function FPSHubClient() {
   };
 
   if (!isClient) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-canvas">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-red-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-red-400 font-mono tracking-widest uppercase animate-pulse">Initializing Combat Core...</p>
-        </div>
-      </div>
-    );
+    return <DrillLoading />;
   }
 
   return (
@@ -307,8 +297,14 @@ export default function FPSHubClient() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {category.drills.map((drill, index) => {
-                  const drillPath = `/drills/${category.folderName}/${drill.folderName}`;
+                  const drillPath = drill.href;
                   const bestLevel = drillLevels[drill.folderName];
+                  const resetOverride = FOLDER_TO_STORAGE_KEY[drill.folderName];
+                  const storageKeys = resetOverride ? [resetOverride] : [
+                    `skilldrills_fps_${drill.folderName.replace(/-/g, '_')}_v2`,
+                    `skilldrills_fps_${drill.folderName.replace(/-/g, '_')}_v1`,
+                    `skilldrills_${drill.folderName.replace(/-/g, '_')}`,
+                  ];
                   return (
                     <Link
                       key={index}
@@ -339,6 +335,15 @@ export default function FPSHubClient() {
                             <CategoryIcon className="w-5 h-5" />
                           </div>
                           <div className="flex items-center gap-1.5">
+                            <ResetDrillButton
+                              storageKeys={storageKeys}
+                              drillName={drill.name}
+                              onReset={() => setDrillLevels((prev) => {
+                                const next = { ...prev };
+                                delete next[drill.folderName];
+                                return next;
+                              })}
+                            />
                             {bestLevel && (
                               <div className="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold tracking-wide border border-blue-500/20 bg-blue-500/10 text-blue-400">
                                 Lv. {bestLevel}

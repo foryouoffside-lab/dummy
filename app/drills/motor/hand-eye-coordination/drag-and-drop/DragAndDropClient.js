@@ -1,4 +1,5 @@
 'use client';
+import { isIdleFrameSkippable } from '@/lib/performance';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
@@ -8,12 +9,14 @@ import {
   Crosshair, Eye, GraduationCap, Info, Lightbulb, 
   Play, RefreshCw, Target, Timer, TrendingUp, Trophy, 
   Volume2, VolumeX, Flame, Share2, Sliders, LogOut, Award,
-  Shield, Users, Zap, Move, PenTool, Video, Star
+  Shield, Users, Zap, ZapOff, Move, PenTool, Video, Star
 } from 'lucide-react';
 
 import generateShareCard, { shareScoreCard } from '../../../../../components/ShareScoreCard';
 import { getPlayerName } from '../../../../../lib/leaderboard';
 import { drillAudio } from '../../../../../lib/drillAudio';
+import { drillFlash } from '../../../../../lib/drillFlash';
+import { drillTimeout } from '../../../../../lib/drillTimeout';
 import { MAX_LEVEL, getStartLevel, getDifficultyProgress, getComboBonusLevel } from '../../../../../lib/drillDifficulty';
 import { getComboMultiplier, getFpsScoreGrade } from '../../../../../lib/scoringEngine';
 import { createBackdropCache, getCanvasDpr, drawPulseRing } from '../../../../../lib/canvasFx';
@@ -22,6 +25,73 @@ import DrillFooter from '../../../../../components/drill/DrillFooter';
 import DrillCountdown from '../../../../../components/drill/DrillCountdown';
 import DrillAccordion from '../../../../../components/drill/DrillAccordion';
 import FpsStartCard from '../../../../../components/drill/FpsStartCard';
+
+/**
+ * Draws a hollow blue bucket target container with empty inside space (no white lines or notches).
+ */
+function drawHollowBucketTarget(ctx, x, y, r, lifeRatio, isHighCombo) {
+  const primaryBlue = isHighCombo ? '#00f0ff' : '#38bdf8';
+  const timerColor = lifeRatio < 0.25 ? '#ef4444' : '#60a5fa';
+
+  ctx.save();
+
+  // 1. Transparent / Faint radial gradient for empty inside space
+  const insideGrad = ctx.createRadialGradient(x, y, 0, x, y, r);
+  insideGrad.addColorStop(0, 'rgba(56, 189, 248, 0.08)');
+  insideGrad.addColorStop(0.75, 'rgba(56, 189, 248, 0.02)');
+  insideGrad.addColorStop(1, 'rgba(56, 189, 248, 0.0)');
+  ctx.fillStyle = insideGrad;
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 2. Inner subtle drop-zone guide ring
+  ctx.strokeStyle = 'rgba(56, 189, 248, 0.3)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.arc(x, y, Math.max(4, r * 0.7), 0, Math.PI * 2);
+  ctx.stroke();
+
+  // 3. Main Solid Blue Bucket Rim (Circle outline with empty space inside, NO white lines)
+  ctx.strokeStyle = primaryBlue;
+  ctx.lineWidth = 3.5;
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // 4. Radial Timer Ring Arc around Bucket Rim
+  ctx.strokeStyle = timerColor;
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.arc(x, y, r + 7, -Math.PI / 2, -Math.PI / 2 + (Math.PI * 2 * lifeRatio));
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+/**
+ * Draws the small blue ball without glow or white center part.
+ */
+function drawSmallBlueBall(ctx, x, y, r, isDragging) {
+  ctx.save();
+
+  const baseBlue = isDragging ? '#00f0ff' : '#38bdf8';
+
+  // Solid clean blue ball body without glow or white center dot
+  ctx.fillStyle = baseBlue;
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Clean subtle inner border stroke for sharpness
+  ctx.strokeStyle = '#0284c7';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, Math.PI * 2);
+  ctx.stroke();
+
+  ctx.restore();
+}
 
 // ============================================================
 // TUNING CONSTANTS
@@ -112,6 +182,7 @@ export default function DragAndDropClient() {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [flashEnabled, setFlashEnabled] = useState(true);
   const [pointerLocked, setPointerLocked] = useState(false);
   const [universalSens, setUniversalSens] = useState(1.0);
   const [openAccordion, setOpenAccordion] = useState(null);
@@ -157,6 +228,7 @@ export default function DragAndDropClient() {
   const cmPer360 = (30 / universalSens).toFixed(1);
 
   const triggerFlash = useCallback(() => {
+    if (!drillFlash.isEnabled()) return;
     const id = Date.now() + Math.random();
     setFlashes((f) => [...f, { id }]);
     setTimeout(() => setFlashes((f) => f.filter((x) => x.id !== id)), 480);
@@ -210,6 +282,8 @@ export default function DragAndDropClient() {
   // Touch Device Detection & Storage Loading
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      setSoundEnabled(drillAudio.isEnabled());
+      setFlashEnabled(drillFlash.isEnabled());
       const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
       const isTouchCapable = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
       setIsTouchOnlyDevice(isTouchCapable && !hasFinePointer);
@@ -237,8 +311,7 @@ export default function DragAndDropClient() {
     if (gameState !== 'playing') {
       try { localStorage.setItem('dragAndDropPro_sens', universalSens.toString()); } catch (e) {}
     }
-    drillAudio.setEnabled(soundEnabled);
-  }, [universalSens, gameState, soundEnabled]);
+  }, [universalSens, gameState]);
 
   // Fullscreen Listener
   useEffect(() => {
@@ -520,6 +593,10 @@ export default function DragAndDropClient() {
     let lastTime = performance.now();
 
     const loop = (time) => {
+      if (isIdleFrameSkippable(gameState === 'playing', time, lastTime)) {
+        animationRef.current = requestAnimationFrame(loop);
+        return;
+      }
       const deltaTimeMs = time - lastTime;
       lastTime = time;
       const dt = Math.min(deltaTimeMs / 1000, 0.1);
@@ -559,8 +636,8 @@ export default function DragAndDropClient() {
         b.x += b.vx * dt;
         b.y += b.vy * dt;
 
-        e.lifeTimer -= dt;
-        if (e.lifeTimer <= 0) {
+        if (drillTimeout.isEnabled()) e.lifeTimer -= dt;
+        if (drillTimeout.isEnabled() && e.lifeTimer <= 0) {
           e.timeouts++;
           e.combo = 0;
           e.screenShake = 6;
@@ -592,31 +669,14 @@ export default function DragAndDropClient() {
       if (gameState === 'playing' || gameState === 'start') {
         const b = e.bucket;
         const lifeRatio = Math.max(0, e.lifeTimer / e.maxLife);
+        const isHighCombo = e.combo >= 10;
+        const targetColor = isHighCombo ? '#00f0ff' : '#38bdf8';
 
-        drawPulseRing(ctx, b.x, b.y, b.r, '#3b82f6', 1 - lifeRatio);
-
-        ctx.shadowBlur = 15;
-        ctx.shadowColor = '#3b82f6';
-        ctx.fillStyle = '#050508';
-        ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2); ctx.fill();
-        ctx.shadowBlur = 0;
-
-        ctx.strokeStyle = '#3b82f6';
-        ctx.lineWidth = 2.5;
-        ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2); ctx.stroke();
-
-        ctx.strokeStyle = '#60a5fa';
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.arc(b.x, b.y, b.r + 5, -Math.PI / 2, -Math.PI / 2 + (Math.PI * 2 * lifeRatio));
-        ctx.stroke();
+        drawPulseRing(ctx, b.x, b.y, b.r, targetColor, 1 - lifeRatio);
+        drawHollowBucketTarget(ctx, b.x, b.y, b.r, lifeRatio, isHighCombo);
 
         const ball = e.ball;
-        ctx.shadowBlur = ball.dragging ? 20 : 10;
-        ctx.shadowColor = ball.dragging ? '#60a5fa' : '#3b82f6';
-        ctx.fillStyle = ball.dragging ? '#93c5fd' : '#3b82f6';
-        ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2); ctx.fill();
-        ctx.shadowBlur = 0;
+        drawSmallBlueBall(ctx, ball.x, ball.y, ball.r, ball.dragging);
       }
 
       ctx.lineWidth = 2.0;
@@ -707,17 +767,30 @@ export default function DragAndDropClient() {
               <span className="text-blue-400 font-medium">Drag &amp; Drop Precision</span>
             </div>
 
-            <button
-              onClick={() => {
-                const next = !soundEnabled;
-                setSoundEnabled(next);
-                drillAudio?.setEnabled?.(next);
-              }}
-              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-              title={soundEnabled ? "Mute Sound" : "Unmute Sound"}
-            >
-              {soundEnabled ? <Volume2 className="w-4 h-4 text-blue-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
-            </button>
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => {
+                  const next = !soundEnabled;
+                  setSoundEnabled(next);
+                  drillAudio?.setEnabled?.(next);
+                }}
+                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title={soundEnabled ? "Mute Sound" : "Unmute Sound"}
+              >
+                {soundEnabled ? <Volume2 className="w-4 h-4 text-blue-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
+              </button>
+              <button
+                onClick={() => {
+                  const next = !flashEnabled;
+                  setFlashEnabled(next);
+                  drillFlash?.setEnabled?.(next);
+                }}
+                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title={flashEnabled ? "Disable Miss Flash" : "Enable Miss Flash"}
+              >
+                {flashEnabled ? <Zap className="w-4 h-4 text-red-400" /> : <ZapOff className="w-4 h-4 text-red-400" />}
+              </button>
+            </div>
           </div>
         </header>
       )}
@@ -788,22 +861,38 @@ export default function DragAndDropClient() {
             </>
           )}
 
-          {/* IN-GAME HUD SOUND TOGGLE */}
+          {/* IN-GAME HUD SOUND + FLASH TOGGLES */}
           {(gameState === 'playing' || gameState === 'countdown') && (
-            <button
-              onPointerDown={(e) => e.stopPropagation()}
-              onClick={(e) => {
-                e.stopPropagation();
-                setSoundEnabled((v) => {
-                  drillAudio.setEnabled(!v);
-                  return !v;
-                });
-              }}
-              className="absolute bottom-4 right-4 z-40 p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-              title="Toggle Sound"
-            >
-              {soundEnabled ? <Volume2 className="w-4 h-4 text-blue-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
-            </button>
+            <div className="absolute bottom-4 right-4 z-40 flex items-center gap-2">
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setFlashEnabled((v) => {
+                    drillFlash.setEnabled(!v);
+                    return !v;
+                  });
+                }}
+                className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title="Toggle Miss Flash"
+              >
+                {flashEnabled ? <Zap className="w-4 h-4 text-red-400" /> : <ZapOff className="w-4 h-4 text-slate-500" />}
+              </button>
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSoundEnabled((v) => {
+                    drillAudio.setEnabled(!v);
+                    return !v;
+                  });
+                }}
+                className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title="Toggle Sound"
+              >
+                {soundEnabled ? <Volume2 className="w-4 h-4 text-blue-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
+              </button>
+            </div>
           )}
 
           {/* PAUSE OVERLAY IF POINTER LOCK LOST DURING PLAY */}
@@ -833,18 +922,18 @@ export default function DragAndDropClient() {
           {gameState === 'start' && (
             <FpsStartCard
               icon={Move}
-              accent="emerald"
+              accent="blue"
               title="Drag & Drop Precision"
               subtitle="Spatial Drag & Drop Target Alignment • 15 Levels"
               rules={[
-                { icon: Target, accent: 'emerald', title: 'Drag Ball to Target (+100 PTS)', text: 'Grab and accurately drag objects to dynamic target drop zones' },
+                { icon: Target, accent: 'blue', title: 'Drag Blue Ball into Moving Bucket (+100 PTS)', text: 'Grab the blue ball and drop it cleanly inside the hollow moving blue bucket' },
                 { icon: Zap, accent: 'red', title: 'Miss / Timeout Penalty', text: 'Dropping off-target or timing out resets your combo streak' },
               ]}
               sensitivity={{ value: universalSens, onChange: setUniversalSens, cmPer360 }}
               stats={[
                 { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
-                { icon: Flame, label: 'Best Combo', value: `${bestCombo}x`, color: 'text-emerald-400', accent: 'emerald' },
-                { icon: TrendingUp, label: 'Best Level', value: `Lv. ${bestLevel}`, color: 'text-blue-400', accent: 'blue' },
+                { icon: Flame, label: 'Best Combo', value: `${bestCombo}x`, color: 'text-blue-400', accent: 'blue' },
+                { icon: TrendingUp, label: 'Best Level', value: `Lv. ${bestLevel}`, color: 'text-cyan-400', accent: 'cyan' },
               ]}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
@@ -853,7 +942,7 @@ export default function DragAndDropClient() {
 
           {/* COUNTDOWN OVERLAY */}
           {gameState === 'countdown' && (
-            <DrillCountdown value={countdownValue} subtitle="GET READY" accent="#ef4444" />
+            <DrillCountdown value={countdownValue} subtitle="GET READY" />
           )}
 
           {/* END SCREEN */}

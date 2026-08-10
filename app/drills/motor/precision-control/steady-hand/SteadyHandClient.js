@@ -1,16 +1,19 @@
 'use client';
+import { isIdleFrameSkippable } from '@/lib/performance';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 
-import { 
-  AlertCircle, ArrowRight, BarChart3, Flame, RefreshCw, Target, 
-  Timer, TrendingUp, Trophy, Zap, Share2, Users, Route, LogOut
+import {
+  AlertCircle, ArrowRight, BarChart3, Flame, RefreshCw, Target,
+  Timer, TrendingUp, Trophy, Zap, ZapOff, Share2, Users, Route, LogOut,
+  Volume2, VolumeX
 } from 'lucide-react';
 
 import generateShareCard, { shareScoreCard } from '@/components/ShareScoreCard';
 import { getPlayerName } from '@/lib/leaderboard';
 import { drillAudio } from '@/lib/drillAudio';
+import { drillFlash } from '@/lib/drillFlash';
 import useUnexpectedExitGuard from '@/lib/useUnexpectedExitGuard';
 import DrillFooter from '@/components/drill/DrillFooter';
 import DrillCountdown from '@/components/drill/DrillCountdown';
@@ -28,7 +31,9 @@ export default function SteadyHandClient() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [pointerLocked, setPointerLocked] = useState(false);
   const [flashes, setFlashes] = useState([]);
-  
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [flashEnabled, setFlashEnabled] = useState(true);
+
   // === Settings State ===
   const [universalSens, setUniversalSens] = useState(1.0);
   const [openAccordion, setOpenAccordion] = useState(null);
@@ -80,6 +85,8 @@ export default function SteadyHandClient() {
       const savedBest = localStorage.getItem('steadyHand_bestScore');
       if (savedBest) setBestScore(parseInt(savedBest, 10));
     } catch {}
+    setSoundEnabled(drillAudio.isEnabled());
+    setFlashEnabled(drillFlash.isEnabled());
   }, []);
 
   useEffect(() => {
@@ -89,6 +96,7 @@ export default function SteadyHandClient() {
   }, [universalSens, gameState]);
 
   const triggerRedFlash = useCallback(() => {
+    if (!drillFlash.isEnabled()) return;
     const id = Date.now() + Math.random();
     setFlashes((prev) => [...prev, { id }]);
     setTimeout(() => {
@@ -303,7 +311,13 @@ export default function SteadyHandClient() {
     });
     resizeObserver.observe(container);
 
-    const loop = () => {
+    let lastTime = performance.now();
+    const loop = (time) => {
+      if (isIdleFrameSkippable(gameState === 'playing', time, lastTime)) {
+        animationRef.current = requestAnimationFrame(loop);
+        return;
+      }
+      lastTime = time;
       const e = engine.current;
 
       if (gameState === 'playing' && pointerLocked && e.path.length > 0) {
@@ -443,6 +457,31 @@ export default function SteadyHandClient() {
               <span>/</span>
               <span className="text-cyan-400 font-medium">Steady Hand Circuit</span>
             </div>
+
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => {
+                  const next = !soundEnabled;
+                  setSoundEnabled(next);
+                  drillAudio?.setEnabled?.(next);
+                }}
+                className="p-2 rounded-lg bg-white/[0.04] border border-white/10 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title={soundEnabled ? "Mute Sound" : "Unmute Sound"}
+              >
+                {soundEnabled ? <Volume2 className="w-4 h-4 text-cyan-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
+              </button>
+              <button
+                onClick={() => {
+                  const next = !flashEnabled;
+                  setFlashEnabled(next);
+                  drillFlash?.setEnabled?.(next);
+                }}
+                className="p-2 rounded-lg bg-white/[0.04] border border-white/10 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title={flashEnabled ? "Disable Miss Flash" : "Enable Miss Flash"}
+              >
+                {flashEnabled ? <Zap className="w-4 h-4 text-red-400" /> : <ZapOff className="w-4 h-4 text-red-400" />}
+              </button>
+            </div>
           </div>
         </header>
       )}
@@ -512,7 +551,39 @@ export default function SteadyHandClient() {
             </>
           )}
 
-
+          {/* IN-GAME HUD SOUND + FLASH TOGGLES */}
+          {(gameState === 'playing' || gameState === 'countdown') && (
+            <div className="absolute bottom-4 right-4 z-40 flex items-center gap-2">
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setFlashEnabled((v) => {
+                    drillFlash.setEnabled(!v);
+                    return !v;
+                  });
+                }}
+                className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title="Toggle Miss Flash"
+              >
+                {flashEnabled ? <Zap className="w-4 h-4 text-red-400" /> : <ZapOff className="w-4 h-4 text-slate-500" />}
+              </button>
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSoundEnabled((v) => {
+                    drillAudio.setEnabled(!v);
+                    return !v;
+                  });
+                }}
+                className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title="Toggle Sound"
+              >
+                {soundEnabled ? <Volume2 className="w-4 h-4 text-cyan-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
+              </button>
+            </div>
+          )}
 
           {/* Paused Overlay */}
           {gameState === 'playing' && !pointerLocked && (
@@ -562,7 +633,7 @@ export default function SteadyHandClient() {
 
           {/* COUNTDOWN OVERLAY */}
           {gameState === 'countdown' && (
-            <DrillCountdown value={countdownValue} subtitle="GET READY" accent="#06b6d4" />
+            <DrillCountdown value={countdownValue} subtitle="GET READY" />
           )}
 
           {/* END SCREEN */}

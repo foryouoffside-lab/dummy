@@ -6,12 +6,13 @@ import Link from 'next/link';
 import { 
   Volume2, VolumeX,
   Play, RefreshCw, Crosshair,
-  Share2, LogOut, RotateCw, Eye, Users, TrendingUp, Zap, Brain, Move, AlertTriangle, Trophy, Target
+  Share2, LogOut, RotateCw, Eye, Users, TrendingUp, Zap, ZapOff, Brain, Move, AlertTriangle, Trophy, Target
 } from 'lucide-react';
 
 import generateShareCard, { shareScoreCard } from '../../../../../components/ShareScoreCard';
 import { getPlayerName } from '../../../../../lib/leaderboard';
 import { drillAudio } from '../../../../../lib/drillAudio';
+import { drillFlash } from '../../../../../lib/drillFlash';
 import { getFpsScoreGrade } from '../../../../../lib/scoringEngine';
 import { drawTacticalTarget } from '../../../../../lib/canvasFx';
 import useDrillFlash from '../../../../../lib/useDrillFlash';
@@ -87,6 +88,7 @@ export default function AutoPursuitClient() {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [flashEnabled, setFlashEnabled] = useState(true);
   const [openAccordion, setOpenAccordion] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
   const [isPortrait, setIsPortrait] = useState(false);
@@ -156,15 +158,13 @@ export default function AutoPursuitClient() {
   // Load saved metrics
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      setSoundEnabled(drillAudio.isEnabled());
+      setFlashEnabled(drillFlash.isEnabled());
       const saved = getSavedData();
       setBestScore(saved.bestScore || 0);
       setBestStreak(saved.bestStreak || 0);
     }
   }, []);
-
-  useEffect(() => {
-    drillAudio?.setEnabled?.(soundEnabled);
-  }, [soundEnabled]);
 
   // Fullscreen change listener
   useEffect(() => {
@@ -577,17 +577,30 @@ export default function AutoPursuitClient() {
               <span className="text-emerald-400 font-medium">Pursuit Tracker Pro</span>
             </div>
 
-            <button
-              onClick={() => {
-                const next = !soundEnabled;
-                setSoundEnabled(next);
-                drillAudio.setEnabled(next);
-              }}
-              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-              title={soundEnabled ? "Mute Sound" : "Unmute Sound"}
-            >
-              {soundEnabled ? <Volume2 className="w-4 h-4 text-emerald-400" /> : <VolumeX className="w-4 h-4 text-red-400" />}
-            </button>
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => {
+                  const next = !soundEnabled;
+                  setSoundEnabled(next);
+                  drillAudio.setEnabled(next);
+                }}
+                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title={soundEnabled ? "Mute Sound" : "Unmute Sound"}
+              >
+                {soundEnabled ? <Volume2 className="w-4 h-4 text-emerald-400" /> : <VolumeX className="w-4 h-4 text-red-400" />}
+              </button>
+              <button
+                onClick={() => {
+                  const next = !flashEnabled;
+                  setFlashEnabled(next);
+                  drillFlash.setEnabled(next);
+                }}
+                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title={flashEnabled ? "Disable Miss Flash" : "Enable Miss Flash"}
+              >
+                {flashEnabled ? <Zap className="w-4 h-4 text-red-400" /> : <ZapOff className="w-4 h-4 text-red-400" />}
+              </button>
+            </div>
           </div>
         </header>
       )}
@@ -665,9 +678,24 @@ export default function AutoPursuitClient() {
               </>
             )}
 
-            {/* IN-GAME HUD SOUND TOGGLE */}
+            {/* IN-GAME HUD SOUND + FLASH TOGGLES */}
             {gameState === 'playing' && (
-              <button
+              <div className="absolute bottom-4 right-4 z-40 flex items-center gap-2">
+                <button
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setFlashEnabled((v) => {
+                      drillFlash.setEnabled(!v);
+                      return !v;
+                    });
+                  }}
+                  className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                  title="Toggle Miss Flash"
+                >
+                  {flashEnabled ? <Zap className="w-4 h-4 text-red-400" /> : <ZapOff className="w-4 h-4 text-slate-500" />}
+                </button>
+                <button
                 onPointerDown={(e) => e.stopPropagation()}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -676,11 +704,12 @@ export default function AutoPursuitClient() {
                     return !v;
                   });
                 }}
-                className="absolute bottom-4 right-4 z-40 p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
                 title="Toggle Sound"
               >
                 {soundEnabled ? <Volume2 className="w-4 h-4 text-emerald-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
-              </button>
+                </button>
+              </div>
             )}
 
             {/* CANVAS */}
@@ -715,7 +744,7 @@ export default function AutoPursuitClient() {
 
             {/* COUNTDOWN OVERLAY */}
             {gameState === 'countdown' && (
-              <DrillCountdown value={countdownValue} subtitle="GET READY" accent="#10b981" />
+              <DrillCountdown value={countdownValue} subtitle="GET READY" />
             )}
 
             {/* END SCREEN — OPTIMIZED RESULTS DISPLAY (MATCHING MOVING-TARGET) */}

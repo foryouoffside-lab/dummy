@@ -1,4 +1,5 @@
 'use client';
+import { isIdleFrameSkippable } from '@/lib/performance';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
@@ -8,15 +9,17 @@ import {
   Crosshair, Eye, GraduationCap, Info, Lightbulb, 
   Play, RefreshCw, Target, Timer, TrendingUp, Trophy, 
   Volume2, VolumeX, Flame, Share2, Sliders, LogOut, Award,
-  Shield, Users, Zap
+  Shield, Users, Zap, ZapOff
 } from 'lucide-react';
 
 import generateShareCard, { shareScoreCard } from '../../../../../components/ShareScoreCard';
 import { getPlayerName } from '../../../../../lib/leaderboard';
 import { drillAudio } from '../../../../../lib/drillAudio';
+import { drillFlash } from '../../../../../lib/drillFlash';
+import { drillTimeout } from '../../../../../lib/drillTimeout';
 import { MAX_LEVEL, getStartLevel, getDifficultyProgress, getComboBonusLevel } from '../../../../../lib/drillDifficulty';
 import { getComboMultiplier, getFpsScoreGrade } from '../../../../../lib/scoringEngine';
-import { createBackdropCache, getCanvasDpr, drawPulseRing } from '../../../../../lib/canvasFx';
+import { createBackdropCache, getCanvasDpr, drawPulseRing, drawTacticalTarget } from '../../../../../lib/canvasFx';
 import useUnexpectedExitGuard from '../../../../../lib/useUnexpectedExitGuard';
 import DrillFooter from '../../../../../components/drill/DrillFooter';
 import DrillCountdown from '../../../../../components/drill/DrillCountdown';
@@ -111,6 +114,7 @@ export default function PrecisionFlickShotClient() {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [flashEnabled, setFlashEnabled] = useState(true);
   const [pointerLocked, setPointerLocked] = useState(false);
   const [universalSens, setUniversalSens] = useState(1.0);
   const [openAccordion, setOpenAccordion] = useState(null);
@@ -145,6 +149,7 @@ export default function PrecisionFlickShotClient() {
   const engine = useRef({
     crosshair: { x: 0, y: 0, initialized: false },
     targets: [],
+    activeIndex: 0,
     spawnTimer: 0,
     score: 0, level: 1, combo: 0, bestCombo: 0, timeLeft: DRILL_DURATION,
     hits: 0, bullseyes: 0, misses: 0, totalClicks: 0,
@@ -155,6 +160,7 @@ export default function PrecisionFlickShotClient() {
   const cmPer360 = (30 / universalSens).toFixed(1);
 
   const triggerFlash = useCallback(() => {
+    if (!drillFlash.isEnabled()) return;
     const id = Date.now() + Math.random();
     setFlashes((f) => [...f, { id }]);
     setTimeout(() => setFlashes((f) => f.filter((x) => x.id !== id)), 480);
@@ -178,12 +184,28 @@ export default function PrecisionFlickShotClient() {
     }
   }, []);
 
-  const spawnTarget = useCallback((w, h, cfg) => {
+  const spawnTarget = useCallback((w, h, cfg, existingTargets = []) => {
     const pad = cfg.maxRadius + 40;
+    let x = pad + Math.random() * Math.max(10, w - pad * 2);
+    let y = pad + Math.random() * Math.max(10, h - pad * 2);
+
+    for (let attempts = 0; attempts < 12; attempts++) {
+      let tooClose = false;
+      for (const other of existingTargets) {
+        if (other && Math.hypot(x - other.x, y - other.y) < cfg.maxRadius * 3) {
+          tooClose = true;
+          break;
+        }
+      }
+      if (!tooClose) break;
+      x = pad + Math.random() * Math.max(10, w - pad * 2);
+      y = pad + Math.random() * Math.max(10, h - pad * 2);
+    }
+
     return {
       id: Math.random().toString(36).substring(2, 9),
-      x: pad + Math.random() * Math.max(10, w - pad * 2),
-      y: pad + Math.random() * Math.max(10, h - pad * 2),
+      x,
+      y,
       maxRadius: cfg.maxRadius,
       radius: cfg.maxRadius,
       decayRate: cfg.decayRate
@@ -193,6 +215,8 @@ export default function PrecisionFlickShotClient() {
   // Touch Device Detection & Storage Loading
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      setSoundEnabled(drillAudio.isEnabled());
+      setFlashEnabled(drillFlash.isEnabled());
       const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
       const isTouchCapable = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
       setIsTouchOnlyDevice(isTouchCapable && !hasFinePointer);
@@ -220,8 +244,7 @@ export default function PrecisionFlickShotClient() {
     if (gameState !== 'playing') {
       try { localStorage.setItem('precisionFlick_sens', universalSens.toString()); } catch (e) {}
     }
-    drillAudio.setEnabled(soundEnabled);
-  }, [universalSens, gameState, soundEnabled]);
+  }, [universalSens, gameState]);
 
   // Fullscreen Listener
   useEffect(() => {
@@ -331,14 +354,14 @@ export default function PrecisionFlickShotClient() {
     const h = engine.current.logicalHeight || 450;
     const config = getLevelConfig(startLevel);
 
-    const initTargets = [];
-    for (let i = 0; i < config.targetCount; i++) {
-      initTargets.push(spawnTarget(w, h, config));
-    }
+    const targetA = spawnTarget(w, h, config, []);
+    const targetB = spawnTarget(w, h, config, [targetA]);
 
     engine.current = {
       crosshair: { ...engine.current.crosshair },
-      targets: initTargets, spawnTimer: 0,
+      targets: [targetA, targetB],
+      activeIndex: 0,
+      spawnTimer: 0,
       score: 0, level: startLevel, combo: 0, bestCombo: 0, timeLeft: DRILL_DURATION,
       hits: 0, bullseyes: 0, misses: 0, totalClicks: 0,
       particles: [], hitMarkers: [], screenShake: 0, logicalWidth: w, logicalHeight: h
@@ -431,7 +454,16 @@ export default function PrecisionFlickShotClient() {
             setUiScore(eRef.score);
 
             const cfg = getLevelConfig(eRef.level);
-            eRef.targets[hitIndex] = spawnTarget(eRef.logicalWidth, eRef.logicalHeight, cfg);
+            const remainingIdx = 1 - hitIndex;
+            const remainingTgt = eRef.targets[remainingIdx];
+
+            // Respawn the hit target cleanly without overlapping
+            eRef.targets[hitIndex] = spawnTarget(eRef.logicalWidth, eRef.logicalHeight, cfg, [remainingTgt]);
+
+            // If player hit the active shrinking target, switch active target to standby target!
+            if (hitIndex === eRef.activeIndex) {
+              eRef.activeIndex = remainingIdx;
+            }
           } else {
             eRef.misses++;
             eRef.combo = 0;
@@ -496,6 +528,10 @@ export default function PrecisionFlickShotClient() {
     let lastTime = performance.now();
 
     const loop = (time) => {
+      if (isIdleFrameSkippable(gameState === 'playing', time, lastTime)) {
+        animationRef.current = requestAnimationFrame(loop);
+        return;
+      }
       const deltaTimeMs = time - lastTime;
       lastTime = time;
       const dt = Math.min(deltaTimeMs / 1000, 0.1);
@@ -521,24 +557,53 @@ export default function PrecisionFlickShotClient() {
 
         const config = getLevelConfig(e.level);
 
-        for (let i = e.targets.length - 1; i >= 0; i--) {
-          const tgt = e.targets[i];
-          tgt.radius -= tgt.decayRate * dt;
-
-          if (tgt.radius <= 4) {
-            e.combo = 0;
-            e.screenShake = 6;
-            triggerFlash();
-            drillAudio.playPenalty();
-            createExplosion(tgt.x, tgt.y, '#ef4444');
-            e.targets[i] = spawnTarget(w, h, config);
-          }
+        // Ensure 2 targets stay on screen at all times
+        while (e.targets.length < 2) {
+          e.targets.push(spawnTarget(w, h, config, e.targets));
         }
 
-        e.spawnTimer += dt;
-        if (e.spawnTimer >= config.spawnInterval && e.targets.length < config.targetCount) {
-          e.targets.push(spawnTarget(w, h, config));
-          e.spawnTimer = 0;
+        if (e.activeIndex === undefined || e.activeIndex < 0 || e.activeIndex >= e.targets.length) {
+          e.activeIndex = 0;
+        }
+
+        // Primary target shrinks at 100% rate
+        const activeIdx = e.activeIndex;
+        const activeTgt = e.targets[activeIdx];
+
+        // Secondary target ALSO shrinks with a slight time delay (at ~58% rate)
+        const secondaryIdx = 1 - activeIdx;
+        const secondaryTgt = e.targets[secondaryIdx];
+
+        if (activeTgt && drillTimeout.isEnabled()) {
+          activeTgt.radius -= activeTgt.decayRate * dt;
+        }
+
+        if (secondaryTgt && drillTimeout.isEnabled()) {
+          secondaryTgt.radius -= (secondaryTgt.decayRate * 0.58) * dt;
+        }
+
+        // Expiration check for active target
+        if (activeTgt && drillTimeout.isEnabled() && activeTgt.radius <= 4) {
+          e.combo = 0;
+          e.screenShake = 6;
+          triggerFlash();
+          drillAudio.playPenalty();
+          createExplosion(activeTgt.x, activeTgt.y, '#ef4444');
+
+          // Respawn expired active target
+          e.targets[activeIdx] = spawnTarget(w, h, config, [secondaryTgt]);
+          // Secondary target becomes the new primary shrinking target!
+          e.activeIndex = secondaryIdx;
+        } else if (secondaryTgt && secondaryTgt.radius <= 4) {
+          // Secondary target expired
+          e.combo = 0;
+          e.screenShake = 6;
+          triggerFlash();
+          drillAudio.playPenalty();
+          createExplosion(secondaryTgt.x, secondaryTgt.y, '#ef4444');
+
+          // Respawn expired secondary target
+          e.targets[secondaryIdx] = spawnTarget(w, h, config, [activeTgt]);
         }
       }
 
@@ -561,24 +626,14 @@ export default function PrecisionFlickShotClient() {
       }
 
       if (gameState === 'playing' || gameState === 'start') {
-        for (const tgt of e.targets) {
-          const progress = 1 - (tgt.radius / tgt.maxRadius);
-          const targetColor = '#06b6d4';
+        for (let i = 0; i < e.targets.length; i++) {
+          const tgt = e.targets[i];
+          const isActive = (i === e.activeIndex);
+          const progress = Math.max(0, Math.min(1, 1 - (tgt.radius / tgt.maxRadius)));
+          const targetColor = e.combo >= 10 ? '#38bdf8' : (isActive ? '#00ff88' : '#38bdf8');
 
           drawPulseRing(ctx, tgt.x, tgt.y, tgt.radius, targetColor, progress);
-
-          ctx.shadowBlur = 15;
-          ctx.shadowColor = targetColor;
-          ctx.fillStyle = '#050508';
-          ctx.beginPath(); ctx.arc(tgt.x, tgt.y, tgt.radius, 0, Math.PI * 2); ctx.fill();
-          ctx.shadowBlur = 0;
-
-          ctx.fillStyle = '#eab308';
-          ctx.beginPath(); ctx.arc(tgt.x, tgt.y, Math.min(8, tgt.radius * 0.4), 0, Math.PI * 2); ctx.fill();
-
-          ctx.strokeStyle = targetColor;
-          ctx.lineWidth = 2;
-          ctx.beginPath(); ctx.arc(tgt.x, tgt.y, tgt.radius + 3, 0, Math.PI * 2); ctx.stroke();
+          drawTacticalTarget(ctx, tgt.x, tgt.y, tgt.radius, targetColor, isActive);
         }
       }
 
@@ -670,17 +725,30 @@ export default function PrecisionFlickShotClient() {
               <span className="text-cyan-400 font-medium">Precision Flick Shot</span>
             </div>
 
-            <button
-              onClick={() => {
-                const next = !soundEnabled;
-                setSoundEnabled(next);
-                drillAudio?.setEnabled?.(next);
-              }}
-              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-              title={soundEnabled ? "Mute Sound" : "Unmute Sound"}
-            >
-              {soundEnabled ? <Volume2 className="w-4 h-4 text-cyan-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
-            </button>
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => {
+                  const next = !soundEnabled;
+                  setSoundEnabled(next);
+                  drillAudio?.setEnabled?.(next);
+                }}
+                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title={soundEnabled ? "Mute Sound" : "Unmute Sound"}
+              >
+                {soundEnabled ? <Volume2 className="w-4 h-4 text-cyan-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
+              </button>
+              <button
+                onClick={() => {
+                  const next = !flashEnabled;
+                  setFlashEnabled(next);
+                  drillFlash?.setEnabled?.(next);
+                }}
+                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title={flashEnabled ? "Disable Miss Flash" : "Enable Miss Flash"}
+              >
+                {flashEnabled ? <Zap className="w-4 h-4 text-red-400" /> : <ZapOff className="w-4 h-4 text-red-400" />}
+              </button>
+            </div>
           </div>
         </header>
       )}
@@ -751,22 +819,38 @@ export default function PrecisionFlickShotClient() {
             </>
           )}
 
-          {/* IN-GAME HUD SOUND TOGGLE */}
+          {/* IN-GAME HUD SOUND + FLASH TOGGLES */}
           {(gameState === 'playing' || gameState === 'countdown') && (
-            <button
-              onPointerDown={(e) => e.stopPropagation()}
-              onClick={(e) => {
-                e.stopPropagation();
-                setSoundEnabled((v) => {
-                  drillAudio.setEnabled(!v);
-                  return !v;
-                });
-              }}
-              className="absolute bottom-4 right-4 z-40 p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-              title="Toggle Sound"
-            >
-              {soundEnabled ? <Volume2 className="w-4 h-4 text-cyan-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
-            </button>
+            <div className="absolute bottom-4 right-4 z-40 flex items-center gap-2">
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setFlashEnabled((v) => {
+                    drillFlash.setEnabled(!v);
+                    return !v;
+                  });
+                }}
+                className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title="Toggle Miss Flash"
+              >
+                {flashEnabled ? <Zap className="w-4 h-4 text-red-400" /> : <ZapOff className="w-4 h-4 text-slate-500" />}
+              </button>
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSoundEnabled((v) => {
+                    drillAudio.setEnabled(!v);
+                    return !v;
+                  });
+                }}
+                className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title="Toggle Sound"
+              >
+                {soundEnabled ? <Volume2 className="w-4 h-4 text-cyan-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
+              </button>
+            </div>
           )}
 
           {/* PAUSE OVERLAY IF POINTER LOCK LOST DURING PLAY */}
@@ -796,7 +880,7 @@ export default function PrecisionFlickShotClient() {
           {gameState === 'start' && (
             <FpsStartCard
               icon={Crosshair}
-              accent="emerald"
+              accent="cyan"
               title="Precision Flick Shot"
               subtitle="Target Decay & Bulls-Eye Micro-Flicks • 15 Levels"
               rules={[
@@ -816,7 +900,7 @@ export default function PrecisionFlickShotClient() {
 
           {/* COUNTDOWN OVERLAY */}
           {gameState === 'countdown' && (
-            <DrillCountdown value={countdownValue} subtitle="GET READY" accent="#ef4444" />
+            <DrillCountdown value={countdownValue} subtitle="GET READY" />
           )}
 
           {/* END SCREEN */}

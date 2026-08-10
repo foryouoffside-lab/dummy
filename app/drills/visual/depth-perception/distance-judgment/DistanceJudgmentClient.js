@@ -6,12 +6,14 @@ import Link from 'next/link';
 import { 
   Volume2, VolumeX,
   Play, RefreshCw, Target,
-  Share2, LogOut, RotateCw, Eye, Users, TrendingUp, Zap, Brain, Crosshair, Trophy
+  Share2, LogOut, RotateCw, Eye, Users, TrendingUp, Zap, ZapOff, Brain, Crosshair, Trophy
 } from 'lucide-react';
 
 import generateShareCard, { shareScoreCard } from '../../../../../components/ShareScoreCard';
 import { getPlayerName } from '../../../../../lib/leaderboard';
 import { drillAudio } from '../../../../../lib/drillAudio';
+import { drillFlash } from '../../../../../lib/drillFlash';
+import { drillTimeout } from '../../../../../lib/drillTimeout';
 import { getFpsScoreGrade } from '../../../../../lib/scoringEngine';
 import { MAX_LEVEL } from '../../../../../lib/drillDifficulty';
 import useDrillFlash from '../../../../../lib/useDrillFlash';
@@ -60,6 +62,7 @@ export default function DistanceJudgmentClient() {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [flashEnabled, setFlashEnabled] = useState(true);
   const [openAccordion, setOpenAccordion] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
   const [isPortrait, setIsPortrait] = useState(false);
@@ -126,15 +129,13 @@ export default function DistanceJudgmentClient() {
   // Storage loading & sound init
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      setSoundEnabled(drillAudio.isEnabled());
+      setFlashEnabled(drillFlash.isEnabled());
       const saved = getSavedData();
       setBestScore(saved.bestScore || 0);
       setBestLevel(saved.bestLevel || 1);
     }
   }, []);
-
-  useEffect(() => {
-    drillAudio?.setEnabled?.(soundEnabled);
-  }, [soundEnabled]);
 
   // Fullscreen change listener
   useEffect(() => {
@@ -380,10 +381,10 @@ export default function DistanceJudgmentClient() {
       // Update Approaching Sphere Z position
       if (isApproachingRef.current) {
         const elapsed = now - approachStartTimeRef.current;
-        const progress = Math.min(1, elapsed / durationRef.current);
+        const progress = drillTimeout.isEnabled() ? Math.min(1, elapsed / durationRef.current) : Math.min(0.999, elapsed / durationRef.current);
         currentZRef.current = progress * 100;
 
-        if (progress >= 1) {
+        if (drillTimeout.isEnabled() && progress >= 1) {
           // Reached end without intercept: handle miss
           isApproachingRef.current = false;
           const e = engine.current;
@@ -572,17 +573,30 @@ export default function DistanceJudgmentClient() {
               <span className="text-cyan-400 font-medium">Distance Judgment</span>
             </div>
 
-            <button
-              onClick={() => {
-                const next = !soundEnabled;
-                setSoundEnabled(next);
-                drillAudio?.setEnabled?.(next);
-              }}
-              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-              title={soundEnabled ? "Mute Sound" : "Unmute Sound"}
-            >
-              {soundEnabled ? <Volume2 className="w-4 h-4 text-cyan-400" /> : <VolumeX className="w-4 h-4 text-red-400" />}
-            </button>
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => {
+                  const next = !soundEnabled;
+                  setSoundEnabled(next);
+                  drillAudio?.setEnabled?.(next);
+                }}
+                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title={soundEnabled ? "Mute Sound" : "Unmute Sound"}
+              >
+                {soundEnabled ? <Volume2 className="w-4 h-4 text-cyan-400" /> : <VolumeX className="w-4 h-4 text-red-400" />}
+              </button>
+              <button
+                onClick={() => {
+                  const next = !flashEnabled;
+                  setFlashEnabled(next);
+                  drillFlash.setEnabled(next);
+                }}
+                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title={flashEnabled ? "Disable Miss Flash" : "Enable Miss Flash"}
+              >
+                {flashEnabled ? <Zap className="w-4 h-4 text-red-400" /> : <ZapOff className="w-4 h-4 text-red-400" />}
+              </button>
+            </div>
           </div>
         </header>
       )}
@@ -656,22 +670,38 @@ export default function DistanceJudgmentClient() {
             </>
           )}
 
-          {/* IN-GAME HUD SOUND TOGGLE */}
+          {/* IN-GAME HUD SOUND + FLASH TOGGLES */}
           {(gameState === 'playing' || gameState === 'countdown') && (
-            <button
-              onPointerDown={(e) => e.stopPropagation()}
-              onClick={(e) => {
-                e.stopPropagation();
-                setSoundEnabled((v) => {
-                  drillAudio?.setEnabled?.(!v);
-                  return !v;
-                });
-              }}
-              className="absolute bottom-4 right-4 z-40 p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-              title="Toggle Sound"
-            >
-              {soundEnabled ? <Volume2 className="w-4 h-4 text-cyan-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
-            </button>
+            <div className="absolute bottom-4 right-4 z-40 flex items-center gap-2">
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setFlashEnabled((v) => {
+                    drillFlash.setEnabled(!v);
+                    return !v;
+                  });
+                }}
+                className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title="Toggle Miss Flash"
+              >
+                {flashEnabled ? <Zap className="w-4 h-4 text-red-400" /> : <ZapOff className="w-4 h-4 text-slate-500" />}
+              </button>
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSoundEnabled((v) => {
+                    drillAudio?.setEnabled?.(!v);
+                    return !v;
+                  });
+                }}
+                className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title="Toggle Sound"
+              >
+                {soundEnabled ? <Volume2 className="w-4 h-4 text-cyan-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
+              </button>
+            </div>
           )}
 
           {/* GAMEPLAY CANVAS SURFACE */}
@@ -707,7 +737,7 @@ export default function DistanceJudgmentClient() {
 
           {/* COUNTDOWN OVERLAY */}
           {gameState === 'countdown' && (
-            <DrillCountdown value={countdownValue} subtitle="GET READY" accent="#06b6d4" />
+            <DrillCountdown value={countdownValue} subtitle="GET READY" />
           )}
 
           {/* END SCREEN (GAME OVER WITH RESULT GRADE) */}
@@ -859,6 +889,9 @@ export default function DistanceJudgmentClient() {
                 <DrillFAQItem q="How does progressive difficulty work?" a="As your score increases, sphere approach speed accelerates from 2200ms down to 500ms and target depth windows become narrower." />
                 <DrillFAQItem q="Are there negative score or time penalties?" a="No. A missed tap never deducts score points or reduces remaining timer seconds — the screen just flashes red and the next sphere approaches." />
                 <DrillFAQItem q="How long does each drill session last?" a="Each round is timed for exactly 45 seconds of continuous focus." />
+                <DrillFAQItem q="What skills does this drill improve?" a="Stereoscopic depth perception, visual distance estimation, 3D spatial awareness, and interceptive timing." />
+                <DrillFAQItem q="Does difficulty decrease on mistakes?" a="No. The level remains unchanged when a mistake is made, allowing you to master your current level." />
+                <DrillFAQItem q="Do I need to sign up?" a="No registration required. This drill is completely free and works instantly in your browser." />
               </div>
             </DrillAccordion>
           </div>

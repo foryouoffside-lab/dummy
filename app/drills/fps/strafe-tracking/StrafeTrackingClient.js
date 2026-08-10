@@ -1,4 +1,5 @@
 'use client';
+import { isIdleFrameSkippable } from '@/lib/performance';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
@@ -8,12 +9,13 @@ import {
   Eye, GraduationCap, RefreshCw, Target,
   Timer, TrendingUp, Trophy, Volume2, VolumeX,
   Flame, Share2, LogOut,
-  Award, Shield, Users, Zap
+  Award, Shield, Users, Zap, ZapOff
 } from 'lucide-react';
 
 import generateShareCard, { shareScoreCard } from '../../../../components/ShareScoreCard';
 import { getPlayerName } from '../../../../lib/leaderboard';
 import { drillAudio } from '../../../../lib/drillAudio';
+import { drillFlash } from '../../../../lib/drillFlash';
 import { getStartLevel, getDifficultyProgress, getComboBonusLevel } from '../../../../lib/drillDifficulty';
 import { getComboMultiplier, getFpsScoreGrade } from '../../../../lib/scoringEngine';
 import { createBackdropCache, getCanvasDpr, drawPulseRing } from '../../../../lib/canvasFx';
@@ -63,6 +65,7 @@ export default function StrafeTrackingClient() {
   const [countdownValue, setCountdownValue] = useState(3);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [flashEnabled, setFlashEnabled] = useState(true);
   const [pointerLocked, setPointerLocked] = useState(false);
   const [openAccordion, setOpenAccordion] = useState(null);
   const [isTouchOnlyDevice, setIsTouchOnlyDevice] = useState(false);
@@ -120,11 +123,9 @@ export default function StrafeTrackingClient() {
   }, []);
 
   useEffect(() => {
-    drillAudio.setEnabled(soundEnabled);
-  }, [soundEnabled]);
-
-  useEffect(() => {
     if (typeof window !== 'undefined') {
+      setSoundEnabled(drillAudio.isEnabled());
+      setFlashEnabled(drillFlash.isEnabled());
       const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
       const isTouchCapable = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
       setIsTouchOnlyDevice(isTouchCapable && !hasFinePointer);
@@ -142,6 +143,7 @@ export default function StrafeTrackingClient() {
   }, [universalSens, gameState]);
 
   const triggerFlash = useCallback(() => {
+    if (!drillFlash.isEnabled()) return;
     const id = Date.now() + Math.random();
     setFlashes((f) => [...f, { id }]);
     setTimeout(() => setFlashes((f) => f.filter((x) => x.id !== id)), 480);
@@ -372,6 +374,10 @@ export default function StrafeTrackingClient() {
     let lastTime = performance.now();
 
     const loop = (time) => {
+      if (isIdleFrameSkippable(gameState === 'playing', time, lastTime)) {
+        animationRef.current = requestAnimationFrame(loop);
+        return;
+      }
       const dtMs = time - lastTime;
       lastTime = time;
       const dt = Math.min(dtMs / 1000, 0.1);
@@ -632,17 +638,30 @@ export default function StrafeTrackingClient() {
               <span className="text-green-400 font-medium">Strafe Tracking</span>
             </div>
 
-            <button
-              onClick={() => {
-                const next = !soundEnabled;
-                setSoundEnabled(next);
-                drillAudio?.setEnabled?.(next);
-              }}
-              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-              title={soundEnabled ? "Mute Sound" : "Unmute Sound"}
-            >
-              {soundEnabled ? <Volume2 className="w-4 h-4 text-green-400" /> : <VolumeX className="w-4 h-4 text-green-400" />}
-            </button>
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => {
+                  const next = !soundEnabled;
+                  setSoundEnabled(next);
+                  drillAudio?.setEnabled?.(next);
+                }}
+                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title={soundEnabled ? "Mute Sound" : "Unmute Sound"}
+              >
+                {soundEnabled ? <Volume2 className="w-4 h-4 text-green-400" /> : <VolumeX className="w-4 h-4 text-green-400" />}
+              </button>
+              <button
+                onClick={() => {
+                  const next = !flashEnabled;
+                  setFlashEnabled(next);
+                  drillFlash?.setEnabled?.(next);
+                }}
+                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title={flashEnabled ? "Disable Miss Flash" : "Enable Miss Flash"}
+              >
+                {flashEnabled ? <Zap className="w-4 h-4 text-red-400" /> : <ZapOff className="w-4 h-4 text-red-400" />}
+              </button>
+            </div>
           </div>
         </header>
       )}
@@ -724,17 +743,33 @@ export default function StrafeTrackingClient() {
           )}
 
           {(gameState === 'playing' || gameState === 'countdown') && (
-            <button 
-              onPointerDown={(e) => e.stopPropagation()}
-              onClick={(e) => {
-                e.stopPropagation();
-                setSoundEnabled(v => !v);
-              }} 
-              className="absolute bottom-4 right-4 z-40 p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer" 
-              title="Toggle Sound"
-            >
-              {soundEnabled ? <Volume2 className="w-4 h-4 text-green-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
-            </button>
+            <div className="absolute bottom-4 right-4 z-40 flex items-center gap-2">
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setFlashEnabled((v) => {
+                    drillFlash.setEnabled(!v);
+                    return !v;
+                  });
+                }}
+                className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title="Toggle Miss Flash"
+              >
+                {flashEnabled ? <Zap className="w-4 h-4 text-red-400" /> : <ZapOff className="w-4 h-4 text-slate-500" />}
+              </button>
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSoundEnabled(v => !v);
+                }}
+                className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title="Toggle Sound"
+              >
+                {soundEnabled ? <Volume2 className="w-4 h-4 text-green-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
+              </button>
+            </div>
           )}
 
           {gameState === 'playing' && !pointerLocked && (
@@ -782,7 +817,7 @@ export default function StrafeTrackingClient() {
 
           {/* COUNTDOWN OVERLAY */}
           {gameState === 'countdown' && (
-            <DrillCountdown value={countdownValue} subtitle="GET READY" accent="#22c55e" />
+            <DrillCountdown value={countdownValue} subtitle="GET READY" />
           )}
 
           {gameState === 'gameOver' && analytics.grade && (
@@ -920,6 +955,17 @@ export default function StrafeTrackingClient() {
                 <FAQItem q="How is tracking different from flicking?" a="Flicking requires rapid muscle memory snaps to hit a target and reset, while tracking requires continuous visual pursuit, direction change recognition, and smooth speed adjustment." />
                 <FAQItem q="How do I improve reactive tracking?" a="Improve reactive tracking by practicing against fast, unpredictable strafe speeds. Learn to read momentum changes without over-predicting or tensing your wrist." />
                 <FAQItem q="Why do I overtrack targets?" a="Overtracking happens when your crosshair moves faster than the target during a direction swap, which is often caused by predictive aiming or excessive mouse acceleration." />
+                <FAQItem q="What causes shaky aim during tracking?" a="Shaky aim is caused by excessive wrist tension, inappropriate mouse grip, or too high sensitivity. Smoothness aim drills help condition your hand to glide without micro-jitters." />
+                <FAQItem q="How much should I practice tracking?" a="We recommend practicing tracking for 10-15 minutes daily as a pre-game warmup routine to establish muscle memory consistency." />
+                <FAQItem q="Is tracking more important than flicking?" a="It depends on the game. Tracking is primary in high-TTK games (Apex Legends, Overwatch 2, The Finals), whereas flicking is more critical in tactical, low-TTK shooters (Valorant, CS2)." />
+                <FAQItem q="Can tracking improve Apex Legends aim?" a="Yes. Gunfights in Apex Legends require landing full automatic magazines on dodging enemies. Consistent tracking practice is the single best way to improve Apex aim." />
+                <FAQItem q="Can tracking improve Overwatch 2 aim?" a="Target tracking is critical for heroes like Soldier: 76, Tracer, Zarya, and Sombra who rely on smooth pursuit and direction change recognition to maximize damage output." />
+                <FAQItem q="What is counter-strafe reading?" a="Counter-strafe reading is your neurological speed in registering when an enemy reverses their horizontal direction, allowing you to re-align your crosshair with minimal lag." />
+                <FAQItem q="What is aim smoothness?" a="Smoothness refers to moving your mouse at a constant, matching speed to the target without micro-corrections, jitters, or abrupt jerking movements." />
+                <FAQItem q="How do professional players train tracking?" a="Pros use specialized software aim trainers to practice isolating horizontal sweeps, vertical tracking, and reaction speed under variable speeds." />
+                <FAQItem q="What sensitivity is best for tracking?" a="A moderate-to-low sensitivity (e.g., 25cm to 45cm per 360 rotation) is generally best for tracking, as it provides enough physical space to make smooth micro-adjustments." />
+                <FAQItem q="Can this drill improve mouse control?" a="Yes. Keeping your crosshair on dodging targets forces your wrist and fingers to build subtle motor-control adjustments, optimizing mouse handling." />
+                <FAQItem q="How long does it take to improve tracking?" a="Most players notice improvements in crosshair smoothness and reaction time after 2 weeks of daily, focused 10-minute training sessions." />
               </div>
             </DrillAccordion>
           </div>

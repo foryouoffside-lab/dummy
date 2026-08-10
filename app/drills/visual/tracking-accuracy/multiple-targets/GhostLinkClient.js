@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { 
-  Eye, Zap, Volume2, VolumeX,
+  Eye, Zap, ZapOff, Volume2, VolumeX,
   Target, RefreshCw, GraduationCap,
   TrendingUp, Share2, Brain, AlertTriangle, Play,
   Users, Layers, LogOut, RotateCw, Trophy
@@ -17,6 +17,7 @@ import DrillFlashOverlay from '../../../../../components/drill/DrillFlashOverlay
 import DrillRuleItem from '../../../../../components/drill/DrillRuleItem';
 import DrillFAQItem from '../../../../../components/drill/DrillFAQItem';
 import { drillAudio } from '../../../../../lib/drillAudio';
+import { drillFlash } from '../../../../../lib/drillFlash';
 import { drawTacticalTarget } from '../../../../../lib/canvasFx';
 import { getFpsScoreGrade } from '../../../../../lib/scoringEngine';
 import generateShareCard, { shareScoreCard } from '../../../../../components/ShareScoreCard';
@@ -104,6 +105,7 @@ export default function GhostLinkClient() {
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [isBoxDarkMode, setIsBoxDarkMode] = useState(true);
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [flashEnabled, setFlashEnabled] = useState(true);
   const [loading, setLoading] = useState(true);
   const [isClient, setIsClient] = useState(false);
   const [playerNameInput, setPlayerNameInput] = useState('');
@@ -697,17 +699,30 @@ diagnostics = "Low target identification accuracy. Anchor your gaze centrally an
               <span className="text-purple-400 font-medium">Multiple Targets</span>
             </div>
 
-            <button
-              onClick={() => {
-                const next = !soundEnabled;
-                setSoundEnabled(next);
-                drillAudio.setEnabled(next);
-              }}
-              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-              title={soundEnabled ? "Mute Sound" : "Unmute Sound"}
-            >
-              {soundEnabled ? <Volume2 className="w-4 h-4 text-purple-400" /> : <VolumeX className="w-4 h-4 text-red-400" />}
-            </button>
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => {
+                  const next = !soundEnabled;
+                  setSoundEnabled(next);
+                  drillAudio.setEnabled(next);
+                }}
+                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title={soundEnabled ? "Mute Sound" : "Unmute Sound"}
+              >
+                {soundEnabled ? <Volume2 className="w-4 h-4 text-purple-400" /> : <VolumeX className="w-4 h-4 text-red-400" />}
+              </button>
+              <button
+                onClick={() => {
+                  const next = !flashEnabled;
+                  setFlashEnabled(next);
+                  drillFlash.setEnabled(next);
+                }}
+                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title={flashEnabled ? "Disable Miss Flash" : "Enable Miss Flash"}
+              >
+                {flashEnabled ? <Zap className="w-4 h-4 text-red-400" /> : <ZapOff className="w-4 h-4 text-red-400" />}
+              </button>
+            </div>
           </div>
         </header>
       )}
@@ -826,22 +841,38 @@ diagnostics = "Low target identification accuracy. Anchor your gaze centrally an
               </>
             )}
 
-            {/* IN-GAME HUD SOUND TOGGLE */}
+            {/* IN-GAME HUD SOUND + FLASH TOGGLES */}
             {(gameState === 'playing' || gameState === 'countdown') && (
-              <button
-                onPointerDown={(e) => e.stopPropagation()}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setSoundEnabled((v) => {
-                    drillAudio.setEnabled(!v);
-                    return !v;
-                  });
-                }}
-                className="absolute bottom-4 right-4 z-40 p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-                title="Toggle Sound"
-              >
-                {soundEnabled ? <Volume2 className="w-4 h-4 text-purple-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
-              </button>
+              <div className="absolute bottom-4 right-4 z-40 flex items-center gap-2">
+                <button
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setFlashEnabled((v) => {
+                      drillFlash.setEnabled(!v);
+                      return !v;
+                    });
+                  }}
+                  className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                  title="Toggle Miss Flash"
+                >
+                  {flashEnabled ? <Zap className="w-4 h-4 text-red-400" /> : <ZapOff className="w-4 h-4 text-slate-500" />}
+                </button>
+                <button
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSoundEnabled((v) => {
+                      drillAudio.setEnabled(!v);
+                      return !v;
+                    });
+                  }}
+                  className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                  title="Toggle Sound"
+                >
+                  {soundEnabled ? <Volume2 className="w-4 h-4 text-purple-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
+                </button>
+              </div>
             )}
 
             {/* CANVAS LAYER */}
@@ -902,7 +933,7 @@ diagnostics = "Low target identification accuracy. Anchor your gaze centrally an
 
             {/* COUNTDOWN OVERLAY */}
             {gameState === 'countdown' && (
-              <DrillCountdown value={countdownValue} subtitle="GET READY" accent="#a855f7" />
+              <DrillCountdown value={countdownValue} subtitle="GET READY" />
             )}
 
             {/* END SCREEN */}

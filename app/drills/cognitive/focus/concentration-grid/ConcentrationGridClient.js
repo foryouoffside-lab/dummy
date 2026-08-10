@@ -3,11 +3,12 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import {
-  Compass, Volume2, VolumeX, Eye, Zap, Ban, Heart,
+  Compass, Volume2, VolumeX, Eye, Zap, ZapOff, Ban, Heart,
   Share2, ArrowLeft, Trophy, Target, Timer, TrendingUp, RefreshCw, Layers, Users, Play, Flame
 } from 'lucide-react';
 
 import { drillAudio } from '../../../../../lib/drillAudio';
+import { drillFlash } from '../../../../../lib/drillFlash';
 import { getPlayerName } from '../../../../../lib/leaderboard';
 import { getFpsScoreGrade } from '../../../../../lib/scoringEngine';
 import { getStartLevel } from '../../../../../lib/drillDifficulty';
@@ -88,6 +89,7 @@ const RELATED_DRILLS = [
 export default function ConcentrationGridClient() {
   const [phase, setPhase] = useState('start'); // 'start' | 'countdown' | 'playing' | 'ended'
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [flashEnabled, setFlashEnabled] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const [isPortrait, setIsPortrait] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -439,17 +441,30 @@ export default function ConcentrationGridClient() {
             <span className="text-cyan-400 font-medium">Concentration Grid</span>
           </div>
 
-          <button
-            onClick={() => {
-              const next = !soundEnabled;
-              setSoundEnabled(next);
-              drillAudio.setEnabled(next);
-            }}
-            className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-            title={soundEnabled ? "Mute Sound" : "Unmute Sound"}
-          >
-            {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4 text-red-400" />}
-          </button>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => {
+                const next = !soundEnabled;
+                setSoundEnabled(next);
+                drillAudio.setEnabled(next);
+              }}
+              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+              title={soundEnabled ? "Mute Sound" : "Unmute Sound"}
+            >
+              {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4 text-red-400" />}
+            </button>
+            <button
+              onClick={() => {
+                const next = !flashEnabled;
+                setFlashEnabled(next);
+                drillFlash.setEnabled(next);
+              }}
+              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+              title={flashEnabled ? "Disable Miss Flash" : "Enable Miss Flash"}
+            >
+              {flashEnabled ? <Zap className="w-4 h-4 text-red-400" /> : <ZapOff className="w-4 h-4 text-red-400" />}
+            </button>
+          </div>
         </div>
       </header>
       )}
@@ -541,28 +556,44 @@ export default function ConcentrationGridClient() {
             </>
           )}
 
-          {/* IN-GAME HUD SOUND TOGGLE (header's toggle is hidden while fullscreen) */}
+          {/* IN-GAME HUD SOUND + FLASH TOGGLES (header's toggle is hidden while fullscreen) */}
           {(phase === 'playing' || phase === 'countdown') && (
-            <button
-              onPointerDown={(e) => e.stopPropagation()}
-              onClick={(e) => {
-                e.stopPropagation();
-                const next = !soundEnabled;
-                setSoundEnabled(next);
-                drillAudio.setEnabled(next);
-              }}
-              className="absolute bottom-4 right-4 z-40 p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-              title="Toggle Sound"
-            >
-              {soundEnabled ? <Volume2 className="w-4 h-4 text-cyan-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
-            </button>
+            <div className="absolute bottom-4 right-4 z-40 flex items-center gap-2">
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setFlashEnabled((v) => {
+                    drillFlash.setEnabled(!v);
+                    return !v;
+                  });
+                }}
+                className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title="Toggle Miss Flash"
+              >
+                {flashEnabled ? <Zap className="w-4 h-4 text-red-400" /> : <ZapOff className="w-4 h-4 text-slate-500" />}
+              </button>
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const next = !soundEnabled;
+                  setSoundEnabled(next);
+                  drillAudio.setEnabled(next);
+                }}
+                className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title="Toggle Sound"
+              >
+                {soundEnabled ? <Volume2 className="w-4 h-4 text-cyan-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
+              </button>
+            </div>
           )}
 
           {/* START CARD */}
           {phase === 'start' && (
             <FpsStartCard
               icon={Compass}
-              accent="emerald"
+              accent="cyan"
               title="Concentration Grid"
               subtitle="Sequential Number Search"
               rules={[
@@ -580,7 +611,7 @@ export default function ConcentrationGridClient() {
 
           {/* COUNTDOWN OVERLAY */}
           {phase === 'countdown' && (
-            <DrillCountdown value={countdownValue} subtitle="GET READY" accent="#22d3ee" />
+            <DrillCountdown value={countdownValue} subtitle="GET READY" />
           )}
 
           {/* PLAYING GRID BOARD */}

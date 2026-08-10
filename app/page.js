@@ -1,8 +1,9 @@
 import HomePageClient from './HomePageClient';
+import { DRILLS } from '@/lib/drillsRegistry';
 
 export const metadata = {
   title: 'SkillDrills - Free FPS Aim Trainer & Cognitive Brain Training Platform',
-  description: 'Master your mind and mechanics with 115+ free interactive drills. Improve FPS aim, reaction time, memory, focus, typing speed, and mental fitness. No sign-up.',
+  description: `Master your mind and mechanics with ${DRILLS.length}+ free interactive drills. Improve FPS aim, reaction time, memory, focus, typing speed, and mental fitness. No sign-up.`,
   keywords: [
     'free aim trainer', 'FPS aim trainer', 'flick shot training', 'tracking aim practice',
     'Valorant aim trainer', 'CS2 aim practice', 'free brain training', 'cognitive training',
@@ -15,7 +16,7 @@ export const metadata = {
   ],
   openGraph: {
     title: 'SkillDrills - Free FPS Aim Trainer & Cognitive Brain Training',
-    description: '115+ free drills for FPS gaming, cognitive skills, memory, and mental fitness. No registration. Start now.',
+    description: `${DRILLS.length}+ free drills for FPS gaming, cognitive skills, memory, and mental fitness. No registration. Start now.`,
     url: 'https://skilldrills.online',
     siteName: 'SkillDrills',
     images: [{ url: 'https://skilldrills.online/icons/icon-512x512.png', width: 512, height: 512, alt: 'SkillDrills - Free Brain Training Platform' }],
@@ -25,7 +26,7 @@ export const metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'SkillDrills - Free FPS & Cognitive Training Platform',
-    description: '115+ free training drills. No sign-up required. Start training instantly.',
+    description: `${DRILLS.length}+ free training drills. No sign-up required. Start training instantly.`,
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
@@ -37,7 +38,7 @@ export default function HomePage() {
     <>
       <noscript>
         <h1>SkillDrills - Free FPS Aim Trainer & Cognitive Brain Training Platform</h1>
-        <p>Master your mind and mechanics with 115+ free interactive drills. No sign-up required.</p>
+        <p>Master your mind and mechanics with {DRILLS.length}+ free interactive drills. No sign-up required.</p>
       </noscript>
       <HomePageClient />
     </>

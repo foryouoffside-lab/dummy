@@ -96,7 +96,7 @@ const faqSchema = {
       "name": "What is a reflex test?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "A reflex test measures the speed and accuracy of your neuromuscular response to sudden visual stimuli. This specific test also measures target discrimination by forcing you to filter out decoy targets."
+        "text": "A reflex test measures the speed and accuracy of your neuromuscular response to sudden visual stimuli, filtering out decoy targets."
       }
     },
     {
@@ -104,7 +104,7 @@ const faqSchema = {
       "name": "How does target recognition improve gaming?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "In competitive FPS games like Valorant or CS2, you must rapidly distinguish between enemies, teammates, and utility (like flashes). Target recognition training reduces false-positives (team damage or panic firing) and improves time-to-kill."
+        "text": "In competitive FPS games like Valorant or CS2, you must rapidly distinguish between enemies, teammates, and utility (like flashes)."
       }
     },
     {
@@ -112,15 +112,15 @@ const faqSchema = {
       "name": "Why are there red decoy balls?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "The red decoys test your impulse control. Pure reaction speed is useless if you shoot the wrong target. The decoys force your brain to cognitively process the target's validity before executing the motor command."
+        "text": "The red decoys test your impulse control. Pure reaction speed is useless if you shoot the wrong target."
       }
     },
     {
       "@type": "Question",
-      "name": "How does the adaptive difficulty work?",
+      "name": "How does adaptive difficulty work?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "As your score increases, the level rises up to Level 15. The engine automatically accelerates falling velocity, shrinks target radiuses, increases spawn rates, and raises the probability of red decoys appearing."
+        "text": "As your score increases, level rises up to Level 15. Falling velocity accelerates, radiuses shrink, and decoy probability increases."
       }
     },
     {
@@ -153,14 +153,6 @@ const faqSchema = {
       "acceptedAnswer": {
         "@type": "Answer",
         "text": "Yes! The SkillDrills Reflex Test is entirely free, open-source, and runs purely in your web browser with zero downloads required."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "What is a good score for the Reflex Test?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Scoring 8,000+ points earns a Gold or Platinum grade, while reaching 17,000+ points with 90%+ accuracy places you in the Master tier."
       }
     },
     {

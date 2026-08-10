@@ -109,34 +109,82 @@ export default function RSVPReaderPage() {
             "mainEntity": [
               {
                 "@type": "Question",
+                "name": "How does the target word system work in RSVP Speed Reader?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "The banner at top center displays an upcoming target word. Watch the focal stream as words flash. The moment the target word appears, tap 'TARGET DETECTED'. Once detected or passed, a new upcoming target word is assigned."
+                }
+              },
+              {
+                "@type": "Question",
                 "name": "What is an RSVP speed reader?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "RSVP displays words one at a time at a single focal point, eliminating eye movements. Words flash at the Optimal Recognition Point for maximum comprehension at speeds from 100 to 1000 WPM."
+                  "text": "RSVP (Rapid Serial Visual Presentation) displays words one at a time at a single focal point, eliminating saccadic eye movements. Words flash at the Optimal Recognition Point (ORP) for maximum reading throughput."
                 }
               },
               {
                 "@type": "Question",
-                "name": "What is the Optimal Recognition Point?",
+                "name": "What are the 5 difficulty levels?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "The ORP is the position within a word where the eye can most efficiently recognize it. Aligning each word at its ORP maximizes recognition speed and comprehension."
+                  "text": "Level 1 (250 WPM), Level 2 (350 WPM), Level 3 (480 WPM), Level 4 (650 WPM), and Level 5 (850 WPM). Level increases progressively up to Level 5 as you hit target words with high precision."
                 }
               },
               {
                 "@type": "Question",
-                "name": "How fast does this drill get?",
+                "name": "What is the Optimal Recognition Point (ORP)?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "The drill has 5 progressive speed tiers: Level 1 (250 WPM) up to Level 5 (850 WPM). Catching target words accurately advances you to the next tier, and each session runs for 45 seconds against a 5-life budget."
+                  "text": "The ORP is the position within a word where the human visual cortex can recognize it most efficiently — typically just left of center, weighted toward the beginning. Aligning each word at its ORP lets your eyes stay fixed at one point while still decoding the full word, accelerating visual token decoding."
                 }
               },
               {
                 "@type": "Question",
-                "name": "Do I need to sign up?",
+                "name": "Why do saccadic eye movements slow down normal reading?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "No registration required. This RSVP speed reader is completely free and works instantly in your browser."
+                  "text": "In conventional reading, the eyes don't move smoothly across a line — they jump between fixation points (saccades) and pause briefly at each word. Research suggests up to 80% of reading time is spent on these jumps and pauses rather than actual word recognition. RSVP removes the jumps entirely by bringing the words to a fixed focal point instead."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Can RSVP training actually increase my reading speed?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "RSVP reliably increases raw word-recognition throughput because it removes eye-movement overhead, and regular practice measurably improves how quickly your visual cortex parses each flashed word. Comprehension at very high WPM tiers depends on the material and the reader, which is why this drill also tracks accuracy alongside speed rather than raw WPM alone."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Is RSVP the same technique used in speed-reading apps?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Yes. RSVP is the core mechanism behind most commercial speed-reading apps and browser extensions. This drill isolates the technique as a trainable cognitive skill — a target-detection task — rather than a passive reading tool, so you get a measurable score and progression instead of just a WPM counter."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "What is a good WPM score for this drill?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "The average adult reads prose at 200-300 WPM with full comprehension. Reaching Level 3 (480 WPM) with high accuracy is a strong result; sustaining Level 5 (850 WPM) while still catching target words reliably puts you in elite speed-reading territory."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Who benefits most from RSVP training?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Students processing dense reading loads, professionals who read large volumes of text daily, and competitive gamers who need to parse on-screen information streams quickly all benefit from sharper visual word-recognition speed."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Is this RSVP speed reader free?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Yes. SkillDrills RSVP Speed Reader is 100% free with no ads, downloads, or registration required. It runs entirely in your browser on desktop and mobile."
                 }
               }
             ]

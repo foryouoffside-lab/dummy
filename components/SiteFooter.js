@@ -14,7 +14,7 @@ const categoryConfigs = [
 ];
 
 export default function SiteFooter() {
-  const totalDrills = DRILLS?.length || 113;
+  const totalDrills = DRILLS.length;
 
   return (
     <footer className="bg-canvas border-t border-hairline text-ink-2 py-16 relative overflow-hidden">

@@ -11,9 +11,12 @@ import {
   Play
 } from 'lucide-react';
 import { DRILLS } from '@/lib/drillsRegistry';
+import { getDifficultyRank } from '@/lib/scoringEngine';
 import SiteFooter from '@/components/SiteFooter';
 import Reveal from '@/components/Reveal';
 import StickyMobileCta from '@/components/StickyMobileCta';
+import DrillLoading from '@/components/DrillLoading';
+import ResetDrillButton from '@/components/drill/ResetDrillButton';
 
 const FOLDER_TO_STORAGE_KEY: Record<string, string> = {
   'market-doors-pursuit': 'skilldrills_market_doors_v2',
@@ -34,7 +37,7 @@ export default function ReactionSpeedDrillsClient() {
     setIsClient(true);
   }, []);
 
-  const reactiveDrills = DRILLS.filter(d => d.category === 'reaction-speed');
+  const reactiveDrills = DRILLS.filter(d => d.category === 'reaction-speed').sort((a, b) => getDifficultyRank(a.difficulty) - getDifficultyRank(b.difficulty));
 
   useEffect(() => {
     if (!isClient) return;
@@ -75,14 +78,7 @@ export default function ReactionSpeedDrillsClient() {
   };
 
   if (!isClient) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-canvas">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-amber-400 font-mono tracking-widest uppercase animate-pulse">Initializing Reflex Gateway...</p>
-        </div>
-      </div>
-    );
+    return <DrillLoading />;
   }
 
   return (
@@ -219,6 +215,11 @@ export default function ReactionSpeedDrillsClient() {
                 {reactiveDrills.map((drill) => {
                   const drillPath = `/drills/reaction-speed/${drill.folderName}`;
                   const bestLevel = drillLevels[drill.folderName];
+                  const resetOverride = FOLDER_TO_STORAGE_KEY[drill.folderName];
+                  const storageKeys = resetOverride ? [resetOverride] : [
+                    `skilldrills_${drill.folderName.replace(/-/g, '_')}_v2`,
+                    `skilldrills_${drill.folderName.replace(/-/g, '_')}`,
+                  ];
 
                   return (
                     <Link
@@ -250,6 +251,15 @@ export default function ReactionSpeedDrillsClient() {
                             <Zap className="w-5 h-5" />
                           </div>
                           <div className="flex items-center gap-1.5">
+                            <ResetDrillButton
+                              storageKeys={storageKeys}
+                              drillName={drill.name}
+                              onReset={() => setDrillLevels((prev) => {
+                                const next = { ...prev };
+                                delete next[drill.folderName];
+                                return next;
+                              })}
+                            />
                             {bestLevel && (
                               <span className="px-2 py-0.5 text-[9px] font-mono font-bold rounded-full border border-amber-500/20 bg-amber-500/10 text-amber-400">
                                 Lv. {bestLevel}

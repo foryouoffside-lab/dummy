@@ -124,6 +124,46 @@ export default function ConcentrationGridPage() {
           "@type": "Answer",
           "text": "You start each session with 3 lives, shown as hearts in the HUD. Every wrong tap costs one life; losing your last life ends the run immediately, regardless of time remaining."
         }
+      },
+      {
+        "@type": "Question",
+        "name": "What cognitive skill does Concentration Grid actually train?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "It primarily trains visual search efficiency — the speed at which your brain scans a cluttered field and locates a specific target among distractors. This relies on efficient micro-saccadic eye movements and peripheral vision rather than central foveal focus alone."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Where did the concentration grid exercise originate?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Numbered scanning grids trace back to sports psychology performance labs and are a staple warm-up in football, tennis, and combat sports training. Coaches use them to sharpen an athlete's ability to process a busy visual field quickly before switching attention to the actual game action."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Why do the numbers rotate at larger grid sizes?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "From the 5x5 grid onward, each number tile is rendered at a slight random rotation. This removes the shortcut of recognizing a number purely by its shape and orientation, forcing genuine digit recognition and keeping visual search difficulty climbing alongside grid size."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does this compare to a standard Schulte table?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "This drill is a timed, gamified evolution of the classic Schulte table (a fixed 5x5 number grid used in speed-reading and attention training). Instead of one static grid, it chains progressively larger grids together against a single countdown clock, rewarding sustained accuracy over the whole run rather than one isolated attempt."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is this concentration grid test free to play?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Concentration Grid on SkillDrills is completely free with no sign-up, downloads, or paywalls. It runs directly in your browser on desktop and mobile."
+        }
       }
     ]
   };

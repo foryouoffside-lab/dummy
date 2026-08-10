@@ -8,9 +8,13 @@ import {
   ChevronRight, Cpu
 } from 'lucide-react';
 import { DRILLS } from '@/lib/drillsRegistry';
+import { getDifficultyRank } from '@/lib/scoringEngine';
 import SiteFooter from '@/components/SiteFooter';
 import Reveal from '@/components/Reveal';
 import StickyMobileCta from '@/components/StickyMobileCta';
+import DrillLoading from '@/components/DrillLoading';
+import { isIdleFrameSkippable } from '@/lib/performance';
+import ResetDrillButton from '@/components/drill/ResetDrillButton';
 
 const motorDrills = DRILLS.filter(d => d.category === 'motor');
 
@@ -63,6 +67,7 @@ export default function MotorDrillsClient() {
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     let animationFrameId;
+    let lastTime = performance.now();
 
     const resize = () => {
       canvas.width = canvas.offsetWidth;
@@ -80,7 +85,12 @@ export default function MotorDrillsClient() {
     window.addEventListener("mousemove", handleMouseMove);
 
     const trail = [];
-    const draw = () => {
+    const draw = (time) => {
+      if (isIdleFrameSkippable(false, time, lastTime)) {
+        animationFrameId = requestAnimationFrame(draw);
+        return;
+      }
+      lastTime = time;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       
       if (mouse.x > 0 && mouse.y > 0) {
@@ -114,7 +124,7 @@ export default function MotorDrillsClient() {
 
       animationFrameId = requestAnimationFrame(draw);
     };
-    draw();
+    animationFrameId = requestAnimationFrame(draw);
 
     return () => {
       cancelAnimationFrame(animationFrameId);
@@ -132,7 +142,7 @@ export default function MotorDrillsClient() {
       bgColor: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400',
       textColor: 'text-emerald-400',
       description: 'Train aim, click accuracy, and drag-and-drop precision',
-      drills: motorDrills.filter(d => ['aim-trainer', 'drag-and-drop', 'precision-flick-shot'].includes(d.folderName))
+      drills: motorDrills.filter(d => ['aim-trainer', 'drag-and-drop', 'precision-flick-shot'].includes(d.folderName)).sort((a, b) => getDifficultyRank(a.difficulty) - getDifficultyRank(b.difficulty))
     },
     { 
       name: 'Movement Speed', 
@@ -142,7 +152,7 @@ export default function MotorDrillsClient() {
       bgColor: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400',
       textColor: 'text-emerald-400',
       description: 'Increase movement speed, sequencing, and gesture velocity',
-      drills: motorDrills.filter(d => ['finger-sequencing', 'gesture-speed', 'keyboard-recognition', 'rapid-tapping'].includes(d.folderName))
+      drills: motorDrills.filter(d => ['finger-sequencing', 'keyboard-recognition', 'rapid-tapping'].includes(d.folderName)).sort((a, b) => getDifficultyRank(a.difficulty) - getDifficultyRank(b.difficulty))
     },
     { 
       name: 'Precision Control', 
@@ -152,7 +162,7 @@ export default function MotorDrillsClient() {
       bgColor: 'bg-teal-500/10 border-teal-500/20 text-teal-400',
       textColor: 'text-teal-400',
       description: 'Master fine motor skills and precise cursor movements',
-      drills: motorDrills.filter(d => ['steady-hand', 'tracing'].includes(d.folderName))
+      drills: motorDrills.filter(d => ['steady-hand', 'tracing'].includes(d.folderName)).sort((a, b) => getDifficultyRank(a.difficulty) - getDifficultyRank(b.difficulty))
     }
   ];
 
@@ -169,14 +179,7 @@ export default function MotorDrillsClient() {
   const totalDrills = categories.reduce((acc, cat) => acc + cat.drills.length, 0);
 
   if (!isClient) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-canvas">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-emerald-400 font-mono tracking-widest uppercase animate-pulse">Initializing Motor Circuits...</p>
-        </div>
-      </div>
-    );
+    return <DrillLoading />;
   }
 
   return (
@@ -336,6 +339,11 @@ export default function MotorDrillsClient() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {categoryDrills.map((drill, index) => {
                   const bestLevel = drillLevels[drill.folderName];
+                  const storageKeys = [
+                    `skilldrills_motor_${drill.folderName.replace(/-/g, '_')}_v3`,
+                    `skilldrills_motor_${drill.folderName.replace(/-/g, '_')}_v2`,
+                    `skilldrills_${drill.folderName.replace(/-/g, '_')}`,
+                  ];
                   return (
                   <Link
                     key={index}
@@ -366,6 +374,15 @@ export default function MotorDrillsClient() {
                           <Icon className="w-5 h-5" />
                         </div>
                         <div className="flex items-center gap-1.5">
+                          <ResetDrillButton
+                            storageKeys={storageKeys}
+                            drillName={drill.name}
+                            onReset={() => setDrillLevels((prev) => {
+                              const next = { ...prev };
+                              delete next[drill.folderName];
+                              return next;
+                            })}
+                          />
                           {bestLevel && (
                             <div className="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold tracking-wide border border-emerald-500/20 bg-emerald-500/10 text-emerald-400">
                               Lv. {bestLevel}

@@ -4,13 +4,16 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import {
   Volume2, VolumeX,
-  Play, RefreshCw, Target,
-  Share2, LogOut, Eye, Users, TrendingUp, Zap, Trophy
+  Play, RefreshCw, Target, Clock,
+  Share2, LogOut, Eye, Users, TrendingUp, Zap, ZapOff, Trophy,
+  XSquare, Activity
 } from 'lucide-react';
 
 import generateShareCard, { shareScoreCard } from '../../../../components/ShareScoreCard';
 import { getPlayerName } from '../../../../lib/leaderboard';
 import { drillAudio } from '../../../../lib/drillAudio';
+import { drillFlash } from '../../../../lib/drillFlash';
+import { drillTimeout } from '../../../../lib/drillTimeout';
 import { getFpsScoreGrade } from '../../../../lib/scoringEngine';
 import { getDifficultyProgress, getStartLevel } from '../../../../lib/drillDifficulty';
 import useDrillFlash from '../../../../lib/useDrillFlash';
@@ -19,14 +22,11 @@ import DrillFooter from '../../../../components/drill/DrillFooter';
 import DrillCountdown from '../../../../components/drill/DrillCountdown';
 import DrillAccordion from '../../../../components/drill/DrillAccordion';
 import DrillFlashOverlay from '../../../../components/drill/DrillFlashOverlay';
-import DrillRuleItem from '../../../../components/drill/DrillRuleItem';
-import DrillFAQItem from '../../../../components/drill/DrillFAQItem';
 import FpsStartCard from '../../../../components/drill/FpsStartCard';
 
-const DRILL_DURATION = 45; // 45 seconds focused duration
-const POINTS_PER_HIT = 100;
-const POINTS_PER_LEVEL = 250;
-const ELITE_SCORE = 6000; // Benchmark score for elite grade rating (rebalanced after combo removal)
+const FpsStartCardAny = FpsStartCard as React.ComponentType<any>;
+
+const ELITE_SCORE = 5000;
 const STORAGE_KEY = 'skilldrills_reaction_time_test_v2';
 
 const RELATED_DRILLS = [
@@ -54,25 +54,13 @@ const saveData = (data: { bestScore: number; bestLevel: number; totalSessions: n
   } catch (e) {}
 };
 
-
-// Smooth difficulty curve parameters driving Level 1 to Level 15
-const getLevelConfig = (level: number) => {
-  const p = getDifficultyProgress(level); // 0 -> 1 across L1..L15
-  return {
-    radius: Math.max(12, Math.round(28 - p * 16)),           // 28px -> 12px
-    ttl: Math.max(380, Math.round(1300 - p * 880)),           // 1300ms -> 380ms
-    spawnDelayMin: Math.max(120, Math.round(550 - p * 400)), // 550ms -> 150ms
-    spawnDelayMax: Math.max(180, Math.round(750 - p * 520)), // 750ms -> 230ms
-  };
-};
-
 type Particle = { x: number; y: number; vx: number; vy: number; color: string; life: number };
-type RingBurst = { x: number; y: number; startR: number; maxR: number; life: number; maxLife: number; color: string };
 
 export default function ReactionTimeTestClient() {
   const [gameState, setGameState] = useState<'start' | 'countdown' | 'playing' | 'gameOver'>('start');
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
-  const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [flashEnabled, setFlashEnabled] = useState(true);
   const [openAccordion, setOpenAccordion] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState<boolean>(false);
   const [isPortrait, setIsPortrait] = useState<boolean>(false);
@@ -80,7 +68,9 @@ export default function ReactionTimeTestClient() {
 
   // HUD & Best Stats State
   const [uiScore, setUiScore] = useState<number>(0);
-  const [uiTimeLeft, setUiTimeLeft] = useState<number>(DRILL_DURATION);
+  const [uiRounds, setUiRounds] = useState<number>(0);
+  const [uiLevel, setUiLevel] = useState<number>(1);
+  const [liveAvgError, setLiveAvgError] = useState<number>(0);
   const [bestScore, setBestScore] = useState<number>(0);
   const [bestLevel, setBestLevel] = useState<number>(1);
   const [totalSessions, setTotalSessions] = useState<number>(0);
@@ -90,9 +80,10 @@ export default function ReactionTimeTestClient() {
   const [analytics, setAnalytics] = useState({
     accuracy: 100,
     successfulHits: 0,
-    missedClicks: 0,
-    timeouts: 0,
-    avgReactionTime: 0,
+    misses: 0,
+    exactHits: 0,
+    perfectHits: 0,
+    avgReactionTime: 0, // avg error in ms
     finalLevel: 1,
     grade: null as any
   });
@@ -102,28 +93,34 @@ export default function ReactionTimeTestClient() {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const animationRef = useRef<number | null>(null);
   const countdownTimeoutsRef = useRef<NodeJS.Timeout[]>([]);
-  const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const engine = useRef({
+    state: 'TARGET', // 'TARGET' | 'TIMER' | 'RESULT'
+    targetTime: 1000,
+    startTime: 0,
+    displayTimer: 1.5,
+    resultTimer: 1.0,
+    lastError: 0,
+    clickedTime: 0,
+    lastRating: '',
+    lastColor: '',
     score: 0,
     level: 1,
-    successfulHits: 0,
-    missedClicks: 0,
-    timeouts: 0,
+    combo: 0,
+    maxCombo: 0,
+    comboMultiplier: 1.0,
+    totalAttempts: 0,
+    hits: 0,
+    misses: 0,
+    exactHits: 0,
+    perfectHits: 0,
+    totalErrorAbs: 0,
     reactionTimes: [] as number[],
-    timeLeft: DRILL_DURATION,
-    screenShake: 0,
+    mousePos: { x: 0, y: 0 },
     particles: [] as Particle[],
-    rings: [] as RingBurst[],
-    target: {
-      active: false,
-      x: 0,
-      y: 0,
-      radius: 24,
-      spawnTime: 0,
-      ttl: 1200,
-    },
-    nextSpawnTime: 0
+    screenShake: 0,
+    flashRed: 0,
+    totalFrames: 0
   });
 
   const { flashes, triggerFlash } = useDrillFlash();
@@ -131,6 +128,8 @@ export default function ReactionTimeTestClient() {
   // Mobile Detection & Device Orientation Tracking
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      setSoundEnabled(drillAudio.isEnabled());
+      setFlashEnabled(drillFlash.isEnabled());
       const checkDeviceAndOrientation = () => {
         const ua = navigator.userAgent || '';
         const hasTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
@@ -157,11 +156,6 @@ export default function ReactionTimeTestClient() {
     }
   }, []);
 
-  // Sound sync
-  useEffect(() => {
-    drillAudio.setEnabled(soundEnabled);
-  }, [soundEnabled]);
-
   // Fullscreen Listener
   useEffect(() => {
     const handleFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
@@ -173,7 +167,6 @@ export default function ReactionTimeTestClient() {
   useEffect(() => {
     return () => {
       countdownTimeoutsRef.current.forEach(clearTimeout);
-      if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
     };
   }, []);
 
@@ -182,7 +175,6 @@ export default function ReactionTimeTestClient() {
     markIntentionalExit();
     countdownTimeoutsRef.current.forEach(clearTimeout);
     countdownTimeoutsRef.current = [];
-    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
 
     if (document.fullscreenElement) {
       await document.exitFullscreen().catch(() => {});
@@ -190,40 +182,32 @@ export default function ReactionTimeTestClient() {
     setGameState('start');
   }, []);
 
-  // Stop the drill if the player leaves any way other than the in-app Exit
-  // button (back gesture, tab switch, Esc) instead of running invisibly.
   const { markIntentionalExit } = useUnexpectedExitGuard({
     active: gameState === 'playing' || gameState === 'countdown',
     onUnexpectedExit: handleExitDrill,
   });
 
-  // Complete Drill Session cleanly
+  // Complete Drill Session cleanly when user clicks "End Drill"
   const endGame = useCallback(() => {
     if (animationRef.current) cancelAnimationFrame(animationRef.current);
-    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
 
-    // Fullscreen stays through the results screen — only handleExitDrill
-    // (the Exit button) drops back to half-screen.
     setGameState('gameOver');
 
     const e = engine.current;
-    const totalActions = e.successfulHits + e.missedClicks + e.timeouts;
-    const acc = totalActions > 0 ? Math.round((e.successfulHits / totalActions) * 100) : 100;
-    const avgRt = e.reactionTimes.length > 0
-      ? Math.round(e.reactionTimes.reduce((a, b) => a + b, 0) / e.reactionTimes.length)
-      : 0;
+    const totalActions = e.totalAttempts;
+    const acc = totalActions > 0 ? Math.round((e.hits / totalActions) * 100) : 100;
+    const avgErr = e.hits > 0 ? Math.round(e.totalErrorAbs / e.hits) : 0;
 
-    // getFpsScoreGrade returns { grade, label, color, ... } — remap `grade`
-    // to `letter` here so the JSX below has a stable field name to read.
     const rating = getFpsScoreGrade(e.score, ELITE_SCORE);
     const gradeObj = { letter: rating.grade, label: rating.label, color: rating.color };
 
     setAnalytics({
       accuracy: acc,
-      successfulHits: e.successfulHits,
-      missedClicks: e.missedClicks,
-      timeouts: e.timeouts,
-      avgReactionTime: avgRt,
+      successfulHits: e.hits,
+      misses: e.misses,
+      exactHits: e.exactHits,
+      perfectHits: e.perfectHits,
+      avgReactionTime: avgErr,
       finalLevel: e.level,
       grade: gradeObj
     });
@@ -252,41 +236,29 @@ export default function ReactionTimeTestClient() {
     drillAudio.playSessionEnd();
   }, [bestScore, bestLevel]);
 
-  // Target Spawn Logic (Random placement with screen margins)
-  const spawnTarget = useCallback((W: number, H: number, level: number) => {
+  // Generate New Timing Trial
+  const generateNewRound = useCallback(() => {
     const e = engine.current;
-    const config = getLevelConfig(level);
+    const minTarget = 1000;
+    const maxTarget = Math.min(8000, 1800 + (e.level * 450));
+    e.targetTime = minTarget + Math.floor(Math.random() * (maxTarget - minTarget));
 
-    const baseR = isMobile ? 26 : 24;
-    const radius = Math.max(14, Math.round(baseR - (getDifficultyProgress(level) * 8)));
-
-    const marginX = W * 0.12;
-    const marginY = H * 0.16;
-
-    const spawnX = marginX + Math.random() * (W - marginX * 2);
-    const spawnY = marginY + Math.random() * (H - marginY * 2);
-
-    e.target = {
-      active: true,
-      x: spawnX,
-      y: spawnY,
-      radius,
-      spawnTime: performance.now(),
-      ttl: config.ttl,
-    };
-  }, [isMobile]);
+    e.displayTimer = Math.max(0.5, 1.6 - (e.level * 0.05));
+    e.resultTimer = Math.max(0.5, 1.2 - (e.level * 0.05));
+    e.state = 'TARGET';
+    drillAudio.playTick();
+  }, []);
 
   // Enter Drill (Full Screen -> 321GO Countdown with Sound -> Playing)
   const enterDrill = useCallback(async () => {
     try {
       if (containerRef.current && !document.fullscreenElement) {
-        await containerRef.current.requestFullscreen();
+        await containerRef.current.requestFullscreen().catch(() => {});
       }
     } catch (e) {}
 
     countdownTimeoutsRef.current.forEach(clearTimeout);
     countdownTimeoutsRef.current = [];
-    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
 
     drillAudio.init();
 
@@ -294,24 +266,38 @@ export default function ReactionTimeTestClient() {
     const startLevel = getStartLevel(saved.bestLevel);
 
     setUiScore(0);
-    setUiTimeLeft(DRILL_DURATION);
+    setUiRounds(0);
+    setUiLevel(startLevel);
+    setLiveAvgError(0);
+    setIsNewBest(false);
 
     engine.current = {
+      state: 'TARGET',
+      targetTime: 1000,
+      startTime: 0,
+      displayTimer: 1.5,
+      resultTimer: 1.0,
+      lastError: 0,
+      clickedTime: 0,
+      lastRating: '',
+      lastColor: '',
       score: 0,
       level: startLevel,
-      successfulHits: 0,
-      missedClicks: 0,
-      timeouts: 0,
+      combo: 0,
+      maxCombo: 0,
+      comboMultiplier: 1.0,
+      totalAttempts: 0,
+      hits: 0,
+      misses: 0,
+      exactHits: 0,
+      perfectHits: 0,
+      totalErrorAbs: 0,
       reactionTimes: [],
-      timeLeft: DRILL_DURATION,
-      screenShake: 0,
+      mousePos: { x: window.innerWidth / 2, y: window.innerHeight / 2 },
       particles: [],
-      rings: [],
-      target: {
-        active: false,
-        x: 0, y: 0, radius: 24, spawnTime: 0, ttl: 1200
-      },
-      nextSpawnTime: 0
+      screenShake: 0,
+      flashRed: 0,
+      totalFrames: 0
     };
 
     // Countdown sequence: 3 -> 2 -> 1 -> GO with Audio Cues
@@ -336,264 +322,308 @@ export default function ReactionTimeTestClient() {
 
     const t4 = setTimeout(() => {
       setGameState('playing');
-
-      // Start 1-second Interval Timer (45 seconds duration)
-      let remaining = DRILL_DURATION;
-      timerIntervalRef.current = setInterval(() => {
-        remaining -= 1;
-        setUiTimeLeft(remaining);
-        if (remaining <= 0) {
-          endGame();
-        }
-      }, 1000);
-
-    }, 2450);
+      generateNewRound();
+      drillAudio.playGo();
+    }, 2600);
 
     countdownTimeoutsRef.current = [t1, t2, t3, t4];
-  }, [endGame]);
+  }, [generateNewRound]);
 
-  // Target Click / Tap Handler
-  const handleCanvasInteraction = useCallback((clientX: number, clientY: number) => {
+  // Particle Explosions
+  const createExplosion = useCallback((x: number, y: number, color: string, count: number) => {
+    const e = engine.current;
+    for (let i = 0; i < count; i++) {
+      const a = Math.random() * Math.PI * 2;
+      const s = Math.random() * 5 + 1;
+      e.particles.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, life: 1.0, color });
+    }
+  }, []);
+
+  // Handle User Input Click / Tap during gameplay
+  const handleInteraction = useCallback((clientX: number, clientY: number) => {
     if (gameState !== 'playing') return;
+
+    const eRef = engine.current;
     const cvs = canvasRef.current;
     if (!cvs) return;
 
-    const rect = cvs.getBoundingClientRect();
-    const clickX = clientX - rect.left;
-    const clickY = clientY - rect.top;
+    const cx = cvs.width / 2;
+    const cy = cvs.height / 2;
 
-    const e = engine.current;
+    if (eRef.state === 'TIMER') {
+      const now = performance.now();
+      const elapsed = now - eRef.startTime;
+      const error = elapsed - eRef.targetTime;
+      const errorAbs = Math.abs(error);
 
-    if (e.target.active) {
-      const dist = Math.hypot(clickX - e.target.x, clickY - e.target.y);
-      const hitPad = isMobile ? 24 : 14;
-      if (dist <= e.target.radius + hitPad) {
-        const rt = Math.round(performance.now() - e.target.spawnTime);
-        e.reactionTimes.push(rt);
-        e.successfulHits += 1;
-        e.score += POINTS_PER_HIT;
+      eRef.lastError = error;
+      eRef.clickedTime = elapsed;
+      eRef.totalAttempts++;
 
-        // Monotonic level progression as user scores points
-        const rawLevel = Math.floor(e.score / POINTS_PER_LEVEL) + 1;
-        e.level = Math.max(e.level, rawLevel);
+      // Tolerance Formula
+      const baseTolerance = 50 + (eRef.targetTime * 0.05);
+      const tExact = 10;
+      const tPerfect = baseTolerance * 0.2;
+      const tExcellent = baseTolerance * 0.4;
+      const tGood = baseTolerance * 0.6;
+      const tOk = baseTolerance * 0.8;
+      const tHit = baseTolerance;
 
-        setUiScore(e.score);
-        drillAudio.playHit();
+      if (errorAbs <= tHit) {
+        // Successful Hit!
+        eRef.hits++;
+        eRef.totalErrorAbs += errorAbs;
+        eRef.combo++;
+        if (eRef.combo > eRef.maxCombo) eRef.maxCombo = eRef.combo;
 
-        // Particles explosion (Constant Red)
-        for (let i = 0; i < 10; i++) {
-          const angle = Math.random() * Math.PI * 2;
-          const spd = 2 + Math.random() * 4;
-          e.particles.push({
-            x: e.target.x,
-            y: e.target.y,
-            vx: Math.cos(angle) * spd,
-            vy: Math.sin(angle) * spd,
-            color: '#ef4444',
-            life: 1.0
-          });
+        eRef.comboMultiplier = Math.min(3.0, 1.0 + (eRef.combo * 0.1));
+
+        let flashColor = '#06b6d4';
+        let basePts = 0;
+        let rating = '';
+
+        if (errorAbs <= tExact) {
+          basePts = 25; rating = 'EXACT'; flashColor = '#fbbf24';
+          eRef.exactHits++;
+        } else if (errorAbs <= tPerfect) {
+          basePts = 10; rating = 'PERFECT'; flashColor = '#00ff88';
+          eRef.perfectHits++;
+        } else if (errorAbs <= tExcellent) {
+          basePts = 8; rating = 'EXCELLENT'; flashColor = '#3b82f6';
+        } else if (errorAbs <= tGood) {
+          basePts = 5; rating = 'GOOD'; flashColor = '#06b6d4';
+        } else if (errorAbs <= tOk) {
+          basePts = 3; rating = 'OK'; flashColor = '#f59e0b';
+        } else {
+          basePts = 1; rating = 'HIT'; flashColor = '#d946ef';
         }
 
-        // Ring Burst Effect
-        e.rings.push({
-          x: e.target.x,
-          y: e.target.y,
-          startR: e.target.radius * 0.4,
-          maxR: e.target.radius * 2.6,
-          life: 0.28,
-          maxLife: 0.28,
-          color: '#ef4444'
-        });
+        const ptsGained = Math.round(basePts * eRef.comboMultiplier * 10);
+        eRef.score += ptsGained;
+        eRef.lastRating = rating;
+        eRef.lastColor = flashColor;
 
-        e.target.active = false;
-        const config = getLevelConfig(e.level);
-        const delay = config.spawnDelayMin + Math.random() * (config.spawnDelayMax - config.spawnDelayMin);
-        e.nextSpawnTime = performance.now() + delay;
-        return;
+        drillAudio.playHit();
+        createExplosion(cx, cy, flashColor, basePts * 2);
+
+        // Endless Leveling
+        const newLevel = Math.floor(eRef.score / 250) + 1;
+        if (newLevel > eRef.level) {
+          eRef.level = newLevel;
+          drillAudio.playGo();
+        }
+
+        eRef.state = 'RESULT';
+      } else {
+        // Miss - Timing Penalty
+        eRef.misses++;
+        eRef.combo = 0;
+        eRef.comboMultiplier = 1.0;
+        eRef.screenShake = 12;
+        eRef.flashRed = 0.25;
+        eRef.lastRating = 'MISS';
+        eRef.lastColor = '#ef4444';
+
+        triggerFlash();
+        drillAudio.playPenalty();
+
+        eRef.state = 'RESULT';
       }
+
+      setUiScore(Math.floor(eRef.score));
+      setUiRounds(eRef.totalAttempts);
+      setUiLevel(eRef.level);
+      setLiveAvgError(Math.round(eRef.totalErrorAbs / Math.max(1, eRef.hits)));
+
+    } else if (eRef.state === 'RESULT') {
+      // Immediate advance to next round on fast click
+      generateNewRound();
     }
+  }, [gameState, generateNewRound, createExplosion, triggerFlash]);
 
-    // Missed click on empty space: no penalty, just flash + audio feedback
-    e.missedClicks += 1;
-    e.screenShake = 6;
-    triggerFlash();
-    drillAudio.playPenalty();
-  }, [gameState, isMobile, triggerFlash]);
-
-  // Canvas Physics & Render Loop (Visual Reflex Speed Engine)
+  // Main Render & Physics Loop
   useEffect(() => {
     if (gameState !== 'playing') return;
+
     const cvs = canvasRef.current;
     const container = containerRef.current;
     if (!cvs || !container) return;
 
-    const ctx = cvs.getContext('2d');
+    const ctx = cvs.getContext('2d', { alpha: false });
     if (!ctx) return;
 
-    const updateSize = () => {
-      if (!container) return;
-      const rect = container.getBoundingClientRect();
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      cvs.width = rect.width * dpr;
-      cvs.height = rect.height * dpr;
-      ctx.scale(dpr, dpr);
-    };
-
-    updateSize();
-    const ro = new ResizeObserver(updateSize);
-    ro.observe(container);
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const { width, height } = entry.contentRect;
+        if (width > 0 && height > 0) {
+          cvs.width = width;
+          cvs.height = height;
+        }
+      }
+    });
+    resizeObserver.observe(container);
 
     let lastTime = performance.now();
 
-    const draw = (now: number) => {
-      const dt = Math.min((now - lastTime) / 1000, 0.1);
-      lastTime = now;
-
-      const rect = container.getBoundingClientRect();
-      const W = rect.width;
-      const H = rect.height;
+    const loop = (time: number) => {
+      const dt = Math.min((time - lastTime) / 1000, 0.033);
+      lastTime = time;
       const e = engine.current;
 
-      // Screen Shake Effect
+      // State Timers
+      if (e.state === 'TARGET') {
+        e.displayTimer -= dt;
+        if (e.displayTimer <= 0) {
+          e.state = 'TIMER';
+          e.startTime = performance.now();
+        }
+      } else if (e.state === 'RESULT') {
+        e.resultTimer -= dt;
+        if (e.resultTimer <= 0) {
+          generateNewRound();
+        }
+      }
+
+      // FX Decay
+      if (e.screenShake > 0) e.screenShake -= dt * 35;
+      if (e.flashRed > 0) e.flashRed -= dt * 2.0;
+
+      // --- RENDERING PHASE ---
       ctx.save();
+
       if (e.screenShake > 0) {
         const sx = (Math.random() - 0.5) * e.screenShake;
         const sy = (Math.random() - 0.5) * e.screenShake;
         ctx.translate(sx, sy);
         e.screenShake *= 0.85;
-        if (e.screenShake < 0.2) e.screenShake = 0;
+        if (e.screenShake < 0.5) e.screenShake = 0;
       }
 
-      // Clear Canvas (Deep Dark `#050508`)
       ctx.fillStyle = '#050508';
-      ctx.fillRect(0, 0, W, H);
+      ctx.fillRect(0, 0, cvs.width, cvs.height);
 
-      // Render subtle background grid
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.02)';
+      const cx = cvs.width / 2;
+      const cy = cvs.height / 2;
+
+      // Professional Background Tactical Grid
+      ctx.strokeStyle = 'rgba(6, 182, 212, 0.04)';
       ctx.lineWidth = 1;
-      const gridSize = 40;
-      for (let x = 0; x < W; x += gridSize) {
-        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+      for (let i = 0; i < cvs.width; i += 50) {
+        ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, cvs.height); ctx.stroke();
       }
-      for (let y = 0; y < H; y += gridSize) {
-        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
-      }
-
-      // Spawn Target if inactive
-      if (!e.target.active && now >= e.nextSpawnTime) {
-        spawnTarget(W, H, e.level);
+      for (let j = 0; j < cvs.height; j += 50) {
+        ctx.beginPath(); ctx.moveTo(0, j); ctx.lineTo(cvs.width, j); ctx.stroke();
       }
 
-      // Target Timeout Check
-      if (e.target.active) {
-        const age = now - e.target.spawnTime;
-        if (age >= e.target.ttl) {
-          e.target.active = false;
-          e.timeouts += 1;
-          e.screenShake = 6;
-          triggerFlash();
-          drillAudio.playPenalty();
-          const config = getLevelConfig(e.level);
-          const delay = config.spawnDelayMin + Math.random() * (config.spawnDelayMax - config.spawnDelayMin);
-          e.nextSpawnTime = now + delay;
-        }
+      // --- State Specific Professional Render ---
+      if (e.state === 'TARGET') {
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "900 64px monospace";
+        ctx.textAlign = "center";
+        ctx.fillText(`${(e.targetTime / 1000).toFixed(3)}s`, cx, cy + 15);
+
+        // Progress bar for memorization phase
+        const maxDisplay = Math.max(0.5, 1.6 - (e.level * 0.05));
+        const prog = e.displayTimer / maxDisplay;
+        ctx.fillStyle = "rgba(6, 182, 212, 0.15)";
+        ctx.fillRect(cx - 110, cy + 50, 220, 4);
+        ctx.fillStyle = "#06b6d4";
+        ctx.fillRect(cx - 110, cy + 50, Math.max(0, 220 * prog), 4);
       }
 
-      // Draw Target (Tactical Red Target Sphere matching reference design)
-      if (e.target.active) {
-        const t = e.target;
-        const r = t.radius;
-        ctx.save();
+      if (e.state === 'TIMER') {
+        const elapsed = performance.now() - e.startTime;
 
-        // Ghost outer ring
-        ctx.globalAlpha = 0.2;
-        ctx.strokeStyle = '#ef4444';
-        ctx.lineWidth = 1.0;
+        // Center Glowing Orb
         ctx.beginPath();
-        ctx.arc(t.x, t.y, r + 5, 0, Math.PI * 2);
-        ctx.stroke();
-
-        // Tactical outer ring
-        ctx.globalAlpha = 0.55;
-        ctx.strokeStyle = '#ef4444';
-        ctx.lineWidth = 1.8;
-        ctx.beginPath();
-        ctx.arc(t.x, t.y, r, 0, Math.PI * 2);
-        ctx.stroke();
-
-        // Filled red body with subtle glow
-        ctx.globalAlpha = 0.88;
-        ctx.shadowColor = '#ef4444';
-        ctx.shadowBlur = 14;
-        ctx.fillStyle = '#ef4444';
-        ctx.beginPath();
-        ctx.arc(t.x, t.y, r * 0.82, 0, Math.PI * 2);
+        ctx.arc(cx, cy, 12, 0, Math.PI * 2);
+        ctx.fillStyle = "#06b6d4";
+        ctx.shadowBlur = 20;
+        ctx.shadowColor = "#06b6d4";
         ctx.fill();
         ctx.shadowBlur = 0;
 
-        // Highlight sheen
-        ctx.globalAlpha = 0.3;
-        ctx.fillStyle = '#ffffff';
-        ctx.beginPath();
-        ctx.arc(t.x - r * 0.2, t.y - r * 0.2, r * 0.28, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Bright white center core
-        ctx.globalAlpha = 1.0;
-        ctx.fillStyle = '#ffffff';
-        ctx.beginPath();
-        ctx.arc(t.x, t.y, Math.max(2.5, r * 0.18), 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.restore();
-      }
-
-      // Ring Bursts Draw
-      for (let i = e.rings.length - 1; i >= 0; i--) {
-        const ring = e.rings[i];
-        ring.life -= dt;
-        if (ring.life <= 0) { e.rings.splice(i, 1); continue; }
-        const progress = 1 - ring.life / ring.maxLife;
-        const currentR = ring.startR + (ring.maxR - ring.startR) * progress;
+        // Rotating inner dashed ring
         ctx.save();
-        ctx.globalAlpha = (ring.life / ring.maxLife) * 0.75;
-        ctx.strokeStyle = ring.color;
-        ctx.lineWidth = 2.5;
+        ctx.translate(cx, cy);
+        ctx.rotate(elapsed * 0.0012);
         ctx.beginPath();
-        ctx.arc(ring.x, ring.y, currentR, 0, Math.PI * 2);
+        ctx.arc(0, 0, 52, 0, Math.PI * 2);
+        ctx.strokeStyle = "rgba(6, 182, 212, 0.5)";
+        ctx.lineWidth = 2;
+        ctx.setLineDash([10, 15]);
         ctx.stroke();
         ctx.restore();
+
+        // Counter-rotating outer orbital ring
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(-elapsed * 0.0006);
+        ctx.beginPath();
+        ctx.arc(0, 0, 75, 0, Math.PI * 2);
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.18)";
+        ctx.lineWidth = 1.2;
+        ctx.setLineDash([6, 6]);
+        ctx.stroke();
+        ctx.restore();
+
+        // Pulsing rings
+        const pulse = (elapsed % 1000) / 1000;
+        ctx.beginPath();
+        ctx.arc(cx, cy, 75 + (pulse * 42), 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(6, 182, 212, ${0.4 * (1 - pulse)})`;
+        ctx.lineWidth = 2;
+        ctx.stroke();
       }
 
-      // Particles Update & Draw
+      if (e.state === 'RESULT') {
+        const color = e.lastColor;
+
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "900 64px monospace";
+        ctx.textAlign = "center";
+        ctx.fillText(`${(e.clickedTime / 1000).toFixed(3)}s`, cx, cy - 5);
+
+        ctx.fillStyle = color;
+        ctx.font = "bold 26px monospace";
+        ctx.fillText(`${e.lastError > 0 ? '+' : ''}${e.lastError.toFixed(0)}ms`, cx, cy + 42);
+
+        // Next round progress bar
+        const maxResult = Math.max(0.5, 1.2 - (e.level * 0.05));
+        const prog = e.resultTimer / maxResult;
+        ctx.fillStyle = "rgba(255,255,255,0.15)";
+        ctx.fillRect(cx - 100, cy + 75, 200, 3);
+        ctx.fillStyle = color;
+        ctx.fillRect(cx - 100, cy + 75, Math.max(0, 200 * prog), 3);
+      }
+
+      if (e.flashRed > 0) {
+        ctx.fillStyle = `rgba(239, 68, 68, ${e.flashRed})`;
+        ctx.fillRect(0, 0, cvs.width, cvs.height);
+      }
+
+      // Particles
       for (let i = e.particles.length - 1; i >= 0; i--) {
         const p = e.particles[i];
-        p.x += p.vx;
-        p.y += p.vy;
+        p.x += p.vx * dt * 60;
+        p.y += p.vy * dt * 60;
         p.life -= dt * 2.5;
-        if (p.life <= 0) {
-          e.particles.splice(i, 1);
-          continue;
-        }
-        ctx.globalAlpha = Math.max(0, p.life);
-        ctx.fillStyle = p.color;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
-        ctx.fill();
+        if (p.life <= 0) { e.particles.splice(i, 1); continue; }
+        ctx.globalAlpha = p.life; ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, 4, 4);
       }
       ctx.globalAlpha = 1.0;
 
       ctx.restore();
-      animationRef.current = requestAnimationFrame(draw);
+      animationRef.current = requestAnimationFrame(loop);
     };
 
-    animationRef.current = requestAnimationFrame(draw);
+    animationRef.current = requestAnimationFrame(loop);
 
     return () => {
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
-      ro.disconnect();
+      resizeObserver.disconnect();
     };
-  }, [gameState, spawnTarget, triggerFlash, isMobile]);
+  }, [gameState, generateNewRound]);
 
   // Share Score Card helper
   const sharePage = useCallback(async () => {
@@ -610,7 +640,7 @@ export default function ReactionTimeTestClient() {
       });
       await shareScoreCard(url, canvas);
     } catch (e) {
-      const text = `🎯 I scored ${uiScore} PTS (Level ${analytics.finalLevel}) on Reaction Time Test! Average reaction: ${analytics.avgReactionTime}ms. Practice free reflex drills at skilldrills.online! ⚡`;
+      const text = `🎯 I scored ${uiScore} PTS (Avg Error: ±${analytics.avgReactionTime}ms) on Reaction Time Test! Practice free reflex drills at skilldrills.online! ⚡`;
       if (typeof navigator !== 'undefined' && navigator.share) {
         navigator.share({ title: 'Reaction Time Test Score', text, url }).catch(() => {});
       } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
@@ -631,20 +661,33 @@ export default function ReactionTimeTestClient() {
               <span>/</span>
               <Link href="/drills/reaction-speed" className="hover:text-white transition-colors">Reaction Speed</Link>
               <span>/</span>
-              <span className="text-red-400 font-medium">Reaction Time Test</span>
+              <span className="text-cyan-400 font-medium">Reaction Time Test</span>
             </div>
 
-            <button
-              onClick={() => {
-                const next = !soundEnabled;
-                setSoundEnabled(next);
-                drillAudio.setEnabled(next);
-              }}
-              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-              title={soundEnabled ? "Mute Sound" : "Unmute Sound"}
-            >
-              {soundEnabled ? <Volume2 className="w-4 h-4 text-emerald-400" /> : <VolumeX className="w-4 h-4 text-red-400" />}
-            </button>
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => {
+                  const next = !soundEnabled;
+                  setSoundEnabled(next);
+                  drillAudio.setEnabled(next);
+                }}
+                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title={soundEnabled ? "Mute Sound" : "Unmute Sound"}
+              >
+                {soundEnabled ? <Volume2 className="w-4 h-4 text-emerald-400" /> : <VolumeX className="w-4 h-4 text-red-400" />}
+              </button>
+              <button
+                onClick={() => {
+                  const next = !flashEnabled;
+                  setFlashEnabled(next);
+                  drillFlash.setEnabled(next);
+                }}
+                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title={flashEnabled ? "Disable Miss Flash" : "Enable Miss Flash"}
+              >
+                {flashEnabled ? <Zap className="w-4 h-4 text-red-400" /> : <ZapOff className="w-4 h-4 text-red-400" />}
+              </button>
+            </div>
           </div>
         </header>
       )}
@@ -654,11 +697,11 @@ export default function ReactionTimeTestClient() {
         {/* Title */}
         {!isFullscreen && (
           <div className="text-center">
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight bg-gradient-to-r from-white via-slate-200 to-red-400 bg-clip-text text-transparent">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight bg-gradient-to-r from-white via-slate-200 to-cyan-400 bg-clip-text text-transparent">
               REACTION TIME TEST
             </h1>
             <p className="text-xs text-slate-400 mt-1">
-              Visual Speed & Millisecond Reflex Telemetry
+              Visual Latency & Mental Chronometry • Unlimited Practice
             </p>
           </div>
         )}
@@ -668,32 +711,32 @@ export default function ReactionTimeTestClient() {
           <div className="grid grid-cols-4 gap-2.5 max-w-2xl mx-auto w-full">
             <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
-              <div className="text-lg sm:text-xl font-black text-red-400 tabular-nums">{uiScore}</div>
+              <div className="text-lg sm:text-xl font-black text-cyan-400 tabular-nums font-mono">{uiScore}</div>
             </div>
             <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
-              <div className={`text-lg sm:text-xl font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>
-                {uiTimeLeft}s
+              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Avg Error</div>
+              <div className="text-lg sm:text-xl font-black text-white tabular-nums font-mono">
+                ±{liveAvgError}<span className="text-xs text-slate-400">ms</span>
               </div>
             </div>
             <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Level</div>
-              <div className="text-lg sm:text-xl font-black text-indigo-400 tabular-nums">L{engine.current.level}</div>
+              <div className="text-lg sm:text-xl font-black text-indigo-400 tabular-nums font-mono">L{uiLevel}</div>
             </div>
             <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
-              <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
+              <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums font-mono">{bestScore}</div>
             </div>
           </div>
         )}
 
         {/* Game Stage Container */}
-        <div 
-          ref={containerRef} 
+        <div
+          ref={containerRef}
           className={
-            isFullscreen 
-              ? 'fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#050508] flex flex-col items-center justify-center' 
-              : isMobile 
+            isFullscreen
+              ? 'fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#050508] flex flex-col items-center justify-center'
+              : isMobile
                 ? (isPortrait
                     ? 'w-full rounded-2xl aspect-[3/4] min-h-[420px] max-h-[76vh] bg-[#080811] border border-white/10 relative overflow-hidden flex flex-col'
                     : 'w-full rounded-2xl aspect-video min-h-[340px] max-h-[85vh] bg-[#080811] border border-white/10 relative overflow-hidden flex flex-col')
@@ -703,59 +746,90 @@ export default function ReactionTimeTestClient() {
           {/* Red Flash Overlay */}
           <DrillFlashOverlay flashes={flashes} />
 
-          {/* IN-BOX SCORE / TIMER HUD */}
+          {/* IN-BOX OVERLAY HUD */}
           {(gameState === 'playing' || gameState === 'countdown') && (
             <>
               <div className="absolute top-4 left-4 z-30 pointer-events-none">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Score</p>
-                <p className="text-2xl sm:text-3xl font-bold text-white tabular-nums leading-tight">{uiScore}</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50 font-mono">Score</p>
+                <p className="text-2xl sm:text-3xl font-black text-white tabular-nums font-mono leading-tight">{uiScore}</p>
               </div>
-              <div className="absolute top-4 right-4 z-30 pointer-events-none text-right">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Time</p>
-                <p className={`text-2xl sm:text-3xl font-bold tabular-nums leading-tight ${uiTimeLeft <= 10 ? 'text-red-400' : 'text-white'}`}>{uiTimeLeft}s</p>
-              </div>
+
+              {/* End Drill Action Button in HUD */}
+              {gameState === 'playing' && (
+                <div className="absolute top-4 left-1/2 -translate-x-1/2 z-40">
+                  <button
+                    onPointerDown={(e) => e.stopPropagation()}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      endGame();
+                    }}
+                    className="px-4 py-1.5 rounded-full bg-red-600/90 hover:bg-red-500 text-white font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 shadow-lg border border-red-400/40 cursor-pointer active:scale-95 transition-all"
+                  >
+                    <XSquare className="w-3.5 h-3.5" /> End Drill
+                  </button>
+                </div>
+              )}
+
+
             </>
           )}
 
-          {/* IN-GAME SOUND TOGGLE */}
+          {/* IN-GAME HUD SOUND + FLASH TOGGLES */}
           {(gameState === 'playing' || gameState === 'countdown') && (
-            <button
-              onPointerDown={(e) => e.stopPropagation()}
-              onClick={(e) => {
-                e.stopPropagation();
-                setSoundEnabled((v) => {
-                  drillAudio.setEnabled(!v);
-                  return !v;
-                });
-              }}
-              className="absolute bottom-4 right-4 z-40 p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-              title="Toggle Sound"
-            >
-              {soundEnabled ? <Volume2 className="w-4 h-4 text-red-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
-            </button>
+            <div className="absolute bottom-4 right-4 z-40 flex items-center gap-2">
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setFlashEnabled((v) => {
+                    drillFlash.setEnabled(!v);
+                    return !v;
+                  });
+                }}
+                className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title="Toggle Miss Flash"
+              >
+                {flashEnabled ? <Zap className="w-4 h-4 text-red-400" /> : <ZapOff className="w-4 h-4 text-slate-500" />}
+              </button>
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSoundEnabled((v) => {
+                    drillAudio.setEnabled(!v);
+                    return !v;
+                  });
+                }}
+                className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title="Toggle Sound"
+              >
+                {soundEnabled ? <Volume2 className="w-4 h-4 text-emerald-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
+              </button>
+            </div>
           )}
 
           {/* CANVAS */}
-          <canvas 
-            ref={canvasRef} 
-            onPointerDown={(e) => handleCanvasInteraction(e.clientX, e.clientY)}
-            className="block absolute top-0 left-0 w-full h-full z-10 cursor-crosshair touch-none" 
+          <canvas
+            ref={canvasRef}
+            onPointerDown={(e) => handleInteraction(e.clientX, e.clientY)}
+            className="block absolute top-0 left-0 w-full h-full z-10 cursor-pointer touch-none"
           />
 
           {/* START CARD */}
           {gameState === 'start' && (
-            <FpsStartCard
-              icon={Target}
-              accent="red"
+            <FpsStartCardAny
+              icon={Clock}
+              accent="cyan"
               title="Reaction Time Test"
-              subtitle="Visual Speed • Millisecond Reflexes"
+              subtitle="Visual Latency • Mental Chronometry"
               rules={[
-                { icon: Target, accent: 'red', title: 'Tap Flashing Targets', text: 'Strike targets as quickly as possible upon visual spawn' },
-                { icon: Zap, accent: 'orange', title: 'Millisecond Response Telemetry', text: 'Benchmark pure visual latency and response accuracy' },
+                { icon: Clock, accent: 'cyan', title: 'Memorize Target Interval', text: 'Note the exact target time displayed before estimation starts' },
+                { icon: Target, accent: 'orange', title: 'Click at Exact Time', text: 'Click as close to 0ms error as possible when time elapses' },
+                { icon: Zap, accent: 'emerald', title: 'Time-Free Practice', text: 'Play unlimited rounds at your pace. Click End Drill whenever ready!' }
               ]}
               stats={[
                 { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
-                { icon: TrendingUp, label: 'Best Level', value: `Lv. ${bestLevel}`, color: 'text-blue-400', accent: 'blue' },
+                { icon: TrendingUp, label: 'Best Level', value: `Lv. ${bestLevel}`, color: 'text-cyan-400', accent: 'blue' },
               ]}
               isTouchOnlyDevice={false}
               onStart={enterDrill}
@@ -764,72 +838,72 @@ export default function ReactionTimeTestClient() {
 
           {/* COUNTDOWN OVERLAY */}
           {gameState === 'countdown' && (
-            <DrillCountdown value={countdownValue} subtitle="GET READY" accent="#ef4444" />
+            <DrillCountdown value={countdownValue} subtitle="GET READY" />
           )}
 
           {/* END SCREEN */}
           {gameState === 'gameOver' && analytics.grade && (
             <div className="absolute inset-0 z-40 flex bg-neutral-950/98 select-none font-sans" style={{ background: 'rgba(5,5,8,0.97)' }} onPointerDown={e => e.stopPropagation()}>
-              
+
               {/* Left Grade Panel */}
-              <div className="w-[36%] flex flex-col items-center justify-center gap-1 border-r border-white/5 px-4" style={{ background: 'radial-gradient(ellipse 260px 200px at 50% 30%, rgba(239,68,68,.12), transparent 70%)' }}>
+              <div className="w-[36%] flex flex-col items-center justify-center gap-1 border-r border-white/5 px-4" style={{ background: 'radial-gradient(ellipse 260px 200px at 50% 30%, rgba(6,182,212,.12), transparent 70%)' }}>
                 {isNewBest && (
                   <span className="text-[9.5px] font-bold text-yellow-400 bg-yellow-500/10 border border-yellow-500/25 px-2.5 py-0.5 rounded-full mb-1 animate-pulse">
                     NEW BEST
                   </span>
                 )}
-                <div className={`text-5xl sm:text-6xl font-black leading-none ${analytics.grade.color}`}>
+                <div className={`text-5xl sm:text-6xl font-black leading-none ${analytics.grade.color} font-mono`}>
                   {analytics.grade.letter}
                 </div>
-                <div className="text-[10px] uppercase tracking-widest text-slate-500 text-center font-bold mt-1">
+                <div className="text-[10px] uppercase tracking-widest text-slate-500 text-center font-bold mt-1 font-mono">
                   {analytics.grade.label}
                 </div>
-                <div className="text-3xl sm:text-4xl font-black text-white mt-2 tabular-nums">
+                <div className="text-3xl sm:text-4xl font-black text-white mt-2 tabular-nums font-mono">
                   {uiScore}
                 </div>
-                <div className="text-[9px] uppercase tracking-widest text-slate-500">Points</div>
+                <div className="text-[9px] uppercase tracking-widest text-slate-500 font-mono">Points</div>
               </div>
 
               {/* Right Stats & Actions Panel */}
               <div className="flex-1 flex flex-col justify-center gap-3 px-6 py-4 min-w-0">
-                
+
                 {/* 3 Stat Tiles */}
                 <div className="grid grid-cols-3 gap-2">
                   <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.accuracy}%</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Accuracy</p>
+                    <p className="text-sm sm:text-base font-black text-white font-mono">{analytics.accuracy}%</p>
+                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5 font-mono">Accuracy</p>
                   </div>
                   <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.avgReactionTime}<span className="text-[10px] text-gray-500">ms</span></p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Avg Reaction</p>
+                    <p className="text-sm sm:text-base font-black text-cyan-400 font-mono">±{analytics.avgReactionTime}<span className="text-[10px] text-gray-500">ms</span></p>
+                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5 font-mono">Avg Error</p>
                   </div>
                   <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">Lv. {analytics.finalLevel}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Peak Level</p>
+                    <p className="text-sm sm:text-base font-black text-white font-mono">Lv. {analytics.finalLevel}</p>
+                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5 font-mono">Peak Level</p>
                   </div>
                 </div>
 
                 {/* Action Buttons */}
                 <div className="flex gap-2">
-                  <button 
+                  <button
                     type="button"
-                    onClick={enterDrill} 
-                    className="flex-1 py-3 rounded-[13px] bg-gradient-to-r from-red-600 to-rose-600 text-white font-bold text-xs uppercase tracking-wide cursor-pointer transition-transform active:scale-[0.98] shadow-md flex items-center justify-center gap-1.5"
+                    onClick={enterDrill}
+                    className="flex-1 py-3 rounded-[13px] bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-bold text-xs uppercase tracking-wide cursor-pointer transition-transform active:scale-[0.98] shadow-md flex items-center justify-center gap-1.5"
                   >
                     <RefreshCw className="w-3.5 h-3.5" /> Play Again
                   </button>
-                  <button 
+                  <button
                     type="button"
-                    onClick={sharePage} 
-                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform" 
+                    onClick={sharePage}
+                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform"
                     title="Share Score"
                   >
                     <Share2 className="w-4 h-4" />
                   </button>
-                  <button 
+                  <button
                     type="button"
-                    onClick={handleExitDrill} 
-                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform" 
+                    onClick={handleExitDrill}
+                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform"
                     title="Return to Options"
                   >
                     <LogOut className="w-4 h-4 text-red-400" />
@@ -852,10 +926,10 @@ export default function ReactionTimeTestClient() {
               onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-sans">
-                <DrillRuleItem num="1" text="Tap Flashing Targets" highlight="+100 PTS" result="Adds to score & levels you up" />
-                <DrillRuleItem num="2" text="Level Progression" highlight="Every 250 PTS" result="Targets spawn faster & shrink" />
-                <DrillRuleItem num="3" text="Miss / Timeout" highlight="No Penalty" result="Triggers red alert, score safe" />
-                <DrillRuleItem num="4" text="Session Length" highlight="45 Seconds" result="Beat your best before time's up" />
+                <RuleItem num="1" text="Timing Accuracy" highlight="Up to +250 PTS" result="Sub-10ms error earns EXACT bonus" />
+                <RuleItem num="2" text="Combo Stacking" highlight="Up to 3.0x" result="Consecutive hits multiply point gains" />
+                <RuleItem num="3" text="Timing Miss" highlight="Combo Reset" result="Triggers red alert, score safe" />
+                <RuleItem num="4" text="Unlimited Time" highlight="Free Mode" result="Play at your pace until you click End Drill" />
               </div>
             </DrillAccordion>
 
@@ -868,37 +942,37 @@ export default function ReactionTimeTestClient() {
               <div className="space-y-8 font-sans">
                 <section>
                   <h4 className="text-base font-bold text-white mb-2 flex items-center gap-2">
-                    <Eye className="w-4 h-4 text-red-400" /> What Is Visual Reaction Speed & Millisecond Response Training?
+                    <Eye className="w-4 h-4 text-cyan-400" /> What Is Visual Reaction Time & Mental Chronometry?
                   </h4>
                   <p className="text-sm leading-relaxed mb-3 text-gray-300">
-                    <strong>Reaction Time Test</strong> measures and conditions your brain's visual-to-motor processing speed. Human reaction latency is the time elapsed between the presentation of a visual stimulus and the execution of a mechanical response.
+                    <strong>Reaction Time Test</strong> measures and conditions visual latency, internal clock calibration, and mental chronometry. In fast-paced FPS, racing, and sports games, judging timing intervals and visual cues with sub-millisecond precision is essential for winning duels.
                   </p>
                   <p className="text-sm leading-relaxed text-gray-300">
-                    While the average human reaction time is around 200–250 milliseconds, competitive esports athletes, Formula 1 drivers, and elite martial artists achieve response latencies under 180ms. Training visual stimulus recognition conditions neuromuscular efficiency and minimizes motor hesitation.
+                    This drill isolates time estimation and visual stimulus latency. Training your temporal processing reduces visual reaction delay, improves hand-eye synchronization, and helps you execute actions with peak consistency.
                   </p>
                 </section>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-red-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
+                      <div className="w-7 h-7 rounded-lg bg-cyan-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
                       <h5 className="text-xs font-bold text-white">Who Should Use This?</h5>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Gamers, F1 fans, athletes, and anyone wanting to measure or improve visual reaction latency in milliseconds.</p>
+                    <p className="text-xs text-gray-300 leading-relaxed">Gamers, esports athletes, musicians, and drivers looking to refine visual response speed and internal timing rhythm.</p>
                   </div>
                   <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Millisecond Telemetry</h5>
+                      <h5 className="text-xs font-bold text-white">Temporal Calibration</h5>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Accurately logs your response latency for every click, giving you clear empirical feedback on your cognitive reaction speed.</p>
+                    <p className="text-xs text-gray-300 leading-relaxed">Trains your brain to track seconds smoothly without relying on visual metronomes or rushing clicks.</p>
                   </div>
                   <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Zap className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Peripheral Acquisition</h5>
+                      <div className="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center"><Zap className="w-3.5 h-3.5 text-white" /></div>
+                      <h5 className="text-xs font-bold text-white">Sustained Focus</h5>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Trains your peripheral vision to recognize target flashes across the screen without relying on slow central gaze sweeps.</p>
+                    <p className="text-xs text-gray-300 leading-relaxed">Unlimited practice mode allows you to build flow-state focus and track millisecond error statistics over time.</p>
                   </div>
                 </div>
               </div>
@@ -911,21 +985,11 @@ export default function ReactionTimeTestClient() {
               onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-sans">
-                <DrillFAQItem q="What is a good reaction time?" a="Average human reaction time to visual stimuli is 200-250ms. Scores below 200ms are excellent, and sub-180ms scores are elite." />
-                <DrillFAQItem q="How is reaction time measured?" a="Reaction time is measured in milliseconds (ms) from the instant the target appears on screen to the instant your input is registered." />
-                <DrillFAQItem q="Can you train your reaction time?" a="Yes. Dedicated reaction training sharpens visual processing, reduces motor hesitation, and conditions fast neuromuscular response loops." />
-                <DrillFAQItem q="Why do reaction times vary?" a="Reaction time varies due to fatigue, sleep, age, input hardware latency, display refresh rates, and level of cognitive focus." />
-                <DrillFAQItem q="Does monitor refresh rate affect reaction scores?" a="Yes! Higher refresh rate displays (144Hz, 240Hz, 360Hz) render target frames sooner, reducing display lag by 10-15ms." />
-                <DrillFAQItem q="Is reaction the same as a reflex?" a="A reflex is an involuntary spinal circuit response, whereas reaction time involves cerebral visual processing and conscious motor execution." />
-                <DrillFAQItem q="How does age affect reaction time?" a="Peak reaction speed occurs in late teens and early 20s, declining very gradually thereafter. Regular vision training mitigates age-related slowdown." />
-                <DrillFAQItem q="Does caffeine improve reaction speed?" a="Studies show moderate caffeine intake increases central nervous system alertness, temporarily lowering reaction time by 10-20ms." />
-                <DrillFAQItem q="How does this drill differ from Human Benchmark?" a="This drill combines millisecond reaction testing with adaptive level progression, precision hit detection, and full mobile support." />
-                <DrillFAQItem q="Is this reaction time test free?" a="Yes, all drills on SkillDrills are 100% free with no signups, downloads, or pop-up ads required." />
-                <DrillFAQItem q="What games benefit from reaction speed training?" a="Fast tactical FPS games (CS2, Valorant), fighting games, racing simulators, and battle royales benefit heavily from fast reaction times." />
-                <DrillFAQItem q="Can traditional athletes use this test?" a="Yes. Formula 1 drivers, boxers, sprinters, and racquet sport athletes perform visual reaction training to condition fast-twitch reflexes." />
-                <DrillFAQItem q="Should I focus on central or peripheral vision?" a="Keep a relaxed visual gaze so your peripheral vision detects the target flash instantly, then trigger a quick motor click." />
-                <DrillFAQItem q="Does this test work on mobile devices?" a="Yes! It features generous touch hitpads and full support for both portrait and landscape orientation." />
-                <DrillFAQItem q="How often should I test my reaction speed?" a="A daily 5-minute session provides an accurate benchmark of your neurological alertness and warmup readiness." />
+                <FAQItem q="What is the Reaction Time Test?" a="It is an online visual reaction speed game that measures your response latency and internal clock timing accuracy in milliseconds." />
+                <FAQItem q="What is a good reaction time?" a="Average human visual reaction time is 200-250ms. Elite gamers and athletes achieve reaction speeds under 180ms." />
+                <FAQItem q="Can you improve reaction speed?" a="Yes! Dedicated practice sharpens neural processing efficiency, reducing decision time and motor execution delay." />
+                <FAQItem q="How does the time-free mode work?" a="You can play as many rounds as you want without a timer forcing the game to end. Click End Drill whenever you wish to view your full session analytics." />
+                <FAQItem q="Is this reflex trainer free?" a="Yes, all drills on SkillDrills are 100% free with no signups or ads." />
               </div>
             </DrillAccordion>
           </div>
@@ -934,7 +998,7 @@ export default function ReactionTimeTestClient() {
         {/* RELATED DRILLS GRID */}
         {!isFullscreen && (
           <section className="mt-4">
-            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">
+            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3 font-mono">
               Related Reaction Speed Drills
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -942,14 +1006,14 @@ export default function ReactionTimeTestClient() {
                 <Link
                   key={drill.id}
                   href={drill.href}
-                  className="group bg-[#0c0c16] border border-white/5 hover:border-red-500/40 rounded-xl p-3.5 transition-all duration-200 hover:-translate-y-0.5 flex flex-col justify-between"
+                  className="group bg-[#0c0c16] border border-white/5 hover:border-cyan-500/40 rounded-xl p-3.5 transition-all duration-200 hover:-translate-y-0.5 flex flex-col justify-between"
                 >
                   <div>
-                    <div className="text-[10px] font-bold text-red-400 uppercase tracking-wider mb-1">{drill.cat}</div>
-                    <div className="text-xs font-bold text-white group-hover:text-red-300 transition-colors">{drill.name}</div>
+                    <div className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider mb-1 font-mono">{drill.cat}</div>
+                    <div className="text-xs font-bold text-white group-hover:text-cyan-300 transition-colors">{drill.name}</div>
                     <div className="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">{drill.desc}</div>
                   </div>
-                  <div className="text-[10px] font-bold text-slate-500 group-hover:text-red-400 mt-3 flex items-center gap-1 transition-colors">
+                  <div className="text-[10px] font-bold text-slate-500 group-hover:text-cyan-400 mt-3 flex items-center gap-1 transition-colors font-mono">
                     Train Drill <span>→</span>
                   </div>
                 </Link>
@@ -962,6 +1026,32 @@ export default function ReactionTimeTestClient() {
         {!isFullscreen && <DrillFooter />}
 
       </main>
+    </div>
+  );
+}
+
+// === Subcomponents ===
+function RuleItem({ num, text, highlight = '', result }: { num: string; text: string; highlight?: string; result: string }) {
+  return (
+    <div className="flex items-center gap-4 bg-black p-4 rounded-xl border border-white/10 shadow-sm font-sans">
+      <div className="w-8 h-8 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-white text-base font-black shadow-lg flex-shrink-0 font-mono">{num}</div>
+      <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <p className="text-sm font-medium text-gray-100 font-sans">
+          {text}{highlight && <span className="font-black text-white font-mono"> ({highlight})</span>}
+        </p>
+        <div className="text-xs font-black px-3 py-1.5 rounded-lg bg-[#050811] border border-white/10 text-white whitespace-nowrap shadow-inner tracking-wide text-center sm:text-left font-mono">
+          {result}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function FAQItem({ q, a }: { q: string; a: string }) {
+  return (
+    <div className="bg-[#05060b] border border-gray-800 rounded-xl p-5 hover:border-gray-700 transition-colors font-sans">
+      <h4 className="text-sm font-bold text-gray-200 mb-2">{q}</h4>
+      <p className="text-xs text-gray-400 leading-relaxed">{a}</p>
     </div>
   );
 }

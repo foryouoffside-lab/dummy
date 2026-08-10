@@ -82,18 +82,18 @@ export default function VisualSearchPage() {
             "mainEntity": [
               {
                 "@type": "Question",
-                "name": "What is the Visual Search Pro Drill?",
+                "name": "What is the Visual Search Drill?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "A free conjunctive search exercise. Find the target letter 'C' hidden among rotated 'O' distractors in a grid."
+                  "text": "A free conjunctive search exercise. Find the target letter 'C' hidden among rotated 'O' distractors."
                 }
               },
               {
                 "@type": "Question",
-                "name": "What is conjunctive search?",
+                "name": "How does target location change?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Target shares features with distractors requiring focused attention. Scanning each rotated distractor builds real-world proofreading and target isolation speed."
+                  "text": "The grid size stays constant while target 'C' shifts location continuously across the grid as you find each target."
                 }
               },
               {
@@ -106,10 +106,26 @@ export default function VisualSearchPage() {
               },
               {
                 "@type": "Question",
+                "name": "Does difficulty decrease on mistakes?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "No. Your level only ever goes up — a mistake never takes you back down, so you can safely master your current grid size."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "How long does each drill session last?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Each round is timed for exactly 45 seconds of continuous focus."
+                }
+              },
+              {
+                "@type": "Question",
                 "name": "Do I need to sign up?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "No registration required. This drill is completely free and works instantly in your browser."
+                  "text": "No registration required. This drill runs directly in your browser with instant response."
                 }
               }
             ]

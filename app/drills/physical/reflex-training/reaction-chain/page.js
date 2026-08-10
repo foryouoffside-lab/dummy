@@ -98,7 +98,7 @@ const faqSchema = {
       "name": "How do impulse arrest mechanics work?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "When your crosshair is over a target, your mouse velocity must be under 1.5 pixels/frame ('ARREST READY' turns green). Stopping successfully scores +5 PTS. If you slice through it while moving, it triggers a time penalty."
+        "text": "When your crosshair is over a target, your mouse velocity must be under 1.5 pixels/frame ('ARREST READY' turns green). Stopping successfully scores 50 points base per hit."
       }
     },
     {
@@ -111,26 +111,26 @@ const faqSchema = {
     },
     {
       "@type": "Question",
-      "name": "Why does my clock drain?",
+      "name": "How long does each round last?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Unlike standard aim trainers, this drill actively punishes bad accuracy and kinetic overflow. Missing a target or slicing through it without stopping deducts 3 seconds from your master survival clock."
+        "text": "Each round lasts 45 seconds focused duration."
       }
     },
     {
       "@type": "Question",
-      "name": "Why are the targets changing colors?",
+      "name": "Why do targets change colors?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "As you hit targets and build your level, the engine's speed radar accelerates node velocity from 600px/s up to 1800px/s. Node colors shift from Green &rarr; Orange &rarr; Red to visually warn you of the intense speed."
+        "text": "As you level up, node velocities accelerate from 600px/s up to 1800px/s. Node colors shift from Green -> Orange -> Red to visually warn you of higher speeds."
       }
     },
     {
       "@type": "Question",
-      "name": "Is there a combo streak system?",
+      "name": "How does the combo multiplier work?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes. Catches are chained together. Every 5 consecutive arrests trigger a streak sound, and every 10 arrests increase the adaptive difficulty and speed multipliers."
+        "text": "Chaining successful arrests increases your combo multiplier up to 3.0x. Maintaining high combos is the key to scaling score quickly."
       }
     },
     {
@@ -139,14 +139,6 @@ const faqSchema = {
       "acceptedAnswer": {
         "@type": "Answer",
         "text": "Yes, it directly trains snap deceleration. In tactical shooters, you must stop moving your mouse and character to achieve perfect first-shot accuracy. This drill builds that muscle memory."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "What is a good score in the Reaction Chain drill?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "A score of 150+ points is Gold tier. Hitting 400+ points requires elite kinetic braking and perfect timing, placing you in the Master tier."
       }
     },
     {

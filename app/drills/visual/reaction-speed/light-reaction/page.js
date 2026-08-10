@@ -99,7 +99,7 @@ export default function StrobeLatencyPage() {
                 "name": "How does progressive difficulty work?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Every 5 successful hits you level up, and the flash window shrinks from 300ms down to a 100ms floor, while the inter-flash delay stays randomized between 1000ms and 2500ms so the strobe timing can't be anticipated."
+                  "text": "Every 5 successful hits you level up, and the flash window shrinks from 300ms down to a 100ms floor. The inter-flash delay stays randomized between 1000ms and 2500ms so the strobe timing can't be anticipated."
                 }
               },
               {
@@ -115,7 +115,15 @@ export default function StrobeLatencyPage() {
                 "name": "Does difficulty decrease on mistakes?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "No. The level remains unchanged when a mistake is made, allowing you to master your current level."
+                  "text": "No. Your level only ever goes up — a mistake never takes you back down, so you can safely push your current level to its limit."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Why did my tap not register?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Tapping before the flash appears, or tapping faster than roughly 3 times per second, is treated as spam clicking rather than a genuine reaction — the strobe pauses for 1.2 seconds of stillness before resuming, so guessing can't substitute for a real reaction."
                 }
               },
               {

@@ -8,6 +8,7 @@ import { searchDrills } from '@/lib/searchDrills';
 import { DRILLS } from '@/lib/drillsRegistry';
 import SiteFooter from '@/components/SiteFooter';
 import Reveal from '@/components/Reveal';
+import DrillLoading from '@/components/DrillLoading';
 
 function SearchResultsContent() {
   const searchParams = useSearchParams();
@@ -51,7 +52,7 @@ function SearchResultsContent() {
             Search <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">Drills</span>
           </h1>
           <p className="text-gray-400 text-sm sm:text-base">
-            Search through 113+ browser-native drills by name, category, or target skill.
+            Search through {DRILLS.length}+ browser-native drills by name, category, or target skill.
           </p>
 
           {/* Search Input Box */}
@@ -153,11 +154,7 @@ function SearchResultsContent() {
 
 export default function SearchPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-[#050508] flex items-center justify-center text-gray-400 text-sm font-mono">
-        Loading search index...
-      </div>
-    }>
+    <Suspense fallback={<DrillLoading />}>
       <SearchResultsContent />
     </Suspense>
   );
