@@ -24,6 +24,12 @@ const FOLDER_TO_STORAGE_KEY = {
   'reaction-chain': 'skilldrills_reaction_chain_v2',
 };
 
+// reaction-chain's saved best level is never read back to set a new
+// session's starting difficulty (every round begins at the same base
+// difficulty) — no adaptive difficulty, so a "reset progress" button has
+// nothing meaningful to reset.
+const NO_ADAPTIVE_DIFFICULTY = new Set(['reaction-chain']);
+
 function handleCardMouseMove(e) {
   const rect = e.currentTarget.getBoundingClientRect();
   e.currentTarget.style.setProperty('--mx', `${e.clientX - rect.left}px`);
@@ -382,6 +388,7 @@ export default function PhysicalDrillsClient() {
                             <Icon className="w-5 h-5" />
                           </div>
                           <div className="flex items-center gap-1.5">
+                            {!NO_ADAPTIVE_DIFFICULTY.has(drill.folderName) && (
                             <ResetDrillButton
                               storageKeys={storageKeys}
                               drillName={drill.name}
@@ -391,6 +398,7 @@ export default function PhysicalDrillsClient() {
                                 return next;
                               })}
                             />
+                            )}
                             {bestLevel && (
                               <div className="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold tracking-wide border border-rose-500/20 bg-rose-500/10 text-rose-400">
                                 Lv. {bestLevel}

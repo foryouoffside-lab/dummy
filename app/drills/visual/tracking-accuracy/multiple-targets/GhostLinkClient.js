@@ -87,20 +87,7 @@ class GameErrorBoundary extends React.Component {
 export default function GhostLinkClient() {
   // === UI State ===
   const [openAccordion, setOpenAccordion] = useState(null);
-  const [isMobile, setIsMobile] = useState(false);
-  const [isPortrait, setIsPortrait] = useState(false);
 
-  useEffect(() => {
-    const checkViewport = () => {
-      const w = window.innerWidth;
-      const h = window.innerHeight;
-      setIsMobile(w < 768);
-      setIsPortrait(h > w);
-    };
-    checkViewport();
-    window.addEventListener('resize', checkViewport);
-    return () => window.removeEventListener('resize', checkViewport);
-  }, []);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [isBoxDarkMode, setIsBoxDarkMode] = useState(true);
@@ -564,8 +551,6 @@ export default function GhostLinkClient() {
         }
       });
 
-
-
       animationRef.current = requestAnimationFrame(executionRenderingGraph);
     };
 
@@ -687,46 +672,6 @@ diagnostics = "Low target identification accuracy. Anchor your gaze centrally an
 
   return (
     <div className="min-h-screen bg-[#050508] text-white flex flex-col font-sans select-none">
-      {/* ── HEADER / BREADCRUMB ── */}
-      {!isFullscreen && (
-        <header className="border-b border-white/5 bg-[#080811]/80 backdrop-blur-md sticky top-0 z-50">
-          <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
-            <div className="flex items-center gap-2 text-xs text-slate-400">
-              <Link href="/" className="hover:text-white transition-colors">Home</Link>
-              <span>/</span>
-              <Link href="/drills/visual" className="hover:text-white transition-colors">Visual</Link>
-              <span>/</span>
-              <span className="text-purple-400 font-medium">Multiple Targets</span>
-            </div>
-
-            <div className="flex items-center gap-1.5">
-              <button
-                onClick={() => {
-                  const next = !soundEnabled;
-                  setSoundEnabled(next);
-                  drillAudio.setEnabled(next);
-                }}
-                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-                title={soundEnabled ? "Mute Sound" : "Unmute Sound"}
-              >
-                {soundEnabled ? <Volume2 className="w-4 h-4 text-purple-400" /> : <VolumeX className="w-4 h-4 text-red-400" />}
-              </button>
-              <button
-                onClick={() => {
-                  const next = !flashEnabled;
-                  setFlashEnabled(next);
-                  drillFlash.setEnabled(next);
-                }}
-                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-                title={flashEnabled ? "Disable Miss Flash" : "Enable Miss Flash"}
-              >
-                {flashEnabled ? <Zap className="w-4 h-4 text-red-400" /> : <ZapOff className="w-4 h-4 text-red-400" />}
-              </button>
-            </div>
-          </div>
-        </header>
-      )}
-
       {/* ── MAIN CONTENT AREA ── */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
         {/* Title */}
@@ -815,13 +760,7 @@ diagnostics = "Low target identification accuracy. Anchor your gaze centrally an
             ref={containerRef} 
             onPointerDown={handleInputStrikes}
             className={
-              isFullscreen 
-                ? 'fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#050508] flex flex-col items-center justify-center' 
-                : isMobile 
-                  ? (isPortrait
-                      ? 'w-full rounded-2xl aspect-[3/4] min-h-[420px] max-h-[76vh] bg-[#080811] border border-white/10 relative overflow-hidden flex flex-col'
-                      : 'w-full rounded-2xl aspect-video min-h-[340px] max-h-[85vh] bg-[#080811] border border-white/10 relative overflow-hidden flex flex-col')
-                  : 'w-full rounded-2xl aspect-video min-h-[460px] sm:min-h-[500px] max-h-[88vh] bg-[#080811] border border-white/10 relative overflow-hidden flex flex-col'
+              isFullscreen ? 'fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#050508] flex flex-col items-center justify-center' : 'w-full rounded-2xl aspect-video min-h-[460px] md:min-h-[500px] max-h-[88vh] max-md:portrait:aspect-[3/4] max-md:portrait:min-h-[420px] max-md:portrait:max-h-[76vh] max-md:landscape:min-h-[340px] max-md:landscape:max-h-[85vh] bg-[#080811] border border-white/10 relative overflow-hidden flex flex-col'
             } 
             style={{ touchAction: 'none' }}
           >

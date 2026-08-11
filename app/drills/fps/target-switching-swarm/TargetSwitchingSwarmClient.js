@@ -647,46 +647,6 @@ export default function TargetSwitchingSwarmClient() {
 
   return (
     <div className="min-h-screen bg-[#050508] text-white flex flex-col font-sans select-none">
-      {/* ── HEADER / BREADCRUMB ── */}
-      {!isFullscreen && (
-        <header className="border-b border-white/5 bg-[#080811]/80 backdrop-blur-md sticky top-0 z-50">
-          <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
-            <div className="flex items-center gap-2 text-xs text-slate-400">
-              <Link href="/" className="hover:text-white transition-colors">Home</Link>
-              <span>/</span>
-              <Link href="/drills/fps" className="hover:text-white transition-colors">FPS</Link>
-              <span>/</span>
-              <span className="text-cyan-400 font-medium">Target Switching Swarm</span>
-            </div>
-
-            <div className="flex items-center gap-1.5">
-              <button
-                onClick={() => {
-                  const next = !soundEnabled;
-                  setSoundEnabled(next);
-                  drillAudio?.setEnabled?.(next);
-                }}
-                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-                title={soundEnabled ? "Mute Sound" : "Unmute Sound"}
-              >
-                {soundEnabled ? <Volume2 className="w-4 h-4 text-cyan-400" /> : <VolumeX className="w-4 h-4 text-cyan-400" />}
-              </button>
-              <button
-                onClick={() => {
-                  const next = !flashEnabled;
-                  setFlashEnabled(next);
-                  drillFlash?.setEnabled?.(next);
-                }}
-                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-                title={flashEnabled ? "Disable Miss Flash" : "Enable Miss Flash"}
-              >
-                {flashEnabled ? <Zap className="w-4 h-4 text-red-400" /> : <ZapOff className="w-4 h-4 text-red-400" />}
-              </button>
-            </div>
-          </div>
-        </header>
-      )}
-
       {/* ── MAIN CONTENT AREA ── */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
         {/* Title */}
@@ -772,7 +732,10 @@ export default function TargetSwitchingSwarmClient() {
                 onPointerDown={(e) => e.stopPropagation()}
                 onClick={(e) => {
                   e.stopPropagation();
-                  setSoundEnabled(v => !v);
+                  setSoundEnabled((v) => {
+                    drillAudio.setEnabled(!v);
+                    return !v;
+                  });
                 }}
                 className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
                 title="Toggle Sound"

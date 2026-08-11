@@ -65,8 +65,7 @@ function draw2dTarget(ctx, x, y, targetVisible, targetType) {
   }
 
   // 1. Outer Ambient Radial Glow Aura
-  ctx.shadowColor = glowColor;
-  ctx.shadowBlur = targetVisible ? 36 : 16;
+  ctx.shadowBlur = 0;
 
   // 2. Outer Tactical Bezel Ring
   ctx.beginPath();
@@ -75,35 +74,16 @@ function draw2dTarget(ctx, x, y, targetVisible, targetType) {
   ctx.lineWidth = 1.5;
   ctx.stroke();
 
-  // 3. Main Target Sphere (3D Radial Gradient)
-  const sphereGrad = ctx.createRadialGradient(
-    x - radius * 0.25,
-    y - radius * 0.25,
-    radius * 0.08,
-    x,
-    y,
-    radius
-  );
-  sphereGrad.addColorStop(0, centerHighlight);
-  sphereGrad.addColorStop(0.55, primaryColor);
-  sphereGrad.addColorStop(1, edgeDark);
-
+  // 3. Main Target Circle (Flat 2D Fill)
   ctx.beginPath();
   ctx.arc(x, y, radius, 0, Math.PI * 2);
-  ctx.fillStyle = sphereGrad;
+  ctx.fillStyle = primaryColor;
   ctx.fill();
 
   // Reset shadow for crisp inner detailing
   ctx.shadowBlur = 0;
 
-  // 4. Premium Inner Rim Highlight
-  ctx.beginPath();
-  ctx.arc(x, y, radius - 1.5, 0, Math.PI * 2);
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.65)';
-  ctx.lineWidth = 2;
-  ctx.stroke();
-
-  // 5. Tactical Crosshair Reticle Tick Marks (N, S, E, W)
+  // 4. Tactical Crosshair Reticle Tick Marks (N, S, E, W)
   const tickLen = 8;
   const tickGap = radius + 3;
   ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
@@ -120,19 +100,11 @@ function draw2dTarget(ctx, x, y, targetVisible, targetType) {
   ctx.moveTo(x + tickGap, y); ctx.lineTo(x + tickGap + tickLen, y);
   ctx.stroke();
 
-  // 6. High-Precision Center Core Dot (White Core with Specular Glow)
-  ctx.fillStyle = '#ffffff';
-  ctx.shadowColor = '#ffffff';
-  ctx.shadowBlur = 10;
-  ctx.beginPath();
-  ctx.arc(x, y, 6, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Inner Pinpoint Specular Dot
+  // 5. Center Core Dot
   ctx.fillStyle = '#ffffff';
   ctx.shadowBlur = 0;
   ctx.beginPath();
-  ctx.arc(x - 1.5, y - 1.5, 2, 0, Math.PI * 2);
+  ctx.arc(x, y, 6, 0, Math.PI * 2);
   ctx.fill();
 
   ctx.restore();
@@ -163,29 +135,14 @@ const saveData = (data) => {
   } catch (e) {}
 };
 
-
 export default function ChromaSyncClient() {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
   const [openAccordion, setOpenAccordion] = useState(null);
-  const [isMobile, setIsMobile] = useState(false);
-  const [isPortrait, setIsPortrait] = useState(false);
   const [countdownValue, setCountdownValue] = useState(3);
   const { flashes, triggerFlash } = useDrillFlash();
-
-  useEffect(() => {
-    const checkViewport = () => {
-      const w = window.innerWidth;
-      const h = window.innerHeight;
-      setIsMobile(w < 768);
-      setIsPortrait(h > w);
-    };
-    checkViewport();
-    window.addEventListener('resize', checkViewport);
-    return () => window.removeEventListener('resize', checkViewport);
-  }, []);
 
   // Signal & Target State
   const [level, setLevel] = useState(1);
@@ -630,46 +587,6 @@ export default function ChromaSyncClient() {
 
   return (
     <div className="min-h-screen bg-[#050508] text-white flex flex-col font-sans select-none">
-      {/* ── HEADER / BREADCRUMB ── */}
-      {!isFullscreen && (
-        <header className="border-b border-white/5 bg-[#080811]/80 backdrop-blur-md sticky top-0 z-50">
-          <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
-            <div className="flex items-center gap-2 text-xs text-slate-400">
-              <Link href="/" className="hover:text-white transition-colors">Home</Link>
-              <span>/</span>
-              <Link href="/drills/visual" className="hover:text-white transition-colors">Visual</Link>
-              <span>/</span>
-              <span className="text-emerald-400 font-medium">Go/No-Go Pro</span>
-            </div>
-
-            <div className="flex items-center gap-1.5">
-              <button
-                onClick={() => {
-                  const next = !soundEnabled;
-                  setSoundEnabled(next);
-                  drillAudio.setEnabled(next);
-                }}
-                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-                title={soundEnabled ? "Mute Sound" : "Unmute Sound"}
-              >
-                {soundEnabled ? <Volume2 className="w-4 h-4 text-emerald-400" /> : <VolumeX className="w-4 h-4 text-red-400" />}
-              </button>
-              <button
-                onClick={() => {
-                  const next = !flashEnabled;
-                  setFlashEnabled(next);
-                  drillFlash.setEnabled(next);
-                }}
-                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-                title={flashEnabled ? "Disable Miss Flash" : "Enable Miss Flash"}
-              >
-                {flashEnabled ? <Zap className="w-4 h-4 text-red-400" /> : <ZapOff className="w-4 h-4 text-red-400" />}
-              </button>
-            </div>
-          </div>
-        </header>
-      )}
-
       {/* ── MAIN CONTENT AREA ── */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
         {/* Title */}
@@ -686,7 +603,7 @@ export default function ChromaSyncClient() {
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-          <div className="grid grid-cols-5 gap-2 max-w-2xl mx-auto w-full">
+          <div className="grid grid-cols-4 gap-2 max-w-2xl mx-auto w-full">
             <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
               <div className="text-lg sm:text-xl font-black text-emerald-400 tabular-nums">{uiScore}</div>
@@ -702,10 +619,6 @@ export default function ChromaSyncClient() {
               <div className={`text-lg sm:text-xl font-black tabular-nums ${uiLives <= 1 ? 'text-red-400 animate-pulse' : 'text-rose-400'}`}>{uiLives}</div>
             </div>
             <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Level</div>
-              <div className="text-lg sm:text-xl font-black text-indigo-400 tabular-nums">L{level}</div>
-            </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
               <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
             </div>
@@ -716,13 +629,7 @@ export default function ChromaSyncClient() {
         <div 
           ref={containerRef} 
           className={
-            isFullscreen 
-              ? 'fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#050508] flex flex-col items-center justify-center' 
-              : isMobile 
-                ? (isPortrait
-                    ? 'w-full rounded-2xl aspect-[3/4] min-h-[420px] max-h-[76vh] bg-[#080811] border border-white/10 relative overflow-hidden flex flex-col'
-                    : 'w-full rounded-2xl aspect-video min-h-[340px] max-h-[85vh] bg-[#080811] border border-white/10 relative overflow-hidden flex flex-col')
-                : 'w-full rounded-2xl aspect-video min-h-[460px] sm:min-h-[500px] max-h-[88vh] bg-[#080811] border border-white/10 relative overflow-hidden flex flex-col'
+            isFullscreen ? 'fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#050508] flex flex-col items-center justify-center' : 'w-full rounded-2xl aspect-video min-h-[460px] md:min-h-[500px] max-h-[88vh] max-md:portrait:aspect-[3/4] max-md:portrait:min-h-[420px] max-md:portrait:max-h-[76vh] max-md:landscape:min-h-[340px] max-md:landscape:max-h-[85vh] bg-[#080811] border border-white/10 relative overflow-hidden flex flex-col'
           }
         >
           {/* Red Flash Overlay */}

@@ -739,74 +739,31 @@ export default function RapidTappingClient() {
   const shareScore = useCallback(async () => {
     const player = getPlayerName();
     const gradeLetter = analytics.grade ? analytics.grade.letter : 'A';
+    const url = 'https://skilldrills.online/drills/motor/movement-speed/rapid-tapping';
     try {
-      const cardDataUrl = await generateShareCard({
+      const canvas = generateShareCard({
+        score: uiScore,
+        bestScore,
+        accuracy: `${analytics.cps} CPS`,
+        rating: { letter: gradeLetter, label: analytics.grade?.label || 'Keep Going', emoji: '⚡' },
+        newBest: isNewBest,
         drillName: 'Rapid Tapping Test',
         playerName: player,
-        score: uiScore,
-        grade: gradeLetter,
-        metrics: [
-          { label: 'CPS', value: `${analytics.cps}` },
-          { label: 'Total Clicks', value: analytics.totalClicks.toString() },
-          { label: 'Max Difficulty', value: `+${analytics.maxDifficulty}%` },
-          { label: 'Best CPS', value: `${bestCps}` }
-        ]
       });
-
-      if (cardDataUrl) {
-        await shareScoreCard(cardDataUrl, `I scored ${uiScore} PTS (${analytics.cps} CPS, Grade ${gradeLetter}) on SkillDrills Rapid Tapping Test!`);
-      }
+      await shareScoreCard(url, canvas);
     } catch (e) {
       const text = `🎯 I scored ${uiScore} PTS (${analytics.cps} CPS) on Rapid Tapping Test! Practice at skilldrills.online!`;
-      if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      if (typeof navigator !== 'undefined' && navigator.share) {
+        navigator.share({ title: 'Rapid Tapping Test Score', text, url }).catch(() => {});
+      } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
         navigator.clipboard.writeText(text);
         alert('Score card copied to clipboard!');
       }
     }
-  }, [uiScore, analytics, bestCps]);
+  }, [uiScore, analytics, bestScore, isNewBest]);
 
   return (
     <div className="min-h-screen bg-[#050508] text-white flex flex-col font-sans select-none">
-      {/* ── HEADER / BREADCRUMB ── */}
-      {!isFullscreen && (
-        <header className="border-b border-white/5 bg-[#080811]/80 backdrop-blur-md sticky top-0 z-50">
-          <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
-            <div className="flex items-center gap-2 text-xs text-slate-400">
-              <Link href="/" className="hover:text-white transition-colors">Home</Link>
-              <span>/</span>
-              <Link href="/drills/motor" className="hover:text-white transition-colors">Motor</Link>
-              <span>/</span>
-              <span className="text-fuchsia-400 font-medium">Rapid Tapping Test</span>
-            </div>
-
-            <div className="flex items-center gap-1.5">
-              <button
-                onClick={() => {
-                  const next = !soundEnabled;
-                  setSoundEnabled(next);
-                  drillAudio?.setEnabled?.(next);
-                }}
-                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-                title={soundEnabled ? "Mute Sound" : "Unmute Sound"}
-              >
-                {soundEnabled ? <Volume2 className="w-4 h-4 text-fuchsia-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
-              </button>
-              <button
-                onClick={() => {
-                  const next = !flashEnabled;
-                  setFlashEnabled(next);
-                  drillFlash?.setEnabled?.(next);
-                }}
-                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-                title={flashEnabled ? "Disable Miss Flash" : "Enable Miss Flash"}
-              >
-                {flashEnabled ? <Zap className="w-4 h-4 text-red-400" /> : <ZapOff className="w-4 h-4 text-red-400" />}
-              </button>
-            </div>
-          </div>
-        </header>
-      )}
-
       {/* ── MAIN CONTENT AREA ── */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
         {/* Title */}
@@ -1138,7 +1095,7 @@ function StatCard({ icon, value, label, unit = '', accentColor = 'border-white/1
       <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-black border border-white/10 flex items-center justify-center mb-1 shadow-inner">
         {icon}
       </div>
-      <p className="text-xs sm:text-lg lg:text-xl font-black tracking-tight text-white leading-none truncate w-full font-sans font-mono tabular-nums">
+      <p className="text-xs sm:text-lg lg:text-xl font-black tracking-tight text-white leading-none truncate w-full font-mono tabular-nums">
         {value}<span className="text-[9px] sm:text-xs font-semibold ml-0.5 text-gray-400 font-sans">{unit}</span>
       </p>
       <p className="text-[8px] sm:text-[9.5px] font-bold uppercase tracking-wider text-gray-400 mt-1 truncate w-full">{label}</p>

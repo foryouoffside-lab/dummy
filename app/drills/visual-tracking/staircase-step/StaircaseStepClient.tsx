@@ -145,7 +145,7 @@ export default function StaircaseStepClient() {
     const url = 'https://skilldrills.online/drills/visual-tracking/staircase-step';
     try {
       const canvas = generateSessionCard({
-        drillName: 'Staircase Step',
+        drillName: 'Vertical Tracking',
         badgeText: 'Smooth Pursuit Calibrated',
         stats: [
           { label: 'Session Time', value: `${selectedDuration}s` },
@@ -157,10 +157,10 @@ export default function StaircaseStepClient() {
       });
       await shareScoreCard(url, canvas);
     } catch (e) {
-      const text = 'Staircase Step — Free Visual Tracking & Gaze Calibration Drill!';
+      const text = 'Vertical Tracking — Free Visual Tracking & Gaze Calibration Drill!';
       if (typeof navigator !== 'undefined' && navigator.share) {
         try {
-          await navigator.share({ title: 'Staircase Step Drill', text, url });
+          await navigator.share({ title: 'Vertical Tracking Drill', text, url });
         } catch (e) {}
       } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
         navigator.clipboard.writeText(url);
@@ -429,33 +429,6 @@ export default function StaircaseStepClient() {
 
   return (
     <div className="min-h-screen bg-[#050508] text-white flex flex-col font-sans select-none">
-      {/* ── HEADER / BREADCRUMB ── */}
-      {!isFullscreen && (
-        <header className="border-b border-white/5 bg-[#080811]/80 backdrop-blur-md sticky top-0 z-50">
-          <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
-            <div className="flex items-center gap-2 text-xs text-slate-400">
-              <Link href="/" className="hover:text-white transition-colors">Home</Link>
-              <span>/</span>
-              <Link href="/drills/visual-tracking" className="hover:text-white transition-colors">Visual Tracking</Link>
-              <span>/</span>
-              <span className="text-red-400 font-medium">Staircase Step</span>
-            </div>
-
-            <button
-              onClick={() => {
-                const next = !soundEnabled;
-                setSoundEnabled(next);
-                drillAudio?.setEnabled?.(next);
-              }}
-              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-              title={soundEnabled ? "Mute Sound" : "Unmute Sound"}
-            >
-              {soundEnabled ? <Volume2 className="w-4 h-4 text-red-400" /> : <VolumeX className="w-4 h-4 text-red-400" />}
-            </button>
-          </div>
-        </header>
-      )}
-
       {/* ── MAIN CONTENT AREA ── */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
         {/* Title */}
@@ -502,11 +475,7 @@ export default function StaircaseStepClient() {
           className={`relative overflow-hidden flex flex-col transition-all duration-150 select-none border border-white/10 ${
             dayMode ? 'bg-[#ffffff]' : 'bg-[#080811]'
           } ${dayMode ? 'text-slate-900' : 'text-white'} ${
-            isFullscreen 
-              ? 'fixed inset-0 z-[100] w-screen h-[100dvh] rounded-none border-none flex flex-col items-center justify-center' 
-              : isMobile 
-                ? 'w-full rounded-2xl aspect-[3/4] min-h-[420px] max-h-[76vh] relative overflow-hidden flex flex-col'
-                : 'w-full rounded-2xl aspect-video min-h-[460px] sm:min-h-[500px] max-h-[88vh] relative overflow-hidden flex flex-col'
+            isFullscreen ? 'fixed inset-0 z-[100] w-screen h-[100dvh] rounded-none border-none flex flex-col items-center justify-center' : 'w-full rounded-2xl aspect-video min-h-[460px] md:min-h-[500px] max-h-[88vh] max-md:aspect-[3/4] max-md:min-h-[420px] max-md:max-h-[76vh] relative overflow-hidden flex flex-col'
           }`}
         >
 

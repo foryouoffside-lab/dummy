@@ -44,6 +44,9 @@ export default function DrillFooter() {
 
   return (
     <footer className="mt-12 py-8 border-t border-white/10 flex flex-col items-center justify-center gap-4 text-center text-sm text-gray-400">
+      <p className="text-xs text-gray-500 max-w-md px-4">
+        Found a bug or have feedback? Message us on social with the drill name — we read every one.
+      </p>
       <div className="flex items-center gap-6">
         {socialLinks.map((link) => (
           <a

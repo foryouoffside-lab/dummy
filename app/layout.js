@@ -3,13 +3,14 @@ import { Inter } from 'next/font/google';
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import SiteHeader from '@/components/SiteHeader';
+import ZoomGuard from '@/components/ZoomGuard';
 import { DRILLS } from '@/lib/drillsRegistry';
 
 const totalDrillsCount = DRILLS.length;
 
 const inter = Inter({
   subsets: ['latin'],
-  display: 'swap',
+  display: 'block',
   preload: true,
   fallback: ['system-ui', 'arial'],
   adjustFontFallback: true,
@@ -143,6 +144,7 @@ export default function RootLayout({ children }) {
         <meta name="rating" content="general" />
       </head>
       <body className={`${inter.className} antialiased`}>
+        <ZoomGuard />
         <SiteHeader />
         <main id="main-content">
           {children}

@@ -90,22 +90,8 @@ export default function AutoPursuitClient() {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
   const [openAccordion, setOpenAccordion] = useState(null);
-  const [isMobile, setIsMobile] = useState(false);
-  const [isPortrait, setIsPortrait] = useState(false);
   const [countdownValue, setCountdownValue] = useState(3);
   const { flashes, triggerFlash } = useDrillFlash();
-
-  useEffect(() => {
-    const checkViewport = () => {
-      const w = window.innerWidth;
-      const h = window.innerHeight;
-      setIsMobile(w < 768);
-      setIsPortrait(h > w);
-    };
-    checkViewport();
-    window.addEventListener('resize', checkViewport);
-    return () => window.removeEventListener('resize', checkViewport);
-  }, []);
 
   // HUD & Best Stats State
   const [uiScore, setUiScore] = useState(0);
@@ -139,7 +125,6 @@ export default function AutoPursuitClient() {
   const TARGET_RADIUS = 18; 
   const targetRef = useRef({ x: 150, y: 150, vx: 5, vy: 5, radius: 18 });
   const pointerRef = useRef({ x: -1000, y: -1000 });
-  const popupsRef = useRef([]);
 
   const streakRef = useRef(0);
   const bestStreakRef = useRef(0);
@@ -281,18 +266,6 @@ export default function AutoPursuitClient() {
     pointerRef.current = { x: -1000, y: -1000 };
   }, []);
 
-  // Helper to spawn canvas popups
-  const spawnPopup = (text, x, y, color = '#10B981') => {
-    popupsRef.current.push({
-      text,
-      x: x + (Math.random() - 0.5) * 20,
-      y: y - 15,
-      color,
-      life: 35,
-      maxLife: 35
-    });
-  };
-
   // High Performance Render & Pursuit Physics Loop
   useEffect(() => {
     if (gameState !== 'playing') return;
@@ -370,7 +343,6 @@ export default function AutoPursuitClient() {
           setUiScore(engine.current.score);
 
           drillAudio?.playHit?.();
-          spawnPopup('+5 PTS', tr.x, tr.y, '#10B981');
         }
       } else {
         continuousTrackingFramesRef.current = 0; // Break pulse streak
@@ -385,7 +357,6 @@ export default function AutoPursuitClient() {
 
           drillAudio?.playPenalty?.();
           triggerFlash();
-          spawnPopup('LOST LINK', tr.x, tr.y, '#EF4444');
         }
       }
 
@@ -413,24 +384,6 @@ export default function AutoPursuitClient() {
         ctx.shadowBlur = 0;
       }
 
-      // Render Floating Text Popups
-      const popups = popupsRef.current;
-      for (let i = popups.length - 1; i >= 0; i--) {
-        const p = popups[i];
-        p.y -= 0.8;
-        p.life--;
-        const alpha = Math.max(0, p.life / p.maxLife);
-        
-        ctx.save();
-        ctx.font = 'bold 12px sans-serif';
-        ctx.fillStyle = p.color;
-        ctx.globalAlpha = alpha;
-        ctx.textAlign = 'center';
-        ctx.fillText(p.text, p.x, p.y);
-        ctx.restore();
-
-        if (p.life <= 0) popups.splice(i, 1);
-      }
 
       animationRef.current = requestAnimationFrame(draw);
     }
@@ -465,7 +418,6 @@ export default function AutoPursuitClient() {
     totalFramesRef.current = 0;
     continuousTrackingFramesRef.current = 0;
     noTrackingFramesRef.current = 0;
-    popupsRef.current = [];
 
     engine.current = {
       score: 0,
@@ -565,46 +517,6 @@ export default function AutoPursuitClient() {
 
   return (
     <div className="min-h-screen bg-[#050508] text-white flex flex-col font-sans select-none">
-      {/* ── HEADER / BREADCRUMB ── */}
-      {!isFullscreen && (
-        <header className="border-b border-white/5 bg-[#080811]/80 backdrop-blur-md sticky top-0 z-50">
-          <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
-            <div className="flex items-center gap-2 text-xs text-slate-400">
-              <Link href="/" className="hover:text-white transition-colors">Home</Link>
-              <span>/</span>
-              <Link href="/drills/visual" className="hover:text-white transition-colors">Visual</Link>
-              <span>/</span>
-              <span className="text-emerald-400 font-medium">Pursuit Tracker Pro</span>
-            </div>
-
-            <div className="flex items-center gap-1.5">
-              <button
-                onClick={() => {
-                  const next = !soundEnabled;
-                  setSoundEnabled(next);
-                  drillAudio.setEnabled(next);
-                }}
-                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-                title={soundEnabled ? "Mute Sound" : "Unmute Sound"}
-              >
-                {soundEnabled ? <Volume2 className="w-4 h-4 text-emerald-400" /> : <VolumeX className="w-4 h-4 text-red-400" />}
-              </button>
-              <button
-                onClick={() => {
-                  const next = !flashEnabled;
-                  setFlashEnabled(next);
-                  drillFlash.setEnabled(next);
-                }}
-                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-                title={flashEnabled ? "Disable Miss Flash" : "Enable Miss Flash"}
-              >
-                {flashEnabled ? <Zap className="w-4 h-4 text-red-400" /> : <ZapOff className="w-4 h-4 text-red-400" />}
-              </button>
-            </div>
-          </div>
-        </header>
-      )}
-
       {/* ── MAIN CONTENT AREA ── */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
         {/* Title */}
@@ -621,7 +533,7 @@ export default function AutoPursuitClient() {
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-          <div className="grid grid-cols-5 gap-2 max-w-2xl mx-auto w-full">
+          <div className="grid grid-cols-4 gap-2 max-w-2xl mx-auto w-full">
             <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
               <div className="text-base sm:text-lg font-black text-emerald-400 tabular-nums">{uiScore}</div>
@@ -637,10 +549,6 @@ export default function AutoPursuitClient() {
               </div>
             </div>
             <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Max Speed</div>
-              <div className="text-base sm:text-lg font-black text-cyan-400 tabular-nums">{targetSpeed}</div>
-            </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
               <div className="text-base sm:text-lg font-black text-amber-400 tabular-nums">{bestScore}</div>
             </div>
@@ -652,13 +560,7 @@ export default function AutoPursuitClient() {
           <div 
             ref={containerRef} 
             className={
-              isFullscreen 
-                ? 'fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#050508] flex flex-col items-center justify-center' 
-                : isMobile 
-                  ? (isPortrait
-                      ? 'w-full rounded-2xl aspect-[3/4] min-h-[420px] max-h-[76vh] bg-[#080811] border border-white/10 relative overflow-hidden flex flex-col'
-                      : 'w-full rounded-2xl aspect-video min-h-[340px] max-h-[85vh] bg-[#080811] border border-white/10 relative overflow-hidden flex flex-col')
-                  : 'w-full rounded-2xl aspect-video min-h-[460px] sm:min-h-[500px] max-h-[88vh] bg-[#080811] border border-white/10 relative overflow-hidden flex flex-col'
+              isFullscreen ? 'fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#050508] flex flex-col items-center justify-center' : 'w-full rounded-2xl aspect-video min-h-[460px] md:min-h-[500px] max-h-[88vh] max-md:portrait:aspect-[3/4] max-md:portrait:min-h-[420px] max-md:portrait:max-h-[76vh] max-md:landscape:min-h-[340px] max-md:landscape:max-h-[85vh] bg-[#080811] border border-white/10 relative overflow-hidden flex flex-col'
             }
           >
             {/* Red Flash Overlay */}

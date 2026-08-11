@@ -810,19 +810,6 @@ export default function RecoilControlClient() {
     <div className="min-h-screen select-none bg-[#050508] text-white font-sans">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 font-sans">
         
-        {/* BREADCRUMB NAV */}
-        {!isFullscreen && (
-          <nav>
-            <ol className="flex items-center gap-2 text-xs text-slate-400 font-sans">
-              <li><Link href="/" className="hover:text-white transition-colors">Home</Link></li>
-              <li>/</li>
-              <li><Link href="/drills/fps" className="hover:text-white transition-colors">FPS Drills</Link></li>
-              <li>/</li>
-              <li className="text-red-400 font-bold">Recoil Control Pro</li>
-            </ol>
-          </nav>
-        )}
-
         {/* CENTERED PAGE HEADING */}
         {!isFullscreen && (
           <h1 className="text-2xl sm:text-3xl font-black text-center text-white tracking-tight font-sans">

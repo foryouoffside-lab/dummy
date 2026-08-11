@@ -324,13 +324,15 @@ export default function PeripheralPingPursuitClient() {
         ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
       }
 
-      // Render Central Fixation Crosshair
-      ctx.strokeStyle = isDay ? 'rgba(0, 0, 0, 0.35)' : 'rgba(255, 255, 255, 0.35)';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(W / 2 - 24, H / 2); ctx.lineTo(W / 2 + 24, H / 2);
-      ctx.moveTo(W / 2, H / 2 - 24); ctx.lineTo(W / 2, H / 2 + 24);
-      ctx.stroke();
+      // Render Central Fixation Crosshair (hidden when "Hide Line" is enabled)
+      if (!mathInvisible) {
+        ctx.strokeStyle = isDay ? 'rgba(0, 0, 0, 0.35)' : 'rgba(255, 255, 255, 0.35)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(W / 2 - 24, H / 2); ctx.lineTo(W / 2 + 24, H / 2);
+        ctx.moveTo(W / 2, H / 2 - 24); ctx.lineTo(W / 2, H / 2 + 24);
+        ctx.stroke();
+      }
 
       // Peripheral Target Spawn & Flash Logic
       const spawnChance = 0.025 * effectiveSpeed;
@@ -398,33 +400,6 @@ export default function PeripheralPingPursuitClient() {
 
   return (
     <div className="min-h-screen bg-[#050508] text-white flex flex-col font-sans select-none">
-      {/* ── HEADER / BREADCRUMB ── */}
-      {!isFullscreen && (
-        <header className="border-b border-white/5 bg-[#080811]/80 backdrop-blur-md sticky top-0 z-50">
-          <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
-            <div className="flex items-center gap-2 text-xs text-slate-400">
-              <Link href="/" className="hover:text-white transition-colors">Home</Link>
-              <span>/</span>
-              <Link href="/drills/visual-tracking" className="hover:text-white transition-colors">Visual Tracking</Link>
-              <span>/</span>
-              <span className="text-red-400 font-medium">Peripheral Ping Pursuit</span>
-            </div>
-
-            <button
-              onClick={() => {
-                const next = !soundEnabled;
-                setSoundEnabled(next);
-                drillAudio?.setEnabled?.(next);
-              }}
-              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-              title={soundEnabled ? "Mute Sound" : "Unmute Sound"}
-            >
-              {soundEnabled ? <Volume2 className="w-4 h-4 text-red-400" /> : <VolumeX className="w-4 h-4 text-red-400" />}
-            </button>
-          </div>
-        </header>
-      )}
-
       {/* ── MAIN CONTENT AREA ── */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
         {/* Title */}
@@ -471,11 +446,7 @@ export default function PeripheralPingPursuitClient() {
           className={`relative overflow-hidden flex flex-col transition-all duration-150 select-none border border-white/10 ${
             dayMode ? 'bg-[#ffffff]' : 'bg-[#080811]'
           } ${dayMode ? 'text-slate-900' : 'text-white'} ${
-            isFullscreen 
-              ? 'fixed inset-0 z-[100] w-screen h-[100dvh] rounded-none border-none flex flex-col items-center justify-center' 
-              : isMobile 
-                ? 'w-full rounded-2xl aspect-[3/4] min-h-[420px] max-h-[76vh] relative overflow-hidden flex flex-col'
-                : 'w-full rounded-2xl aspect-video min-h-[460px] sm:min-h-[500px] max-h-[88vh] relative overflow-hidden flex flex-col'
+            isFullscreen ? 'fixed inset-0 z-[100] w-screen h-[100dvh] rounded-none border-none flex flex-col items-center justify-center' : 'w-full rounded-2xl aspect-video min-h-[460px] md:min-h-[500px] max-h-[88vh] max-md:aspect-[3/4] max-md:min-h-[420px] max-md:max-h-[76vh] relative overflow-hidden flex flex-col'
           }`}
         >
 

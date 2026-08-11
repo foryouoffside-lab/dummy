@@ -65,7 +65,13 @@ export async function POST(request) {
       return `${BASE_URL}${url.startsWith('/') ? url : '/' + url}`;
     });
 
-    const invalidUrl = fullUrls.find(url => !url.startsWith(BASE_URL));
+    const invalidUrl = fullUrls.find(url => {
+      try {
+        return new URL(url).origin !== new URL(BASE_URL).origin;
+      } catch {
+        return true;
+      }
+    });
     if (invalidUrl) {
       return Response.json({
         error: 'Invalid URL origin',

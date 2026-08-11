@@ -18,6 +18,14 @@ import ResetDrillButton from '@/components/drill/ResetDrillButton';
 
 const motorDrills = DRILLS.filter(d => d.category === 'motor');
 
+// Drills whose saved best score/level is never read back to set a new
+// session's starting difficulty (every round always begins at the same base
+// difficulty) — no adaptive difficulty, so a "reset progress" button has
+// nothing meaningful to reset.
+const NO_ADAPTIVE_DIFFICULTY = new Set([
+  'keyboard-recognition', 'rapid-tapping', 'steady-hand', 'tracing',
+]);
+
 function handleCardMouseMove(e) {
   const rect = e.currentTarget.getBoundingClientRect();
   e.currentTarget.style.setProperty('--mx', `${e.clientX - rect.left}px`);
@@ -374,6 +382,7 @@ export default function MotorDrillsClient() {
                           <Icon className="w-5 h-5" />
                         </div>
                         <div className="flex items-center gap-1.5">
+                          {!NO_ADAPTIVE_DIFFICULTY.has(drill.folderName) && (
                           <ResetDrillButton
                             storageKeys={storageKeys}
                             drillName={drill.name}
@@ -383,6 +392,7 @@ export default function MotorDrillsClient() {
                               return next;
                             })}
                           />
+                          )}
                           {bestLevel && (
                             <div className="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold tracking-wide border border-emerald-500/20 bg-emerald-500/10 text-emerald-400">
                               Lv. {bestLevel}

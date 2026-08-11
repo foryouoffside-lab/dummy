@@ -64,7 +64,7 @@ const RULES_ITEMS = [
 
 const ABOUT_TEXT = `Cross-Body Movement Pro trains bilateral motor control, cross-body mouse sweeps, and vector line precision under cognitive speed pressure. Players initiate connections on edge nodes and sweep diagonally across the canvas.
 
-As your score increases, the level scales up to Level 15+. Corridor tolerance tightens from 20px down to 8px, node radius physically shrinks, and diagonal distance between nodes expands.
+As your score increases, the level scales up to Level 15+. Corridor tolerance tightens from 10px down to 4px, node radius physically shrinks, and diagonal distance between nodes expands.
 
 Successfully sweeping vectors builds massive combo multipliers across a fixed 45-second session without negative score penalties.`;
 
@@ -72,7 +72,7 @@ const FAQ_ITEMS = [
   { q: "What is Cross-Body Movement Pro?", a: "Cross-Body Movement Pro is a physical coordination drill testing bilateral motor control and diagonal line tracing precision. It forces players to sweep their mouse across large diagonal screen distances within tight corridor bounds." },
   { q: "How do vector connection mechanics work?", a: "Touch the starting cyan node to activate the connection line, then trace directly along the vector to the target magenta node. Deviating past the corridor tolerance breaks connection." },
   { q: "Does this drill improve gaming performance?", a: "Yes. Sweeping wide diagonal angles trains the arm muscles for large flick movements, target switching across screens, and smooth mouse resetting in fast-paced shooters." },
-  { q: "How does difficulty scaling work?", a: "As you score points, your level rises up to Level 15. Path corridor width shrinks from 20px down to 8px, node radius shrinks from 16px to 8px, and node placement variance increases." },
+  { q: "How does difficulty scaling work?", a: "As you score points, your level rises up to Level 15. Path corridor width shrinks from 10px down to 4px, node radius shrinks from 16px to 8px, and node placement variance increases." },
   { q: "Are there penalties for drifting off path?", a: "No. Drifting off the path corridor resets your combo streak to 1.0x, but does not deduct points or reduce your 45-second timer." },
   { q: "How long does each session run?", a: "Each session runs for a fixed 45 seconds to provide a standard, reproducible performance benchmark." },
   { q: "What is a good score in Cross-Body Movement Pro?", a: "Scoring 8,000+ points earns a Gold or Platinum grade, while reaching 17,000+ points with 90%+ connection accuracy places you in the Master tier." },
@@ -96,7 +96,7 @@ const getLevelConfig = (level, combo = 0) => {
   const heat = Math.min(1.0, combo / 50);
 
   return {
-    pathTolerance: Math.max(8, 20 - p * 12),   // 20 -> 8 px corridor
+    pathTolerance: Math.max(4, 10 - p * 6),   // 10 -> 4 px corridor tolerance
     nodeRadius: Math.max(8, 16 - p * 8),      // 16 -> 8 px
     basePoints: Math.round(10 + p * 30)       // 10 -> 40
   };
@@ -638,48 +638,6 @@ export default function CrossBodyMovementClient() {
 
   return (
     <div className="min-h-screen bg-[#050508] text-white flex flex-col font-sans select-none">
-      {/* ── HEADER / BREADCRUMB ── */}
-      {!isFullscreen && (
-        <header className="border-b border-white/5 bg-[#080811]/80 backdrop-blur-md sticky top-0 z-50">
-          <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
-            <div className="flex items-center gap-2 text-xs text-slate-400">
-              <Link href="/" className="hover:text-white transition-colors">Home</Link>
-              <span>/</span>
-              <Link href="/drills/physical" className="hover:text-white transition-colors">Physical</Link>
-              <span>/</span>
-              <span className="text-slate-400">Coordination</span>
-              <span>/</span>
-              <span className="text-cyan-400 font-medium">Cross-Body Movement Pro</span>
-            </div>
-
-            <div className="flex items-center gap-1.5">
-              <button
-                onClick={() => {
-                  const next = !soundEnabled;
-                  setSoundEnabled(next);
-                  drillAudio?.setEnabled?.(next);
-                }}
-                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-                title={soundEnabled ? "Mute Sound" : "Unmute Sound"}
-              >
-                {soundEnabled ? <Volume2 className="w-4 h-4 text-emerald-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
-              </button>
-              <button
-                onClick={() => {
-                  const next = !flashEnabled;
-                  setFlashEnabled(next);
-                  drillFlash?.setEnabled?.(next);
-                }}
-                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-                title={flashEnabled ? "Disable Miss Flash" : "Enable Miss Flash"}
-              >
-                {flashEnabled ? <Zap className="w-4 h-4 text-red-400" /> : <ZapOff className="w-4 h-4 text-red-400" />}
-              </button>
-            </div>
-          </div>
-        </header>
-      )}
-
       {/* ── MAIN CONTENT AREA ── */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
         {/* Title */}

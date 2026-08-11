@@ -53,8 +53,6 @@ const saveData = (data) => {
   } catch (e) {}
 };
 
-
-
 // ============================================================
 // ACCORDION DATA
 // ============================================================
@@ -97,8 +95,6 @@ export default function ConcentrationStaminaClient() {
   const [phase, setPhase] = useState('start'); // 'start' | 'countdown' | 'playing' | 'ended'
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
-  const [isMobile, setIsMobile] = useState(false);
-  const [isPortrait, setIsPortrait] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   // Gameplay State
@@ -141,33 +137,6 @@ export default function ConcentrationStaminaClient() {
   const hitsRef = useRef(0);
   const missesRef = useRef(0);
   const falseAlarmsRef = useRef(0);
-
-  // Check window size
-  useEffect(() => {
-    const handleResize = () => {
-      if (typeof window !== 'undefined') {
-        setIsMobile(window.innerWidth < 768);
-        setIsPortrait(window.innerHeight > window.innerWidth);
-      }
-    };
-    handleResize();
-    window.addEventListener('resize', handleResize);
-
-    const handleFsChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-    document.addEventListener('fullscreenchange', handleFsChange);
-
-    const saved = getSavedData();
-    setBestScore(saved.bestScore);
-    setBestLevel(saved.bestLevel);
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      document.removeEventListener('fullscreenchange', handleFsChange);
-      clearAllTimers();
-    };
-  }, []);
 
   const clearAllTimers = useCallback(() => {
     if (clockTimerRef.current) clearInterval(clockTimerRef.current);
@@ -450,46 +419,6 @@ export default function ConcentrationStaminaClient() {
 
   return (
     <div className="min-h-screen bg-[#050508] text-white flex flex-col font-sans select-none">
-      {/* ── HEADER / BREADCRUMB ── */}
-      {!isFullscreen && (
-      <header className="border-b border-white/5 bg-[#080811]/80 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-xs text-slate-400">
-            <Link href="/" className="hover:text-white transition-colors">Home</Link>
-            <span>/</span>
-            <Link href="/drills/cognitive" className="hover:text-white transition-colors">Cognitive</Link>
-            <span>/</span>
-            <span className="text-indigo-400 font-medium">Concentration Stamina</span>
-          </div>
-
-          <div className="flex items-center gap-1.5">
-            <button
-              onClick={() => {
-                const next = !soundEnabled;
-                setSoundEnabled(next);
-                drillAudio.setEnabled(next);
-              }}
-              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-              title={soundEnabled ? "Mute Sound" : "Unmute Sound"}
-            >
-              {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4 text-red-400" />}
-            </button>
-            <button
-              onClick={() => {
-                const next = !flashEnabled;
-                setFlashEnabled(next);
-                drillFlash.setEnabled(next);
-              }}
-              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-              title={flashEnabled ? "Disable Miss Flash" : "Enable Miss Flash"}
-            >
-              {flashEnabled ? <Zap className="w-4 h-4 text-red-400" /> : <ZapOff className="w-4 h-4 text-red-400" />}
-            </button>
-          </div>
-        </div>
-      </header>
-      )}
-
       {/* ── MAIN CONTENT AREA ── */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
         {/* Title */}
@@ -532,13 +461,7 @@ export default function ConcentrationStaminaClient() {
         <div 
           ref={containerRef} 
           className={
-            isFullscreen 
-              ? 'fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#050508] flex flex-col items-center justify-center' 
-              : isMobile 
-                ? (isPortrait
-                    ? 'w-full rounded-2xl aspect-[3/4] min-h-[420px] max-h-[76vh] bg-[#080811] border border-white/10 relative overflow-hidden flex flex-col'
-                    : 'w-full rounded-2xl aspect-video min-h-[340px] max-h-[85vh] bg-[#080811] border border-white/10 relative overflow-hidden flex flex-col')
-                : 'w-full rounded-2xl aspect-video min-h-[460px] sm:min-h-[500px] max-h-[88vh] bg-[#080811] border border-white/10 relative overflow-hidden flex flex-col'
+            isFullscreen ? 'fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#050508] flex flex-col items-center justify-center' : 'w-full rounded-2xl aspect-video min-h-[460px] md:min-h-[500px] max-h-[88vh] max-md:portrait:aspect-[3/4] max-md:portrait:min-h-[420px] max-md:portrait:max-h-[76vh] max-md:landscape:min-h-[340px] max-md:landscape:max-h-[85vh] bg-[#080811] border border-white/10 relative overflow-hidden flex flex-col'
           }
         >
           <div className="absolute inset-0 pointer-events-none opacity-20" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)', backgroundSize: '40px 40px' }} />

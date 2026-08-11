@@ -50,8 +50,6 @@ const saveData = (data) => {
   } catch (e) {}
 };
 
-
-
 const MAX_LEVEL = 5;
 const MAX_LIVES = 5;
 const POINTS_PER_HIT = 100;
@@ -138,8 +136,6 @@ export default function RSVPReaderClient() {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
   const [openAccordion, setOpenAccordion] = useState(null);
-  const [isMobile, setIsMobile] = useState(false);
-  const [isPortrait, setIsPortrait] = useState(false);
   const [countdownValue, setCountdownValue] = useState(3);
 
   // Live HUD State
@@ -186,35 +182,6 @@ export default function RSVPReaderClient() {
   });
 
   const { flashes, triggerFlash } = useDrillFlash();
-
-  // Screen/Orientation tracking
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setSoundEnabled(drillAudio.isEnabled());
-      setFlashEnabled(drillFlash.isEnabled());
-      const checkDevice = () => {
-        setIsMobile(window.innerWidth < 768);
-        setIsPortrait(window.innerHeight > window.innerWidth);
-      };
-      checkDevice();
-      window.addEventListener('resize', checkDevice);
-      window.addEventListener('orientationchange', checkDevice);
-
-      const saved = getSavedData();
-      setBestScore(saved.bestScore || 0);
-      setBestLevel(saved.bestLevel || 1);
-      setTotalSessions(saved.totalSessions || 0);
-
-      const handleFs = () => setIsFullscreen(!!document.fullscreenElement);
-      document.addEventListener('fullscreenchange', handleFs);
-
-      return () => {
-        window.removeEventListener('resize', checkDevice);
-        window.removeEventListener('orientationchange', checkDevice);
-        document.removeEventListener('fullscreenchange', handleFs);
-      };
-    }
-  }, []);
 
   // Clean timers on unmount
   useEffect(() => {
@@ -477,46 +444,6 @@ export default function RSVPReaderClient() {
 
   return (
     <div className="min-h-screen bg-[#050508] text-white flex flex-col font-sans select-none">
-      {/* ── HEADER / BREADCRUMB ── */}
-      {!isFullscreen && (
-      <header className="border-b border-white/5 bg-[#080811]/80 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-xs text-slate-400">
-            <Link href="/" className="hover:text-white transition-colors">Home</Link>
-            <span>/</span>
-            <Link href="/drills/cognitive" className="hover:text-white transition-colors">Cognitive</Link>
-            <span>/</span>
-            <span className="text-amber-400 font-medium">RSVP Speed Reader</span>
-          </div>
-
-          <div className="flex items-center gap-1.5">
-            <button
-              onClick={() => {
-                const next = !soundEnabled;
-                setSoundEnabled(next);
-                drillAudio.setEnabled(next);
-              }}
-              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-              title={soundEnabled ? "Mute Sound" : "Unmute Sound"}
-            >
-              {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4 text-red-400" />}
-            </button>
-            <button
-              onClick={() => {
-                const next = !flashEnabled;
-                setFlashEnabled(next);
-                drillFlash.setEnabled(next);
-              }}
-              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-              title={flashEnabled ? "Disable Miss Flash" : "Enable Miss Flash"}
-            >
-              {flashEnabled ? <Zap className="w-4 h-4 text-red-400" /> : <ZapOff className="w-4 h-4 text-red-400" />}
-            </button>
-          </div>
-        </div>
-      </header>
-      )}
-
       {/* ── MAIN CONTENT AREA ── */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
         {/* Title */}
@@ -559,13 +486,7 @@ export default function RSVPReaderClient() {
         <div 
           ref={containerRef} 
           className={
-            isFullscreen 
-              ? 'fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#050508] flex flex-col items-center justify-center' 
-              : isMobile 
-                ? (isPortrait
-                    ? 'w-full rounded-2xl aspect-[3/4] min-h-[420px] max-h-[76vh] bg-[#080811] border border-white/10 relative overflow-hidden flex flex-col'
-                    : 'w-full rounded-2xl aspect-video min-h-[340px] max-h-[85vh] bg-[#080811] border border-white/10 relative overflow-hidden flex flex-col')
-                : 'w-full rounded-2xl aspect-video min-h-[460px] sm:min-h-[500px] max-h-[88vh] bg-[#080811] border border-white/10 relative overflow-hidden flex flex-col'
+            isFullscreen ? 'fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#050508] flex flex-col items-center justify-center' : 'w-full rounded-2xl aspect-video min-h-[460px] md:min-h-[500px] max-h-[88vh] max-md:portrait:aspect-[3/4] max-md:portrait:min-h-[420px] max-md:portrait:max-h-[76vh] max-md:landscape:min-h-[340px] max-md:landscape:max-h-[85vh] bg-[#080811] border border-white/10 relative overflow-hidden flex flex-col'
           }
         >
           {/* Red Flash Overlay */}
@@ -653,7 +574,7 @@ export default function RSVPReaderClient() {
               <div className="relative flex items-center justify-center w-full max-w-lg h-36 sm:h-44 font-mono text-4xl sm:text-6xl font-black my-auto pointer-events-none">
                 <div className="flex items-center justify-center tracking-tight">
                   <span className="text-slate-300 text-right min-w-[120px] sm:min-w-[180px]">{orp.prefix}</span>
-                  <span className="text-amber-400 font-extrabold text-red-400 px-0.5 underline decoration-2">{orp.pivot}</span>
+                  <span className="text-red-500 font-black px-0.5 underline decoration-red-500 decoration-2">{orp.pivot}</span>
                   <span className="text-slate-300 text-left min-w-[120px] sm:min-w-[180px]">{orp.suffix}</span>
                 </div>
               </div>

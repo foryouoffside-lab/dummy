@@ -13,6 +13,15 @@ import ResetDrillButton from "@/components/drill/ResetDrillButton";
 
 const memDrills = DRILLS.filter(d => d.category === 'memory');
 
+// Every memory drill always restarts a new round at its base difficulty
+// (level 1 / smallest grid) regardless of saved best level — the saved value
+// is display-only, never read back to raise the starting difficulty. So
+// there's nothing an adaptive-difficulty reset would meaningfully change.
+const NO_ADAPTIVE_DIFFICULTY = new Set([
+  'color-sequence', 'digit-span', 'word-recall',
+  'grid-memorization', 'object-location', 'path-tracing', 'n-back',
+]);
+
 const memoryCategories = [
   {
     name: "Short-Term Memory",
@@ -360,6 +369,7 @@ export default function MemoryClient() {
                           <Brain className="w-5 h-5" />
                         </div>
                         <div className="flex items-center gap-1.5">
+                          {!NO_ADAPTIVE_DIFFICULTY.has(drill.folderName) && (
                           <ResetDrillButton
                             storageKeys={storageKeys}
                             drillName={drill.name}
@@ -369,6 +379,7 @@ export default function MemoryClient() {
                               return next;
                             })}
                           />
+                          )}
                           {bestLevel && (
                             <div className="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold tracking-wide border border-indigo-500/20 bg-indigo-500/10 text-indigo-400">
                               Lv. {bestLevel}

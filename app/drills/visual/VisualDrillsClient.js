@@ -25,7 +25,17 @@ const FOLDER_TO_STORAGE_KEY = {
   'no-go': 'skilldrills_visual_go_nogo_v4',
   'pursuit-tracker': 'skilldrills_visual_pursuit_tracker_v2',
   'multiple-targets': 'skilldrills_visual_multiple_targets_v1',
+  'rhythm-anomaly': 'rhythmAnomalyBestScore_v8',
 };
+
+// Drills whose saved best score/level is never read back to set a new
+// session's starting difficulty (every round always begins at the same base
+// difficulty) — no adaptive difficulty, so a "reset progress" button has
+// nothing meaningful to reset.
+const NO_ADAPTIVE_DIFFICULTY = new Set([
+  'visual-search', 'rhythm-anomaly', 'entropic-grid', 'distance-judgment',
+  'light-reaction', 'no-go', 'pursuit-tracker', 'multiple-targets', 'moving-target',
+]);
 
 function handleCardMouseMove(e) {
   const rect = e.currentTarget.getBoundingClientRect();
@@ -319,15 +329,17 @@ export default function VisualDrillsClient() {
                               <Eye className={`w-5 h-5 ${styles.text}`} />
                             </div>
                             <div className="flex items-center gap-1.5">
-                              <ResetDrillButton
-                                storageKeys={storageKeys}
-                                drillName={drill.name}
-                                onReset={() => setDrillLevels((prev) => {
-                                  const next = { ...prev };
-                                  delete next[drill.folderName];
-                                  return next;
-                                })}
-                              />
+                              {!NO_ADAPTIVE_DIFFICULTY.has(drill.folderName) && (
+                                <ResetDrillButton
+                                  storageKeys={storageKeys}
+                                  drillName={drill.name}
+                                  onReset={() => setDrillLevels((prev) => {
+                                    const next = { ...prev };
+                                    delete next[drill.folderName];
+                                    return next;
+                                  })}
+                                />
+                              )}
                               {bestLevel && (
                                 <span className={`px-2 py-0.5 text-[9px] font-mono font-bold rounded-full border border-fuchsia-500/20 bg-fuchsia-500/10 ${styles.text}`}>
                                   Lv. {bestLevel}
