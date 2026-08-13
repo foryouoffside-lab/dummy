@@ -773,7 +773,7 @@ export default function TargetPrioritizationClient() {
         {/* Title */}
         {!isFullscreen && (
           <div className="text-center">
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight bg-gradient-to-r from-white via-slate-200 to-blue-400 bg-clip-text text-transparent">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
               TARGET PRIORITIZATION
             </h1>
             <p className="text-xs text-slate-400 mt-1">
