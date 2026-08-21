@@ -5,6 +5,9 @@ One-time setup (run this yourself, it opens a browser):
 
 Then any of:
     python scripts/gsc/gsc.py sites
+    python scripts/gsc/gsc.py sitemaps            # read-only, uses the normal token
+    python scripts/gsc/gsc.py authwrite           # one-time, only needed for submit
+    python scripts/gsc/gsc.py submit [sitemapUrl] # resubmit the sitemap
     python scripts/gsc/gsc.py queries [days] [limit]
     python scripts/gsc/gsc.py pages [days] [limit]
     python scripts/gsc/gsc.py opportunities [days] [limit]
@@ -30,39 +33,72 @@ if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 SCOPES = ["https://www.googleapis.com/auth/webmasters.readonly"]
+# Sitemap submission is the only write this tool ever performs and it needs the
+# full webmasters scope. It gets its own token file: swapping the scope on the
+# main token would invalidate it and force a browser re-consent before any read
+# could run again. Reads keep working untouched if this token never exists.
+WRITE_SCOPES = ["https://www.googleapis.com/auth/webmasters"]
 CREDENTIALS = os.environ.get(
     "GSC_CREDENTIALS", r"C:\Users\sangmesh\Desktop\credentials.json"
 )
 TOKEN = os.environ.get("GSC_TOKEN", r"C:\Users\sangmesh\Desktop\gsc-token.json")
+WRITE_TOKEN = os.environ.get(
+    "GSC_WRITE_TOKEN", r"C:\Users\sangmesh\Desktop\gsc-write-token.json"
+)
 SITE = os.environ.get("GSC_SITE", "https://skilldrills.online/")
 
 
-def get_service(interactive=False):
+def get_service(interactive=False, write=False):
+    token, scopes = (WRITE_TOKEN, WRITE_SCOPES) if write else (TOKEN, SCOPES)
+    cmd = "authwrite" if write else "auth"
     creds = None
-    if os.path.exists(TOKEN):
-        creds = Credentials.from_authorized_user_file(TOKEN, SCOPES)
+    if os.path.exists(token):
+        creds = Credentials.from_authorized_user_file(token, scopes)
     if creds and creds.expired and creds.refresh_token:
         creds.refresh(Request())
-        _save(creds)
+        _save(creds, token)
     if not creds or not creds.valid:
         if not interactive:
             sys.exit(
                 "No valid token. Run this yourself in your own terminal:\n"
-                "    python scripts/gsc/gsc.py auth"
+                "    python scripts/gsc/gsc.py " + cmd
             )
-        flow = InstalledAppFlow.from_client_secrets_file(CREDENTIALS, SCOPES)
+        flow = InstalledAppFlow.from_client_secrets_file(CREDENTIALS, scopes)
         creds = flow.run_local_server(port=0)
-        _save(creds)
+        _save(creds, token)
     return build("searchconsole", "v1", credentials=creds)
 
 
-def _save(creds):
-    with open(TOKEN, "w") as f:
+def _save(creds, token=None):
+    token = token or TOKEN
+    with open(token, "w") as f:
         f.write(creds.to_json())
     try:
-        os.chmod(TOKEN, 0o600)
+        os.chmod(token, 0o600)
     except OSError:
         pass
+
+
+def sitemap_status(svc):
+    """One formatted block per registered sitemap. Works with the read-only token."""
+    out = []
+    for m in svc.sitemaps().list(siteUrl=SITE).execute().get("sitemap", []):
+        c = (m.get("contents") or [{}])[0]
+        out.append(
+            "{}\n"
+            "   submitted   {}\n"
+            "   downloaded  {}\n"
+            "   urls {}   errors {}   warnings {}   pending {}".format(
+                m.get("path"),
+                m.get("lastSubmitted"),
+                m.get("lastDownloaded"),
+                c.get("submitted"),
+                m.get("errors"),
+                m.get("warnings"),
+                m.get("isPending"),
+            )
+        )
+    return out or ["NO SITEMAP SUBMITTED for " + SITE]
 
 
 def _range(days):
@@ -111,7 +147,26 @@ def main():
 
     if cmd == "auth":
         get_service(interactive=True)
-        print(f"Authorized. Token saved to {TOKEN}")
+        print(f"Authorized (read-only). Token saved to {TOKEN}")
+        return
+
+    if cmd == "authwrite":
+        # One-time browser consent. Only needed for `submit`.
+        get_service(interactive=True, write=True)
+        print(f"Authorized (read/write). Token saved to {WRITE_TOKEN}")
+        return
+
+    if cmd == "sitemaps":
+        for block in sitemap_status(get_service()):
+            print(block)
+        return
+
+    if cmd == "submit":
+        feed = sys.argv[2] if len(sys.argv) > 2 else SITE.rstrip("/") + "/sitemap.xml"
+        get_service(write=True).sitemaps().submit(siteUrl=SITE, feedpath=feed).execute()
+        print("Submitted " + feed + "\n")
+        for block in sitemap_status(get_service()):
+            print(block)
         return
 
     svc = get_service()
