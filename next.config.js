@@ -76,8 +76,11 @@ const nextConfig = {
         ],
       },
       {
-        // The API relays pings to third-party search engines. It must never be
-        // cached, indexed, or reachable from another origin's page.
+        // The site currently ships no API routes at all — the IndexNow relay was
+        // deleted once it turned out `scripts/notify-indexnow.js` (postbuild)
+        // covered every real use. This rule is kept deliberately so that any
+        // route added later is no-store and noindex by default rather than by
+        // someone remembering to set it.
         source: '/api/(.*)',
         headers: [
           { key: 'Cache-Control', value: 'no-store, max-age=0' },

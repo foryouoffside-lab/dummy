@@ -6,8 +6,11 @@ const { DRILLS } = require('../lib/drillsRegistry');
 // This is the PUBLIC IndexNow protocol key. The protocol requires it to be
 // downloadable at public/indexnow-key.txt so the engines can verify host
 // ownership, so it is published by design and is not a secret. It authenticates
-// *us to the engines*; it must never be used to authorise a write to our own
-// API. app/api/indexnow/route.js uses a separate INDEXNOW_ADMIN_KEY for that.
+// *us to the engines* and nothing else — never reuse it to gate a write.
+//
+// This script is the only IndexNow path the site has. It runs as `postbuild` on
+// every deploy and can be run on demand with `npm run notify-search-engines`.
+// It posts to the engines directly, so it needs no server route and no secret.
 const INDEXNOW_KEY = process.env.INDEXNOW_KEY || 'c8f7a3b2e1d4f5a6b7c8d9e0f1a2b3c4';
 
 const CATEGORY_PAGES = [
