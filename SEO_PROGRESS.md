@@ -20,7 +20,7 @@ python scripts/gsc/gsc.py sites | queries [days] [limit] | pages | opportunities
 ```
 Secrets are gitignored (`credentials.json`, `*-token.json`, `gsc-*.csv`).
 
-Old GitHub PAT was removed from `.git/config`. **User still needs to revoke it** at github.com/settings/tokens (the old `github_pat_` fine-grained token — see your token list).
+Old GitHub PAT was removed from `.git/config`. ~~User still needs to revoke it.~~ **RESOLVED 2026-08-21 (session 3):** the user checked github.com/settings/tokens and there are no personal access tokens on the account at all. Fine-grained PATs carry a mandatory expiry, so it had almost certainly lapsed on its own. Verified independently: no token in `.git/config`, zero token matches across full git history, and `gh` authenticates with a `gho_` OAuth token in the Windows keyring (which lives under Settings > Applications, not under Personal access tokens). Nothing further to do — do not re-raise this item.
 
 ---
 
@@ -523,8 +523,10 @@ GET                        -> still serves the public key (the protocol needs it
 - sharp's libvips CVEs need attacker-supplied images. The only image path is
   `next/image` with `remotePatterns` limited to our own host, and the site has no
   upload anywhere. Patched anyway, since it turned out to be free.
-- **The old GitHub PAT still needs revoking** at github.com/settings/tokens.
-  Carried over from session 1 and still outstanding.
+- ~~The old GitHub PAT still needs revoking.~~ **Closed.** The user checked their
+  token list and it is empty — the token no longer exists. See the resolution note
+  at the top of this file. This had been carried as an open item since session 1
+  purely on the strength of a note, never on a verified check.
 
 ## Sitemap
 
