@@ -1,7 +1,9 @@
 import DirectionalChaosPursuitClient from './DirectionalChaosPursuitClient';
+import DrillGuide from '../../../../components/drill/DrillGuide';
+import { GUIDES } from '../guides';
 
 export const metadata = {
-  title: "Directional Chaos Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
+  title: "Directional Chaos Pursuit - Erratic Motion Eye Drill",
   description: "Track a bouncing target subjected to continuous chaotic velocity nudges. Trains gaze recovery from unpredictable, erratic motion.",
   keywords: [
     "directional chaos pursuit",
@@ -22,7 +24,7 @@ export const metadata = {
     follow: true,
   },
   openGraph: {
-    title: "Directional Chaos Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
+    title: "Directional Chaos Pursuit - Erratic Motion Eye Drill | SkillDrills",
     description: "Track a bouncing target subjected to continuous chaotic velocity nudges. Free browser-based visual tracking drill.",
     url: "https://skilldrills.online/drills/visual-tracking/directional-chaos-pursuit",
     siteName: 'SkillDrills',
@@ -31,7 +33,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Directional Chaos Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
+    title: "Directional Chaos Pursuit - Erratic Motion Eye Drill | SkillDrills",
     description: "Track a bouncing target subjected to continuous chaotic velocity nudges. Free browser-based visual tracking drill.",
   },
 };
@@ -102,6 +104,18 @@ export default function DirectionalChaosPursuitPage() {
     ]
   };
 
+  // The guide block below renders extra Q&As; append them to the FAQPage
+  // schema so the structured data matches what is actually on the page.
+  const guide = GUIDES['directional-chaos-pursuit'];
+  faqSchema.mainEntity = faqSchema.mainEntity.concat(
+    (guide?.faqs || []).map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    }))
+  );
+
+
   return (
     <>
       <script
@@ -118,6 +132,7 @@ export default function DirectionalChaosPursuitPage() {
       />
 
       <DirectionalChaosPursuitClient />
+      <DrillGuide guide={guide} />
     </>
   );
 }

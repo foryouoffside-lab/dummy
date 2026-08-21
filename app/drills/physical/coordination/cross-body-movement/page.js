@@ -1,8 +1,8 @@
 import CrossBodyMovementClient from './CrossBodyMovementClient';
 
 export const metadata = {
-  title: 'Hand Eye Coordination Game - Free Cross Body Movement Training | SkillDrills',
-  description: 'Play this free hand eye coordination game. Connect nodes across the screen to improve bilateral coordination, cross-body movement, fine motor skills, and mouse accuracy.',
+  title: 'Hand Eye Coordination Game - Free Cross Body Drill',
+  description: 'Free hand eye coordination game. Connect nodes across the screen to train bilateral coordination, cross-body movement and mouse accuracy.',
   keywords: [
     'hand eye coordination game', 'hand eye coordination exercises', 'hand eye coordination training',
     'free hand eye coordination game', 'online hand eye coordination', 'hand eye coordination test',
@@ -16,7 +16,7 @@ export const metadata = {
     'best hand eye coordination game', 'free motor skills game', 'browser coordination game'
   ],
   openGraph: {
-    title: 'Hand Eye Coordination Game - Free Cross Body Movement Training',
+    title: 'Hand Eye Coordination Game - Free Cross Body Drill',
     description: 'Improve bilateral coordination and fine motor skills with this free hand eye coordination game. Connect nodes across the screen to build cross-body movement accuracy.',
     type: 'website',
     url: 'https://skilldrills.online/drills/physical/coordination/cross-body-movement',
@@ -31,7 +31,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Hand Eye Coordination Game - Free Cross Body Movement Training',
+    title: 'Hand Eye Coordination Game - Free Cross Body Drill',
     description: 'Play this free hand eye coordination game to improve bilateral motor control and mouse accuracy. No sign-up required.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },

@@ -130,7 +130,7 @@ const howToSchema = {
 };
 
 export const metadata = {
-  title: "Divided Attention Test – Free Dual-Task Split Focus Game | SkillDrills",
+  title: "Divided Attention Test – Free Dual-Task Split Focus Game",
   description: "Test and train divided attention online. Track two visual stimulus streams simultaneously in this free dual-task split focus brain game. No sign-up required.",
   keywords: [
     "divided attention test",

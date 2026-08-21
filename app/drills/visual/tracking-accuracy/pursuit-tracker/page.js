@@ -107,7 +107,7 @@ const howToSchema = {
 };
 
 export const metadata = {
-  title: "Smooth Pursuit Tracker | Free Visual Aim Training Game | SkillDrills",
+  title: "Smooth Pursuit Tracker | Free Visual Aim Training Game",
   description: "Measure your continuous hand-eye target follow accuracy. Keep your cursor on the unpredictably moving orb to evaluate smooth pursuit speed and coordination.",
   keywords: [
     "visual pursuit test",

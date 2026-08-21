@@ -1,7 +1,9 @@
 import GhostingSuppressPursuitClient from './GhostingSuppressPursuitClient';
+import DrillGuide from '../../../../components/drill/DrillGuide';
+import { GUIDES } from '../guides';
 
 export const metadata = {
-  title: "Ghosting Suppress Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
+  title: "Ghosting Suppress - Eye Fixation Stability Training",
   description: "Train foveal tracking precision by suppressing motion ghosting artifacts and visual lag. Sharpens fixation stability against blur and afterimage drift.",
   keywords: [
     "ghosting suppress pursuit",
@@ -22,7 +24,7 @@ export const metadata = {
     follow: true,
   },
   openGraph: {
-    title: "Ghosting Suppress Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
+    title: "Ghosting Suppress - Eye Fixation Stability Training | SkillDrills",
     description: "Train foveal tracking precision by suppressing motion ghosting artifacts and visual lag. Free browser-based visual tracking drill.",
     url: "https://skilldrills.online/drills/visual-tracking/ghosting-suppress-pursuit",
     siteName: 'SkillDrills',
@@ -31,7 +33,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Ghosting Suppress Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
+    title: "Ghosting Suppress - Eye Fixation Stability Training | SkillDrills",
     description: "Train foveal tracking precision by suppressing motion ghosting artifacts and visual lag. Free browser-based visual tracking drill.",
   },
 };
@@ -102,6 +104,18 @@ export default function GhostingSuppressPursuitPage() {
     ]
   };
 
+  // The guide block below renders extra Q&As; append them to the FAQPage
+  // schema so the structured data matches what is actually on the page.
+  const guide = GUIDES['ghosting-suppress-pursuit'];
+  faqSchema.mainEntity = faqSchema.mainEntity.concat(
+    (guide?.faqs || []).map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    }))
+  );
+
+
   return (
     <>
       <script
@@ -118,6 +132,7 @@ export default function GhostingSuppressPursuitPage() {
       />
 
       <GhostingSuppressPursuitClient />
+      <DrillGuide guide={guide} />
     </>
   );
 }

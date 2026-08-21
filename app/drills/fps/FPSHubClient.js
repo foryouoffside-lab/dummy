@@ -11,7 +11,6 @@ import { getDifficultyRank } from '@/lib/scoringEngine';
 import SiteFooter from '@/components/SiteFooter';
 import Reveal from '@/components/Reveal';
 import StickyMobileCta from '@/components/StickyMobileCta';
-import DrillLoading from '@/components/DrillLoading';
 import ResetDrillButton from '@/components/drill/ResetDrillButton';
 
 // Mapping: drill folderName → actual localStorage STORAGE_KEY, for drills whose
@@ -166,9 +165,6 @@ export default function FPSHubClient() {
     }))
   };
 
-  if (!isClient) {
-    return <DrillLoading />;
-  }
 
   return (
     <div className="min-h-screen bg-canvas text-ink-1 font-sans selection:bg-red-500/30 selection:text-red-300 relative overflow-hidden">
@@ -237,7 +233,7 @@ export default function FPSHubClient() {
               </div>
               <div>
                 <div className="inline-flex items-center gap-2 mb-1">
-                  <h1 className="text-2xl sm:text-4xl font-extrabold text-ink-1 tracking-tight uppercase">FPS Aim &amp; Reflex</h1>
+                  <h1 className="text-2xl sm:text-4xl font-extrabold text-ink-1 tracking-tight uppercase">Free FPS Aim Trainer</h1>
                   <span className="px-2.5 py-0.5 rounded-full text-2xs font-mono font-bold bg-red-500/10 border border-red-500/20 text-red-400">
                     {totalDrills} DRILLS ONLINE
                   </span>

@@ -12,8 +12,8 @@ import ReactionTimeTestWrapper from './ReactionTimeTestWrapper';
 // ============================================================
 
 export const metadata = {
-  title: 'Reaction Time Test - Free Visual Reflex Speed Game | SkillDrills',
-  description: 'Test your visual reaction speed and reflexes with this free Reaction Time Test. Measure your reaction latency in milliseconds, compare with average human scores, and train to improve. Free, mobile-friendly, and no download needed.',
+  title: 'Reaction Time Test - Free Visual Reflex Speed Game',
+  description: 'Free reaction time test online. Measure your visual reflex speed in milliseconds, compare your average against benchmarks, and track your best score.',
   keywords: [
     'reaction time test', 'reflex test', 'reaction test',
     'f1 reaction time test', 'average reaction time', 'reaction speed test',

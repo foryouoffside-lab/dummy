@@ -65,6 +65,26 @@ const nextConfig = {
   
   async redirects() {
     return [
+      // ------------------------------------------------------------------
+      // Retired sections. These URLs were deleted from the app but are still
+      // indexed and still earning impressions (measured in Search Console
+      // 2026-08-21: /drills/academic 185 impr @ pos 9.7, /drills/productivity
+      // 39 impr, inference-drill 11 impr, /drills/mental-fitness 8 impr --
+      // 243 impressions and 8 clicks landing on 404s). 301 them to the nearest
+      // live equivalent so the ranking equity transfers instead of decaying.
+      // Most specific first: Next matches redirects in array order.
+      // ------------------------------------------------------------------
+      {
+        source: '/drills/academic/reading-speed/rsvp-reader',
+        destination: '/drills/cognitive/processing-speed/rsvp-reader',
+        permanent: true,
+      },
+      { source: '/drills/academic', destination: '/drills/cognitive', permanent: true },
+      { source: '/drills/academic/:path*', destination: '/drills/cognitive', permanent: true },
+      { source: '/drills/productivity', destination: '/drills/cognitive', permanent: true },
+      { source: '/drills/productivity/:path*', destination: '/drills/cognitive', permanent: true },
+      { source: '/drills/mental-fitness', destination: '/drills', permanent: true },
+      { source: '/drills/mental-fitness/:path*', destination: '/drills', permanent: true },
       {
         source: '/index',
         destination: '/',

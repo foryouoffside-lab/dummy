@@ -1,7 +1,9 @@
 import ConstantSlowPursuitClient from './ConstantSlowPursuitClient';
+import DrillGuide from '../../../../components/drill/DrillGuide';
+import { GUIDES } from '../guides';
 
 export const metadata = {
-  title: "Constant Slow Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
+  title: "Constant Slow Pursuit - Smooth Pursuit Eye Exercise",
   description: "Train smooth pursuit eye movements along a continuous Lissajous curve. Adjustable speed and duration build steady low-velocity gaze control.",
   keywords: [
     "constant slow pursuit",
@@ -21,7 +23,7 @@ export const metadata = {
     follow: true,
   },
   openGraph: {
-    title: "Constant Slow Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
+    title: "Constant Slow Pursuit - Smooth Pursuit Eye Exercise | SkillDrills",
     description: "Train smooth pursuit eye movements along a continuous Lissajous curve. Free browser-based visual tracking drill.",
     url: "https://skilldrills.online/drills/visual-tracking/constant-slow-pursuit",
     siteName: 'SkillDrills',
@@ -30,7 +32,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Constant Slow Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
+    title: "Constant Slow Pursuit - Smooth Pursuit Eye Exercise | SkillDrills",
     description: "Train smooth pursuit eye movements along a continuous Lissajous curve. Free browser-based visual tracking drill.",
   },
 };
@@ -101,6 +103,18 @@ export default function ConstantSlowPursuitPage() {
     ]
   };
 
+  // The guide block below renders extra Q&As; append them to the FAQPage
+  // schema so the structured data matches what is actually on the page.
+  const guide = GUIDES['constant-slow-pursuit'];
+  faqSchema.mainEntity = faqSchema.mainEntity.concat(
+    (guide?.faqs || []).map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    }))
+  );
+
+
   return (
     <>
       <script
@@ -117,6 +131,7 @@ export default function ConstantSlowPursuitPage() {
       />
 
       <ConstantSlowPursuitClient />
+      <DrillGuide guide={guide} />
     </>
   );
 }

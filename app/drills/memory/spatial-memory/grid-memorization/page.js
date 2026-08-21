@@ -1,8 +1,8 @@
 import GridMemorizationClient from './GridMemorizationClient';
 
 export const metadata = {
-  title: 'Grid Memorization Pro - Spatial Memory Test & Drill | SkillDrills',
-  description: 'Train spatial memory with progressive 4x4 to 5x5 grids. 1.5-second memorization of illuminated cells, zero negative penalties, 45-second session. Free online tool.',
+  title: 'Grid Memorization Pro - Spatial Memory Test & Drill',
+  description: 'Train spatial memory with progressive 4x4 to 5x5 grids. 1.5-second memorization of illuminated cells, zero negative penalties, 45-second session.',
   keywords: [
     'grid memorization', 'spatial memory', 'visual pattern memory',
     'grid pattern recall', 'spatial recall drill', 'visual spatial memory',
@@ -17,7 +17,7 @@ export const metadata = {
     'grid memory exercise', 'spatial recall practice', 'grid recognition drill',
   ],
   openGraph: {
-    title: 'Grid Memorization Pro - Spatial Memory Test & Drill | SkillDrills',
+    title: 'Grid Memorization Pro - Spatial Memory Test & Drill',
     description: 'Train spatial memory with progressive 4x4 to 5x5 grids. 1.5-second pattern memorization, zero penalties. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/memory/spatial-memory/grid-memorization',
@@ -26,7 +26,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Grid Memorization Pro - Spatial Memory Test & Drill | SkillDrills',
+    title: 'Grid Memorization Pro - Spatial Memory Test & Drill',
     description: 'Train spatial memory with progressive 4x4 to 5x5 grids. 1.5s pattern memorization, zero penalties. Free.',
   },
   robots: { index: true, follow: true },

@@ -93,8 +93,6 @@ export default function GhostLinkClient() {
   const [isBoxDarkMode, setIsBoxDarkMode] = useState(true);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
-  const [loading, setLoading] = useState(true);
-  const [isClient, setIsClient] = useState(false);
   const [playerNameInput, setPlayerNameInput] = useState('');
   const [showNameInput, setShowNameInput] = useState(false);
 
@@ -176,12 +174,9 @@ export default function GhostLinkClient() {
   useEffect(() => { gameStateRef.current = gameState; }, [gameState]);
 
   useEffect(() => {
-    setIsClient(true);
     const saved = getSavedData();
     setBestScore(saved.bestScore || 0);
     setBestLevel(saved.bestLevel || 1);
-    const timer = setTimeout(() => setLoading(false), 100);
-    return () => clearTimeout(timer);
   }, []);
 
   // Sound profiles mapped onto the shared canonical drillAudio calls.
@@ -645,17 +640,6 @@ export default function GhostLinkClient() {
       }
     }
   }, [accuracy, bestScore, analytics.grade, isNewBest]);
-
-  if (loading || !isClient) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-black">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4 shadow-[0_0_20px_rgba(168,85,247,0.5)]"></div>
-          <p className="text-gray-400 font-medium tracking-widest uppercase text-sm animate-pulse">Loading Engine...</p>
-        </div>
-      </div>
-    );
-  }
 
   const gradeLetter = analytics.grade?.letter || 'C';
   const rankName = analytics.grade?.label || 'Master Tracker';

@@ -130,8 +130,8 @@ const howToSchema = {
 };
 
 export const metadata = {
-  title: "Ignore Distractions Game: Free Online Focus & Attention Training | SkillDrills",
-  description: "Train your brain to block out noise! Play our free online focus games designed to improve your selective attention, ignore distractions, and boost your daily productivity.",
+  title: "Ignore Distractions Game - Free Focus & Attention Test",
+  description: "Free online focus game. Train selective attention by locking onto targets while moving distractions try to pull your eyes away. No sign-up needed.",
   keywords: [
     "ignore distractions game",
     "focus games online free",
@@ -159,7 +159,7 @@ export const metadata = {
   robots: { index: true, follow: true },
   openGraph: {
     title: "Ignore Distractions Game: Free Online Focus & Attention Training | SkillDrills",
-    description: "Train your brain to block out noise! Play our free online focus games designed to improve your selective attention, ignore distractions, and boost your daily productivity.",
+    description: "Free online focus game. Train selective attention by locking onto targets while moving distractions try to pull your eyes away. No sign-up needed.",
     url: "https://skilldrills.online/drills/cognitive/focus/distraction-fighter",
     siteName: 'SkillDrills',
     locale: 'en_US',
@@ -168,7 +168,7 @@ export const metadata = {
   twitter: {
     card: 'summary_large_image',
     title: "Ignore Distractions Game: Free Online Focus & Attention Training | SkillDrills",
-    description: "Train your brain to block out noise! Play our free online focus games designed to improve your selective attention, ignore distractions, and boost your daily productivity.",
+    description: "Free online focus game. Train selective attention by locking onto targets while moving distractions try to pull your eyes away. No sign-up needed.",
   },
 };
 

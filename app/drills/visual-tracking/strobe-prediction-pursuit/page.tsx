@@ -1,7 +1,9 @@
 import StrobePredictionPursuitClient from './StrobePredictionPursuitClient';
+import DrillGuide from '../../../../components/drill/DrillGuide';
+import { GUIDES } from '../guides';
 
 export const metadata = {
-  title: "Strobe Prediction Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
+  title: "Strobe Prediction - Strobe Vision Training Drill",
   description: "Predict target locations during cyclic strobe occlusion intervals. Trains gaze prediction through brief target occlusion.",
   keywords: [
     "strobe prediction pursuit",
@@ -22,7 +24,7 @@ export const metadata = {
     follow: true,
   },
   openGraph: {
-    title: "Strobe Prediction Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
+    title: "Strobe Prediction - Strobe Vision Training Drill | SkillDrills",
     description: "Predict target locations during cyclic strobe occlusion intervals. Free browser-based visual tracking drill.",
     url: "https://skilldrills.online/drills/visual-tracking/strobe-prediction-pursuit",
     siteName: 'SkillDrills',
@@ -31,7 +33,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Strobe Prediction Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
+    title: "Strobe Prediction - Strobe Vision Training Drill | SkillDrills",
     description: "Predict target locations during cyclic strobe occlusion intervals. Free browser-based visual tracking drill.",
   },
 };
@@ -102,6 +104,18 @@ export default function StrobePredictionPursuitPage() {
     ]
   };
 
+  // The guide block below renders extra Q&As; append them to the FAQPage
+  // schema so the structured data matches what is actually on the page.
+  const guide = GUIDES['strobe-prediction-pursuit'];
+  faqSchema.mainEntity = faqSchema.mainEntity.concat(
+    (guide?.faqs || []).map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    }))
+  );
+
+
   return (
     <>
       <script
@@ -118,6 +132,7 @@ export default function StrobePredictionPursuitPage() {
       />
 
       <StrobePredictionPursuitClient />
+      <DrillGuide guide={guide} />
     </>
   );
 }

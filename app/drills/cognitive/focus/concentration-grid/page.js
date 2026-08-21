@@ -1,8 +1,8 @@
 import ConcentrationGridClient from './ConcentrationGridClient';
 
 export const metadata = {
-  title: "Concentration Grid — Sequential Number Search Trainer | SkillDrills",
-  description: "Sharpen visual search speed and sustained focus with Concentration Grid — tap numbers in order on expanding 3x3 to 8x8 grids. Free, browser-based cognitive training.",
+  title: "Concentration Grid — Sequential Number Search Trainer",
+  description: "Sharpen visual search speed and sustained focus with Concentration Grid — tap numbers in order on expanding 3x3 to 8x8 grids.",
   keywords: [
     "concentration grid",
     "visual search training",
@@ -26,7 +26,7 @@ export const metadata = {
   },
   openGraph: {
     title: "Concentration Grid — Sequential Number Search Trainer | SkillDrills",
-    description: "Sharpen visual search speed and sustained focus with Concentration Grid — tap numbers in order on expanding 3x3 to 8x8 grids. Free, browser-based cognitive training.",
+    description: "Sharpen visual search speed and sustained focus with Concentration Grid — tap numbers in order on expanding 3x3 to 8x8 grids.",
     url: "https://skilldrills.online/drills/cognitive/focus/concentration-grid",
     siteName: 'SkillDrills',
     locale: 'en_US',
@@ -37,7 +37,7 @@ export const metadata = {
   twitter: {
     card: 'summary_large_image',
     title: "Concentration Grid — Sequential Number Search Trainer | SkillDrills",
-    description: "Sharpen visual search speed and sustained focus with Concentration Grid — tap numbers in order on expanding 3x3 to 8x8 grids. Free, browser-based cognitive training.",
+    description: "Sharpen visual search speed and sustained focus with Concentration Grid — tap numbers in order on expanding 3x3 to 8x8 grids.",
   },
 };
 

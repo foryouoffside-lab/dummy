@@ -1,7 +1,9 @@
 import PredictivePursuitClient from './PredictivePursuitClient';
+import DrillGuide from '../../../../components/drill/DrillGuide';
+import { GUIDES } from '../guides';
 
 export const metadata = {
-  title: "Predictive Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
+  title: "Predictive Pursuit - Predictive Eye Tracking Drill",
   description: "Interpolate path trajectory of a moving target node and execute predictive gaze shifts. Builds anticipatory tracking ahead of the target's actual position.",
   keywords: [
     "predictive pursuit",
@@ -22,7 +24,7 @@ export const metadata = {
     follow: true,
   },
   openGraph: {
-    title: "Predictive Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
+    title: "Predictive Pursuit - Predictive Eye Tracking Drill | SkillDrills",
     description: "Interpolate path trajectory of a moving target node and execute predictive gaze shifts. Free browser-based visual tracking drill.",
     url: "https://skilldrills.online/drills/visual-tracking/predictive-pursuit",
     siteName: 'SkillDrills',
@@ -31,7 +33,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Predictive Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
+    title: "Predictive Pursuit - Predictive Eye Tracking Drill | SkillDrills",
     description: "Interpolate path trajectory of a moving target node and execute predictive gaze shifts. Free browser-based visual tracking drill.",
   },
 };
@@ -102,6 +104,18 @@ export default function PredictivePursuitPage() {
     ]
   };
 
+  // The guide block below renders extra Q&As; append them to the FAQPage
+  // schema so the structured data matches what is actually on the page.
+  const guide = GUIDES['predictive-pursuit'];
+  faqSchema.mainEntity = faqSchema.mainEntity.concat(
+    (guide?.faqs || []).map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    }))
+  );
+
+
   return (
     <>
       <script
@@ -118,6 +132,7 @@ export default function PredictivePursuitPage() {
       />
 
       <PredictivePursuitClient />
+      <DrillGuide guide={guide} />
     </>
   );
 }

@@ -1,8 +1,8 @@
 import SteadyHandClient from './SteadyHandClient';
 
 export const metadata = {
-  title: 'Steady Hand Game - Free Mouse Path Tracing Drill | SkillDrills',
-  description: 'Free steady hand game online. Trace a winding corridor with steady cursor control — the best mouse precision and hand steadiness drill. Corridor shrinks with streak. No sign-up.',
+  title: 'Steady Hand Game - Free Mouse Path Tracing Drill',
+  description: 'Free steady hand game online. Trace a winding corridor with steady cursor control — the best mouse precision and hand steadiness drill.',
   keywords: [
     'steady hand game', 'steady hand game online', 'free steady hand game',
     'steady hand test', 'steady hand drill', 'hand steadiness test',
@@ -20,7 +20,7 @@ export const metadata = {
     'browser steady hand game', 'no download tracing game', 'instant mouse game',
   ],
   openGraph: {
-    title: 'Steady Hand Game - Free Mouse Path Tracing Drill | SkillDrills',
+    title: 'Steady Hand Game - Free Mouse Path Tracing Drill',
     description: 'Free steady hand game online. Trace a winding corridor with steady cursor control. Best hand steadiness and mouse precision drill. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/motor/precision-control/steady-hand',
@@ -35,7 +35,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Steady Hand Game - Free Mouse Path Tracing Drill | SkillDrills',
+    title: 'Steady Hand Game - Free Mouse Path Tracing Drill',
     description: 'Free steady hand game. Trace a winding corridor. Best mouse precision and hand steadiness drill. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },

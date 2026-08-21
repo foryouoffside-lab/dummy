@@ -1,7 +1,9 @@
 import SpatialShiftPursuitClient from './SpatialShiftPursuitClient';
+import DrillGuide from '../../../../components/drill/DrillGuide';
+import { GUIDES } from '../guides';
 
 export const metadata = {
-  title: "Spatial Shift Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
+  title: "Spatial Shift Pursuit - Adaptive Eye Tracking Drill",
   description: "Track a bouncing target undergoing randomized spatial shifts in speed and direction. Builds adaptive tracking against sudden trajectory changes.",
   keywords: [
     "spatial shift pursuit",
@@ -22,7 +24,7 @@ export const metadata = {
     follow: true,
   },
   openGraph: {
-    title: "Spatial Shift Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
+    title: "Spatial Shift Pursuit - Adaptive Eye Tracking Drill | SkillDrills",
     description: "Track a bouncing target undergoing randomized spatial shifts in speed and direction. Free browser-based visual tracking drill.",
     url: "https://skilldrills.online/drills/visual-tracking/spatial-shift-pursuit",
     siteName: 'SkillDrills',
@@ -31,7 +33,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Spatial Shift Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
+    title: "Spatial Shift Pursuit - Adaptive Eye Tracking Drill | SkillDrills",
     description: "Track a bouncing target undergoing randomized spatial shifts in speed and direction. Free browser-based visual tracking drill.",
   },
 };
@@ -102,6 +104,18 @@ export default function SpatialShiftPursuitPage() {
     ]
   };
 
+  // The guide block below renders extra Q&As; append them to the FAQPage
+  // schema so the structured data matches what is actually on the page.
+  const guide = GUIDES['spatial-shift-pursuit'];
+  faqSchema.mainEntity = faqSchema.mainEntity.concat(
+    (guide?.faqs || []).map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    }))
+  );
+
+
   return (
     <>
       <script
@@ -118,6 +132,7 @@ export default function SpatialShiftPursuitPage() {
       />
 
       <SpatialShiftPursuitClient />
+      <DrillGuide guide={guide} />
     </>
   );
 }

@@ -1,8 +1,8 @@
 import ChromaSyncClient from './ChromaSyncClient';
 
 export const metadata = {
-  title: 'Go/No-Go Pro - Impulse Control & Reaction Speed Test | SkillDrills',
-  description: 'Train impulse control with Go/No-Go reaction speed test. React to green Go targets and suppress response on red No-Go triggers, zero penalties, 45s session. Free.',
+  title: 'Go/No-Go Pro - Impulse Control & Reaction Speed Test',
+  description: 'Train impulse control with Go/No-Go reaction speed test. React to green Go targets and suppress response on red No-Go triggers, zero penalties, 45s session.',
   keywords: [
     'go no go test online',
     'go no go test',

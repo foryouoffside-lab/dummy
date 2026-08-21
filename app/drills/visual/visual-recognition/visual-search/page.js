@@ -1,8 +1,8 @@
 import VisualSearchClient from './VisualSearchClient';
 
 export const metadata = {
-  title: 'Visual Search Pro - Conjunctive Scanning & Target Test | SkillDrills',
-  description: 'Train visual scanning speed with conjunctive search test. Find target C among rotated O distractors, zero negative penalties, 45-second session. Free online tool.',
+  title: 'Visual Search Pro - Conjunctive Scanning & Target Test',
+  description: 'Train visual scanning speed with conjunctive search test. Find target C among rotated O distractors, zero negative penalties, 45-second session.',
   keywords: [
     'visual search', 'conjunctive search', 'visual scanning training',
     'find the letter', 'selective attention drill', 'visual discrimination',

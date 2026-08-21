@@ -130,7 +130,7 @@ const howToSchema = {
 };
 
 export const metadata = {
-  title: "Multitasking Test | Dual Target Flow Brain Training | SkillDrills",
+  title: "Multitasking Test | Dual Target Flow Brain Training",
   description: "Take our free online multitasking test. Challenge your brain with dual-target tracking and improve cognitive flexibility. No sign-up required.",
   keywords: [
     "multitasking test",
@@ -151,7 +151,7 @@ export const metadata = {
   },
   robots: { index: true, follow: true },
   openGraph: {
-    title: "Multitasking Test | Dual Target Flow Brain Training | SkillDrills",
+    title: "Multitasking Test | Dual Target Flow Brain Training",
     description: "Take our free online multitasking test. Challenge your brain with dual-target tracking and improve cognitive flexibility. No sign-up required.",
     url: "https://skilldrills.online/drills/cognitive/attention/multi-tasking",
     siteName: 'SkillDrills',
@@ -160,7 +160,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Multitasking Test | Dual Target Flow Brain Training | SkillDrills",
+    title: "Multitasking Test | Dual Target Flow Brain Training",
     description: "Take our free online multitasking test. Challenge your brain with dual-target tracking and improve cognitive flexibility. No sign-up required.",
   },
 };

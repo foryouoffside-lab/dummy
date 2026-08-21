@@ -4,8 +4,8 @@ import { DRILLS } from '../../../lib/drillsRegistry';
 const visualDrillCount = DRILLS.filter((d) => d.category === 'visual').length;
 
 export const metadata = {
-  title: `Free Visual Training Online - Reaction Speed, Tracking & Perception Drills | SkillDrills`,
-  description: `Free visual training online. ${visualDrillCount} drills for reaction speed, tracking accuracy, depth perception, and visual recognition. No sign-up. Play instantly in your browser.`,
+  title: `Free Visual Training - Tracking & Perception | SkillDrills`,
+  description: `Free visual training online. ${visualDrillCount} drills for reaction speed, tracking accuracy, depth perception and visual recognition. No sign-up needed.`,
   keywords: [
     'visual training online', 'free visual training', 'visual training drills',
     'reaction time test', 'reaction time training', 'reaction speed test',

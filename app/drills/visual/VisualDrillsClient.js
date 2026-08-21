@@ -17,7 +17,6 @@ import SiteFooter from '@/components/SiteFooter';
 import Reveal from '@/components/Reveal';
 
 import StickyMobileCta from '@/components/StickyMobileCta';
-import DrillLoading from '@/components/DrillLoading';
 import ResetDrillButton from '@/components/drill/ResetDrillButton';
 
 const FOLDER_TO_STORAGE_KEY = {
@@ -143,10 +142,6 @@ export default function VisualDrillsClient() {
 
   const totalDrills = drills.length;
 
-  if (!isClient) {
-    return <DrillLoading />;
-  }
-
   return (
     <div className="min-h-screen bg-canvas text-ink-1 font-sans selection:bg-fuchsia-500/30">
       {/* SEO Structured Data */}
@@ -210,7 +205,7 @@ export default function VisualDrillsClient() {
               <div>
                 <div className="inline-flex items-center gap-2 mb-1">
                   <h1 className="text-2xl sm:text-4xl font-extrabold text-ink-1 tracking-tight uppercase">
-                    Visual Training System
+                    Visual Training &amp; Recognition
                   </h1>
                   <span className="px-2.5 py-0.5 rounded-full text-2xs font-mono font-bold bg-fuchsia-500/10 border border-fuchsia-500/20 text-fuchsia-400">
                     {totalDrills} DRILLS ONLINE

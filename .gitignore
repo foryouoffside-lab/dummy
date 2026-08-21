@@ -51,3 +51,13 @@ coverage/
 # OS
 .DS_Store
 Thumbs.db
+# Google Search Console secrets
+credentials.json
+*-token.json
+gsc-*.csv
+
+# GSC pull artifacts (data dumps, regenerate with scripts/gsc/)
+index-status.json
+scripts/gsc/index-status.json
+__pycache__/
+*.pyc

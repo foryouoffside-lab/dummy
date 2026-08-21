@@ -1,7 +1,9 @@
 import SineWavePursuitClient from './SineWavePursuitClient';
+import DrillGuide from '../../../../components/drill/DrillGuide';
+import { GUIDES } from '../guides';
 
 export const metadata = {
-  title: "Sine Wave Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
+  title: "Sine Wave Pursuit - Smooth Pursuit Eye Training",
   description: "Track target oscillations along a horizontal sine wave curve. Builds smooth pursuit through continuous rhythmic motion.",
   keywords: [
     "sine wave pursuit",
@@ -22,7 +24,7 @@ export const metadata = {
     follow: true,
   },
   openGraph: {
-    title: "Sine Wave Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
+    title: "Sine Wave Pursuit - Smooth Pursuit Eye Training | SkillDrills",
     description: "Track target oscillations along a horizontal sine wave curve. Free browser-based visual tracking drill.",
     url: "https://skilldrills.online/drills/visual-tracking/sine-wave-pursuit",
     siteName: 'SkillDrills',
@@ -31,7 +33,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Sine Wave Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
+    title: "Sine Wave Pursuit - Smooth Pursuit Eye Training | SkillDrills",
     description: "Track target oscillations along a horizontal sine wave curve. Free browser-based visual tracking drill.",
   },
 };
@@ -102,6 +104,18 @@ export default function SineWavePursuitPage() {
     ]
   };
 
+  // The guide block below renders extra Q&As; append them to the FAQPage
+  // schema so the structured data matches what is actually on the page.
+  const guide = GUIDES['sine-wave-pursuit'];
+  faqSchema.mainEntity = faqSchema.mainEntity.concat(
+    (guide?.faqs || []).map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    }))
+  );
+
+
   return (
     <>
       <script
@@ -118,6 +132,7 @@ export default function SineWavePursuitPage() {
       />
 
       <SineWavePursuitClient />
+      <DrillGuide guide={guide} />
     </>
   );
 }

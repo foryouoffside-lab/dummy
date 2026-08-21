@@ -14,7 +14,7 @@ import DynamicGridEvasionClient from './DynamicGridEvasionClient';
 // ============================================================
 
 export const metadata = {
-  title: 'Dynamic Grid Evasion — Free Spatial Hazard Avoidance & Reflex Trainer | SkillDrills',
+  title: 'Dynamic Grid Evasion - Free Spatial Reflex Trainer',
   description: 'Dodge dynamic hazard zones and master rapid spatial scanning in Dynamic Grid Evasion. Practice 3x3 grid evasion in this free reflex training game.',
   keywords: [
     // Primary / Head terms

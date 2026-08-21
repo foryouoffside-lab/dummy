@@ -12,7 +12,6 @@ import { getDifficultyRank } from '@/lib/scoringEngine';
 import SiteFooter from '@/components/SiteFooter';
 import Reveal from '@/components/Reveal';
 import StickyMobileCta from '@/components/StickyMobileCta';
-import DrillLoading from '@/components/DrillLoading';
 import { isIdleFrameSkippable } from '@/lib/performance';
 import ResetDrillButton from '@/components/drill/ResetDrillButton';
 
@@ -186,10 +185,6 @@ export default function MotorDrillsClient() {
 
   const totalDrills = categories.reduce((acc, cat) => acc + cat.drills.length, 0);
 
-  if (!isClient) {
-    return <DrillLoading />;
-  }
-
   return (
     <div className="min-h-screen bg-canvas text-ink-1 font-sans selection:bg-emerald-500/30 selection:text-emerald-300 relative overflow-hidden">
       
@@ -284,7 +279,7 @@ export default function MotorDrillsClient() {
               </div>
               <div>
                 <div className="inline-flex items-center gap-2 mb-1">
-                  <h1 className="text-2xl sm:text-4xl font-extrabold text-ink-1 tracking-tight uppercase">Motor Sector</h1>
+                  <h1 className="text-2xl sm:text-4xl font-extrabold text-ink-1 tracking-tight uppercase">Mouse Precision &amp; Motor Drills</h1>
                   <span className="px-2.5 py-0.5 rounded-full text-2xs font-mono font-bold bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
                     {totalDrills} DRILLS ONLINE
                   </span>

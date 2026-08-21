@@ -1,7 +1,7 @@
 import StrobeLatencyClient from './StrobeLatencyClient';
 
 export const metadata = {
-  title: 'Light Reaction Pro - Visual Reflex & Reaction Time Test | SkillDrills',
+  title: 'Light Reaction Pro - Visual Reflex & Reaction Time Test',
   description: 'Train visual reflex speed with Light Reaction test. Measure millisecond reaction latency when target flashes white, zero penalties, 45s session. Free.',
   keywords: [
     'light reaction test',

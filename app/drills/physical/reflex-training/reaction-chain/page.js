@@ -14,7 +14,7 @@ import ReactionChainClient from './ReactionChainClient';
 // ============================================================
 
 export const metadata = {
-  title: 'Reaction Chain - Impulse Arrest Reflex Training Game | SkillDrills',
+  title: 'Reaction Chain - Impulse Arrest Reflex Training Game',
   description: 'Train your reaction speed, precision stopping, and motor inhibition. Intercept and arrest cursor momentum on targets in this free reflex training game.',
   keywords: [
     // Primary / Head terms

@@ -15,8 +15,8 @@ import ReactionSpeedDrillsClient from './ReactionSpeedDrillsClient';
 // ============================================================
 
 export const metadata = {
-  title: 'Free Reaction Time Test & Reaction Speed Training | SkillDrills',
-  description: 'Improve your reflexes with free online Reaction Time Tests and Reaction Speed Training drills. Train your click speed, saccadic tracking, and eye agility with 8 free tools.',
+  title: 'Free Reaction Time Test & Speed Training | SkillDrills',
+  description: 'Free online reaction time test and reflex training drills. Measure your reaction speed in milliseconds and train faster reflexes. No sign-up needed.',
   keywords: [
     // Primary / Head terms
     'reaction time test', 'reaction speed training', 'reflex training',

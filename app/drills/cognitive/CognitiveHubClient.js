@@ -8,7 +8,6 @@ import { getDifficultyRank } from "@/lib/scoringEngine";
 import SiteFooter from "@/components/SiteFooter";
 import Reveal from "@/components/Reveal";
 import StickyMobileCta from "@/components/StickyMobileCta";
-import DrillLoading from "@/components/DrillLoading";
 import ResetDrillButton from "@/components/drill/ResetDrillButton";
 
 const cogDrills = DRILLS.filter(d => d.category === 'cognitive');
@@ -179,10 +178,6 @@ export default function CognitiveHubClient() {
 
   const totalDrills = cognitiveCategories.reduce((acc, cat) => acc + cat.drills.length, 0);
 
-  if (!isClient) {
-    return <DrillLoading />;
-  }
-
   return (
     <div className="min-h-screen bg-canvas text-ink-1 font-sans selection:bg-violet-500/30 selection:text-violet-300 relative overflow-hidden">
       
@@ -246,7 +241,7 @@ export default function CognitiveHubClient() {
               </div>
               <div>
                 <div className="inline-flex items-center gap-2 mb-1">
-                  <h1 className="text-2xl sm:text-4xl font-extrabold text-ink-1 tracking-tight uppercase">Decision &amp; Priority Speed</h1>
+                  <h1 className="text-2xl sm:text-4xl font-extrabold text-ink-1 tracking-tight uppercase">Brain Training &amp; Decision Speed</h1>
                   <span className="px-2.5 py-0.5 rounded-full text-2xs font-mono font-bold bg-violet-500/10 border border-violet-500/20 text-violet-400">
                     {totalDrills} DRILLS ONLINE
                   </span>

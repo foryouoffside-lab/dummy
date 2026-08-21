@@ -15,8 +15,8 @@ import FPSTrackingTrainerWrapper from './FPSTrackingTrainerWrapper';
 // ============================================================
 
 export const metadata = {
-  title: 'FPS Tracking Trainer - Smooth Aim & Strafe Practice | SkillDrills',
-  description: 'Train smooth aim and strafe tracking with this free FPS Tracking Trainer. Fix shaky aim, practice reactive tracking scenarios, and improve your target tracking for Apex Legends, Valorant, and CS2. Free online, no download needed.',
+  title: 'FPS Tracking Trainer - Smooth Aim & Strafe Practice',
+  description: 'Free FPS tracking trainer online. Practice smooth aim and strafe tracking against moving targets to build consistent crosshair control for CS2 and Valorant.',
   keywords: [
     'fps tracking trainer', 'aim tracking trainer', 'best tracking aim trainer',
     'strafe tracking aim', 'aim trainer tracking', 'shaky aim fix',
@@ -31,7 +31,7 @@ export const metadata = {
   },
   robots: { index: true, follow: true },
   openGraph: {
-    title: 'FPS Tracking Trainer - Smooth Aim & Strafe Practice | SkillDrills',
+    title: 'FPS Tracking Trainer - Smooth Aim & Strafe Practice',
     description: 'Train smooth aim and strafe tracking with this free FPS Tracking Trainer. Fix shaky aim, practice reactive tracking scenarios, and improve your target tracking.',
     url: 'https://skilldrills.online/drills/reaction-speed/fps-tracking-trainer',
     siteName: 'SkillDrills',

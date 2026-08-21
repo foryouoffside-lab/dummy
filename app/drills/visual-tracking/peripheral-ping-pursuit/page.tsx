@@ -1,7 +1,9 @@
 import PeripheralPingPursuitClient from './PeripheralPingPursuitClient';
+import DrillGuide from '../../../../components/drill/DrillGuide';
+import { GUIDES } from '../guides';
 
 export const metadata = {
-  title: "Peripheral Ping Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
+  title: "Peripheral Ping - Free Peripheral Vision Training",
   description: "Fixate on center crosshairs while detecting transient targets spawning in your peripheral view. Trains peripheral awareness without breaking central fixation.",
   keywords: [
     "peripheral ping pursuit",
@@ -22,7 +24,7 @@ export const metadata = {
     follow: true,
   },
   openGraph: {
-    title: "Peripheral Ping Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
+    title: "Peripheral Ping - Free Peripheral Vision Training | SkillDrills",
     description: "Fixate on center crosshairs while detecting transient targets spawning in your peripheral view. Free browser-based visual tracking drill.",
     url: "https://skilldrills.online/drills/visual-tracking/peripheral-ping-pursuit",
     siteName: 'SkillDrills',
@@ -31,7 +33,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Peripheral Ping Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
+    title: "Peripheral Ping - Free Peripheral Vision Training | SkillDrills",
     description: "Fixate on center crosshairs while detecting transient targets spawning in your peripheral view. Free browser-based visual tracking drill.",
   },
 };
@@ -102,6 +104,18 @@ export default function PeripheralPingPursuitPage() {
     ]
   };
 
+  // The guide block below renders extra Q&As; append them to the FAQPage
+  // schema so the structured data matches what is actually on the page.
+  const guide = GUIDES['peripheral-ping-pursuit'];
+  faqSchema.mainEntity = faqSchema.mainEntity.concat(
+    (guide?.faqs || []).map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    }))
+  );
+
+
   return (
     <>
       <script
@@ -118,6 +132,7 @@ export default function PeripheralPingPursuitPage() {
       />
 
       <PeripheralPingPursuitClient />
+      <DrillGuide guide={guide} />
     </>
   );
 }

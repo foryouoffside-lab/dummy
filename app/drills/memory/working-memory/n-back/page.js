@@ -1,7 +1,7 @@
 import NBackClient from './NBackClient';
 
 export const metadata = {
-  title: '3-Back Training Pro - Working Memory Test & Drill | SkillDrills',
+  title: '3-Back Training Pro - Working Memory Test & Drill',
   description: 'Train working memory with classic N-Back task at 3-back level. Compare letters to 3 steps back, zero negative penalties, 45-second session. Free online tool.',
   keywords: [
     'n-back training', '3-back task', 'working memory exercise',
@@ -17,7 +17,7 @@ export const metadata = {
     'mental agility training', 'attention memory drill', 'n-back practice free',
   ],
   openGraph: {
-    title: '3-Back Training Pro - Working Memory Test & Drill | SkillDrills',
+    title: '3-Back Training Pro - Working Memory Test & Drill',
     description: 'Train working memory with classic N-Back task at 3-back level. Compare letters to 3 steps back, zero penalties. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/memory/working-memory/n-back',
@@ -26,7 +26,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: '3-Back Training Pro - Working Memory Test & Drill | SkillDrills',
+    title: '3-Back Training Pro - Working Memory Test & Drill',
     description: 'Train working memory with classic N-Back task at 3-back level. Compare letters to 3 steps back, zero penalties. Free.',
   },
   robots: { index: true, follow: true },

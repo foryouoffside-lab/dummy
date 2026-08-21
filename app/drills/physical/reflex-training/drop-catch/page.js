@@ -14,7 +14,7 @@ import DropCatchClient from './DropCatchClient';
 // ============================================================
 
 export const metadata = {
-  title: 'Reflex Drop Catch — Free Reflex Test Online & Game | SkillDrills',
+  title: 'Reflex Drop Catch — Free Reflex Test Online & Game',
   description: 'Free reflex test online. Catch falling green targets and avoid red decoys in this reflex training game for reaction speed and visual discrimination.',
   keywords: [
     // Primary / Head terms
@@ -31,7 +31,7 @@ export const metadata = {
   },
   robots: { index: true, follow: true },
   openGraph: {
-    title: 'Reflex Drop Catch — Free Reflex Test Online & Game | SkillDrills',
+    title: 'Reflex Drop Catch — Free Reflex Test Online & Game',
     description: 'Free reflex test online. Catch falling green targets and avoid red decoys in this reflex training game for reaction speed and visual discrimination.',
     url: 'https://skilldrills.online/drills/physical/reflex-training/drop-catch',
     siteName: 'SkillDrills',
@@ -40,7 +40,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Reflex Drop Catch — Free Reflex Test Online & Game | SkillDrills',
+    title: 'Reflex Drop Catch — Free Reflex Test Online & Game',
     description: 'Free reflex test online. Catch falling green targets and avoid red decoys in this reflex training game for reaction speed and visual discrimination.',
   },
 };

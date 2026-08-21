@@ -14,8 +14,8 @@ import JumpSequenceClient from './JumpSequenceClient';
 // ============================================================
 
 export const metadata = {
-  title: 'Reaction Time Training - Free Jump Sequence Precision Drill | SkillDrills',
-  description: 'Free reaction time training and trajectory control game. Charge-and-launch with mid-air steering, land on targets — the best trajectory control and reaction training drill.',
+  title: 'Reaction Time Training - Free Jump Sequence Precision Drill',
+  description: 'Free reaction time training game. Charge, launch and steer mid-air to land on moving targets - trains trajectory control and reaction timing.',
   keywords: [
     // Primary / Head terms
     'reaction time training', 'reaction training game',
@@ -32,7 +32,7 @@ export const metadata = {
   robots: { index: true, follow: true },
   openGraph: {
     title: 'Reaction Time Training - Free Jump Sequence Precision Drill | SkillDrills',
-    description: 'Free reaction time training and trajectory control game. Charge-and-launch with mid-air steering, land on targets — the best trajectory control and reaction training drill.',
+    description: 'Free reaction time training game. Charge, launch and steer mid-air to land on moving targets - trains trajectory control and reaction timing.',
     url: 'https://skilldrills.online/drills/physical/fitness/jump-sequence',
     siteName: 'SkillDrills',
     locale: 'en_US',

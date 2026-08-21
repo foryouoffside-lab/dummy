@@ -1,7 +1,9 @@
 import TriangularPursuitClient from './TriangularPursuitClient';
+import DrillGuide from '../../../../components/drill/DrillGuide';
+import { GUIDES } from '../guides';
 
 export const metadata = {
-  title: "Triangular Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
+  title: "Triangular Pursuit - Eye Tracking Accuracy Drill",
   description: "Track target transitions along a triangular vector path. Builds smooth pursuit through sharp triangular direction changes.",
   keywords: [
     "triangular pursuit",
@@ -22,7 +24,7 @@ export const metadata = {
     follow: true,
   },
   openGraph: {
-    title: "Triangular Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
+    title: "Triangular Pursuit - Eye Tracking Accuracy Drill | SkillDrills",
     description: "Track target transitions along a triangular vector path. Free browser-based visual tracking drill.",
     url: "https://skilldrills.online/drills/visual-tracking/triangular-pursuit",
     siteName: 'SkillDrills',
@@ -31,7 +33,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Triangular Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
+    title: "Triangular Pursuit - Eye Tracking Accuracy Drill | SkillDrills",
     description: "Track target transitions along a triangular vector path. Free browser-based visual tracking drill.",
   },
 };
@@ -102,6 +104,18 @@ export default function TriangularPursuitPage() {
     ]
   };
 
+  // The guide block below renders extra Q&As; append them to the FAQPage
+  // schema so the structured data matches what is actually on the page.
+  const guide = GUIDES['triangular-pursuit'];
+  faqSchema.mainEntity = faqSchema.mainEntity.concat(
+    (guide?.faqs || []).map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    }))
+  );
+
+
   return (
     <>
       <script
@@ -118,6 +132,7 @@ export default function TriangularPursuitPage() {
       />
 
       <TriangularPursuitClient />
+      <DrillGuide guide={guide} />
     </>
   );
 }

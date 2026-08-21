@@ -2,7 +2,7 @@ import RSVPReaderClient from './RSVPReaderClient';
 
 export const metadata = {
   title: 'RSVP Speed Reader - Visual Training | SkillDrills',
-  description: 'Train visual processing speed with RSVP target-detection. Words flash at the Optimal Recognition Point across 5 progressive levels, 250-850 WPM. Free, no sign-up.',
+  description: 'Train visual processing speed with RSVP target-detection. Words flash at the Optimal Recognition Point across 5 progressive levels, 250-850 WPM.',
   keywords: [
     'RSVP reader', 'speed reading tool', 'rapid serial visual presentation',
     'optimal recognition point training', 'reading speed training', 'WPM improvement',
@@ -24,7 +24,7 @@ export const metadata = {
   ],
   openGraph: {
     title: 'RSVP Speed Reader - Visual Training | SkillDrills',
-    description: 'Train visual processing speed with RSVP target-detection. Words flash at the Optimal Recognition Point across 5 progressive levels, 250-850 WPM. Free, no sign-up.',
+    description: 'Train visual processing speed with RSVP target-detection. Words flash at the Optimal Recognition Point across 5 progressive levels, 250-850 WPM.',
     type: 'website',
     url: 'https://skilldrills.online/drills/cognitive/processing-speed/rsvp-reader',
     siteName: 'SkillDrills',
@@ -37,7 +37,7 @@ export const metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'RSVP Speed Reader - Visual Training | SkillDrills',
-    description: 'Train visual processing speed with RSVP target-detection. Words flash at the Optimal Recognition Point across 5 progressive levels, 250-850 WPM. Free, no sign-up.',
+    description: 'Train visual processing speed with RSVP target-detection. Words flash at the Optimal Recognition Point across 5 progressive levels, 250-850 WPM.',
   },
   robots: { index: true, follow: true },
   alternates: {

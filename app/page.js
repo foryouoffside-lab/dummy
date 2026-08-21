@@ -2,7 +2,7 @@ import HomePageClient from './HomePageClient';
 import { DRILLS } from '@/lib/drillsRegistry';
 
 export const metadata = {
-  title: 'SkillDrills - Free FPS Aim Trainer & Cognitive Brain Training Platform',
+  title: 'Free Aim Trainer & Brain Training Drills | SkillDrills',
   description: `Master your mind and mechanics with ${DRILLS.length}+ free interactive drills. Improve FPS aim, reaction time, memory, focus, typing speed, and mental fitness. No sign-up.`,
   keywords: [
     'free aim trainer', 'FPS aim trainer', 'flick shot training', 'tracking aim practice',
@@ -36,10 +36,6 @@ export const metadata = {
 export default function HomePage() {
   return (
     <>
-      <noscript>
-        <h1>SkillDrills - Free FPS Aim Trainer & Cognitive Brain Training Platform</h1>
-        <p>Master your mind and mechanics with {DRILLS.length}+ free interactive drills. No sign-up required.</p>
-      </noscript>
       <HomePageClient />
     </>
   );

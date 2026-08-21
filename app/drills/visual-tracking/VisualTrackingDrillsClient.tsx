@@ -17,8 +17,6 @@ import { DRILLS } from '@/lib/drillsRegistry';
 import SiteFooter from '@/components/SiteFooter';
 import Reveal from '@/components/Reveal';
 import StickyMobileCta from '@/components/StickyMobileCta';
-import DrillLoading from '@/components/DrillLoading';
-
 function handleCardMouseMove(e: MouseEvent<HTMLAnchorElement>) {
   const rect = e.currentTarget.getBoundingClientRect();
   e.currentTarget.style.setProperty('--mx', `${e.clientX - rect.left}px`);
@@ -107,10 +105,6 @@ export default function VisualTrackingDrillsClient() {
     );
   };
 
-  if (!isClient) {
-    return <DrillLoading />;
-  }
-
   return (
     <div className="min-h-screen bg-canvas text-ink-1 font-sans selection:bg-cyan-500/30 relative overflow-hidden">
 
@@ -174,7 +168,7 @@ export default function VisualTrackingDrillsClient() {
               <div>
                 <div className="inline-flex items-center gap-2 mb-1">
                   <h1 className="text-2xl sm:text-4xl font-extrabold text-ink-1 tracking-tight uppercase">
-                    Visual Tracking Systems
+                    Visual Tracking Training
                   </h1>
                   <span className="px-2.5 py-0.5 rounded-full text-2xs font-mono font-bold bg-cyan-500/10 border border-cyan-500/20 text-cyan-400">
                     {trackingDrills.length} DRILLS ONLINE

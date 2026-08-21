@@ -14,8 +14,8 @@ import MotorSequencingClient from './MotorSequencingClient';
 // ============================================================
 
 export const metadata = {
-  title: 'Motor Sequencing — Free Agility Ladder Drills Online | SkillDrills',
-  description: 'Master bilateral motor sequencing and hand-eye coordination in Motor Sequencing (Agility Ladder). Practice alternating ladder sweeps in this free reflex training game.',
+  title: 'Motor Sequencing — Free Agility Ladder Drills Online',
+  description: 'Free agility ladder drill online. Train bilateral motor sequencing, footwork timing and hand-eye coordination with progressive step patterns.',
   keywords: [
     // Primary / Head terms
     'motor sequencing training', 'agility ladder drills',
@@ -32,7 +32,7 @@ export const metadata = {
   robots: { index: true, follow: true },
   openGraph: {
     title: 'Motor Sequencing — Free Agility Ladder Drills Online | SkillDrills',
-    description: 'Master bilateral motor sequencing and hand-eye coordination in Motor Sequencing (Agility Ladder). Practice alternating ladder sweeps in this free reflex training game.',
+    description: 'Free agility ladder drill online. Train bilateral motor sequencing, footwork timing and hand-eye coordination with progressive step patterns.',
     url: 'https://skilldrills.online/drills/physical/fitness/agility-ladder',
     siteName: 'SkillDrills',
     locale: 'en_US',
@@ -41,7 +41,7 @@ export const metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Motor Sequencing — Free Agility Ladder Drills Online | SkillDrills',
-    description: 'Master bilateral motor sequencing and hand-eye coordination in Motor Sequencing (Agility Ladder). Practice alternating ladder sweeps in this free reflex training game.',
+    description: 'Free agility ladder drill online. Train bilateral motor sequencing, footwork timing and hand-eye coordination with progressive step patterns.',
   },
 };
 

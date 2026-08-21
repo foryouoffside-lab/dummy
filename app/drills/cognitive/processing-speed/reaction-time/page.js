@@ -124,7 +124,7 @@ const howToSchema = {
 };
 
 export const metadata = {
-  title: "Free Reaction Time Test | Online Neuro Speed & Reflex Trainer | SkillDrills",
+  title: "Free Reaction Time Test - Neuro Speed & Reflex Trainer",
   description: "Test your reaction speed for free with our online neuro speed test. Assess your reflexes, compare against human benchmarks, and train your cognitive response.",
   keywords: [
     "reaction time test online",

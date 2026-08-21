@@ -1,7 +1,9 @@
 import SplitScreenTrackingClient from './SplitScreenTrackingClient';
+import DrillGuide from '../../../../components/drill/DrillGuide';
+import { GUIDES } from '../guides';
 
 export const metadata = {
-  title: "Split-Screen Tracking — Visual Tracking & Gaze Calibration Drill | SkillDrills",
+  title: "Split-Screen Tracking - Divided Attention Eye Test",
   description: "Condition divided attention by tracking dual targets moving along vertical and horizontal axes. Builds split-attention tracking across two simultaneous targets.",
   keywords: [
     "split screen tracking",
@@ -22,7 +24,7 @@ export const metadata = {
     follow: true,
   },
   openGraph: {
-    title: "Split-Screen Tracking — Visual Tracking & Gaze Calibration Drill | SkillDrills",
+    title: "Split-Screen Tracking - Divided Attention Eye Test | SkillDrills",
     description: "Condition divided attention by tracking dual targets moving along vertical and horizontal axes. Free browser-based visual tracking drill.",
     url: "https://skilldrills.online/drills/visual-tracking/split-screen-tracking",
     siteName: 'SkillDrills',
@@ -31,7 +33,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Split-Screen Tracking — Visual Tracking & Gaze Calibration Drill | SkillDrills",
+    title: "Split-Screen Tracking - Divided Attention Eye Test | SkillDrills",
     description: "Condition divided attention by tracking dual targets moving along vertical and horizontal axes. Free browser-based visual tracking drill.",
   },
 };
@@ -102,6 +104,18 @@ export default function SplitScreenTrackingPage() {
     ]
   };
 
+  // The guide block below renders extra Q&As; append them to the FAQPage
+  // schema so the structured data matches what is actually on the page.
+  const guide = GUIDES['split-screen-tracking'];
+  faqSchema.mainEntity = faqSchema.mainEntity.concat(
+    (guide?.faqs || []).map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    }))
+  );
+
+
   return (
     <>
       <script
@@ -118,6 +132,7 @@ export default function SplitScreenTrackingPage() {
       />
 
       <SplitScreenTrackingClient />
+      <DrillGuide guide={guide} />
     </>
   );
 }

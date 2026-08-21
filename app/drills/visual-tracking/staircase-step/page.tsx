@@ -1,7 +1,9 @@
 import StaircaseStepClient from './StaircaseStepClient';
+import DrillGuide from '../../../../components/drill/DrillGuide';
+import { GUIDES } from '../guides';
 
 export const metadata = {
-  title: "Vertical Zig-Zag Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
+  title: "Vertical Zig-Zag - Vertical Eye Tracking Exercise",
   description: "Track target movements along a vertical multi-segment zig-zag polyline. Builds vertical gaze accuracy through sharp directional steps.",
   keywords: [
     "vertical zig zag pursuit",
@@ -22,7 +24,7 @@ export const metadata = {
     follow: true,
   },
   openGraph: {
-    title: "Vertical Zig-Zag Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
+    title: "Vertical Zig-Zag - Vertical Eye Tracking Exercise | SkillDrills",
     description: "Track target movements along a vertical multi-segment zig-zag polyline. Free browser-based visual tracking drill.",
     url: "https://skilldrills.online/drills/visual-tracking/staircase-step",
     siteName: 'SkillDrills',
@@ -31,7 +33,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Vertical Zig-Zag Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
+    title: "Vertical Zig-Zag - Vertical Eye Tracking Exercise | SkillDrills",
     description: "Track target movements along a vertical multi-segment zig-zag polyline. Free browser-based visual tracking drill.",
   },
 };
@@ -102,6 +104,18 @@ export default function StaircaseStepPage() {
     ]
   };
 
+  // The guide block below renders extra Q&As; append them to the FAQPage
+  // schema so the structured data matches what is actually on the page.
+  const guide = GUIDES['staircase-step'];
+  faqSchema.mainEntity = faqSchema.mainEntity.concat(
+    (guide?.faqs || []).map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    }))
+  );
+
+
   return (
     <>
       <script
@@ -118,6 +132,7 @@ export default function StaircaseStepPage() {
       />
 
       <StaircaseStepClient />
+      <DrillGuide guide={guide} />
     </>
   );
 }

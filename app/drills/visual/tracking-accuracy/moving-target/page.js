@@ -1,7 +1,7 @@
 import KineticInterceptClient from './KineticInterceptClient';
 
 export const metadata = {
-  title: 'Moving Target Pro - Visual Tracking & Intercept Click Test | SkillDrills',
+  title: 'Moving Target Pro - Visual Tracking & Intercept Click Test',
   description: 'Train visual pursuit tracking speed and hand-eye coordination with kinetic moving target click test. Intercept targets with zero penalties, 45s session. Free.',
   keywords: [
     'moving target training',

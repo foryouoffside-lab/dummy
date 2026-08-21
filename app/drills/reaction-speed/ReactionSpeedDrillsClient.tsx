@@ -15,7 +15,6 @@ import { getDifficultyRank } from '@/lib/scoringEngine';
 import SiteFooter from '@/components/SiteFooter';
 import Reveal from '@/components/Reveal';
 import StickyMobileCta from '@/components/StickyMobileCta';
-import DrillLoading from '@/components/DrillLoading';
 import ResetDrillButton from '@/components/drill/ResetDrillButton';
 
 const FOLDER_TO_STORAGE_KEY: Record<string, string> = {
@@ -76,10 +75,6 @@ export default function ReactionSpeedDrillsClient() {
       default: return 'bg-slate-500/10 text-slate-400 border-slate-500/20';
     }
   };
-
-  if (!isClient) {
-    return <DrillLoading />;
-  }
 
   return (
     <div className="min-h-screen bg-canvas text-ink-1 font-sans selection:bg-amber-500/30 relative overflow-hidden">
@@ -144,7 +139,7 @@ export default function ReactionSpeedDrillsClient() {
               <div>
                 <div className="inline-flex items-center gap-2 mb-1">
                   <h1 className="text-2xl sm:text-4xl font-extrabold text-ink-1 tracking-tight uppercase">
-                    Reaction Speed Drills
+                    Reaction Time Test &amp; Drills
                   </h1>
                   <span className="px-2.5 py-0.5 rounded-full text-2xs font-mono font-bold bg-amber-500/10 border border-amber-500/20 text-amber-400">
                     {reactiveDrills.length} DRILLS ONLINE

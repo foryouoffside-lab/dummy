@@ -5,8 +5,8 @@ const fpsDrills = DRILLS.filter((d) => d.category === 'fps');
 const fpsDrillCount = fpsDrills.length;
 
 export const metadata = {
-  title: 'Free FPS Aim Trainer - Best Online Aim Training Hub | SkillDrills',
-  description: `Free FPS aim trainer hub. ${fpsDrillCount} professional aim training drills — flick shots, tracking aim, recoil control, reaction time, strafe tracking, and more. Valorant, CS2, Apex compatible. No sign-up.`,
+  title: 'Free FPS Aim Trainer - Online Aim Training | SkillDrills',
+  description: `Free FPS aim trainer online. ${fpsDrillCount} aim training drills - flick shots, tracking, recoil control and reaction time. For Valorant, CS2 and Apex.`,
   keywords: [
     'free fps aim trainer', 'fps aim trainer online', 'best aim trainer',
     'aim trainer online', 'free aim trainer', 'aim training online',

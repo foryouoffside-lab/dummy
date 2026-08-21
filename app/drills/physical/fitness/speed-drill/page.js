@@ -14,7 +14,7 @@ import SpeedDrillClient from './SpeedDrillClient';
 // ============================================================
 
 export const metadata = {
-  title: 'Speed Drill — Free Target Acquisition & Rapid Tapping Trainer | SkillDrills',
+  title: 'Speed Drill - Free Rapid Tapping & Target Trainer',
   description: 'Test target acquisition speed and rapid tapping in Speed Drill. Click moving, shrinking targets in this free reflex training game.',
   keywords: [
     // Primary / Head terms

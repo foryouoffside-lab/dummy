@@ -11,8 +11,8 @@ import PhysicalDrillsClient from './PhysicalDrillsClient';
 // ============================================================
 
 export const metadata = {
-  title: 'Free Physical Training Drills - Reflex, Balance & Coordination | SkillDrills',
-  description: 'Free online physical training drills and games. Train your reaction time, reflexes, stability, balance, agility, and motor coordination. 11 free drills. No sign-up.',
+  title: 'Free Reflex, Balance & Coordination Drills | SkillDrills',
+  description: 'Free online physical training drills and games. Train your reaction time, reflexes, stability, balance, agility, and motor coordination. 11 free drills.',
   keywords: [
     'physical training drills', 'free physical training online', 'physical training game',
     'reaction time test', 'free reaction time test', 'online reaction time test',

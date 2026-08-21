@@ -1,8 +1,8 @@
 import ObjectLocationClient from './ObjectLocationClient';
 
 export const metadata = {
-  title: 'Object Location Pro - Spatial Memory Test & Drill | SkillDrills',
-  description: 'Train spatial position memory with emoji objects on expanding 3x3 to 7x7 grids. 1.5-second memorization, zero negative penalties, 45-second session. Free online tool.',
+  title: 'Object Location Pro - Spatial Memory Test & Drill',
+  description: 'Train spatial position memory with emoji objects on expanding 3x3 to 7x7 grids. 1.5-second memorization, zero negative penalties, 45-second session.',
   keywords: [
     'object location memory', 'spatial position recall', 'object placement memory',
     'spatial memory grid', 'location memory drill', 'object position test',
@@ -17,7 +17,7 @@ export const metadata = {
     'position memory exercise', 'grid object memory', 'spatial awareness drill',
   ],
   openGraph: {
-    title: 'Object Location Pro - Spatial Memory Test & Drill | SkillDrills',
+    title: 'Object Location Pro - Spatial Memory Test & Drill',
     description: 'Train spatial position memory with emoji objects on expanding 3x3 to 7x7 grids. 1.5-second memorization, zero penalties. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/memory/spatial-memory/object-location',
@@ -26,7 +26,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Object Location Pro - Spatial Memory Test & Drill | SkillDrills',
+    title: 'Object Location Pro - Spatial Memory Test & Drill',
     description: 'Train spatial position memory with emoji objects on expanding 3x3 to 7x7 grids. 1.5s memorization, zero penalties. Free.',
   },
   robots: { index: true, follow: true },

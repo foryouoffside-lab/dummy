@@ -13,8 +13,8 @@ import MarketDoorsPursuitWrapper from './MarketDoorsPursuitWrapper';
 // ============================================================
 
 export const metadata = {
-  title: 'Corner Checking Trainer - Saccadic Eye Training Drill | SkillDrills',
-  description: 'Train your saccadic eye movements and corner checking reflexes with this free Corner Checking Trainer (Market Doors Pursuit). Improve your angle clearing, master \'slicing the pie\' in FPS games, and boost sports vision speed.',
+  title: 'Corner Checking Trainer - Saccadic Eye Training Drill',
+  description: 'Free corner checking trainer online. Train saccadic eye movements and angle clearing reflexes - practice slicing the pie for FPS games and sports vision.',
   keywords: [
     'corner checking trainer', 'saccadic eye movement training', 'corner checking drill',
     'slicing the pie shooting', 'saccadic eye exercises', 'clearing angles fps',

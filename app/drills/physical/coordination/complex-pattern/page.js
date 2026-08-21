@@ -15,8 +15,8 @@ import ComplexPatternClient from './ComplexPatternClient';
 // ============================================================
 
 export const metadata = {
-  title: 'Pattern Memory Game - Free Visual & Spatial Memory Training | SkillDrills',
-  description: 'Play a free Pattern Memory Game online. Memorize increasingly complex paths, redraw them from memory, and improve visual memory, spatial memory, and hand-eye coordination.',
+  title: 'Pattern Memory Game - Free Visual & Spatial Memory Training',
+  description: 'Free pattern memory game online. Memorize increasingly complex paths and redraw them from memory to train visual memory and spatial recall.',
   keywords: [
     // Primary / Head terms
     'pattern memory game', 'visual memory training',

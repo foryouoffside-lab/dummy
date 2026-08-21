@@ -12,7 +12,6 @@ import { getDifficultyRank } from '@/lib/scoringEngine';
 import SiteFooter from '@/components/SiteFooter';
 import Reveal from '@/components/Reveal';
 import StickyMobileCta from '@/components/StickyMobileCta';
-import DrillLoading from '@/components/DrillLoading';
 import ResetDrillButton from '@/components/drill/ResetDrillButton';
 import { isIdleFrameSkippable } from '@/lib/performance';
 
@@ -191,10 +190,6 @@ export default function PhysicalDrillsClient() {
 
   const totalDrills = categories.reduce((acc, cat) => acc + cat.drills.length, 0);
 
-  if (!isClient) {
-    return <DrillLoading />;
-  }
-
   return (
     <div className="min-h-screen bg-canvas text-ink-1 font-sans selection:bg-rose-500/30 selection:text-rose-300 relative overflow-hidden">
       
@@ -289,7 +284,7 @@ export default function PhysicalDrillsClient() {
               </div>
               <div>
                 <div className="inline-flex items-center gap-2 mb-1">
-                  <h1 className="text-2xl sm:text-4xl font-extrabold text-ink-1 tracking-tight uppercase">Physical Sector</h1>
+                  <h1 className="text-2xl sm:text-4xl font-extrabold text-ink-1 tracking-tight uppercase">Reflex &amp; Coordination Training</h1>
                   <span className="px-2.5 py-0.5 rounded-full text-2xs font-mono font-bold bg-rose-500/10 border border-rose-500/20 text-rose-400">
                     {totalDrills} DRILLS ONLINE
                   </span>

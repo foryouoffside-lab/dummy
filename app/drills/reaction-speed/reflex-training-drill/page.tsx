@@ -12,8 +12,8 @@ import ReflexTrainingDrillWrapper from './ReflexTrainingDrillWrapper';
 // ============================================================
 
 export const metadata = {
-  title: 'Reflex Training Drill - Multi-Target Burst Reflex Game | SkillDrills',
-  description: 'Improve your divided attention and click response with this free Reflex Training Drill. Multiple targets flash on screen at once — clear the whole burst, calibrate your hand-eye coordination, and reduce your reaction latency online. Free, no download needed.',
+  title: 'Reflex Training Drill - Multi-Target Burst Reflex Game',
+  description: 'Free reflex training drill online. React to multi-target bursts, sharpen divided attention and click response speed, and track your accuracy per round.',
   keywords: [
     'reflex training drill', 'multi target reflex trainer', 'aim reflex trainer',
     'reflex training game', 'reflex game online', 'hand eye coordination gaming',

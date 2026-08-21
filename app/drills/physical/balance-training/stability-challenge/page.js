@@ -14,7 +14,7 @@ import StabilityChallengeClient from './StabilityChallengeClient';
 // ============================================================
 
 export const metadata = {
-  title: 'Stability Challenge — Free Resistance Tracking & Balance Trainer | SkillDrills',
+  title: 'Stability Challenge - Free Online Balance Trainer',
   description: 'Master force vector counteraction and postural equilibrium in Stability Challenge. Resist dynamic wind forces in this free online balance test.',
   keywords: [
     // Primary / Head terms

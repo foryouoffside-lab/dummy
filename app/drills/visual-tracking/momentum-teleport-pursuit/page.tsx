@@ -1,7 +1,9 @@
 import MomentumTeleportPursuitClient from './MomentumTeleportPursuitClient';
+import DrillGuide from '../../../../components/drill/DrillGuide';
+import { GUIDES } from '../guides';
 
 export const metadata = {
-  title: "Momentum Teleport Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
+  title: "Momentum Teleport - Anticipatory Eye Tracking Drill",
   description: "Predict target direction after coordinates instantly teleport while maintaining velocity momentum. Sharpens anticipatory tracking after sudden position jumps.",
   keywords: [
     "momentum teleport pursuit",
@@ -22,7 +24,7 @@ export const metadata = {
     follow: true,
   },
   openGraph: {
-    title: "Momentum Teleport Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
+    title: "Momentum Teleport - Anticipatory Eye Tracking Drill | SkillDrills",
     description: "Predict target direction after coordinates instantly teleport while maintaining velocity momentum. Free browser-based visual tracking drill.",
     url: "https://skilldrills.online/drills/visual-tracking/momentum-teleport-pursuit",
     siteName: 'SkillDrills',
@@ -31,7 +33,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Momentum Teleport Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
+    title: "Momentum Teleport - Anticipatory Eye Tracking Drill | SkillDrills",
     description: "Predict target direction after coordinates instantly teleport while maintaining velocity momentum. Free browser-based visual tracking drill.",
   },
 };
@@ -102,6 +104,18 @@ export default function MomentumTeleportPursuitPage() {
     ]
   };
 
+  // The guide block below renders extra Q&As; append them to the FAQPage
+  // schema so the structured data matches what is actually on the page.
+  const guide = GUIDES['momentum-teleport-pursuit'];
+  faqSchema.mainEntity = faqSchema.mainEntity.concat(
+    (guide?.faqs || []).map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    }))
+  );
+
+
   return (
     <>
       <script
@@ -118,6 +132,7 @@ export default function MomentumTeleportPursuitPage() {
       />
 
       <MomentumTeleportPursuitClient />
+      <DrillGuide guide={guide} />
     </>
   );
 }

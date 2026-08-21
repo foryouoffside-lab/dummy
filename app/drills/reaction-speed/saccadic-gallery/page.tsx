@@ -11,8 +11,8 @@ import SaccadicGalleryWrapper from './SaccadicGalleryWrapper';
 // ============================================================
 
 export const metadata = {
-  title: 'Saccadic Gallery - Online Saccadic Eye Exercises | SkillDrills',
-  description: 'Practice saccadic eye exercises online with the free Saccadic Gallery training drill. Improve your eye tracking, visual processing speed, and ballistic eye sweeps. Free, mobile-friendly, and no download needed.',
+  title: 'Saccadic Gallery - Online Saccadic Eye Exercises',
+  description: 'Free saccadic eye exercises online. Train rapid eye jumps between fixed targets to build faster visual scanning and sharper target acquisition.',
   keywords: [
     'saccadic eye exercises', 'eye tracking training', 'saccadic gallery',
     'visual tracking exercises', 'saccadic eye movement training', 'esports vision training',
@@ -26,7 +26,7 @@ export const metadata = {
   },
   robots: { index: true, follow: true },
   openGraph: {
-    title: 'Saccadic Gallery - Online Saccadic Eye Exercises | SkillDrills',
+    title: 'Saccadic Gallery - Online Saccadic Eye Exercises',
     description: 'Practice saccadic eye exercises online with the free Saccadic Gallery training drill. Improve your eye tracking, visual processing speed, and ballistic eye sweeps.',
     url: 'https://skilldrills.online/drills/reaction-speed/saccadic-gallery',
     siteName: 'SkillDrills',

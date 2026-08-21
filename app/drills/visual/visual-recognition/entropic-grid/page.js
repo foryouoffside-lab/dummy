@@ -1,8 +1,8 @@
 import EntropicGridClient from './EntropicGridClient';
 
 export const metadata = {
-  title: 'Entropic Grid Pro - Concentration Grid & Visual Search Test | SkillDrills',
-  description: 'Train visual focus with 100-cell concentration grid test. Find target codes under dynamic entropy noise, zero negative penalties, 45-second session. Free online tool.',
+  title: 'Entropic Grid Pro - Concentration Grid & Visual Search Test',
+  description: 'Train visual focus with 100-cell concentration grid test. Find target codes under dynamic entropy noise, zero negative penalties, 45-second session.',
   keywords: [
     'concentration grid online free',
     'visual search test online',

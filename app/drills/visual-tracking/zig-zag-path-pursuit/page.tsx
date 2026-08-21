@@ -1,7 +1,9 @@
 import ZigZagPathPursuitClient from './ZigZagPathPursuitClient';
+import DrillGuide from '../../../../components/drill/DrillGuide';
+import { GUIDES } from '../guides';
 
 export const metadata = {
-  title: "Zig-Zag Path Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
+  title: "Zig-Zag Pursuit - Eye Tracking Coordination Drill",
   description: "Track target movements along a multi-segment zig-zag guide path. Builds gaze accuracy through sharp directional corners.",
   keywords: [
     "zig zag path pursuit",
@@ -22,7 +24,7 @@ export const metadata = {
     follow: true,
   },
   openGraph: {
-    title: "Zig-Zag Path Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
+    title: "Zig-Zag Pursuit - Eye Tracking Coordination Drill | SkillDrills",
     description: "Track target movements along a multi-segment zig-zag guide path. Free browser-based visual tracking drill.",
     url: "https://skilldrills.online/drills/visual-tracking/zig-zag-path-pursuit",
     siteName: 'SkillDrills',
@@ -31,7 +33,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Zig-Zag Path Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
+    title: "Zig-Zag Pursuit - Eye Tracking Coordination Drill | SkillDrills",
     description: "Track target movements along a multi-segment zig-zag guide path. Free browser-based visual tracking drill.",
   },
 };
@@ -102,6 +104,18 @@ export default function ZigZagPathPursuitPage() {
     ]
   };
 
+  // The guide block below renders extra Q&As; append them to the FAQPage
+  // schema so the structured data matches what is actually on the page.
+  const guide = GUIDES['zig-zag-path-pursuit'];
+  faqSchema.mainEntity = faqSchema.mainEntity.concat(
+    (guide?.faqs || []).map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    }))
+  );
+
+
   return (
     <>
       <script
@@ -118,6 +132,7 @@ export default function ZigZagPathPursuitPage() {
       />
 
       <ZigZagPathPursuitClient />
+      <DrillGuide guide={guide} />
     </>
   );
 }

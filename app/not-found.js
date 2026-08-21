@@ -4,7 +4,7 @@ import { DRILLS } from '@/lib/drillsRegistry';
 
 export const metadata = {
   title: 'Page Not Found - SkillDrills',
-  description: `The page you are looking for does not exist. Explore ${DRILLS.length}+ free brain training, FPS aim drills, cognitive exercises, memory games, typing tests, and mental fitness tools on SkillDrills.`,
+  description: `The page you are looking for does not exist. Explore ${DRILLS.length}+ free brain training, FPS aim, memory, reaction and visual drills on SkillDrills.`,
   keywords: ['404', 'page not found', 'skilldrills', 'free drills', 'brain training', 'FPS aim trainer'],
   robots: {
     index: false,

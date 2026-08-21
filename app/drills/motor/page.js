@@ -1,8 +1,8 @@
 import MotorDrillsClient from './MotorDrillsClient';
 
 export const metadata = {
-  title: 'Free Aim Trainer & Motor Skills Drills - Mouse Precision Online | SkillDrills',
-  description: 'Free aim trainer and motor skills drills online. 8 hand eye coordination, movement speed, and precision control tests. No sign-up. Play instantly in your browser.',
+  title: 'Free Aim Trainer & Mouse Precision Drills | SkillDrills',
+  description: 'Free aim trainer and motor skills drills online. 8 hand eye coordination, movement speed, and precision control tests. No sign-up.',
   keywords: [
     'free aim trainer', 'aim trainer online', 'motor skills drills', 'motor skills training',
     'hand eye coordination training', 'hand eye coordination game', 'hand eye coordination test',
@@ -75,10 +75,6 @@ export default function MotorDrillsPage() {
           })
         }}
       />
-      <noscript>
-        <h1>Free Aim Trainer & Motor Skills Drills - Mouse Precision, Click Speed & Hand Eye Coordination</h1>
-        <p>8 free motor skills drills: aim trainer, drag and drop, click speed test, precision flick shot, and steady hand tracing. No sign-up required.</p>
-      </noscript>
       <MotorDrillsClient />
     </>
   );

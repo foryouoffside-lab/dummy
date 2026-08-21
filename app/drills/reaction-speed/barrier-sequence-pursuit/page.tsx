@@ -1,8 +1,8 @@
 import BarrierSequencePursuitWrapper from './BarrierSequencePursuitWrapper';
 
 export const metadata = {
-  title: 'Jiggle Peek Trainer - Cover Peeking Reflex Drill | SkillDrills',
-  description: 'Train your angle holding and jiggle peek defense with this free Cover Peeking Reflex Drill (Barrier Sequence Pursuit). Improve reaction speed against peeker\'s advantage, optimize visual scanning, and build esports-level target recognition.',
+  title: 'Jiggle Peek Trainer - Cover Peeking Reflex Drill',
+  description: 'Free jiggle peek trainer online. Train angle holding and cover peeking reflexes, beat peeker\'s advantage, and build esports target recognition.',
   keywords: [
     // Primary / Head terms
     'jiggle peek trainer', 'cover peeking reflex drill', 'corner peeking trainer',
@@ -20,7 +20,7 @@ export const metadata = {
   },
   robots: { index: true, follow: true },
   openGraph: {
-    title: 'Jiggle Peek Trainer - Cover Peeking Reflex Drill | SkillDrills',
+    title: 'Jiggle Peek Trainer - Cover Peeking Reflex Drill',
     description: 'Train your angle holding and jiggle peek defense with this free Cover Peeking Reflex Drill. Improve reaction speed against peeker\'s advantage and optimize visual scanning.',
     url: 'https://skilldrills.online/drills/reaction-speed/barrier-sequence-pursuit',
     siteName: 'SkillDrills',

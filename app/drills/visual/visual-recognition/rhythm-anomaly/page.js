@@ -1,7 +1,7 @@
 import RhythmAnomalyClient from './RhythmAnomalyClient';
 
 export const metadata = {
-  title: 'Rhythm Anomaly Pro - Visual Rhythm & Temporal Perception Test | SkillDrills',
+  title: 'Rhythm Anomaly - Visual Timing & Perception Test',
   description: 'Train visual temporal discrimination with 6x6 pulsing cell grid. Find out-of-sync anomaly cells in endless Time-Attack mode. Free online tool.',
   keywords: [
     'rhythm anomaly', 'entropic grid', 'pulse detection training',

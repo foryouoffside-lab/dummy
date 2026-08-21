@@ -124,7 +124,7 @@ const howToSchema = {
 };
 
 export const metadata = {
-  title: "Play Symbol Matching Online | Free Symbol Search Test | SkillDrills",
+  title: "Play Symbol Matching Online | Free Symbol Search Test",
   description: "Play our free Symbol Matching online game. Challenge your cognitive processing speed, take a symbol search test, and train your visual working memory.",
   keywords: [
     "symbol search test",

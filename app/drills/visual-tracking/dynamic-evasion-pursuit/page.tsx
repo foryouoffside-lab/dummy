@@ -1,7 +1,9 @@
 import DynamicEvasionPursuitClient from './DynamicEvasionPursuitClient';
+import DrillGuide from '../../../../components/drill/DrillGuide';
+import { GUIDES } from '../guides';
 
 export const metadata = {
-  title: "Dynamic Evasion Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
+  title: "Dynamic Evasion Pursuit - Reactive Eye Tracking Drill",
   description: "Train fast-reaction visual pursuit tracking against rapid evasive directional changes. Sharpens gaze reaction speed against sudden evasive turns.",
   keywords: [
     "dynamic evasion pursuit",
@@ -22,7 +24,7 @@ export const metadata = {
     follow: true,
   },
   openGraph: {
-    title: "Dynamic Evasion Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
+    title: "Dynamic Evasion Pursuit - Reactive Eye Tracking Drill | SkillDrills",
     description: "Train fast-reaction visual pursuit tracking against rapid evasive directional changes. Free browser-based visual tracking drill.",
     url: "https://skilldrills.online/drills/visual-tracking/dynamic-evasion-pursuit",
     siteName: 'SkillDrills',
@@ -31,7 +33,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Dynamic Evasion Pursuit — Visual Tracking & Gaze Calibration Drill | SkillDrills",
+    title: "Dynamic Evasion Pursuit - Reactive Eye Tracking Drill | SkillDrills",
     description: "Train fast-reaction visual pursuit tracking against rapid evasive directional changes. Free browser-based visual tracking drill.",
   },
 };
@@ -102,6 +104,18 @@ export default function DynamicEvasionPursuitPage() {
     ]
   };
 
+  // The guide block below renders extra Q&As; append them to the FAQPage
+  // schema so the structured data matches what is actually on the page.
+  const guide = GUIDES['dynamic-evasion-pursuit'];
+  faqSchema.mainEntity = faqSchema.mainEntity.concat(
+    (guide?.faqs || []).map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    }))
+  );
+
+
   return (
     <>
       <script
@@ -118,6 +132,7 @@ export default function DynamicEvasionPursuitPage() {
       />
 
       <DynamicEvasionPursuitClient />
+      <DrillGuide guide={guide} />
     </>
   );
 }

@@ -1,8 +1,8 @@
 import TracingClient from './TracingClient';
 
 export const metadata = {
-  title: 'Mouse Tracing Game - Free Wave Tracking Precision Drill | SkillDrills',
-  description: 'Free mouse tracing game online. Follow a continuously scrolling red wave filament with your cursor — the best mouse tracking game for precision control and flow-state endurance training. Speed ramps up over 45 seconds. No sign-up.',
+  title: 'Mouse Tracing Game - Free Wave Tracking Precision Drill',
+  description: 'Free mouse tracing game online. Follow a scrolling wave filament with your cursor to train precision control, smooth tracking and flow-state endurance.',
   keywords: [
     'mouse tracing game', 'mouse tracing game online', 'free mouse tracing game',
     'wave tracing game', 'cursor tracing game', 'mouse tracking game',

@@ -115,7 +115,7 @@ const howToSchema = {
 };
 
 export const metadata = {
-  title: "Multiple Object Tracking Test | Free Visual Attention Game | SkillDrills",
+  title: "Multiple Object Tracking Test | Free Visual Attention Game",
   description: "Measure your divided attention and visual memory. Track multiple target balls among moving distractors and identify them in this free online MOT cognitive test.",
   keywords: [
     "multiple object tracking test",

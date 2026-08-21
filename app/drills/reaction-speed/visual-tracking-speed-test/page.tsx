@@ -12,8 +12,8 @@ import VisualTrackingSpeedTestWrapper from './VisualTrackingSpeedTestWrapper';
 // ============================================================
 
 export const metadata = {
-  title: 'Visual Tracking Test - Speed & Reflex Test Online | SkillDrills',
-  description: 'Test your visual tracking speed and hand-eye reflexes with the free Visual Tracking Test. Measure your ability to track moving targets, compare scores, and train to improve. Free online, no download needed.',
+  title: 'Visual Tracking Test - Speed & Reflex Test Online',
+  description: 'Free visual tracking speed test. Measure how fast your eyes and hand follow moving targets, and train hand-eye reflexes with progressive difficulty.',
   keywords: [
     'visual tracking test', 'visual tracking speed test', 'mouse tracking test',
     'reaction speed test', 'reflex test online', 'gaming reflex test',
@@ -27,7 +27,7 @@ export const metadata = {
   },
   robots: { index: true, follow: true },
   openGraph: {
-    title: 'Visual Tracking Test - Speed & Reflex Test Online | SkillDrills',
+    title: 'Visual Tracking Test - Speed & Reflex Test Online',
     description: 'Test your visual tracking speed and hand-eye reflexes with the free Visual Tracking Test. Measure your ability to track moving targets and compare scores.',
     url: 'https://skilldrills.online/drills/reaction-speed/visual-tracking-speed-test',
     siteName: 'SkillDrills',
