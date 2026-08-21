@@ -11,7 +11,9 @@ import PhysicalDrillsClient from './PhysicalDrillsClient';
 // ============================================================
 
 export const metadata = {
-  title: 'Free Reflex, Balance & Coordination Drills | SkillDrills',
+  // GSC (180d): physical drills (pos 9.0) and physical fitness drills (pos 50)
+  // land here against a title that never said "physical drills".
+  title: 'Free Physical Drills - Reflex, Balance & Coordination',
   description: 'Free online physical training drills and games. Train your reaction time, reflexes, stability, balance, agility, and motor coordination. 11 free drills.',
   keywords: [
     'physical training drills', 'free physical training online', 'physical training game',

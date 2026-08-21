@@ -5,7 +5,10 @@ const memoryDrills = DRILLS.filter((d) => d.category === 'memory');
 const MEMORY_COUNT = memoryDrills.length;
 
 export const metadata = {
-  title: `Memory Training - ${MEMORY_COUNT} Free Drills | SkillDrills`,
+  // GSC (180d): memory drill 16 impr (pos 10.1), online memory training 14
+  // (pos 43.6), memory training online 11 (pos 49.5). Leading with "Online
+  // Memory Training" matches the two phrases stuck on page 5.
+  title: `Online Memory Training - ${MEMORY_COUNT} Free Memory Drills`,
   description: `Free memory training with ${MEMORY_COUNT} drills across short-term, working, and spatial memory. Improve recall, digit span, and pattern memorization. No sign-up.`,
   keywords: [
     'memory training', 'memory drills', 'short term memory', 'working memory training',

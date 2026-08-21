@@ -5,7 +5,9 @@ const cognitiveDrills = DRILLS.filter((d) => d.category === 'cognitive');
 const cognitiveDrillCount = cognitiveDrills.length;
 
 export const metadata = {
-  title: 'Free Brain Training - Focus & Attention | SkillDrills',
+  // GSC (180d): train your brain online (pos 70.5) and processing speed games
+  // online (pos 87) both land here; neither phrase contained "online".
+  title: 'Free Brain Training Online - Focus, Attention & Speed',
   description: `Free cognitive training online. ${cognitiveDrillCount} science-based drills for attention, focus, and processing speed. No sign-up. Play instantly in your browser.`,
   keywords: [
     'cognitive training online', 'free cognitive training', 'cognitive training drills',

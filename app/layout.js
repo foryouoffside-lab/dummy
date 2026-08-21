@@ -110,14 +110,12 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`scroll-smooth ${inter.variable}`}>
       <head>
-        {/* DNS Prefetch for faster connections */}
-        <link rel="dns-prefetch" href="//fonts.googleapis.com" />
-        <link rel="dns-prefetch" href="//fonts.gstatic.com" />
+        {/* next/font/google self-hosts Inter at build time, so nothing is ever
+            fetched from fonts.googleapis.com or fonts.gstatic.com at runtime.
+            Preconnecting to them opened TLS connections that were never used
+            and that the CSP would block anyway. Only the insights origin is
+            genuinely contacted. */}
         <link rel="dns-prefetch" href="//cdn.vercel-insights.com" />
-        
-        {/* Preconnect for critical origins */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://cdn.vercel-insights.com" crossOrigin="anonymous" />
         
         {/* Favicon & Icons */}

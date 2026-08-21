@@ -5,7 +5,10 @@ const fpsDrills = DRILLS.filter((d) => d.category === 'fps');
 const fpsDrillCount = fpsDrills.length;
 
 export const metadata = {
-  title: 'Free FPS Aim Trainer - Online Aim Training | SkillDrills',
+  // GSC (180d) for this URL: fps training 48 impr (pos 28.8), fps practice 28,
+  // fps trainer 16, practice fps aim 12. The old title carried "aim trainer"
+  // and "aim training" but never the phrase "FPS Training" those queries use.
+  title: 'Free FPS Aim Trainer - FPS Training & Aim Practice',
   description: `Free FPS aim trainer online. ${fpsDrillCount} aim training drills - flick shots, tracking, recoil control and reaction time. For Valorant, CS2 and Apex.`,
   keywords: [
     'free fps aim trainer', 'fps aim trainer online', 'best aim trainer',

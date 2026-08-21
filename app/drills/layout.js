@@ -1,5 +1,6 @@
-﻿import { DRILLS } from '@/lib/drillsRegistry';
+import { DRILLS } from '@/lib/drillsRegistry';
 import DrillBreadcrumb from '@/components/drill/DrillBreadcrumb';
+import RelatedDrills from '@/components/drill/RelatedDrills';
 
 export const metadata = {
   title: {
@@ -13,7 +14,7 @@ export const metadata = {
   keywords: [
     'training drills', 'brain training', 'FPS aim trainer', 'cognitive drills',
     'free online drills', 'skill training', 'interactive exercises',
-    'reaction time test', 'memory games', 'typing speed test'
+    'reaction time test', 'memory games', 'eye tracking training'
   ],
   openGraph: {
     title: 'Training Drills | SkillDrills',
@@ -41,6 +42,10 @@ export default function DrillsLayout({ children }) {
       <main id="drills-main-content" role="main">
         <DrillBreadcrumb />
         {children}
+        {/* Renders only on leaf drill pages; self-gates on the pathname, so hub
+            pages keep their own grids. Mounted here rather than in each of the
+            81 drill clients so the cross-link mesh stays in one place. */}
+        <RelatedDrills />
       </main>
     </>
   );

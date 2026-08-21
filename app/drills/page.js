@@ -1,7 +1,9 @@
 import DrillsDirectoryClient from './DrillsDirectoryClient';
 import { DRILLS } from '@/lib/drillsRegistry';
 
-const TITLE = `All Training Drills - ${DRILLS.length} Free Browser Drills | SkillDrills`;
+// GSC (180d): this URL takes 29 impr for "online drills" (pos 14.7) and 23 for
+// "drills online" (pos 10.6) without the phrase appearing in the title at all.
+const TITLE = `Free Online Drills - ${DRILLS.length} Skill Training Drills`;
 const DESCRIPTION = `Browse ${DRILLS.length}+ free training drills across 8 categories. FPS aim trainer, cognitive brain training, visual tracking, memory games, reaction speed and more.`;
 
 export const metadata = {

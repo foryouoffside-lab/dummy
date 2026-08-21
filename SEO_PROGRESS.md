@@ -447,3 +447,194 @@ off-site work, not another on-page pass.**
 also blocks the user from auditing their own site with those tools and hides
 their own backlink profile from them. Unblock or keep? `PetalBot` (Huawei
 search) and `Bytespider` (ByteDance search) are also blocked; both are minor.
+
+---
+
+# SESSION 3 — 2026-08-21 (security review + sitemap + keyword SEO)
+
+Session 2's work **was** committed this time (`9be849b`). This session's changes
+sit on top of it and are again uncommitted and undeployed.
+
+## Security review
+
+Scope: dependencies, the one API route, response headers, secret exposure (working
+tree and full git history), and the reflected-input surface.
+
+### Fixed
+
+| # | Issue | Severity | Fix |
+|---|---|---|---|
+| 1 | `POST /api/indexnow` was effectively unauthenticated | **High** | Split the two keys apart |
+| 2 | 4 Next.js CVEs, 2 PostCSS, nanoid, js-yaml, brace-expansion | **High** | `npm audit fix` |
+| 3 | 4 libvips CVEs via sharp 0.34.5 | High (not reachable here) | Forced `sharp@^0.35.3` via `overrides` |
+| 4 | CSP had no `frame-ancestors`, `base-uri`, `form-action` or `object-src` | Medium | Added |
+| 5 | `X-XSS-Protection: 1; mode=block` | Low | Set to `0` |
+| 6 | No `security.txt` at the RFC 9116 path | Low | Added `/.well-known/security.txt` |
+| 7 | API responses were cacheable and indexable | Low | `no-store` + `X-Robots-Tag: noindex` |
+
+**#1 in detail.** `app/api/indexnow/route.js` authorised POST by comparing the
+caller's key against `INDEXNOW_KEY` — a value the IndexNow protocol *requires* to
+be published at `/indexnow-key.txt`, and which the same route's own GET handler
+returned to anyone who asked. So anyone could read the key and then drive the
+endpoint, which fires POSTs to Bing, Yandex, Seznam and Naver under our host
+identity, 100 URLs at a time, unthrottled. That is an abuse amplifier and a good
+way to get the site's IndexNow key rate-limited or the host flagged.
+
+Now:
+- `INDEXNOW_KEY` stays the public protocol key. It never gates a write.
+- `INDEXNOW_ADMIN_KEY` is a new env-only secret with no fallback. Unset means the
+  route refuses every POST with 503 rather than failing open.
+- Constant-time key comparison, `Authorization: Bearer` accepted, 5 submissions
+  per hour per instance, `new URL(u, BASE)` origin validation, and the URL list is
+  no longer echoed into the logs.
+
+**Set `INDEXNOW_ADMIN_KEY` in the Vercel project env vars** or the route stays
+off. Nothing in the app calls it — `scripts/notify-indexnow.js` (postbuild) talks
+to the engines directly — so leaving it unset breaks nothing.
+
+Verified against a local `next start`:
+
+```
+POST with the public key   -> 401 Unauthorized        (no relay fired)
+POST off-origin URL        -> 400 Invalid URL origin  (no relay fired)
+POST 101 URLs              -> 400 Too many URLs
+POST with ADMIN key unset  -> 503 Endpoint disabled
+GET                        -> still serves the public key (the protocol needs it)
+```
+
+`npm audit`: **6 high → 0**.
+
+### Checked and clean
+
+- No secrets in the working tree or in any commit across full git history. The
+  only credential-shaped string is the IndexNow key, which is public by protocol.
+- `.env` holds one non-secret (`GEMINI_MODEL`) and is gitignored; never committed.
+- `.git/config` carries no token.
+- All 358 `dangerouslySetInnerHTML` uses are JSON-LD built from static author
+  copy. No user input reaches any of them.
+- `/search` reflects `?q=` as a JSX text node, so React escapes it. No XSS.
+- GSC credentials live outside the repo and are gitignored.
+
+### Not fixed, deliberately
+
+- `script-src` keeps `'unsafe-inline'`. Next.js emits inline bootstrap and flight
+  scripts on every page; removing it needs nonce plumbing through the whole app.
+  Worth doing, but it is a project, not a patch.
+- sharp's libvips CVEs need attacker-supplied images. The only image path is
+  `next/image` with `remotePatterns` limited to our own host, and the site has no
+  upload anywhere. Patched anyway, since it turned out to be free.
+- **The old GitHub PAT still needs revoking** at github.com/settings/tokens.
+  Carried over from session 1 and still outstanding.
+
+## Sitemap
+
+Rewritten. 91 → **93 URLs**, no duplicates, no malformed entries, and every URL
+cross-checked against the real route tree on disk (0 sitemap URLs without a page,
+0 indexable pages missing from the sitemap).
+
+- Added `/privacy` and `/terms`. Both were indexable but absent.
+- `/search` stays out: its metadata is `index: false`, and a noindex URL in a
+  sitemap is a contradictory signal that wastes crawl budget.
+- `lastModified` moved from one global constant to a per-section map, and the
+  stale `2026-08-10` bumped to `2026-08-21` to match the content rewrites.
+- `priority` was 0.9 or 0.85 on 90 of 91 URLs, which tells Bing and Yandex
+  nothing. Now spread 1.0 / 0.9 / 0.8 / 0.7 / 0.6 / 0.5 / 0.3, ranked by measured
+  GSC performance.
+
+## Keyword SEO for drill pages
+
+### The real gap was internal links, not meta keywords
+
+Every drill page already had a `keywords` array (median 14 terms) and a
+keyword-researched title. The `keywords` meta tag has been ignored by Google since
+2009 and is a spam hint to Bing, so editing those arrays would have changed
+nothing at all.
+
+What was actually missing: **no drill page linked to any other drill page.** The
+GSC URL Inspection API had shown 64 of 81 drill URLs with no referring URL at all.
+Session 2 fixed the hubs, which gives each drill exactly one inbound link — still
+a hub-and-spoke graph, with no keyword-bearing anchor text anywhere in it.
+
+### What was built
+
+**`lib/drillSeo.js`** — one curated entry per drill (81/81), each with:
+
+- `term` — the primary search phrase, taken from the page's own researched title
+- `anchor` — link text used when other pages link here, **unique across all 81**
+- `also` — secondary phrases, used for relatedness scoring
+
+Aligned to the measured 180-day GSC clusters: fps training 48 · fps practice 28 ·
+fps trainer 16 · flick trainer 19 · flick training 17 · memory drill 19 · online
+memory training 14 · drills online 42 · online drills 40 — plus long-tail with no
+page targeting it yet (`fps warm up`, `cs2 jitter`, `apex legends jitter aim`,
+`gridshot 3x3 online`).
+
+**`lib/relatedDrills.js`** — deterministic selection: 2 same-subcategory, then 2
+same-category, then a registry-order coverage slot, then cross-category by term
+overlap. The coverage slot lays a cycle across all 81 drills so no drill can end
+up with zero inbound drill links, however its terms happen to score.
+
+**`components/drill/RelatedDrills.js`** — mounted once in `app/drills/layout.js`
+and self-gating on the pathname, so hub pages are untouched. It is a client
+component only to read `usePathname()`; everything it renders derives from the
+static registry, so the markup is identical on server and client and the links
+are in the initial HTML.
+
+Anchor text is the target search phrase, not the product name. "Ghost-Link
+Tracking" and "Triangular Pursuit" have no search volume; "Multiple Object
+Tracking Test" and "Eye Tracking Accuracy Drill" do.
+
+### Link graph, measured
+
+| | Before | After |
+|---|---|---|
+| drill → drill links | 0 | **486** |
+| inbound drill links per drill | 0 | min 1, median 5, max 16 |
+| drills with zero inbound drill links | 81 | **0** |
+| cross-category share of links | — | 38.1% |
+| unique `/drills/*` links in a drill page's HTML | ~2 | min 8, median 11, max 23 |
+| median rendered words per drill page | 786 | **921** |
+
+### Hub titles — each change justified by GSC
+
+| Page | Before | After | Why |
+|---|---|---|---|
+| `/drills` | All Training Drills - 81 Free Browser Drills | Free Online Drills - 81 Skill Training Drills | "online drills" 29 impr pos 14.7, "drills online" 23 pos 10.6 — phrase absent from title |
+| `/drills/fps` | Free FPS Aim Trainer - Online Aim Training | Free FPS Aim Trainer - FPS Training & Aim Practice | "fps training" 48 impr pos 28.8, "fps practice" 28, "fps trainer" 16 |
+| `/drills/memory` | Memory Training - 7 Free Drills | Online Memory Training - 7 Free Memory Drills | "online memory training" 14 pos 43.6, "memory training online" 11 pos 49.5 |
+| `/drills/cognitive` | Free Brain Training - Focus & Attention | Free Brain Training Online - Focus, Attention & Speed | "train your brain online" pos 70.5 |
+| `/drills/physical` | Free Reflex, Balance & Coordination Drills | Free Physical Drills - Reflex, Balance & Coordination | "physical drills" pos 9.0, "physical fitness drills" pos 50 |
+
+Untouched on purpose: `/` (pos 5.5, 33% CTR, 181 of the site's 244 clicks — do
+not touch it), plus `/drills/motor`, `/drills/visual`, `/drills/visual-tracking`
+and `/drills/reaction-speed`, which already lead with their demand terms.
+
+Also removed "typing speed test" from `app/drills/layout.js` keywords — that
+section was deleted from the site.
+
+## Verification
+
+| Check | Result |
+|---|---|
+| `npx next build` | compiled successfully, 180 static pages |
+| `npm audit` | 0 vulnerabilities (was 6 high) |
+| Security headers, live via `next start` | all present; `'unsafe-eval'` absent in prod |
+| `POST /api/indexnow` abuse paths | 401 / 400 / 400 / 503, no relay fired |
+| Sitemap | 93 URLs, 0 dupes, 0 dead, `/search` excluded |
+| Related block in prerendered HTML | present on all 81 drill pages, absent on all 8 hubs |
+| Drill link graph | 0 orphans |
+| Anchor text uniqueness | 81/81 unique |
+
+## NEXT
+
+1. **Deploy.** Set `INDEXNOW_ADMIN_KEY` in Vercel env first, or leave the route
+   disabled — which is safe.
+2. Browser-check one drill page for hydration warnings. `RelatedDrills` is a pure
+   function of the static registry so a mismatch is not possible in principle, but
+   it has not been opened in a real browser.
+3. GSC: resubmit the sitemap, then URL-inspect + Request Indexing for
+   `/drills/fps`, `/drills/memory`, `/drills` and the top 10 drills.
+4. Re-run `scratchpad/gsc_index.py` in ~3 weeks. The number to watch is
+   "Discovered - currently not indexed" draining from 76.
+5. Off-site work is still the actual constraint. Nothing on-page moves
+   "aim trainer online" from position 65.
