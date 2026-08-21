@@ -640,3 +640,81 @@ section was deleted from the site.
    "Discovered - currently not indexed" draining from 76.
 5. Off-site work is still the actual constraint. Nothing on-page moves
    "aim trainer online" from position 65.
+
+---
+
+## SESSION 3 addendum — H1 keyword pass (deployed, `eb817b9`)
+
+### The gap
+
+Measured across all 81 drill pages before the change:
+
+| H1 vs its target search phrase | Count |
+|---|---|
+| Contains the full phrase | 12 |
+| Contains part of it (>=50% of words) | 25 |
+| Contains **none** of it | **44** |
+
+The H1 was the drill's product name. "TRIANGULAR PURSUIT", "GHOSTING SUPPRESS
+PURSUIT", "PRO FLICK TRAINER" — names with no search volume occupying the
+strongest on-page element after the title.
+
+### The fix
+
+The drill name stays the hero text; the keyword goes in as a second line inside
+the same `<h1>`:
+
+```jsx
+<h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+  TRIANGULAR PURSUIT
+  <span className="block text-sm font-semibold text-slate-400 mt-1
+                   normal-case tracking-normal">
+    Eye Tracking Accuracy Drill
+  </span>
+</h1>
+```
+
+The phrase is the existing `anchor` field from `lib/drillSeo.js` — already Title
+Case, already unique across all 81 — so H1s, internal link anchor text and page
+titles all name the same thing and cannot drift apart. `normal-case` and
+`tracking-normal` stop the span inheriting the parent's uppercase and tight
+tracking; the muted colour is whichever one that file's sibling `<p>` already used.
+
+Applied by codemod to 68 files: **+204 lines, 0 deletions**, purely additive.
+
+**13 pages were skipped deliberately** because their H1 already contained the
+phrase — e.g. "Aim Trainer Elite" already says *aim trainer*, "JIGGLE PEEK
+TRAINER" already says *jiggle peek trainer*. Adding it twice would be stuffing.
+
+Where a sub-line looks redundant beside the name ("GRID MEMORIZATION" / "Grid
+Memorization Test"), the added word is the query modifier people actually type.
+That redundancy is the point, not an oversight.
+
+Also: `/drills` H1 "All Training Hubs" -> "Free Online Drills". It was the last
+hub H1 that was pure brand copy, on a URL taking 29 impressions for "online
+drills" (pos 14.7) and 23 for "drills online" (pos 10.6).
+
+### Result
+
+| | Before | After |
+|---|---|---|
+| Drill H1s containing their full target phrase | 12 / 81 | **81 / 81** |
+| Pages with exactly one H1 | all | all |
+| Build | — | 180 static pages, compiled clean |
+
+Verified live as Googlebot across all 8 categories after deploy.
+
+### Gotcha for whoever verifies a deploy next
+
+`skilldrills.online` serves prerendered HTML through Vercel's edge cache
+(`X-Vercel-Cache: PRERENDER`). A plain `curl` right after a deploy can return the
+**previous** build and make a good deploy look broken. Bust it:
+
+```
+curl -s -H "Cache-Control: no-cache" "https://skilldrills.online/drills?cb=$RANDOM"
+```
+
+And do not write a deploy-wait loop that greps for a phrase which also appears in
+the page's `<title>` or in the RelatedDrills block — it will match the old build
+and exit immediately. Grep for something unique to the new markup instead
+(e.g. `data-seo-kw`).
