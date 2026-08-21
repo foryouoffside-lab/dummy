@@ -748,6 +748,9 @@ export default function ProFlickClient() {
           <div className="text-center">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
               PRO FLICK TRAINER
+              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
+                Flick Shot Trainer
+              </span>
             </h1>
             <p className="text-xs text-slate-400 mt-1">
               Macro Flicking &amp; Target Acquisition • 15 Levels

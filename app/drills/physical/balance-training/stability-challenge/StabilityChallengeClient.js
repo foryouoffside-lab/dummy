@@ -610,6 +610,9 @@ export default function StabilityChallengeClient() {
           <div className="text-center">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white uppercase">
               Stability Challenge
+              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
+                Stability &amp; Balance Trainer
+              </span>
             </h1>
             <p className="text-xs text-slate-400 mt-1">
               Wind Resistance Motor Control • 15 Levels

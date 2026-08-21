@@ -419,6 +419,9 @@ export default function VisualSearchClient() {
           <div className="text-center">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
               VISUAL SEARCH
+              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
+                Conjunctive Visual Search Test
+              </span>
             </h1>
             <p className="text-xs text-slate-400 mt-1">
               Conjunctive Target Scanning & Feature Discrimination

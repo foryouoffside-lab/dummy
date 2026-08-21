@@ -814,6 +814,9 @@ export default function RecoilControlClient() {
         {!isFullscreen && (
           <h1 className="text-2xl sm:text-3xl font-black text-center text-white tracking-tight font-sans">
             Recoil Control Pro
+            <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
+              Recoil Control Trainer
+            </span>
           </h1>
         )}
 

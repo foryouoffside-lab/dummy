@@ -514,6 +514,9 @@ export default function DualTargetFlowClient() {
         <div className="text-center">
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
             MULTI-TASKING
+            <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
+              Multitasking Test
+            </span>
           </h1>
           <p className="text-xs text-slate-400 mt-1">
             Dual-Stream Visual Tracking & Bilateral Hemispheric Focus

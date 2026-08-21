@@ -732,6 +732,9 @@ export default function InstantResponseClient() {
           <div className="text-center">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
               INSTANT RESPONSE PRO
+              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
+                FPS Reaction Time Test
+              </span>
             </h1>
             <p className="text-xs text-slate-400 mt-1">
               Visual Reaction Latency &amp; Reflex • 15 Levels

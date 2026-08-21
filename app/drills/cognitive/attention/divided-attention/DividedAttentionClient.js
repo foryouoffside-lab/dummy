@@ -501,6 +501,9 @@ export default function DividedAttentionClient() {
           <div className="text-center">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
               DIVIDED ATTENTION
+              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
+                Divided Attention Test
+              </span>
             </h1>
             <p className="text-xs text-slate-400 mt-1">
               Dual-Task Target Tracking & Numerical Match Stream

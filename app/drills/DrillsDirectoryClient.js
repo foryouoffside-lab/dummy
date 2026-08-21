@@ -207,7 +207,7 @@ export default function DrillsDirectoryClient() {
             <span>Complete Training Hub Directory</span>
           </div>
           <h1 className="text-4xl sm:text-6xl font-black text-ink-1 uppercase tracking-tight leading-[0.95]">
-            All <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400">Training Hubs</span>
+            Free <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400">Online Drills</span>
           </h1>
           <p className="text-ink-2 text-base sm:text-lg leading-relaxed max-w-2xl mx-auto">
             {totalDrills} scientific, browser-native performance drills across 8 specialized categories. Zero installs, instant start.

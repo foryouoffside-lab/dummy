@@ -648,6 +648,9 @@ export default function DropCatchClient() {
           <div className="text-center">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white uppercase">
               Reflex Drop Catch
+              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
+                Reflex Drop Catch Test
+              </span>
             </h1>
             <p className="text-xs text-slate-400 mt-1">
               Visual Discrimination &amp; Impulse Control • 15 Levels

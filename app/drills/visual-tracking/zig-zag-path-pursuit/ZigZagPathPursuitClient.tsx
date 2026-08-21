@@ -447,6 +447,9 @@ export default function ZigZagPathPursuitClient() {
           <div className="text-center">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
               ZIG-ZAG PATH PURSUIT
+              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
+                Eye Tracking Coordination Drill
+              </span>
             </h1>
             <p className="text-xs text-slate-400 mt-1">
               Acute Direction Changes & Multi-Segment Vector Tracking

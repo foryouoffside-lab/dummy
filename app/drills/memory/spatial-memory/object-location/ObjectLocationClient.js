@@ -461,6 +461,9 @@ export default function ObjectLocationClient() {
         <div className="text-center">
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
             OBJECT LOCATION
+            <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
+              Object Location Memory Test
+            </span>
           </h1>
           <p className="text-xs text-slate-400 mt-1">
             Spatial Object Memory Recall Under Speed Constraints

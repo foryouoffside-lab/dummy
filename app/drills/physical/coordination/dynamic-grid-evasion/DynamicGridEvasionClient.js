@@ -663,6 +663,9 @@ export default function DynamicGridEvasionClient() {
           <div className="text-center">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white uppercase">
               Dynamic Grid Evasion
+              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
+                Dynamic Grid Evasion Drill
+              </span>
             </h1>
             <p className="text-xs text-slate-400 mt-1">
               Spatial Hazard Avoidance &amp; Rapid Flicking • 15 Levels
