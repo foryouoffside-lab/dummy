@@ -277,9 +277,6 @@ export default function DrillsDirectoryClient() {
                     isMatch ? 'border-hairline hover:border-hairline-2 opacity-100' : 'border-hairline/50 opacity-55 hover:opacity-90'
                   }`}
                 >
-                  {/* Top accent hairline */}
-                  <div className={`absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r ${cat.color} opacity-70`} />
-
                   {/* Cursor-tracked spotlight */}
                   <span
                     aria-hidden="true"

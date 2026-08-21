@@ -32,7 +32,7 @@ const DRILL_DURATION = 45; // 45 seconds focused duration
 const POINTS_PER_LEVEL = 250; // Aggressive progression
 const ELITE_SCORE = 17000; // 100% mark for letter grade
 const STORAGE_KEY = 'skilldrills_fps_flick_shot_v2';
-const TARGET_COLOR = '#00ff88'; // fixed tactical-sphere color — matches the drill's emerald identity
+const TARGET_COLOR = '#10b981'; // fixed tactical-sphere color — matches the drill's emerald identity
 
 const getSavedData = () => {
   try {
@@ -679,7 +679,7 @@ export default function ProFlickClient() {
 
       const ch = e.crosshair;
       if (ch.initialized && (gameState === 'playing' || gameState === 'start')) {
-        const activeColor = pointerLocked ? '#00ff88' : '#eab308';
+        const activeColor = pointerLocked ? '#10b981' : '#eab308';
         ctx.strokeStyle = activeColor;
         ctx.fillStyle = activeColor;
 

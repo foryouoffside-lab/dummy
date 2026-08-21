@@ -446,7 +446,7 @@ export default function AwarenessDrillClient() {
               bestLevelRunRef.current = Math.max(bestLevelRunRef.current, eRef.level);
 
               drillAudio.playHit();
-              createExplosion(tgt.x, tgt.y, '#00ff88');
+              createExplosion(tgt.x, tgt.y, '#10b981');
               createHitMarker(ch.x, ch.y);
               setUiScore(eRef.score);
 
@@ -630,10 +630,10 @@ export default function AwarenessDrillClient() {
       if ((gameState === 'playing' || gameState === 'start') && e.target.active) {
         const tgt = e.target;
         const progress = Math.min(1, tgt.age / tgt.ttl);
-        const targetColor = e.combo >= 10 ? '#38bdf8' : '#00ff88';
+        const targetColor = e.combo >= 10 ? '#38bdf8' : '#10b981';
 
         drawPulseRing(ctx, tgt.x, tgt.y, tgt.radius, targetColor, progress);
-        drawTacticalTarget(ctx, tgt.x, tgt.y, tgt.radius, targetColor, false);
+        drawTacticalTarget(ctx, tgt.x, tgt.y, tgt.radius, targetColor, true);
       }
 
       ctx.lineWidth = 2.0;
@@ -652,7 +652,7 @@ export default function AwarenessDrillClient() {
 
       const ch = e.crosshair;
       if (ch.initialized && (gameState === 'playing' || gameState === 'start')) {
-        const activeColor = pointerLocked ? '#00ff88' : '#34d399';
+        const activeColor = pointerLocked ? '#10b981' : '#34d399';
         ctx.strokeStyle = activeColor;
         ctx.fillStyle = activeColor;
 

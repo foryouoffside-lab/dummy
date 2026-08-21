@@ -35,76 +35,44 @@ const ELITE_SCORE = 1000; // Target score for S+ rating (rebalanced after combo 
 const STORAGE_KEY = 'skilldrills_visual_go_nogo_v4';
 const MAX_LIVES = 5;
 
-const IDLE_BALL_COLOR = '#f4f6fa'; // constant resting ball — premium off-white
-const GO_BALL_COLOR = '#10b981';
-const STOP_BALL_COLOR = '#ef4444';
-
-// Premium 2D Tactical Target Renderer (100px diameter / 50px radius)
+// Clean 2D Target Renderer matching deploy style (104px diameter / 52px radius)
 function draw2dTarget(ctx, x, y, targetVisible, targetType) {
   ctx.save();
 
-  const radius = 50;
+  const radius = 52;
 
-  let primaryColor = '#1e293b';
-  let centerHighlight = '#475569';
-  let edgeDark = '#0f172a';
-  let glowColor = 'rgba(255, 255, 255, 0.08)';
+  // Main Target Circle
+  ctx.beginPath();
+  ctx.arc(x, y, radius, 0, Math.PI * 2);
 
   if (targetVisible) {
     if (targetType === 'GO') {
-      primaryColor = '#10b981'; // Solid Emerald Green
-      centerHighlight = '#a7f3d0';
-      edgeDark = '#047857';
-      glowColor = 'rgba(16, 185, 129, 0.8)';
+      ctx.fillStyle = '#10b981'; // Emerald Green
+      ctx.shadowBlur = 30;
+      ctx.shadowColor = '#10b981';
     } else if (targetType === 'NO_GO') {
-      primaryColor = '#ef4444'; // Solid Crimson Red
-      centerHighlight = '#fecaca';
-      edgeDark = '#b91c1c';
-      glowColor = 'rgba(239, 68, 68, 0.8)';
+      ctx.fillStyle = '#ef4444'; // Crimson Red
+      ctx.shadowBlur = 30;
+      ctx.shadowColor = '#ef4444';
     }
+  } else {
+    ctx.fillStyle = '#151515';
+    ctx.shadowBlur = 0;
   }
-
-  // 1. Outer Ambient Radial Glow Aura
-  ctx.shadowBlur = 0;
-
-  // 2. Outer Tactical Bezel Ring
-  ctx.beginPath();
-  ctx.arc(x, y, radius + 10, 0, Math.PI * 2);
-  ctx.strokeStyle = targetVisible ? (targetType === 'GO' ? 'rgba(16, 185, 129, 0.45)' : 'rgba(239, 68, 68, 0.45)') : 'rgba(255, 255, 255, 0.15)';
-  ctx.lineWidth = 1.5;
-  ctx.stroke();
-
-  // 3. Main Target Circle (Flat 2D Fill)
-  ctx.beginPath();
-  ctx.arc(x, y, radius, 0, Math.PI * 2);
-  ctx.fillStyle = primaryColor;
   ctx.fill();
-
-  // Reset shadow for crisp inner detailing
   ctx.shadowBlur = 0;
 
-  // 4. Tactical Crosshair Reticle Tick Marks (N, S, E, W)
-  const tickLen = 8;
-  const tickGap = radius + 3;
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
-  ctx.lineWidth = 1.5;
-
+  // Inner Detailing Ring
   ctx.beginPath();
-  // North
-  ctx.moveTo(x, y - tickGap); ctx.lineTo(x, y - tickGap - tickLen);
-  // South
-  ctx.moveTo(x, y + tickGap); ctx.lineTo(x, y + tickGap + tickLen);
-  // West
-  ctx.moveTo(x - tickGap, y); ctx.lineTo(x - tickGap - tickLen, y);
-  // East
-  ctx.moveTo(x + tickGap, y); ctx.lineTo(x + tickGap + tickLen, y);
+  ctx.arc(x, y, radius - 3, 0, Math.PI * 2);
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+  ctx.lineWidth = 1;
   ctx.stroke();
 
-  // 5. Center Core Dot
-  ctx.fillStyle = '#ffffff';
-  ctx.shadowBlur = 0;
+  // Center Dot
   ctx.beginPath();
-  ctx.arc(x, y, 6, 0, Math.PI * 2);
+  ctx.arc(x, y, 4, 0, Math.PI * 2);
+  ctx.fillStyle = targetVisible ? '#000000' : '#333333';
   ctx.fill();
 
   ctx.restore();
@@ -195,7 +163,7 @@ export default function ChromaSyncClient() {
     lives: MAX_LIVES,
   });
 
-  // Precision 2D target renderer (fixed 100px diameter, 50px radius)
+  // Precision 2D target renderer (fixed 104px diameter, 52px radius)
   const drawTarget = useCallback(() => {
     const cvs = targetCanvasRef.current;
     if (!cvs) return;
@@ -211,6 +179,11 @@ export default function ChromaSyncClient() {
     }
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, w, h);
+
+    // Background Grid
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.03)';
+    for (let i = 0; i < w; i += 40) ctx.fillRect(i, 0, 1, h);
+    for (let i = 0; i < h; i += 40) ctx.fillRect(0, i, w, 1);
 
     const cx = w / 2;
     const cy = h / 2;

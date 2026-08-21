@@ -58,81 +58,39 @@ const saveData = (data) => {
   } catch (e) {}
 };
 
-// Premium 2D Tactical Target Renderer (100px diameter / 50px radius)
+// Clean 2D Target Renderer matching deploy style (104px diameter / 52px radius)
 function draw2dLightTarget(ctx, x, y, targetState, lastLatencyMs, isSpamming) {
   ctx.save();
 
-  const radius = 50;
+  const radius = 52;
+  const isFlashing = targetState === 'flashing';
 
-  // Base color palette definitions based on target state
-  let primaryColor = '#1e293b';
-  let centerHighlight = '#475569';
-  let edgeDark = '#0f172a';
-  let glowColor = 'rgba(255, 255, 255, 0.08)';
-
-  if (isSpamming) {
-    primaryColor = '#64748b';
-    centerHighlight = '#94a3b8';
-    edgeDark = '#334155';
-    glowColor = 'rgba(100, 116, 139, 0.2)';
-  } else if (targetState === 'flashing') {
-    primaryColor = '#fbbf24'; // Vibrant Amber
-    centerHighlight = '#fef08a';
-    edgeDark = '#d97706';
-    glowColor = 'rgba(251, 191, 36, 0.8)';
-  } else if (targetState === 'hit') {
-    primaryColor = '#10b981'; // Emerald Green
-    centerHighlight = '#a7f3d0';
-    edgeDark = '#047857';
-    glowColor = 'rgba(16, 185, 129, 0.8)';
-  } else if (targetState === 'miss') {
-    primaryColor = '#ef4444'; // Crimson Red
-    centerHighlight = '#fecaca';
-    edgeDark = '#b91c1c';
-    glowColor = 'rgba(239, 68, 68, 0.8)';
-  }
-
-  // 1. Outer Ambient Radial Glow Aura
-  ctx.shadowBlur = 0;
-
-  // 2. Outer Tactical Bezel Ring
-  ctx.beginPath();
-  ctx.arc(x, y, radius + 10, 0, Math.PI * 2);
-  ctx.strokeStyle = isSpamming ? 'rgba(239, 68, 68, 0.35)' : (targetState === 'flashing' ? 'rgba(251, 191, 36, 0.45)' : 'rgba(255, 255, 255, 0.15)');
-  ctx.lineWidth = 1.5;
-  ctx.stroke();
-
-  // 3. Main Target Circle (Flat 2D Fill)
+  // Main Target Circle
   ctx.beginPath();
   ctx.arc(x, y, radius, 0, Math.PI * 2);
-  ctx.fillStyle = primaryColor;
-  ctx.fill();
 
-  // Reset shadow for crisp inner detailing
+  if (isFlashing) {
+    ctx.fillStyle = '#FFFFFF';
+    ctx.shadowBlur = 30;
+    ctx.shadowColor = '#FFFFFF';
+  } else {
+    ctx.fillStyle = '#151515';
+    ctx.shadowBlur = 0;
+  }
+  ctx.fill();
   ctx.shadowBlur = 0;
 
-  // 4. Tactical Crosshair Reticle Tick Marks (N, S, E, W)
-  const tickLen = 8;
-  const tickGap = radius + 3;
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
-  ctx.lineWidth = 1.5;
-
+  // Inner Detailing Ring
   ctx.beginPath();
-  // North
-  ctx.moveTo(x, y - tickGap); ctx.lineTo(x, y - tickGap - tickLen);
-  // South
-  ctx.moveTo(x, y + tickGap); ctx.lineTo(x, y + tickGap + tickLen);
-  // West
-  ctx.moveTo(x - tickGap, y); ctx.lineTo(x - tickGap - tickLen, y);
-  // East
-  ctx.moveTo(x + tickGap, y); ctx.lineTo(x + tickGap + tickLen, y);
+  ctx.arc(x, y, radius - 3, 0, Math.PI * 2);
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+  ctx.lineWidth = 1;
   ctx.stroke();
 
-  // 5. Center Core Dot
-  ctx.fillStyle = '#ffffff';
-  ctx.shadowBlur = 0;
+  // Center Dot
   ctx.beginPath();
-  ctx.arc(x, y, 6, 0, Math.PI * 2);
+  ctx.arc(x, y, 4, 0, Math.PI * 2);
+  ctx.fillStyle = isFlashing ? '#000000' : '#333333';
   ctx.fill();
 
   ctx.restore();
@@ -210,6 +168,11 @@ export default function StrobeLatencyClient() {
     }
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, w, h);
+
+    // Background Grid
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.03)';
+    for (let i = 0; i < w; i += 40) ctx.fillRect(i, 0, 1, h);
+    for (let i = 0; i < h; i += 40) ctx.fillRect(0, i, w, 1);
 
     const cx = w / 2;
     const cy = h / 2;
