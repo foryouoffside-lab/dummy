@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-const LAST_UPDATED = 'July 24, 2026';
+const LAST_UPDATED = 'August 22, 2026';
 
 export const metadata = {
   title: 'Terms of Service - SkillDrills',
@@ -61,6 +61,18 @@ export default function TermsOfServicePage() {
 
         <Section title="Termination">
           <p>You may stop using SkillDrills at any time. You can delete your mobile app account at any time from Progress → Delete Account &amp; Wipe Data. We may suspend or terminate accounts that violate these terms.</p>
+        </Section>
+
+        <Section title="Who may use SkillDrills">
+          <p>You must be at least 13 years old to use SkillDrills, and at least 16 if you are in a country where 16 is the minimum age for consenting to online services. If you are under the age of majority where you live, you may only use the website or app with the involvement of a parent or guardian. SkillDrills is not directed at children.</p>
+        </Section>
+
+        <Section title="Nature of the service">
+          <p>SkillDrills is a set of training games built for practice and entertainment. It is not a medical device, a diagnostic tool, or a treatment for any condition, and it is not a substitute for professional advice. Scores, levels, and the EIQ ranking measure how you perform inside SkillDrills only — the EIQ number is a competitive game ranking, not an IQ score or any assessment of your intelligence or cognitive health. We make no promise that using the website or app will improve your performance at school, at work, or in any other part of your life.</p>
+        </Section>
+
+        <Section title="Governing law">
+          <p>These terms are governed by the laws of India, and any dispute will be subject to the jurisdiction of the courts of India. If you are a consumer in the EEA or UK, this does not take away the protections of the mandatory consumer laws of the country you live in, or your right to bring a claim there.</p>
         </Section>
 
         <Section title="Changes to these terms">

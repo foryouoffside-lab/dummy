@@ -35,7 +35,7 @@ const UPDATED = {
   drill: '2026-08-21',
   // visual-tracking additionally got per-drill long-form guides.
   'visual-tracking': '2026-08-21',
-  legal: '2026-06-22',
+  legal: '2026-08-22',
 };
 
 // Ranked by measured Search Console performance, then by realistic potential.
@@ -97,6 +97,9 @@ export default async function sitemap() {
     // pages reads as low-trust to both search engines and users.
     entry('/privacy', UPDATED.legal, 'yearly', 0.3),
     entry('/terms', UPDATED.legal, 'yearly', 0.3),
+    // Google Play links this as the account-deletion URL, so it must stay
+    // reachable and indexable even though it has no search value.
+    entry('/delete-account', UPDATED.legal, 'yearly', 0.3),
   ];
 
   const drillEntries = DRILLS.map((drill) =>
