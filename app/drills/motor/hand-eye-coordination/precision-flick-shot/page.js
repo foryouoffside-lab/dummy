@@ -1,7 +1,7 @@
 import PrecisionFlickShotClient from './PrecisionFlickShotClient';
 
 export const metadata = {
-  title: "Precision Flick Shot Trainer — Flick Aim | SkillDrills",
+  title: "Mouse Accuracy Test - Free Precision Flick Aim Trainer",
   description: "Master mouse flick accuracy, target acquisition speed, and center-click bulls-eye precision with this free online flick shot trainer for Valorant & CS2.",
   keywords: [
     "precision flick shot trainer",
@@ -33,7 +33,7 @@ export const metadata = {
     follow: true,
   },
   openGraph: {
-    title: "Precision Flick Shot Trainer — Flick Aim | SkillDrills",
+    title: "Mouse Accuracy Test - Free Precision Flick Aim Trainer",
     description: "Master mouse flick accuracy, target acquisition speed, and center-click bulls-eye precision with this free online flick shot trainer for Valorant & CS2.",
     url: "https://skilldrills.online/drills/motor/hand-eye-coordination/precision-flick-shot",
     siteName: 'SkillDrills',
@@ -42,7 +42,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Precision Flick Shot Trainer — Flick Aim | SkillDrills",
+    title: "Mouse Accuracy Test - Free Precision Flick Aim Trainer",
     description: "Master mouse flick accuracy, target acquisition speed, and center-click bulls-eye precision with this free online flick shot trainer for Valorant & CS2.",
   },
 };

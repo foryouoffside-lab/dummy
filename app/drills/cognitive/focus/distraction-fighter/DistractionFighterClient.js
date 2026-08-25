@@ -402,7 +402,7 @@ export default function DistractionFighterClient() {
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
             DISTRACTION FIGHTER
             <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
-              Ignore Distractions Game
+              Stroop Test Online
             </span>
           </h1>
           <p className="text-xs text-slate-400 mt-1">

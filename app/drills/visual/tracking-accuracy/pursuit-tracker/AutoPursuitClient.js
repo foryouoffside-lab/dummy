@@ -525,7 +525,7 @@ export default function AutoPursuitClient() {
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
               PURSUIT TRACKER PRO
               <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
-                Smooth Pursuit Tracker
+                Smooth Pursuit Test
               </span>
             </h1>
             <p className="text-xs text-slate-400 mt-1">

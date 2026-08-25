@@ -15,7 +15,7 @@ import ReactionSpeedDrillsClient from './ReactionSpeedDrillsClient';
 // ============================================================
 
 export const metadata = {
-  title: 'Free Reaction Time Test & Speed Training | SkillDrills',
+  title: 'Reaction Training Drills - Free Reflex Speed Practice',
   description: 'Free online reaction time test and reflex training drills. Measure your reaction speed in milliseconds and train faster reflexes. No sign-up needed.',
   keywords: [
     // Primary / Head terms
@@ -34,7 +34,7 @@ export const metadata = {
   },
   robots: { index: true, follow: true },
   openGraph: {
-    title: 'Free Reaction Time Test & Reaction Speed Training | SkillDrills',
+    title: 'Reaction Training Drills - Free Reflex Speed Practice | SkillDrills',
     description: 'Improve your reflexes with free online Reaction Time Tests and Reaction Speed Training drills. Train your click speed, saccadic tracking, and eye agility.',
     url: 'https://skilldrills.online/drills/reaction-speed',
     siteName: 'SkillDrills',
@@ -44,12 +44,12 @@ export const metadata = {
       url: 'https://skilldrills.online/icons/icon-512x512.png',
       width: 512,
       height: 512,
-      alt: 'Free Reaction Time Test & Reaction Speed Training | SkillDrills',
+      alt: 'Reaction Training Drills - Free Reflex Speed Practice | SkillDrills',
     }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Free Reaction Time Test & Reaction Speed Training',
+    title: 'Reaction Training Drills - Free Reflex Speed Practice',
     description: 'Train click speed, saccadic reflex calibration, and visual processing speeds with 8 free interactive reaction speed drills.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },

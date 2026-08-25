@@ -13,7 +13,7 @@ import PhysicalDrillsClient from './PhysicalDrillsClient';
 export const metadata = {
   // GSC (180d): physical drills (pos 9.0) and physical fitness drills (pos 50)
   // land here against a title that never said "physical drills".
-  title: 'Free Physical Drills - Reflex, Balance & Coordination',
+  title: 'Free Agility Drills - Reflex, Balance & Coordination',
   description: 'Free online physical training drills and games. Train your reaction time, reflexes, stability, balance, agility, and motor coordination. 11 free drills.',
   keywords: [
     'physical training drills', 'free physical training online', 'physical training game',
@@ -38,7 +38,7 @@ export const metadata = {
   },
   robots: { index: true, follow: true },
   openGraph: {
-    title: 'Free Physical Training Drills - Reflex, Balance & Coordination | SkillDrills',
+    title: 'Free Agility Drills - Reflex, Balance & Coordination | SkillDrills',
     description: 'Free online physical training drills — reaction time tests, reflex games, balance training, agility ladder drills, and coordination exercises. 11 free drills. No sign-up.',
     type: 'website',
     url: 'https://skilldrills.online/drills/physical',
@@ -48,12 +48,12 @@ export const metadata = {
       url: 'https://skilldrills.online/icons/icon-512x512.png',
       width: 512,
       height: 512,
-      alt: 'Free Physical Training Drills - Reflex, Balance & Coordination | SkillDrills',
+      alt: 'Free Agility Drills - Reflex, Balance & Coordination | SkillDrills',
     }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Free Physical Training Drills - Reflex, Balance & Coordination | SkillDrills',
+    title: 'Free Agility Drills - Reflex, Balance & Coordination | SkillDrills',
     description: 'Free reaction time tests, reflex games, balance training, agility drills, and coordination exercises. 11 drills. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },

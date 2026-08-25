@@ -7,7 +7,7 @@ const cognitiveDrillCount = cognitiveDrills.length;
 export const metadata = {
   // GSC (180d): train your brain online (pos 70.5) and processing speed games
   // online (pos 87) both land here; neither phrase contained "online".
-  title: 'Free Brain Training Online - Focus, Attention & Speed',
+  title: 'Free Brain Games Online - Focus, Attention & Speed',
   description: `Free cognitive training online. ${cognitiveDrillCount} science-based drills for attention, focus, and processing speed. No sign-up. Play instantly in your browser.`,
   keywords: [
     'cognitive training online', 'free cognitive training', 'cognitive training drills',
@@ -25,7 +25,7 @@ export const metadata = {
     'attention focus reaction speed game', 'brain performance training',
   ],
   openGraph: {
-    title: 'Free Cognitive Training Online - Attention, Focus & Reaction Speed Drills | SkillDrills',
+    title: 'Free Brain Games Online - Attention, Focus & Processing Speed | SkillDrills',
     description: `Free cognitive training online. ${cognitiveDrillCount} science-based drills for attention, focus, and processing speed.`,
     type: 'website',
     url: 'https://skilldrills.online/drills/cognitive',
@@ -35,7 +35,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Free Cognitive Training Online - Attention, Focus & Reaction Speed Drills | SkillDrills',
+    title: 'Free Brain Games Online - Attention, Focus & Processing Speed | SkillDrills',
     description: `Free cognitive training online. ${cognitiveDrillCount} drills — attention, focus, processing speed. No sign-up.`,
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },

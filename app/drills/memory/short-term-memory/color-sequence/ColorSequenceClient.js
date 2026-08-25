@@ -464,7 +464,7 @@ export default function ColorSequenceClient() {
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
             COLOR SEQUENCE
             <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
-              Color Sequence Memory Game
+              Color Memory Game
             </span>
           </h1>
           <p className="text-xs text-slate-400 mt-1">

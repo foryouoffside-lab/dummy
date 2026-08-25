@@ -61,3 +61,7 @@ index-status.json
 scripts/gsc/index-status.json
 __pycache__/
 *.pyc
+
+# Bing Webmaster API key (env-only, never commit)
+scripts/bing/.bing-key
+bing-*.csv

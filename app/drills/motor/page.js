@@ -1,7 +1,7 @@
 import MotorDrillsClient from './MotorDrillsClient';
 
 export const metadata = {
-  title: 'Free Aim Trainer & Mouse Precision Drills | SkillDrills',
+  title: 'Mouse Precision & Hand Eye Coordination Drills - Free',
   description: 'Free aim trainer and motor skills drills online. 8 hand eye coordination, movement speed, and precision control tests. No sign-up.',
   keywords: [
     'free aim trainer', 'aim trainer online', 'motor skills drills', 'motor skills training',
@@ -24,7 +24,7 @@ export const metadata = {
     'motor skills game online', 'precision mouse training',
   ],
   openGraph: {
-    title: 'Free Aim Trainer & Motor Skills Drills - Mouse Precision Online | SkillDrills',
+    title: 'Mouse Precision & Hand Eye Coordination Drills | SkillDrills',
     description: 'Free aim trainer and motor skills drills. 8 hand eye coordination, click speed, and precision control tests. No sign-up.',
     type: 'website',
     url: 'https://skilldrills.online/drills/motor',
@@ -39,7 +39,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Free Aim Trainer & Motor Skills Drills - Mouse Precision Online | SkillDrills',
+    title: 'Mouse Precision & Hand Eye Coordination Drills | SkillDrills',
     description: 'Free aim trainer and motor skills drills. 8 hand eye coordination, click speed, and precision control tests. No sign-up.',
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },

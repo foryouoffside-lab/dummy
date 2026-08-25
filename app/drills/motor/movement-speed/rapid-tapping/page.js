@@ -1,8 +1,8 @@
 import RapidTappingClient from './RapidTappingClient';
 
 export const metadata = {
-  title: "Rapid Tapping Test - CPS & Click Speed Trainer | SkillDrills",
-  description: "Test and train your clicks per second with our free Rapid Tapping Test. Improve finger speed, CPS, jitter clicking, and tapping endurance online.",
+  title: "CPS Test - Free Click Speed Test & Clicks Per Second",
+  description: "Free CPS test online. Measure your clicks per second, then train click speed, jitter and butterfly clicking, and finger tapping endurance.",
   keywords: [
     "rapid tapping test",
     "cps test",
@@ -31,8 +31,8 @@ export const metadata = {
     follow: true,
   },
   openGraph: {
-    title: "Rapid Tapping Test - CPS & Click Speed Trainer | SkillDrills",
-    description: "Test and train your clicks per second with our free Rapid Tapping Test. Improve finger speed, CPS, jitter clicking, and tapping endurance online.",
+    title: "CPS Test - Free Click Speed Test & Clicks Per Second",
+    description: "Free CPS test online. Measure your clicks per second, then train click speed, jitter and butterfly clicking, and finger tapping endurance.",
     url: 'https://skilldrills.online/drills/motor/movement-speed/rapid-tapping',
     siteName: 'SkillDrills',
     locale: 'en_US',
@@ -40,8 +40,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Rapid Tapping Test - CPS & Click Speed Trainer | SkillDrills",
-    description: "Test and train your clicks per second with our free Rapid Tapping Test. Improve finger speed, CPS, jitter clicking, and tapping endurance online.",
+    title: "CPS Test - Free Click Speed Test & Clicks Per Second",
+    description: "Free CPS test online. Measure your clicks per second, then train click speed, jitter and butterfly clicking, and finger tapping endurance.",
   },
 };
 

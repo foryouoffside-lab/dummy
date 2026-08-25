@@ -378,7 +378,7 @@ export default function SymbolMatchingClient() {
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
             SYMBOL MATCHING
             <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
-              Symbol Matching Test
+              Symbol Digit Modalities Test
             </span>
           </h1>
           <p className="text-xs text-slate-400 mt-1">

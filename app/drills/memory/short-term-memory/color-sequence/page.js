@@ -1,7 +1,7 @@
 import ColorSequenceClient from './ColorSequenceClient';
 
 export const metadata = {
-  title: 'Color Sequence - Short-Term Memory | SkillDrills',
+  title: 'Color Memory Game - Free Sequence Memory Test Online',
   description: 'Train visual memory with 6 vibrant colors and progressive sequences. Watch patterns play, then tap colors in order. No sign-up.',
   keywords: [
     'color sequence memory', 'visual memory drill', 'short term memory colors',
@@ -17,7 +17,7 @@ export const metadata = {
     'sequential color recall', 'color order practice', 'visual memory improvement',
   ],
   openGraph: {
-    title: 'Color Sequence - Short-Term Memory | SkillDrills',
+    title: 'Color Memory Game - Free Sequence Memory Test Online',
     description: 'Train visual memory with 6 vibrant colors and progressive sequences. Watch patterns play, then tap colors in order. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/memory/short-term-memory/color-sequence',
@@ -26,7 +26,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Color Sequence - Short-Term Memory | SkillDrills',
+    title: 'Color Memory Game - Free Sequence Memory Test Online',
     description: 'Train visual memory with 6 vibrant colors and progressive sequences. Watch patterns play, then tap colors in order. No sign-up.',
   },
   robots: { index: true, follow: true },

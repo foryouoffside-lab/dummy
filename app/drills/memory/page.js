@@ -8,7 +8,7 @@ export const metadata = {
   // GSC (180d): memory drill 16 impr (pos 10.1), online memory training 14
   // (pos 43.6), memory training online 11 (pos 49.5). Leading with "Online
   // Memory Training" matches the two phrases stuck on page 5.
-  title: `Online Memory Training - ${MEMORY_COUNT} Free Memory Drills`,
+  title: `Free Memory Games Online - ${MEMORY_COUNT} Memory Tests`,
   description: `Free memory training with ${MEMORY_COUNT} drills across short-term, working, and spatial memory. Improve recall, digit span, and pattern memorization. No sign-up.`,
   keywords: [
     'memory training', 'memory drills', 'short term memory', 'working memory training',
@@ -20,7 +20,7 @@ export const metadata = {
     'skilldrills memory', 'skilldrills brain training',
   ],
   openGraph: {
-    title: `Memory Training - ${MEMORY_COUNT} Free Drills | SkillDrills`,
+    title: `Free Memory Games & Memory Tests - ${MEMORY_COUNT} Drills | SkillDrills`,
     description: `${MEMORY_COUNT} free memory training drills. No sign-up required.`,
     type: 'website',
     url: 'https://skilldrills.online/drills/memory',
@@ -35,7 +35,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: `Memory Training - ${MEMORY_COUNT} Free Drills | SkillDrills`,
+    title: `Free Memory Games & Memory Tests - ${MEMORY_COUNT} Drills | SkillDrills`,
     description: `${MEMORY_COUNT} free memory drills. No sign-up required.`,
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
