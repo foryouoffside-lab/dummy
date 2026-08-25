@@ -718,3 +718,197 @@ And do not write a deploy-wait loop that greps for a phrase which also appears i
 the page's `<title>` or in the RelatedDrills block — it will match the old build
 and exit immediately. Grep for something unique to the new markup instead
 (e.g. `data-seo-kw`).
+
+---
+
+# SESSION 4 — 2026-08-25 (Bing Webmaster connected + demand-driven keyword pass)
+
+## Bing Webmaster Tools is now connected
+
+API key supplied by the user. Stored in `scripts/bing/.bing-key`, which is
+gitignored — the key is **not** in the repo and must not be committed.
+
+> **Security note for the user:** this key was pasted into a chat message in
+> plain text. Treat it as exposed and rotate it in Bing Webmaster Tools
+> (Settings → API access) when convenient. Anyone holding it can read the site's
+> full search data and spend its 100/day URL submission quota.
+
+New puller: **`scripts/bing/bing.py`** (mirrors `scripts/gsc/gsc.py`)
+
+```
+python scripts/bing/bing.py sites | traffic [days] | queries [n] | pages [n]
+                                  | pagequeries <url> | crawl | quota
+                                  | keyword <phrase> | related <phrase>
+                                  | submit <url>... | submitall [--dry]
+```
+
+Two API gotchas, both cost time:
+- The traffic endpoints *return* dates as `/Date(1779433200000-0700)/`, but the
+  keyword-research endpoints **reject** that format on input. They want plain
+  ISO `YYYY-MM-DD`. Wrong format returns `ERROR!!! String was not recognized as
+  a valid DateTime.`
+- Bing rate-limits parallel keyword lookups and returns an **HTTP error**, not a
+  zero. Six worker threads produced 152 failures out of 308 phrases. Anything
+  that treats a failed call as "0 volume" will silently invent a conclusion.
+  `keyword_volume()` returns `None` on error for exactly this reason; re-fetch
+  serially with backoff before trusting a zero.
+
+## The headline: Bing is now the bigger channel, and it behaves nothing like Google
+
+| | Google (28d) | Bing (30d) |
+|---|---|---|
+| Clicks | 110 | **161** |
+| Impressions | 1,926 | **2,435** |
+| URLs earning impressions | **11** | **84** |
+| Typical position on non-brand terms | 30–70 | **2–10** |
+
+Bing has crawled and ranked the whole site; Google has effectively indexed the
+hubs only. On Bing the site already sits on page 1 for real queries — and
+converts almost none of them:
+
+| Bing query | Impr | Pos | Clicks |
+|---|---|---|---|
+| `drill your skill` | 270 | 6.8 | **0** |
+| `concentration grids` | 88 | 8.7 | **0** |
+| `memory chart drill` | 65 | 3.0 | **0** |
+| `drills` | 31 | 6.8 | **0** |
+| `cognitive drills` | 29 | 4.8 | **0** |
+| `steady hand game` | 27 | 7.0 | **0** |
+
+Page-1 rankings with 0% CTR is a **title and description** problem, not a
+ranking problem — and unlike the Google situation it is fixable on-page.
+
+## Keyword research: the target map was built backwards
+
+`lib/drillSeo.js` was derived from Search Console query clusters — i.e. from
+phrases the site *already ranked for*. That is a survivorship filter, not a
+demand measurement. Running every target term through Bing's keyword API:
+
+- **26 of 81** drill target terms have measurable Bing exact volume.
+- **55 of 81** register zero — they are real phrases, but nobody searches them.
+
+(Zero on Bing is not literally zero searches. Bing is ~3–4% of the market and
+its tool floors low-volume terms. It does mean the term carries no measurable
+demand, and Google volume for these is proportionally small too.)
+
+**36 pages had a better, honestly-matching term available.** The biggest:
+
+| Page | Was | Vol | Now | Vol |
+|---|---|---|---|---|
+| `/drills/motor/movement-speed/rapid-tapping` | click speed test | 3,256 | **cps test** | **26,858** |
+| `/drills/cognitive` | brain training | 68 | **brain games** | **4,249** |
+| `/drills/memory` | memory training | 87 | **memory games** | **1,322** |
+| `/drills/cognitive/focus/distraction-fighter` | focus game | 0 | **stroop test** | **427** |
+| `/drills/cognitive/processing-speed/rsvp-reader` | rsvp speed reader | 0 | **reading speed test** | **250** |
+| `/drills/motor/movement-speed/keyboard-recognition` | keybind speed trainer | 0 | **keyboard speed test** | **199** |
+| `/drills/memory/short-term-memory/color-sequence` | color sequence memory game | 0 | **color memory game** | **172** |
+| `/drills/cognitive/focus/concentration-grid` | concentration grid | 36 | **schulte table** | **149** |
+| `/drills/physical/reflex-training/peripheral-threat-sweeper` | peripheral vision trainer | 0 | **peripheral vision test** | **106** |
+
+`distraction-fighter` is literally a Stroop task ("identify ink colors while
+ignoring conflicting word meanings") and `concentration-grid` is literally a
+Schulte table. Those two were sitting on established, searched names and using
+invented ones instead.
+
+### Retargets deliberately rejected as dishonest
+
+Volume is worthless if the page cannot satisfy the query. These scored well and
+were **not** applied:
+
+| Page | Rejected term | Vol | Why |
+|---|---|---|---|
+| `memory/working-memory/n-back` | dual n back | 146 | Drill is a single 3-back. "Dual" n-back means two simultaneous streams. |
+| `physical/reflex-training/drop-catch` | ruler drop test | 7 | That is a specific physical ruler-catch protocol; this is a falling-ball click drill. |
+| `motor/movement-speed/finger-sequencing` | finger tapping test | 27 | Drill is size-ordering 3 nodes, not tapping speed. |
+| `visual/tracking-accuracy/multiple-targets` | mot test | 10 | "MOT test" is the UK vehicle inspection. Hopeless ambiguity. |
+| `memory/spatial-memory/object-location` | memory matching game | 211 | Drill is spatial recall, not a pairs/Concentration matching game. |
+| `physical/coordination/complex-pattern` | pattern recognition test | 54 | Drill is pattern *memory*, not recognition. |
+
+Also note the raw Bing related-keyword pool is heavily polluted: `reflex` is
+mostly medical (babinski, moro, TSH-reflex), `focus` is Ford Focus and school
+portals, `sequence` is Fibonacci, `memory` is Windows memory diagnostic, and
+`fps tester` means frame rate, not aim. Never take that pool at face value.
+
+## Keyword cannibalisation fixed
+
+Two hubs were competing with their own child drill for the same phrase:
+
+| Hub | Was targeting | Conflicted with | Hub now targets |
+|---|---|---|---|
+| `/drills/motor` | aim trainer | `/drills/motor/hand-eye-coordination/aim-trainer` (9,821) | mouse precision / hand-eye coordination |
+| `/drills/reaction-speed` | reaction time test | `/drills/reaction-speed/reaction-time-test` (10,978) | reaction training drills |
+
+Search engines pick one page per query; two of ours competing splits the signal.
+
+## 27 dead URLs redirected
+
+Cross-checked every URL Bing reports impressions for against the route tree,
+then confirmed each live. 27 returned 404 while carrying **95 impressions and 7
+clicks**, and Bing logged **638 4xx responses / 1,891 crawl errors over 103
+days** — a standing crawl-budget leak. All 27 now 301 to the nearest live drill.
+
+Verified against a production build: 27/27 redirect, all destinations 200.
+
+### A trap worth remembering
+
+The first version of this included a case-normalising redirect
+`/drills/physical/Reflex-Training/:path*` → `/drills/physical/reflex-training/:path*`
+to catch a mixed-case URL Bing had crawled. **Next matches redirect sources
+case-insensitively**, so that rule also matched the real lower-case URL and
+308'd it to itself — an infinite loop on a live drill page. Caught by the
+redirect smoke test, removed, and documented in `next.config.js`. Do not re-add
+it; mixed-case handling belongs in middleware.
+
+## llms.txt added
+
+New `app/llms.txt/route.js`, prerendered static, served at `/llms.txt`.
+Generated from `DRILLS` + `DRILL_SEO` so it cannot drift from the sitemap.
+141 lines, 85 links: every drill with its search phrase as the label, its real
+description, duration and difficulty, plus explicit "key facts for citation"
+(free, no account, runs in browser, scores local, some drills desktop-only).
+
+robots.js already allows the AI search crawlers. Being crawlable is necessary
+but not sufficient — an assistant still has to work out which of 81
+structurally-identical pages answers "free reaction time test". This hands it
+the map.
+
+## Verification (production build, 182 static pages)
+
+| Check | Result |
+|---|---|
+| `npx next build` | compiled clean, 182 static pages |
+| Titles over 60 chars | **0** |
+| Descriptions over 160 chars | **0** |
+| Pages with no meta description | **0** |
+| Duplicate titles | **0** |
+| Pages without exactly one H1 | 1 (`/search`, noindex — correct) |
+| Dead-URL redirects | 27/27 → 301, all destinations 200 |
+| Redirect loops | 0 (one found and removed) |
+| `drillSeo.js` anchor uniqueness | 81/81 unique, 0 duplicate terms |
+| `/llms.txt` | static, 85 links, all 81 drills present |
+
+Title / H1 sub-line / internal anchor text were moved together for all 12
+retargeted drills, so the three signals still name the same phrase.
+
+## NOT DONE — blocked on deploy
+
+Nothing in this session is deployed. Per the established pattern the **user
+deploys**. After deploy:
+
+1. `python scripts/bing/bing.py submitall` — 100 URLs/day, 800/month quota.
+   93 sitemap URLs fit in one day.
+2. `python scripts/gsc/gsc.py submit` — resubmit the sitemap.
+3. Google has no public "request indexing" API. The Indexing API only accepts
+   `JobPosting` and `BroadcastEvent`; using it for ordinary pages violates its
+   terms and does nothing. Sitemap resubmission plus the internal-link mesh is
+   the legitimate path, with manual URL Inspection in the GSC UI for the top
+   10 pages if the user wants to push individual URLs.
+
+## The honest read, updated
+
+Bing rewards this site and Google does not, and the gap is authority, not
+on-page work. Google has 11 URLs earning impressions after every on-page fix of
+sessions 1–3 was deployed; Bing has 84. The on-page work in this session is
+worth doing — the CPS retarget alone addresses a 26,858/mo phrase the site was
+ranking adjacent to — but the constraint on the 100k/month goal is still
+off-site: links, distribution, and time.

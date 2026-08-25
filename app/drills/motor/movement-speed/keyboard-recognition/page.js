@@ -1,7 +1,7 @@
 import KeyboardRecognitionClient from './KeyboardRecognitionClient';
 
 export const metadata = {
-  title: "Keyboard Recognition & Keybind Speed Trainer | SkillDrills",
+  title: "Keyboard Speed Test - Free Keybind Reaction Trainer",
   description: "Master keyboard layout familiarity and gaming keybind reflex speed. Train keybind muscle memory for Valorant, CS2, Fortnite, Minecraft, Apex, and LoL.",
   keywords: [
     "keyboard recognition trainer",
@@ -19,7 +19,7 @@ export const metadata = {
     "keyboard speed test online"
   ],
   openGraph: {
-    title: "Keyboard Recognition & Keybind Speed Trainer | SkillDrills",
+    title: "Keyboard Speed Test - Free Keybind Reaction Trainer",
     description: "Master keyboard layout familiarity and gaming keybind reflex speed. Train keybind muscle memory for Valorant, CS2, Fortnite, Minecraft, Apex, and LoL.",
     type: 'article',
     url: 'https://skilldrills.online/drills/motor/movement-speed/keyboard-recognition',
@@ -34,7 +34,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Keyboard Recognition & Keybind Speed Trainer | SkillDrills",
+    title: "Keyboard Speed Test - Free Keybind Reaction Trainer",
     description: "Master keyboard layout familiarity and gaming keybind reflex speed. Train keybind muscle memory for Valorant, CS2, Fortnite, Minecraft, Apex, and LoL.",
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },

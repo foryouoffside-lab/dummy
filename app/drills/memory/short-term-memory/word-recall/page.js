@@ -1,7 +1,7 @@
 import WordRecallClient from './WordRecallClient';
 
 export const metadata = {
-  title: 'Word Recall - Short-Term Memory | SkillDrills',
+  title: 'Verbal Memory Test - Free Word Recall Memory Game',
   description: 'Train verbal memory with 50 unique words and progressive difficulty. 2-second memorization, then free recall typing. No sign-up.',
   keywords: [
     'word recall', 'verbal memory', 'word list memory', 'short term memory words',
@@ -17,7 +17,7 @@ export const metadata = {
     'word memorization practice', 'vocabulary memory test', 'word list drill',
   ],
   openGraph: {
-    title: 'Word Recall - Short-Term Memory | SkillDrills',
+    title: 'Verbal Memory Test - Free Word Recall Memory Game',
     description: 'Train verbal memory with 50 unique words and progressive difficulty. 2-second memorization, then free recall typing. No sign-up.',
     type: 'article',
     url: 'https://skilldrills.online/drills/memory/short-term-memory/word-recall',
@@ -26,7 +26,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Word Recall - Short-Term Memory | SkillDrills',
+    title: 'Verbal Memory Test - Free Word Recall Memory Game',
     description: 'Train verbal memory with 50 unique words and progressive difficulty. 2-second memorization, then free recall typing. No sign-up.',
   },
   robots: { index: true, follow: true },

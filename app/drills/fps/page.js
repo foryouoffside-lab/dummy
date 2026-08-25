@@ -8,7 +8,7 @@ export const metadata = {
   // GSC (180d) for this URL: fps training 48 impr (pos 28.8), fps practice 28,
   // fps trainer 16, practice fps aim 12. The old title carried "aim trainer"
   // and "aim training" but never the phrase "FPS Training" those queries use.
-  title: 'Free FPS Aim Trainer - FPS Training & Aim Practice',
+  title: 'Free Aim Trainer - Online Aim Training for FPS Games',
   description: `Free FPS aim trainer online. ${fpsDrillCount} aim training drills - flick shots, tracking, recoil control and reaction time. For Valorant, CS2 and Apex.`,
   keywords: [
     'free fps aim trainer', 'fps aim trainer online', 'best aim trainer',
@@ -28,7 +28,7 @@ export const metadata = {
     'professional aim training', 'comprehensive aim trainer',
   ],
   openGraph: {
-    title: 'Free FPS Aim Trainer - Best Online Aim Training Hub | SkillDrills',
+    title: 'Free Aim Trainer - Online Aim Training for FPS Games | SkillDrills',
     description: `Free FPS aim trainer hub. ${fpsDrillCount} professional aim training drills — flick shots, tracking, recoil control, reaction time. Valorant, CS2, Apex. No sign-up.`,
     type: 'website',
     url: 'https://skilldrills.online/drills/fps',
@@ -38,7 +38,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Free FPS Aim Trainer - Best Online Aim Training Hub | SkillDrills',
+    title: 'Free Aim Trainer - Online Aim Training for FPS Games | SkillDrills',
     description: `Free FPS aim trainer. ${fpsDrillCount} professional drills — flick shots, tracking, recoil control, reaction time. Valorant, CS2, Apex. No sign-up.`,
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },

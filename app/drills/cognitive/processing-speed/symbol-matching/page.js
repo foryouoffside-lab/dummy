@@ -124,7 +124,7 @@ const howToSchema = {
 };
 
 export const metadata = {
-  title: "Play Symbol Matching Online | Free Symbol Search Test",
+  title: "Symbol Digit Modalities Test - Free Processing Speed",
   description: "Play our free Symbol Matching online game. Challenge your cognitive processing speed, take a symbol search test, and train your visual working memory.",
   keywords: [
     "symbol search test",
@@ -140,7 +140,7 @@ export const metadata = {
   },
   robots: { index: true, follow: true },
   openGraph: {
-    title: "Play Symbol Matching Online | Free Symbol Search Test | SkillDrills",
+    title: "Symbol Digit Modalities Test - Free Processing Speed | SkillDrills",
     description: "Play our free Symbol Matching online game. Challenge your cognitive processing speed, take a symbol search test, and train your visual working memory.",
     url: "https://skilldrills.online/drills/cognitive/processing-speed/symbol-matching",
     siteName: 'SkillDrills',
@@ -149,7 +149,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Play Symbol Matching Online | Free Symbol Search Test | SkillDrills",
+    title: "Symbol Digit Modalities Test - Free Processing Speed | SkillDrills",
     description: "Play our free Symbol Matching online game. Challenge your cognitive processing speed, take a symbol search test, and train your visual working memory.",
   },
 };

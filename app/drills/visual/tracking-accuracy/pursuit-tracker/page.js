@@ -107,7 +107,7 @@ const howToSchema = {
 };
 
 export const metadata = {
-  title: "Smooth Pursuit Tracker | Free Visual Aim Training Game",
+  title: "Smooth Pursuit Test - Free Eye Tracking Accuracy Game",
   description: "Measure your continuous hand-eye target follow accuracy. Keep your cursor on the unpredictably moving orb to evaluate smooth pursuit speed and coordination.",
   keywords: [
     "visual pursuit test",
@@ -121,7 +121,7 @@ export const metadata = {
   },
   robots: { index: true, follow: true },
   openGraph: {
-    title: "Smooth Pursuit Tracker | Free Visual Aim Training Game | SkillDrills",
+    title: "Smooth Pursuit Test - Free Eye Tracking Accuracy Game | SkillDrills",
     description: "Measure your continuous hand-eye target follow accuracy. Keep your cursor on the unpredictably moving orb to evaluate smooth pursuit speed and coordination.",
     url: "https://skilldrills.online/drills/visual/tracking-accuracy/pursuit-tracker",
     siteName: 'SkillDrills',
@@ -130,7 +130,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Smooth Pursuit Tracker | Free Visual Aim Training Game | SkillDrills",
+    title: "Smooth Pursuit Test - Free Eye Tracking Accuracy Game | SkillDrills",
     description: "Measure your continuous hand-eye target follow accuracy. Keep your cursor on the unpredictably moving orb to evaluate smooth pursuit speed and coordination.",
   },
 };

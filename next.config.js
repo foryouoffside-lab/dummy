@@ -129,6 +129,62 @@ const nextConfig = {
       { source: '/drills/productivity/:path*', destination: '/drills/cognitive', permanent: true },
       { source: '/drills/mental-fitness', destination: '/drills', permanent: true },
       { source: '/drills/mental-fitness/:path*', destination: '/drills', permanent: true },
+
+      // ------------------------------------------------------------------
+      // Retired individual drills. Found 2026-08-25 by cross-checking every
+      // URL Bing Webmaster Tools reports impressions for against the route
+      // tree on disk, then confirming each one live: 27 URLs returning 404
+      // while still carrying 95 Bing impressions and 7 clicks. They are also
+      // a standing crawl-budget leak -- Bing logged 638 4xx responses and
+      // 1,891 crawl errors over 103 days. Each goes to the nearest live drill
+      // rather than a hub where a real equivalent exists, so the redirect
+      // still answers the query the visitor typed.
+      // ------------------------------------------------------------------
+      { source: '/drills/cognitive/attention/sustained-attention', destination: '/drills/cognitive/attention/concentration-stamina', permanent: true },
+      { source: '/drills/cognitive/attention/switch-cost', destination: '/drills/cognitive/attention/multi-tasking', permanent: true },
+      { source: '/drills/cognitive/focus/focus-timer', destination: '/drills/cognitive/attention/concentration-stamina', permanent: true },
+      { source: '/drills/cognitive/memory/number-recall', destination: '/drills/memory/short-term-memory/digit-span', permanent: true },
+      { source: '/drills/cognitive/memory/card-matching', destination: '/drills/memory/spatial-memory/object-location', permanent: true },
+      { source: '/drills/cognitive/memory/pattern-recognition', destination: '/drills/memory', permanent: true },
+      { source: '/drills/motor/hand-eye-coordination/click-accuracy', destination: '/drills/motor/hand-eye-coordination/aim-trainer', permanent: true },
+      { source: '/drills/motor/precision-control/fine-motor', destination: '/drills/motor/precision-control/steady-hand', permanent: true },
+      { source: '/drills/motor/movement-speed/gesture-speed', destination: '/drills/motor/movement-speed/finger-sequencing', permanent: true },
+      { source: '/drills/motor/timing-accuracy/rhythm-tap', destination: '/drills/visual/visual-recognition/rhythm-anomaly', permanent: true },
+      { source: '/drills/motor/timing-accuracy/synchronization', destination: '/drills/visual/visual-recognition/rhythm-anomaly', permanent: true },
+      { source: '/drills/motor/timing-accuracy/stopwatch-click', destination: '/drills/motor/movement-speed/rapid-tapping', permanent: true },
+      { source: '/drills/memory/working-memory/sentence-span', destination: '/drills/memory/short-term-memory/word-recall', permanent: true },
+      { source: '/drills/memory/working-memory/mental-arithmetic', destination: '/drills/memory/working-memory/n-back', permanent: true },
+      { source: '/drills/memory/long-term-memory/image-association', destination: '/drills/memory/spatial-memory/object-location', permanent: true },
+      { source: '/drills/memory/associative-memory/name-face', destination: '/drills/memory/spatial-memory/object-location', permanent: true },
+      { source: '/drills/memory/associative-memory/sound-pattern', destination: '/drills/memory/short-term-memory/color-sequence', permanent: true },
+      { source: '/drills/memory/associative-memory/concept-linking', destination: '/drills/memory', permanent: true },
+      { source: '/drills/physical/balance-training/dynamic-balance', destination: '/drills/physical/balance-training/stability-challenge', permanent: true },
+      { source: '/drills/visual/peripheral-vision/peripheral-flash', destination: '/drills/visual-tracking/peripheral-ping-pursuit', permanent: true },
+      { source: '/drills/visual-tracking/stop-and-go-dash', destination: '/drills/visual-tracking/dynamic-evasion-pursuit', permanent: true },
+      { source: '/drills/fps/240fps-click-test', destination: '/drills/motor/movement-speed/rapid-tapping', permanent: true },
+      { source: '/drills/fps/reactive-sphere-tracking', destination: '/drills/fps/strafe-tracking', permanent: true },
+      { source: '/drills/fps/reactive-tracking', destination: '/drills/fps/strafe-tracking', permanent: true },
+      { source: '/drills/cognitive/problem-solving/logic-puzzles', destination: '/drills/cognitive', permanent: true },
+
+      // Whole subtrees that no longer exist. These sit after the specific
+      // rules above because Next matches redirects in array order.
+      { source: '/drills/motor/timing-accuracy/:path*', destination: '/drills/motor', permanent: true },
+      { source: '/drills/memory/associative-memory/:path*', destination: '/drills/memory', permanent: true },
+      { source: '/drills/memory/long-term-memory/:path*', destination: '/drills/memory', permanent: true },
+      { source: '/drills/cognitive/memory/:path*', destination: '/drills/memory', permanent: true },
+      { source: '/drills/cognitive/problem-solving/:path*', destination: '/drills/cognitive', permanent: true },
+      { source: '/drills/visual/peripheral-vision/:path*', destination: '/drills/visual', permanent: true },
+
+      // NOTE: do not try to fix mixed-case 404s here. Bing crawled
+      // /drills/physical/Reflex-Training/quick-dodge (2 impressions) and got a
+      // 404 because Next's *route* matching is case-sensitive. The obvious fix
+      // -- a redirect from the mixed-case path to the lower-case one -- is a
+      // trap: Next matches *redirect* sources case-INSENSITIVELY, so that rule
+      // also matches the real lower-case URL and 308s it to itself forever.
+      // Verified against a production build: it put a live drill page into an
+      // infinite redirect loop. If mixed-case URLs ever matter enough to fix,
+      // do it in middleware where the incoming casing can actually be tested.
+
       {
         source: '/index',
         destination: '/',

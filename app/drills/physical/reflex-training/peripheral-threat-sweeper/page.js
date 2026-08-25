@@ -14,7 +14,7 @@ import PeripheralThreatSweeperClient from './PeripheralThreatSweeperClient';
 // ============================================================
 
 export const metadata = {
-  title: 'Peripheral Threat Sweeper — Peripheral Vision Trainer',
+  title: 'Peripheral Vision Test - Free Awareness Training Game',
   description: 'Train peripheral vision, spatial awareness, and target acquisition. Intercept radial threats before they breach your core in this free reflex game.',
   keywords: [
     // Primary / Head terms
@@ -31,7 +31,7 @@ export const metadata = {
   },
   robots: { index: true, follow: true },
   openGraph: {
-    title: 'Peripheral Threat Sweeper — Peripheral Vision Trainer | SkillDrills',
+    title: 'Peripheral Vision Test - Free Awareness Training Game | SkillDrills',
     description: 'Train peripheral vision, spatial awareness, and target acquisition. Intercept radial threats before they breach your core in this free reflex game.',
     url: 'https://skilldrills.online/drills/physical/reflex-training/peripheral-threat-sweeper',
     siteName: 'SkillDrills',
@@ -40,7 +40,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Peripheral Threat Sweeper — Peripheral Vision Trainer | SkillDrills',
+    title: 'Peripheral Vision Test - Free Awareness Training Game | SkillDrills',
     description: 'Train peripheral vision, spatial awareness, and target acquisition. Intercept radial threats before they breach your core in this free reflex game.',
   },
 };

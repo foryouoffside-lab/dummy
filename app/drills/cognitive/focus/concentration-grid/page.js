@@ -1,7 +1,7 @@
 import ConcentrationGridClient from './ConcentrationGridClient';
 
 export const metadata = {
-  title: "Concentration Grid — Sequential Number Search Trainer",
+  title: "Schulte Table & Concentration Grid - Free Online Test",
   description: "Sharpen visual search speed and sustained focus with Concentration Grid — tap numbers in order on expanding 3x3 to 8x8 grids.",
   keywords: [
     "concentration grid",
@@ -25,7 +25,7 @@ export const metadata = {
     follow: true,
   },
   openGraph: {
-    title: "Concentration Grid — Sequential Number Search Trainer | SkillDrills",
+    title: "Schulte Table & Concentration Grid - Free Online Test | SkillDrills",
     description: "Sharpen visual search speed and sustained focus with Concentration Grid — tap numbers in order on expanding 3x3 to 8x8 grids.",
     url: "https://skilldrills.online/drills/cognitive/focus/concentration-grid",
     siteName: 'SkillDrills',
@@ -36,7 +36,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Concentration Grid — Sequential Number Search Trainer | SkillDrills",
+    title: "Schulte Table & Concentration Grid - Free Online Test | SkillDrills",
     description: "Sharpen visual search speed and sustained focus with Concentration Grid — tap numbers in order on expanding 3x3 to 8x8 grids.",
   },
 };

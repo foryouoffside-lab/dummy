@@ -772,7 +772,7 @@ export default function RapidTappingClient() {
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white uppercase">
               Rapid Tapping Test
               <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
-                Rapid Tapping &amp; CPS Test
+                CPS Test &amp; Click Speed Test
               </span>
             </h1>
             <p className="text-xs text-slate-400 mt-1">
