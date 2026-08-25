@@ -29,13 +29,46 @@ const UPDATED = {
   home: '2026-08-21',
   directory: '2026-08-21',
   // Every hub was rewritten in the 2026-08-21 crawlability pass (SSR restored,
-  // H1s and titles rewritten).
+  // H1s and titles rewritten). The six hubs retargeted on 2026-08-25 carry that
+  // date via UPDATED_OVERRIDES below; this stays the date for the ones that did
+  // not change, so /drills/visual does not inherit a bump it never earned.
   hub: '2026-08-21',
   // Drill bodies became visible to crawlers in the same pass (the accordion fix).
   drill: '2026-08-21',
   // visual-tracking additionally got per-drill long-form guides.
   'visual-tracking': '2026-08-21',
   legal: '2026-08-22',
+};
+
+// Per-URL overrides, for when a subset of a section changes rather than all of
+// it. Bumping the whole `drill` section for 12 retargeted pages would tell
+// crawlers that all 81 changed; they would recrawl 69 unchanged pages, find
+// nothing new, and learn to discount this field. Rule 3 above is only worth
+// anything if it is applied at the granularity the change actually happened at.
+//
+// 2026-08-25: title + H1 sub-line + internal anchor text retargeted onto
+// measured Bing search demand.
+const UPDATED_OVERRIDES = {
+  '/drills/motor/movement-speed/rapid-tapping': '2026-08-25',
+  '/drills/motor/movement-speed/keyboard-recognition': '2026-08-25',
+  '/drills/motor/hand-eye-coordination/precision-flick-shot': '2026-08-25',
+  '/drills/cognitive/focus/distraction-fighter': '2026-08-25',
+  '/drills/cognitive/focus/concentration-grid': '2026-08-25',
+  '/drills/cognitive/processing-speed/rsvp-reader': '2026-08-25',
+  '/drills/cognitive/processing-speed/symbol-matching': '2026-08-25',
+  '/drills/memory/short-term-memory/color-sequence': '2026-08-25',
+  '/drills/memory/short-term-memory/word-recall': '2026-08-25',
+  '/drills/memory/spatial-memory/grid-memorization': '2026-08-25',
+  '/drills/physical/reflex-training/peripheral-threat-sweeper': '2026-08-25',
+  '/drills/visual/tracking-accuracy/pursuit-tracker': '2026-08-25',
+  // Hub titles retargeted the same day. /drills, /drills/visual and
+  // /drills/visual-tracking were deliberately left alone, so they are absent.
+  '/drills/cognitive': '2026-08-25',
+  '/drills/memory': '2026-08-25',
+  '/drills/fps': '2026-08-25',
+  '/drills/motor': '2026-08-25',
+  '/drills/physical': '2026-08-25',
+  '/drills/reaction-speed': '2026-08-25',
 };
 
 // Ranked by measured Search Console performance, then by realistic potential.
@@ -88,7 +121,9 @@ export default async function sitemap() {
       .map((path) =>
         entry(
           path,
-          UPDATED[path.replace('/drills/', '')] ?? UPDATED.hub,
+          UPDATED_OVERRIDES[path] ??
+            UPDATED[path.replace('/drills/', '')] ??
+            UPDATED.hub,
           'weekly',
           HUB_PRIORITY[path]
         )
@@ -105,7 +140,7 @@ export default async function sitemap() {
   const drillEntries = DRILLS.map((drill) =>
     entry(
       drill.href,
-      UPDATED[drill.category] ?? UPDATED.drill,
+      UPDATED_OVERRIDES[drill.href] ?? UPDATED[drill.category] ?? UPDATED.drill,
       'monthly',
       DRILL_PRIORITY_OVERRIDES[drill.href] ?? DRILL_PRIORITY[drill.category] ?? 0.5
     )
