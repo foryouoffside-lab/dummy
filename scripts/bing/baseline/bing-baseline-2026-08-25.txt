@@ -1,0 +1,194 @@
+BING BASELINE SNAPSHOT — 2026-08-25
+Captured immediately before the API key was revoked, so the post-change
+comparison has something to measure against even without API access.
+All figures are pre-change: the retarget deployed 2026-08-25 and Bing's
+most recent crawl data at capture time was 2026-08-24.
+
+================ TRAFFIC ================
+Bing, last 30 days (28 days of data)
+  clicks      158
+  impressions 2375
+  CTR         6.65%
+  range       2026-05-10 .. 2026-08-22
+  all-time    236 clicks / 3974 impressions
+
+Bing, last 90 days (88 days of data)
+  clicks      227
+  impressions 3776
+  CTR         6.01%
+  range       2026-05-10 .. 2026-08-22
+  all-time    236 clicks / 3974 impressions
+
+================ CRAWL ================
+Crawl totals over 103 days
+  CrawledPages          47854
+  InIndex               12024
+  Code2xx               9694
+  Code301               0
+  Code302               0
+  Code4xx               638
+  Code5xx               0
+  BlockedByRobotsTxt    0
+  CrawlErrors           1891
+  DnsFailures           0
+  ConnectionTimeout     0
+
+Most recent day (2026-08-24): crawled=172 inIndex=134
+
+Crawl issues: 0
+
+================ TOP QUERIES ================
+Bing queries (all time, 707 unique)
+
+query                                                       clicks  impr    CTR%    pos  
+-----------------------------------------------------------------------------------------
+drill your skill                                            0       270     0.0     6.8  
+strafetrack终极                                               6       102     5.9     8.9  
+concentration grids                                         0       88      0.0     8.7  
+memory chart drill                                          0       65      0.0     3.0  
+skilldrills                                                 18      43      41.9    2.8  
+drills                                                      0       31      0.0     6.8  
+cognitive drills                                            0       29      0.0     4.8  
+skill drill                                                 1       28      3.6     5.8  
+steady hand game                                            0       27      0.0     7.0  
+skilldrills.oline                                           8       25      32.0    3.8  
+skills, drills                                              0       24      0.0     2.0  
+drill skill                                                 0       22      0.0     3.5  
+recoil control                                              3       20      15.0    4.8  
+drill your skills                                           0       17      0.0     5.4  
+memory drills                                               1       16      6.2     4.4  
+skilldrills online                                          2       14      14.3    4.9  
+strafetrack                                                 1       12      8.3     7.3  
+concentration grid online                                   0       12      0.0     8.1  
+skip the loading time#N##N#launch training exercises insta  0       10      0.0     3.1  
+drill skill training                                        3       10      30.0    3.0  
+recoil trainer                                              1       10      10.0    9.5  
+valorant angle hold v2                                      3       9       33.3    3.6  
+aim training game online                                    0       8       0.0     6.0  
+skilldrills.online                                          3       8       37.5    1.8  
+concentration grids online                                  0       8       0.0     8.0  
+crosshair placement trainer                                 3       8       37.5    7.4  
+recoil control practice                                     2       8       25.0    5.6  
+the concentration grid                                      1       8       12.5    4.9  
+visual tracking drill olahraga                              0       8       0.0     4.0  
+training ground drills for improving flick speed to heads   0       8       0.0     2.0  
+pc games mouse precision hand eye coordination puzzle typi  0       8       0.0     5.0  
+skills drill                                                1       7       14.3    3.4  
+vision drill                                                0       7       0.0     6.6  
+aim drills                                                  0       7       0.0     6.6  
+angle hold trainer cs2                                      0       7       0.0     7.3  
+skilldrill for valorant                                     1       7       14.3    2.0  
+fps training aim                                            0       6       0.0     8.0  
+skills drills                                               1       6       16.7    2.5  
+flick training                                              0       6       0.0     6.8  
+skills and drills                                           0       6       0.0     5.0  
+crosshair placement training                                0       6       0.0     5.5  
+controller fps training online                              0       6       0.0     10.0 
+fps shooting training                                       0       6       0.0     8.3  
+memory drills links                                         0       6       0.0     3.0  
+smooth mouse control techniques for tracking                0       6       0.0     4.0  
+valorant hold angle training                                1       6       16.7    2.0  
+smooth tracking exercises fps                               0       6       0.0     2.0  
+best pc games improve mouse accuracy fine motor skills      0       6       0.0     4.0  
+aim training drills                                         0       5       0.0     7.2  
+tracking drills aim drills                                  0       5       0.0     4.0  
+crosshair placement                                         0       5       0.0     7.4  
+flickshot training                                          0       5       0.0     6.8  
+strafe tracking                                             0       5       0.0     3.4  
+skilldrills rsvp wpm training                               1       5       20.0    3.0  
+online drills                                               1       4       25.0    1.5  
+visual association drills                                   0       4       0.0     2.0  
+flick shot practice                                         0       4       0.0     7.0  
+drill your skill game                                       0       4       0.0     4.5  
+aim drilling for fps games                                  2       4       50.0    2.0  
+mental speed training drills                                0       4       0.0     5.0  
+
+================ TOP PAGES ================
+Bing pages (all time, 84 URLs with impressions)
+
+page                                                                    clicks  impr    CTR%  
+----------------------------------------------------------------------------------------------
+https://skilldrills.online/                                             27      677     4.0   
+https://skilldrills.online/drills                                       31      518     6.0   
+https://skilldrills.online/drills/fps/angle-hold-trainer                58      373     15.5  
+https://skilldrills.online/drills/fps/recoil-control                    30      238     12.6  
+https://skilldrills.online/drills/fps/strafe-tracking                   7       162     4.3   
+https://skilldrills.online/drills/motor/precision-control/steady-hand   6       150     4.0   
+https://skilldrills.online/drills/cognitive/focus/concentration-grid    2       146     1.4   
+https://skilldrills.online/drills/fps/flick-shot-training               0       98      0.0   
+https://skilldrills.online/drills/memory                                5       95      5.3   
+https://skilldrills.online/drills/fps                                   6       49      12.2  
+https://skilldrills.online/drills/cognitive                             2       49      4.1   
+https://skilldrills.online/drills/visual                                0       33      0.0   
+https://skilldrills.online/drills/fps/micro-correction-precision        3       24      12.5  
+https://skilldrills.online/drills/cognitive/attention/divided-attentio  3       16      18.8  
+https://skilldrills.online/drills/fps/180-degree-awareness              3       15      20.0  
+https://skilldrills.online/drills/fps/pro-smooth-pursuit                0       14      0.0   
+https://skilldrills.online/drills/cognitive/attention/sustained-attent  0       14      0.0   
+https://skilldrills.online/drills/fps/target-switching-swarm            0       13      0.0   
+https://skilldrills.online/drills/motor/hand-eye-coordination/click-ac  0       11      0.0   
+https://skilldrills.online/drills/motor/hand-eye-coordination/aim-trai  0       11      0.0   
+https://skilldrills.online/drills/motor/precision-control/fine-motor    0       10      0.0   
+https://skilldrills.online/drills/physical/reflex-training/drop-catch   3       10      30.0  
+https://skilldrills.online/drills/physical/balance-training/dynamic-ba  1       9       11.1  
+https://skilldrills.online/drills/fps/instant-response                  0       8       0.0   
+https://skilldrills.online/drills/motor/hand-eye-coordination/drag-and  0       7       0.0   
+https://skilldrills.online/drills/reaction-speed/visual-tracking-speed  0       6       0.0   
+https://skilldrills.online/drills/fps/target-acquisition                0       5       0.0   
+https://skilldrills.online/drills/motor/precision-control/tracing       1       5       20.0  
+https://skilldrills.online/drills/motor/movement-speed/keyboard-recogn  0       5       0.0   
+https://skilldrills.online/drills/reaction-speed/reaction-time-test     1       5       20.0  
+https://skilldrills.online/drills/motor/hand-eye-coordination/precisio  0       5       0.0   
+https://skilldrills.online/drills/motor/timing-accuracy/time-estimatio  0       5       0.0   
+https://skilldrills.online/drills/motor/timing-accuracy/rhythm-tap      1       4       25.0  
+https://skilldrills.online/drills/mental-fitness/breathing-exercises/w  0       4       0.0   
+https://skilldrills.online/drills/visual/tracking-accuracy/pursuit-tra  0       4       0.0   
+https://skilldrills.online/drills/memory/working-memory/sentence-span   0       4       0.0   
+https://skilldrills.online/drills/memory/short-term-memory/word-recall  1       4       25.0  
+https://skilldrills.online/drills/visual-tracking                       1       4       25.0  
+https://skilldrills.online/drills/cognitive/problem-solving/logic-puzz  1       4       25.0  
+https://skilldrills.online/drills/reaction-speed/fps-tracking-trainer   3       4       75.0  
+https://skilldrills.online/drills/visual/peripheral-vision/peripheral-  0       3       0.0   
+https://skilldrills.online/drills/memory/long-term-memory/image-associ  0       3       0.0   
+https://skilldrills.online/drills/cognitive/memory/pattern-recognition  1       3       33.3  
+https://skilldrills.online/drills/cognitive/processing-speed/symbol-ma  0       3       0.0   
+https://skilldrills.online/drills/fps/240fps-click-test                 0       3       0.0   
+https://skilldrills.online/drills/fps/anti-strafe-jitter-duel           0       3       0.0   
+https://skilldrills.online/drills/mental-fitness                        0       2       0.0   
+https://skilldrills.online/drills/motor                                 0       2       0.0   
+https://skilldrills.online/drills/memory/associative-memory/concept-li  0       2       0.0   
+https://skilldrills.online/drills/memory/spatial-memory/grid-memorizat  0       2       0.0   
+https://skilldrills.online/drills/physical/Reflex-Training/quick-dodge  0       2       0.0   
+https://skilldrills.online/drills/motor/timing-accuracy/stopwatch-clic  0       2       0.0   
+https://skilldrills.online/drills/cognitive/focus/focus-timer           0       2       0.0   
+https://skilldrills.online/drills/motor/movement-speed/finger-sequenci  1       2       50.0  
+https://skilldrills.online/drills/academic/reading-speed/peripheral-re  1       2       50.0  
+https://skilldrills.online/drills/visual-tracking/stop-and-go-dash      0       2       0.0   
+https://skilldrills.online/drills/visual-tracking/infinity-pursuit      0       2       0.0   
+https://skilldrills.online/drills/motor/movement-speed/gesture-speed    1       2       50.0  
+https://skilldrills.online/drills/reaction-speed/reflex-training-drill  1       2       50.0  
+https://skilldrills.online/drills/physical/reflex-training/peripheral-  0       2       0.0   
+https://skilldrills.online/drills/academic/comprehension/reading-compr  1       2       50.0  
+https://skilldrills.online/drills/visual/reaction-speed/light-reaction  0       2       0.0   
+https://skilldrills.online/drills/fps/reactive-sphere-tracking          0       2       0.0   
+https://skilldrills.online/drills/mental-fitness/breathing-exercises/4  0       1       0.0   
+https://skilldrills.online/drills/physical                              0       1       0.0   
+https://skilldrills.online/drills/visual/visual-recognition/entropic-g  0       1       0.0   
+https://skilldrills.online/drills/fps/reactive-tracking                 0       1       0.0   
+https://skilldrills.online/drills/mental-fitness/stress-control/stress  0       1       0.0   
+https://skilldrills.online/drills/visual/tracking-accuracy/moving-targ  1       1       100.0 
+https://skilldrills.online/drills/cognitive/memory/number-recall        0       1       0.0   
+https://skilldrills.online/drills/memory/working-memory/mental-arithme  0       1       0.0   
+https://skilldrills.online/drills/memory/associative-memory/name-face   1       1       100.0 
+https://skilldrills.online/drills/memory/short-term-memory/digit-span   0       1       0.0   
+https://skilldrills.online/drills/cognitive/attention/multi-tasking     0       1       0.0   
+https://skilldrills.online/drills/memory/associative-memory/sound-patt  0       1       0.0   
+https://skilldrills.online/drills/academic/reading-speed/rsvp-reader    0       1       0.0   
+https://skilldrills.online/drills/physical/balance-training/stability-  0       1       0.0   
+https://skilldrills.online/drills/visual-tracking/ghosting-suppress-pu  0       1       0.0   
+https://skilldrills.online/drills/motor/timing-accuracy/synchronizatio  1       1       100.0 
+https://skilldrills.online/drills/academic/comprehension/inference-dri  0       1       0.0   
+https://skilldrills.online/drills/cognitive/memory/card-matching        0       1       0.0   
+https://skilldrills.online/drills/cognitive/attention/switch-cost       0       1       0.0   
+https://skilldrills.online/drills/visual/reaction-speed/go/no-go        0       1       0.0   
+https://skilldrills.online/drills/visual-tracking/zig-zag-path-pursuit  0       1       0.0   
