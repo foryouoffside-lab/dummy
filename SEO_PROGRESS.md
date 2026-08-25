@@ -912,3 +912,87 @@ sessions 1–3 was deployed; Bing has 84. The on-page work in this session is
 worth doing — the CPS retarget alone addresses a 26,858/mo phrase the site was
 ranking adjacent to — but the constraint on the 100k/month goal is still
 off-site: links, distribution, and time.
+
+---
+
+## SESSION 4 — SHIPPED AND SUBMITTED (2026-08-25)
+
+Unlike sessions 1–3, this work **is deployed**. Both PRs merged.
+
+| PR | What | Merge commit |
+|---|---|---|
+| #1 | Bing-demand keyword retarget, 27 dead-URL redirects, llms.txt | `c425f0a` |
+| #2 | Per-URL sitemap `lastModified` | `7e12113` |
+
+### Verified on production (cache-busted)
+
+| Check | Result |
+|---|---|
+| Retargeted titles serving | 9/9 — e.g. `CPS Test - Free Click Speed Test & Clicks Per Second` |
+| `/llms.txt` | 200, `text/plain; charset=utf-8`, 17,755 bytes |
+| Dead-URL redirects | 26/26 → 308 → destination 200 |
+| Redirect-loop guard | `/drills/physical/reflex-training/quick-dodge` → 200 |
+| Live sitemap | 94 URLs; 73 @ 08-21, 3 @ 08-22, **18 @ 08-25** (exactly the pages edited) |
+
+### Index submission — done
+
+- **Bing:** all 94 sitemap URLs submitted via `bing.py submitall`. Quota confirms
+  it landed: daily 100 → 6, monthly 700 → 606.
+- **Google:** sitemap resubmitted via `gsc.py submit` (the write token now
+  exists; `gsc.py authwrite` was run by the user). GSC shows
+  `submitted 2026-08-25T01:27:11Z`, `pending True`. The `urls 93` figure is the
+  stale count from Google's last *download* (2026-08-21) and will become 94 when
+  it re-fetches.
+
+### A mistake made and corrected mid-session
+
+The first version of the sitemap change bumped the **section-level** `drill`
+date, which claimed all 81 drills had changed when only 12 had. That sends
+crawlers to recrawl 69 byte-identical pages and is exactly how a sitemap trains
+Google to discount its own freshness field — the thing rule 3 in `app/sitemap.js`
+exists to prevent. Fixed in PR #2 with per-URL `UPDATED_OVERRIDES`. A second
+bug surfaced from that fix: with the changed hubs listed individually, leaving
+`UPDATED.hub` at the new date made `/drills/visual` inherit a bump it never
+earned, because it resolves through the fallback (there is no `UPDATED['visual']`
+key). Both caught by auditing the built sitemap rather than trusting the diff.
+
+### What to watch, and where
+
+**Watch Bing first, and expect movement in days-to-weeks.** It has 84 URLs
+earning impressions at positions 2–10, so the retargeted titles are converting
+rankings the site already holds. Re-measure with:
+
+```
+python scripts/bing/bing.py traffic 30
+python scripts/bing/bing.py queries 40
+python scripts/bing/bing.py pages 40
+python scripts/bing/bing.py crawl        # 4xx count should fall from 638
+```
+
+The specific numbers to beat: `concentration grids` 88 impr @ 8.7 with 0 clicks,
+`memory chart drill` 65 @ 3.0 with 0 clicks, `cognitive drills` 29 @ 4.8 with 0
+clicks. If CTR on those stays at zero after 3–4 weeks, the titles are not the
+constraint and the next hypothesis should be SERP presentation (descriptions,
+sitelinks) rather than more keyword work.
+
+**Do not read a flat Google line as failure.** Google has 11 URLs earning
+impressions against Bing's 84, at positions 30–70 on commercial terms. Every
+crawlability fix is already shipped; the remaining constraint there is domain
+authority. Submitting URLs cannot move it.
+
+```
+python scripts/gsc/gsc.py pages 28 20
+python scratchpad/gsc_index.py           # watch "Discovered - not indexed" drain
+```
+
+### Still open
+
+- **Rotate the Bing API key.** It was pasted in plain-text chat. Bing Webmaster
+  Tools → Settings → API access. Then update `scripts/bing/.bing-key`.
+- **The `global-drill-system-app` Vercel project fails on every commit**
+  ("Git author foryouoffside-lab must have access to the project on Vercel").
+  It has been red since at least `eb817b9`, so the repo currently has no usable
+  CI signal. Either grant that account access in that Vercel team, or disconnect
+  the project from this repo if it is dead.
+- Off-site work remains the real constraint on the 100k/month goal. Nothing
+  on-page moves `aim trainer online` from position 65.
