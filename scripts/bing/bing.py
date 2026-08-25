@@ -26,6 +26,25 @@ import urllib.request
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 
+# PROTOCOL: JSON/HTTP, not SOAP and not POX.
+#
+# Bing Webmaster Tools exposes the same methods over three protocols, all under
+# api.svc, distinguished only by the path segment:
+#
+#   .../api.svc/soap        SOAP  -- RETIRED 2026-08-31
+#   .../api.svc/pox/METHOD  POX   -- RETIRED 2026-08-31
+#   .../api.svc/json/METHOD JSON  -- this is the "REST API" they tell you to
+#                                    migrate to; it is NOT going away
+#
+# The retirement banner in the Bing Webmaster UI says "Legacy SOAP and POX APIs
+# will be retired on August 31, 2026. Migrate to our REST APIs" and reads as if
+# it applies to everything under api.svc. It does not. Microsoft's own protocol
+# reference lists JSON/HTTP as a peer of SOAP and POX, and the retirement notice
+# names only SOAP and POX. Anything already calling /api.svc/json/ is the
+# migration target, so this file needs no change.
+#
+# Do not "modernise" this to some other host on the strength of that banner.
+# https://learn.microsoft.com/en-us/bingwebmaster/api-protocols
 BASE = "https://ssl.bing.com/webmaster/api.svc/json"
 SITE = "https://skilldrills.online/"
 HERE = os.path.dirname(os.path.abspath(__file__))
