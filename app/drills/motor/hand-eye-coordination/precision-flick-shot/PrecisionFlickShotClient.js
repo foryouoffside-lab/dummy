@@ -7,8 +7,8 @@ import Link from 'next/link';
 import { 
   Activity, AlertCircle, ArrowRight, Brain, ChevronRight, 
   Crosshair, Eye, GraduationCap, Info, Lightbulb, 
-  Play, RefreshCw, Target, Timer, TrendingUp, Trophy, 
-  Volume2, VolumeX, Flame, Share2, Sliders, LogOut, Award,
+  Play, Target, Timer, TrendingUp, Trophy, 
+  Volume2, VolumeX, Flame, Award,
   Shield, Users, Zap, ZapOff
 } from 'lucide-react';
 
@@ -17,7 +17,8 @@ import { getPlayerName } from '../../../../../lib/leaderboard';
 import { drillAudio } from '../../../../../lib/drillAudio';
 import { drillFlash } from '../../../../../lib/drillFlash';
 import { drillTimeout } from '../../../../../lib/drillTimeout';
-import { MAX_LEVEL, getStartLevel, getDifficultyProgress, getComboBonusLevel } from '../../../../../lib/drillDifficulty';
+import { drillPenalty } from '../../../../../lib/drillPenalty';
+import { getStartLevel, getDifficultyProgress, ramp } from '../../../../../lib/drillDifficulty';
 import { getComboMultiplier, getFpsScoreGrade } from '../../../../../lib/scoringEngine';
 import { createBackdropCache, getCanvasDpr, drawPulseRing, drawTacticalTarget } from '../../../../../lib/canvasFx';
 import useUnexpectedExitGuard from '../../../../../lib/useUnexpectedExitGuard';
@@ -25,22 +26,22 @@ import DrillFooter from '../../../../../components/drill/DrillFooter';
 import DrillCountdown from '../../../../../components/drill/DrillCountdown';
 import DrillAccordion from '../../../../../components/drill/DrillAccordion';
 import FpsStartCard from '../../../../../components/drill/FpsStartCard';
+import DrillResultCard from '../../../../../components/drill/DrillResultCard';
 
 // ============================================================
 // TUNING CONSTANTS
 // ============================================================
-const DRILL_DURATION = 45; // Fixed 45-second session timer
-const POINTS_PER_LEVEL = 200; // Aggressive progression
-const ELITE_SCORE = 17000;
-const STORAGE_KEY = 'skilldrills_motor_precision_flick_shot_v2';
-const OLD_STORAGE_KEY = 'precisionFlick_bestScore2';
+const DRILL_DURATION = 45; // starting clock only; a run grows past this
+const POINTS_PER_LEVEL = 1400; // 200 -> 1400 (7x)
+const ELITE_SCORE = 51000; // 17000 -> 51000 (3x)
+const TIME_PER_HIT = 0.6; // +0.6s on clean hit
+const TIME_PENALTY = 0.8; // opt-in on miss or timeout
+const STORAGE_KEY = 'skilldrills_motor_precision_flick_shot_v3';
 
 const getSavedData = () => {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) return { bestScore: 0, bestCombo: 0, bestLevel: 1, totalSessions: 0, ...JSON.parse(raw) };
-    const legacy = localStorage.getItem(OLD_STORAGE_KEY);
-    if (legacy) return { bestScore: parseInt(legacy, 10) || 0, bestCombo: 0, bestLevel: 1, totalSessions: 0 };
     return { bestScore: 0, bestCombo: 0, bestLevel: 1, totalSessions: 0 };
   } catch (e) {
     return { bestScore: 0, bestCombo: 0, bestLevel: 1, totalSessions: 0 };
@@ -53,14 +54,13 @@ const saveData = (data) => {
   } catch (e) {}
 };
 
-
-const getLevelConfig = (level) => {
-  const p = getDifficultyProgress(level); // 0 -> 1 across L1..L15
+const getLevelConfig = (level, combo = 0) => {
+  const p = getDifficultyProgress(level); // 0 at L1, 1 at L15, unbounded above
+  const heat = (getComboMultiplier(combo) - 1) / 2;
   return {
-    maxRadius: Math.max(16, 36 - p * 20),
-    decayRate: 18 + p * 32,
-    spawnInterval: Math.max(0.35, 1.4 - p * 1.05),
-    targetCount: 2                         // Fixed at 2 targets at a time only
+    maxRadius: Math.max(10, ramp(36, 16, p) * (1 - heat * 0.15)),
+    decayRate: ramp(18, 65, p) * (1 + heat * 0.20),
+    targetCount: 2
   };
 };
 
@@ -68,25 +68,25 @@ const getLevelConfig = (level) => {
 // ACCORDION DATA
 // ============================================================
 const RULES_ITEMS = [
-  { title: "Bulls-eye Hit", text: "Score +200 PTS × Combo for hitting the inner 8px center ring." },
-  { title: "Standard Hit", text: "Score +100 PTS × Combo for hitting outer target ring." },
-  { title: "Level Progression", text: "Score increases level every 200 PTS. Targets shrink & decay faster." },
-  { title: "Miss / Timeout", text: "Missing shots or letting targets decay resets active combo multiplier." }
+  { title: "Bulls-eye Hit", text: "Score +200 PTS × Combo (+0.6s) for hitting the inner 8px center ring." },
+  { title: "Standard Hit", text: "Score +100 PTS × Combo (+0.6s) for hitting outer target ring." },
+  { title: "Level Progression", text: "Level up every 1400 PTS. Targets shrink & decay faster dynamically." },
+  { title: "Miss / Timeout", text: "Missing shots or letting targets decay resets combo streak and deducts time when enabled." }
 ];
 
 const ABOUT_TEXT = `Precision Flick Shot Training is a high-speed motor drill engineered to refine mouse flick accuracy, target acquisition speed, and center-click timing.
 
 By training your hand to rapidly snap to target coordinates and stop cleanly over target centers, you condition muscle memory for instant headshot acquiring in competitive FPS games.
 
-As your score rises, target hitboxes shrink and decay rates accelerate, continuously pushing your spatial flick speed ceiling.`;
+As your score rises, target hitboxes shrink and decay rates accelerate dynamically, continuously pushing your spatial flick speed ceiling.`;
 
 const FAQ_ITEMS = [
   { q: "What is the Precision Flick Shot Trainer?", a: "The Precision Flick Shot Trainer is an advanced motor drill engineered to test and improve mouse flick accuracy, target acquisition speed, and center-click timing." },
   { q: "How does flick shot training improve FPS aim?", a: "By training your hand to rapidly snap to target coordinates and stop cleanly before clicking, you build refined muscle memory for flicking in tactical shooters." },
   { q: "Does flick accuracy training help Valorant and CS2 players?", a: "Yes, opening duels and headshots in Valorant and CS2 rely heavily on fast micro-flicks and precise crosshair placement trained in this drill." },
-  { q: "How does difficulty scale in this trainer?", a: "Every 200 points earned advances your level from 1 to 15, shrinking target hitboxes, increasing decay rates, and spawning targets faster — two targets stay active on screen throughout." },
+  { q: "How does difficulty scale in this trainer?", a: "Every 1400 points earned advances your level without cap, shrinking target hitboxes and accelerating target decay rates — two targets stay active on screen throughout." },
   { q: "What is the Bulls-eye mechanic?", a: "Clicking within the inner 8-pixel center of a target awards double points (+200 PTS) and spawns yellow spark effects." },
-  { q: "What happens when you miss a click?", a: "Clicking empty space or letting a target decay out resets your combo multiplier to zero and triggers a red error flash without point loss." },
+  { q: "What happens when you miss a click?", a: "Clicking empty space or letting a target decay out resets your combo multiplier to zero and triggers a red error flash. When the optional Time Penalty is enabled, 0.8s is deducted." },
   { q: "How is flick accuracy calculated?", a: "Accuracy is calculated as total target hits divided by total clicks, displayed as a real-time percentage." },
   { q: "Does this trainer support raw mouse input sensitivity?", a: "Yes, the Universal Sens slider allows you to match your raw input multiplier and cm/360 sensitivity setting." },
   { q: "Is this precision flick shot drill free?", a: "Yes, the drill is 100% free with no sign-ups or downloads required, running directly in modern web browsers." },
@@ -95,7 +95,7 @@ const FAQ_ITEMS = [
   { q: "How long should I train flick accuracy daily?", a: "A 10-15 minute daily session before competitive gaming helps calibrate hand-eye coordination and spatial snapping accuracy." },
   { q: "How is high performance maintained during gameplay?", a: "The canvas engine utilizes cached backdrop grid rendering and hardware-accelerated requestAnimationFrame loops for smooth 60+ FPS performance." },
   { q: "What is the best technique for high flick scores?", a: "Focus on smooth deceleration so your cursor stops directly over the target center rather than over-shooting past the edges." },
-  { q: "How does the 45-second session timer work?", a: "Each session runs for a fixed 45 seconds, giving you a standardized time window to score maximum points and benchmark your performance." }
+  { q: "How does the session timer work?", a: "Each session starts with 45 seconds on the clock. Clean target hits add +0.6s to extend your run. When the optional Time Penalty setting is enabled, misses and expirations deduct 0.8s." }
 ];
 
 const RELATED_DRILLS = [
@@ -115,6 +115,7 @@ export default function PrecisionFlickShotClient() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
+  const [penaltyEnabled, setPenaltyEnabled] = useState(false);
   const [pointerLocked, setPointerLocked] = useState(false);
   const [universalSens, setUniversalSens] = useState(1.0);
   const [openAccordion, setOpenAccordion] = useState(null);
@@ -217,6 +218,7 @@ export default function PrecisionFlickShotClient() {
     if (typeof window !== 'undefined') {
       setSoundEnabled(drillAudio.isEnabled());
       setFlashEnabled(drillFlash.isEnabled());
+      setPenaltyEnabled(drillPenalty.isEnabled());
       const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
       const isTouchCapable = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
       setIsTouchOnlyDevice(isTouchCapable && !hasFinePointer);
@@ -268,8 +270,6 @@ export default function PrecisionFlickShotClient() {
     setGameState('start');
   }, []);
 
-  // Stop the drill if the player leaves any way other than the in-app Exit
-  // button (back gesture, tab switch, Esc) instead of running invisibly.
   const { markIntentionalExit } = useUnexpectedExitGuard({
     active: gameState === 'playing' || gameState === 'countdown',
     onUnexpectedExit: handleExitDrill,
@@ -294,13 +294,13 @@ export default function PrecisionFlickShotClient() {
     const e = engine.current;
     const totalAttempts = e.totalClicks;
     const finalAccuracy = totalAttempts > 0 ? Math.round((e.hits / totalAttempts) * 100) : 0;
-
+    const peakLevel = Math.floor(bestLevelRunRef.current);
     const rating = getFpsScoreGrade(e.score, ELITE_SCORE);
     const grade = { letter: rating.grade, label: rating.label, color: rating.color };
 
     setAnalytics({
       accuracy: finalAccuracy, hits: e.hits, bullseyes: e.bullseyes, misses: e.misses,
-      bestCombo: e.bestCombo, levelReached: e.level,
+      bestCombo: e.bestCombo, levelReached: peakLevel,
       grade
     });
 
@@ -310,7 +310,7 @@ export default function PrecisionFlickShotClient() {
     const isNewHigh = e.score > prevSaved.bestScore;
     setIsNewBest(isNewHigh);
 
-    const runBestLevel = Math.max(prevSaved.bestLevel, bestLevelRunRef.current);
+    const runBestLevel = Math.max(prevSaved.bestLevel, peakLevel);
     const updatedData = {
       bestScore: Math.max(prevSaved.bestScore, e.score),
       bestCombo: Math.max(prevSaved.bestCombo, e.bestCombo),
@@ -341,8 +341,7 @@ export default function PrecisionFlickShotClient() {
     setUiTimeLeft(DRILL_DURATION);
     lastTimeRef.current = DRILL_DURATION;
 
-    const saved = getSavedData();
-    const startLevel = getStartLevel(saved.bestLevel);
+    const startLevel = getStartLevel();
     bestLevelRunRef.current = startLevel;
 
     setAnalytics({
@@ -352,7 +351,7 @@ export default function PrecisionFlickShotClient() {
 
     const w = engine.current.logicalWidth || 800;
     const h = engine.current.logicalHeight || 450;
-    const config = getLevelConfig(startLevel);
+    const config = getLevelConfig(startLevel, 0);
 
     const targetA = spawnTarget(w, h, config, []);
     const targetB = spawnTarget(w, h, config, [targetA]);
@@ -443,8 +442,9 @@ export default function PrecisionFlickShotClient() {
             const basePoints = isBullseye ? 200 : 100;
             const levelMult = 1 + getDifficultyProgress(eRef.level) * 0.5;
             eRef.score += Math.round(basePoints * getComboMultiplier(eRef.combo) * levelMult);
+            eRef.timeLeft += TIME_PER_HIT;
 
-            const rawLevel = Math.floor(eRef.score / POINTS_PER_LEVEL) + 1 + getComboBonusLevel(eRef.combo);
+            const rawLevel = (eRef.score / POINTS_PER_LEVEL) + 1;
             eRef.level = Math.max(eRef.level, rawLevel);
             bestLevelRunRef.current = Math.max(bestLevelRunRef.current, eRef.level);
 
@@ -453,7 +453,7 @@ export default function PrecisionFlickShotClient() {
             createHitMarker(ch.x, ch.y);
             setUiScore(eRef.score);
 
-            const cfg = getLevelConfig(eRef.level);
+            const cfg = getLevelConfig(eRef.level, eRef.combo);
             const remainingIdx = 1 - hitIndex;
             const remainingTgt = eRef.targets[remainingIdx];
 
@@ -471,6 +471,7 @@ export default function PrecisionFlickShotClient() {
             triggerFlash();
             drillAudio.playPenalty();
             createExplosion(ch.x, ch.y, '#ef4444');
+            if (drillPenalty.isEnabled()) eRef.timeLeft -= TIME_PENALTY;
           }
         }
       }
@@ -555,7 +556,7 @@ export default function PrecisionFlickShotClient() {
           lastTimeRef.current = intTime;
         }
 
-        const config = getLevelConfig(e.level);
+        const config = getLevelConfig(e.level, e.combo);
 
         // Ensure 2 targets stay on screen at all times
         while (e.targets.length < 2) {
@@ -589,18 +590,20 @@ export default function PrecisionFlickShotClient() {
           triggerFlash();
           drillAudio.playPenalty();
           createExplosion(activeTgt.x, activeTgt.y, '#ef4444');
+          if (drillPenalty.isEnabled()) e.timeLeft -= TIME_PENALTY;
 
           // Respawn expired active target
           e.targets[activeIdx] = spawnTarget(w, h, config, [secondaryTgt]);
           // Secondary target becomes the new primary shrinking target!
           e.activeIndex = secondaryIdx;
-        } else if (secondaryTgt && secondaryTgt.radius <= 4) {
+        } else if (secondaryTgt && drillTimeout.isEnabled() && secondaryTgt.radius <= 4) {
           // Secondary target expired
           e.combo = 0;
           e.screenShake = 6;
           triggerFlash();
           drillAudio.playPenalty();
           createExplosion(secondaryTgt.x, secondaryTgt.y, '#ef4444');
+          if (drillPenalty.isEnabled()) e.timeLeft -= TIME_PENALTY;
 
           // Respawn expired secondary target
           e.targets[secondaryIdx] = spawnTarget(w, h, config, [activeTgt]);
@@ -725,7 +728,7 @@ export default function PrecisionFlickShotClient() {
               </span>
             </h1>
             <p className="text-xs text-slate-400 mt-1">
-              Target Decay &amp; Bulls-Eye Micro-Flicks • 15 Levels
+              Target Decay &amp; Bulls-Eye Micro-Flicks • Endless Level Progression
             </p>
           </div>
         )}
@@ -739,7 +742,7 @@ export default function PrecisionFlickShotClient() {
             </div>
             <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
-              <div className={`text-lg sm:text-xl font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>{uiTimeLeft}s</div>
+              <div className={`text-lg sm:text-xl font-black tabular-nums ${uiTimeLeft <= 10 ? "text-red-400 animate-pulse" : "text-white"}`}>{uiTimeLeft}s</div>
             </div>
             <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Accuracy</div>
@@ -758,8 +761,8 @@ export default function PrecisionFlickShotClient() {
           onContextMenu={(e) => { if (gameActiveRef.current) e.preventDefault(); }}
           className={`relative overflow-hidden flex flex-col transition-all duration-150 select-none bg-[#080811] text-white border border-white/10 ${
             isFullscreen 
-              ? 'fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#080811] rounded-none border-none flex flex-col items-center justify-center' 
-              : 'w-full rounded-2xl bg-[#080811] aspect-video min-h-[460px] sm:min-h-[500px] max-h-[88vh] relative overflow-hidden flex flex-col'
+              ? "fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#080811] rounded-none border-none flex flex-col items-center justify-center" 
+              : "w-full rounded-2xl bg-[#080811] aspect-video min-h-[460px] sm:min-h-[500px] max-h-[88vh] relative overflow-hidden flex flex-col"
           }`}
           style={{ touchAction: gameActiveRef.current ? 'none' : 'auto' }}
         >
@@ -777,7 +780,7 @@ export default function PrecisionFlickShotClient() {
               </div>
               <div className="absolute top-4 right-4 z-30 pointer-events-none text-right">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Time</p>
-                <p className={`text-2xl sm:text-3xl font-bold tabular-nums leading-tight ${uiTimeLeft <= 10 ? 'text-red-400' : 'text-white'}`}>{uiTimeLeft}s</p>
+                <p className={`text-2xl sm:text-3xl font-bold tabular-nums leading-tight ${uiTimeLeft <= 10 ? "text-red-400" : "text-white"}`}>{uiTimeLeft}s</p>
               </div>
             </>
           )}
@@ -836,7 +839,7 @@ export default function PrecisionFlickShotClient() {
           <canvas 
             ref={canvasRef} 
             onClick={() => { if (gameState === 'playing' && !pointerLocked) resumeDrill(); }}
-            className={`block absolute top-0 left-0 w-full h-full touch-none z-10 ${gameState === 'playing' ? 'cursor-none' : ''}`} 
+            className={`block absolute top-0 left-0 w-full h-full touch-none z-10 ${gameState === "playing" ? "cursor-none" : ""}`}
           />
 
           {/* START MODAL */}
@@ -845,16 +848,16 @@ export default function PrecisionFlickShotClient() {
               icon={Crosshair}
               accent="cyan"
               title="Precision Flick Shot"
-              subtitle="Target Decay & Bulls-Eye Micro-Flicks • 15 Levels"
+              subtitle="Target Decay & Bulls-Eye Micro-Flicks • Endless Level Progression"
               rules={[
-                { icon: Target, accent: 'emerald', title: 'Bulls-eye Hit (+200 PTS)', text: 'Micro-flick to target centers for double bonus points' },
-                { icon: Zap, accent: 'red', title: 'Miss / Timeout Penalty', text: 'Missing or target decay expiration resets your combo streak' },
+                { icon: Target, accent: "emerald", title: "Bulls-eye Hit (+200 PTS)", text: "Micro-flick to target centers for double bonus points (+0.6s)" },
+                { icon: Zap, accent: "red", title: "Miss / Timeout Penalty", text: penaltyEnabled ? "Missing or target decay expiration resets combo & deducts 0.8s" : "Missing or target decay expiration resets combo streak" },
               ]}
               sensitivity={{ value: universalSens, onChange: setUniversalSens, cmPer360 }}
               stats={[
-                { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
-                { icon: Flame, label: 'Best Combo', value: `${bestCombo}x`, color: 'text-emerald-400', accent: 'emerald' },
-                { icon: TrendingUp, label: 'Best Level', value: `Lv. ${bestLevel}`, color: 'text-blue-400', accent: 'blue' },
+                { icon: Trophy, label: "Best Score", value: bestScore, color: "text-white", accent: "slate" },
+                { icon: Flame, label: "Best Combo", value: `${bestCombo}x`, color: "text-emerald-400", accent: "emerald" },
+                { icon: TrendingUp, label: "Best Level", value: `Lv. ${bestLevel}`, color: "text-blue-400", accent: "blue" },
               ]}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
@@ -866,84 +869,29 @@ export default function PrecisionFlickShotClient() {
             <DrillCountdown value={countdownValue} subtitle="GET READY" />
           )}
 
-          {/* END SCREEN */}
+          {/* END SCREEN — Universal Result Card */}
           {gameState === 'gameOver' && analytics.grade && (
-            <div className="absolute inset-0 z-40 flex bg-neutral-950/98 select-none font-sans" style={{ background: 'rgba(5,5,8,0.97)' }} onPointerDown={e => e.stopPropagation()}>
-              
-              {/* Left Grade Panel */}
-              <div className="w-[36%] flex flex-col items-center justify-center gap-1 border-r border-white/5 px-4" style={{ background: 'radial-gradient(ellipse 260px 200px at 50% 30%, rgba(6,182,212,.12), transparent 70%)' }}>
-                {isNewBest && (
-                  <span className="text-[9.5px] font-bold text-yellow-400 bg-yellow-500/10 border border-yellow-500/25 px-2.5 py-0.5 rounded-full mb-1 animate-pulse">
-                    NEW BEST
-                  </span>
-                )}
-                <div className={`text-5xl sm:text-6xl font-black leading-none ${analytics.grade.color}`}>
-                  {analytics.grade.letter}
-                </div>
-                <div className="text-[10px] uppercase tracking-widest text-slate-500 text-center font-bold mt-1">
-                  {analytics.grade.label}
-                </div>
-                <div className="text-3xl sm:text-4xl font-black text-white mt-2 tabular-nums">
-                  {uiScore}
-                </div>
-                <div className="text-[9px] uppercase tracking-widest text-slate-500">Points</div>
-              </div>
-
-              {/* Right Stats & Actions Panel */}
-              <div className="flex-1 flex flex-col justify-center gap-3 px-6 py-4 min-w-0">
-                
-                {/* 4 Stat Tiles */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.accuracy}%</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Accuracy</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.bullseyes}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Bulls-eyes</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.bestCombo}x</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Max Combo</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">Lv. {analytics.levelReached}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Peak Level</p>
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex gap-2">
-                  <button 
-                    onClick={enterDrill} 
-                    className="flex-1 py-3 rounded-[13px] bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold text-xs uppercase tracking-wide cursor-pointer transition-transform active:scale-[0.98] shadow-md flex items-center justify-center gap-1.5"
-                  >
-                    <RefreshCw className="w-3.5 h-3.5" /> Play Again
-                  </button>
-                  <button 
-                    onClick={shareDrillLink} 
-                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform" 
-                    title="Share Score"
-                  >
-                    <Share2 className="w-4 h-4" />
-                  </button>
-                  <button 
-                    onClick={handleExitDrill} 
-                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform" 
-                    title="Exit Fullscreen & Return"
-                  >
-                    <LogOut className="w-4 h-4 text-red-400" />
-                  </button>
-                </div>
-
-              </div>
-            </div>
+            <DrillResultCard
+              accent="cyan"
+              grade={analytics.grade}
+              score={uiScore}
+              isNewBest={isNewBest}
+              stats={[
+                { value: analytics.accuracy, suffix: "%", label: "Accuracy" },
+                { value: analytics.hits, label: "Target Hits" },
+                { value: analytics.bullseyes, label: "Bulls-eyes" },
+                { value: `Lv. ${analytics.levelReached}`, label: "Peak Level" },
+              ]}
+              onPlayAgain={enterDrill}
+              onShare={shareDrillLink}
+              onExit={handleExitDrill}
+            />
           )}
         </div>
 
         {/* ── ACCORDIONS ── */}
         {!isFullscreen && (
-          <div className="[&>div]:!mt-0">
+          <div className="[&>div]:!mt-0 font-sans">
             <DrillAccordion
               id="rules"
               title="Drill Instructions & Scoring System"
@@ -962,40 +910,12 @@ export default function PrecisionFlickShotClient() {
 
             <DrillAccordion
               id="about"
-              title="About Precision Flick Shot Trainer"
+              title="About Precision Flick Shot"
               isOpen={openAccordion === 'about'}
               onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
             >
-              <div className="space-y-8">
-                <div className="space-y-4">
-                  {ABOUT_TEXT.split('\n\n').map((para, i) => (
-                    <p key={i} className="text-sm leading-relaxed text-gray-300">{para}</p>
-                  ))}
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
-                    <div className="flex items-center gap-2.5 mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Who Should Use This?</h5>
-                    </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Esports players sharpening Valorant/CS2 duel openers, aspiring aim-lab regulars, and anyone wanting faster, cleaner mouse flicks.</p>
-                  </div>
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
-                    <div className="flex items-center gap-2.5 mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Skills Improved</h5>
-                    </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Flick accuracy, target acquisition speed, center-click bulls-eye precision, and rapid crosshair deceleration.</p>
-                  </div>
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
-                    <div className="flex items-center gap-2.5 mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-purple-600 flex items-center justify-center"><Target className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Bulls-eye Precision</h5>
-                    </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Stop your flick dead-center within the inner 8px ring for double points — over-flicking past it still counts as a hit, but only at standard value.</p>
-                  </div>
-                </div>
+              <div className="space-y-4">
+                <p className="text-xs text-gray-300 leading-relaxed">{ABOUT_TEXT}</p>
               </div>
             </DrillAccordion>
 
@@ -1005,10 +925,10 @@ export default function PrecisionFlickShotClient() {
               isOpen={openAccordion === 'faq'}
               onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
             >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {FAQ_ITEMS.map((item, i) => (
-                  <div key={i} className="bg-[#05060b] border border-gray-800 rounded-xl p-5">
-                    <h4 className="text-sm font-bold text-gray-200 mb-2">{item.q}</h4>
+              <div className="space-y-4">
+                {FAQ_ITEMS.map((item, idx) => (
+                  <div key={idx} className="border-b border-gray-800/80 pb-3 last:border-0 last:pb-0">
+                    <h5 className="text-xs font-bold text-white mb-1">{item.q}</h5>
                     <p className="text-xs text-gray-400 leading-relaxed">{item.a}</p>
                   </div>
                 ))}
@@ -1017,10 +937,10 @@ export default function PrecisionFlickShotClient() {
           </div>
         )}
 
-        {/* ── RELATED MOTOR DRILLS ── */}
+        {/* ── RELATED FPS DRILLS ── */}
         {!isFullscreen && (
           <section className="mt-4">
-            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3 font-sans">
+            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">
               Related Motor &amp; FPS Drills
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -1043,11 +963,10 @@ export default function PrecisionFlickShotClient() {
             </div>
           </section>
         )}
-
-        {/* ── FOOTER ── */}
-        {!isFullscreen && <DrillFooter />}
-
       </main>
+
+      {/* ── FOOTER ── */}
+      {!isFullscreen && <DrillFooter />}
     </div>
   );
 }

@@ -2,7 +2,7 @@ import ChromaSyncClient from './ChromaSyncClient';
 
 export const metadata = {
   title: 'Go/No-Go Pro - Impulse Control & Reaction Speed Test',
-  description: 'Train impulse control with Go/No-Go reaction speed test. React to green Go targets and suppress response on red No-Go triggers, zero penalties, 45s session.',
+  description: 'Train impulse control with Go/No-Go reaction speed test. React to green Go targets and suppress response on red No-Go triggers, dynamic level scaling, 45s+ session.',
   keywords: [
     'go no go test online',
     'go no go test',
@@ -17,7 +17,7 @@ export const metadata = {
   ],
   openGraph: {
     title: 'Go/No-Go Pro - Impulse Control & Reaction Speed Test | SkillDrills',
-    description: 'Train impulse control with Go/No-Go reaction speed test. React to green Go targets and suppress response on red No-Go triggers, zero penalties. Free.',
+    description: 'Train impulse control with Go/No-Go reaction speed test. React to green Go targets and suppress response on red No-Go triggers, dynamic level scaling. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/visual/reaction-speed/go/no-go',
     siteName: 'SkillDrills',
@@ -26,7 +26,7 @@ export const metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Go/No-Go Pro - Impulse Control & Reaction Speed Test | SkillDrills',
-    description: 'Train impulse control with Go/No-Go reaction speed test. React to green Go targets and suppress response on red No-Go triggers, zero penalties. Free.',
+    description: 'Train impulse control with Go/No-Go reaction speed test. React to green Go targets and suppress response on red No-Go triggers, dynamic level scaling. Free.',
   },
   robots: { index: true, follow: true },
   alternates: {
@@ -62,7 +62,7 @@ export default function ChromaSyncPage() {
             "@type": "WebApplication",
             "name": "Go/No-Go Pro Drill",
             "url": "https://skilldrills.online/drills/visual/reaction-speed/go/no-go",
-            "description": "Free response inhibition task. React instantly to green GO targets while restraining response when red STOP targets appear, zero negative penalties, clean 45-second timer.",
+            "description": "Free response inhibition task. React instantly to green GO targets while restraining response when red STOP targets appear, dynamic level scaling, clean timer.",
             "applicationCategory": "EducationalApplication",
             "operatingSystem": "All",
             "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
@@ -92,7 +92,7 @@ export default function ChromaSyncPage() {
                 "name": "How does progressive difficulty work?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Every 900 points earned you level up, and signal flash windows accelerate from 600ms down to 350ms, challenging your impulse control boundaries."
+                  "text": "As your score and combo climb, signal display windows tighten continuously, challenging your impulse control boundaries."
                 }
               },
               {
@@ -100,7 +100,7 @@ export default function ChromaSyncPage() {
                 "name": "Are there negative score or time penalties?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "No. Wrong clicks and missed signals never deduct score points or reduce remaining timer seconds — a wrong click on a red NO-GO signal instead costs 1 of your 5 lives."
+                  "text": "By default, wrong clicks on red NO-GO signals cost 1 life without deducting time. An opt-in time penalty (-0.8s per error) is available in session settings for hard-mode training."
                 }
               },
               {
@@ -116,7 +116,7 @@ export default function ChromaSyncPage() {
                 "name": "Does difficulty decrease on mistakes?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "No. Your level only ever goes up — a mistake never takes you back down, so you can safely master your current level."
+                  "text": "No. Your level progression is monotonic — a mistake never takes you back down, so you can safely master your current level."
                 }
               },
               {
@@ -124,7 +124,7 @@ export default function ChromaSyncPage() {
                 "name": "How long does each drill session last?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Each round is timed for exactly 45 seconds, or until your 5 lives run out — whichever comes first."
+                  "text": "Each round starts with 45 seconds on the clock (extendable by hitting GO targets and holding NO-GOs), or until your 5 lives run out."
                 }
               },
               {

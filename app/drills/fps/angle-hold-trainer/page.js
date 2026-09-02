@@ -120,10 +120,10 @@ export default function AngleHoldPage() {
       },
       {
         "@type": "Question",
-        "name": "Can this drill improve my reaction time and defensive gameplay?",
+        "name": "How are errors penalised in Angle Hold Pro?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Yes. Exposing your brain to surprise, high-speed peeks and penalizing misses and premature clicking conditions you to react to visual movement faster, preventing you from getting caught off guard by wide peeks and making you a more effective defensive anchor."
+          "text": "By default, pre-firing early, shooting a fake peek, missing, or letting an enemy retreat resets your streak combo without reducing clock time. When the optional Time Penalty setting is enabled, each error deducts 0.8s from the session clock."
         }
       },
       {

@@ -151,10 +151,10 @@ export default function VerticalAirTrackPage() {
       },
       {
         "@type": "Question",
-        "name": "Does this drill improve vertical mouse control?",
+        "name": "How are errors penalised in Vertical Air-Track?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Yes, this vertical air track trainer specifically isolates and trains Y-axis micro-adjustments, arc prediction, and vertical mouse speed control."
+          "text": "Losing tracking contact resets your active combo streak. When the optional Time Penalty setting is enabled, allowing an airborne target to drop past the bottom boundary without destroying it deducts 0.6s from your timer."
         }
       },
       {

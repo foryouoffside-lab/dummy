@@ -16,7 +16,8 @@ import generateShareCard, { shareScoreCard } from '../../../../components/ShareS
 import { getPlayerName } from '../../../../lib/leaderboard';
 import { drillAudio } from '../../../../lib/drillAudio';
 import { drillFlash } from '../../../../lib/drillFlash';
-import { getStartLevel, getDifficultyProgress, getComboBonusLevel } from '../../../../lib/drillDifficulty';
+import { drillPenalty } from '../../../../lib/drillPenalty';
+import { getStartLevel, getDifficultyProgress, ramp } from '../../../../lib/drillDifficulty';
 import { getComboMultiplier, getFpsScoreGrade } from '../../../../lib/scoringEngine';
 import { createBackdropCache, getCanvasDpr, drawPulseRing } from '../../../../lib/canvasFx';
 import useUnexpectedExitGuard from '../../../../lib/useUnexpectedExitGuard';
@@ -24,19 +25,22 @@ import DrillFooter from '../../../../components/drill/DrillFooter';
 import DrillCountdown from '../../../../components/drill/DrillCountdown';
 import DrillAccordion from '../../../../components/drill/DrillAccordion';
 import FpsStartCard from '../../../../components/drill/FpsStartCard';
+import DrillResultCard from '../../../../components/drill/DrillResultCard';
 
-const DRILL_DURATION = 45;
-const POINTS_PER_LEVEL = 60; // Reach L15 in the first third of the run under strong play, not at ~78%
-const ELITE_SCORE = 4200; // Calibrated against simulated perfect-play ceiling (~4488) for this tick-based tracking formula
-const STORAGE_KEY = 'skilldrills_fps_strafe_tracking_v2';
-const OLD_STORAGE_KEY = 'strafeTrack_bestScore2';
+// ============================================================
+// TUNING CONSTANTS
+// ============================================================
+const DRILL_DURATION = 45; // starting clock only; a run grows past this
+const POINTS_PER_LEVEL = 1400; // 200 -> 1400 (7x)
+const ELITE_SCORE = 54000; // 18000 -> 54000 (3x)
+const TIME_PER_HIT = 0.4; // +0.1s per 0.25s on-target tick (+0.4s/sec)
+const TIME_PENALTY = 0.6; // opt-in on 1.0s continuous off-target
+const STORAGE_KEY = 'skilldrills_fps_strafe_tracking_v3';
 
 const getSavedData = () => {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) return { bestScore: 0, bestCombo: 0, bestLevel: 1, totalSessions: 0, ...JSON.parse(raw) };
-    const legacy = localStorage.getItem(OLD_STORAGE_KEY);
-    if (legacy) return { bestScore: parseInt(legacy, 10) || 0, bestCombo: 0, bestLevel: 1, totalSessions: 0 };
     return { bestScore: 0, bestCombo: 0, bestLevel: 1, totalSessions: 0 };
   } catch (e) {
     return { bestScore: 0, bestCombo: 0, bestLevel: 1, totalSessions: 0 };
@@ -49,14 +53,14 @@ const saveData = (data) => {
   } catch (e) {}
 };
 
-
-const getLevelConfig = (level) => {
-  const p = getDifficultyProgress(level);
+const getLevelConfig = (level, combo = 0) => {
+  const p = getDifficultyProgress(level); // 0 at L1, 1 at L15, unbounded above
+  const heat = (getComboMultiplier(combo) - 1) / 2;
   return {
-    speed: 280 + p * 470,
-    radius: Math.max(12, 26 - p * 14),
-    height: Math.max(28, 52 - p * 24),
-    switchFreq: Math.max(150, 600 - p * 400)
+    speed:      ramp(280, 750, p) * (1 + heat * 0.15),
+    radius:     Math.max(10, ramp(26, 12, p) * (1 - heat * 0.15)),
+    height:     Math.max(24, ramp(52, 28, p) * (1 - heat * 0.15)),
+    switchFreq: Math.max(120, ramp(600, 200, p) * (1 - heat * 0.20)),
   };
 };
 
@@ -66,6 +70,7 @@ export default function StrafeTrackingClient() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
+  const [penaltyEnabled, setPenaltyEnabled] = useState(false);
   const [pointerLocked, setPointerLocked] = useState(false);
   const [openAccordion, setOpenAccordion] = useState(null);
   const [isTouchOnlyDevice, setIsTouchOnlyDevice] = useState(false);
@@ -126,6 +131,7 @@ export default function StrafeTrackingClient() {
     if (typeof window !== 'undefined') {
       setSoundEnabled(drillAudio.isEnabled());
       setFlashEnabled(drillFlash.isEnabled());
+      setPenaltyEnabled(drillPenalty.isEnabled());
       const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
       const isTouchCapable = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
       setIsTouchOnlyDevice(isTouchCapable && !hasFinePointer);
@@ -169,7 +175,7 @@ export default function StrafeTrackingClient() {
 
     const e = engine.current;
     const finalAccuracy = e.totalFrames > 0 ? Math.round((e.framesOnTarget / e.totalFrames) * 100) : 100;
-    const peakLevel = bestLevelRunRef.current;
+    const peakLevel = Math.floor(bestLevelRunRef.current);
     const grade = getFpsScoreGrade(e.score, ELITE_SCORE);
 
     setAccuracy(finalAccuracy);
@@ -214,15 +220,14 @@ export default function StrafeTrackingClient() {
     lastTimeRef.current = DRILL_DURATION;
     lastAccuracyRef.current = 100;
 
-    const saved = getSavedData();
-    const startLvl = getStartLevel(saved.bestLevel);
+    const startLvl = getStartLevel();
     setLevel(startLvl);
     bestLevelRunRef.current = startLvl;
 
     const w = engine.current.logicalWidth || canvasRef.current?.width || 800;
     const h = engine.current.logicalHeight || canvasRef.current?.height || 600;
 
-    const cfg = getLevelConfig(startLvl);
+    const cfg = getLevelConfig(startLvl, 0);
     engine.current = {
       crosshair: { x: w / 2, y: h / 2, initialized: true },
       target: { x: w / 2, y: h / 2, vx: cfg.speed, vy: 0, radius: cfg.radius, height: cfg.height, groundY: h / 2 },
@@ -276,8 +281,6 @@ export default function StrafeTrackingClient() {
     setGameState('start');
   }, []);
 
-  // Stop the drill if the player leaves any way other than the in-app Exit
-  // button (back gesture, tab switch, Esc) instead of running invisibly.
   const { markIntentionalExit } = useUnexpectedExitGuard({
     active: gameState === 'playing' || gameState === 'countdown',
     onUnexpectedExit: handleExitDrill,
@@ -387,7 +390,7 @@ export default function StrafeTrackingClient() {
       const width = e.logicalWidth || cvs.width / dpr;
       const height = e.logicalHeight || cvs.height / dpr;
 
-      const cfg = getLevelConfig(e.level);
+      const cfg = getLevelConfig(e.level, e.combo);
       const t = e.target;
       t.radius = cfg.radius;
       t.height = cfg.height;
@@ -438,10 +441,11 @@ export default function StrafeTrackingClient() {
           e.framesOnTarget++;
           e.onTargetTimer += dt;
           if (e.onTargetTimer >= 0.25) {
-            const baseScore = 10;
+            const baseScore = 50;
             const levelMult = 1 + getDifficultyProgress(e.level) * 0.5;
             const gained = Math.round(baseScore * getComboMultiplier(e.combo) * levelMult);
             e.score += gained;
+            e.timeLeft += 0.1; // +0.1s per 0.25s = +0.4s per full second on target
             e.onTargetTimer -= 0.25;
             setScore(e.score);
             drillAudio.playHit();
@@ -455,10 +459,10 @@ export default function StrafeTrackingClient() {
             if (e.combo > e.bestCombo) e.bestCombo = e.combo;
             setCombo(e.combo);
 
-            const rawLevel = Math.floor(e.score / POINTS_PER_LEVEL) + 1 + getComboBonusLevel(e.combo);
+            const rawLevel = (e.score / POINTS_PER_LEVEL) + 1;
             e.level = Math.max(e.level, rawLevel);
             bestLevelRunRef.current = Math.max(bestLevelRunRef.current, e.level);
-            setLevel(e.level);
+            setLevel(Math.floor(e.level));
           }
           e.msOffTarget = 0;
         } else {
@@ -470,6 +474,7 @@ export default function StrafeTrackingClient() {
           e.offTargetTotalTime += dt;
           if (e.msOffTarget >= 1.0) {
             e.msOffTarget -= 1.0;
+            if (drillPenalty.isEnabled()) e.timeLeft -= TIME_PENALTY;
             e.screenShake = 6;
             drillAudio.playPenalty();
             triggerFlash();
@@ -638,7 +643,7 @@ export default function StrafeTrackingClient() {
               </span>
             </h1>
             <p className="text-xs text-slate-400 mt-1">
-              Erratic Horizontal Target Motion & Continuous Tracking
+              Erratic Horizontal Target Motion • Endless Level Progression
             </p>
           </div>
         )}
@@ -655,7 +660,7 @@ export default function StrafeTrackingClient() {
 
             <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time Left</div>
-              <div className={`text-lg sm:text-xl font-black tabular-nums ${timeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>
+              <div className={`text-lg sm:text-xl font-black tabular-nums ${timeLeft <= 10 ? "text-red-400 animate-pulse" : "text-white"}`}>
                 {timeLeft}s
               </div>
             </div>
@@ -682,8 +687,8 @@ export default function StrafeTrackingClient() {
           onContextMenu={(e) => { if (gameState === 'playing' || gameState === 'countdown') e.preventDefault(); }}
           className={`relative overflow-hidden flex flex-col transition-all duration-150 select-none bg-[#050508] text-white ${
             isFullscreen 
-              ? 'fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#050508] rounded-none border-none' 
-              : 'w-full rounded-2xl border border-white/10 bg-[#050508] shadow-[0_0_40px_rgba(0,0,0,0.9)] aspect-video min-h-[460px] sm:min-h-[500px] max-h-[88vh]'
+              ? "fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#050508] rounded-none border-none" 
+              : "w-full rounded-2xl border border-white/10 bg-[#050508] shadow-[0_0_40px_rgba(0,0,0,0.9)] aspect-video min-h-[460px] sm:min-h-[500px] max-h-[88vh]"
           }`}
           style={{ touchAction: (gameState === 'playing' || gameState === 'countdown') ? 'none' : 'auto' }}
         >
@@ -700,7 +705,7 @@ export default function StrafeTrackingClient() {
 
               <div className="absolute top-4 right-4 z-30 pointer-events-none text-right">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Time</p>
-                <p className={`text-2xl sm:text-3xl font-bold tabular-nums leading-tight ${timeLeft <= 10 ? 'text-red-400' : 'text-white'}`}>{timeLeft}s</p>
+                <p className={`text-2xl sm:text-3xl font-bold tabular-nums leading-tight ${timeLeft <= 10 ? "text-red-400" : "text-white"}`}>{timeLeft}s</p>
               </div>
             </>
           )}
@@ -757,7 +762,7 @@ export default function StrafeTrackingClient() {
           <canvas 
             ref={canvasRef} 
             onClick={() => { if (gameState === 'playing' && !pointerLocked) resumeDrill(); }}
-            className={`block absolute top-0 left-0 w-full h-full touch-none z-10 ${gameState === 'playing' ? 'cursor-none' : ''}`} 
+            className={`block absolute top-0 left-0 w-full h-full touch-none z-10 ${gameState === "playing" ? "cursor-none" : ""}`}
           />
 
           {gameState === 'start' && (
@@ -765,16 +770,16 @@ export default function StrafeTrackingClient() {
               icon={Target}
               accent="green"
               title="Strafe Tracking"
-              subtitle="Hardware Raw Input • 15 Difficulty Levels"
+              subtitle="Hardware Raw Input • Endless Level Progression"
               rules={[
-                { icon: Target, accent: 'green', title: 'Objective', text: 'Continuous Crosshair Lock' },
-                { icon: AlertCircle, accent: 'red', title: 'Failure Rule', text: 'Off-Target 1s → Resets Combo' },
+                { icon: Target, accent: "green", title: "Objective", text: "Continuous Crosshair Lock (+0.4s/s)" },
+                { icon: AlertCircle, accent: "red", title: "Failure Rule", text: penaltyEnabled ? "Off-Target 1s → Resets Combo, -0.6s" : "Off-Target 1s → Resets Combo" },
               ]}
               sensitivity={{ value: universalSens, onChange: setUniversalSens, cmPer360 }}
               stats={[
-                { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
-                { icon: Flame, label: 'Best Combo', value: `${bestCombo}x`, color: 'text-green-400', accent: 'green' },
-                { icon: TrendingUp, label: 'Best Level', value: `Lv. ${bestLevel}`, color: 'text-blue-400', accent: 'blue' },
+                { icon: Trophy, label: "Best Score", value: bestScore, color: "text-white", accent: "slate" },
+                { icon: Flame, label: "Best Combo", value: `${bestCombo}x`, color: "text-green-400", accent: "green" },
+                { icon: TrendingUp, label: "Best Level", value: `Lv. ${bestLevel}`, color: "text-blue-400", accent: "blue" },
               ]}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
@@ -786,75 +791,29 @@ export default function StrafeTrackingClient() {
             <DrillCountdown value={countdownValue} subtitle="GET READY" />
           )}
 
+          {/* END SCREEN — Universal Result Card */}
           {gameState === 'gameOver' && analytics.grade && (
-            <div className="absolute inset-0 z-40 flex bg-neutral-950/98 select-none font-sans" style={{ background: 'rgba(5,5,8,0.97)' }} onPointerDown={e => e.stopPropagation()}>
-              
-              <div className="w-[36%] flex flex-col items-center justify-center gap-1 border-r border-white/5 px-4" style={{ background: 'radial-gradient(ellipse 260px 200px at 50% 30%, rgba(34,197,94,.12), transparent 70%)' }}>
-                {isNewBest && (
-                  <span className="text-[9.5px] font-bold text-yellow-400 bg-yellow-500/10 border border-yellow-500/25 px-2.5 py-0.5 rounded-full mb-1 animate-pulse">
-                    NEW BEST
-                  </span>
-                )}
-                <div className={`text-5xl sm:text-6xl font-black leading-none ${analytics.grade.color}`}>
-                  {analytics.grade.grade}
-                </div>
-                <div className="text-[10px] uppercase tracking-widest text-slate-500 text-center font-bold mt-1">
-                  {analytics.grade.label}
-                </div>
-                <div className="text-3xl sm:text-4xl font-black text-white mt-2 tabular-nums">
-                  {score.toLocaleString()}
-                </div>
-                <div className="text-[9px] uppercase tracking-widest text-slate-500">Points</div>
-              </div>
-
-              <div className="flex-1 flex flex-col justify-center gap-3 px-6 py-4 min-w-0">
-                
-                <div className="grid grid-cols-3 gap-2">
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.accuracy}%</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Accuracy</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">Lvl {analytics.levelReached}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Peak Level</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.bestCombo}x</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Best Streak</p>
-                  </div>
-                </div>
-
-                <div className="flex gap-2">
-                  <button 
-                    onClick={enterDrill} 
-                    className="flex-1 py-3 rounded-[13px] bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold text-xs uppercase tracking-wide cursor-pointer transition-transform active:scale-[0.98] shadow-md flex items-center justify-center gap-1.5"
-                  >
-                    <RefreshCw className="w-3.5 h-3.5" /> Play Again
-                  </button>
-                  <button 
-                    onClick={shareDrillLink} 
-                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform" 
-                    title="Share Score"
-                  >
-                    <Share2 className="w-4 h-4" />
-                  </button>
-                  <button 
-                    onClick={handleExitDrill} 
-                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform" 
-                    title="Return to Options"
-                  >
-                    <LogOut className="w-4 h-4 text-red-400" />
-                  </button>
-                </div>
-
-              </div>
-            </div>
+            <DrillResultCard
+              accent="green"
+              grade={analytics.grade}
+              score={score}
+              isNewBest={isNewBest}
+              stats={[
+                { value: analytics.accuracy, suffix: "%", label: "Tracking Accuracy" },
+                { value: `${analytics.bestCombo}s`, label: "Max Lock Streak" },
+                { value: `Lv. ${analytics.levelReached}`, label: "Peak Level" },
+                { value: `${analytics.offTargetTime}s`, label: "Off-Target Time" },
+              ]}
+              onPlayAgain={enterDrill}
+              onShare={shareDrillLink}
+              onExit={handleExitDrill}
+            />
           )}
         </div>
 
         {/* ACCORDIONS SECTION */}
         {!isFullscreen && (
-          <div className="[&>div]:!mt-0">
+          <div className="[&>div]:!mt-0 font-sans">
             <DrillAccordion
               id="rules"
               title="Drill Instructions & Settings"
@@ -862,10 +821,10 @@ export default function StrafeTrackingClient() {
               onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-sans">
-                <RuleItem num="1" text="Target Tracking" highlight="Pure Reactive" result="Keep crosshair locked on target" />
-                <RuleItem num="2" text="Time Adjusting" highlight={`${DRILL_DURATION}s Duration`} result="Standard session timer" />
-                <RuleItem num="3" text="Off-Target Penalty" highlight="Combo Reset" result="1s off-target resets streak" />
-                <RuleItem num="4" text="Raw Input" highlight="1:1 Pointer Lock" result="Direct hardware mouse calibration" />
+                <RuleItem num="1" text="Target Tracking" highlight="Pure Reactive (+0.4s/s)" result="Keep crosshair locked on target" />
+                <RuleItem num="2" text="Time Adjusting" highlight={`${DRILL_DURATION}s Starting Duration`} result="Uncapped session timer" />
+                <RuleItem num="3" text="Off-Target Penalty" highlight="Combo Reset / -0.6s" result="1s off-target resets streak" />
+                <RuleItem num="4" text="Level Progression" highlight="+1 Level / 1400 PTS" result="Continuous Speed & Direction Frequency" />
               </div>
             </DrillAccordion>
 
@@ -902,9 +861,9 @@ export default function StrafeTrackingClient() {
                   <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-orange-600 flex items-center justify-center"><Zap className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Why It Is Harder</h5>
+                      <h5 className="text-xs font-bold text-white">Hardware Raw Input</h5>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Predicting target direction leads to overtracking. This drill trains raw visual reaction over guess-aiming.</p>
+                    <p className="text-xs text-gray-300 leading-relaxed">1:1 unaccelerated pointer lock mouse movement calibrated to simulate true in-game competitive mouse feel.</p>
                   </div>
                 </div>
               </div>
@@ -916,126 +875,42 @@ export default function StrafeTrackingClient() {
               isOpen={openAccordion === 'faq'}
               onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
             >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-sans">
-                <FAQItem q="What is tracking aim in FPS games?" a="Tracking aim is the mechanical ability to keep your crosshair continuously locked onto an opponent moving in a 3D environment, which is highly critical in games with a high time-to-kill (TTK)." />
-                <FAQItem q="How is tracking different from flicking?" a="Flicking requires rapid muscle memory snaps to hit a target and reset, while tracking requires continuous visual pursuit, direction change recognition, and smooth speed adjustment." />
-                <FAQItem q="How do I improve reactive tracking?" a="Improve reactive tracking by practicing against fast, unpredictable strafe speeds. Learn to read momentum changes without over-predicting or tensing your wrist." />
-                <FAQItem q="Why do I overtrack targets?" a="Overtracking happens when your crosshair moves faster than the target during a direction swap, which is often caused by predictive aiming or excessive mouse acceleration." />
-                <FAQItem q="What causes shaky aim during tracking?" a="Shaky aim is caused by excessive wrist tension, inappropriate mouse grip, or too high sensitivity. Smoothness aim drills help condition your hand to glide without micro-jitters." />
-                <FAQItem q="How much should I practice tracking?" a="We recommend practicing tracking for 10-15 minutes daily as a pre-game warmup routine to establish muscle memory consistency." />
-                <FAQItem q="Is tracking more important than flicking?" a="It depends on the game. Tracking is primary in high-TTK games (Apex Legends, Overwatch 2, The Finals), whereas flicking is more critical in tactical, low-TTK shooters (Valorant, CS2)." />
-                <FAQItem q="Can tracking improve Apex Legends aim?" a="Yes. Gunfights in Apex Legends require landing full automatic magazines on dodging enemies. Consistent tracking practice is the single best way to improve Apex aim." />
-                <FAQItem q="Can tracking improve Overwatch 2 aim?" a="Target tracking is critical for heroes like Soldier: 76, Tracer, Zarya, and Sombra who rely on smooth pursuit and direction change recognition to maximize damage output." />
-                <FAQItem q="What is counter-strafe reading?" a="Counter-strafe reading is your neurological speed in registering when an enemy reverses their horizontal direction, allowing you to re-align your crosshair with minimal lag." />
-                <FAQItem q="What is aim smoothness?" a="Smoothness refers to moving your mouse at a constant, matching speed to the target without micro-corrections, jitters, or abrupt jerking movements." />
-                <FAQItem q="How do professional players train tracking?" a="Pros use specialized software aim trainers to practice isolating horizontal sweeps, vertical tracking, and reaction speed under variable speeds." />
-                <FAQItem q="What sensitivity is best for tracking?" a="A moderate-to-low sensitivity (e.g., 25cm to 45cm per 360 rotation) is generally best for tracking, as it provides enough physical space to make smooth micro-adjustments." />
-                <FAQItem q="Can this drill improve mouse control?" a="Yes. Keeping your crosshair on dodging targets forces your wrist and fingers to build subtle motor-control adjustments, optimizing mouse handling." />
-                <FAQItem q="How long does it take to improve tracking?" a="Most players notice improvements in crosshair smoothness and reaction time after 2 weeks of daily, focused 10-minute training sessions." />
+              <div className="space-y-4 font-sans">
+                {FAQ_ITEMS.map((item, idx) => (
+                  <div key={idx} className="border-b border-gray-800/80 pb-3 last:border-0 last:pb-0">
+                    <h5 className="text-xs font-bold text-white mb-1">{item.q}</h5>
+                    <p className="text-xs text-gray-400 leading-relaxed">{item.a}</p>
+                  </div>
+                ))}
               </div>
             </DrillAccordion>
           </div>
         )}
-
-        {/* RELATED DRILLS GRID */}
-        {!isFullscreen && (
-          <section className="mt-4">
-            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">
-              Related FPS & Visual Drills
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              <Link
-                href="/drills/visual-tracking/constant-slow-pursuit"
-                className="group bg-[#0c0c16] border border-white/5 hover:border-green-500/40 rounded-xl p-3.5 transition-all duration-200 hover:-translate-y-0.5 flex flex-col justify-between"
-              >
-                <div>
-                  <div className="text-[10px] font-bold text-green-400 uppercase tracking-wider mb-1">Visual Tracking</div>
-                  <div className="text-xs font-bold text-white group-hover:text-green-300 transition-colors">Constant Slow Pursuit</div>
-                  <div className="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">Smooth pursuit tracking along Lissajous curves.</div>
-                </div>
-              </Link>
-
-              <Link
-                href="/drills/visual-tracking/sine-wave-pursuit"
-                className="group bg-[#0c0c16] border border-white/5 hover:border-green-500/40 rounded-xl p-3.5 transition-all duration-200 hover:-translate-y-0.5 flex flex-col justify-between"
-              >
-                <div>
-                  <div className="text-[10px] font-bold text-green-400 uppercase tracking-wider mb-1">Visual Tracking</div>
-                  <div className="text-xs font-bold text-white group-hover:text-green-300 transition-colors">Sine-Wave Pursuit</div>
-                  <div className="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">Smooth pursuit along vertical and horizontal sine oscillations.</div>
-                </div>
-              </Link>
-
-              <Link
-                href="/drills/visual-tracking/infinity-pursuit"
-                className="group bg-[#0c0c16] border border-white/5 hover:border-green-500/40 rounded-xl p-3.5 transition-all duration-200 hover:-translate-y-0.5 flex flex-col justify-between"
-              >
-                <div>
-                  <div className="text-[10px] font-bold text-green-400 uppercase tracking-wider mb-1">Visual Tracking</div>
-                  <div className="text-xs font-bold text-white group-hover:text-green-300 transition-colors">Infinity Pursuit</div>
-                  <div className="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">Track targets along figure-8 infinity loops at custom speeds.</div>
-                </div>
-              </Link>
-
-              <Link
-                href="/drills/visual-tracking/directional-chaos-pursuit"
-                className="group bg-[#0c0c16] border border-white/5 hover:border-green-500/40 rounded-xl p-3.5 transition-all duration-200 hover:-translate-y-0.5 flex flex-col justify-between"
-              >
-                <div>
-                  <div className="text-[10px] font-bold text-green-400 uppercase tracking-wider mb-1">Visual Tracking</div>
-                  <div className="text-xs font-bold text-white group-hover:text-green-300 transition-colors">Directional Chaos Pursuit</div>
-                  <div className="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">Complex multi-directional visual tracking with sudden direction shifts.</div>
-                </div>
-              </Link>
-
-              <Link
-                href="/drills/fps/180-degree-awareness"
-                className="group bg-[#0c0c16] border border-white/5 hover:border-green-500/40 rounded-xl p-3.5 transition-all duration-200 hover:-translate-y-0.5 flex flex-col justify-between"
-              >
-                <div>
-                  <div className="text-[10px] font-bold text-green-400 uppercase tracking-wider mb-1">FPS Awareness</div>
-                  <div className="text-xs font-bold text-white group-hover:text-green-300 transition-colors">180° Awareness Pro</div>
-                  <div className="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">Master 180-degree snap turn awareness for CS2 & Valorant.</div>
-                </div>
-              </Link>
-
-              <Link
-                href="/drills/fps/flow-state"
-                className="group bg-[#0c0c16] border border-white/5 hover:border-green-500/40 rounded-xl p-3.5 transition-all duration-200 hover:-translate-y-0.5 flex flex-col justify-between"
-              >
-                <div>
-                  <div className="text-[10px] font-bold text-green-400 uppercase tracking-wider mb-1">FPS Tracking</div>
-                  <div className="text-xs font-bold text-white group-hover:text-green-300 transition-colors">Flow State Induction</div>
-                  <div className="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">Sustained visual focus & smooth crosshair tracking.</div>
-                </div>
-              </Link>
-            </div>
-          </section>
-        )}
-
-        {!isFullscreen && <DrillFooter />}
       </main>
+
+      {/* ── FOOTER ── */}
+      {!isFullscreen && <DrillFooter />}
     </div>
   );
 }
 
-function StatCard({ icon, value, label, unit = '', accentColor = 'border-white/10' }) {
-  return (
-    <div className={`rounded-xl border ${accentColor} bg-black backdrop-blur-md p-1.5 sm:p-2.5 text-center flex flex-col items-center justify-center transition-all duration-300 shadow-md hover:-translate-y-0.5 pointer-events-none font-sans`}>
-      <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-black border border-white/10 flex items-center justify-center mb-1 shadow-inner">
-        {icon}
-      </div>
-      <p className="text-xs sm:text-lg lg:text-xl font-black tracking-tight text-white leading-none truncate w-full font-sans font-mono tabular-nums">
-        {value}<span className="text-[9px] sm:text-xs font-semibold ml-0.5 text-gray-400 font-sans">{unit}</span>
-      </p>
-      <p className="text-[8px] sm:text-[9.5px] font-bold uppercase tracking-wider text-gray-400 mt-1 truncate w-full">{label}</p>
-    </div>
-  );
-}
+const FAQ_ITEMS = [
+  { q: "What is tracking aim in FPS games?", a: "Tracking aim is the mechanical ability to keep your crosshair continuously locked onto an opponent moving in a 3D environment, which is highly critical in games with a high time-to-kill (TTK)." },
+  { q: "How is tracking different from flicking?", a: "Flicking requires rapid muscle memory snaps to hit a target and reset, while tracking requires continuous visual pursuit, direction change recognition, and smooth speed adjustment." },
+  { q: "How do I improve reactive tracking?", a: "Improve reactive tracking by practicing against fast, unpredictable strafe speeds. Learn to read momentum changes without over-predicting or tensing your wrist." },
+  { q: "Why do I overtrack targets?", a: "Overtracking happens when your crosshair moves faster than the target during a direction swap, which is often caused by predictive aiming or excessive mouse acceleration." },
+  { q: "What causes shaky aim during tracking?", a: "Shaky aim is caused by excessive wrist tension, inappropriate mouse grip, or too high sensitivity. Smoothness aim drills help condition your hand to glide without micro-jitters." },
+  { q: "How are errors penalised in Strafe Tracking?", a: "Losing contact with the target resets your active combo multiplier. When the optional Time Penalty setting is enabled, falling off-target for 1.0 cumulative second also deducts 0.6s from your timer." },
+  { q: "Is tracking more important than flicking?", a: "It depends on the game. Tracking is primary in high-TTK games (Apex Legends, Overwatch 2, The Finals), whereas flicking is more critical in tactical, low-TTK shooters (Valorant, CS2)." },
+  { q: "Can tracking improve Apex Legends aim?", a: "Yes. Gunfights in Apex Legends require landing full automatic magazines on dodging enemies. Consistent tracking practice is the single best way to improve Apex aim." },
+  { q: "What sensitivity is best for tracking?", a: "Medium-to-low sensitivity (30cm to 45cm per 360°) offers the best balance between smoothness and speed for reactive tracking." },
+  { q: "Is this strafe tracking drill free?", a: "Yes, 100% free with unaccelerated raw input in your browser without downloads or signups." }
+];
 
+// === Subcomponents ===
 function RuleItem({ num, text, highlight = '', result }) {
   return (
-    <div className="flex items-center gap-4 bg-black p-4 rounded-xl border border-white/10 shadow-sm">
+    <div className="flex items-center gap-4 bg-black p-4 rounded-xl border border-white/10 shadow-sm font-sans">
       <div className="w-8 h-8 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-white text-base font-black shadow-lg flex-shrink-0">{num}</div>
       <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <p className="text-sm font-medium text-gray-100 font-sans">
@@ -1045,30 +920,6 @@ function RuleItem({ num, text, highlight = '', result }) {
           {result}
         </div>
       </div>
-    </div>
-  );
-}
-
-function RelatedCard({ href, title, desc }) {
-  return (
-    <Link href={href} className="group p-5 bg-black rounded-2xl border border-gray-800 hover:border-green-500/50 hover:bg-white/[0.02] transition-all flex flex-col justify-between">
-      <div>
-        <h4 className="font-bold text-white group-hover:text-green-400 transition-colors mb-1 text-base">{title}</h4>
-        <p className="text-xs text-gray-400 leading-relaxed line-clamp-2">{desc}</p>
-      </div>
-      <div className="flex items-center gap-1 mt-4 text-xs text-green-400 font-bold font-mono">
-        <span>TRY DRILL</span>
-        <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-      </div>
-    </Link>
-  );
-}
-
-function FAQItem({ q, a }) {
-  return (
-    <div className="bg-[#05060b] border border-gray-800 rounded-xl p-5 hover:border-gray-700 transition-colors">
-      <h4 className="text-sm font-bold text-gray-200 mb-2">{q}</h4>
-      <p className="text-xs text-gray-200 leading-relaxed">{a}</p>
     </div>
   );
 }

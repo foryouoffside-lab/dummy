@@ -1,5 +1,6 @@
 import VisualTrackingDrillsClient from './VisualTrackingDrillsClient';
 import { DRILLS } from '../../../lib/drillsRegistry';
+import { getAlternateLanguages } from '@/lib/i18n/locales';
 
 const trackingDrills = DRILLS.filter((d) => d.category === 'visual-tracking');
 const trackingDrillCount = trackingDrills.length;
@@ -37,7 +38,10 @@ export const metadata = {
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
-  alternates: { canonical: 'https://skilldrills.online/drills/visual-tracking' },
+  alternates: {
+    canonical: 'https://skilldrills.online/drills/visual-tracking',
+    languages: getAlternateLanguages('/drills/visual-tracking'),
+  },
 };
 
 export default function VisualTrackingDrillsPage() {

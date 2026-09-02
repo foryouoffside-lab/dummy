@@ -88,7 +88,7 @@ export default async function Image() {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          {['45-SECOND DRILL', '15 DIFFICULTY LEVELS', 'RAW MOUSE INPUT', 'FREE — NO SIGN-UP'].map((label) => (
+          {['45S+ DRILL', 'ENDLESS PROGRESSION', 'RAW MOUSE INPUT', 'FREE — NO SIGN-UP'].map((label) => (
             <div
               key={label}
               style={{

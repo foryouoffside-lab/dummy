@@ -17,7 +17,8 @@ import { getPlayerName } from '../../../../lib/leaderboard';
 import { drillAudio } from '../../../../lib/drillAudio';
 import { drillFlash } from '../../../../lib/drillFlash';
 import { drillTimeout } from '../../../../lib/drillTimeout';
-import { getStartLevel, getDifficultyProgress, getComboBonusLevel } from '../../../../lib/drillDifficulty';
+import { drillPenalty } from '../../../../lib/drillPenalty';
+import { getStartLevel, getDifficultyProgress, ramp } from '../../../../lib/drillDifficulty';
 import { getComboMultiplier, getFpsScoreGrade } from '../../../../lib/scoringEngine';
 import { createBackdropCache, getCanvasDpr, drawPulseRing, drawTacticalTarget } from '../../../../lib/canvasFx';
 import useUnexpectedExitGuard from '../../../../lib/useUnexpectedExitGuard';
@@ -25,14 +26,17 @@ import DrillFooter from '../../../../components/drill/DrillFooter';
 import DrillCountdown from '../../../../components/drill/DrillCountdown';
 import DrillAccordion from '../../../../components/drill/DrillAccordion';
 import FpsStartCard from '../../../../components/drill/FpsStartCard';
+import DrillResultCard from '../../../../components/drill/DrillResultCard';
 
 // ============================================================
 // TUNING CONSTANTS
 // ============================================================
-const DRILL_DURATION = 45; // 45 seconds focused duration
-const POINTS_PER_LEVEL = 150; // Aggressive progression
-const ELITE_SCORE = 12000; // 100% mark for letter grade
-const STORAGE_KEY = 'skilldrills_fps_angle_hold_v2';
+const DRILL_DURATION = 45; // starting clock only; a run grows past this
+const POINTS_PER_LEVEL = 1400; // 200 -> 1400 (7x)
+const ELITE_SCORE = 48000; // 16000 -> 48000 (3x)
+const TIME_PER_HIT = 0.6; // +0.6s on confirmed hit
+const TIME_PENALTY = 0.8; // opt-in on miss, pre-fire, or escape
+const STORAGE_KEY = 'skilldrills_fps_angle_hold_v3';
 
 const getSavedData = () => {
   try {
@@ -50,45 +54,42 @@ const saveData = (data) => {
   } catch (e) {}
 };
 
-
-const getLevelConfig = (level) => {
-  const p = getDifficultyProgress(level); // 0 -> 1 across L1..L15
+const getLevelConfig = (level, combo = 0) => {
+  const p = getDifficultyProgress(level); // 0 at L1, 1 at L15, unbounded above
+  const heat = (getComboMultiplier(combo) - 1) / 2;
   return {
-    peekDuration:  Math.max(420, 1400 - p * 980),   // 1400 -> 420 ms exposure (PRIMARY AXIS)
-    targetRadius:  Math.max(12, 26 - p * 14),        // 26 -> 12 px floor
-    peekDelayMin:  900  - p * 550,                   // 900 -> 350 ms between peeks
-    peekDelayMax:  1600 - p * 950,                   // 1600 -> 650 ms
-    hitPad:        10   - p * 6,                     // 10 -> 4 px
-    fakePeekChance: p < 0.6 ? 0 : (p - 0.6) * 0.6,   // 0 -> 0.24 from L10
-    peekDistance:  52   - p * 28,                    // 52 -> 24 px into the lane — short, tight jiggle-peeks
-    verticalSpread: 0.25 + p * 0.20,                 // ±25% -> ±45% of height
+    peekDuration: Math.max(220, ramp(1400, 420, p) * (1 - heat * 0.20)),
+    targetRadius: Math.max(10, ramp(26, 12, p) * (1 - heat * 0.15)),
+    peekDelayMin: Math.max(200, ramp(900, 350, p) * (1 - heat * 0.25)),
+    peekDelayMax: Math.max(400, ramp(1600, 650, p) * (1 - heat * 0.25)),
+    hitPad: Math.max(2, ramp(10, 4, p) * (1 - heat * 0.25)),
+    fakePeekChance: p < 0.4 ? 0 : Math.min(0.35, (p - 0.4) * 0.45 + heat * 0.1),
+    peekDistance: ramp(52, 24, p),
+    verticalSpread: Math.min(0.48, 0.25 + p * 0.20)
   };
 };
 
-// Distance of each peek corner from its side of the canvas. Pulled inward from the raw
-// edge so both corners sit closer together — a tighter double-angle hold, harder to split
-// attention between than two peeks at the extreme screen edges.
 const getCornerMargin = (width) => Math.round(Math.max(70, Math.min(170, width * 0.19)));
 
 // ============================================================
 // ACCORDION DATA
 // ============================================================
 const RULES_ITEMS = [
-  { num: "1", text: "Successful Peek Hit", highlight: "+100 PTS", result: "× Combo (3.0x) × Level Bonus (1.5x)" },
-  { num: "2", text: "Level Progression", highlight: "+1 Level / 150 PTS", result: "Exposure window shrinks 1400ms → 420ms" },
-  { num: "3", text: "Pre-fire / Miss / Escape", highlight: "Zero Penalties", result: "Combo resets, no time or score lost" },
-  { num: "4", text: "Jiggle & Fake Peeks", highlight: "From Level 10", result: "Fast bait swings punish premature clicks" }
+  { num: "1", text: "Successful Peek Hit", highlight: "+100 PTS (+0.6s)", result: "× Combo (3.0x) × Level Bonus" },
+  { num: "2", text: "Level Progression", highlight: "+1 Level / 1400 PTS", result: "Continuous Adaptive Target Scaling" },
+  { num: "3", text: "Pre-fire / Miss / Escape", highlight: "Failure Penalty", result: "Combo resets to 0 (-0.8s with Time Penalty enabled)" },
+  { num: "4", text: "Jiggle & Fake Peeks", highlight: "Adaptive Traps", result: "Fast bait swings punish premature clicks" }
 ];
 
 const ABOUT_INTRO = [
   "Angle Hold Pro trains crosshair placement and pre-aim discipline, the defensive skill that decides most site-anchor duels in tactical FPS games like CS2, Valorant, and Rainbow Six Siege. A peeking opponent moves toward you and gets to see your position on their screen a fraction of a second before your screen updates with theirs — this latency gap is peeker's advantage. The only reliable counter is pre-aiming the exact pixel where an enemy's head will appear and firing the instant they cross that plane, rather than reacting and flicking after the fact.",
-  "Each round spawns a target peeking out from either the left or right chokepoint at a random height and exposure duration, so you can't memorize a rhythm — every peek demands fresh pre-aim discipline. Exposure window and target size both shrink as your score climbs, so the drill keeps pace with you instead of staying static once you've adapted to it."
+  "Each round spawns a target peeking out from either the left or right chokepoint at a random height and exposure duration, so you can't memorize a rhythm — every peek demands fresh pre-aim discipline. Exposure window and target size both shrink continuously as your score climbs, so the drill keeps pace with you instead of staying static once you've adapted to it."
 ];
 
 const ABOUT_CARDS = [
-  { icon: Users, iconBg: 'bg-blue-600', title: "Who Should Use This?", text: "Valorant defenders holding site angles, CS2 players covering bomb site chokepoints, and Rainbow Six Siege anchors who need fast, disciplined passive-hold reactions against tight-angle peeks." },
-  { icon: TrendingUp, iconBg: 'bg-emerald-600', title: "Skills Improved", text: "Crosshair-to-corner distance calibration, trigger discipline, peek reaction speed, and visual tracking of fast, variable-height peeks." },
-  { icon: Zap, iconBg: 'bg-purple-600', title: "Jiggle & Fake Peeks", text: "From Level 10, targets execute fast bait swings that punish premature clicking, forcing you to confirm a real exposure before you fire." },
+  { icon: Users, iconBg: "bg-blue-600", title: "Who Should Use This?", text: "Valorant defenders holding site angles, CS2 players covering bomb site chokepoints, and Rainbow Six Siege anchors who need fast, disciplined passive-hold reactions against tight-angle peeks." },
+  { icon: TrendingUp, iconBg: "bg-orange-600", title: "Skills Improved", text: "Crosshair-to-corner distance calibration, trigger discipline, peek reaction speed, and visual tracking of fast, variable-height peeks." },
+  { icon: Zap, iconBg: "bg-purple-600", title: "Jiggle & Fake Peeks", text: "As difficulty escalates, targets execute fast bait swings that punish premature clicking, forcing you to confirm a real exposure before you fire." },
 ];
 
 const ABOUT_SECTIONS = [
@@ -101,17 +102,16 @@ const ABOUT_SECTIONS = [
   },
   {
     icon: Target,
-    title: "Progressive Difficulty & Jiggle Peeks",
+    title: "Continuous Dynamic Escalation",
     paragraphs: [
-      "The difficulty curve tightens gradually across 15 levels: exposure window shrinks from 1400ms down to 420ms, target radius drops from 26px to 12px, and peeks fire in tighter succession as your score climbs — mirroring how real angle holds feel, forgiving on early rounds, unforgiving in the clutch moments that matter.",
-      "Starting at Level 10, a fraction of peeks become fast jiggle fakes that retreat almost immediately, testing whether you're actually confirming a target before you click or just pattern-matching movement."
+      "The difficulty curve tightens smoothly with level progression: exposure window shrinks, target radius drops, and peeks fire in tighter succession as your score climbs — mirroring high-stakes clutch rounds in competitive shooters."
     ]
   },
   {
     icon: Eye,
     title: "What The Drill Tracks",
     paragraphs: [
-      "Average reaction time tells you how quickly your eyes and trigger finger convert a confirmed peek into a completed click. Max combo shows how consistently you land hits without a pre-fire or miss breaking your rhythm — a better predictor of real defensive performance than raw accuracy alone. Peak level reached tells you how far into the 15-level curve your discipline holds up before exposure windows and peek speed outpace your reaction time."
+      "Average reaction time tells you how quickly your eyes and trigger finger convert a confirmed peek into a completed click. Max combo shows how consistently you land hits without a pre-fire or miss breaking your rhythm."
     ]
   }
 ];
@@ -121,7 +121,7 @@ const FAQ_ITEMS = [
   { q: "What is peeker's advantage?", a: "Peeker's advantage is a latency-driven delay where a moving player rounding a corner gets to see a stationary player holding the angle slightly before the stationary player's screen updates with their presence." },
   { q: "How do CS2 and Valorant players hold angles?", a: "Players hold corners by leaving a slight horizontal gap between the corner wall and their crosshair. This offset accommodates their visual reaction delay, allowing them to click without needing to flick when an enemy swings wide." },
   { q: "How far should my crosshair be from the wall?", a: "If enemies consistently push past your crosshair before you can click, hold wider (further away from the corner). If you shoot early and miss, hold tighter. Adjust the distance to match your reaction latency." },
-  { q: "Can this drill improve my reaction time and defensive gameplay?", a: "Yes. Exposing your brain to surprise, high-speed peeks and penalizing misses and premature clicking conditions you to react to visual movement faster, preventing you from getting caught off guard by wide peeks and making you a more effective defensive anchor." },
+  { q: "How are errors penalised in Angle Hold Pro?", a: "By default, pre-firing early, shooting a fake peek, missing, or letting an enemy retreat resets your streak combo without reducing clock time. When the optional Time Penalty setting is enabled, each error deducts 0.8s from the session clock." },
   { q: "Which competitive shooters does this drill help?", a: "This drill directly benefits Valorant defenders holding site angles, CS2 players covering bomb site holds against peeker swings, and Rainbow Six Siege anchors who need fast passive-hold reaction speed against tight-angle peeks." },
   { q: "What skills does this drill improve?", a: "It improves trigger discipline, peek reaction speed, crosshair-to-corner distance calibration, and visual tracking of fast, variable peeks." },
   { q: "How often should I practice crosshair placement?", a: "We recommend dedicating 10-15 minutes to crosshair placement and angle holding drills daily before your gaming sessions." },
@@ -145,6 +145,7 @@ export default function AngleHoldClient() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
+  const [penaltyEnabled, setPenaltyEnabled] = useState(false);
   const [pointerLocked, setPointerLocked] = useState(false);
   const [universalSens, setUniversalSens] = useState(1.0);
   const [openAccordion, setOpenAccordion] = useState(null);
@@ -199,6 +200,7 @@ export default function AngleHoldClient() {
     if (typeof window !== 'undefined') {
       setSoundEnabled(drillAudio.isEnabled());
       setFlashEnabled(drillFlash.isEnabled());
+      setPenaltyEnabled(drillPenalty.isEnabled());
       const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
       const isTouchCapable = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
       setIsTouchOnlyDevice(isTouchCapable && !hasFinePointer);
@@ -266,9 +268,9 @@ export default function AngleHoldClient() {
     }
   }, []);
 
-  const spawnPeekTarget = useCallback((time, width, height, currentLevel) => {
+  const spawnPeekTarget = useCallback((time, width, height, currentLevel, currentCombo = 0) => {
     const e = engine.current;
-    const config = getLevelConfig(currentLevel);
+    const config = getLevelConfig(currentLevel, currentCombo);
     
     const side = Math.random() < 0.5 ? 'left' : 'right';
     const isFake = Math.random() < config.fakePeekChance;
@@ -316,6 +318,7 @@ export default function AngleHoldClient() {
     const avgRt = e.reactionTimes.length > 0 
       ? Math.round(e.reactionTimes.reduce((a, b) => a + b, 0) / e.reactionTimes.length) 
       : 0;
+    const peakLevel = Math.floor(bestLevelRunRef.current);
 
     const rating = getFpsScoreGrade(e.score, ELITE_SCORE);
     const grade = { letter: rating.grade, label: rating.label, color: rating.color };
@@ -323,7 +326,7 @@ export default function AngleHoldClient() {
     setAnalytics({
       accuracy: finalAccuracy, successfulHits: e.successfulHits, missedClicks: e.missedClicks,
       preFires: e.preFires, targetsEscaped: e.targetsEscaped, avgReactionMs: avgRt,
-      maxCombo: e.maxCombo, finalLevel: e.level, grade
+      maxCombo: e.maxCombo, finalLevel: peakLevel, grade
     });
 
     setUiScore(e.score);
@@ -363,8 +366,7 @@ export default function AngleHoldClient() {
     setUiTimeLeft(DRILL_DURATION);
     lastTimeRef.current = DRILL_DURATION;
 
-    const saved = getSavedData();
-    const startLevel = getStartLevel(saved.bestLevel);
+    const startLevel = getStartLevel();
     bestLevelRunRef.current = startLevel;
 
     setAnalytics({
@@ -448,12 +450,13 @@ export default function AngleHoldClient() {
           const eRef = engine.current;
           const ch = eRef.crosshair;
           const tgt = eRef.target;
-          const config = getLevelConfig(eRef.level);
+          const config = getLevelConfig(eRef.level, eRef.combo);
 
           eRef.totalShots++;
 
           if (!tgt.active) {
             eRef.preFires++;
+            if (drillPenalty.isEnabled()) eRef.timeLeft -= TIME_PENALTY;
             eRef.combo = 0;
             eRef.screenShake = 6;
             triggerFlash();
@@ -464,6 +467,7 @@ export default function AngleHoldClient() {
             if (dist <= config.targetRadius + config.hitPad) {
               if (tgt.isFake) {
                 eRef.preFires++;
+                if (drillPenalty.isEnabled()) eRef.timeLeft -= TIME_PENALTY;
                 eRef.combo = 0;
                 eRef.screenShake = 6;
                 triggerFlash();
@@ -479,8 +483,9 @@ export default function AngleHoldClient() {
 
                 const levelMult = 1 + getDifficultyProgress(eRef.level) * 0.5;
                 eRef.score += Math.round(100 * getComboMultiplier(eRef.combo) * levelMult);
+                eRef.timeLeft += TIME_PER_HIT; // +0.6s
 
-                const rawLevel = Math.floor(eRef.score / POINTS_PER_LEVEL) + 1 + getComboBonusLevel(eRef.combo);
+                const rawLevel = (eRef.score / POINTS_PER_LEVEL) + 1;
                 eRef.level = Math.max(eRef.level, rawLevel);
                 bestLevelRunRef.current = Math.max(bestLevelRunRef.current, eRef.level);
 
@@ -491,10 +496,11 @@ export default function AngleHoldClient() {
               }
 
               tgt.active = false;
-              const nextConfig = getLevelConfig(eRef.level);
+              const nextConfig = getLevelConfig(eRef.level, eRef.combo);
               eRef.nextPeekTime = performance.now() + (nextConfig.peekDelayMin + Math.random() * (nextConfig.peekDelayMax - nextConfig.peekDelayMin));
             } else {
               eRef.missedClicks++;
+              if (drillPenalty.isEnabled()) eRef.timeLeft -= TIME_PENALTY;
               eRef.combo = 0;
               eRef.screenShake = 6;
               triggerFlash();
@@ -588,12 +594,12 @@ export default function AngleHoldClient() {
         }
 
         if (!e.target.active && time >= e.nextPeekTime) {
-          spawnPeekTarget(time, w, h, e.level);
+          spawnPeekTarget(time, w, h, e.level, e.combo);
         }
 
         if (e.target.active) {
           const tgt = e.target;
-          const config = getLevelConfig(e.level);
+          const config = getLevelConfig(e.level, e.combo);
           const age = time - tgt.spawnTime;
           const progress = Math.min(1, age / tgt.peekDuration);
 
@@ -611,6 +617,7 @@ export default function AngleHoldClient() {
             tgt.active = false;
             if (!tgt.isFake) {
               e.targetsEscaped++;
+              if (drillPenalty.isEnabled()) e.timeLeft -= TIME_PENALTY;
               e.combo = 0;
               e.screenShake = 6;
               triggerFlash();
@@ -618,7 +625,7 @@ export default function AngleHoldClient() {
               createExplosion(tgt.x, tgt.y, '#ef4444');
             }
 
-            const nextConfig = getLevelConfig(e.level);
+            const nextConfig = getLevelConfig(e.level, e.combo);
             e.nextPeekTime = time + (nextConfig.peekDelayMin + Math.random() * (nextConfig.peekDelayMax - nextConfig.peekDelayMin));
           }
         }
@@ -644,7 +651,7 @@ export default function AngleHoldClient() {
 
       if ((gameState === 'playing' || gameState === 'start') && e.target.active) {
         const tgt = e.target;
-        const config = getLevelConfig(e.level);
+        const config = getLevelConfig(e.level, e.combo);
         const age = time - tgt.spawnTime;
         const progress = Math.min(1, age / tgt.peekDuration);
 
@@ -745,7 +752,7 @@ export default function AngleHoldClient() {
               </span>
             </h1>
             <p className="text-xs text-slate-400 mt-1">
-              Crosshair Placement &amp; Peek Reaction • 15 Levels
+              Crosshair Placement &amp; Peek Reaction • Endless Level Progression
             </p>
           </div>
         )}
@@ -759,7 +766,7 @@ export default function AngleHoldClient() {
             </div>
             <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
-              <div className={`text-lg sm:text-xl font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>{uiTimeLeft}s</div>
+              <div className={`text-lg sm:text-xl font-black tabular-nums ${uiTimeLeft <= 10 ? "text-red-400 animate-pulse" : "text-white"}`}>{uiTimeLeft}s</div>
             </div>
             <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Accuracy</div>
@@ -778,8 +785,8 @@ export default function AngleHoldClient() {
           onContextMenu={(e) => { if (gameActiveRef.current) e.preventDefault(); }}
           className={`relative overflow-hidden flex flex-col transition-all duration-150 select-none bg-[#080811] text-white border border-white/10 ${
             isFullscreen 
-              ? 'fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#080811] rounded-none border-none flex flex-col items-center justify-center' 
-              : 'w-full rounded-2xl bg-[#080811] aspect-video min-h-[460px] sm:min-h-[500px] max-h-[88vh] relative overflow-hidden flex flex-col'
+              ? "fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#080811] rounded-none border-none flex flex-col items-center justify-center" 
+              : "w-full rounded-2xl bg-[#080811] aspect-video min-h-[460px] sm:min-h-[500px] max-h-[88vh] relative overflow-hidden flex flex-col"
           }`}
           style={{ touchAction: gameActiveRef.current ? 'none' : 'auto' }}
         >
@@ -797,7 +804,7 @@ export default function AngleHoldClient() {
               </div>
               <div className="absolute top-4 right-4 z-30 pointer-events-none text-right">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Time</p>
-                <p className={`text-2xl sm:text-3xl font-bold tabular-nums leading-tight ${uiTimeLeft <= 10 ? 'text-red-400' : 'text-white'}`}>{uiTimeLeft}s</p>
+                <p className={`text-2xl sm:text-3xl font-bold tabular-nums leading-tight ${uiTimeLeft <= 10 ? "text-red-400" : "text-white"}`}>{uiTimeLeft}s</p>
               </div>
             </>
           )}
@@ -856,7 +863,7 @@ export default function AngleHoldClient() {
           <canvas 
             ref={canvasRef} 
             onClick={() => { if (gameState === 'playing' && !pointerLocked) resumeDrill(); }}
-            className={`block absolute top-0 left-0 w-full h-full touch-none z-10 ${gameState === 'playing' ? 'cursor-none' : ''}`} 
+            className={`block absolute top-0 left-0 w-full h-full touch-none z-10 ${gameState === "playing" ? "cursor-none" : ""}`}
           />
 
           {/* START MODAL */}
@@ -865,16 +872,16 @@ export default function AngleHoldClient() {
               icon={Crosshair}
               accent="orange"
               title="Angle Hold Pro"
-              subtitle="Crosshair Placement & Peek Reaction • 15 Levels"
+              subtitle="Crosshair Placement & Peek Reaction • Endless Level Progression"
               rules={[
-                { icon: Target, accent: 'orange', title: 'Objective', text: 'Punish Cover Peeks (+100)' },
-                { icon: AlertCircle, accent: 'red', title: 'Failure Rule', text: 'Pre-fire / Miss / Escape' },
+                { icon: Target, accent: "orange", title: "Objective (+100 PTS)", text: "Punish Cover Peeks (Confirm Real Swings)" },
+                { icon: AlertCircle, accent: "red", title: "Failure Rule", text: penaltyEnabled ? "Pre-fire / Miss / Escape → Resets Combo, -0.8s" : "Pre-fire / Miss / Escape → Resets Combo" },
               ]}
               sensitivity={{ value: universalSens, onChange: setUniversalSens, cmPer360 }}
               stats={[
-                { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
-                { icon: Flame, label: 'Best Combo', value: `${bestCombo}x`, color: 'text-orange-400', accent: 'orange' },
-                { icon: TrendingUp, label: 'Best Level', value: `Lv. ${bestLevel}`, color: 'text-blue-400', accent: 'blue' },
+                { icon: Trophy, label: "Best Score", value: bestScore, color: "text-white", accent: "slate" },
+                { icon: Flame, label: "Best Combo", value: `${bestCombo}x`, color: "text-orange-400", accent: "orange" },
+                { icon: TrendingUp, label: "Best Level", value: `Lv. ${bestLevel}`, color: "text-blue-400", accent: "blue" },
               ]}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
@@ -886,78 +893,23 @@ export default function AngleHoldClient() {
             <DrillCountdown value={countdownValue} subtitle="GET READY" />
           )}
 
-          {/* END SCREEN */}
+          {/* END SCREEN — Universal Result Card */}
           {gameState === 'gameOver' && analytics.grade && (
-            <div className="absolute inset-0 z-40 flex bg-neutral-950/98 select-none font-sans" style={{ background: 'rgba(5,5,8,0.97)' }} onPointerDown={e => e.stopPropagation()}>
-              
-              {/* Left Grade Panel */}
-              <div className="w-[36%] flex flex-col items-center justify-center gap-1 border-r border-white/5 px-4" style={{ background: 'radial-gradient(ellipse 260px 200px at 50% 30%, rgba(249,115,22,.12), transparent 70%)' }}>
-                {isNewBest && (
-                  <span className="text-[9.5px] font-bold text-yellow-400 bg-yellow-500/10 border border-yellow-500/25 px-2.5 py-0.5 rounded-full mb-1 animate-pulse">
-                    NEW BEST
-                  </span>
-                )}
-                <div className={`text-5xl sm:text-6xl font-black leading-none ${analytics.grade.color}`}>
-                  {analytics.grade.letter}
-                </div>
-                <div className="text-[10px] uppercase tracking-widest text-slate-500 text-center font-bold mt-1">
-                  {analytics.grade.label}
-                </div>
-                <div className="text-3xl sm:text-4xl font-black text-white mt-2 tabular-nums">
-                  {uiScore}
-                </div>
-                <div className="text-[9px] uppercase tracking-widest text-slate-500">Points</div>
-              </div>
-
-              {/* Right Stats & Actions Panel */}
-              <div className="flex-1 flex flex-col justify-center gap-3 px-6 py-4 min-w-0">
-                
-                {/* 4 Stat Tiles */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.accuracy}%</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Accuracy</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.avgReactionMs}<span className="text-[10px] text-gray-500">ms</span></p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Avg Reaction</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.maxCombo}x</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Max Combo</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">Lv. {analytics.finalLevel}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Peak Level</p>
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex gap-2">
-                  <button 
-                    onClick={enterDrill} 
-                    className="flex-1 py-3 rounded-[13px] bg-gradient-to-r from-orange-500 to-amber-600 text-white font-bold text-xs uppercase tracking-wide cursor-pointer transition-transform active:scale-[0.98] shadow-md flex items-center justify-center gap-1.5"
-                  >
-                    <RefreshCw className="w-3.5 h-3.5" /> Play Again
-                  </button>
-                  <button 
-                    onClick={shareScore} 
-                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform" 
-                    title="Share Score"
-                  >
-                    <Share2 className="w-4 h-4" />
-                  </button>
-                  <button 
-                    onClick={handleExitDrill} 
-                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform" 
-                    title="Exit Fullscreen & Return"
-                  >
-                    <LogOut className="w-4 h-4 text-red-400" />
-                  </button>
-                </div>
-
-              </div>
-            </div>
+            <DrillResultCard
+              accent="orange"
+              grade={analytics.grade}
+              score={uiScore}
+              isNewBest={isNewBest}
+              stats={[
+                { value: analytics.accuracy, suffix: "%", label: "Accuracy" },
+                { value: analytics.avgReactionMs, suffix: "ms", label: "Avg Reaction" },
+                { value: `${analytics.maxCombo}x`, label: "Max Combo" },
+                { value: `Lv. ${analytics.finalLevel}`, label: "Peak Level" },
+              ]}
+              onPlayAgain={enterDrill}
+              onShare={shareScore}
+              onExit={handleExitDrill}
+            />
           )}
         </div>
 
@@ -989,7 +941,7 @@ export default function AngleHoldClient() {
                     <Crosshair className="w-4 h-4 text-orange-400" /> What Is Crosshair Placement & Angle Holding?
                   </h4>
                   {ABOUT_INTRO.map((para, i) => (
-                    <p key={i} className={`text-sm leading-relaxed text-gray-300 ${i < ABOUT_INTRO.length - 1 ? 'mb-3' : ''}`}>{para}</p>
+                    <p key={i} className={`text-sm leading-relaxed text-gray-300 ${i < ABOUT_INTRO.length - 1 ? "mb-3" : ""}`}>{para}</p>
                   ))}
                 </section>
 
@@ -1013,7 +965,7 @@ export default function AngleHoldClient() {
                       <section.icon className="w-4 h-4 text-orange-400" /> {section.title}
                     </h4>
                     {section.paragraphs.map((para, j) => (
-                      <p key={j} className={`text-sm leading-relaxed text-gray-300 ${j < section.paragraphs.length - 1 ? 'mb-3' : ''}`}>{para}</p>
+                      <p key={j} className={`text-sm leading-relaxed text-gray-300 ${j < section.paragraphs.length - 1 ? "mb-3" : ""}`}>{para}</p>
                     ))}
                   </section>
                 ))}
@@ -1061,11 +1013,10 @@ export default function AngleHoldClient() {
             </div>
           </section>
         )}
-
-        {/* ── FOOTER ── */}
-        {!isFullscreen && <DrillFooter />}
-
       </main>
+
+      {/* ── FOOTER ── */}
+      {!isFullscreen && <DrillFooter />}
     </div>
   );
 }

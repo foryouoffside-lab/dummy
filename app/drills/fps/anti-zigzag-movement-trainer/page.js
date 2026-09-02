@@ -138,7 +138,7 @@ export default function AntiZigzagPage() {
         "name": "How does the level progression work?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Every 150 points increases the level. Higher levels make targets smaller, faster, and perform more frequent direction changes with less time before escape."
+          "text": "Every 1400 points increases your continuous level. Higher levels make targets smaller, faster, and perform more frequent direction reversals with tighter lifespan windows."
         }
       },
       {
@@ -175,10 +175,10 @@ export default function AntiZigzagPage() {
       },
       {
         "@type": "Question",
-        "name": "What causes the target to escape?",
+        "name": "How are errors penalised in Anti-Zigzag Movement?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Each target has a lifespan timer (shown as a red arc). If you don't deplete its health before the timer runs out, it escapes and you lose 1 second from your clock."
+          "text": "When a target escapes or tracking contact is broken for 1.0s, your combo resets to zero. When the optional Time Penalty setting is enabled, target escapes and 1.0s tracking losses deduct 0.6s from your clock."
         }
       },
       {

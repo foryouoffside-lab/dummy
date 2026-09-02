@@ -2,18 +2,17 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
-import {
-  Target, Volume2, VolumeX,
-  Play, RefreshCw, Share2, ArrowLeft, Heart, Users, TrendingUp, Repeat, Zap, ZapOff, Trophy
-} from 'lucide-react';
+import { Target, Volume2, VolumeX, Play, RefreshCw, Share2, ArrowLeft, Heart, Users, TrendingUp, Repeat, Zap, ZapOff, Trophy } from 'lucide-react';
 
+import { isIdleFrameSkippable } from '@/lib/performance';
 import generateShareCard, { shareScoreCard } from '../../../../../components/ShareScoreCard';
 import { drillAudio } from '../../../../../lib/drillAudio';
 import { drillFlash } from '../../../../../lib/drillFlash';
 import { drillTimeout } from '../../../../../lib/drillTimeout';
+import { drillPenalty } from '../../../../../lib/drillPenalty';
 import { getPlayerName } from '../../../../../lib/leaderboard';
-import { getFpsScoreGrade } from '../../../../../lib/scoringEngine';
-import { getDifficultyProgress, getStartLevel } from '../../../../../lib/drillDifficulty';
+import { getFpsScoreGrade, getComboMultiplier } from '../../../../../lib/scoringEngine';
+import { getDifficultyProgress, getStartLevel, ramp } from '../../../../../lib/drillDifficulty';
 import useDrillFlash from '../../../../../lib/useDrillFlash';
 import useUnexpectedExitGuard from '../../../../../lib/useUnexpectedExitGuard';
 import DrillFooter from '../../../../../components/drill/DrillFooter';
@@ -21,23 +20,29 @@ import DrillCountdown from '../../../../../components/drill/DrillCountdown';
 import DrillAccordion from '../../../../../components/drill/DrillAccordion';
 import DrillFlashOverlay from '../../../../../components/drill/DrillFlashOverlay';
 import FpsStartCard from '../../../../../components/drill/FpsStartCard';
+import DrillResultCard from '../../../../../components/drill/DrillResultCard';
 
-const DRILL_DURATION = 45;
+// ============================================================
+// TUNING CONSTANTS
+// ============================================================
+const DRILL_DURATION = 45; // starting clock only; a run grows past this
 const MAX_LIVES = 5;
 const POINTS_PER_HIT = 100;
-const POINTS_PER_LEVEL = 250;
-const ELITE_SCORE = 7500; // Target score for S+ rating (rebalanced after combo removal)
-const STORAGE_KEY = 'skilldrills_symbol_matching_v7';
+const POINTS_PER_LEVEL = 1750; // 250 -> 1750 (7x)
+const ELITE_SCORE = 24000; // 7500 -> 24000 (~3.2x)
+const TIME_PER_HIT = 0.6; // +0.6s on clean hit
+const TIME_PENALTY = 0.8; // -0.8s on wrong tap or trial timeout (opt-in gated)
+const STORAGE_KEY = 'skilldrills_symbol_matching_v8';
 
 const ALL_SYMBOLS = ['Δ', 'Φ', 'Ω', 'Σ', 'Ξ', 'Π'];
 
 const getSavedData = () => {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { bestScore: 0, bestLevel: 1, totalSessions: 0 };
-    return { bestScore: 0, bestLevel: 1, totalSessions: 0, ...JSON.parse(raw) };
+    if (!raw) return { bestScore: 0, bestCombo: 0, bestLevel: 1, totalSessions: 0 };
+    return { bestScore: 0, bestCombo: 0, bestLevel: 1, totalSessions: 0, ...JSON.parse(raw) };
   } catch (e) {
-    return { bestScore: 0, bestLevel: 1, totalSessions: 0 };
+    return { bestScore: 0, bestCombo: 0, bestLevel: 1, totalSessions: 0 };
   }
 };
 
@@ -47,18 +52,20 @@ const saveData = (data) => {
   } catch (e) {}
 };
 
-const getLevelConfig = (level) => {
-  const p = getDifficultyProgress(level); // 0 -> 1 across L1..L15
+// Continuous unbounded difficulty with streak heat
+const getLevelConfig = (level, combo = 0) => {
+  const p = getDifficultyProgress(level); // 0 at L1, 1 at L15, unbounded above
+  const heat = (getComboMultiplier(combo) - 1) / 2;
   return {
-    ttl: Math.max(600, Math.round(2200 - p * 1600)) // Trial duration 2200ms -> 600ms
+    ttl: Math.max(120, ramp(2200, 200, p) * (1 - heat * 0.30)), // Trial duration
   };
 };
 
 const RULES_ITEMS = [
   { title: "Symbol Digit Modality", text: "A key mapping bar at the top assigns 6 unique Greek symbols to digits 1 through 6." },
-  { title: "Target Symbol Prompt", text: "A target symbol appears in the central display. Tap the digit button that matches its assigned number." },
-  { title: "Visual Search & Translation", text: "Rapidly translate visual symbol patterns into numeric motor responses under strict time pressure." },
-  { title: "Precision Matters", text: "Tapping the wrong digit or letting a trial time out triggers a red alert — stay sharp to keep your accuracy high." }
+  { title: "Target Symbol Prompt", text: "A target symbol appears in the center. Tap the matching digit (+100 PTS × Combo, +0.6s)." },
+  { title: "5 Lives Safeguard", text: "You have 5 lives. Tapping the wrong digit costs 1 life and resets your combo. Losing all 5 lives ends the drill early." },
+  { title: "Streak & Penalty Rules", text: "Building streaks multiplies your score. Timeouts and wrong taps deduct 0.8s when enabled in settings." }
 ];
 
 const ABOUT_TEXT = `Symbol Matching is modeled after the clinical Symbol Digit Modality Test (SDMT), a gold-standard neuropsychological evaluation for measuring information processing speed, visual scanning efficiency, and working memory translation.
@@ -94,6 +101,7 @@ export default function SymbolMatchingClient() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
+  const [penaltyEnabled, setPenaltyEnabled] = useState(false);
   const [openAccordion, setOpenAccordion] = useState(null);
   const [countdownValue, setCountdownValue] = useState(3);
 
@@ -101,7 +109,10 @@ export default function SymbolMatchingClient() {
   const [uiScore, setUiScore] = useState(0);
   const [uiLives, setUiLives] = useState(MAX_LIVES);
   const [uiTimeLeft, setUiTimeLeft] = useState(DRILL_DURATION);
+  const [uiLevel, setUiLevel] = useState(1);
+  const [uiCombo, setUiCombo] = useState(0);
   const [bestScore, setBestScore] = useState(0);
+  const [bestCombo, setBestCombo] = useState(0);
   const [bestLevel, setBestLevel] = useState(1);
   const [totalSessions, setTotalSessions] = useState(0);
   const [isNewBest, setIsNewBest] = useState(false);
@@ -116,6 +127,8 @@ export default function SymbolMatchingClient() {
     successfulHits: 0,
     mistakes: 0,
     timeouts: 0,
+    maxCombo: 0,
+    livesRemaining: MAX_LIVES,
     finalLevel: 1,
     grade: null
   });
@@ -123,12 +136,17 @@ export default function SymbolMatchingClient() {
   // DOM & Engine Refs
   const containerRef = useRef(null);
   const countdownTimeoutsRef = useRef([]);
-  const timerIntervalRef = useRef(null);
   const trialTimerRef = useRef(null);
+  const startingRef = useRef(false);
+  const gameActiveRef = useRef(false);
+  const bestLevelRunRef = useRef(1);
+  const lastTimeRef = useRef(DRILL_DURATION);
 
   const engine = useRef({
     score: 0,
     level: 1,
+    combo: 0,
+    maxCombo: 0,
     lives: MAX_LIVES,
     successfulHits: 0,
     mistakes: 0,
@@ -140,11 +158,31 @@ export default function SymbolMatchingClient() {
 
   const { flashes, triggerFlash } = useDrillFlash();
 
+  // Storage loading & sound init
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setSoundEnabled(drillAudio.isEnabled());
+      setFlashEnabled(drillFlash.isEnabled());
+      setPenaltyEnabled(drillPenalty.isEnabled());
+      const saved = getSavedData();
+      setBestScore(saved.bestScore || 0);
+      setBestCombo(saved.bestCombo || 0);
+      setBestLevel(saved.bestLevel || 1);
+      setTotalSessions(saved.totalSessions || 0);
+    }
+  }, []);
+
+  // Fullscreen listener
+  useEffect(() => {
+    const handleFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
+
   // Clean timers on unmount
   useEffect(() => {
     return () => {
       countdownTimeoutsRef.current.forEach(clearTimeout);
-      if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
       if (trialTimerRef.current) clearTimeout(trialTimerRef.current);
     };
   }, []);
@@ -153,8 +191,9 @@ export default function SymbolMatchingClient() {
     markIntentionalExit();
     countdownTimeoutsRef.current.forEach(clearTimeout);
     countdownTimeoutsRef.current = [];
-    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
     if (trialTimerRef.current) clearTimeout(trialTimerRef.current);
+    startingRef.current = false;
+    gameActiveRef.current = false;
 
     if (document.fullscreenElement) {
       await document.exitFullscreen().catch(() => {});
@@ -168,7 +207,9 @@ export default function SymbolMatchingClient() {
   });
 
   const endGame = useCallback(() => {
-    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    markIntentionalExit();
+    gameActiveRef.current = false;
+    startingRef.current = false;
     if (trialTimerRef.current) clearTimeout(trialTimerRef.current);
 
     setGameState('gameOver');
@@ -177,46 +218,92 @@ export default function SymbolMatchingClient() {
     const totalActs = e.successfulHits + e.mistakes + e.timeouts;
     const acc = totalActs > 0 ? Math.round((e.successfulHits / totalActs) * 100) : 100;
 
-    const gradeObj = getFpsScoreGrade(e.score, ELITE_SCORE);
+    const rating = getFpsScoreGrade(e.score, ELITE_SCORE);
+    const gradeObj = {
+      letter: rating.grade || rating.letter || 'C',
+      label: rating.label || 'Keep Going',
+      color: rating.color || 'text-cyan-400',
+    };
 
     setAnalytics({
       accuracy: acc,
       successfulHits: e.successfulHits,
       mistakes: e.mistakes,
       timeouts: e.timeouts,
-      finalLevel: e.level,
+      maxCombo: e.maxCombo,
+      livesRemaining: e.lives,
+      finalLevel: Math.floor(bestLevelRunRef.current),
       grade: gradeObj
     });
 
-    const isNew = e.score > bestScore;
-    if (isNew) {
-      setIsNewBest(true);
-      setBestScore(e.score);
-    } else {
-      setIsNewBest(false);
-    }
+    setUiScore(e.score);
 
-    const newBestLevel = Math.max(bestLevel, e.level);
-    setBestLevel(newBestLevel);
+    const prevSaved = getSavedData();
+    const isNew = e.score > prevSaved.bestScore;
+    setIsNewBest(isNew);
 
-    setTotalSessions((prev) => {
-      const next = prev + 1;
-      saveData({
-        bestScore: Math.max(bestScore, e.score),
-        bestLevel: newBestLevel,
-        totalSessions: next
-      });
-      return next;
-    });
+    const runBestLevel = Math.max(prevSaved.bestLevel, Math.floor(bestLevelRunRef.current));
+    const updatedData = {
+      bestScore: Math.max(prevSaved.bestScore, e.score),
+      bestCombo: Math.max(prevSaved.bestCombo || 0, e.maxCombo),
+      bestLevel: runBestLevel,
+      totalSessions: (prevSaved.totalSessions || 0) + 1
+    };
+    saveData(updatedData);
+
+    setBestScore(updatedData.bestScore);
+    setBestCombo(updatedData.bestCombo);
+    setBestLevel(updatedData.bestLevel);
+    setTotalSessions(updatedData.totalSessions);
 
     drillAudio.playSessionEnd();
-  }, [bestScore, bestLevel]);
+  }, [markIntentionalExit]);
+
+  // Main RAF loop for clock draining
+  useEffect(() => {
+    if (gameState !== 'playing') return;
+
+    let animId;
+    let lastTime = performance.now();
+
+    const loop = (now) => {
+      if (isIdleFrameSkippable(gameState === 'playing', now, lastTime)) {
+        animId = requestAnimationFrame(loop);
+        return;
+      }
+
+      const dt = Math.min((now - lastTime) / 1000, 0.1);
+      lastTime = now;
+
+      const e = engine.current;
+      if (gameActiveRef.current) {
+        if (e.timeLeft > 0) e.timeLeft -= dt;
+        if (e.timeLeft <= 0) {
+          e.timeLeft = 0;
+          setUiTimeLeft(0);
+          endGame();
+          return;
+        }
+
+        const ceilSec = Math.ceil(e.timeLeft);
+        if (ceilSec !== lastTimeRef.current) {
+          lastTimeRef.current = ceilSec;
+          setUiTimeLeft(ceilSec);
+        }
+      }
+
+      animId = requestAnimationFrame(loop);
+    };
+
+    animId = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(animId);
+  }, [gameState, endGame]);
 
   // Trial Spawner
   const spawnTrial = useCallback(() => {
     if (trialTimerRef.current) clearTimeout(trialTimerRef.current);
     const e = engine.current;
-    const config = getLevelConfig(e.level);
+    const config = getLevelConfig(e.level, e.combo);
 
     // Pick random item from key map
     const target = e.keyMap[Math.floor(Math.random() * e.keyMap.length)];
@@ -230,6 +317,9 @@ export default function SymbolMatchingClient() {
       }
       // Timeout miss - NO life lost (timeouts do not cost lives)
       e.timeouts += 1;
+      if (drillPenalty.isEnabled()) e.timeLeft -= TIME_PENALTY;
+      e.combo = 0;
+      setUiCombo(0);
       triggerFlash();
       drillAudio.playPenalty();
       spawnTrial();
@@ -238,25 +328,39 @@ export default function SymbolMatchingClient() {
 
   const handleDigitClick = useCallback((digit, ev) => {
     if (ev) ev.stopPropagation();
+    if (!gameActiveRef.current) return;
     if (trialTimerRef.current) clearTimeout(trialTimerRef.current);
 
     const eng = engine.current;
 
     if (eng.currentTarget && digit === eng.currentTarget.digit) {
       eng.successfulHits += 1;
+      eng.combo += 1;
+      if (eng.combo > eng.maxCombo) eng.maxCombo = eng.combo;
 
-      eng.score += POINTS_PER_HIT;
+      const levelMult = 1 + getDifficultyProgress(eng.level) * 0.5;
+      eng.score += Math.round(POINTS_PER_HIT * getComboMultiplier(eng.combo) * levelMult);
 
-      const rawLevel = Math.floor(eng.score / POINTS_PER_LEVEL) + 1;
+      // Time bonus on clean hit
+      eng.timeLeft += TIME_PER_HIT;
+
+      // Continuous level progression
+      const rawLevel = (eng.score / POINTS_PER_LEVEL) + 1;
       eng.level = Math.max(eng.level, rawLevel);
+      bestLevelRunRef.current = Math.max(bestLevelRunRef.current, eng.level);
 
       setUiScore(eng.score);
+      setUiLevel(Math.floor(eng.level));
+      setUiCombo(eng.combo);
       drillAudio.playHit();
       spawnTrial();
     } else {
       // Wrong click / mistake: lose 1 life!
       eng.mistakes += 1;
       eng.lives -= 1;
+      if (drillPenalty.isEnabled()) eng.timeLeft -= TIME_PENALTY;
+      eng.combo = 0;
+      setUiCombo(0);
       setUiLives(Math.max(0, eng.lives));
       triggerFlash();
       drillAudio.playPenalty();
@@ -271,6 +375,9 @@ export default function SymbolMatchingClient() {
 
   // Enter Drill
   const enterDrill = useCallback(async () => {
+    if (startingRef.current) return;
+    startingRef.current = true;
+
     try {
       if (containerRef.current && !document.fullscreenElement) {
         await containerRef.current.requestFullscreen();
@@ -279,26 +386,31 @@ export default function SymbolMatchingClient() {
 
     countdownTimeoutsRef.current.forEach(clearTimeout);
     countdownTimeoutsRef.current = [];
-    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
     if (trialTimerRef.current) clearTimeout(trialTimerRef.current);
 
     drillAudio.init();
 
-    const saved = getSavedData();
-    const startLevel = getStartLevel(saved.bestLevel);
+    const startLevel = getStartLevel();
+    bestLevelRunRef.current = startLevel;
 
     // Generate random symbol-to-digit key mapping (6 digits: 1 to 6)
     const shuffledSymbols = [...ALL_SYMBOLS].sort(() => Math.random() - 0.5);
     const newKeyMap = shuffledSymbols.slice(0, 6).map((sym, idx) => ({ digit: idx + 1, symbol: sym }));
     setKeyMap(newKeyMap);
 
+    setIsNewBest(false);
     setUiScore(0);
+    setUiLevel(startLevel);
+    setUiCombo(0);
     setUiLives(MAX_LIVES);
     setUiTimeLeft(DRILL_DURATION);
+    lastTimeRef.current = DRILL_DURATION;
 
     engine.current = {
       score: 0,
       level: startLevel,
+      combo: 0,
+      maxCombo: 0,
       lives: MAX_LIVES,
       successfulHits: 0,
       mistakes: 0,
@@ -328,45 +440,41 @@ export default function SymbolMatchingClient() {
     }, 2100);
 
     const t4 = setTimeout(() => {
+      gameActiveRef.current = true;
+      startingRef.current = false;
       setGameState('playing');
-
-      let remaining = DRILL_DURATION;
-      timerIntervalRef.current = setInterval(() => {
-        remaining -= 1;
-        setUiTimeLeft(remaining);
-        if (remaining <= 0) {
-          endGame();
-        }
-      }, 1000);
-
       spawnTrial();
     }, 2450);
 
     countdownTimeoutsRef.current = [t1, t2, t3, t4];
-  }, [endGame, spawnTrial]);
+  }, [spawnTrial]);
 
   const shareResult = useCallback(async () => {
     const url = 'https://skilldrills.online/drills/cognitive/processing-speed/symbol-matching';
     try {
       const canvas = generateShareCard({
         score: uiScore,
-        bestScore,
         accuracy: analytics.accuracy,
-        rating: { letter: analytics.grade?.grade || analytics.grade?.letter || 'C', label: analytics.grade?.label || 'Keep Going', emoji: '🎯' },
-        newBest: isNewBest,
+        speed: 0,
         drillName: 'Symbol Matching',
+        rank: analytics.grade?.letter || 'A',
+        rankName: analytics.grade?.label || 'ELITE SDMT',
         playerName: getPlayerName(),
+        level: analytics.finalLevel,
+        date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        url: 'skilldrills.online/drills/cognitive/processing-speed/symbol-matching'
       });
-      await shareScoreCard(url, canvas);
+      await shareScoreCard(canvas, {
+        title: 'Symbol Matching — My Score',
+        text: `I scored ${uiScore} (Grade: ${analytics.grade?.letter || 'A'}, Lv. ${analytics.finalLevel}) on Symbol Matching at SkillDrills!`,
+        url
+      });
     } catch (e) {
-      const text = `🎯 I scored ${uiScore} PTS (Level ${analytics.finalLevel}) on Symbol Matching! SDMT processing accuracy: ${analytics.accuracy}%. Practice free cognitive focus drills at skilldrills.online! ⚡`;
-      if (typeof navigator !== 'undefined' && navigator.share) {
-        navigator.share({ title: 'Symbol Matching Score', text, url }).catch(() => {});
-      } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
-        navigator.clipboard.writeText(`${text} ${url}`);
+      if (navigator.share) {
+        navigator.share({ title: 'Symbol Matching Score', text: `I scored ${uiScore} on Symbol Matching!`, url }).catch(() => {});
       }
     }
-  }, [uiScore, bestScore, analytics, isNewBest]);
+  }, [uiScore, analytics]);
 
   return (
     <div className="min-h-screen bg-[#050508] text-white flex flex-col font-sans select-none">
@@ -402,7 +510,7 @@ export default function SymbolMatchingClient() {
           </div>
           <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
             <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Level</div>
-            <div className="text-lg sm:text-xl font-black text-indigo-400 tabular-nums">L{engine.current.level}</div>
+            <div className="text-lg sm:text-xl font-black text-indigo-400 tabular-nums">L{uiLevel}</div>
           </div>
           <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
             <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
@@ -419,17 +527,17 @@ export default function SymbolMatchingClient() {
           }
         >
           {/* Red Flash Overlay */}
-          {flashes.map((f) => (
-            <div key={f.id} className="fx-flash fx-flash-red" />
-          ))}
+          <DrillFlashOverlay flashes={flashes} />
 
           {/* IN-BOX OVERLAY HUD */}
           {(gameState === 'playing' || gameState === 'countdown') && (
             <>
               {/* Top Left: Score & 5 Hearts */}
               <div className="absolute top-4 left-4 z-30 pointer-events-none flex flex-col items-start gap-1">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Score</p>
-                <p className="text-2xl sm:text-3xl font-black text-white tabular-nums leading-tight">{uiScore}</p>
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Score</p>
+                  <p className="text-2xl sm:text-3xl font-black text-white tabular-nums leading-tight">{uiScore}</p>
+                </div>
                 <div className="flex items-center gap-1 mt-0.5">
                   {Array.from({ length: MAX_LIVES }).map((_, idx) => {
                     const active = idx < uiLives;
@@ -456,7 +564,7 @@ export default function SymbolMatchingClient() {
           )}
 
           {/* IN-GAME HUD SOUND + FLASH TOGGLES */}
-          {gameState === 'playing' && (
+          {(gameState === 'playing' || gameState === 'countdown') && (
             <div className="absolute bottom-4 right-4 z-40 flex items-center gap-2">
               <button
                 onPointerDown={(e) => e.stopPropagation()}
@@ -495,7 +603,7 @@ export default function SymbolMatchingClient() {
               {/* Background Grid */}
               <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
 
-              {/* Legend Key Mapping Header (6 Symbol-Digit Pairs - Centered to prevent Score & Time overlap) */}
+              {/* Legend Key Mapping Header (6 Symbol-Digit Pairs) */}
               <div className="z-20 w-full max-w-[280px] sm:max-w-xs md:max-w-md bg-black/80 backdrop-blur-md rounded-2xl border border-white/10 p-1.5 sm:p-2.5 shadow-xl grid grid-cols-6 gap-1 sm:gap-2 mt-1 sm:mt-2">
                 {keyMap.map((pair) => (
                   <div key={pair.digit} className="flex flex-col items-center justify-center bg-white/[0.03] border border-white/5 rounded-xl py-1 sm:py-1.5">
@@ -515,7 +623,7 @@ export default function SymbolMatchingClient() {
                 </div>
               </div>
 
-              {/* 6 Digit Touch Buttons Grid Bottom (Lifted higher to prevent Sound Button interference) */}
+              {/* 6 Digit Touch Buttons Grid Bottom */}
               <div className="z-20 w-full max-w-[320px] sm:max-w-md grid grid-cols-6 gap-1.5 sm:gap-2.5 mb-6 sm:mb-8">
                 {[1, 2, 3, 4, 5, 6].map((digit) => (
                   <button
@@ -539,8 +647,15 @@ export default function SymbolMatchingClient() {
               title="Symbol Matching"
               subtitle="SDMT Paradigm • Visual Search"
               rules={[
-                { icon: Target, accent: 'cyan', title: 'Match Target Symbol to Digit', text: 'Locate target symbol and tap the matching number key' },
-                { icon: Zap, accent: 'blue', title: 'Top Key Mapping', text: 'Cross-reference unfamiliar symbols against the top key legend' },
+                { icon: Target, accent: 'cyan', title: 'Match Target Symbol to Digit', text: '+100 PTS × Combo × Level multiplier (+0.6s per hit)' },
+                {
+                  icon: Zap,
+                  accent: 'blue',
+                  title: penaltyEnabled ? '5 Lives & Time Penalty' : '5 Lives System',
+                  text: penaltyEnabled
+                    ? 'Wrong clicks lose 1 life and subtract 0.8s. Run ends if lives reach 0'
+                    : '5 lives total. Wrong clicks cost 1 life and reset combo. Run ends if lives reach 0'
+                },
               ]}
               stats={[
                 { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
@@ -556,75 +671,23 @@ export default function SymbolMatchingClient() {
             <DrillCountdown value={countdownValue} subtitle="GET READY" />
           )}
 
-          {/* END SCREEN */}
+          {/* UNIVERSAL RESULT CARD */}
           {gameState === 'gameOver' && analytics.grade && (
-            <div className="absolute inset-0 z-40 flex bg-neutral-950/98 select-none font-sans" style={{ background: 'rgba(5,5,8,0.97)' }} onPointerDown={e => e.stopPropagation()}>
-              
-              {/* Left Grade Panel */}
-              <div className="w-[36%] flex flex-col items-center justify-center gap-1 border-r border-white/5 px-4" style={{ background: 'radial-gradient(ellipse 260px 200px at 50% 30%, rgba(34,211,238,.12), transparent 70%)' }}>
-                {isNewBest && (
-                  <span className="text-[9.5px] font-bold text-yellow-400 bg-yellow-500/10 border border-yellow-500/25 px-2.5 py-0.5 rounded-full mb-1 animate-pulse">
-                    NEW BEST
-                  </span>
-                )}
-                <div className={`text-5xl sm:text-6xl font-black leading-none ${analytics.grade?.color || 'text-cyan-400'}`}>
-                  {analytics.grade?.grade || analytics.grade?.letter || 'C'}
-                </div>
-                <div className="text-[10px] uppercase tracking-widest text-slate-500 text-center font-bold mt-1">
-                  {analytics.grade?.label || 'Good Effort'}
-                </div>
-                <div className="text-3xl sm:text-4xl font-black text-white mt-2 tabular-nums">
-                  {uiScore}
-                </div>
-                <div className="text-[9px] uppercase tracking-widest text-slate-500">Points</div>
-              </div>
-
-              {/* Right Stats & Actions Panel */}
-              <div className="flex-1 flex flex-col justify-center gap-3 px-6 py-4 min-w-0">
-                
-                <div className="grid grid-cols-3 gap-2">
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.accuracy}%</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Accuracy</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-emerald-400">{analytics.successfulHits}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Hits</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-red-400">{analytics.mistakes + analytics.timeouts}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Errors</p>
-                  </div>
-                </div>
-
-                <div className="flex gap-2">
-                  <button 
-                    type="button"
-                    onClick={enterDrill} 
-                    className="flex-1 py-3 rounded-[13px] bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-bold text-xs uppercase tracking-wide cursor-pointer transition-transform active:scale-[0.98] shadow-md flex items-center justify-center gap-1.5"
-                  >
-                    <RefreshCw className="w-3.5 h-3.5" /> Play Again
-                  </button>
-                  <button 
-                    type="button"
-                    onClick={shareResult} 
-                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform" 
-                    title="Share Score"
-                  >
-                    <Share2 className="w-4 h-4" />
-                  </button>
-                  <button 
-                    type="button"
-                    onClick={handleExitDrill} 
-                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform" 
-                    title="Exit Drill"
-                  >
-                    <ArrowLeft className="w-4 h-4 text-red-400" />
-                  </button>
-                </div>
-
-              </div>
-            </div>
+            <DrillResultCard
+              accent="cyan"
+              grade={analytics.grade}
+              score={uiScore}
+              isNewBest={isNewBest}
+              stats={[
+                { label: 'Accuracy', value: analytics.accuracy, suffix: '%' },
+                { label: 'Hits', value: analytics.successfulHits },
+                { label: 'Lives Left', value: `${analytics.livesRemaining}/${MAX_LIVES}` },
+                { label: 'Peak Level', value: `Lv. ${analytics.finalLevel}` },
+              ]}
+              onPlayAgain={enterDrill}
+              onShare={shareResult}
+              onExit={handleExitDrill}
+            />
           )}
 
         </div>
@@ -683,7 +746,7 @@ export default function SymbolMatchingClient() {
                       <div className="w-7 h-7 rounded-lg bg-purple-600 flex items-center justify-center"><Repeat className="w-3.5 h-3.5 text-white" /></div>
                       <h5 className="text-xs font-bold text-white">Rotating Key Mapping</h5>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">The symbol-to-digit key changes after every answer, preventing rote memorization and forcing a fresh visual lookup on each trial — just like the clinical SDMT.</p>
+                    <p className="text-xs text-gray-300 leading-relaxed">The symbol-to-digit key changes after every session, preventing rote memorization and forcing a fresh visual lookup on each trial — just like the clinical SDMT.</p>
                   </div>
                 </div>
               </div>

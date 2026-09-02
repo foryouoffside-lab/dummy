@@ -1,4 +1,5 @@
 import MotorDrillsClient from './MotorDrillsClient';
+import { getAlternateLanguages } from '@/lib/i18n/locales';
 
 export const metadata = {
   title: 'Mouse Precision & Hand Eye Coordination Drills - Free',
@@ -46,6 +47,7 @@ export const metadata = {
   robots: { index: true, follow: true },
   alternates: {
     canonical: 'https://skilldrills.online/drills/motor',
+    languages: getAlternateLanguages('/drills/motor'),
   },
 };
 

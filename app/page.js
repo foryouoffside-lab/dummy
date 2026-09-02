@@ -1,5 +1,6 @@
 import HomePageClient from './HomePageClient';
 import { DRILLS } from '@/lib/drillsRegistry';
+import { getAlternateLanguages } from '@/lib/i18n/locales';
 
 export const metadata = {
   title: 'Free Aim Trainer & Brain Training Drills | SkillDrills',
@@ -30,7 +31,10 @@ export const metadata = {
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
-  alternates: { canonical: 'https://skilldrills.online' },
+  alternates: {
+    canonical: 'https://skilldrills.online',
+    languages: getAlternateLanguages('/'),
+  },
 };
 
 export default function HomePage() {

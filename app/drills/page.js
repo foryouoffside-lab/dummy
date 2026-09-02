@@ -1,5 +1,6 @@
 import DrillsDirectoryClient from './DrillsDirectoryClient';
 import { DRILLS } from '@/lib/drillsRegistry';
+import { getAlternateLanguages } from '@/lib/i18n/locales';
 
 // GSC (180d): this URL takes 29 impr for "online drills" (pos 14.7) and 23 for
 // "drills online" (pos 10.6) without the phrase appearing in the title at all.
@@ -11,6 +12,7 @@ export const metadata = {
   description: DESCRIPTION,
   alternates: {
     canonical: 'https://skilldrills.online/drills',
+    languages: getAlternateLanguages('/drills'),
   },
   robots: { index: true, follow: true },
   openGraph: {

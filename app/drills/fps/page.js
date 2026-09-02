@@ -1,5 +1,6 @@
 import FPSHubClient from './FPSHubClient';
 import { DRILLS } from '../../../lib/drillsRegistry';
+import { getAlternateLanguages } from '@/lib/i18n/locales';
 
 const fpsDrills = DRILLS.filter((d) => d.category === 'fps');
 const fpsDrillCount = fpsDrills.length;
@@ -43,7 +44,10 @@ export const metadata = {
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
-  alternates: { canonical: 'https://skilldrills.online/drills/fps' },
+  alternates: {
+    canonical: 'https://skilldrills.online/drills/fps',
+    languages: getAlternateLanguages('/drills/fps'),
+  },
 };
 
 export default function FPSHubPage() {

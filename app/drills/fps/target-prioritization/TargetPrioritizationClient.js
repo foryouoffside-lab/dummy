@@ -17,30 +17,31 @@ import { getPlayerName } from '../../../../lib/leaderboard';
 import { drillAudio } from '../../../../lib/drillAudio';
 import { drillFlash } from '../../../../lib/drillFlash';
 import { drillTimeout } from '../../../../lib/drillTimeout';
-import { getStartLevel, getDifficultyProgress, getComboBonusLevel } from '../../../../lib/drillDifficulty';
+import { drillPenalty } from '../../../../lib/drillPenalty';
+import { getStartLevel, getDifficultyProgress, ramp } from '../../../../lib/drillDifficulty';
 import { getComboMultiplier, getFpsScoreGrade } from '../../../../lib/scoringEngine';
 import { createBackdropCache, getCanvasDpr, drawPulseRing, drawTacticalTarget } from '../../../../lib/canvasFx';
 import DrillFooter from '../../../../components/drill/DrillFooter';
 import DrillCountdown from '../../../../components/drill/DrillCountdown';
 import DrillAccordion from '../../../../components/drill/DrillAccordion';
 import FpsStartCard from '../../../../components/drill/FpsStartCard';
+import DrillResultCard from '../../../../components/drill/DrillResultCard';
 import useUnexpectedExitGuard from '../../../../lib/useUnexpectedExitGuard';
 
 // ============================================================
 // TUNING CONSTANTS
 // ============================================================
-const DRILL_DURATION = 45;
-const POINTS_PER_LEVEL = 200;
-const ELITE_SCORE = 16000;
-const STORAGE_KEY = 'skilldrills_fps_target_prioritization_v2';
-const OLD_STORAGE_KEY = 'targetPrioritization_bestScore';
+const DRILL_DURATION = 45; // starting clock only; a run grows past this
+const POINTS_PER_LEVEL = 1400; // 200 -> 1400 (7x)
+const ELITE_SCORE = 54000; // 18000 -> 54000 (3x)
+const TIME_PER_HIT = 0.4; // +0.4s on valid threat elimination
+const TIME_PENALTY = 0.6; // opt-in on friendly fire, wrong priority, miss, or timeout
+const STORAGE_KEY = 'skilldrills_fps_target_prioritization_v3';
 
 const getSavedData = () => {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) return { bestScore: 0, bestCombo: 0, bestLevel: 1, totalSessions: 0, ...JSON.parse(raw) };
-    const legacy = localStorage.getItem(OLD_STORAGE_KEY);
-    if (legacy) return { bestScore: parseInt(legacy, 10) || 0, bestCombo: 0, bestLevel: 1, totalSessions: 0 };
     return { bestScore: 0, bestCombo: 0, bestLevel: 1, totalSessions: 0 };
   } catch (e) {
     return { bestScore: 0, bestCombo: 0, bestLevel: 1, totalSessions: 0 };
@@ -53,16 +54,17 @@ const saveData = (data) => {
   } catch (e) {}
 };
 
-const getLevelConfig = (level) => {
-  const p = getDifficultyProgress(level);
+const getLevelConfig = (level, combo = 0) => {
+  const p = getDifficultyProgress(level); // 0 at L1, 1 at L15, unbounded above
+  const heat = (getComboMultiplier(combo) - 1) / 2;
   return {
-    maxTargets: Math.min(3, Math.floor(2 + p * 1.5)), // 2 targets initially -> strictly max 3 targets at higher difficulty
-    spawnDelay: Math.max(500, 1100 - p * 600),
-    redRatio: 0.25 + p * 0.30,
-    greenRatio: 0.20 + p * 0.15,
-    yellowTtl: Math.max(1400, 2400 - p * 1000),
-    redTtl: Math.max(1400, 2200 - p * 800),
-    speed: 35 + p * 90
+    maxTargets: Math.min(4, Math.floor(2 + p * 1.8 + heat * 0.5)),
+    spawnDelay: Math.max(400, ramp(1100, 500, p) * (1 - heat * 0.20)),
+    redRatio: Math.min(0.65, 0.25 + p * 0.30 + heat * 0.10),
+    greenRatio: Math.min(0.40, 0.20 + p * 0.15),
+    yellowTtl: Math.max(1000, ramp(2400, 1400, p) * (1 - heat * 0.20)),
+    redTtl: Math.max(1100, ramp(2200, 1400, p) * (1 - heat * 0.20)),
+    speed: ramp(35, 130, p) * (1 + heat * 0.20)
   };
 };
 
@@ -70,10 +72,10 @@ const getLevelConfig = (level) => {
 // ACCORDION & RELATED DRILLS DATA
 // ============================================================
 const RULES_ITEMS = [
-  { num: "1", text: "High Threat Target", highlight: "Red (+100 PTS)", result: "Must be eliminated first" },
-  { num: "2", text: "Medium Threat Target", highlight: "Yellow (+50 PTS)", result: "Escalates to Red after timer" },
-  { num: "3", text: "Friendly Unit", highlight: "Green (0 PTS)", result: "Causes penalty on hit" },
-  { num: "4", text: "Decision Combo", highlight: "Up to 3.0x Multiplier", result: "Resets on friendly/wrong/miss" }
+  { num: "1", text: "High Threat Target", highlight: "Red (+100 PTS / +0.4s)", result: "Must be eliminated first" },
+  { num: "2", text: "Medium Threat Target", highlight: "Yellow (+50 PTS / +0.4s)", result: "Escalates to Red after timer" },
+  { num: "3", text: "Friendly Unit", highlight: "Green (DO NOT SHOOT)", result: "Causes penalty on hit" },
+  { num: "4", text: "Level Progression", highlight: "+1 Level / 1400 PTS", result: "Continuous Dynamic Density & Speed" }
 ];
 
 const ABOUT_INTRO = [
@@ -82,9 +84,9 @@ const ABOUT_INTRO = [
 ];
 
 const ABOUT_CARDS = [
-  { icon: Users, iconBg: 'bg-blue-600', title: "Who Should Use This?", text: "Tactical FPS players, entry fraggers, and IGLa facing multi-enemy site pushes in Valorant, CS2, and Rainbow Six Siege." },
-  { icon: TrendingUp, iconBg: 'bg-fuchsia-600', title: "Skills Trained", text: "Threat assessment, distractor suppression, impulse control, tactical decision speed, and target selection under cognitive load." },
-  { icon: Zap, iconBg: 'bg-orange-600', title: "Why It Is Harder", text: "Under adrenaline, the brain naturally defaults to shooting the first visual movement. This drill forces active visual confirmation before clicking." }
+  { icon: Users, iconBg: "bg-blue-600", title: "Who Should Use This?", text: "Tactical FPS players, entry fraggers, and IGLa facing multi-enemy site pushes in Valorant, CS2, and Rainbow Six Siege." },
+  { icon: TrendingUp, iconBg: "bg-fuchsia-600", title: "Skills Trained", text: "Threat assessment, distractor suppression, impulse control, tactical decision speed, and target selection under cognitive load." },
+  { icon: Zap, iconBg: "bg-orange-600", title: "Why It Is Harder", text: "Under adrenaline, the brain naturally defaults to shooting the first visual movement. This drill forces active visual confirmation before clicking." }
 ];
 
 const ABOUT_SECTIONS = [
@@ -109,7 +111,7 @@ const FAQ_ITEMS = [
   { q: "How do professional FPS players choose targets?", a: "Professional players assess threats instantaneously, prioritizing low-health enemies, immediate headshot threats, active duelists, and high-DPS opponents while ignoring non-threat distractors." },
   { q: "Why do I shoot the wrong enemy under pressure?", a: "Shooting the wrong enemy is often caused by panic firing or poor visual filtering. Under high adrenaline, the brain defaults to shooting the first movement it detects rather than sorting target threat levels." },
   { q: "What is threat assessment training?", a: "Threat assessment training uses cognitive drills to condition the brain to identify, rank, and eliminate targets in order of threat level (e.g., Red vs. Yellow) rather than raw visual proximity." },
-  { q: "How can I improve target selection?", a: "You can improve target selection by training with cognitive aim tools that actively punish you for shooting decoys, helping you build impulse control and target confirmation habits." },
+  { q: "How are errors penalised in Target Prioritization?", a: "Shooting a friendly green target, clicking a yellow target while a red threat is active, or missing clicks resets your combo streak. When the optional Time Penalty setting is enabled, each error deducts 0.6s from your clock." },
   { q: "What is distractor suppression?", a: "Distractor suppression is the ability to ignore moving visual elements, friendly teammates, or non-threatening details (like decoy targets) to maintain absolute focus on critical targets." },
   { q: "Can this drill improve decision making?", a: "Yes, this drill forces you to make split-second decisions under time pressure. Repeated practice builds the neural pathways required to make accurate tactical decisions in games." },
   { q: "Does this help Valorant players?", a: "Yes, Valorant features decoy abilities (like Yoru clones or flashes) and chaotic team fights. Target prioritization training helps you ignore decoys and target the actual threat." },
@@ -140,6 +142,7 @@ export default function TargetPrioritizationClient() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
+  const [penaltyEnabled, setPenaltyEnabled] = useState(false);
   const [pointerLocked, setPointerLocked] = useState(false);
   const [openAccordion, setOpenAccordion] = useState(null);
   const [isTouchOnlyDevice, setIsTouchOnlyDevice] = useState(false);
@@ -199,6 +202,7 @@ export default function TargetPrioritizationClient() {
     if (typeof window !== 'undefined') {
       setSoundEnabled(drillAudio.isEnabled());
       setFlashEnabled(drillFlash.isEnabled());
+      setPenaltyEnabled(drillPenalty.isEnabled());
       const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
       const isTouchCapable = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
       setIsTouchOnlyDevice(isTouchCapable && !hasFinePointer);
@@ -222,8 +226,8 @@ export default function TargetPrioritizationClient() {
     setTimeout(() => setFlashes((f) => f.filter((x) => x.id !== id)), 480);
   }, []);
 
-  const spawnTarget = useCallback((width, height, currentLevel) => {
-    const cfg = getLevelConfig(currentLevel);
+  const spawnTarget = useCallback((width, height, currentLevel, currentCombo = 0) => {
+    const cfg = getLevelConfig(currentLevel, currentCombo);
     const pad = 48;
     const rand = Math.random();
 
@@ -273,8 +277,9 @@ export default function TargetPrioritizationClient() {
     const e = engine.current;
     const totalCorrect = e.redHits + e.yellowHits;
     const finalAccuracy = e.totalActions > 0 ? Math.round((totalCorrect / e.totalActions) * 100) : 100;
-    const peakLevel = bestLevelRunRef.current;
-    const grade = getFpsScoreGrade(e.score, ELITE_SCORE);
+    const peakLevel = Math.floor(bestLevelRunRef.current);
+    const rating = getFpsScoreGrade(e.score, ELITE_SCORE);
+    const grade = { letter: rating.grade, label: rating.label, color: rating.color };
 
     setAccuracy(finalAccuracy);
     setAnalytics({
@@ -296,7 +301,7 @@ export default function TargetPrioritizationClient() {
     const isNew = e.score > saved.bestScore;
 
     saveData({
-      bestScore: newBestScore,
+      bestScore: newBestScore, 
       bestCombo: newBestCombo,
       bestLevel: newBestLevel,
       totalSessions: (saved.totalSessions || 0) + 1
@@ -322,8 +327,7 @@ export default function TargetPrioritizationClient() {
     setTimeLeft(DRILL_DURATION);
     lastTimeRef.current = DRILL_DURATION;
 
-    const saved = getSavedData();
-    const startLvl = getStartLevel(saved.bestLevel);
+    const startLvl = getStartLevel();
     setLevel(startLvl);
     bestLevelRunRef.current = startLvl;
 
@@ -454,12 +458,14 @@ export default function TargetPrioritizationClient() {
           const levelMult = 1 + getDifficultyProgress(eRef.level) * 0.5;
           const gained = Math.round(baseScore * getComboMultiplier(eRef.combo) * levelMult);
           eRef.score += gained;
+          eRef.timeLeft += TIME_PER_HIT; // +0.4s
 
           drillAudio.playHit();
           createExplosion(clickedTarget.x, clickedTarget.y, '#ef4444');
         } else if (clickedTarget.type === 'yellow') {
           if (activeReds) {
             eRef.wrongPriority++;
+            if (drillPenalty.isEnabled()) eRef.timeLeft -= TIME_PENALTY;
             eRef.combo = 0;
             eRef.screenShake = 6;
             drillAudio.playPenalty();
@@ -474,12 +480,14 @@ export default function TargetPrioritizationClient() {
             const levelMult = 1 + getDifficultyProgress(eRef.level) * 0.5;
             const gained = Math.round(baseScore * getComboMultiplier(eRef.combo) * levelMult);
             eRef.score += gained;
+            eRef.timeLeft += TIME_PER_HIT; // +0.4s
 
             drillAudio.playHit();
             createExplosion(clickedTarget.x, clickedTarget.y, '#eab308');
           }
         } else if (clickedTarget.type === 'green') {
           eRef.friendlyFire++;
+          if (drillPenalty.isEnabled()) eRef.timeLeft -= TIME_PENALTY;
           eRef.combo = 0;
           eRef.screenShake = 12;
           drillAudio.playPenalty();
@@ -490,12 +498,13 @@ export default function TargetPrioritizationClient() {
         setScore(eRef.score);
         setCombo(eRef.combo);
 
-        const rawLevel = Math.floor(eRef.score / POINTS_PER_LEVEL) + 1 + getComboBonusLevel(eRef.combo);
+        const rawLevel = (eRef.score / POINTS_PER_LEVEL) + 1;
         eRef.level = Math.max(eRef.level, rawLevel);
         bestLevelRunRef.current = Math.max(bestLevelRunRef.current, eRef.level);
-        setLevel(eRef.level);
+        setLevel(Math.floor(eRef.level));
       } else {
         eRef.missedClicks++;
+        if (drillPenalty.isEnabled()) eRef.timeLeft -= TIME_PENALTY;
         eRef.combo = 0;
         eRef.screenShake = 6;
         setCombo(0);
@@ -578,7 +587,7 @@ export default function TargetPrioritizationClient() {
       const dpr = getCanvasDpr();
       const width = e.logicalWidth || cvs.width / dpr;
       const height = e.logicalHeight || cvs.height / dpr;
-      const cfg = getLevelConfig(e.level);
+      const cfg = getLevelConfig(e.level, e.combo);
 
       if (gameState === 'playing' && pointerLocked) {
         if (e.timeLeft > 0) e.timeLeft -= dt;
@@ -596,7 +605,7 @@ export default function TargetPrioritizationClient() {
         }
 
         if (time >= e.nextSpawnTime && e.targets.length < cfg.maxTargets) {
-          e.targets.push(spawnTarget(width, height, e.level));
+          e.targets.push(spawnTarget(width, height, e.level, e.combo));
           e.nextSpawnTime = time + cfg.spawnDelay;
         }
 
@@ -612,6 +621,7 @@ export default function TargetPrioritizationClient() {
 
           if (t.type === 'red' && drillTimeout.isEnabled() && t.age >= cfg.redTtl) {
             e.expiredReds++;
+            if (drillPenalty.isEnabled()) e.timeLeft -= TIME_PENALTY;
             e.combo = 0;
             e.screenShake = 8;
             setCombo(0);
@@ -682,7 +692,7 @@ export default function TargetPrioritizationClient() {
         p.y += p.vy;
         p.life -= dt * 2.2;
         if (p.life <= 0) { e.particles.splice(i, 1); continue; }
-        ctx.globalAlpha = p.life;
+        ctx.globalAlpha = p.life; 
         ctx.fillStyle = p.color;
         ctx.fillRect(p.x, p.y, 3, 3);
       }
@@ -749,7 +759,7 @@ export default function TargetPrioritizationClient() {
         bestScore,
         accuracy: analytics.accuracy,
         bestCombo: analytics.bestCombo,
-        rating: { letter: analytics.grade?.grade || 'C', label: analytics.grade?.label || 'Keep Going', emoji: '🎯' },
+        rating: { letter: analytics.grade?.letter || 'C', label: analytics.grade?.label || 'Keep Going', emoji: '🎯' },
         newBest: isNewBest,
         drillName: 'Target Prioritization',
         playerName: getPlayerName(),
@@ -780,7 +790,7 @@ export default function TargetPrioritizationClient() {
               </span>
             </h1>
             <p className="text-xs text-slate-400 mt-1">
-              Threat Assessment &amp; Cognitive Filtering • 15 Levels
+              Threat Assessment &amp; Cognitive Filtering • Endless Level Progression
             </p>
           </div>
         )}
@@ -794,7 +804,7 @@ export default function TargetPrioritizationClient() {
             </div>
             <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
-              <div className={`text-lg sm:text-xl font-black tabular-nums ${timeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>{timeLeft}s</div>
+              <div className={`text-lg sm:text-xl font-black tabular-nums ${timeLeft <= 10 ? "text-red-400 animate-pulse" : "text-white"}`}>{timeLeft}s</div>
             </div>
             <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Accuracy</div>
@@ -813,8 +823,8 @@ export default function TargetPrioritizationClient() {
           onContextMenu={(e) => { if (gameState === 'playing' || gameState === 'countdown') e.preventDefault(); }}
           className={`relative overflow-hidden flex flex-col transition-all duration-150 select-none bg-[#080811] text-white border border-white/10 ${
             isFullscreen 
-              ? 'fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#080811] rounded-none border-none flex flex-col items-center justify-center' 
-              : 'w-full rounded-2xl bg-[#080811] aspect-video min-h-[460px] sm:min-h-[500px] max-h-[88vh] relative overflow-hidden flex flex-col'
+              ? "fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#080811] rounded-none border-none flex flex-col items-center justify-center" 
+              : "w-full rounded-2xl bg-[#080811] aspect-video min-h-[460px] sm:min-h-[500px] max-h-[88vh] relative overflow-hidden flex flex-col"
           }`}
           style={{ touchAction: (gameState === 'playing' || gameState === 'countdown') ? 'none' : 'auto' }}
         >
@@ -833,7 +843,7 @@ export default function TargetPrioritizationClient() {
 
               <div className="absolute top-4 right-4 z-30 pointer-events-none text-right">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Time</p>
-                <p className={`text-2xl sm:text-3xl font-bold tabular-nums leading-tight ${timeLeft <= 10 ? 'text-red-400' : 'text-white'}`}>{timeLeft}s</p>
+                <p className={`text-2xl sm:text-3xl font-bold tabular-nums leading-tight ${timeLeft <= 10 ? "text-red-400" : "text-white"}`}>{timeLeft}s</p>
               </div>
             </>
           )}
@@ -892,7 +902,7 @@ export default function TargetPrioritizationClient() {
           <canvas 
             ref={canvasRef} 
             onClick={() => { if (gameState === 'playing' && !pointerLocked) resumeDrill(); }}
-            className={`block absolute top-0 left-0 w-full h-full touch-none z-10 ${gameState === 'playing' ? 'cursor-none' : ''}`} 
+            className={`block absolute top-0 left-0 w-full h-full touch-none z-10 ${gameState === "playing" ? "cursor-none" : ""}`}
           />
 
           {/* START MODAL */}
@@ -901,17 +911,18 @@ export default function TargetPrioritizationClient() {
               icon={Target}
               accent="indigo"
               title="Target Prioritization"
-              subtitle="Threat Assessment & Cognitive Filtering • 15 Levels"
+              subtitle="Threat Assessment & Cognitive Filtering • Endless Level Progression"
               rules={[
-                { icon: Target, accent: 'red', title: 'Red Threat', text: 'High Priority (+100 PTS)' },
-                { icon: AlertCircle, accent: 'amber', title: 'Yellow Threat', text: 'Medium Priority (+50 PTS)' },
-                { icon: Shield, accent: 'green', title: 'Green Unit', text: 'Friendly — DO NOT SHOOT' },
+                { icon: Target, accent: "red", title: "Red Threat (+100 PTS)", text: "High Priority (Shoot First)" },
+                { icon: AlertCircle, accent: "amber", title: "Yellow Threat (+50 PTS)", text: "Medium Priority (Escalates)" },
+                { icon: Shield, accent: "green", title: "Green Unit", text: "Friendly — DO NOT SHOOT" },
+                { icon: AlertCircle, accent: "red", title: "Failure Rule", text: penaltyEnabled ? "Friendly / Wrong / Miss → Resets Combo, -0.6s" : "Friendly / Wrong / Miss → Resets Combo" },
               ]}
               sensitivity={{ value: universalSens, onChange: setUniversalSens, cmPer360 }}
               stats={[
-                { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
-                { icon: Flame, label: 'Best Combo', value: `${bestCombo}x`, color: 'text-blue-400', accent: 'indigo' },
-                { icon: TrendingUp, label: 'Best Level', value: `Lv. ${bestLevel}`, color: 'text-blue-400', accent: 'blue' },
+                { icon: Trophy, label: "Best Score", value: bestScore, color: "text-white", accent: "slate" },
+                { icon: Flame, label: "Best Combo", value: `${bestCombo}x`, color: "text-blue-400", accent: "indigo" },
+                { icon: TrendingUp, label: "Best Level", value: `Lv. ${bestLevel}`, color: "text-blue-400", accent: "blue" },
               ]}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
@@ -923,78 +934,23 @@ export default function TargetPrioritizationClient() {
             <DrillCountdown value={countdownValue} subtitle="GET READY" />
           )}
 
-          {/* END SCREEN */}
+          {/* END SCREEN — Universal Result Card */}
           {gameState === 'gameOver' && analytics.grade && (
-            <div className="absolute inset-0 z-40 flex bg-neutral-950/98 select-none font-sans" style={{ background: 'rgba(5,5,8,0.97)' }} onPointerDown={e => e.stopPropagation()}>
-              
-              {/* Left Grade Panel */}
-              <div className="w-[36%] flex flex-col items-center justify-center gap-1 border-r border-white/5 px-4" style={{ background: 'radial-gradient(ellipse 260px 200px at 50% 30%, rgba(59,130,246,.12), transparent 70%)' }}>
-                {isNewBest && (
-                  <span className="text-[9.5px] font-bold text-yellow-400 bg-yellow-500/10 border border-yellow-500/25 px-2.5 py-0.5 rounded-full mb-1 animate-pulse">
-                    NEW BEST
-                  </span>
-                )}
-                <div className={`text-5xl sm:text-6xl font-black leading-none ${analytics.grade.color}`}>
-                  {analytics.grade.grade}
-                </div>
-                <div className="text-[10px] uppercase tracking-widest text-slate-500 text-center font-bold mt-1">
-                  {analytics.grade.label}
-                </div>
-                <div className="text-3xl sm:text-4xl font-black text-white mt-2 tabular-nums">
-                  {score}
-                </div>
-                <div className="text-[9px] uppercase tracking-widest text-slate-500">Points</div>
-              </div>
-
-              {/* Right Stats & Actions Panel */}
-              <div className="flex-1 flex flex-col justify-center gap-3 px-6 py-4 min-w-0">
-                
-                {/* 4 Stat Tiles */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.accuracy}%</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Accuracy</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.redHits + analytics.yellowHits}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Threats Cleared</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.bestCombo}x</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Max Combo</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">Lv. {analytics.levelReached}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Peak Level</p>
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex gap-2">
-                  <button 
-                    onClick={enterDrill} 
-                    className="flex-1 py-3 rounded-[13px] bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold text-xs uppercase tracking-wide cursor-pointer transition-transform active:scale-[0.98] shadow-md flex items-center justify-center gap-1.5"
-                  >
-                    <RefreshCw className="w-3.5 h-3.5" /> Play Again
-                  </button>
-                  <button 
-                    onClick={shareDrillLink} 
-                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform" 
-                    title="Share Score"
-                  >
-                    <Share2 className="w-4 h-4" />
-                  </button>
-                  <button 
-                    onClick={handleExitDrill} 
-                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform" 
-                    title="Exit Fullscreen & Return"
-                  >
-                    <LogOut className="w-4 h-4 text-red-400" />
-                  </button>
-                </div>
-
-              </div>
-            </div>
+            <DrillResultCard
+              accent="blue"
+              grade={analytics.grade}
+              score={score}
+              isNewBest={isNewBest}
+              stats={[
+                { value: analytics.accuracy, suffix: "%", label: "Accuracy" },
+                { value: analytics.redHits + analytics.yellowHits, label: "Threats Cleared" },
+                { value: `${analytics.bestCombo}x`, label: "Max Combo" },
+                { value: `Lv. ${analytics.levelReached}`, label: "Peak Level" },
+              ]}
+              onPlayAgain={enterDrill}
+              onShare={shareDrillLink}
+              onExit={handleExitDrill}
+            />
           )}
         </div>
 
@@ -1023,10 +979,10 @@ export default function TargetPrioritizationClient() {
               <div className="space-y-8">
                 <section>
                   <h4 className="text-base font-bold text-white mb-2 flex items-center gap-2">
-                    <Target className="w-4 h-4 text-blue-400" /> What Is Target Prioritization?
+                    <Crosshair className="w-4 h-4 text-blue-400" /> What Is Target Prioritization?
                   </h4>
                   {ABOUT_INTRO.map((para, i) => (
-                    <p key={i} className={`text-sm leading-relaxed text-gray-300 ${i < ABOUT_INTRO.length - 1 ? 'mb-3' : ''}`}>{para}</p>
+                    <p key={i} className={`text-sm leading-relaxed text-gray-300 ${i < ABOUT_INTRO.length - 1 ? "mb-3" : ""}`}>{para}</p>
                   ))}
                 </section>
 
@@ -1050,7 +1006,7 @@ export default function TargetPrioritizationClient() {
                       <section.icon className="w-4 h-4 text-blue-400" /> {section.title}
                     </h4>
                     {section.paragraphs.map((para, j) => (
-                      <p key={j} className={`text-sm leading-relaxed text-gray-300 ${j < section.paragraphs.length - 1 ? 'mb-3' : ''}`}>{para}</p>
+                      <p key={j} className={`text-sm leading-relaxed text-gray-300 ${j < section.paragraphs.length - 1 ? "mb-3" : ""}`}>{para}</p>
                     ))}
                   </section>
                 ))}
@@ -1075,7 +1031,7 @@ export default function TargetPrioritizationClient() {
         {/* ── RELATED FPS DRILLS ── */}
         {!isFullscreen && (
           <section className="mt-4">
-            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3 font-sans">
+            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">
               Related FPS Drills
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -1098,11 +1054,10 @@ export default function TargetPrioritizationClient() {
             </div>
           </section>
         )}
-
-        {/* ── FOOTER ── */}
-        {!isFullscreen && <DrillFooter />}
-
       </main>
+
+      {/* ── FOOTER ── */}
+      {!isFullscreen && <DrillFooter />}
     </div>
   );
 }

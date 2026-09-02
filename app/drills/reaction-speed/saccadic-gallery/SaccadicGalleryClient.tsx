@@ -2,19 +2,17 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
-import {
-  Volume2, VolumeX,
-  Play, RefreshCw, Target,
-  Share2, LogOut, Eye, Users, TrendingUp, Zap, ZapOff, Trophy
-} from 'lucide-react';
+import { Volume2, VolumeX, Target, Eye, Users, TrendingUp, Zap, ZapOff, Trophy } from 'lucide-react';
 
+import { isIdleFrameSkippable } from '@/lib/performance';
 import generateShareCard, { shareScoreCard } from '../../../../components/ShareScoreCard';
 import { getPlayerName } from '../../../../lib/leaderboard';
 import { drillAudio } from '../../../../lib/drillAudio';
 import { drillFlash } from '../../../../lib/drillFlash';
 import { drillTimeout } from '../../../../lib/drillTimeout';
-import { getFpsScoreGrade } from '../../../../lib/scoringEngine';
-import { getDifficultyProgress, getStartLevel } from '../../../../lib/drillDifficulty';
+import { drillPenalty } from '../../../../lib/drillPenalty';
+import { getFpsScoreGrade, getComboMultiplier } from '../../../../lib/scoringEngine';
+import { getDifficultyProgress, getStartLevel, ramp } from '../../../../lib/drillDifficulty';
 import useDrillFlash from '../../../../lib/useDrillFlash';
 import useUnexpectedExitGuard from '../../../../lib/useUnexpectedExitGuard';
 import DrillFooter from '../../../../components/drill/DrillFooter';
@@ -22,12 +20,18 @@ import DrillCountdown from '../../../../components/drill/DrillCountdown';
 import DrillAccordion from '../../../../components/drill/DrillAccordion';
 import DrillFlashOverlay from '../../../../components/drill/DrillFlashOverlay';
 import FpsStartCard from '../../../../components/drill/FpsStartCard';
+import DrillResultCard from '../../../../components/drill/DrillResultCard';
 
-const DRILL_DURATION = 45; // 45 seconds focused duration
+// ============================================================
+// TUNING CONSTANTS
+// ============================================================
+const DRILL_DURATION = 45; // starting clock only; a run grows past this
 const POINTS_PER_HIT = 100;
-const POINTS_PER_LEVEL = 250;
-const ELITE_SCORE = 6000; // Rebalanced after combo removal
-const STORAGE_KEY = 'skilldrills_saccadic_gallery_v2';
+const POINTS_PER_LEVEL = 1750; // 250 -> 1750 (7x)
+const ELITE_SCORE = 18000; // 6000 -> 18000 (3x)
+const TIME_PER_HIT = 0.6; // +0.6s per valid hit
+const TIME_PENALTY = 0.8; // -0.8s on miss / target timeout (opt-in gated)
+const STORAGE_KEY = 'skilldrills_saccadic_gallery_v3';
 
 const RELATED_DRILLS = [
   { id: "barrier-sequence-pursuit", name: "Jiggle Peek Trainer", cat: "Reaction Speed", desc: "Train angle holding and cover peeking reaction reflexes.", href: "/drills/reaction-speed/barrier-sequence-pursuit" },
@@ -41,28 +45,30 @@ const RELATED_DRILLS = [
 const getSavedData = () => {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { bestScore: 0, bestLevel: 1, totalSessions: 0 };
-    return { bestScore: 0, bestLevel: 1, totalSessions: 0, ...JSON.parse(raw) };
+    if (!raw) return { bestScore: 0, bestCombo: 0, bestLevel: 1, totalSessions: 0 };
+    return { bestScore: 0, bestCombo: 0, bestLevel: 1, totalSessions: 0, ...JSON.parse(raw) };
   } catch (e) {
-    return { bestScore: 0, bestLevel: 1, totalSessions: 0 };
+    return { bestScore: 0, bestCombo: 0, bestLevel: 1, totalSessions: 0 };
   }
 };
 
-const saveData = (data: { bestScore: number; bestLevel: number; totalSessions: number }) => {
+const saveData = (data: { bestScore: number; bestCombo?: number; bestLevel: number; totalSessions: number }) => {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   } catch (e) {}
 };
 
+// Continuous unbounded difficulty with streak heat
+const getLevelConfig = (level: number, combo = 0) => {
+  const p = getDifficultyProgress(level); // 0 at L1, 1 at L15, unbounded above
+  const heat = (getComboMultiplier(combo) - 1) / 2;
 
-// Smooth difficulty curve parameters driving Level 1 to Level 15
-const getLevelConfig = (level: number) => {
-  const p = getDifficultyProgress(level); // 0 -> 1 across L1..L15
   return {
-    radius: Math.max(12, Math.round(28 - p * 16)),           // 28px -> 12px
-    ttl: Math.max(380, Math.round(1300 - p * 880)),           // 1300ms -> 380ms
-    spawnDelayMin: Math.max(120, Math.round(550 - p * 400)), // 550ms -> 150ms
-    spawnDelayMax: Math.max(180, Math.round(750 - p * 520)), // 750ms -> 230ms
+    radius:        Math.max(6, ramp(28, 7, p) * (1 - heat * 0.25)),
+    ttl:           ramp(1300, 90, p) * (1 - heat * 0.32),
+    spawnDelayMin: ramp(550, 20, p) * (1 - heat * 0.30),
+    spawnDelayMax: ramp(750, 35, p) * (1 - heat * 0.30),
+    hitPad:        Math.max(4, ramp(14, 2, p) * (1 - heat * 0.50)),
   };
 };
 
@@ -74,6 +80,7 @@ export default function SaccadicGalleryClient() {
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
+  const [penaltyEnabled, setPenaltyEnabled] = useState(false);
   const [openAccordion, setOpenAccordion] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState<boolean>(false);
   const [isPortrait, setIsPortrait] = useState<boolean>(false);
@@ -82,7 +89,10 @@ export default function SaccadicGalleryClient() {
   // HUD & Best Stats State
   const [uiScore, setUiScore] = useState<number>(0);
   const [uiTimeLeft, setUiTimeLeft] = useState<number>(DRILL_DURATION);
+  const [uiLevel, setUiLevel] = useState<number>(1);
+  const [uiCombo, setUiCombo] = useState<number>(0);
   const [bestScore, setBestScore] = useState<number>(0);
+  const [bestCombo, setBestCombo] = useState<number>(0);
   const [bestLevel, setBestLevel] = useState<number>(1);
   const [totalSessions, setTotalSessions] = useState<number>(0);
   const [isNewBest, setIsNewBest] = useState<boolean>(false);
@@ -94,6 +104,7 @@ export default function SaccadicGalleryClient() {
     missedClicks: 0,
     timeouts: 0,
     avgReactionTime: 0,
+    maxCombo: 0,
     finalLevel: 1,
     grade: null as any
   });
@@ -103,11 +114,14 @@ export default function SaccadicGalleryClient() {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const animationRef = useRef<number | null>(null);
   const countdownTimeoutsRef = useRef<NodeJS.Timeout[]>([]);
-  const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const bestLevelRunRef = useRef(1);
+  const lastTimeRef = useRef(DRILL_DURATION);
 
   const engine = useRef({
     score: 0,
     level: 1,
+    combo: 0,
+    maxCombo: 0,
     successfulHits: 0,
     missedClicks: 0,
     timeouts: 0,
@@ -135,6 +149,8 @@ export default function SaccadicGalleryClient() {
     if (typeof window !== 'undefined') {
       setSoundEnabled(drillAudio.isEnabled());
       setFlashEnabled(drillFlash.isEnabled());
+      setPenaltyEnabled(drillPenalty.isEnabled());
+
       const checkDeviceAndOrientation = () => {
         const ua = navigator.userAgent || '';
         const hasTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
@@ -151,6 +167,7 @@ export default function SaccadicGalleryClient() {
 
       const saved = getSavedData();
       setBestScore(saved.bestScore || 0);
+      setBestCombo(saved.bestCombo || 0);
       setBestLevel(saved.bestLevel || 1);
       setTotalSessions(saved.totalSessions || 0);
 
@@ -172,7 +189,6 @@ export default function SaccadicGalleryClient() {
   useEffect(() => {
     return () => {
       countdownTimeoutsRef.current.forEach(clearTimeout);
-      if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
     };
   }, []);
 
@@ -181,7 +197,6 @@ export default function SaccadicGalleryClient() {
     markIntentionalExit();
     countdownTimeoutsRef.current.forEach(clearTimeout);
     countdownTimeoutsRef.current = [];
-    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
 
     if (document.fullscreenElement) {
       await document.exitFullscreen().catch(() => {});
@@ -197,7 +212,6 @@ export default function SaccadicGalleryClient() {
   // Complete Drill Session cleanly
   const endGame = useCallback(() => {
     if (animationRef.current) cancelAnimationFrame(animationRef.current);
-    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
 
     setGameState('gameOver');
 
@@ -217,41 +231,41 @@ export default function SaccadicGalleryClient() {
       missedClicks: e.missedClicks,
       timeouts: e.timeouts,
       avgReactionTime: avgRt,
-      finalLevel: e.level,
+      maxCombo: e.maxCombo,
+      finalLevel: Math.floor(bestLevelRunRef.current),
       grade: gradeObj
     });
 
-    const isNew = e.score > bestScore;
-    if (isNew) {
-      setIsNewBest(true);
-      setBestScore(e.score);
-    } else {
-      setIsNewBest(false);
-    }
+    setUiScore(e.score);
 
-    const newBestLevel = Math.max(bestLevel, e.level);
-    setBestLevel(newBestLevel);
+    const prevSaved = getSavedData();
+    const isNew = e.score > prevSaved.bestScore;
+    setIsNewBest(isNew);
 
-    setTotalSessions((prev) => {
-      const next = prev + 1;
-      saveData({
-        bestScore: Math.max(bestScore, e.score),
-        bestLevel: newBestLevel,
-        totalSessions: next
-      });
-      return next;
-    });
+    const runBestLevel = Math.max(prevSaved.bestLevel, Math.floor(bestLevelRunRef.current));
+    const updatedData = {
+      bestScore: Math.max(prevSaved.bestScore, e.score),
+      bestCombo: Math.max(prevSaved.bestCombo || 0, e.maxCombo),
+      bestLevel: runBestLevel,
+      totalSessions: (prevSaved.totalSessions || 0) + 1
+    };
+    saveData(updatedData);
+
+    setBestScore(updatedData.bestScore);
+    setBestCombo(updatedData.bestCombo);
+    setBestLevel(updatedData.bestLevel);
+    setTotalSessions(updatedData.totalSessions);
 
     drillAudio.playSessionEnd();
-  }, [bestScore, bestLevel]);
+  }, []);
 
   // Target Spawn Logic (Saccadic Array Nodes jumping)
-  const spawnTarget = useCallback((W: number, H: number, level: number) => {
+  const spawnTarget = useCallback((W: number, H: number, level: number, combo: number) => {
     const e = engine.current;
-    const config = getLevelConfig(level);
+    const config = getLevelConfig(level, combo);
 
-    const baseR = isMobile ? 26 : 24;
-    const radius = Math.max(14, Math.round(baseR - (getDifficultyProgress(level) * 8)));
+    const baseR = isMobile ? config.radius + 2 : config.radius;
+    const radius = Math.max(6, baseR);
 
     // Grid nodes (4 cols x 3 rows) across canvas for ballistic eye sweeps
     const cols = isMobile ? 3 : 4;
@@ -294,19 +308,24 @@ export default function SaccadicGalleryClient() {
 
     countdownTimeoutsRef.current.forEach(clearTimeout);
     countdownTimeoutsRef.current = [];
-    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
 
     drillAudio.init();
 
-    const saved = getSavedData();
-    const startLevel = getStartLevel(saved.bestLevel);
+    const startLevel = getStartLevel();
+    bestLevelRunRef.current = startLevel;
 
     setUiScore(0);
+    setUiLevel(startLevel);
+    setUiCombo(0);
     setUiTimeLeft(DRILL_DURATION);
+    lastTimeRef.current = DRILL_DURATION;
+    setIsNewBest(false);
 
     engine.current = {
       score: 0,
       level: startLevel,
+      combo: 0,
+      maxCombo: 0,
       successfulHits: 0,
       missedClicks: 0,
       timeouts: 0,
@@ -344,21 +363,11 @@ export default function SaccadicGalleryClient() {
 
     const t4 = setTimeout(() => {
       setGameState('playing');
-
-      // Start 1-second Interval Timer (45 seconds duration)
-      let remaining = DRILL_DURATION;
-      timerIntervalRef.current = setInterval(() => {
-        remaining -= 1;
-        setUiTimeLeft(remaining);
-        if (remaining <= 0) {
-          endGame();
-        }
-      }, 1000);
-
+      engine.current.nextSpawnTime = performance.now() + 200;
     }, 2450);
 
     countdownTimeoutsRef.current = [t1, t2, t3, t4];
-  }, [endGame]);
+  }, []);
 
   // Target Click / Tap Handler
   const handleCanvasInteraction = useCallback((clientX: number, clientY: number) => {
@@ -371,24 +380,35 @@ export default function SaccadicGalleryClient() {
     const clickY = clientY - rect.top;
 
     const e = engine.current;
+    const config = getLevelConfig(e.level, e.combo);
+    const hitPad = isMobile ? config.hitPad + 10 : config.hitPad;
 
     if (e.target.active) {
       const dist = Math.hypot(clickX - e.target.x, clickY - e.target.y);
-      const hitPad = isMobile ? 24 : 14;
       if (dist <= e.target.radius + hitPad) {
         const rt = Math.round(performance.now() - e.target.spawnTime);
         e.reactionTimes.push(rt);
         e.successfulHits += 1;
-        e.score += POINTS_PER_HIT;
+        e.combo += 1;
+        if (e.combo > e.maxCombo) e.maxCombo = e.combo;
 
-        // Monotonic level progression as user scores points
-        const rawLevel = Math.floor(e.score / POINTS_PER_LEVEL) + 1;
+        const levelMult = 1 + getDifficultyProgress(e.level) * 0.5;
+        e.score += Math.round(POINTS_PER_HIT * getComboMultiplier(e.combo) * levelMult);
+
+        // Time bonus on clean hit
+        e.timeLeft += TIME_PER_HIT;
+
+        // Continuous unbounded level progression
+        const rawLevel = (e.score / POINTS_PER_LEVEL) + 1;
         e.level = Math.max(e.level, rawLevel);
+        bestLevelRunRef.current = Math.max(bestLevelRunRef.current, e.level);
 
         setUiScore(e.score);
+        setUiLevel(Math.floor(e.level));
+        setUiCombo(e.combo);
         drillAudio.playHit();
 
-        // Particles explosion (Constant Red)
+        // Particles explosion (Tactical Rose / Red)
         for (let i = 0; i < 10; i++) {
           const angle = Math.random() * Math.PI * 2;
           const spd = 2 + Math.random() * 4;
@@ -414,15 +434,17 @@ export default function SaccadicGalleryClient() {
         });
 
         e.target.active = false;
-        const config = getLevelConfig(e.level);
         const delay = config.spawnDelayMin + Math.random() * (config.spawnDelayMax - config.spawnDelayMin);
         e.nextSpawnTime = performance.now() + delay;
         return;
       }
     }
 
-    // Missed click on empty space: no penalty, just flash + audio feedback
+    // Missed click on empty space: optional time penalty + combo reset
     e.missedClicks += 1;
+    if (drillPenalty.isEnabled()) e.timeLeft -= TIME_PENALTY;
+    e.combo = 0;
+    setUiCombo(0);
     e.screenShake = 6;
     triggerFlash();
     drillAudio.playPenalty();
@@ -454,6 +476,11 @@ export default function SaccadicGalleryClient() {
     let lastTime = performance.now();
 
     const draw = (now: number) => {
+      if (isIdleFrameSkippable(gameState === 'playing', now, lastTime)) {
+        animationRef.current = requestAnimationFrame(draw);
+        return;
+      }
+
       const dt = Math.min((now - lastTime) / 1000, 0.1);
       lastTime = now;
 
@@ -461,6 +488,23 @@ export default function SaccadicGalleryClient() {
       const W = rect.width;
       const H = rect.height;
       const e = engine.current;
+
+      // Clock draining in RAF loop
+      if (gameState === 'playing') {
+        if (e.timeLeft > 0) e.timeLeft -= dt;
+        if (e.timeLeft <= 0) {
+          e.timeLeft = 0;
+          setUiTimeLeft(0);
+          endGame();
+          return;
+        }
+
+        const ceilSec = Math.ceil(e.timeLeft);
+        if (ceilSec !== lastTimeRef.current) {
+          lastTimeRef.current = ceilSec;
+          setUiTimeLeft(ceilSec);
+        }
+      }
 
       // Screen Shake Effect
       ctx.save();
@@ -476,7 +520,7 @@ export default function SaccadicGalleryClient() {
       ctx.fillStyle = '#050508';
       ctx.fillRect(0, 0, W, H);
 
-      // Render subtle background grid with node crosshairs
+      // Render subtle background grid
       ctx.strokeStyle = 'rgba(255, 255, 255, 0.02)';
       ctx.lineWidth = 1;
       const gridSize = 40;
@@ -487,31 +531,62 @@ export default function SaccadicGalleryClient() {
         ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
       }
 
-      // Spawn Target if inactive
-      if (!e.target.active && now >= e.nextSpawnTime) {
-        spawnTarget(W, H, e.level);
+      // Render gallery node markers (subtle guide points)
+      const cols = isMobile ? 3 : 4;
+      const rows = isMobile ? 3 : 3;
+      const marginX = W * 0.14;
+      const marginY = H * 0.18;
+      const stepX = (W - marginX * 2) / (cols - 1);
+      const stepY = (H - marginY * 2) / (rows - 1);
+
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+      for (let c = 0; c < cols; c++) {
+        for (let r = 0; r < rows; r++) {
+          const nx = marginX + c * stepX;
+          const ny = marginY + r * stepY;
+          ctx.beginPath();
+          ctx.arc(nx, ny, 3, 0, Math.PI * 2);
+          ctx.fill();
+        }
       }
 
-      // Target Timeout Check
+      // Spawn target on interval
+      if (!e.target.active && now >= e.nextSpawnTime) {
+        spawnTarget(W, H, e.level, e.combo);
+      }
+
+      // Timeout Check
       if (e.target.active) {
         const age = now - e.target.spawnTime;
         if (drillTimeout.isEnabled() && age >= e.target.ttl) {
           e.target.active = false;
           e.timeouts += 1;
+          if (drillPenalty.isEnabled()) e.timeLeft -= TIME_PENALTY;
+          e.combo = 0;
+          setUiCombo(0);
           e.screenShake = 6;
           triggerFlash();
           drillAudio.playPenalty();
-          const config = getLevelConfig(e.level);
+          const config = getLevelConfig(e.level, e.combo);
           const delay = config.spawnDelayMin + Math.random() * (config.spawnDelayMax - config.spawnDelayMin);
           e.nextSpawnTime = now + delay;
         }
       }
 
-      // Draw Target (Tactical Red Target Sphere matching reference design)
+      // Draw active target
       if (e.target.active) {
         const t = e.target;
         const r = t.radius;
+        const remaining = Math.max(0, 1 - (now - t.spawnTime) / t.ttl);
         ctx.save();
+
+        // Depleting countdown ring
+        ctx.globalAlpha = 0.5;
+        ctx.strokeStyle = remaining < 0.3 ? '#ef4444' : '#ffffff';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(t.x, t.y, r + 8, -Math.PI / 2, -Math.PI / 2 + remaining * Math.PI * 2);
+        ctx.stroke();
 
         // Ghost outer ring
         ctx.globalAlpha = 0.2;
@@ -601,7 +676,7 @@ export default function SaccadicGalleryClient() {
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
       ro.disconnect();
     };
-  }, [gameState, spawnTarget, triggerFlash, isMobile]);
+  }, [gameState, endGame, spawnTarget, triggerFlash]);
 
   // Share Score Card helper
   const sharePage = useCallback(async () => {
@@ -609,40 +684,72 @@ export default function SaccadicGalleryClient() {
     try {
       const canvas = generateShareCard({
         score: uiScore,
-        bestScore,
         accuracy: analytics.accuracy,
-        rating: { letter: analytics.grade?.letter || 'C', label: analytics.grade?.label || 'Keep Going', emoji: '🎯' },
-        newBest: isNewBest,
+        speed: analytics.avgReactionTime,
         drillName: 'Saccadic Gallery',
+        rank: analytics.grade?.letter || 'A',
+        rankName: analytics.grade?.label || 'ELITE REFLEX',
         playerName: getPlayerName(),
+        level: analytics.finalLevel,
+        date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        url: 'skilldrills.online/drills/reaction-speed/saccadic-gallery'
       });
-      await shareScoreCard(url, canvas);
-    } catch (e) {
-      const text = `🎯 I scored ${uiScore} PTS (Level ${analytics.finalLevel}) on Saccadic Gallery! Eye tracking accuracy: ${analytics.accuracy}%. Practice free vision drills at skilldrills.online! ⚡`;
-      if (typeof navigator !== 'undefined' && navigator.share) {
-        navigator.share({ title: 'Saccadic Gallery Score', text, url }).catch(() => {});
-      } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
-        navigator.clipboard.writeText(`${text} ${url}`);
-        alert('Score & drill link copied to clipboard!');
+
+      await shareScoreCard(canvas, {
+        title: 'Saccadic Gallery — My Score',
+        text: `I scored ${uiScore} (Grade: ${analytics.grade?.letter || 'A'}, Lv. ${analytics.finalLevel}) on Saccadic Gallery at SkillDrills!`,
+        url
+      });
+    } catch (err) {
+      if (navigator.share) {
+        navigator.share({
+          title: 'Saccadic Gallery',
+          text: `I scored ${uiScore} on Saccadic Gallery! Can you beat my score?`,
+          url
+        }).catch(() => {});
       }
     }
-  }, [uiScore, bestScore, analytics, isNewBest]);
+  }, [uiScore, analytics]);
 
   return (
-    <div className="min-h-screen bg-[#050508] text-white flex flex-col font-sans select-none">
-      {/* ── MAIN CONTENT AREA ── */}
-      <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
-        {/* Title */}
+    <div className="w-full flex flex-col items-center justify-start min-h-screen bg-[#050508] text-white selection:bg-red-500 selection:text-white">
+      
+      {/* Mobile Orientation Alert */}
+      {isMobile && isPortrait && (
+        <div className="w-full bg-amber-500/10 border-b border-amber-500/20 px-4 py-2 text-center text-xs text-amber-300 flex items-center justify-center gap-2">
+          <span>Rotate to landscape mode for a wider saccadic eye sweep field.</span>
+        </div>
+      )}
+
+      {/* Main Container */}
+      <main className="w-full max-w-5xl mx-auto px-3 sm:px-4 py-3 sm:py-6 flex flex-col gap-3 sm:gap-6">
+        
+        {/* Navigation & Header */}
+        {!isFullscreen && (
+          <div className="w-full flex items-center justify-between">
+            <Link 
+              href="/drills/reaction-speed"
+              className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition-colors bg-white/5 px-3 py-1.5 rounded-lg border border-white/5"
+            >
+              ← Back to Reaction Hub
+            </Link>
+            <div className="text-xs text-slate-400 font-mono">
+              Drill ID: <span className="text-red-400">RS-07</span>
+            </div>
+          </div>
+        )}
+
+        {/* Drill Header */}
         {!isFullscreen && (
           <div className="text-center">
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-black uppercase tracking-tight text-white flex items-center justify-center gap-3 flex-wrap">
               SACCADIC GALLERY
               <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
-                Saccadic Eye Exercises
+                Saccadic Eye Movement Test & Gallery Aim Trainer
               </span>
             </h1>
             <p className="text-xs text-slate-400 mt-1">
-              Ballistic Eye Movement & Rapid Visual Sweeps
+              Sequence-Based Ballistic Eye Shifts & Rapid Target Acquisition
             </p>
           </div>
         )}
@@ -662,7 +769,7 @@ export default function SaccadicGalleryClient() {
             </div>
             <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Level</div>
-              <div className="text-lg sm:text-xl font-black text-indigo-400 tabular-nums">L{engine.current.level}</div>
+              <div className="text-lg sm:text-xl font-black text-indigo-400 tabular-nums">L{uiLevel}</div>
             </div>
             <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
@@ -681,21 +788,21 @@ export default function SaccadicGalleryClient() {
           {/* Red Flash Overlay */}
           <DrillFlashOverlay flashes={flashes} />
 
-          {/* IN-BOX SCORE / TIMER HUD */}
+          {/* IN-BOX OVERLAY HUD */}
           {(gameState === 'playing' || gameState === 'countdown') && (
             <>
-              <div className="absolute top-4 left-4 z-30 pointer-events-none">
+              <div className="absolute top-4 left-4 z-30 pointer-events-none flex flex-col">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Score</p>
-                <p className="text-2xl sm:text-3xl font-bold text-white tabular-nums leading-tight">{uiScore}</p>
+                <p className="text-2xl sm:text-3xl font-black text-white tabular-nums leading-tight">{uiScore}</p>
               </div>
               <div className="absolute top-4 right-4 z-30 pointer-events-none text-right">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Time</p>
-                <p className={`text-2xl sm:text-3xl font-bold tabular-nums leading-tight ${uiTimeLeft <= 10 ? 'text-red-400' : 'text-white'}`}>{uiTimeLeft}s</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Time Left</p>
+                <p className={`text-2xl sm:text-3xl font-black tabular-nums leading-tight ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>{uiTimeLeft}s</p>
               </div>
             </>
           )}
 
-          {/* IN-GAME SOUND + FLASH TOGGLES */}
+          {/* IN-GAME HUD SOUND + FLASH TOGGLES */}
           {(gameState === 'playing' || gameState === 'countdown') && (
             <div className="absolute bottom-4 right-4 z-40 flex items-center gap-2">
               <button
@@ -742,10 +849,17 @@ export default function SaccadicGalleryClient() {
               icon={Target}
               accent="red"
               title="Saccadic Gallery"
-              subtitle="Ballistic Eye Movements • Visual Sweeps"
+              subtitle="Ballistic Eye Shifts • Rapid Acquisition"
               rules={[
-                { icon: Target, accent: 'red', title: 'Track Saccadic Targets', text: 'Rapidly snap cursor focus to distant targets appearing across wide visual field' },
-                { icon: Zap, accent: 'orange', title: 'Ballistic Foveal Sweeps', text: 'Train rapid eye re-fixation and instantaneous target acquisition' },
+                { icon: Target, accent: 'red', title: 'Target Acquisition', text: '+100 PTS × Combo × Level multiplier (+0.6s per hit)' },
+                {
+                  icon: Zap,
+                  accent: 'orange',
+                  title: penaltyEnabled ? 'Time Penalty (-0.8s)' : 'Streak & Combo System',
+                  text: penaltyEnabled
+                    ? 'Missing or target timeout subtracts 0.8s and resets combo'
+                    : 'Target timeouts reset combo multiplier. No time deducted (enable in session settings)'
+                },
               ]}
               stats={[
                 { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
@@ -761,77 +875,23 @@ export default function SaccadicGalleryClient() {
             <DrillCountdown value={countdownValue} subtitle="GET READY" />
           )}
 
-          {/* END SCREEN */}
+          {/* UNIVERSAL RESULT CARD */}
           {gameState === 'gameOver' && analytics.grade && (
-            <div className="absolute inset-0 z-40 flex bg-neutral-950/98 select-none font-sans" style={{ background: 'rgba(5,5,8,0.97)' }} onPointerDown={e => e.stopPropagation()}>
-              
-              {/* Left Grade Panel */}
-              <div className="w-[36%] flex flex-col items-center justify-center gap-1 border-r border-white/5 px-4" style={{ background: 'radial-gradient(ellipse 260px 200px at 50% 30%, rgba(239,68,68,.12), transparent 70%)' }}>
-                {isNewBest && (
-                  <span className="text-[9.5px] font-bold text-yellow-400 bg-yellow-500/10 border border-yellow-500/25 px-2.5 py-0.5 rounded-full mb-1 animate-pulse">
-                    NEW BEST
-                  </span>
-                )}
-                <div className={`text-5xl sm:text-6xl font-black leading-none ${analytics.grade.color}`}>
-                  {analytics.grade.letter}
-                </div>
-                <div className="text-[10px] uppercase tracking-widest text-slate-500 text-center font-bold mt-1">
-                  {analytics.grade.label}
-                </div>
-                <div className="text-3xl sm:text-4xl font-black text-white mt-2 tabular-nums">
-                  {uiScore}
-                </div>
-                <div className="text-[9px] uppercase tracking-widest text-slate-500">Points</div>
-              </div>
-
-              {/* Right Stats & Actions Panel */}
-              <div className="flex-1 flex flex-col justify-center gap-3 px-6 py-4 min-w-0">
-                
-                {/* 3 Stat Tiles */}
-                <div className="grid grid-cols-3 gap-2">
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.accuracy}%</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Accuracy</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.avgReactionTime}<span className="text-[10px] text-gray-500">ms</span></p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Avg Reaction</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">Lv. {analytics.finalLevel}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Peak Level</p>
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={enterDrill}
-                    className="flex-1 py-3 rounded-[13px] bg-gradient-to-r from-red-600 to-rose-600 text-white font-bold text-xs uppercase tracking-wide cursor-pointer transition-transform active:scale-[0.98] shadow-md flex items-center justify-center gap-1.5"
-                  >
-                    <RefreshCw className="w-3.5 h-3.5" /> Play Again
-                  </button>
-                  <button
-                    type="button"
-                    onClick={sharePage}
-                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform"
-                    title="Share Score"
-                  >
-                    <Share2 className="w-4 h-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleExitDrill}
-                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform"
-                    title="Return to Options"
-                  >
-                    <LogOut className="w-4 h-4 text-red-400" />
-                  </button>
-                </div>
-
-              </div>
-            </div>
+            <DrillResultCard
+              accent="rose"
+              grade={analytics.grade}
+              score={uiScore}
+              isNewBest={isNewBest}
+              stats={[
+                { label: 'Accuracy', value: analytics.accuracy, suffix: '%' },
+                { label: 'Avg Reaction', value: analytics.avgReactionTime, suffix: 'ms' },
+                { label: 'Peak Level', value: `Lv. ${analytics.finalLevel}` },
+                { label: 'Max Combo', value: analytics.maxCombo, suffix: 'x' },
+              ]}
+              onPlayAgain={enterDrill}
+              onShare={sharePage}
+              onExit={handleExitDrill}
+            />
           )}
 
         </div>
@@ -846,10 +906,15 @@ export default function SaccadicGalleryClient() {
               onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-sans">
-                <RuleItem num="1" text="Track Saccadic Targets" highlight="+100 PTS" result="Adds to score & levels you up" />
-                <RuleItem num="2" text="Level Progression" highlight="Every 250 PTS" result="Target jumps faster & shrinks" />
-                <RuleItem num="3" text="Miss / Timeout" highlight="No Penalty" result="Triggers red alert, score safe" />
-                <RuleItem num="4" text="Session Length" highlight="45 Seconds" result="Beat your best before time's up" />
+                <RuleItem num="1" text="Hit Active Nodes" highlight="+100 PTS" result="× Combo × Level bonus (+0.6s clock per hit)" />
+                <RuleItem num="2" text="Combo & Heat System" highlight="Up to 3.0x Multiplier" result="Higher streaks speed up node jump cadence" />
+                <RuleItem num="3" text="Level Progression" highlight="Continuous Scaling" result="Targets shrink and exposure windows shorten" />
+                <RuleItem 
+                  num="4" 
+                  text="Miss & Timeout Rules" 
+                  highlight={penaltyEnabled ? "-0.8s Penalty" : "Zero Penalties (Default)"} 
+                  result={penaltyEnabled ? "Deducts 0.8s & resets combo" : "Resets combo. Time penalty is opt-in via settings"} 
+                />
               </div>
             </DrillAccordion>
 
@@ -862,13 +927,13 @@ export default function SaccadicGalleryClient() {
               <div className="space-y-8 font-sans">
                 <section>
                   <h4 className="text-base font-bold text-white mb-2 flex items-center gap-2">
-                    <Eye className="w-4 h-4 text-red-400" /> What Are Saccadic Eye Exercises & Visual Sweeps?
+                    <Eye className="w-4 h-4 text-red-400" /> What Is Saccadic Eye Movement & Gallery Training?
                   </h4>
                   <p className="text-sm leading-relaxed mb-3 text-gray-300">
-                    <strong>Saccadic Gallery</strong> trains rapid saccadic eye movements — fast, simultaneous movements of both eyes between two or more phases of fixation in the same direction. Saccades allow your eyes to quickly scan complex visual fields.
+                    <strong>Saccadic Gallery</strong> trains ballistic eye movements — rapid, simultaneous movements of both eyes in the same direction between phases of fixation. In competitive gaming, saccadic speed governs how quickly your gaze snaps to spotted enemies across different screen regions.
                   </p>
                   <p className="text-sm leading-relaxed text-gray-300">
-                    In esports and high-speed sports vision therapy, practicing saccadic sweeps increases foveal fixation speed and reduces saccadic latency (the time taken for the eyes to lock onto a new target).
+                    Repeatedly shifting focus across grid nodes under dynamic time constraints develops high-speed visual acquisition and precise hand-eye coordination.
                   </p>
                 </section>
 
@@ -878,21 +943,21 @@ export default function SaccadicGalleryClient() {
                       <div className="w-7 h-7 rounded-lg bg-red-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
                       <h5 className="text-xs font-bold text-white">Who Should Use This?</h5>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Esports athletes, vision therapy patients, traditional athletes, and anyone wanting faster ocular fixation.</p>
+                    <p className="text-xs text-gray-300 leading-relaxed">Gamers and esports athletes sharpening rapid gaze acquisition, ballistic saccades, and first-shot accuracy.</p>
                   </div>
                   <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Ballistic Foveal Sweeps</h5>
+                      <h5 className="text-xs font-bold text-white">Saccadic Gaze Calibration</h5>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Conditions quick eye jumps across node galleries, training rapid visual search and target confirmation.</p>
+                    <p className="text-xs text-gray-300 leading-relaxed">Conditions ocular muscles to execute ballistic gaze shifts across screen sectors with zero foveal latency.</p>
                   </div>
                   <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Zap className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Adaptive Speed Curve</h5>
+                      <h5 className="text-xs font-bold text-white">Rapid Target Acquisition</h5>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Target jump intervals shorten dynamically as your level increases, sharpening neurological response speed.</p>
+                    <p className="text-xs text-gray-300 leading-relaxed">Enhances trigger response timing immediately upon completing ballistic eye shifts to new target nodes.</p>
                   </div>
                 </div>
               </div>
@@ -905,21 +970,12 @@ export default function SaccadicGalleryClient() {
               onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-sans">
-                <FAQItem q="What are saccadic eye exercises?" a="Saccadic eye exercises train fast voluntary eye movements between visual targets, improving reading speed, vision therapy, and sports tracking." />
-                <FAQItem q="What is a saccade in vision?" a="A saccade is a quick, simultaneous movement of both eyes between phases of fixation. It is the fastest movement the human body can perform." />
-                <FAQItem q="How does saccadic training help in FPS gaming?" a="In games like CS2, Valorant, and Overwatch, targets spawn in different areas of your screen. Fast saccadic eye movements let you acquire enemies instantly." />
-                <FAQItem q="Can you train saccadic eye movements online?" a="Yes. Dedicated online vision utilities condition visual search speed, reducing saccadic latency and improving click synchronization." />
-                <FAQItem q="Does monitor refresh rate affect saccadic training?" a="Yes. High refresh rates (144Hz+) provide smoother target transitions during rapid eye sweeps, reducing visual motion blur." />
-                <FAQItem q="Is Saccadic Gallery free?" a="Yes, all drills on SkillDrills are 100% free with no signups, downloads, or pop-up ads required." />
-                <FAQItem q="What is the difference between saccadic and smooth pursuit?" a="Saccadic movements are rapid jumps between targets, whereas smooth pursuit involves smoothly tracking a moving object across space." />
-                <FAQItem q="How does level progression work?" a="Every 250 points earned levels up the drill, shortening target TTL and shrinking target radius to challenge your foveal accuracy." />
-                <FAQItem q="What happens if I miss a click?" a="Clicking empty background space triggers a red alert flash and a miss is logged against your accuracy — there's no score penalty, so keep going." />
-                <FAQItem q="Can traditional athletes use this drill?" a="Yes. Sports vision specialists use saccadic eye drills to improve peripheral awareness and reaction speed in tennis, baseball, and martial arts." />
-                <FAQItem q="Does this drill support touchscreens and mobile devices?" a="Yes! It features generous touch hitpads and automatic orientation warnings for mobile devices." />
-                <FAQItem q="How often should I practice saccadic eye exercises?" a="A daily 5-minute session keeps ocular muscles agile, reduces visual fatigue, and sharpens visual scanning reflexes." />
-                <FAQItem q="Should I move my head or only my eyes?" a="Keep your head still and move only your eyes. Moving only your eyes conditions true saccadic agility and faster neural processing." />
-                <FAQItem q="What is saccadic latency?" a="Saccadic latency is the time delay (typically 150-200ms) between the appearance of a visual target and the initiation of an eye jump." />
-                <FAQItem q="What is a good score on Saccadic Gallery?" a="A score above 5,000 indicates strong ocular reflexes, while scores exceeding 10,000 represent elite saccadic eye speed." />
+                <FAQItem q="What is Saccadic Gallery (Ballistic Gaze Shifts)?" a="It is an online reflex training drill where targets appear sequentially across structured grid nodes, testing saccadic eye acceleration and click response." />
+                <FAQItem q="What are saccadic eye movements?" a="Saccades are rapid, jerky eye movements between fixation points. Training saccades reduces visual fixation delay in high-speed gaming." />
+                <FAQItem q="How does this help in FPS games?" a="Faster saccades allow you to visually acquire off-angle enemies and flankers in games like CS2, Valorant, and Apex Legends before snapping your crosshair." />
+                <FAQItem q="Is this saccadic training drill free?" a="Yes, all drills on SkillDrills are 100% free with no downloads or registrations required." />
+                <FAQItem q="How does adaptive level progression work?" a="Difficulty scales continuously as your score and combo rise, shrinking node size and reducing target exposure windows." />
+                <FAQItem q="Is there a time penalty for missing or timeouts?" a="By default, missing or timeouts only reset your combo streak. A time penalty (-0.8s per error) is available as an opt-in toggle in session settings." />
               </div>
             </DrillAccordion>
           </div>

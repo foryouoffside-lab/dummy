@@ -1,5 +1,6 @@
 import MemoryClient from './MemoryClient';
 import { DRILLS } from '../../../lib/drillsRegistry';
+import { getAlternateLanguages } from '@/lib/i18n/locales';
 
 const memoryDrills = DRILLS.filter((d) => d.category === 'memory');
 const MEMORY_COUNT = memoryDrills.length;
@@ -42,6 +43,7 @@ export const metadata = {
   robots: { index: true, follow: true },
   alternates: {
     canonical: 'https://skilldrills.online/drills/memory',
+    languages: getAlternateLanguages('/drills/memory'),
   },
 };
 

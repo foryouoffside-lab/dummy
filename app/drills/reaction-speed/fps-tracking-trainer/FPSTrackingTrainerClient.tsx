@@ -2,19 +2,17 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
-import {
-  Volume2, VolumeX,
-  Play, RefreshCw, Target,
-  Share2, LogOut, Eye, Users, TrendingUp, Zap, ZapOff, Trophy
-} from 'lucide-react';
+import { Volume2, VolumeX, Target, Eye, Users, TrendingUp, Zap, ZapOff, Trophy } from 'lucide-react';
 
+import { isIdleFrameSkippable } from '@/lib/performance';
 import generateShareCard, { shareScoreCard } from '../../../../components/ShareScoreCard';
 import { getPlayerName } from '../../../../lib/leaderboard';
 import { drillAudio } from '../../../../lib/drillAudio';
 import { drillFlash } from '../../../../lib/drillFlash';
 import { drillTimeout } from '../../../../lib/drillTimeout';
-import { getFpsScoreGrade } from '../../../../lib/scoringEngine';
-import { getDifficultyProgress, getStartLevel } from '../../../../lib/drillDifficulty';
+import { drillPenalty } from '../../../../lib/drillPenalty';
+import { getFpsScoreGrade, getComboMultiplier } from '../../../../lib/scoringEngine';
+import { getDifficultyProgress, getStartLevel, ramp } from '../../../../lib/drillDifficulty';
 import useDrillFlash from '../../../../lib/useDrillFlash';
 import useUnexpectedExitGuard from '../../../../lib/useUnexpectedExitGuard';
 import DrillFooter from '../../../../components/drill/DrillFooter';
@@ -22,12 +20,18 @@ import DrillCountdown from '../../../../components/drill/DrillCountdown';
 import DrillAccordion from '../../../../components/drill/DrillAccordion';
 import DrillFlashOverlay from '../../../../components/drill/DrillFlashOverlay';
 import FpsStartCard from '../../../../components/drill/FpsStartCard';
+import DrillResultCard from '../../../../components/drill/DrillResultCard';
 
-const DRILL_DURATION = 45; // 45 seconds focused duration
+// ============================================================
+// TUNING CONSTANTS
+// ============================================================
+const DRILL_DURATION = 45; // starting clock only; a run grows past this
 const POINTS_PER_HIT = 100;
-const POINTS_PER_LEVEL = 250;
-const ELITE_SCORE = 6000; // Rebalanced after combo removal
-const STORAGE_KEY = 'skilldrills_fps_tracking_v2';
+const POINTS_PER_LEVEL = 1750; // 250 -> 1750 (7x)
+const ELITE_SCORE = 18000; // 6000 -> 18000 (3x)
+const TIME_PER_HIT = 0.6; // +0.6s per valid hit
+const TIME_PENALTY = 0.8; // -0.8s on miss / target timeout (opt-in gated)
+const STORAGE_KEY = 'skilldrills_fps_tracking_v3';
 
 const RELATED_DRILLS = [
   { id: "barrier-sequence-pursuit", name: "Jiggle Peek Trainer", cat: "Reaction Speed", desc: "Train angle holding and cover peeking reaction reflexes.", href: "/drills/reaction-speed/barrier-sequence-pursuit" },
@@ -41,29 +45,31 @@ const RELATED_DRILLS = [
 const getSavedData = () => {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { bestScore: 0, bestLevel: 1, totalSessions: 0 };
-    return { bestScore: 0, bestLevel: 1, totalSessions: 0, ...JSON.parse(raw) };
+    if (!raw) return { bestScore: 0, bestCombo: 0, bestLevel: 1, totalSessions: 0 };
+    return { bestScore: 0, bestCombo: 0, bestLevel: 1, totalSessions: 0, ...JSON.parse(raw) };
   } catch (e) {
-    return { bestScore: 0, bestLevel: 1, totalSessions: 0 };
+    return { bestScore: 0, bestCombo: 0, bestLevel: 1, totalSessions: 0 };
   }
 };
 
-const saveData = (data: { bestScore: number; bestLevel: number; totalSessions: number }) => {
+const saveData = (data: { bestScore: number; bestCombo?: number; bestLevel: number; totalSessions: number }) => {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   } catch (e) {}
 };
 
+// Continuous unbounded difficulty with streak heat
+const getLevelConfig = (level: number, combo = 0) => {
+  const p = getDifficultyProgress(level); // 0 at L1, 1 at L15, unbounded above
+  const heat = (getComboMultiplier(combo) - 1) / 2;
 
-// Difficulty curve position across Level 1..15
-const getLevelConfig = (level: number) => {
-  const p = getDifficultyProgress(level); // 0 -> 1 across L1..L15
   return {
-    radius: Math.max(12, Math.round(28 - p * 16)),           // 28px -> 12px
-    ttl: Math.max(380, Math.round(1300 - p * 880)),           // 1300ms -> 380ms
-    baseSpeed: 200 + p * 340,                                 // 200px/s -> 540px/s
-    switchIntervalMin: Math.max(200, Math.round(700 - p * 450)), // 700ms -> 250ms
-    switchIntervalMax: Math.max(350, Math.round(1100 - p * 650)),// 1100ms -> 450ms
+    radius:             Math.max(6, ramp(28, 7, p) * (1 - heat * 0.25)),
+    ttl:                ramp(1300, 90, p) * (1 - heat * 0.32),
+    baseSpeed:          ramp(200, 850, p) * (1 + heat * 0.40),
+    switchIntervalMin:  ramp(700, 80, p) * (1 - heat * 0.30),
+    switchIntervalMax:  ramp(1100, 160, p) * (1 - heat * 0.30),
+    hitPad:             Math.max(4, ramp(14, 2, p) * (1 - heat * 0.50)),
   };
 };
 
@@ -75,6 +81,7 @@ export default function FPSTrackingTrainerClient() {
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
+  const [penaltyEnabled, setPenaltyEnabled] = useState(false);
   const [openAccordion, setOpenAccordion] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState<boolean>(false);
   const [isPortrait, setIsPortrait] = useState<boolean>(false);
@@ -83,7 +90,10 @@ export default function FPSTrackingTrainerClient() {
   // HUD & Best Stats State
   const [uiScore, setUiScore] = useState<number>(0);
   const [uiTimeLeft, setUiTimeLeft] = useState<number>(DRILL_DURATION);
+  const [uiLevel, setUiLevel] = useState<number>(1);
+  const [uiCombo, setUiCombo] = useState<number>(0);
   const [bestScore, setBestScore] = useState<number>(0);
+  const [bestCombo, setBestCombo] = useState<number>(0);
   const [bestLevel, setBestLevel] = useState<number>(1);
   const [totalSessions, setTotalSessions] = useState<number>(0);
   const [isNewBest, setIsNewBest] = useState<boolean>(false);
@@ -95,6 +105,7 @@ export default function FPSTrackingTrainerClient() {
     missedClicks: 0,
     timeouts: 0,
     avgReactionTime: 0,
+    maxCombo: 0,
     finalLevel: 1,
     grade: null as any
   });
@@ -104,11 +115,14 @@ export default function FPSTrackingTrainerClient() {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const animationRef = useRef<number | null>(null);
   const countdownTimeoutsRef = useRef<NodeJS.Timeout[]>([]);
-  const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const bestLevelRunRef = useRef(1);
+  const lastTimeRef = useRef(DRILL_DURATION);
 
   const engine = useRef({
     score: 0,
     level: 1,
+    combo: 0,
+    maxCombo: 0,
     successfulHits: 0,
     missedClicks: 0,
     timeouts: 0,
@@ -137,6 +151,8 @@ export default function FPSTrackingTrainerClient() {
     if (typeof window !== 'undefined') {
       setSoundEnabled(drillAudio.isEnabled());
       setFlashEnabled(drillFlash.isEnabled());
+      setPenaltyEnabled(drillPenalty.isEnabled());
+
       const checkDeviceAndOrientation = () => {
         const ua = navigator.userAgent || '';
         const hasTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
@@ -153,6 +169,7 @@ export default function FPSTrackingTrainerClient() {
 
       const saved = getSavedData();
       setBestScore(saved.bestScore || 0);
+      setBestCombo(saved.bestCombo || 0);
       setBestLevel(saved.bestLevel || 1);
       setTotalSessions(saved.totalSessions || 0);
 
@@ -174,7 +191,6 @@ export default function FPSTrackingTrainerClient() {
   useEffect(() => {
     return () => {
       countdownTimeoutsRef.current.forEach(clearTimeout);
-      if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
     };
   }, []);
 
@@ -183,7 +199,6 @@ export default function FPSTrackingTrainerClient() {
     markIntentionalExit();
     countdownTimeoutsRef.current.forEach(clearTimeout);
     countdownTimeoutsRef.current = [];
-    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
 
     if (document.fullscreenElement) {
       await document.exitFullscreen().catch(() => {});
@@ -199,7 +214,6 @@ export default function FPSTrackingTrainerClient() {
   // Complete Drill Session cleanly
   const endGame = useCallback(() => {
     if (animationRef.current) cancelAnimationFrame(animationRef.current);
-    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
 
     setGameState('gameOver');
 
@@ -219,60 +233,62 @@ export default function FPSTrackingTrainerClient() {
       missedClicks: e.missedClicks,
       timeouts: e.timeouts,
       avgReactionTime: avgRt,
-      finalLevel: e.level,
+      maxCombo: e.maxCombo,
+      finalLevel: Math.floor(bestLevelRunRef.current),
       grade: gradeObj
     });
 
-    const isNew = e.score > bestScore;
-    if (isNew) {
-      setIsNewBest(true);
-      setBestScore(e.score);
-    } else {
-      setIsNewBest(false);
-    }
+    setUiScore(e.score);
 
-    const newBestLevel = Math.max(bestLevel, e.level);
-    setBestLevel(newBestLevel);
+    const prevSaved = getSavedData();
+    const isNew = e.score > prevSaved.bestScore;
+    setIsNewBest(isNew);
 
-    setTotalSessions((prev) => {
-      const next = prev + 1;
-      saveData({
-        bestScore: Math.max(bestScore, e.score),
-        bestLevel: newBestLevel,
-        totalSessions: next
-      });
-      return next;
-    });
+    const runBestLevel = Math.max(prevSaved.bestLevel, Math.floor(bestLevelRunRef.current));
+    const updatedData = {
+      bestScore: Math.max(prevSaved.bestScore, e.score),
+      bestCombo: Math.max(prevSaved.bestCombo || 0, e.maxCombo),
+      bestLevel: runBestLevel,
+      totalSessions: (prevSaved.totalSessions || 0) + 1
+    };
+    saveData(updatedData);
+
+    setBestScore(updatedData.bestScore);
+    setBestCombo(updatedData.bestCombo);
+    setBestLevel(updatedData.bestLevel);
+    setTotalSessions(updatedData.totalSessions);
 
     drillAudio.playSessionEnd();
-  }, [bestScore, bestLevel]);
+  }, []);
 
-  // Target Spawn Logic with Level-based Velocity & Dynamic Strafe Switching
-  const spawnTarget = useCallback((W: number, H: number, level: number) => {
+  // Moving Target Spawn Logic
+  const spawnTarget = useCallback((W: number, H: number, level: number, combo: number) => {
     const e = engine.current;
-    const config = getLevelConfig(level);
+    const config = getLevelConfig(level, combo);
+
+    const baseR = isMobile ? config.radius + 2 : config.radius;
+    const radius = Math.max(6, baseR);
+
+    // Spawn on horizontal line with random strafe direction
+    const spawnLeft = Math.random() > 0.5;
     const bounds = W * 0.12;
+    const spawnX = spawnLeft ? bounds + 30 : W - bounds - 30;
+    const spawnY = H * (0.35 + Math.random() * 0.30);
 
-    const baseR = isMobile ? 26 : 24;
-    const radius = Math.max(14, Math.round(baseR - (getDifficultyProgress(level) * 8)));
+    const dir = spawnLeft ? 1 : -1;
+    const vx = dir * config.baseSpeed;
 
-    const dir = Math.random() > 0.5 ? 1 : -1;
-    const speed = config.baseSpeed * (0.85 + Math.random() * 0.3);
-
-    const spawnX = bounds + Math.random() * (W - bounds * 2);
-    const spawnY = H * 0.5;
-
-    const switchDelay = config.switchIntervalMin + Math.random() * (config.switchIntervalMax - config.switchIntervalMin);
+    const switchInterval = config.switchIntervalMin + Math.random() * (config.switchIntervalMax - config.switchIntervalMin);
 
     e.target = {
       active: true,
       x: spawnX,
       y: spawnY,
       radius,
-      vx: dir * speed,
+      vx,
       spawnTime: performance.now(),
       ttl: config.ttl,
-      nextSwitchTime: performance.now() + switchDelay,
+      nextSwitchTime: performance.now() + switchInterval,
     };
   }, [isMobile]);
 
@@ -286,19 +302,24 @@ export default function FPSTrackingTrainerClient() {
 
     countdownTimeoutsRef.current.forEach(clearTimeout);
     countdownTimeoutsRef.current = [];
-    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
 
     drillAudio.init();
 
-    const saved = getSavedData();
-    const startLevel = getStartLevel(saved.bestLevel);
+    const startLevel = getStartLevel();
+    bestLevelRunRef.current = startLevel;
 
     setUiScore(0);
+    setUiLevel(startLevel);
+    setUiCombo(0);
     setUiTimeLeft(DRILL_DURATION);
+    lastTimeRef.current = DRILL_DURATION;
+    setIsNewBest(false);
 
     engine.current = {
       score: 0,
       level: startLevel,
+      combo: 0,
+      maxCombo: 0,
       successfulHits: 0,
       missedClicks: 0,
       timeouts: 0,
@@ -336,21 +357,11 @@ export default function FPSTrackingTrainerClient() {
 
     const t4 = setTimeout(() => {
       setGameState('playing');
-
-      // Start 1-second Interval Timer (45 seconds duration)
-      let remaining = DRILL_DURATION;
-      timerIntervalRef.current = setInterval(() => {
-        remaining -= 1;
-        setUiTimeLeft(remaining);
-        if (remaining <= 0) {
-          endGame();
-        }
-      }, 1000);
-
+      engine.current.nextSpawnTime = performance.now() + 200;
     }, 2450);
 
     countdownTimeoutsRef.current = [t1, t2, t3, t4];
-  }, [endGame]);
+  }, []);
 
   // Target Click / Tap Handler
   const handleCanvasInteraction = useCallback((clientX: number, clientY: number) => {
@@ -363,25 +374,35 @@ export default function FPSTrackingTrainerClient() {
     const clickY = clientY - rect.top;
 
     const e = engine.current;
+    const config = getLevelConfig(e.level, e.combo);
+    const hitPad = isMobile ? config.hitPad + 10 : config.hitPad;
 
     if (e.target.active) {
       const dist = Math.hypot(clickX - e.target.x, clickY - e.target.y);
-      // Hit target (Target Radius + generous touch hitpad)
-      const hitPad = isMobile ? 24 : 14;
       if (dist <= e.target.radius + hitPad) {
         const rt = Math.round(performance.now() - e.target.spawnTime);
         e.reactionTimes.push(rt);
         e.successfulHits += 1;
-        e.score += POINTS_PER_HIT;
+        e.combo += 1;
+        if (e.combo > e.maxCombo) e.maxCombo = e.combo;
 
-        // Monotonic level progression as user scores points
-        const rawLevel = Math.floor(e.score / POINTS_PER_LEVEL) + 1;
+        const levelMult = 1 + getDifficultyProgress(e.level) * 0.5;
+        e.score += Math.round(POINTS_PER_HIT * getComboMultiplier(e.combo) * levelMult);
+
+        // Time bonus on clean hit
+        e.timeLeft += TIME_PER_HIT;
+
+        // Continuous unbounded level progression
+        const rawLevel = (e.score / POINTS_PER_LEVEL) + 1;
         e.level = Math.max(e.level, rawLevel);
+        bestLevelRunRef.current = Math.max(bestLevelRunRef.current, e.level);
 
         setUiScore(e.score);
+        setUiLevel(Math.floor(e.level));
+        setUiCombo(e.combo);
         drillAudio.playHit();
 
-        // Particles explosion (Constant Red)
+        // Particles explosion (Tactical Rose / Red)
         for (let i = 0; i < 10; i++) {
           const angle = Math.random() * Math.PI * 2;
           const spd = 2 + Math.random() * 4;
@@ -412,8 +433,11 @@ export default function FPSTrackingTrainerClient() {
       }
     }
 
-    // Missed click on empty space: no penalty, just flash + audio feedback
+    // Missed click on empty space: optional time penalty + combo reset
     e.missedClicks += 1;
+    if (drillPenalty.isEnabled()) e.timeLeft -= TIME_PENALTY;
+    e.combo = 0;
+    setUiCombo(0);
     e.screenShake = 6;
     triggerFlash();
     drillAudio.playPenalty();
@@ -445,6 +469,11 @@ export default function FPSTrackingTrainerClient() {
     let lastTime = performance.now();
 
     const draw = (now: number) => {
+      if (isIdleFrameSkippable(gameState === 'playing', now, lastTime)) {
+        animationRef.current = requestAnimationFrame(draw);
+        return;
+      }
+
       const dt = Math.min((now - lastTime) / 1000, 0.1);
       lastTime = now;
 
@@ -453,6 +482,23 @@ export default function FPSTrackingTrainerClient() {
       const H = rect.height;
       const e = engine.current;
       const bounds = W * 0.12;
+
+      // Clock draining in RAF loop
+      if (gameState === 'playing') {
+        if (e.timeLeft > 0) e.timeLeft -= dt;
+        if (e.timeLeft <= 0) {
+          e.timeLeft = 0;
+          setUiTimeLeft(0);
+          endGame();
+          return;
+        }
+
+        const ceilSec = Math.ceil(e.timeLeft);
+        if (ceilSec !== lastTimeRef.current) {
+          lastTimeRef.current = ceilSec;
+          setUiTimeLeft(ceilSec);
+        }
+      }
 
       // Screen Shake Effect
       ctx.save();
@@ -490,7 +536,7 @@ export default function FPSTrackingTrainerClient() {
 
       // Spawn Target if inactive
       if (!e.target.active && now >= e.nextSpawnTime) {
-        spawnTarget(W, H, e.level);
+        spawnTarget(W, H, e.level, e.combo);
       }
 
       // Target Movement & Timeout Update
@@ -501,6 +547,9 @@ export default function FPSTrackingTrainerClient() {
         if (drillTimeout.isEnabled() && age >= t.ttl) {
           t.active = false;
           e.timeouts += 1;
+          if (drillPenalty.isEnabled()) e.timeLeft -= TIME_PENALTY;
+          e.combo = 0;
+          setUiCombo(0);
           e.screenShake = 6;
           triggerFlash();
           drillAudio.playPenalty();
@@ -508,32 +557,40 @@ export default function FPSTrackingTrainerClient() {
         } else {
           // Horizontal strafe movement
           t.x += t.vx * dt;
-          t.y = py;
 
-          // Boundary bounce with direction flip
-          if (t.x < bounds + t.radius) {
+          // Wall bounce / strafe reversal on bounds
+          if (t.x <= bounds + t.radius) {
             t.x = bounds + t.radius;
             t.vx = Math.abs(t.vx);
-          } else if (t.x > W - bounds - t.radius) {
+          } else if (t.x >= W - bounds - t.radius) {
             t.x = W - bounds - t.radius;
             t.vx = -Math.abs(t.vx);
           }
 
-          // Random direction/speed switch simulating counter-strafes
+          // Random direction switch (human-like evasive strafe)
           if (now >= t.nextSwitchTime) {
-            const config = getLevelConfig(e.level);
-            t.vx = (Math.random() > 0.4 ? -Math.sign(t.vx) : Math.sign(t.vx)) * (config.baseSpeed * (0.85 + Math.random() * 0.3));
-            const switchDelay = config.switchIntervalMin + Math.random() * (config.switchIntervalMax - config.switchIntervalMin);
-            t.nextSwitchTime = now + switchDelay;
+            t.vx = -t.vx;
+            const config = getLevelConfig(e.level, e.combo);
+            const switchInterval = config.switchIntervalMin + Math.random() * (config.switchIntervalMax - config.switchIntervalMin);
+            t.nextSwitchTime = now + switchInterval;
           }
         }
       }
 
-      // Draw Target (Tactical Red Target Sphere matching reference design)
+      // Draw active target
       if (e.target.active) {
         const t = e.target;
         const r = t.radius;
+        const remaining = Math.max(0, 1 - (now - t.spawnTime) / t.ttl);
         ctx.save();
+
+        // Depleting countdown ring
+        ctx.globalAlpha = 0.5;
+        ctx.strokeStyle = remaining < 0.3 ? '#ef4444' : '#ffffff';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(t.x, t.y, r + 8, -Math.PI / 2, -Math.PI / 2 + remaining * Math.PI * 2);
+        ctx.stroke();
 
         // Ghost outer ring
         ctx.globalAlpha = 0.2;
@@ -623,7 +680,7 @@ export default function FPSTrackingTrainerClient() {
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
       ro.disconnect();
     };
-  }, [gameState, spawnTarget, triggerFlash, isMobile]);
+  }, [gameState, endGame, spawnTarget, triggerFlash]);
 
   // Share Score Card helper
   const sharePage = useCallback(async () => {
@@ -631,37 +688,72 @@ export default function FPSTrackingTrainerClient() {
     try {
       const canvas = generateShareCard({
         score: uiScore,
-        bestScore,
         accuracy: analytics.accuracy,
-        rating: { letter: analytics.grade?.letter || 'C', label: analytics.grade?.label || 'Keep Going', emoji: '🎯' },
-        newBest: isNewBest,
+        speed: analytics.avgReactionTime,
         drillName: 'FPS Tracking Trainer',
+        rank: analytics.grade?.letter || 'A',
+        rankName: analytics.grade?.label || 'ELITE REFLEX',
         playerName: getPlayerName(),
+        level: analytics.finalLevel,
+        date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        url: 'skilldrills.online/drills/reaction-speed/fps-tracking-trainer'
       });
-      await shareScoreCard(url, canvas);
-    } catch (e) {
-      const text = `🎯 I scored ${uiScore} PTS (Level ${analytics.finalLevel}) on FPS Tracking Trainer! Average reaction: ${analytics.avgReactionTime}ms. Practice free reflex drills at skilldrills.online! ⚡`;
-      if (typeof navigator !== 'undefined' && navigator.share) {
-        navigator.share({ title: 'FPS Tracking Trainer Score', text, url }).catch(() => {});
-      } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
-        navigator.clipboard.writeText(`${text} ${url}`);
-        alert('Score & drill link copied to clipboard!');
+
+      await shareScoreCard(canvas, {
+        title: 'FPS Tracking Trainer — My Score',
+        text: `I scored ${uiScore} (Grade: ${analytics.grade?.letter || 'A'}, Lv. ${analytics.finalLevel}) on FPS Tracking Trainer at SkillDrills!`,
+        url
+      });
+    } catch (err) {
+      if (navigator.share) {
+        navigator.share({
+          title: 'FPS Tracking Trainer',
+          text: `I scored ${uiScore} on FPS Tracking Trainer! Can you beat my score?`,
+          url
+        }).catch(() => {});
       }
     }
-  }, [uiScore, bestScore, analytics, isNewBest]);
+  }, [uiScore, analytics]);
 
   return (
-    <div className="min-h-screen bg-[#050508] text-white flex flex-col font-sans select-none">
-      {/* ── MAIN CONTENT AREA ── */}
-      <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
-        {/* Title */}
+    <div className="w-full flex flex-col items-center justify-start min-h-screen bg-[#050508] text-white selection:bg-red-500 selection:text-white">
+      
+      {/* Mobile Orientation Alert */}
+      {isMobile && isPortrait && (
+        <div className="w-full bg-amber-500/10 border-b border-amber-500/20 px-4 py-2 text-center text-xs text-amber-300 flex items-center justify-center gap-2">
+          <span>Rotate to landscape mode for a wider horizontal tracking field.</span>
+        </div>
+      )}
+
+      {/* Main Container */}
+      <main className="w-full max-w-5xl mx-auto px-3 sm:px-4 py-3 sm:py-6 flex flex-col gap-3 sm:gap-6">
+        
+        {/* Navigation & Header */}
+        {!isFullscreen && (
+          <div className="w-full flex items-center justify-between">
+            <Link 
+              href="/drills/reaction-speed"
+              className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition-colors bg-white/5 px-3 py-1.5 rounded-lg border border-white/5"
+            >
+              ← Back to Reaction Hub
+            </Link>
+            <div className="text-xs text-slate-400 font-mono">
+              Drill ID: <span className="text-red-400">RS-02</span>
+            </div>
+          </div>
+        )}
+
+        {/* Drill Header */}
         {!isFullscreen && (
           <div className="text-center">
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-black uppercase tracking-tight text-white flex items-center justify-center gap-3 flex-wrap">
               FPS TRACKING TRAINER
+              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
+                Dynamic Strafe Tracking & Moving Target Reaction Drill
+              </span>
             </h1>
             <p className="text-xs text-slate-400 mt-1">
-              Reactive Strafe Pursuit & Motion Control
+              Horizontal Target Pursuit • Anti-Strafe Reaction • Click Timing
             </p>
           </div>
         )}
@@ -681,7 +773,7 @@ export default function FPSTrackingTrainerClient() {
             </div>
             <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Level</div>
-              <div className="text-lg sm:text-xl font-black text-indigo-400 tabular-nums">L{engine.current.level}</div>
+              <div className="text-lg sm:text-xl font-black text-indigo-400 tabular-nums">L{uiLevel}</div>
             </div>
             <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
@@ -703,7 +795,7 @@ export default function FPSTrackingTrainerClient() {
           {/* IN-BOX OVERLAY HUD */}
           {(gameState === 'playing' || gameState === 'countdown') && (
             <>
-              <div className="absolute top-4 left-4 z-30 pointer-events-none">
+              <div className="absolute top-4 left-4 z-30 pointer-events-none flex flex-col">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Score</p>
                 <p className="text-2xl sm:text-3xl font-black text-white tabular-nums leading-tight">{uiScore}</p>
               </div>
@@ -761,10 +853,17 @@ export default function FPSTrackingTrainerClient() {
               icon={Target}
               accent="red"
               title="FPS Tracking Trainer"
-              subtitle="Reactive Strafe Pursuit • Motion Control"
+              subtitle="Dynamic Strafe • Moving Target Pursuit"
               rules={[
-                { icon: Target, accent: 'red', title: 'Track & Tap Moving Targets', text: 'Maintain focus and click evasive targets moving across the canvas' },
-                { icon: Zap, accent: 'orange', title: 'Horizontal Strafe Swaps', text: 'Adapt to rapid direction shifts and velocity changes' },
+                { icon: Target, accent: 'red', title: 'Hit Moving Strafers', text: '+100 PTS × Combo × Level multiplier (+0.6s per hit)' },
+                {
+                  icon: Zap,
+                  accent: 'orange',
+                  title: penaltyEnabled ? 'Time Penalty (-0.8s)' : 'Streak & Combo System',
+                  text: penaltyEnabled
+                    ? 'Missing or strafer timeout subtracts 0.8s and resets combo'
+                    : 'Target timeouts reset combo multiplier. No time deducted (enable in session settings)'
+                },
               ]}
               stats={[
                 { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
@@ -780,77 +879,23 @@ export default function FPSTrackingTrainerClient() {
             <DrillCountdown value={countdownValue} subtitle="GET READY" />
           )}
 
-          {/* END SCREEN */}
+          {/* UNIVERSAL RESULT CARD */}
           {gameState === 'gameOver' && analytics.grade && (
-            <div className="absolute inset-0 z-40 flex bg-neutral-950/98 select-none font-sans" style={{ background: 'rgba(5,5,8,0.97)' }} onPointerDown={e => e.stopPropagation()}>
-              
-              {/* Left Grade Panel */}
-              <div className="w-[36%] flex flex-col items-center justify-center gap-1 border-r border-white/5 px-4" style={{ background: 'radial-gradient(ellipse 260px 200px at 50% 30%, rgba(239,68,68,.12), transparent 70%)' }}>
-                {isNewBest && (
-                  <span className="text-[9.5px] font-bold text-yellow-400 bg-yellow-500/10 border border-yellow-500/25 px-2.5 py-0.5 rounded-full mb-1 animate-pulse">
-                    NEW BEST
-                  </span>
-                )}
-                <div className={`text-5xl sm:text-6xl font-black leading-none ${analytics.grade.color}`}>
-                  {analytics.grade.letter}
-                </div>
-                <div className="text-[10px] uppercase tracking-widest text-slate-500 text-center font-bold mt-1">
-                  {analytics.grade.label}
-                </div>
-                <div className="text-3xl sm:text-4xl font-black text-white mt-2 tabular-nums">
-                  {uiScore}
-                </div>
-                <div className="text-[9px] uppercase tracking-widest text-slate-500">Points</div>
-              </div>
-
-              {/* Right Stats & Actions Panel */}
-              <div className="flex-1 flex flex-col justify-center gap-3 px-6 py-4 min-w-0">
-                
-                {/* 3 Stat Tiles */}
-                <div className="grid grid-cols-3 gap-2">
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.accuracy}%</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Accuracy</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.avgReactionTime}<span className="text-[10px] text-gray-500">ms</span></p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Avg Reaction</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">Lv. {analytics.finalLevel}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Peak Level</p>
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={enterDrill}
-                    className="flex-1 py-3 rounded-[13px] bg-gradient-to-r from-red-600 to-rose-600 text-white font-bold text-xs uppercase tracking-wide cursor-pointer transition-transform active:scale-[0.98] shadow-md flex items-center justify-center gap-1.5"
-                  >
-                    <RefreshCw className="w-3.5 h-3.5" /> Play Again
-                  </button>
-                  <button
-                    type="button"
-                    onClick={sharePage}
-                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform"
-                    title="Share Score"
-                  >
-                    <Share2 className="w-4 h-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleExitDrill}
-                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform"
-                    title="Return to Options"
-                  >
-                    <LogOut className="w-4 h-4 text-red-400" />
-                  </button>
-                </div>
-
-              </div>
-            </div>
+            <DrillResultCard
+              accent="rose"
+              grade={analytics.grade}
+              score={uiScore}
+              isNewBest={isNewBest}
+              stats={[
+                { label: 'Accuracy', value: analytics.accuracy, suffix: '%' },
+                { label: 'Avg Reaction', value: analytics.avgReactionTime, suffix: 'ms' },
+                { label: 'Peak Level', value: `Lv. ${analytics.finalLevel}` },
+                { label: 'Max Combo', value: analytics.maxCombo, suffix: 'x' },
+              ]}
+              onPlayAgain={enterDrill}
+              onShare={sharePage}
+              onExit={handleExitDrill}
+            />
           )}
 
         </div>
@@ -865,10 +910,15 @@ export default function FPSTrackingTrainerClient() {
               onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-sans">
-                <RuleItem num="1" text="Track & Tap Moving Targets" highlight="+100 PTS" result="Adds to score & levels you up" />
-                <RuleItem num="2" text="Level Progression" highlight="Every 250 PTS" result="Target strafes faster & shrinks" />
-                <RuleItem num="3" text="Miss / Timeout" highlight="No Penalty" result="Triggers red alert, score safe" />
-                <RuleItem num="4" text="Session Length" highlight="45 Seconds" result="Beat your best before time's up" />
+                <RuleItem num="1" text="Hit Moving Targets" highlight="+100 PTS" result="× Combo × Level bonus (+0.6s clock per hit)" />
+                <RuleItem num="2" text="Combo & Heat System" highlight="Up to 3.0x Multiplier" result="Higher streaks increase strafe speed and jitter" />
+                <RuleItem num="3" text="Level Progression" highlight="Continuous Scaling" result="Targets shrink, accelerate, and switch directions faster" />
+                <RuleItem 
+                  num="4" 
+                  text="Miss & Timeout Rules" 
+                  highlight={penaltyEnabled ? "-0.8s Penalty" : "Zero Penalties (Default)"} 
+                  result={penaltyEnabled ? "Deducts 0.8s & resets combo" : "Resets combo. Time penalty is opt-in via settings"} 
+                />
               </div>
             </DrillAccordion>
 
@@ -881,13 +931,13 @@ export default function FPSTrackingTrainerClient() {
               <div className="space-y-8 font-sans">
                 <section>
                   <h4 className="text-base font-bold text-white mb-2 flex items-center gap-2">
-                    <Eye className="w-4 h-4 text-red-400" /> What Is FPS Tracking Aim & Smooth Pursuit Training?
+                    <Eye className="w-4 h-4 text-red-400" /> What Is Dynamic Strafe Tracking & Moving Target Reaction?
                   </h4>
                   <p className="text-sm leading-relaxed mb-3 text-gray-300">
-                    <strong>FPS Tracking Training</strong> (Reactive Strafe Pursuit) isolates and conditions your ability to maintain crosshair placement on erratic, moving targets along horizontal planes. Unlike flick-shooting which relies on single-point snapping, <strong>aim tracking</strong> requires continuous foveal gaze pursuit, muscle tension control, and instant direction-reversal motor reactivity.
+                    <strong>FPS Tracking Trainer</strong> isolates visual smooth pursuit and predictive click timing against erratic, horizontally strafing targets. In high-speed gunfights across Apex Legends, Overwatch 2, and COD Warzone, enemies constantly A/D strafe to throw off crosshair tracking.
                   </p>
                   <p className="text-sm leading-relaxed text-gray-300">
-                    In fast-paced shooters like Apex Legends, Overwatch 2, Valorant, and CS2, enemies frequently execute ADAD counter-strafes, slide-cancels, and wide swings. Training smooth pursuit eliminates shaky aim micro-jitters, improves visual coordinate estimation, and maximizes damage per second (DPS) in high-stakes duels.
+                    Predicting directional switches and executing precise click timings while the target is in motion builds smooth hand-eye coordination and minimizes reaction latency during dynamic duels.
                   </p>
                 </section>
 
@@ -897,21 +947,21 @@ export default function FPSTrackingTrainerClient() {
                       <div className="w-7 h-7 rounded-lg bg-red-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
                       <h5 className="text-xs font-bold text-white">Who Should Use This?</h5>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Esports athletes, tracking specialists, and players looking to fix shaky aim. Ideal for Apex Legends, Overwatch, and Valorant warmup routines.</p>
+                    <p className="text-xs text-gray-300 leading-relaxed">FPS and battle royale players looking to improve moving target tracking, strafe prediction, and reactive click accuracy.</p>
                   </div>
                   <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Fixing Shaky Aim</h5>
+                      <h5 className="text-xs font-bold text-white">Anti-Strafe Prediction</h5>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Conditioning smooth motor control reduces hand tension and eliminates over-aiming when targets suddenly change strafe directions.</p>
+                    <p className="text-xs text-gray-300 leading-relaxed">Conditions your visual system to track target velocity and counter unpredictable direction reversals without overshooting.</p>
                   </div>
                   <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Zap className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Directional Reactivity</h5>
+                      <h5 className="text-xs font-bold text-white">Kinetic Intercept Timing</h5>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Trains your visual cortex to react smoothly to target speed spikes and reversals without guessing or panic clicking.</p>
+                    <p className="text-xs text-gray-300 leading-relaxed">Reinforces the exact micro-second trigger timing required to click high-velocity moving hitboxes cleanly.</p>
                   </div>
                 </div>
               </div>
@@ -924,21 +974,12 @@ export default function FPSTrackingTrainerClient() {
               onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-sans">
-                <FAQItem q="What is FPS tracking training?" a="FPS tracking training exercises your eyes and hands to keep your crosshair centered on targets moving along horizontal, vertical, or dynamic paths." />
-                <FAQItem q="Should you look at the crosshair or the target when tracking?" a="Always look at the target character model rather than staring at your crosshair. Staring at the crosshair induces cognitive delay." />
-                <FAQItem q="Why is my tracking aim so shaky?" a="Shaky tracking aim is primarily caused by excessive muscle tension (gripping mouse too tightly) or high sensitivity amplifying micro-jitters." />
-                <FAQItem q="How do I make my aim tracking smoother?" a="Reduce mouse sensitivity to 30-45 cm per 360, keep hand/wrist relaxed, and practice smooth pursuit drills consistently." />
-                <FAQItem q="What is the best sensitivity for tracking aim?" a="For tracking shooters, a low-to-moderate sensitivity between 30 cm/360 and 45 cm/360 provides maximum mechanical stability." />
-                <FAQItem q="How do you practice strafe tracking?" a="Use reactive horizontal scenarios. Focus on reacting smoothly to direction changes rather than predicting turn timing." />
-                <FAQItem q="Is Aim Lab or Kovaak's better for tracking?" a="Both are great. Kovaak's has huge scenario libraries, while Aim Lab offers telemetry. SkillDrills provides instant free browser access." />
-                <FAQItem q="How long does it take to improve tracking aim?" a="Daily practice of 15 to 20 minutes yields noticeable improvements in tracking smoothness within 2 to 4 weeks." />
-                <FAQItem q="Is this FPS tracking trainer free to practice?" a="Yes, all aim and reaction drills on SkillDrills are 100% free with no downloads, signups, or pop-up ads." />
-                <FAQItem q="Does monitor refresh rate affect tracking aim?" a="Yes. High refresh rate monitors (144Hz, 240Hz, 360Hz) make target motion smoother and reduce display ghosting." />
-                <FAQItem q="How does this drill improve reflexes?" a="By presenting unpredictable horizontal target switches, it teaches the brain to translate visual coordinate changes into precise motor movements." />
-                <FAQItem q="Can this improve gaming performance?" a="Yes. Fast reaction times and high-precision target tracking are critical for winning duels in competitive tournaments." />
-                <FAQItem q="Is this useful for FPS games?" a="Absolutely. Countering strafing players or tracking targets executing slide-cancels relies heavily on detecting speed transitions." />
-                <FAQItem q="How is reaction speed measured?" a="Reaction time is measured in milliseconds (ms) from the moment the target relocates to the moment you successfully click it." />
-                <FAQItem q="Is this suitable for beginners?" a="Yes. The adaptive level system scales target sizes and duration limits dynamically so players of all skill levels can start training." />
+                <FAQItem q="What is FPS Tracking Trainer (Dynamic Strafe Reaction)?" a="It is an online reflex training drill where targets execute erratic horizontal strafes with random direction changes, testing your tracking and click timing." />
+                <FAQItem q="How does this improve tracking in Apex Legends and Overwatch 2?" a="It builds the neurological reflex to track moving targets and time your clicks precisely during aggressive A/D strafe duels." />
+                <FAQItem q="What is smooth pursuit in aim training?" a="Smooth pursuit is the ocular ability to match eye velocity to target speed, keeping the target centered in your foveal vision without lagging." />
+                <FAQItem q="Is this FPS tracking drill free?" a="Yes, all drills on SkillDrills are 100% free with no signups, downloads, or pop-up ads required." />
+                <FAQItem q="How does continuous difficulty scaling work?" a="As your score and combo rise, target speed accelerates, size shrinks, and direction switches occur more rapidly without any upper ceiling." />
+                <FAQItem q="Is there a time penalty for missing or timeouts?" a="By default, missing or timeouts only reset your combo streak. An opt-in time penalty (-0.8s per error) is available in session settings." />
               </div>
             </DrillAccordion>
           </div>

@@ -5,10 +5,8 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 
 import {
-  Activity, AlertCircle, ArrowRight, ChevronRight, Eye,
-  Flame, RefreshCw, Target, Timer, TrendingUp,
-  Trophy, Volume2, VolumeX, Zap, ZapOff, Share2,
-  Users, LogOut, Award
+  AlertCircle, Eye, Flame, Target, TrendingUp,
+  Trophy, Volume2, VolumeX, Zap, ZapOff, Users
 } from 'lucide-react';
 
 import generateShareCard, { shareScoreCard } from '../../../../components/ShareScoreCard';
@@ -16,7 +14,8 @@ import { getPlayerName } from '../../../../lib/leaderboard';
 import { drillAudio } from '../../../../lib/drillAudio';
 import { drillFlash } from '../../../../lib/drillFlash';
 import { drillTimeout } from '../../../../lib/drillTimeout';
-import { getStartLevel, getDifficultyProgress, getComboBonusLevel } from '../../../../lib/drillDifficulty';
+import { drillPenalty } from '../../../../lib/drillPenalty';
+import { getStartLevel, getDifficultyProgress, ramp } from '../../../../lib/drillDifficulty';
 import { getComboMultiplier, getFpsScoreGrade } from '../../../../lib/scoringEngine';
 import { createBackdropCache, getCanvasDpr, drawPulseRing, drawTacticalTarget } from '../../../../lib/canvasFx';
 import useUnexpectedExitGuard from '../../../../lib/useUnexpectedExitGuard';
@@ -24,14 +23,19 @@ import DrillFooter from '../../../../components/drill/DrillFooter';
 import DrillCountdown from '../../../../components/drill/DrillCountdown';
 import DrillAccordion from '../../../../components/drill/DrillAccordion';
 import FpsStartCard from '../../../../components/drill/FpsStartCard';
+import DrillResultCard from '../../../../components/drill/DrillResultCard';
 
 // ============================================================
 // TUNING CONSTANTS
 // ============================================================
-const DRILL_DURATION = 45; // 45 seconds focused duration
-const POINTS_PER_LEVEL = 200; // Aggressive progression
-const ELITE_SCORE = 16000; // 100% mark for letter grade
-const STORAGE_KEY = 'skilldrills_fps_instant_response_v2';
+const DRILL_DURATION = 45; // starting clock only; a run grows past this
+const POINTS_PER_LEVEL = 1400; // 200 -> 1400 (7x)
+const ELITE_SCORE = 48000; // 16000 -> 48000 (3x)
+
+const TIME_PER_HIT = 0.6;
+const TIME_PENALTY = 0.8;
+
+const STORAGE_KEY = 'skilldrills_fps_instant_response_v3';
 const SPAM_CALM_WINDOW = 350;
 
 const getSavedData = () => {
@@ -50,6 +54,19 @@ const saveData = (data) => {
   } catch (e) {}
 };
 
+const getLevelConfig = (level, combo = 0) => {
+  const p = getDifficultyProgress(level); // 0 at L1, 1 at L15, unbounded above
+  const heat = (getComboMultiplier(combo) - 1) / 2;
+
+  return {
+    flashWindow:   Math.max(40, ramp(550, 90, p) * (1 - heat * 0.35)),
+    targetRadius:  35,
+    idleMin:       ramp(700, 300, p) * (1 - heat * 0.40),
+    idleMax:       ramp(2200, 1000, p) * (1 - heat * 0.35),
+    hitPad:        Math.max(0.5, ramp(10, 2, p) * (1 - heat * 0.50)),
+    feintChance:   p < 0.5 ? 0 : Math.min(0.35, (p - 0.5) * 0.35),
+  };
+};
 
 // ============================================================
 // ACCORDION DATA
@@ -57,8 +74,8 @@ const saveData = (data) => {
 const RULES_ITEMS = [
   { num: "1", text: "Flash Reaction Hit", highlight: "+100 PTS", result: "Click Immediately On Flash" },
   { num: "2", text: "Speed Bonus System", highlight: "Up to +150 PTS", result: "Sub-150ms Reactions" },
-  { num: "3", text: "Level Progression", highlight: "+1 Level / 200 PTS", result: "Exposure: 550ms → 200ms" },
-  { num: "4", text: "Feint & Pre-fire Penalties", highlight: "Zero Penalties", result: "Combo resets, no time or score lost" }
+  { num: "3", text: "Level Progression", highlight: "+1 Level / 1400 PTS", result: "Adaptive Flash Windows" },
+  { num: "4", text: "Feint & Pre-fire Rule", highlight: "Failure Penalty", result: "Combo resets (-0.8s with Time Penalty enabled)" }
 ];
 
 const ABOUT_INTRO = [
@@ -66,24 +83,24 @@ const ABOUT_INTRO = [
 ];
 
 const ABOUT_CARDS = [
-  { icon: Users, iconBg: 'bg-blue-600', title: "Who Should Use This?", text: "CS2, Valorant, and Apex Legends players sharpening raw visual reaction latency, plus any FPS player chasing faster trigger response without relying on hardware." },
-  { icon: TrendingUp, iconBg: 'bg-emerald-600', title: "Skills Improved", text: "Visual stimulus processing speed, trigger discipline, anticipation control, and consistent sub-200ms reaction latency." },
-  { icon: Target, iconBg: 'bg-purple-600', title: "Speed Bonus & Feints", text: "Sub-150ms reactions earn up to +150 bonus points, while dim feints unlocking at Level 8 test your trigger discipline under pressure." },
+  { icon: Users, iconBg: "bg-blue-600", title: "Who Should Use This?", text: "CS2, Valorant, and Apex Legends players sharpening raw visual reaction latency, plus any FPS player chasing faster trigger response without relying on hardware." },
+  { icon: TrendingUp, iconBg: "bg-emerald-600", title: "Skills Improved", text: "Visual stimulus processing speed, trigger discipline, anticipation control, and consistent sub-200ms reaction latency." },
+  { icon: Target, iconBg: "bg-purple-600", title: "Speed Bonus & Feints", text: "Sub-150ms reactions earn up to +150 bonus points, while dim feints unlocking at higher levels test your trigger discipline under pressure." },
 ];
 
 const ABOUT_SECTIONS = [
   {
-    icon: Activity,
+    icon: Zap,
     title: "Progressive Difficulty & Exposure Window",
     paragraphs: [
-      "By exposing players to randomized idle intervals and shrinking flash windows (from 550ms down to 200ms), Instant Response Pro conditions the nervous system to react to visual flashes with zero hesitation while eliminating premature anticipation clicking."
+      "By exposing players to randomized idle intervals and shrinking flash windows, Instant Response Pro conditions the nervous system to react to visual flashes with zero hesitation while eliminating premature anticipation clicking."
     ]
   },
   {
     icon: Zap,
     title: "Speed Bonus & Trigger Discipline",
     paragraphs: [
-      "Sub-150ms reactions earn up to +150 speed bonus points, directly rewarding high neurological processing speed. Pre-firing during idle states or clicking dim feints (which unlock at Level 8) breaks your combo multiplier, forcing absolute trigger discipline under extreme speed constraints."
+      "Sub-150ms reactions earn up to +150 speed bonus points, directly rewarding high neurological processing speed. Pre-firing during idle states or clicking dim feints breaks your combo multiplier, forcing absolute trigger discipline under extreme speed constraints."
     ]
   }
 ];
@@ -96,12 +113,12 @@ const FAQ_ITEMS = [
   { q: "Does this drill help in CS2?", a: "Absolutely. CS2 gunfights are won in milliseconds. Improving visual stimulus response speed directly translates to winning quick-peek engagements." },
   { q: "What is raw reflex latency?", a: "Raw reflex latency is the speed at which your motor reflex fires upon seeing a visual color/light change on screen, independent of cursor movement." },
   { q: "How often should I train my reflexes?", a: "We recommend daily 10-15 minute reflex sessions as a warm-up before queueing up competitive matches." },
-  { q: "Why does missing reset my combo instead of penalizing my time or score?", a: "To keep every run comparable, this drill never drains your clock or deducts points. Pre-firing, missing, and timing out only reset your combo multiplier, so your final score stays a clean measure of skill." },
+  { q: "Why does missing reset my combo instead of penalizing my time or score?", a: "By default, pre-firing, missing, or timing out only resets your combo multiplier to keep baseline training accessible. If you want a stricter challenge with clock deductions (-0.8s per error), you can enable Time Penalty in the session settings." },
   { q: "What is click timing consistency?", a: "Consistency measures the deviation between your reaction times. Lower deviation means highly stable and predictable in-game reflexes." },
   { q: "Does sleep affect my reaction time?", a: "Yes, fatigue and sleep deprivation can degrade reaction time by 50ms or more, heavily impacting gaming performance." },
   { q: "What games benefit from reflex training?", a: "All fast-paced shooters like Apex Legends, Call of Duty, Overwatch 2, CS2, Valorant, and Spectre Divide." },
   { q: "Is this reflex test free?", a: "Yes, it is 100% free and runs directly in your browser with raw pointer lock precision." },
-  { q: "How does dynamic scaling make the drill harder?", a: "As your score increases, the flash duration decreases from 550ms down to a minimum of 200ms, forcing higher neural speed." },
+  { q: "How does dynamic scaling make the drill harder?", a: "As your score increases, the flash duration decreases dynamically with continuous progression, forcing higher neural speed." },
   { q: "What is anticipation clicking?", a: "Anticipation clicking (pre-firing) is clicking based on timing prediction rather than visual stimulus response, which is penalized in this drill." },
   { q: "Does peripheral vision play a role here?", a: "Even though the target is centered, keeping your visual focus sharp and relaxed helps register the flash state faster." }
 ];
@@ -123,6 +140,7 @@ export default function InstantResponseClient() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
+  const [penaltyEnabled, setPenaltyEnabled] = useState(false);
   const [pointerLocked, setPointerLocked] = useState(false);
   const [openAccordion, setOpenAccordion] = useState(null);
   const [isTouchOnlyDevice, setIsTouchOnlyDevice] = useState(false);
@@ -175,6 +193,7 @@ export default function InstantResponseClient() {
     if (typeof window !== 'undefined') {
       setSoundEnabled(drillAudio.isEnabled());
       setFlashEnabled(drillFlash.isEnabled());
+      setPenaltyEnabled(drillPenalty.isEnabled());
 
       const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
       const isTouchCapable = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
@@ -232,21 +251,9 @@ export default function InstantResponseClient() {
     }
   }, []);
 
-  const getLevelConfig = (level) => {
-    const p = getDifficultyProgress(level); // 0 -> 1 across L1..L15
-    return {
-      flashWindow:   Math.max(200, 550 - p * 350),   // 550 -> 200 ms
-      targetRadius:  35,                             // fixed — difficulty comes from timing, not target size
-      idleMin:       700 - p * 300,                  // 700 -> 400 ms
-      idleMax:       2200 - p * 900,                 // 2200 -> 1300 ms
-      hitPad:        10  - p * 6,                    // 10 -> 4 px
-      feintChance:   p < 0.5 ? 0 : (p - 0.5) * 0.5,  // 0 -> 0.25 from L8
-    };
-  };
-
-  const spawnTargetExposure = useCallback((time, currentLevel) => {
+  const spawnTargetExposure = useCallback((time, currentLevel, currentCombo) => {
     const e = engine.current;
-    const config = getLevelConfig(currentLevel);
+    const config = getLevelConfig(currentLevel, currentCombo);
     const isFeint = Math.random() < config.feintChance;
     
     const windowDuration = isFeint ? 60 : config.flashWindow;
@@ -291,7 +298,7 @@ export default function InstantResponseClient() {
     setAnalytics({
       accuracy: finalAccuracy, successfulHits: e.successfulHits, missedClicks: e.missedClicks,
       preFires: e.preFires, timeouts: e.timeouts, avgReactionMs: avgRt,
-      maxCombo: e.maxCombo, finalLevel: e.level, grade
+      maxCombo: e.maxCombo, finalLevel: Math.floor(e.level), grade
     });
 
     setUiScore(e.score);
@@ -300,7 +307,7 @@ export default function InstantResponseClient() {
     const isNewHigh = e.score > prevSaved.bestScore;
     setIsNewBest(isNewHigh);
 
-    const runBestLevel = Math.max(prevSaved.bestLevel, bestLevelRunRef.current);
+    const runBestLevel = Math.max(prevSaved.bestLevel, Math.floor(bestLevelRunRef.current));
     const updatedData = {
       bestScore: Math.max(prevSaved.bestScore, e.score),
       bestCombo: Math.max(prevSaved.bestCombo, e.maxCombo),
@@ -333,7 +340,7 @@ export default function InstantResponseClient() {
     lastTimeRef.current = DRILL_DURATION;
 
     const saved = getSavedData();
-    const startLevel = getStartLevel(saved.bestLevel);
+    const startLevel = getStartLevel();
     bestLevelRunRef.current = startLevel;
 
     setAnalytics({
@@ -422,7 +429,7 @@ export default function InstantResponseClient() {
           const h = eRef.logicalHeight;
           const targetX = w / 2;
           const targetY = h / 2;
-          const config = getLevelConfig(eRef.level);
+          const config = getLevelConfig(eRef.level, eRef.combo);
 
           eRef.totalShots++;
           eRef.lastClickTime = performance.now();
@@ -430,6 +437,7 @@ export default function InstantResponseClient() {
           if (!eRef.target.isExposed || eRef.target.isFeint) {
             // PRE-FIRE FAILURE
             eRef.preFires++;
+            if (drillPenalty.isEnabled()) eRef.timeLeft -= TIME_PENALTY;
             eRef.combo = 0;
             eRef.screenShake = 8;
             triggerFlash();
@@ -452,7 +460,9 @@ export default function InstantResponseClient() {
               const levelMult = 1 + getDifficultyProgress(eRef.level) * 0.5;
               eRef.score += Math.round((100 + speedBonus) * getComboMultiplier(eRef.combo) * levelMult);
 
-              const rawLevel = Math.floor(eRef.score / POINTS_PER_LEVEL) + 1 + getComboBonusLevel(eRef.combo);
+              eRef.timeLeft += TIME_PER_HIT;
+
+              const rawLevel = (eRef.score / POINTS_PER_LEVEL) + 1;
               eRef.level = Math.max(eRef.level, rawLevel);
               bestLevelRunRef.current = Math.max(bestLevelRunRef.current, eRef.level);
 
@@ -462,11 +472,12 @@ export default function InstantResponseClient() {
               setUiScore(eRef.score);
 
               eRef.target.isExposed = false;
-              const nextConfig = getLevelConfig(eRef.level);
+              const nextConfig = getLevelConfig(eRef.level, eRef.combo);
               eRef.nextExposeTime = performance.now() + (nextConfig.idleMin + Math.random() * (nextConfig.idleMax - nextConfig.idleMin));
             } else {
               // MISS FAILURE
               eRef.missedClicks++;
+              if (drillPenalty.isEnabled()) eRef.timeLeft -= TIME_PENALTY;
               eRef.combo = 0;
               eRef.screenShake = 8;
               triggerFlash();
@@ -563,7 +574,7 @@ export default function InstantResponseClient() {
         }
 
         if (!e.target.isExposed && time >= e.nextExposeTime && (time - e.lastClickTime) >= SPAM_CALM_WINDOW) {
-          spawnTargetExposure(time, e.level);
+          spawnTargetExposure(time, e.level, e.combo);
         }
 
         if (e.target.isExposed) {
@@ -574,6 +585,7 @@ export default function InstantResponseClient() {
 
             if (!e.target.isFeint) {
               e.timeouts++;
+              if (drillPenalty.isEnabled()) e.timeLeft -= TIME_PENALTY;
               e.combo = 0;
               e.screenShake = 8;
               triggerFlash();
@@ -584,7 +596,7 @@ export default function InstantResponseClient() {
               setUiAccuracy(totalAttempts > 0 ? Math.round((e.successfulHits / totalAttempts) * 100) : 100);
             }
 
-            const config = getLevelConfig(e.level);
+            const config = getLevelConfig(e.level, e.combo);
             e.nextExposeTime = time + (config.idleMin + Math.random() * (config.idleMax - config.idleMin));
           }
         }
@@ -609,7 +621,7 @@ export default function InstantResponseClient() {
       }
 
       if (gameState === 'playing' || gameState === 'start') {
-        const config = getLevelConfig(e.level);
+        const config = getLevelConfig(e.level, e.combo);
         const r = config.targetRadius;
         const cx = w / 2;
         const cy = h / 2;
@@ -653,7 +665,7 @@ export default function InstantResponseClient() {
         hm.life -= dt * 4.5;
         if (hm.life <= 0) { e.hitMarkers.splice(i, 1); continue; }
         ctx.globalAlpha = hm.life; ctx.strokeStyle = '#ffffff';
-        const s = 6 + (1 - hm.life) * 8;
+        const s = 6 + (1 - hm.life) * 8; 
         ctx.beginPath();
         ctx.moveTo(hm.x - s, hm.y - s); ctx.lineTo(hm.x + s, hm.y + s);
         ctx.moveTo(hm.x + s, hm.y - s); ctx.lineTo(hm.x - s, hm.y + s);
@@ -737,7 +749,7 @@ export default function InstantResponseClient() {
               </span>
             </h1>
             <p className="text-xs text-slate-400 mt-1">
-              Visual Reaction Latency &amp; Reflex • 15 Levels
+              Visual Reaction Latency &amp; Reflex • Endless Level Progression
             </p>
           </div>
         )}
@@ -751,7 +763,7 @@ export default function InstantResponseClient() {
             </div>
             <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
-              <div className={`text-lg sm:text-xl font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>{uiTimeLeft}s</div>
+              <div className={`text-lg sm:text-xl font-black tabular-nums ${uiTimeLeft <= 10 ? "text-red-400 animate-pulse" : "text-white"}`}>{uiTimeLeft}s</div>
             </div>
             <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Accuracy</div>
@@ -770,8 +782,8 @@ export default function InstantResponseClient() {
           onContextMenu={(e) => { if (gameActiveRef.current) e.preventDefault(); }}
           className={`relative overflow-hidden flex flex-col transition-all duration-150 select-none bg-[#080811] text-white border border-white/10 ${
             isFullscreen 
-              ? 'fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#080811] rounded-none border-none flex flex-col items-center justify-center' 
-              : 'w-full rounded-2xl bg-[#080811] aspect-video min-h-[460px] sm:min-h-[500px] max-h-[88vh] relative overflow-hidden flex flex-col'
+              ? "fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#080811] rounded-none border-none flex flex-col items-center justify-center" 
+              : "w-full rounded-2xl bg-[#080811] aspect-video min-h-[460px] sm:min-h-[500px] max-h-[88vh] relative overflow-hidden flex flex-col"
           }`}
           style={{ touchAction: gameActiveRef.current ? 'none' : 'auto' }}
         >
@@ -789,7 +801,7 @@ export default function InstantResponseClient() {
               </div>
               <div className="absolute top-4 right-4 z-30 pointer-events-none text-right">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Time</p>
-                <p className={`text-2xl sm:text-3xl font-bold tabular-nums leading-tight ${uiTimeLeft <= 10 ? 'text-red-400' : 'text-white'}`}>{uiTimeLeft}s</p>
+                <p className={`text-2xl sm:text-3xl font-bold tabular-nums leading-tight ${uiTimeLeft <= 10 ? "text-red-400" : "text-white"}`}>{uiTimeLeft}s</p>
               </div>
             </>
           )}
@@ -848,7 +860,7 @@ export default function InstantResponseClient() {
           <canvas 
             ref={canvasRef} 
             onClick={() => { if (gameState === 'playing' && !pointerLocked) resumeDrill(); }}
-            className={`block absolute top-0 left-0 w-full h-full touch-none z-10 ${gameState === 'playing' ? 'cursor-none' : ''}`} 
+            className={`block absolute top-0 left-0 w-full h-full touch-none z-10 ${gameState === "playing" ? "cursor-none" : ""}`}
           />
 
           {/* START MODAL */}
@@ -857,15 +869,15 @@ export default function InstantResponseClient() {
               icon={Target}
               accent="emerald"
               title="Instant Response Pro"
-              subtitle="Visual Reaction Latency & Reflex • 15 Levels"
+              subtitle="Visual Reaction Latency & Reflex • Endless Level Progression"
               rules={[
-                { icon: Target, accent: 'emerald', title: 'Objective', text: 'Click Flash Stimulus' },
-                { icon: AlertCircle, accent: 'red', title: 'Failure Rule', text: 'Pre-fire / Miss / Timeout' },
+                { icon: Target, accent: "emerald", title: "Objective (+100 PTS)", text: "Click flash stimulus as fast as possible" },
+                { icon: AlertCircle, accent: "red", title: "Failure Rule", text: penaltyEnabled ? "Pre-fire / Miss / Timeout → Combo Reset, -0.8s" : "Pre-fire / Miss / Timeout → Combo Reset" },
               ]}
               stats={[
-                { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
-                { icon: Flame, label: 'Best Combo', value: `${bestCombo}x`, color: 'text-emerald-400', accent: 'emerald' },
-                { icon: TrendingUp, label: 'Best Level', value: `Lv. ${bestLevel}`, color: 'text-blue-400', accent: 'blue' },
+                { icon: Trophy, label: "Best Score", value: bestScore, color: "text-white", accent: "slate" },
+                { icon: Flame, label: "Best Combo", value: `${bestCombo}x`, color: "text-emerald-400", accent: "emerald" },
+                { icon: TrendingUp, label: "Best Level", value: `Lv. ${bestLevel}`, color: "text-blue-400", accent: "blue" },
               ]}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
@@ -877,78 +889,23 @@ export default function InstantResponseClient() {
             <DrillCountdown value={countdownValue} subtitle="GET READY" />
           )}
 
-          {/* END SCREEN */}
+          {/* END SCREEN — universal card, shared by every drill */}
           {gameState === 'gameOver' && analytics.grade && (
-            <div className="absolute inset-0 z-40 flex bg-neutral-950/98 select-none font-sans" style={{ background: 'rgba(5,5,8,0.97)' }} onPointerDown={e => e.stopPropagation()}>
-              
-              {/* Left Grade Panel */}
-              <div className="w-[36%] flex flex-col items-center justify-center gap-1 border-r border-white/5 px-4" style={{ background: 'radial-gradient(ellipse 260px 200px at 50% 30%, rgba(16,185,129,.12), transparent 70%)' }}>
-                {isNewBest && (
-                  <span className="text-[9.5px] font-bold text-yellow-400 bg-yellow-500/10 border border-yellow-500/25 px-2.5 py-0.5 rounded-full mb-1 animate-pulse">
-                    NEW BEST
-                  </span>
-                )}
-                <div className={`text-5xl sm:text-6xl font-black leading-none ${analytics.grade.color}`}>
-                  {analytics.grade.letter}
-                </div>
-                <div className="text-[10px] uppercase tracking-widest text-slate-500 text-center font-bold mt-1">
-                  {analytics.grade.label}
-                </div>
-                <div className="text-3xl sm:text-4xl font-black text-white mt-2 tabular-nums">
-                  {uiScore}
-                </div>
-                <div className="text-[9px] uppercase tracking-widest text-slate-500">Points</div>
-              </div>
-
-              {/* Right Stats & Actions Panel */}
-              <div className="flex-1 flex flex-col justify-center gap-3 px-6 py-4 min-w-0">
-                
-                {/* 4 Stat Tiles */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.accuracy}%</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Accuracy</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.avgReactionMs}<span className="text-[10px] text-gray-500">ms</span></p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Avg Reaction</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.maxCombo}x</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Max Combo</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">Lv. {analytics.finalLevel}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Peak Level</p>
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex gap-2">
-                  <button 
-                    onClick={enterDrill} 
-                    className="flex-1 py-3 rounded-[13px] bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold text-xs uppercase tracking-wide cursor-pointer transition-transform active:scale-[0.98] shadow-md flex items-center justify-center gap-1.5"
-                  >
-                    <RefreshCw className="w-3.5 h-3.5" /> Play Again
-                  </button>
-                  <button 
-                    onClick={shareScore} 
-                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform" 
-                    title="Share Score"
-                  >
-                    <Share2 className="w-4 h-4" />
-                  </button>
-                  <button 
-                    onClick={handleExitDrill} 
-                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform" 
-                    title="Exit Fullscreen & Return"
-                  >
-                    <LogOut className="w-4 h-4 text-red-400" />
-                  </button>
-                </div>
-
-              </div>
-            </div>
+            <DrillResultCard
+              accent="emerald"
+              grade={analytics.grade}
+              score={uiScore}
+              isNewBest={isNewBest}
+              stats={[
+                { value: analytics.accuracy, suffix: "%", label: "Accuracy" },
+                { value: analytics.avgReactionMs, suffix: "ms", label: "Avg Reaction" },
+                { value: `${analytics.maxCombo}x`, label: "Max Combo" },
+                { value: `Lv. ${analytics.finalLevel}`, label: "Peak Level" },
+              ]}
+              onPlayAgain={enterDrill}
+              onShare={shareScore}
+              onExit={handleExitDrill}
+            />
           )}
 
         </div>
@@ -981,7 +938,7 @@ export default function InstantResponseClient() {
                     <Eye className="w-4 h-4 text-emerald-400" /> What Is Instant Response Training?
                   </h4>
                   {ABOUT_INTRO.map((para, i) => (
-                    <p key={i} className={`text-sm leading-relaxed text-gray-300 ${i < ABOUT_INTRO.length - 1 ? 'mb-3' : ''}`}>{para}</p>
+                    <p key={i} className={`text-sm leading-relaxed text-gray-300 ${i < ABOUT_INTRO.length - 1 ? "mb-3" : ""}`}>{para}</p>
                   ))}
                 </section>
 
@@ -1005,7 +962,7 @@ export default function InstantResponseClient() {
                       <section.icon className="w-4 h-4 text-emerald-400" /> {section.title}
                     </h4>
                     {section.paragraphs.map((para, j) => (
-                      <p key={j} className={`text-sm leading-relaxed text-gray-300 ${j < section.paragraphs.length - 1 ? 'mb-3' : ''}`}>{para}</p>
+                      <p key={j} className={`text-sm leading-relaxed text-gray-300 ${j < section.paragraphs.length - 1 ? "mb-3" : ""}`}>{para}</p>
                     ))}
                   </section>
                 ))}

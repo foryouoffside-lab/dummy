@@ -5,11 +5,9 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 
 import {
-  Activity, AlertCircle, ArrowRight, Brain, ChevronRight, Crosshair,
-  Eye, Flame, GraduationCap, RefreshCw, Target,
-  Timer, TrendingUp, Trophy, Volume2, VolumeX,
-  Zap, ZapOff, Users, Share2,
-  LogOut, Award
+  AlertCircle, Brain, Crosshair, Flame,
+  Target, TrendingUp, Trophy, Volume2, VolumeX,
+  Zap, ZapOff, Users
 } from 'lucide-react';
 
 import generateShareCard, { shareScoreCard } from '../../../../components/ShareScoreCard';
@@ -17,7 +15,8 @@ import { getPlayerName } from '../../../../lib/leaderboard';
 import { drillAudio } from '../../../../lib/drillAudio';
 import { drillFlash } from '../../../../lib/drillFlash';
 import { drillTimeout } from '../../../../lib/drillTimeout';
-import { getStartLevel, getDifficultyProgress, getComboBonusLevel } from '../../../../lib/drillDifficulty';
+import { drillPenalty } from '../../../../lib/drillPenalty';
+import { getStartLevel, getDifficultyProgress, ramp } from '../../../../lib/drillDifficulty';
 import { getComboMultiplier, getFpsScoreGrade } from '../../../../lib/scoringEngine';
 import { createBackdropCache, getCanvasDpr, drawPulseRing, drawTacticalTarget } from '../../../../lib/canvasFx';
 import useUnexpectedExitGuard from '../../../../lib/useUnexpectedExitGuard';
@@ -25,14 +24,19 @@ import DrillFooter from '../../../../components/drill/DrillFooter';
 import DrillCountdown from '../../../../components/drill/DrillCountdown';
 import DrillAccordion from '../../../../components/drill/DrillAccordion';
 import FpsStartCard from '../../../../components/drill/FpsStartCard';
+import DrillResultCard from '../../../../components/drill/DrillResultCard';
 
 // ============================================================
 // TUNING CONSTANTS
 // ============================================================
-const DRILL_DURATION = 45; // 45 seconds focused duration
-const POINTS_PER_LEVEL = 250; // Aggressive progression
-const ELITE_SCORE = 17000;
-const STORAGE_KEY = 'skilldrills_fps_180_awareness_v2';
+const DRILL_DURATION = 45; // starting clock only; a run grows past this
+const POINTS_PER_LEVEL = 1750; // 250 -> 1750 (7x)
+const ELITE_SCORE = 51000; // 17000 -> 51000 (3x)
+
+const TIME_PER_HIT = 0.6;
+const TIME_PENALTY = 0.8;
+
+const STORAGE_KEY = 'skilldrills_fps_180_awareness_v3';
 
 const getSavedData = () => {
   try {
@@ -52,22 +56,16 @@ const saveData = (data) => {
 
 
 const getLevelConfig = (level, combo = 0) => {
-  const p = getDifficultyProgress(level); // 0 -> 1 across L1..L15
-  const curve = p * p;
-  const heat = Math.min(1.0, combo / 50);
-
-  const baseRadius   = Math.max(13, 32 - curve * 19);     // 32 -> 13 px
-  const baseTtl      = Math.max(380, 1300 - curve * 920); // 1300 -> 380 ms
-  const baseSpawnMin = 480 - curve * 350;                 // 480 -> 130 ms
-  const baseSpawnMax = 680 - curve * 490;                 // 680 -> 190 ms
+  const p = getDifficultyProgress(level); // 0 at L1, 1 at L15, unbounded above
+  const heat = (getComboMultiplier(combo) - 1) / 2;
 
   return {
-    radius:        Math.max(9,   baseRadius   - heat * 5),
-    ttl:           Math.max(260, baseTtl      - heat * 150),
-    spawnDelayMin: Math.max(90,  baseSpawnMin - heat * 70),
-    spawnDelayMax: Math.max(140, baseSpawnMax - heat * 90),
-    edgeProb:      0.25 + p * 0.65, // 0.25 -> 0.90
-    hitPad:        Math.max(1,   (12 - curve * 7) - heat * 3),
+    radius:        Math.max(4, ramp(32,   7,   p) * (1 - heat * 0.38)),
+    ttl:                       ramp(1300, 90,  p) * (1 - heat * 0.39),
+    spawnDelayMin:             ramp(480,  20,  p) * (1 - heat * 0.54),
+    spawnDelayMax:             ramp(680,  35,  p) * (1 - heat * 0.47),
+    edgeProb:      Math.min(0.95, 0.25 + p * 0.65),
+    hitPad:                    ramp(12,   0.2, p) * (1 - heat * 0.60),
     drift:         p < 0.6 ? 0 : (p - 0.6) * 55, // px/sec lateral drift from L10
   };
 };
@@ -124,9 +122,10 @@ export default function AwarenessDrillClient() {
   const [bestCombo, setBestCombo] = useState(0);
   const [bestLevel, setBestLevel] = useState(1);
   const [isNewBest, setIsNewBest] = useState(false);
+  const [penaltyEnabled, setPenaltyEnabled] = useState(false);
 
   const [analytics, setAnalytics] = useState({
-    accuracy: 100, successfulHits: 0, missedClicks: 0, timeouts: 0, 
+    accuracy: 100, successfulHits: 0, missedClicks: 0, idleClicks: 0, timeouts: 0, 
     avgReactionTime: 0, maxCombo: 0, finalLevel: 1, grade: null
   });
 
@@ -145,7 +144,7 @@ export default function AwarenessDrillClient() {
     crosshair: { x: 0, y: 0, initialized: false },
     target: { active: false, x: 0, y: 0, radius: 30, age: 0, spawnTime: 0, ttl: 1200, drift: 0, vx: 1 },
     score: 0, level: 1, combo: 0, timeLeft: DRILL_DURATION, nextSpawnTime: 0,
-    successfulHits: 0, missedClicks: 0, timeouts: 0, maxCombo: 0, reactionTimes: [], totalActions: 0,
+    successfulHits: 0, missedClicks: 0, idleClicks: 0, timeouts: 0, maxCombo: 0, reactionTimes: [], totalActions: 0,
     particles: [], hitMarkers: [], screenShake: 0, logicalWidth: 800, logicalHeight: 450
   });
 
@@ -163,6 +162,7 @@ export default function AwarenessDrillClient() {
     if (typeof window !== 'undefined') {
       setSoundEnabled(drillAudio.isEnabled());
       setFlashEnabled(drillFlash.isEnabled());
+      setPenaltyEnabled(drillPenalty.isEnabled());
       const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
       const isTouchCapable = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
       setIsTouchOnlyDevice(isTouchCapable && !hasFinePointer);
@@ -230,9 +230,9 @@ export default function AwarenessDrillClient() {
     }
   }, []);
 
-  const spawnTarget = useCallback((time, width, height, currentLevel) => {
+  const spawnTarget = useCallback((time, width, height, currentLevel, currentCombo) => {
     const e = engine.current;
-    const config = getLevelConfig(currentLevel, e.combo);
+    const config = getLevelConfig(currentLevel, currentCombo);
     
     const margin = config.radius + 15;
     const isEdge = Math.random() < config.edgeProb;
@@ -287,7 +287,8 @@ export default function AwarenessDrillClient() {
     if (document.pointerLockElement) document.exitPointerLock();
     
     const e = engine.current;
-    const finalAccuracy = e.totalActions > 0 ? Math.round((e.successfulHits / e.totalActions) * 100) : 0;
+    const totalAttempts = e.successfulHits + e.missedClicks + e.idleClicks + e.timeouts;
+    const finalAccuracy = totalAttempts > 0 ? Math.round((e.successfulHits / totalAttempts) * 100) : 0;
     const avgRt = e.reactionTimes.length > 0 
       ? Math.round(e.reactionTimes.reduce((a, b) => a + b, 0) / e.reactionTimes.length) 
       : 0;
@@ -297,8 +298,8 @@ export default function AwarenessDrillClient() {
 
     setAnalytics({
       accuracy: finalAccuracy, successfulHits: e.successfulHits, missedClicks: e.missedClicks,
-      timeouts: e.timeouts, avgReactionTime: avgRt, maxCombo: e.maxCombo, finalLevel: e.level,
-      grade
+      idleClicks: e.idleClicks, timeouts: e.timeouts, avgReactionTime: avgRt, maxCombo: e.maxCombo,
+      finalLevel: Math.floor(e.level), grade
     });
 
     setUiScore(e.score);
@@ -307,7 +308,7 @@ export default function AwarenessDrillClient() {
     const isNewHigh = e.score > prevSaved.bestScore;
     setIsNewBest(isNewHigh);
 
-    const runBestLevel = Math.max(prevSaved.bestLevel, bestLevelRunRef.current);
+    const runBestLevel = Math.max(prevSaved.bestLevel, Math.floor(bestLevelRunRef.current));
     const updatedData = {
       bestScore: Math.max(prevSaved.bestScore, e.score),
       bestCombo: Math.max(prevSaved.bestCombo, e.maxCombo),
@@ -339,11 +340,11 @@ export default function AwarenessDrillClient() {
     lastTimeRef.current = DRILL_DURATION;
 
     const saved = getSavedData();
-    const startLevel = getStartLevel(saved.bestLevel);
+    const startLevel = getStartLevel();
     bestLevelRunRef.current = startLevel;
 
     setAnalytics({
-      accuracy: 100, successfulHits: 0, missedClicks: 0, timeouts: 0,
+      accuracy: 100, successfulHits: 0, missedClicks: 0, idleClicks: 0, timeouts: 0,
       avgReactionTime: 0, maxCombo: 0, finalLevel: startLevel, grade: null
     });
 
@@ -355,7 +356,7 @@ export default function AwarenessDrillClient() {
       target: { active: false, x: 0, y: 0, radius: 30, age: 0, spawnTime: 0, ttl: 1200, drift: 0, vx: 1 },
       score: 0, level: startLevel, combo: 0, timeLeft: DRILL_DURATION,
       nextSpawnTime: performance.now() + 500, successfulHits: 0, missedClicks: 0,
-      timeouts: 0, maxCombo: 0, reactionTimes: [], totalActions: 0,
+      idleClicks: 0, timeouts: 0, maxCombo: 0, reactionTimes: [], totalActions: 0,
       particles: [], hitMarkers: [], screenShake: 0, logicalWidth: w, logicalHeight: h
     };
 
@@ -423,11 +424,19 @@ export default function AwarenessDrillClient() {
           const eRef = engine.current;
           const ch = eRef.crosshair;
           const tgt = eRef.target;
-          const config = getLevelConfig(eRef.level);
+          const config = getLevelConfig(eRef.level, eRef.combo);
 
           eRef.totalActions++;
 
-          if (tgt.active) {
+          if (!tgt.active) {
+            eRef.idleClicks++;
+            if (drillPenalty.isEnabled()) eRef.timeLeft -= TIME_PENALTY;
+            eRef.combo = 0;
+            eRef.screenShake = 6;
+            triggerFlash();
+            drillAudio.playPenalty();
+            createExplosion(ch.x, ch.y, '#ef4444');
+          } else {
             const dist = Math.hypot(ch.x - tgt.x, ch.y - tgt.y);
 
             if (dist <= tgt.radius + config.hitPad) {
@@ -441,7 +450,9 @@ export default function AwarenessDrillClient() {
               const levelMult = 1 + getDifficultyProgress(eRef.level) * 0.5;
               eRef.score += Math.round(100 * getComboMultiplier(eRef.combo) * levelMult);
 
-              const rawLevel = Math.floor(eRef.score / POINTS_PER_LEVEL) + 1 + getComboBonusLevel(eRef.combo);
+              eRef.timeLeft += TIME_PER_HIT;
+
+              const rawLevel = (eRef.score / POINTS_PER_LEVEL) + 1;
               eRef.level = Math.max(eRef.level, rawLevel);
               bestLevelRunRef.current = Math.max(bestLevelRunRef.current, eRef.level);
 
@@ -451,23 +462,17 @@ export default function AwarenessDrillClient() {
               setUiScore(eRef.score);
 
               tgt.active = false;
-              const nextConfig = getLevelConfig(eRef.level);
+              const nextConfig = getLevelConfig(eRef.level, eRef.combo);
               eRef.nextSpawnTime = performance.now() + (nextConfig.spawnDelayMin + Math.random() * (nextConfig.spawnDelayMax - nextConfig.spawnDelayMin));
             } else {
               eRef.missedClicks++;
+              if (drillPenalty.isEnabled()) eRef.timeLeft -= TIME_PENALTY;
               eRef.combo = 0;
               eRef.screenShake = 6;
               triggerFlash();
               drillAudio.playPenalty();
               createExplosion(ch.x, ch.y, '#ef4444');
             }
-          } else {
-            eRef.missedClicks++;
-            eRef.combo = 0;
-            eRef.screenShake = 6;
-            triggerFlash();
-            drillAudio.playPenalty();
-            createExplosion(ch.x, ch.y, '#ef4444');
           }
         }
       }
@@ -553,7 +558,7 @@ export default function AwarenessDrillClient() {
         }
 
         if (!e.target.active && time >= e.nextSpawnTime) {
-          spawnTarget(time, w, h, e.level);
+          spawnTarget(time, w, h, e.level, e.combo);
         }
 
         if (e.target.active) {
@@ -571,13 +576,14 @@ export default function AwarenessDrillClient() {
             tgt.active = false;
             e.timeouts++;
             e.totalActions++;
+            if (drillPenalty.isEnabled()) e.timeLeft -= TIME_PENALTY;
             e.combo = 0;
             e.screenShake = 6;
             triggerFlash();
             drillAudio.playPenalty();
             createExplosion(tgt.x, tgt.y, '#ef4444');
 
-            const nextConfig = getLevelConfig(e.level);
+            const nextConfig = getLevelConfig(e.level, e.combo);
             e.nextSpawnTime = time + (nextConfig.spawnDelayMin + Math.random() * (nextConfig.spawnDelayMax - nextConfig.spawnDelayMin));
           }
         }
@@ -710,7 +716,8 @@ export default function AwarenessDrillClient() {
     }
   }, [uiScore, bestScore, analytics, isNewBest]);
 
-  const accuracy = gameState === 'gameOver' ? analytics.accuracy : (engine.current.totalActions > 0 ? Math.round((engine.current.successfulHits / engine.current.totalActions) * 100) : 100);
+  const totalActions = engine.current.successfulHits + engine.current.missedClicks + engine.current.idleClicks + engine.current.timeouts;
+  const accuracy = gameState === 'gameOver' ? analytics.accuracy : (totalActions > 0 ? Math.round((engine.current.successfulHits / totalActions) * 100) : 100);
 
   return (
     <div className="min-h-screen bg-[#050508] text-white flex flex-col font-sans select-none">
@@ -849,7 +856,7 @@ export default function AwarenessDrillClient() {
               subtitle="Hardware Raw Input • Endless Level Progression"
               rules={[
                 { icon: Zap, accent: 'emerald', title: 'Hit Targets (+100 PTS)', text: 'Chain hits to build score and combo up to 3.0x' },
-                { icon: Crosshair, accent: 'blue', title: '180° Edge Spawns', text: 'Targets spawn at extreme edges, shrinking & speeding up on a streak' },
+                { icon: AlertCircle, accent: 'red', title: 'Failure Rule', text: penaltyEnabled ? 'Miss / Timeout → Combo Reset, -0.8s' : 'Miss / Timeout → Combo Reset' },
               ]}
               sensitivity={{ value: universalSens, onChange: setUniversalSens, cmPer360 }}
               stats={[
@@ -867,78 +874,23 @@ export default function AwarenessDrillClient() {
             <DrillCountdown value={countdownValue} subtitle="GET READY" />
           )}
 
-          {/* END SCREEN */}
+          {/* END SCREEN — universal card, shared by every drill */}
           {gameState === 'gameOver' && analytics.grade && (
-            <div className="absolute inset-0 z-40 flex bg-neutral-950/98 select-none font-sans" style={{ background: 'rgba(5,5,8,0.97)' }} onPointerDown={e => e.stopPropagation()}>
-              
-              {/* Left Grade Panel */}
-              <div className="w-[36%] flex flex-col items-center justify-center gap-1 border-r border-white/5 px-4" style={{ background: 'radial-gradient(ellipse 260px 200px at 50% 30%, rgba(16,185,129,.12), transparent 70%)' }}>
-                {isNewBest && (
-                  <span className="text-[9.5px] font-bold text-yellow-400 bg-yellow-500/10 border border-yellow-500/25 px-2.5 py-0.5 rounded-full mb-1 animate-pulse">
-                    NEW BEST
-                  </span>
-                )}
-                <div className={`text-5xl sm:text-6xl font-black leading-none ${analytics.grade.color}`}>
-                  {analytics.grade.letter}
-                </div>
-                <div className="text-[10px] uppercase tracking-widest text-slate-500 text-center font-bold mt-1">
-                  {analytics.grade.label}
-                </div>
-                <div className="text-3xl sm:text-4xl font-black text-white mt-2 tabular-nums">
-                  {uiScore}
-                </div>
-                <div className="text-[9px] uppercase tracking-widest text-slate-500">Points</div>
-              </div>
-
-              {/* Right Stats & Actions Panel */}
-              <div className="flex-1 flex flex-col justify-center gap-3 px-6 py-4 min-w-0">
-                
-                {/* 4 Stat Tiles */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.accuracy}%</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Accuracy</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.avgReactionTime}<span className="text-[10px] text-gray-500">ms</span></p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Avg Reaction</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.maxCombo}x</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Max Combo</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">Lv. {analytics.finalLevel}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Peak Level</p>
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex gap-2">
-                  <button 
-                    onClick={enterDrill} 
-                    className="flex-1 py-3 rounded-[13px] bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold text-xs uppercase tracking-wide cursor-pointer transition-transform active:scale-[0.98] shadow-md flex items-center justify-center gap-1.5"
-                  >
-                    <RefreshCw className="w-3.5 h-3.5" /> Play Again
-                  </button>
-                  <button 
-                    onClick={shareScore} 
-                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform" 
-                    title="Share Score"
-                  >
-                    <Share2 className="w-4 h-4" />
-                  </button>
-                  <button 
-                    onClick={handleExitDrill} 
-                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform" 
-                    title="Exit Fullscreen & Return"
-                  >
-                    <LogOut className="w-4 h-4 text-red-400" />
-                  </button>
-                </div>
-
-              </div>
-            </div>
+            <DrillResultCard
+              accent="emerald"
+              grade={analytics.grade}
+              score={uiScore}
+              isNewBest={isNewBest}
+              stats={[
+                { value: analytics.accuracy, suffix: '%', label: 'Accuracy' },
+                { value: analytics.avgReactionTime, suffix: 'ms', label: 'Avg Reaction' },
+                { value: `${analytics.maxCombo}x`, label: 'Max Combo' },
+                { value: `Lv. ${analytics.finalLevel}`, label: 'Peak Level' },
+              ]}
+              onPlayAgain={enterDrill}
+              onShare={shareScore}
+              onExit={handleExitDrill}
+            />
           )}
 
         </div>

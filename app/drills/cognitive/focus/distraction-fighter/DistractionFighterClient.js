@@ -2,18 +2,17 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
-import {
-  Volume2, VolumeX,
-  Play, RefreshCw, Share2, ArrowLeft, ShieldCheck, Users, TrendingUp, Brain, Heart, Flame, Trophy, Target, Zap, ZapOff
-} from 'lucide-react';
+import { Volume2, VolumeX, Play, RefreshCw, Share2, ArrowLeft, ShieldCheck, Users, TrendingUp, Brain, Heart, Trophy, Target, Zap, ZapOff } from 'lucide-react';
 
+import { isIdleFrameSkippable } from '@/lib/performance';
 import generateShareCard, { shareScoreCard } from '../../../../../components/ShareScoreCard';
 import { drillAudio } from '../../../../../lib/drillAudio';
 import { drillFlash } from '../../../../../lib/drillFlash';
 import { drillTimeout } from '../../../../../lib/drillTimeout';
+import { drillPenalty } from '../../../../../lib/drillPenalty';
 import { getPlayerName } from '../../../../../lib/leaderboard';
-import { getFpsScoreGrade } from '../../../../../lib/scoringEngine';
-import { getDifficultyProgress, getStartLevel } from '../../../../../lib/drillDifficulty';
+import { getFpsScoreGrade, getComboMultiplier } from '../../../../../lib/scoringEngine';
+import { getDifficultyProgress, getStartLevel, ramp } from '../../../../../lib/drillDifficulty';
 import useDrillFlash from '../../../../../lib/useDrillFlash';
 import useUnexpectedExitGuard from '../../../../../lib/useUnexpectedExitGuard';
 import DrillFooter from '../../../../../components/drill/DrillFooter';
@@ -21,13 +20,19 @@ import DrillCountdown from '../../../../../components/drill/DrillCountdown';
 import DrillAccordion from '../../../../../components/drill/DrillAccordion';
 import DrillFlashOverlay from '../../../../../components/drill/DrillFlashOverlay';
 import FpsStartCard from '../../../../../components/drill/FpsStartCard';
+import DrillResultCard from '../../../../../components/drill/DrillResultCard';
 
-const DRILL_DURATION = 45;
+// ============================================================
+// TUNING CONSTANTS
+// ============================================================
+const DRILL_DURATION = 45; // starting clock only; a run grows past this
 const MAX_LIVES = 5;
 const POINTS_PER_HIT = 100;
-const POINTS_PER_LEVEL = 250;
-const ELITE_SCORE = 7500; // Target score for S+ rating (rebalanced after combo removal)
-const STORAGE_KEY = 'skilldrills_distraction_fighter_v9';
+const POINTS_PER_LEVEL = 1750; // 250 -> 1750 (7x)
+const ELITE_SCORE = 24000; // 7500 -> 24000 (~3.2x)
+const TIME_PER_HIT = 0.6; // +0.6s on clean hit
+const TIME_PENALTY = 0.8; // -0.8s on wrong tap or timeout (opt-in gated)
+const STORAGE_KEY = 'skilldrills_distraction_fighter_v10';
 
 const COLOR_NAMES = ['Red', 'Blue', 'Green', 'Yellow', 'Purple', 'Orange'];
 const COLOR_STYLES = {
@@ -42,10 +47,10 @@ const COLOR_STYLES = {
 const getSavedData = () => {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { bestScore: 0, bestLevel: 1, totalSessions: 0 };
-    return { bestScore: 0, bestLevel: 1, totalSessions: 0, ...JSON.parse(raw) };
+    if (!raw) return { bestScore: 0, bestCombo: 0, bestLevel: 1, totalSessions: 0 };
+    return { bestScore: 0, bestCombo: 0, bestLevel: 1, totalSessions: 0, ...JSON.parse(raw) };
   } catch (e) {
-    return { bestScore: 0, bestLevel: 1, totalSessions: 0 };
+    return { bestScore: 0, bestCombo: 0, bestLevel: 1, totalSessions: 0 };
   }
 };
 
@@ -55,19 +60,21 @@ const saveData = (data) => {
   } catch (e) {}
 };
 
-const getLevelConfig = (level) => {
-  const p = getDifficultyProgress(level); // 0 -> 1 across L1..L15
+// Continuous unbounded difficulty with streak heat
+const getLevelConfig = (level, combo = 0) => {
+  const p = getDifficultyProgress(level); // 0 at L1, 1 at L15, unbounded above
+  const heat = (getComboMultiplier(combo) - 1) / 2;
   return {
-    ttl: Math.max(380, Math.round(1700 - p * 1320)), // Trial time window speeds up from 1700ms down to 380ms
-    choiceCount: level >= 4 ? 6 : 4                  // Distractor options scale up from 4 to 6 choices
+    ttl: Math.max(120, ramp(1700, 160, p) * (1 - heat * 0.30)), // Trial time window
+    choiceCount: level >= 4 ? 6 : 4                             // Distractor options scale up
   };
 };
 
 const RULES_ITEMS = [
   { title: "Stroop Effect Challenge", text: "A color word flashes on screen (e.g. 'BLUE'), printed in a conflicting ink color (e.g. RED ink)." },
-  { title: "Target Selection Rule", text: "Tap the button matching the INK COLOR (e.g., tap Red), ignoring the semantic word meaning." },
-  { title: "Cognitive Inhibition", text: "Suppress top-down reading impulses to isolate raw visual color perception under strict speed pressure." },
-  { title: "Precision Matters", text: "Tapping the semantic word color or letting the trial time out triggers a red alert — stay sharp to keep your accuracy high." }
+  { title: "Target Selection Rule", text: "Tap the button matching the INK COLOR (e.g., tap Red), ignoring the semantic word meaning (+100 PTS × Combo, +0.6s)." },
+  { title: "5 Lives Safeguard", text: "You have 5 lives. Wrong selections cost 1 life and reset your combo. Losing all 5 lives ends the drill early." },
+  { title: "Streak & Penalty Rules", text: "Building streaks multiplies your score. Timeouts and wrong taps deduct 0.8s when enabled in settings." }
 ];
 
 const ABOUT_TEXT = `Distraction Fighter is a classical cognitive focus drill grounded in the Stroop Effect and prefrontal inhibitory control research. The Stroop effect demonstrates the cognitive interference that occurs when processing competing visual features — specifically, reading a word versus identifying its font color.
@@ -84,7 +91,7 @@ const FAQ_ITEMS = [
   { q: "What is the Flanker task and how does it relate to distraction?", a: "The Eriksen Flanker Task displays a central target surrounded by congruent (same direction) or incongruent (opposite direction) flanker stimuli. The incongruent condition creates response competition — your brain must inhibit the incorrect flanker response to respond correctly to the central target. This resistance to flanker distraction is precisely what this game trains." },
   { q: "Can distraction-resistance training help with open-office productivity?", a: "Yes. Workers in open offices face continuous visual and auditory distractors. Training inhibitory control makes it cognitively cheaper to suppress peripheral visual movement (colleagues walking), auditory interruptions, and environmental noise, allowing deeper sustained focus during critical work intervals." },
   { q: "What is the orienting reflex and how does it cause distraction?", a: "The orienting reflex is an automatic neurological response to novel stimuli — your brain involuntarily redirects attention to unexpected sounds, movement, or visual changes. Mediated by the superior colliculus and thalamus, it evolved to ensure threat detection. Inhibitory control training helps the prefrontal cortex override this reflex when distraction is unhelpful." },
-  { q: "How does this distraction fighter game work?", a: "The game presents a primary target task while simultaneously spawning deceptive visual distractors. You must successfully complete your primary task while resisting clicking or responding to the distractors. Each successful distractor resistance builds your inhibitory control score, while each distractor click counts as an impulse control failure." },
+  { q: "How does this distraction fighter game work?", a: "A color word flashes on screen printed in a conflicting ink color (e.g. the word 'BLUE' printed in red ink). You must tap the button matching the ink color, not the word's meaning, suppressing the automatic urge to read the word aloud. Each correct ink-color tap builds your score, while a wrong tap or a timed-out trial counts as an impulse control failure." },
   { q: "Does inhibitory control training help children with ADHD?", a: "Inhibitory control deficits are a hallmark of ADHD. Computerized inhibitory control training shows promise as a supplemental intervention, with studies showing improvements in stop-signal reaction times, Stroop interference, and classroom behavior with regular practice. Always combine cognitive training with clinical treatment and professional guidance." },
   { q: "Is this distraction-fighter game free to play?", a: "Yes. The Distraction Fighter drill on SkillDrills is completely free. No sign-up, no downloads, no subscriptions. It runs entirely in your browser on both desktop and mobile devices." }
 ];
@@ -103,6 +110,7 @@ export default function DistractionFighterClient() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
+  const [penaltyEnabled, setPenaltyEnabled] = useState(false);
   const [openAccordion, setOpenAccordion] = useState(null);
   const [countdownValue, setCountdownValue] = useState(3);
 
@@ -110,7 +118,10 @@ export default function DistractionFighterClient() {
   const [uiScore, setUiScore] = useState(0);
   const [uiTimeLeft, setUiTimeLeft] = useState(DRILL_DURATION);
   const [lives, setLives] = useState(MAX_LIVES);
+  const [uiLevel, setUiLevel] = useState(1);
+  const [uiCombo, setUiCombo] = useState(0);
   const [bestScore, setBestScore] = useState(0);
+  const [bestCombo, setBestCombo] = useState(0);
   const [bestLevel, setBestLevel] = useState(1);
   const [totalSessions, setTotalSessions] = useState(0);
   const [isNewBest, setIsNewBest] = useState(false);
@@ -125,6 +136,8 @@ export default function DistractionFighterClient() {
     successfulHits: 0,
     mistakes: 0,
     timeouts: 0,
+    maxCombo: 0,
+    livesRemaining: MAX_LIVES,
     finalLevel: 1,
     grade: null
   });
@@ -132,12 +145,17 @@ export default function DistractionFighterClient() {
   // DOM & Engine Refs
   const containerRef = useRef(null);
   const countdownTimeoutsRef = useRef([]);
-  const timerIntervalRef = useRef(null);
   const trialTimerRef = useRef(null);
+  const startingRef = useRef(false);
+  const gameActiveRef = useRef(false);
+  const bestLevelRunRef = useRef(1);
+  const lastTimeRef = useRef(DRILL_DURATION);
 
   const engine = useRef({
     score: 0,
     level: 1,
+    combo: 0,
+    maxCombo: 0,
     successfulHits: 0,
     mistakes: 0,
     timeouts: 0,
@@ -148,11 +166,31 @@ export default function DistractionFighterClient() {
 
   const { flashes, triggerFlash } = useDrillFlash();
 
+  // Storage loading & sound init
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setSoundEnabled(drillAudio.isEnabled());
+      setFlashEnabled(drillFlash.isEnabled());
+      setPenaltyEnabled(drillPenalty.isEnabled());
+      const saved = getSavedData();
+      setBestScore(saved.bestScore || 0);
+      setBestCombo(saved.bestCombo || 0);
+      setBestLevel(saved.bestLevel || 1);
+      setTotalSessions(saved.totalSessions || 0);
+    }
+  }, []);
+
+  // Fullscreen listener
+  useEffect(() => {
+    const handleFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
+
   // Clean timers on unmount
   useEffect(() => {
     return () => {
       countdownTimeoutsRef.current.forEach(clearTimeout);
-      if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
       if (trialTimerRef.current) clearTimeout(trialTimerRef.current);
     };
   }, []);
@@ -161,8 +199,9 @@ export default function DistractionFighterClient() {
     markIntentionalExit();
     countdownTimeoutsRef.current.forEach(clearTimeout);
     countdownTimeoutsRef.current = [];
-    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
     if (trialTimerRef.current) clearTimeout(trialTimerRef.current);
+    startingRef.current = false;
+    gameActiveRef.current = false;
 
     if (document.fullscreenElement) {
       await document.exitFullscreen().catch(() => {});
@@ -176,7 +215,9 @@ export default function DistractionFighterClient() {
   });
 
   const endGame = useCallback(() => {
-    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    markIntentionalExit();
+    gameActiveRef.current = false;
+    startingRef.current = false;
     if (trialTimerRef.current) clearTimeout(trialTimerRef.current);
 
     setGameState('gameOver');
@@ -185,46 +226,92 @@ export default function DistractionFighterClient() {
     const totalActs = e.successfulHits + e.mistakes + e.timeouts;
     const acc = totalActs > 0 ? Math.round((e.successfulHits / totalActs) * 100) : 100;
 
-    const gradeObj = getFpsScoreGrade(e.score, ELITE_SCORE);
+    const rating = getFpsScoreGrade(e.score, ELITE_SCORE);
+    const gradeObj = {
+      letter: rating.grade || rating.letter || 'C',
+      label: rating.label || 'Keep Going',
+      color: rating.color || 'text-rose-400',
+    };
 
     setAnalytics({
       accuracy: acc,
       successfulHits: e.successfulHits,
       mistakes: e.mistakes,
       timeouts: e.timeouts,
-      finalLevel: e.level,
+      maxCombo: e.maxCombo,
+      livesRemaining: e.lives,
+      finalLevel: Math.floor(bestLevelRunRef.current),
       grade: gradeObj
     });
 
-    const isNew = e.score > bestScore;
-    if (isNew) {
-      setIsNewBest(true);
-      setBestScore(e.score);
-    } else {
-      setIsNewBest(false);
-    }
+    setUiScore(e.score);
 
-    const newBestLevel = Math.max(bestLevel, e.level);
-    setBestLevel(newBestLevel);
+    const prevSaved = getSavedData();
+    const isNew = e.score > prevSaved.bestScore;
+    setIsNewBest(isNew);
 
-    setTotalSessions((prev) => {
-      const next = prev + 1;
-      saveData({
-        bestScore: Math.max(bestScore, e.score),
-        bestLevel: newBestLevel,
-        totalSessions: next
-      });
-      return next;
-    });
+    const runBestLevel = Math.max(prevSaved.bestLevel, Math.floor(bestLevelRunRef.current));
+    const updatedData = {
+      bestScore: Math.max(prevSaved.bestScore, e.score),
+      bestCombo: Math.max(prevSaved.bestCombo || 0, e.maxCombo),
+      bestLevel: runBestLevel,
+      totalSessions: (prevSaved.totalSessions || 0) + 1
+    };
+    saveData(updatedData);
+
+    setBestScore(updatedData.bestScore);
+    setBestCombo(updatedData.bestCombo);
+    setBestLevel(updatedData.bestLevel);
+    setTotalSessions(updatedData.totalSessions);
 
     drillAudio.playSessionEnd();
-  }, [bestScore, bestLevel]);
+  }, [markIntentionalExit]);
+
+  // Main RAF loop for clock draining
+  useEffect(() => {
+    if (gameState !== 'playing') return;
+
+    let animId;
+    let lastTime = performance.now();
+
+    const loop = (now) => {
+      if (isIdleFrameSkippable(gameState === 'playing', now, lastTime)) {
+        animId = requestAnimationFrame(loop);
+        return;
+      }
+
+      const dt = Math.min((now - lastTime) / 1000, 0.1);
+      lastTime = now;
+
+      const e = engine.current;
+      if (gameActiveRef.current) {
+        if (e.timeLeft > 0) e.timeLeft -= dt;
+        if (e.timeLeft <= 0) {
+          e.timeLeft = 0;
+          setUiTimeLeft(0);
+          endGame();
+          return;
+        }
+
+        const ceilSec = Math.ceil(e.timeLeft);
+        if (ceilSec !== lastTimeRef.current) {
+          lastTimeRef.current = ceilSec;
+          setUiTimeLeft(ceilSec);
+        }
+      }
+
+      animId = requestAnimationFrame(loop);
+    };
+
+    animId = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(animId);
+  }, [gameState, endGame]);
 
   // Trial Spawner
   const spawnTrial = useCallback(() => {
     if (trialTimerRef.current) clearTimeout(trialTimerRef.current);
     const e = engine.current;
-    const config = getLevelConfig(e.level);
+    const config = getLevelConfig(e.level, e.combo);
 
     // Pick random text color name and conflicting ink color name
     const textName = COLOR_NAMES[Math.floor(Math.random() * COLOR_NAMES.length)];
@@ -254,6 +341,9 @@ export default function DistractionFighterClient() {
       // Trial timeout miss
       e.timeouts += 1;
       e.lives -= 1;
+      if (drillPenalty.isEnabled()) e.timeLeft -= TIME_PENALTY;
+      e.combo = 0;
+      setUiCombo(0);
       setLives(e.lives);
       triggerFlash();
       drillAudio.playPenalty();
@@ -268,6 +358,7 @@ export default function DistractionFighterClient() {
 
   const handleOptionClick = useCallback((selectedColor, ev) => {
     if (ev) ev.stopPropagation();
+    if (!gameActiveRef.current) return;
     if (trialTimerRef.current) clearTimeout(trialTimerRef.current);
 
     const eng = engine.current;
@@ -275,18 +366,31 @@ export default function DistractionFighterClient() {
 
     if (selectedColor === correctInk) {
       eng.successfulHits += 1;
+      eng.combo += 1;
+      if (eng.combo > eng.maxCombo) eng.maxCombo = eng.combo;
 
-      eng.score += POINTS_PER_HIT;
+      const levelMult = 1 + getDifficultyProgress(eng.level) * 0.5;
+      eng.score += Math.round(POINTS_PER_HIT * getComboMultiplier(eng.combo) * levelMult);
 
-      const rawLevel = Math.floor(eng.score / POINTS_PER_LEVEL) + 1;
+      // Time bonus on clean hit
+      eng.timeLeft += TIME_PER_HIT;
+
+      // Continuous level progression
+      const rawLevel = (eng.score / POINTS_PER_LEVEL) + 1;
       eng.level = Math.max(eng.level, rawLevel);
+      bestLevelRunRef.current = Math.max(bestLevelRunRef.current, eng.level);
 
       setUiScore(eng.score);
+      setUiLevel(Math.floor(eng.level));
+      setUiCombo(eng.combo);
       drillAudio.playHit();
       spawnTrial();
     } else {
       eng.mistakes += 1;
       eng.lives -= 1;
+      if (drillPenalty.isEnabled()) eng.timeLeft -= TIME_PENALTY;
+      eng.combo = 0;
+      setUiCombo(0);
       setLives(eng.lives);
       triggerFlash();
       drillAudio.playPenalty();
@@ -301,6 +405,9 @@ export default function DistractionFighterClient() {
 
   // Enter Drill
   const enterDrill = useCallback(async () => {
+    if (startingRef.current) return;
+    startingRef.current = true;
+
     try {
       if (containerRef.current && !document.fullscreenElement) {
         await containerRef.current.requestFullscreen();
@@ -309,21 +416,26 @@ export default function DistractionFighterClient() {
 
     countdownTimeoutsRef.current.forEach(clearTimeout);
     countdownTimeoutsRef.current = [];
-    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
     if (trialTimerRef.current) clearTimeout(trialTimerRef.current);
 
     drillAudio.init();
 
-    const saved = getSavedData();
-    const startLevel = getStartLevel(saved.bestLevel);
+    const startLevel = getStartLevel();
+    bestLevelRunRef.current = startLevel;
 
+    setIsNewBest(false);
     setUiScore(0);
+    setUiLevel(startLevel);
+    setUiCombo(0);
     setUiTimeLeft(DRILL_DURATION);
+    lastTimeRef.current = DRILL_DURATION;
     setLives(MAX_LIVES);
 
     engine.current = {
       score: 0,
       level: startLevel,
+      combo: 0,
+      maxCombo: 0,
       successfulHits: 0,
       mistakes: 0,
       timeouts: 0,
@@ -352,45 +464,41 @@ export default function DistractionFighterClient() {
     }, 2100);
 
     const t4 = setTimeout(() => {
+      gameActiveRef.current = true;
+      startingRef.current = false;
       setGameState('playing');
-
-      let remaining = DRILL_DURATION;
-      timerIntervalRef.current = setInterval(() => {
-        remaining -= 1;
-        setUiTimeLeft(remaining);
-        if (remaining <= 0) {
-          endGame();
-        }
-      }, 1000);
-
       spawnTrial();
     }, 2450);
 
     countdownTimeoutsRef.current = [t1, t2, t3, t4];
-  }, [endGame, spawnTrial]);
+  }, [spawnTrial]);
 
   const shareResult = useCallback(async () => {
     const url = 'https://skilldrills.online/drills/cognitive/focus/distraction-fighter';
     try {
       const canvas = generateShareCard({
         score: uiScore,
-        bestScore,
         accuracy: analytics.accuracy,
-        rating: { letter: analytics.grade?.grade || analytics.grade?.letter || 'C', label: analytics.grade?.label || 'Keep Going', emoji: '🎯' },
-        newBest: isNewBest,
+        speed: 0,
         drillName: 'Distraction Fighter',
+        rank: analytics.grade?.letter || 'A',
+        rankName: analytics.grade?.label || 'STROOP MASTER',
         playerName: getPlayerName(),
+        level: analytics.finalLevel,
+        date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        url: 'skilldrills.online/drills/cognitive/focus/distraction-fighter'
       });
-      await shareScoreCard(url, canvas);
+      await shareScoreCard(canvas, {
+        title: 'Distraction Fighter — My Score',
+        text: `I scored ${uiScore} (Grade: ${analytics.grade?.letter || 'A'}, Lv. ${analytics.finalLevel}) on Distraction Fighter at SkillDrills!`,
+        url
+      });
     } catch (e) {
-      const text = `🎯 I scored ${uiScore} PTS (Level ${analytics.finalLevel}) on Distraction Fighter! Stroop suppression accuracy: ${analytics.accuracy}%. Practice free cognitive focus drills at skilldrills.online! ⚡`;
-      if (typeof navigator !== 'undefined' && navigator.share) {
-        navigator.share({ title: 'Distraction Fighter Score', text, url }).catch(() => {});
-      } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
-        navigator.clipboard.writeText(`${text} ${url}`);
+      if (navigator.share) {
+        navigator.share({ title: 'Distraction Fighter Score', text: `I scored ${uiScore} on Distraction Fighter!`, url }).catch(() => {});
       }
     }
-  }, [uiScore, bestScore, analytics, isNewBest]);
+  }, [uiScore, analytics]);
 
   return (
     <div className="min-h-screen bg-[#050508] text-white flex flex-col font-sans select-none">
@@ -426,7 +534,7 @@ export default function DistractionFighterClient() {
           </div>
           <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
             <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Level</div>
-            <div className="text-lg sm:text-xl font-black text-indigo-400 tabular-nums">L{engine.current.level}</div>
+            <div className="text-lg sm:text-xl font-black text-indigo-400 tabular-nums">L{uiLevel}</div>
           </div>
           <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
             <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
@@ -450,11 +558,20 @@ export default function DistractionFighterClient() {
             <>
               {/* Score & Lives - Top Left */}
               <div className="absolute top-4 left-4 z-30 pointer-events-none flex flex-col items-start gap-0.5">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Score</p>
-                <p className="text-2xl sm:text-3xl font-black text-white tabular-nums leading-tight">{uiScore}</p>
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Score</p>
+                  <p className="text-2xl sm:text-3xl font-black text-white tabular-nums leading-tight">{uiScore}</p>
+                </div>
                 <div className="flex items-center gap-1 mt-0.5">
-                  {Array.from({ length: Math.max(0, lives) }).map((_, i) => (
-                    <Heart key={i} className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-red-500 fill-red-500 drop-shadow-[0_0_6px_rgba(239,68,68,0.6)]" />
+                  {Array.from({ length: MAX_LIVES }).map((_, i) => (
+                    <Heart
+                      key={i}
+                      className={`w-3.5 h-3.5 sm:w-4 sm:h-4 transition-all duration-200 ${
+                        i < lives
+                          ? 'text-red-500 fill-red-500 drop-shadow-[0_0_6px_rgba(239,68,68,0.6)]'
+                          : 'text-slate-800 fill-slate-800'
+                      }`}
+                    />
                   ))}
                 </div>
               </div>
@@ -467,13 +584,47 @@ export default function DistractionFighterClient() {
             </>
           )}
 
+          {/* IN-GAME HUD SOUND + FLASH TOGGLES */}
+          {(gameState === 'playing' || gameState === 'countdown') && (
+            <div className="absolute bottom-4 right-4 z-40 flex items-center gap-2">
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setFlashEnabled((v) => {
+                    drillFlash.setEnabled(!v);
+                    return !v;
+                  });
+                }}
+                className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title="Toggle Miss Flash"
+              >
+                {flashEnabled ? <Zap className="w-4 h-4 text-red-400" /> : <ZapOff className="w-4 h-4 text-slate-500" />}
+              </button>
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSoundEnabled((v) => {
+                    drillAudio.setEnabled(!v);
+                    return !v;
+                  });
+                }}
+                className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title="Toggle Sound"
+              >
+                {soundEnabled ? <Volume2 className="w-4 h-4 text-rose-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
+              </button>
+            </div>
+          )}
+
           {/* PLAYING FIELD */}
           {gameState === 'playing' && (
             <div className="relative w-full h-full flex flex-col items-center justify-between p-4 sm:p-6">
               {/* Background Grid */}
               <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
 
-              {/* Stroop Prompt Display (Clean Target Color Text, No Square Container) */}
+              {/* Stroop Prompt Display */}
               <div className="flex-1 flex flex-col items-center justify-center z-20">
                 <div className="text-center">
                   <span className="text-6xl sm:text-7xl font-black tracking-wider select-none" style={{ color: COLOR_STYLES[currentPrompt.inkName]?.hex || '#ffffff' }}>
@@ -482,7 +633,7 @@ export default function DistractionFighterClient() {
                 </div>
               </div>
 
-              {/* Color Button Grid Bottom (No Color Swatches) */}
+              {/* Color Button Grid Bottom */}
               <div className={`z-20 w-full max-w-lg grid ${options.length > 4 ? 'grid-cols-3 sm:grid-cols-6 max-w-xl' : 'grid-cols-2 sm:grid-cols-4'} gap-2.5 mb-2`}>
                 {options.map((colName) => (
                   <button
@@ -506,8 +657,15 @@ export default function DistractionFighterClient() {
               title="Distraction Fighter"
               subtitle="Stroop Interference • Executive Focus"
               rules={[
-                { icon: Target, accent: 'emerald', title: 'Tap Matching INK COLOR', text: 'Select the color button that matches the INK COLOR of the displayed text' },
-                { icon: Zap, accent: 'red', title: 'Ignore Word Meaning (Stroop Effect)', text: 'Suppress cognitive interference by ignoring the actual written word' },
+                { icon: Target, accent: 'emerald', title: 'Tap Matching INK COLOR', text: '+100 PTS × Combo × Level multiplier (+0.6s per hit)' },
+                {
+                  icon: Zap,
+                  accent: 'red',
+                  title: penaltyEnabled ? '5 Lives & Time Penalty' : '5 Lives System',
+                  text: penaltyEnabled
+                    ? 'Wrong selections lose 1 life and subtract 0.8s. Run ends if lives reach 0'
+                    : '5 lives total. Wrong clicks cost 1 life and reset combo. Run ends if lives reach 0'
+                },
               ]}
               stats={[
                 { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
@@ -523,75 +681,23 @@ export default function DistractionFighterClient() {
             <DrillCountdown value={countdownValue} subtitle="GET READY" />
           )}
 
-          {/* END SCREEN */}
+          {/* UNIVERSAL RESULT CARD */}
           {gameState === 'gameOver' && analytics.grade && (
-            <div className="absolute inset-0 z-40 flex bg-neutral-950/98 select-none font-sans" style={{ background: 'rgba(5,5,8,0.97)' }} onPointerDown={e => e.stopPropagation()}>
-              
-              {/* Left Grade Panel */}
-              <div className="w-[36%] flex flex-col items-center justify-center gap-1 border-r border-white/5 px-4" style={{ background: 'radial-gradient(ellipse 260px 200px at 50% 30%, rgba(244,63,94,.12), transparent 70%)' }}>
-                {isNewBest && (
-                  <span className="text-[9.5px] font-bold text-yellow-400 bg-yellow-500/10 border border-yellow-500/25 px-2.5 py-0.5 rounded-full mb-1 animate-pulse">
-                    NEW BEST
-                  </span>
-                )}
-                <div className={`text-5xl sm:text-6xl font-black leading-none ${analytics.grade?.color || 'text-rose-400'}`}>
-                  {analytics.grade?.grade || analytics.grade?.letter || 'C'}
-                </div>
-                <div className="text-[10px] uppercase tracking-widest text-slate-500 text-center font-bold mt-1">
-                  {analytics.grade?.label || 'Good Effort'}
-                </div>
-                <div className="text-3xl sm:text-4xl font-black text-white mt-2 tabular-nums">
-                  {uiScore}
-                </div>
-                <div className="text-[9px] uppercase tracking-widest text-slate-500">Points</div>
-              </div>
-
-              {/* Right Stats & Actions Panel */}
-              <div className="flex-1 flex flex-col justify-center gap-3 px-6 py-4 min-w-0">
-                
-                <div className="grid grid-cols-3 gap-2">
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.accuracy}%</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Accuracy</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-emerald-400">{analytics.successfulHits}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Hits</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-red-400">{analytics.mistakes + analytics.timeouts}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Errors</p>
-                  </div>
-                </div>
-
-                <div className="flex gap-2">
-                  <button 
-                    type="button"
-                    onClick={enterDrill} 
-                    className="flex-1 py-3 rounded-[13px] bg-gradient-to-r from-rose-600 to-pink-600 text-white font-bold text-xs uppercase tracking-wide cursor-pointer transition-transform active:scale-[0.98] shadow-md flex items-center justify-center gap-1.5"
-                  >
-                    <RefreshCw className="w-3.5 h-3.5" /> Play Again
-                  </button>
-                  <button 
-                    type="button"
-                    onClick={shareResult} 
-                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform" 
-                    title="Share Score"
-                  >
-                    <Share2 className="w-4 h-4" />
-                  </button>
-                  <button 
-                    type="button"
-                    onClick={handleExitDrill} 
-                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform" 
-                    title="Exit Drill"
-                  >
-                    <ArrowLeft className="w-4 h-4 text-red-400" />
-                  </button>
-                </div>
-
-              </div>
-            </div>
+            <DrillResultCard
+              accent="rose"
+              grade={analytics.grade}
+              score={uiScore}
+              isNewBest={isNewBest}
+              stats={[
+                { label: 'Accuracy', value: analytics.accuracy, suffix: '%' },
+                { label: 'Hits', value: analytics.successfulHits },
+                { label: 'Lives Left', value: `${analytics.livesRemaining}/${MAX_LIVES}` },
+                { label: 'Peak Level', value: `Lv. ${analytics.finalLevel}` },
+              ]}
+              onPlayAgain={enterDrill}
+              onShare={shareResult}
+              onExit={handleExitDrill}
+            />
           )}
 
         </div>

@@ -127,10 +127,10 @@ export default function TargetSwitchingSwarmPage() {
       },
       {
         "@type": "Question",
-        "name": "Should I train target switching at higher or lower sensitivity?",
+        "name": "How are errors penalised in Target Switching Swarm?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Train target switching at your standard in-game sensitivity. Focus on accuracy across all switch targets equally rather than tapering off on later targets."
+          "text": "Missing a shot or letting a target's time-to-live expire resets your combo multiplier. When the optional Time Penalty setting is enabled, each error deducts 0.5s from your timer."
         }
       },
       {

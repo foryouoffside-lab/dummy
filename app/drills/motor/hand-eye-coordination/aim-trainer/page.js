@@ -122,7 +122,7 @@ export default function AimTrainerPage() {
         "name": "How does score-based difficulty scaling work?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "As your score increases, the game engine automatically advances your level from 1 to 15, reducing target sizes and increasing movement speed."
+          "text": "As your score increases, the game engine automatically advances your level without cap, reducing target sizes and increasing movement speed."
         }
       },
       {
@@ -130,7 +130,7 @@ export default function AimTrainerPage() {
         "name": "What happens when a target times out?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "When a target expires before you click it, your combo streak resets and a red error flash triggers without point loss."
+          "text": "When a target expires before you click it, your combo streak resets and a red error flash triggers. If the optional Time Penalty is enabled, 0.8s is deducted."
         }
       },
       {
@@ -207,10 +207,10 @@ export default function AimTrainerPage() {
       },
       {
         "@type": "Question",
-        "name": "How does the 45-second session timer work?",
+        "name": "How does the session timer work?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Each session runs for a fixed 45 seconds, giving you a standardized time window to score maximum points and benchmark your performance."
+          "text": "Each session starts with 45 seconds on the clock. Clean target hits add +0.6s to extend your run. When the optional Time Penalty setting is enabled, misses and timeouts deduct 0.8s."
         }
       }
     ]

@@ -159,10 +159,10 @@ export default function FlowStatePage() {
       },
       {
         "@type": "Question",
-        "name": "Why does focus break?",
+        "name": "Why does focus break and how are penalties applied?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Focus breaks occur due to cognitive fatigue, external sensory interruptions, or when the task's difficulty either dramatically exceeds or falls below the user's skill level."
+          "text": "A focus break occurs when your crosshair stays off the target for 1.0s or more, which resets your combo multiplier. If you have the optional Time Penalty enabled in your session settings, a focus break also deducts 0.6s from your clock."
         }
       },
       {

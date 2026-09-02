@@ -128,7 +128,7 @@ const faqSchema = {
       "name": "How does difficulty scale in Peripheral Threat Sweeper?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "As your score increases, the level rises up to Level 15. Threat movement speed accelerates from 80 px/s up to 500 px/s, spawn interval drops from 1.4s down to 0.3s, and evasive wobbling threats appear more frequently."
+        "text": "As your score increases, difficulty scales continuously. Threat movement speed accelerates from 80 px/s up to 520 px/s, spawn interval drops from 1.4s down to 0.20s, and evasive wobbling threats appear more frequently."
       }
     },
     {
@@ -136,7 +136,7 @@ const faqSchema = {
       "name": "What happens when I miss or allow a core breach?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Missing a threat or allowing a core breach resets your combo multiplier back to 1.0x and triggers a red flash overlay. There are no score deductions or time penalties."
+        "text": "Missing a threat or allowing a core breach resets your combo multiplier back to 1.0x and triggers a red flash overlay. Clean sweeps add +0.6s to your timer, and missing or allowing a core breach deducts 0.8s when time penalty is enabled in settings."
       }
     },
     {
@@ -144,7 +144,7 @@ const faqSchema = {
       "name": "How long does each session run?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Each session runs for a fixed 45 seconds. The game timer counts down steadily from 45s to 0s, providing a standard, reproducible performance benchmark."
+        "text": "Each session starts with a 45-second timer. Every intercepted threat node earns a +0.6s extension, rewarding active peripheral defense with longer, high-intensity sessions."
       }
     },
     {
@@ -160,7 +160,7 @@ const faqSchema = {
       "name": "What is a good score in Peripheral Threat Sweeper?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Scoring 8,000+ points earns a Gold or Platinum grade, while reaching 17,000+ points with 90%+ accuracy places you in the Master tier."
+        "text": "Scoring 12,000+ points earns a Gold or Platinum grade, while reaching 24,000+ points with 90%+ accuracy places you in the Master tier."
       }
     },
     {
@@ -182,7 +182,7 @@ const howToSchema = {
   "step": [
     { "@type": "HowToStep", "name": "Hold the Center", "text": "Keep your crosshair anchored near the central core." },
     { "@type": "HowToStep", "name": "Scan the Edges", "text": "Threat nodes spawn at the perimeter and move inward toward the core." },
-    { "@type": "HowToStep", "name": "Intercept Before Breach", "text": "Click each threat before it reaches the core to score and build combo." }
+    { "@type": "HowToStep", "name": "Intercept Before Breach", "text": "Click each threat before it reaches the core to score points, build your combo, and earn +0.6s clock extensions." }
   ]
 };
 

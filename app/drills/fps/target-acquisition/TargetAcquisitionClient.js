@@ -14,7 +14,8 @@ import generateShareCard, { shareScoreCard } from '../../../../components/ShareS
 import { getPlayerName } from '../../../../lib/leaderboard';
 import { drillAudio } from '../../../../lib/drillAudio';
 import { drillFlash } from '../../../../lib/drillFlash';
-import { getStartLevel, getDifficultyProgress, getComboBonusLevel } from '../../../../lib/drillDifficulty';
+import { drillPenalty } from '../../../../lib/drillPenalty';
+import { getStartLevel, getDifficultyProgress, ramp } from '../../../../lib/drillDifficulty';
 import { getComboMultiplier, getFpsScoreGrade } from '../../../../lib/scoringEngine';
 import { createBackdropCache, getCanvasDpr, drawPulseRing } from '../../../../lib/canvasFx';
 import useUnexpectedExitGuard from '../../../../lib/useUnexpectedExitGuard';
@@ -22,11 +23,17 @@ import DrillFooter from '../../../../components/drill/DrillFooter';
 import DrillCountdown from '../../../../components/drill/DrillCountdown';
 import DrillAccordion from '../../../../components/drill/DrillAccordion';
 import FpsStartCard from '../../../../components/drill/FpsStartCard';
+import DrillResultCard from '../../../../components/drill/DrillResultCard';
 
-const DRILL_DURATION = 45; // 45 seconds focused duration
-const POINTS_PER_LEVEL = 300; // Aggressive progression
-const ELITE_SCORE = 18000; // 100% mark for letter grade
-const STORAGE_KEY = 'skilldrills_fps_target_acquisition_v2';
+// ============================================================
+// TUNING CONSTANTS
+// ============================================================
+const DRILL_DURATION = 45; // starting clock only; a run grows past this
+const POINTS_PER_LEVEL = 1400; // 300 -> 1400 (~7x)
+const ELITE_SCORE = 54000; // 18000 -> 54000 (3x)
+const TIME_PER_HIT = 0.4; // +0.4s on correct target hit
+const TIME_PENALTY = 0.6; // opt-in on wrong target click or miss
+const STORAGE_KEY = 'skilldrills_fps_target_acquisition_v3';
 
 const getSavedData = () => {
   try {
@@ -44,14 +51,26 @@ const saveData = (data) => {
   } catch (e) {}
 };
 
+const getLevelConfig = (level, combo = 0) => {
+  const p = getDifficultyProgress(level); // 0 at L1, 1 at L15, unbounded above
+  const heat = (getComboMultiplier(combo) - 1) / 2;
+  return {
+    count: Math.min(8, Math.round(2 + p * 4 + heat * 0.5)),
+    radius: Math.max(12, ramp(32, 14, p) * (1 - heat * 0.15)),
+    opacityDelta: Math.max(0.04, ramp(0.45, 0.06, p) * (1 - heat * 0.20)),
+    margin: Math.max(25, ramp(120, 30, p)),
+    hitPad: Math.max(2, ramp(10, 4, p) * (1 - heat * 0.25)),
+  };
+};
+
 // ============================================================
 // ACCORDION DATA
 // ============================================================
 const RULES_ITEMS = [
-  { title: "Correct Target Hit (+100 PTS × Combo × Level)", text: "Click the brightest target first. Builds combo and overall score." },
-  { title: "Set Cleared Bonus (+400 PTS × Level)", text: "Clearing all targets in a set spawns the next target set." },
-  { title: "Level Progression (Every 300 PTS)", text: "Target count and opacity delta scale as level increases." },
-  { title: "Wrong Click / Miss Penalty", text: "Clicking the wrong target or missing resets your combo with a red flash." }
+  { title: "Correct Target Hit (+100 PTS / +0.4s)", text: "Click the brightest target first. Multiplied by combo & level bonus." },
+  { title: "Set Cleared Bonus (+400 PTS × Level)", text: "Clearing all targets in a set spawns the next target cluster." },
+  { title: "Level Progression (Every 1400 PTS)", text: "Continuous target density, size, and fine opacity delta scaling." },
+  { title: "Wrong Click / Miss Penalty", text: "Wrong target or miss resets combo to 0 (-0.6s with Time Penalty enabled)." }
 ];
 
 const FAQ_ITEMS = [
@@ -60,7 +79,7 @@ const FAQ_ITEMS = [
   { q: "Why do some players always seem to see enemies before others?", a: "Players with trained target acquisition have learned unconscious threat pattern recognition — their visual system has been trained to flag enemy silhouettes, color cues, and movement patterns faster than untrained players. This creates the illusion that they see first when actually their brain is processing the same visual information faster and more efficiently." },
   { q: "How does this help in Valorant compared to other drills?", a: "Valorant's round-based structure means you often peek corners or angles with partial information. Fast target acquisition is critical for winning the split-second timing battle when two players simultaneously come into view of each other. This drill specifically trains the speed of the visual identification → aim decision → click sequence." },
   { q: "What cognitive skills does target acquisition training improve?", a: "Target acquisition training improves visual processing speed (how fast your eyes register a target), pattern recognition (identifying enemy silhouettes), selective attention (filtering enemies from background), and decision speed (choosing to engage). Together these create the faster perception that high-rank players possess." },
-  { q: "Can target acquisition be trained independently of mechanical aim?", a: "Yes, target acquisition isolates the visual identification and decision phase of aim. Training target acquisition helps your brain recognize threat patterns faster, allowing your existing mechanical aim to execute with higher confidence." },
+  { q: "How are errors penalised in Target Acquisition Pro?", a: "Clicking a darker target out of order or clicking empty space resets your streak combo multiplier. When the optional Time Penalty setting is enabled in your session preferences, each mistake also deducts 0.6s from your clock." },
   { q: "How does target acquisition impact CS2 and tactical shooters?", a: "In CS2, time-to-kill is extremely fast. Spotting a target's head pixel a fraction of a second earlier grants the critical advantage needed to secure first-bullet headshots." },
   { q: "What is the optimal daily target acquisition training routine?", a: "We recommend 10 to 15 minutes of target acquisition drills at the start of your gaming session to warm up visual processing speed before entering competitive matches." }
 ];
@@ -74,13 +93,12 @@ const RELATED_DRILLS = [
   { id: "instant-response", name: "Instant Response", cat: "FPS Reaction", desc: "Train raw single-stimulus reflex acquisition.", href: "/drills/fps/instant-response" }
 ];
 
-
-
 export default function TargetAcquisitionClient() {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
+  const [penaltyEnabled, setPenaltyEnabled] = useState(false);
   const [pointerLocked, setPointerLocked] = useState(false);
   const [universalSens, setUniversalSens] = useState(1.0);
   const [openAccordion, setOpenAccordion] = useState(null);
@@ -136,6 +154,7 @@ export default function TargetAcquisitionClient() {
     if (typeof window !== 'undefined') {
       setSoundEnabled(drillAudio.isEnabled());
       setFlashEnabled(drillFlash.isEnabled());
+      setPenaltyEnabled(drillPenalty.isEnabled());
       const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
       const isTouchCapable = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
       setIsTouchOnlyDevice(isTouchCapable && !hasFinePointer);
@@ -203,21 +222,9 @@ export default function TargetAcquisitionClient() {
     }
   }, []);
 
-  // Recalibrated Level configuration driving params smoothly up to L15
-  const getLevelConfig = (level) => {
-    const p = getDifficultyProgress(level); // 0 -> 1 across L1..L15
-    return {
-      count:        Math.round(2 + p * 4),    // 2 -> 6 targets
-      radius:       Math.max(14, 32 - p * 18), // 32 -> 14 px floor
-      opacityDelta: 0.45 - p * 0.40,          // 0.45 -> 0.05  (the primary discrimination axis)
-      margin:       120 - p * 90,             // 120 -> 30 px
-      hitPad:       10 - p * 6,               // 10 -> 4 px
-    };
-  };
-
-  const spawnTargetSet = useCallback((width, height, currentLevel) => {
+  const spawnTargetSet = useCallback((width, height, currentLevel, currentCombo = 0) => {
     const e = engine.current;
-    const config = getLevelConfig(currentLevel);
+    const config = getLevelConfig(currentLevel, currentCombo);
     
     const targets = [];
     const minSpacing = config.radius * 2.8;
@@ -245,9 +252,6 @@ export default function TargetAcquisitionClient() {
         y,
         radius: config.radius,
         val: Math.max(0.05, 1.0 - (i * config.opacityDelta)),
-        // Pulse phase offset. MUST be random, never derived from `id` — `id`
-        // encodes brightness, so a phase tied to it would let a player read the
-        // answer off the ring animation instead of the opacity.
         seed: Math.random()
       });
     }
@@ -277,14 +281,14 @@ export default function TargetAcquisitionClient() {
     
     const e = engine.current;
     const finalAccuracy = e.totalClicks > 0 ? Math.round((e.correctHits / e.totalClicks) * 100) : 0;
-    
+    const peakLevel = Math.floor(bestLevelRunRef.current);
     const rating = getFpsScoreGrade(e.score, ELITE_SCORE);
     const grade = { letter: rating.grade, label: rating.label, color: rating.color };
 
     setAnalytics({
       accuracy: finalAccuracy, successfulHits: e.correctHits, missedClicks: e.missedClicks,
       sequenceErrors: e.sequenceErrors, setsCleared: e.setsCleared, maxCombo: e.maxCombo,
-      finalLevel: e.level, grade
+      finalLevel: peakLevel, grade
     });
 
     setUiScore(e.score);
@@ -324,8 +328,7 @@ export default function TargetAcquisitionClient() {
     setUiTimeLeft(DRILL_DURATION);
     lastTimeRef.current = DRILL_DURATION;
 
-    const saved = getSavedData();
-    const startLevel = getStartLevel(saved.bestLevel);
+    const startLevel = getStartLevel();
     bestLevelRunRef.current = startLevel;
 
     setAnalytics({
@@ -346,7 +349,7 @@ export default function TargetAcquisitionClient() {
       logicalWidth: w, logicalHeight: h
     };
 
-    spawnTargetSet(w, h, startLevel);
+    spawnTargetSet(w, h, startLevel, 0);
 
     try {
       if (containerRef.current && !document.fullscreenElement) {
@@ -354,7 +357,6 @@ export default function TargetAcquisitionClient() {
       }
     } catch(e) {}
 
-    // Countdown sequence: 3 -> 2 -> 1 -> GO
     setGameState('countdown');
     setCountdownValue(3);
     drillAudio.playCountdownTick();
@@ -419,7 +421,7 @@ export default function TargetAcquisitionClient() {
           if (eRef.targets.length === 0) return;
 
           const ch = eRef.crosshair;
-          const config = getLevelConfig(eRef.level);
+          const config = getLevelConfig(eRef.level, eRef.combo);
 
           // Find the target with lowest id (brightest target remaining)
           const requiredTarget = [...eRef.targets].sort((a, b) => a.id - b.id)[0];
@@ -440,11 +442,11 @@ export default function TargetAcquisitionClient() {
               eRef.combo++;
               if (eRef.combo > eRef.maxCombo) eRef.maxCombo = eRef.combo;
 
-              const levelMult = 1 + getDifficultyProgress(eRef.level) * 0.5; // 1.0 -> 1.5
+              const levelMult = 1 + getDifficultyProgress(eRef.level) * 0.5;
               eRef.score += Math.round(100 * getComboMultiplier(eRef.combo) * levelMult);
+              eRef.timeLeft += TIME_PER_HIT; // +0.4s
 
-              // Monotonic level progression
-              const rawLevel = Math.floor(eRef.score / POINTS_PER_LEVEL) + 1 + getComboBonusLevel(eRef.combo);
+              const rawLevel = (eRef.score / POINTS_PER_LEVEL) + 1;
               eRef.level = Math.max(eRef.level, rawLevel);
               bestLevelRunRef.current = Math.max(bestLevelRunRef.current, eRef.level);
 
@@ -454,11 +456,14 @@ export default function TargetAcquisitionClient() {
                 // SET FULLY CLEARED
                 eRef.setsCleared++;
                 eRef.score += Math.round(400 * levelMult);
+                const rawLevel2 = (eRef.score / POINTS_PER_LEVEL) + 1;
+                eRef.level = Math.max(eRef.level, rawLevel2);
+                bestLevelRunRef.current = Math.max(bestLevelRunRef.current, eRef.level);
                 drillAudio.playHit();
                 
                 const w = eRef.logicalWidth;
                 const h = eRef.logicalHeight;
-                spawnTargetSet(w, h, eRef.level);
+                spawnTargetSet(w, h, eRef.level, eRef.combo);
               } else {
                 drillAudio.playHit();
               }
@@ -470,6 +475,7 @@ export default function TargetAcquisitionClient() {
             } else {
               // SEQUENCE ERROR (Wrong target clicked)
               eRef.sequenceErrors++;
+              if (drillPenalty.isEnabled()) eRef.timeLeft -= TIME_PENALTY;
               eRef.combo = 0;
               eRef.screenShake = 8;
               triggerFlash();
@@ -479,6 +485,7 @@ export default function TargetAcquisitionClient() {
           } else {
             // MISS (Empty space clicked)
             eRef.missedClicks++;
+            if (drillPenalty.isEnabled()) eRef.timeLeft -= TIME_PENALTY;
             eRef.combo = 0;
             eRef.screenShake = 6;
             triggerFlash();
@@ -524,7 +531,7 @@ export default function TargetAcquisitionClient() {
             for(let i = -10; i <= 10; i++) {
               bCtx.moveTo(cx, cy); bCtx.lineTo(cx + i * 250, h);
               bCtx.moveTo(cx, cy); bCtx.lineTo(cx + i * 250, 0);
-            }
+            } 
             bCtx.stroke();
           });
 
@@ -589,40 +596,29 @@ export default function TargetAcquisitionClient() {
         ctx.fillRect(0, 0, w, h);
       }
 
-      // Draw Targets — byte-identical treatment for decoys & target except opacity t.val
+      // Draw Targets
       if (gameState === 'playing' || gameState === 'start') {
         e.targets.forEach((t) => {
           ctx.save();
 
-          // Pulse ring. Alpha is baked into the COLOUR rather than left to
-          // drawPulseRing's own globalAlpha, so the ring is scaled by t.val like
-          // everything else — an equally-bright ring on every target would add
-          // uniform brightness and flatten the opacity cue the drill is built on.
           drawPulseRing(
             ctx, t.x, t.y, t.radius,
             `rgba(245, 158, 11, ${t.val})`,
             ((time / 1600) + t.seed) % 1
           );
 
-          // Body: radial gradient with its origin offset toward the upper-left,
-          // which implies a light source and reads as a lit sphere instead of a
-          // flat disc. Every stop is scaled by t.val, so the discrimination
-          // mechanic is untouched — decoys differ ONLY in opacity.
           const g = ctx.createRadialGradient(
             t.x - t.radius * 0.35, t.y - t.radius * 0.35, t.radius * 0.1,
             t.x, t.y, t.radius
           );
-          g.addColorStop(0,    `rgba(255, 214, 138, ${t.val})`); // warm highlight
-          g.addColorStop(0.55, `rgba(245, 158, 11,  ${t.val})`); // body
-          g.addColorStop(1,    `rgba(154, 71,  8,   ${t.val})`); // deep rim → roundness
+          g.addColorStop(0,    `rgba(255, 214, 138, ${t.val})`);
+          g.addColorStop(0.55, `rgba(245, 158, 11,  ${t.val})`);
+          g.addColorStop(1,    `rgba(154, 71,  8,   ${t.val})`);
           ctx.fillStyle = g;
           ctx.beginPath();
           ctx.arc(t.x, t.y, t.radius, 0, Math.PI * 2);
           ctx.fill();
 
-          // Rim light ON the edge in a related warm tone. The old version stroked
-          // pure white 4px OFF the body, which read as a selection outline in an
-          // unrelated hue rather than part of the object.
           ctx.strokeStyle = `rgba(253, 230, 138, ${t.val * 0.9})`;
           ctx.lineWidth = 2;
           ctx.beginPath();
@@ -733,7 +729,7 @@ export default function TargetAcquisitionClient() {
               </span>
             </h1>
             <p className="text-xs text-slate-400 mt-1">
-              Hardware Raw Input • Endless Level Progression
+              Visual Discrimination Speed • Endless Level Progression
             </p>
           </div>
         )}
@@ -747,11 +743,11 @@ export default function TargetAcquisitionClient() {
             </div>
             <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
-              <div className={`text-lg sm:text-xl font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>{uiTimeLeft}s</div>
+              <div className={`text-lg sm:text-xl font-black tabular-nums ${uiTimeLeft <= 10 ? "text-red-400 animate-pulse" : "text-white"}`}>{uiTimeLeft}s</div>
             </div>
             <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Accuracy</div>
-              <div className="text-lg sm:text-xl font-black text-blue-400 tabular-nums">{accuracy}%</div>
+              <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{accuracy}%</div>
             </div>
             <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
@@ -766,8 +762,8 @@ export default function TargetAcquisitionClient() {
           onContextMenu={(e) => { if (gameActiveRef.current) e.preventDefault(); }}
           className={`relative overflow-hidden flex flex-col transition-all duration-150 select-none bg-[#080811] text-white ${
             isFullscreen 
-              ? 'fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#080811] rounded-none border-none flex flex-col items-center justify-center' 
-              : 'w-full rounded-2xl bg-[#080811] aspect-video min-h-[460px] sm:min-h-[500px] max-h-[88vh] relative overflow-hidden flex flex-col'
+              ? "fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#080811] rounded-none border-none flex flex-col items-center justify-center" 
+              : "w-full rounded-2xl bg-[#080811] aspect-video min-h-[460px] sm:min-h-[500px] max-h-[88vh] relative overflow-hidden flex flex-col"
           }`}
           style={{ touchAction: gameActiveRef.current ? 'none' : 'auto' }}
         >
@@ -785,7 +781,7 @@ export default function TargetAcquisitionClient() {
               </div>
               <div className="absolute top-4 right-4 z-30 pointer-events-none text-right">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Time</p>
-                <p className={`text-2xl sm:text-3xl font-bold tabular-nums leading-tight ${uiTimeLeft <= 10 ? 'text-red-400' : 'text-white'}`}>{uiTimeLeft}s</p>
+                <p className={`text-2xl sm:text-3xl font-bold tabular-nums leading-tight ${uiTimeLeft <= 10 ? "text-red-400" : "text-white"}`}>{uiTimeLeft}s</p>
               </div>
             </>
           )}
@@ -844,7 +840,7 @@ export default function TargetAcquisitionClient() {
           <canvas 
             ref={canvasRef} 
             onClick={() => { if (gameState === 'playing' && !pointerLocked) resumeDrill(); }}
-            className={`block absolute top-0 left-0 w-full h-full touch-none z-10 ${gameState === 'playing' ? 'cursor-none' : ''}`} 
+            className={`block absolute top-0 left-0 w-full h-full touch-none z-10 ${gameState === "playing" ? "cursor-none" : ""}`}
           />
 
           {/* START MODAL */}
@@ -853,16 +849,16 @@ export default function TargetAcquisitionClient() {
               icon={Target}
               accent="amber"
               title="Target Acquisition Pro"
-              subtitle="Hardware Raw Input • Endless Level Progression"
+              subtitle="Visual Discrimination Speed • Endless Level Progression"
               rules={[
-                { icon: Target, accent: 'amber', title: 'Objective', text: 'Click Brightest Target First' },
-                { icon: AlertCircle, accent: 'red', title: 'Failure Rule', text: 'Wrong Click Resets Combo' },
+                { icon: Target, accent: "amber", title: "Objective (+100 PTS)", text: "Click Brightest Target First" },
+                { icon: AlertCircle, accent: "red", title: "Failure Rule", text: penaltyEnabled ? "Wrong Click / Miss → Resets Combo, -0.6s" : "Wrong Click / Miss → Resets Combo" },
               ]}
               sensitivity={{ value: universalSens, onChange: setUniversalSens, cmPer360 }}
               stats={[
-                { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
-                { icon: Flame, label: 'Best Combo', value: `${bestCombo}x`, color: 'text-amber-400', accent: 'amber' },
-                { icon: TrendingUp, label: 'Best Level', value: `Lv. ${bestLevel}`, color: 'text-blue-400', accent: 'blue' },
+                { icon: Trophy, label: "Best Score", value: bestScore, color: "text-white", accent: "slate" },
+                { icon: Flame, label: "Best Combo", value: `${bestCombo}x`, color: "text-amber-400", accent: "amber" },
+                { icon: TrendingUp, label: "Best Level", value: `Lv. ${bestLevel}`, color: "text-blue-400", accent: "blue" },
               ]}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
@@ -874,80 +870,24 @@ export default function TargetAcquisitionClient() {
             <DrillCountdown value={countdownValue} subtitle="GET READY" />
           )}
 
-          {/* END SCREEN */}
+          {/* END SCREEN — Universal Result Card */}
           {gameState === 'gameOver' && analytics.grade && (
-            <div className="absolute inset-0 z-40 flex bg-neutral-950/98 select-none font-sans" style={{ background: 'rgba(5,5,8,0.97)' }} onPointerDown={e => e.stopPropagation()}>
-              
-              {/* Left Grade Panel */}
-              <div className="w-[36%] flex flex-col items-center justify-center gap-1 border-r border-white/5 px-4" style={{ background: 'radial-gradient(ellipse 260px 200px at 50% 30%, rgba(245,158,11,.12), transparent 70%)' }}>
-                {isNewBest && (
-                  <span className="text-[9.5px] font-bold text-yellow-400 bg-yellow-500/10 border border-yellow-500/25 px-2.5 py-0.5 rounded-full mb-1 animate-pulse">
-                    NEW BEST
-                  </span>
-                )}
-                <div className={`text-5xl sm:text-6xl font-black leading-none ${analytics.grade.color}`}>
-                  {analytics.grade.letter}
-                </div>
-                <div className="text-[10px] uppercase tracking-widest text-slate-500 text-center font-bold mt-1">
-                  {analytics.grade.label}
-                </div>
-                <div className="text-3xl sm:text-4xl font-black text-white mt-2 tabular-nums">
-                  {uiScore}
-                </div>
-                <div className="text-[9px] uppercase tracking-widest text-slate-500">Points</div>
-              </div>
-
-              {/* Right Stats & Actions Panel */}
-              <div className="flex-1 flex flex-col justify-center gap-3 px-6 py-4 min-w-0">
-                
-                {/* 4 Stat Tiles */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.accuracy}%</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Accuracy</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.setsCleared}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Sets Cleared</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.maxCombo}x</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Max Combo</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">Lv. {analytics.finalLevel}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Peak Level</p>
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex gap-2">
-                  <button 
-                    onClick={enterDrill} 
-                    className="flex-1 py-3 rounded-[13px] bg-gradient-to-r from-amber-500 to-orange-600 text-white font-bold text-xs uppercase tracking-wide cursor-pointer transition-transform active:scale-[0.98] shadow-md flex items-center justify-center gap-1.5"
-                  >
-                    <RefreshCw className="w-3.5 h-3.5" /> Play Again
-                  </button>
-                  <button 
-                    onClick={shareScore} 
-                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform" 
-                    title="Share Score"
-                  >
-                    <Share2 className="w-4 h-4" />
-                  </button>
-                  <button 
-                    onClick={handleExitDrill} 
-                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform" 
-                    title="Exit Fullscreen & Return"
-                  >
-                    <LogOut className="w-4 h-4 text-red-400" />
-                  </button>
-                </div>
-
-              </div>
-            </div>
+            <DrillResultCard
+              accent="amber"
+              grade={analytics.grade}
+              score={uiScore}
+              isNewBest={isNewBest}
+              stats={[
+                { value: analytics.accuracy, suffix: "%", label: "Accuracy" },
+                { value: analytics.setsCleared, label: "Sets Cleared" },
+                { value: `${analytics.maxCombo}x`, label: "Max Combo" },
+                { value: `Lv. ${analytics.finalLevel}`, label: "Peak Level" },
+              ]}
+              onPlayAgain={enterDrill}
+              onShare={shareScore}
+              onExit={handleExitDrill}
+            />
           )}
-
         </div>
 
         {/* ── ACCORDIONS ── */}
@@ -959,58 +899,13 @@ export default function TargetAcquisitionClient() {
               isOpen={openAccordion === 'rules'}
               onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
             >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {RULES_ITEMS.map((item, i) => (
-                  <div key={i} className="bg-black p-4 rounded-xl border border-white/10">
-                    <p className="text-sm font-bold text-white mb-1">{item.title}</p>
-                    <p className="text-xs text-gray-300 leading-relaxed">{item.text}</p>
+                  <div key={i} className="bg-[#05060b] border border-gray-800 rounded-xl p-4">
+                    <h4 className="text-xs font-bold text-gray-200 mb-1">{item.title}</h4>
+                    <p className="text-xs text-gray-400 leading-relaxed">{item.text}</p>
                   </div>
                 ))}
-              </div>
-            </DrillAccordion>
-
-            <DrillAccordion
-              id="about"
-              title="About Target Acquisition Pro"
-              isOpen={openAccordion === 'about'}
-              onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
-            >
-              <div className="space-y-8">
-                <section>
-                  <h4 className="text-base font-bold text-white mb-2 flex items-center gap-2">
-                    <Eye className="w-4 h-4 text-amber-400" /> What Is Target Acquisition Training?
-                  </h4>
-                  <p className="text-sm leading-relaxed mb-3 text-gray-300">
-                    <strong>Target Acquisition Training</strong> isolates the cognitive phase of aim: visually scanning a scene, recognizing threat priorities, and executing precise crosshair snaps to the primary target. In tactical shooters like CS2 and Valorant, enemies rarely present themselves in isolation. Winning engagements requires sorting through visual clutter, identifying who to shoot first, and firing before your opponent reacts.
-                  </p>
-                  <p className="text-sm leading-relaxed text-gray-300">
-                    By conditioning your visual cortex to perform high-speed <strong>luminance sorting</strong> under strict time pressure, this drill narrows your visual discrimination latency, ensuring your mechanical flicks are guided by fast, decisive threat recognition.
-                  </p>
-                </section>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
-                    <div className="flex items-center gap-2.5 mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Who Should Use This?</h5>
-                    </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Tactical shooter players, entry fraggers, and gamers who hesitate when multiple enemies appear on screen simultaneously.</p>
-                  </div>
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
-                    <div className="flex items-center gap-2.5 mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-amber-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Benefits of Discrimination</h5>
-                    </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Reduces target switching hesitation, eliminates panic clicking, and trains consistent first-shot accuracy on subtle enemy pixels.</p>
-                  </div>
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
-                    <div className="flex items-center gap-2.5 mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-orange-600 flex items-center justify-center"><Zap className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">15-Level Scaling</h5>
-                    </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">As you level up, target size shrinks, target counts grow up to 6 on screen, and the opacity delta tightens to a challenging 5% difference.</p>
-                  </div>
-                </div>
               </div>
             </DrillAccordion>
 
@@ -1022,7 +917,7 @@ export default function TargetAcquisitionClient() {
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {FAQ_ITEMS.map((item, i) => (
-                  <div key={i} className="bg-[#05060b] border border-gray-800 rounded-xl p-5">
+                  <div key={i} className="bg-[#05060b] border border-gray-800 rounded-xl p-5 hover:border-gray-700 transition-colors">
                     <h4 className="text-sm font-bold text-gray-200 mb-2">{item.q}</h4>
                     <p className="text-xs text-gray-400 leading-relaxed">{item.a}</p>
                   </div>
@@ -1035,7 +930,7 @@ export default function TargetAcquisitionClient() {
         {/* ── RELATED FPS DRILLS ── */}
         {!isFullscreen && (
           <section className="mt-4">
-            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3 font-sans">
+            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">
               Related FPS Drills
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -1058,11 +953,10 @@ export default function TargetAcquisitionClient() {
             </div>
           </section>
         )}
-
-        {/* ── FOOTER ── */}
-        {!isFullscreen && <DrillFooter />}
-
       </main>
+
+      {/* ── FOOTER ── */}
+      {!isFullscreen && <DrillFooter />}
     </div>
   );
 }

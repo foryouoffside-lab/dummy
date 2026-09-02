@@ -17,20 +17,26 @@ import { getPlayerName } from '../../../../lib/leaderboard';
 import { drillAudio } from '../../../../lib/drillAudio';
 import { drillFlash } from '../../../../lib/drillFlash';
 import { drillTimeout } from '../../../../lib/drillTimeout';
-import { getStartLevel, getDifficultyProgress, getComboBonusLevel } from '../../../../lib/drillDifficulty';
+import { drillPenalty } from '../../../../lib/drillPenalty';
+import { getStartLevel, getDifficultyProgress, ramp } from '../../../../lib/drillDifficulty';
 import { getComboMultiplier, getFpsScoreGrade } from '../../../../lib/scoringEngine';
 import { createBackdropCache, getCanvasDpr, drawPulseRing, drawTacticalTarget } from '../../../../lib/canvasFx';
 import DrillFooter from '../../../../components/drill/DrillFooter';
 import DrillCountdown from '../../../../components/drill/DrillCountdown';
 import DrillAccordion from '../../../../components/drill/DrillAccordion';
 import FpsStartCard from '../../../../components/drill/FpsStartCard';
+import DrillResultCard from '../../../../components/drill/DrillResultCard';
 import useUnexpectedExitGuard from '../../../../lib/useUnexpectedExitGuard';
 
-const DRILL_DURATION = 45;
-const POINTS_PER_LEVEL = 200;
-const ELITE_SCORE = 16000;
-const STORAGE_KEY = 'skilldrills_fps_target_switching_swarm_v2';
-const OLD_STORAGE_KEY = 'targetSwarm_bestScore';
+// ============================================================
+// TUNING CONSTANTS
+// ============================================================
+const DRILL_DURATION = 45; // starting clock only; a run grows past this
+const POINTS_PER_LEVEL = 2100; // 300 -> 2100 (7x)
+const ELITE_SCORE = 72000; // 24000 -> 72000 (3x)
+const TIME_PER_HIT = 0.35; // +0.35s on target destruction
+const TIME_PENALTY = 0.5; // opt-in on miss or target timeout
+const STORAGE_KEY = 'skilldrills_fps_target_switching_swarm_v3';
 
 const RELATED_DRILLS = [
   { id: "flick-shot-training", name: "Pro Flick Trainer", cat: "FPS Flicking", desc: "Snap to targets in time-attack mode with precision flicking.", href: "/drills/fps/flick-shot-training" },
@@ -45,8 +51,6 @@ const getSavedData = () => {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) return { bestScore: 0, bestCombo: 0, bestLevel: 1, totalSessions: 0, ...JSON.parse(raw) };
-    const legacy = localStorage.getItem(OLD_STORAGE_KEY);
-    if (legacy) return { bestScore: parseInt(legacy, 10) || 0, bestCombo: 0, bestLevel: 1, totalSessions: 0 };
     return { bestScore: 0, bestCombo: 0, bestLevel: 1, totalSessions: 0 };
   } catch (e) {
     return { bestScore: 0, bestCombo: 0, bestLevel: 1, totalSessions: 0 };
@@ -59,24 +63,81 @@ const saveData = (data) => {
   } catch (e) {}
 };
 
-
-const getLevelConfig = (level) => {
-  const p = getDifficultyProgress(level);
+const getLevelConfig = (level, combo = 0) => {
+  const p = getDifficultyProgress(level); // 0 at L1, 1 at L15, unbounded above
+  const heat = (getComboMultiplier(combo) - 1) / 2;
   return {
-    count: Math.min(3, Math.floor(2 + p * 1.5)), // 2 targets initially -> strictly max 3 targets at higher difficulty
-    ttl: Math.max(1200, 2800 - p * 1200),        // 2.8s -> 1.2s fair target lifespan
-    speedBase: 50 + p * 140,                     // 50 -> 190 px/s smooth, readable movement
-    radius: Math.max(18, 28 - p * 8),            // Playable target size
+    count: Math.min(5, Math.floor(2 + p * 2.0 + heat * 0.5)),
+    ttl: Math.max(900, ramp(2800, 1200, p) * (1 - heat * 0.20)),
+    speedBase: ramp(50, 190, p) * (1 + heat * 0.20),
+    radius: Math.max(14, ramp(28, 18, p) * (1 - heat * 0.15)),
     color: '#06b6d4'
   };
 };
 
+// ============================================================
+// ACCORDION DATA
+// ============================================================
+const RULES_ITEMS = [
+  { num: "1", text: "Target Destruction", highlight: "Cyan Targets (+100 PTS / +0.35s)", result: "Rapidly switch between targets" },
+  { num: "2", text: "Dynamic Swarm", highlight: "Instant Respawns", result: "Maintains active targets continuously" },
+  { num: "3", text: "Failure Rule", highlight: "Miss / Timeout (-0.5s)", result: "Resets combo multiplier" },
+  { num: "4", text: "Level Progression", highlight: "+1 Level / 2100 PTS", result: "Continuous Dynamic Speed & Size" }
+];
+
+const ABOUT_INTRO = [
+  "Target Switching is the mechanical ability to rapidly flick your crosshair between multiple targets in sequence without deceleration delay.",
+  "By practicing high-density target switching drills, players develop fast acquisition instincts and smooth spray transfer mechanics under pressure."
+];
+
+const ABOUT_CARDS = [
+  { icon: Users, iconBg: "bg-cyan-600", title: "Who Should Use This?", text: "Tactical FPS players, entry fraggers, and aggressive duelists facing multi-enemy engagements in Valorant, CS2, Apex Legends, and Overwatch 2." },
+  { icon: TrendingUp, iconBg: "bg-fuchsia-600", title: "Skills Trained", text: "Multi-target flick switching, visual target indexing, deceleration control, and sequential click timing under time pressure." },
+  { icon: Zap, iconBg: "bg-orange-600", title: "Why It Is Crucial", text: "Winning 1v2 and 1v3 clutch rounds requires instantaneous target re-acquisition after each elimination without resetting neutral crosshair position." }
+];
+
+const ABOUT_SECTIONS = [
+  {
+    icon: Eye,
+    title: "Overcoming Target Hesitation",
+    paragraphs: [
+      "Most players hesitate after clicking a target while waiting for visual confirmation of death. Training high-speed target switching builds neural confidence to start transitioning to the next target instantly."
+    ]
+  },
+  {
+    icon: Target,
+    title: "Mastering Spray Transfers",
+    paragraphs: [
+      "Clean spray transfers require rapid crosshair repositioning before bullet bloom spreads out of control. Target switching builds the foundational flick agility needed for multi-kill spray transfers."
+    ]
+  }
+];
+
+const FAQ_ITEMS = [
+  { q: "What is target switching in FPS aim training?", a: "Target switching is the mechanical skill of rapidly flicking your crosshair from one target to the next and clicking accurately during the transition. It trains continuous movement between different target locations." },
+  { q: "How does the target swarm format improve multi-kill mechanics?", a: "The swarm format presents multiple targets simultaneously, requiring you to engage them in a fluid sequence rather than waiting for each to appear one at a time. This maintains momentum during multi-kills." },
+  { q: "How is target switching different from a standard flick trainer?", a: "A standard flick trainer presents targets one at a time. A target switching trainer presents multiple active targets and measures your ability to transition between them rapidly in sequence." },
+  { q: "Which games need the best target switching mechanics?", a: "Target switching is essential in Valorant and CS2 for multi-peek entry duels and spray transfers, Apex Legends for team wipes, and Overwatch 2 for DPS aggressive positioning." },
+  { q: "How are errors penalised in Target Switching Swarm?", a: "Missing a shot or letting a target's time-to-live expire resets your combo multiplier. When the optional Time Penalty setting is enabled, each error deducts 0.5s from your timer." },
+  { q: "Why do I hesitate after eliminating a target?", a: "Hesitation occurs because your brain waits for visual confirmation before searching for the next target. Drills train you to trust your shot and move your eyes to the next target immediately." },
+  { q: "What is target acquisition speed?", a: "Target acquisition speed is the combined cognitive process of identifying a threat on screen, predicting its path, and executing the flick to engage it." },
+  { q: "How does target switching help with CS2 spray transfers?", a: "Target switching is the foundation of a spray transfer. Before controlling recoil between targets, your raw crosshair relocation speed must be instantaneous." },
+  { q: "How often should I train target switching?", a: "We recommend 10 to 15 minutes of target switching drills during your pre-match warm-up routine to prime your flick transitions and multi-target indexing." },
+  { q: "What is the optimal mouse grip for target switching?", a: "Claw grip and fingertip grip offer the most agility for micro-adjustments during high-speed target switches, though consistency with your existing comfortable grip is most important." },
+  { q: "Is this drill free?", a: "Yes, this Target Switching Swarm Trainer is 100% free, open-source, and runs directly in your web browser with zero downloads required." },
+  { q: "What skills does this drill improve?", a: "It trains rapid multi-target transitions, visual indexing, flick deceleration, and high-tempo cognitive target switching." }
+];
+
+// ============================================================
+// MAIN COMPONENT
+// ============================================================
 export default function TargetSwitchingSwarmClient() {
   const [gameState, setGameState] = useState('start');
   const [countdownValue, setCountdownValue] = useState(3);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
+  const [penaltyEnabled, setPenaltyEnabled] = useState(false);
   const [pointerLocked, setPointerLocked] = useState(false);
   const [openAccordion, setOpenAccordion] = useState(null);
   const [isTouchOnlyDevice, setIsTouchOnlyDevice] = useState(false);
@@ -136,6 +197,7 @@ export default function TargetSwitchingSwarmClient() {
     if (typeof window !== 'undefined') {
       setSoundEnabled(drillAudio.isEnabled());
       setFlashEnabled(drillFlash.isEnabled());
+      setPenaltyEnabled(drillPenalty.isEnabled());
       const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
       const isTouchCapable = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
       setIsTouchOnlyDevice(isTouchCapable && !hasFinePointer);
@@ -159,8 +221,8 @@ export default function TargetSwitchingSwarmClient() {
     setTimeout(() => setFlashes((f) => f.filter((x) => x.id !== id)), 480);
   }, []);
 
-  const spawnTarget = useCallback((width, height, currentLevel) => {
-    const cfg = getLevelConfig(currentLevel);
+  const spawnTarget = useCallback((width, height, currentLevel, currentCombo = 0) => {
+    const cfg = getLevelConfig(currentLevel, currentCombo);
     const pad = 40;
     const speed = cfg.speedBase + Math.random() * 50;
     const angle = Math.random() * Math.PI * 2;
@@ -198,7 +260,7 @@ export default function TargetSwitchingSwarmClient() {
 
     const e = engine.current;
     const finalAccuracy = e.totalActions > 0 ? Math.round((e.successfulHits / e.totalActions) * 100) : 100;
-    const peakLevel = bestLevelRunRef.current;
+    const peakLevel = Math.floor(bestLevelRunRef.current);
     const grade = getFpsScoreGrade(e.score, ELITE_SCORE);
 
     setAccuracy(finalAccuracy);
@@ -245,8 +307,7 @@ export default function TargetSwitchingSwarmClient() {
     setTimeLeft(DRILL_DURATION);
     lastTimeRef.current = DRILL_DURATION;
 
-    const saved = getSavedData();
-    const startLvl = getStartLevel(saved.bestLevel);
+    const startLvl = getStartLevel();
     setLevel(startLvl);
     bestLevelRunRef.current = startLvl;
 
@@ -254,9 +315,9 @@ export default function TargetSwitchingSwarmClient() {
     const h = engine.current.logicalHeight || canvasRef.current?.height || 600;
 
     const initialTargets = [];
-    const cfg = getLevelConfig(startLvl);
+    const cfg = getLevelConfig(startLvl, 0);
     for (let i = 0; i < cfg.count; i++) {
-      initialTargets.push(spawnTarget(w, h, startLvl));
+      initialTargets.push(spawnTarget(w, h, startLvl, 0));
     }
 
     engine.current = {
@@ -373,28 +434,30 @@ export default function TargetSwitchingSwarmClient() {
         const levelMult = 1 + getDifficultyProgress(eRef.level) * 0.5;
         const gained = Math.round(baseScore * getComboMultiplier(eRef.combo) * levelMult);
         eRef.score += gained;
+        eRef.timeLeft += TIME_PER_HIT; // +0.35s
 
         setScore(eRef.score);
         setCombo(eRef.combo);
 
-        const rawLevel = Math.floor(eRef.score / POINTS_PER_LEVEL) + 1 + getComboBonusLevel(eRef.combo);
+        const rawLevel = (eRef.score / POINTS_PER_LEVEL) + 1;
         eRef.level = Math.max(eRef.level, rawLevel);
         bestLevelRunRef.current = Math.max(bestLevelRunRef.current, eRef.level);
-        setLevel(eRef.level);
+        setLevel(Math.floor(eRef.level));
 
         drillAudio.playHit();
         createExplosion(t.x, t.y, t.color);
         createHitMarker(ch.x, ch.y);
         eRef.targets.splice(hitIndex, 1);
 
-        const cfg = getLevelConfig(eRef.level);
+        const cfg = getLevelConfig(eRef.level, eRef.combo);
         const w = eRef.logicalWidth || canvasRef.current.width;
         const h = eRef.logicalHeight || canvasRef.current.height;
         while (eRef.targets.length < cfg.count) {
-          eRef.targets.push(spawnTarget(w, h, eRef.level));
+          eRef.targets.push(spawnTarget(w, h, eRef.level, eRef.combo));
         }
       } else {
         eRef.missedClicks++;
+        if (drillPenalty.isEnabled()) eRef.timeLeft -= TIME_PENALTY;
         eRef.combo = 0;
         eRef.screenShake = 6;
         setCombo(0);
@@ -492,9 +555,9 @@ export default function TargetSwitchingSwarmClient() {
           lastTimeRef.current = intTime;
         }
 
-        const cfg = getLevelConfig(e.level);
+        const cfg = getLevelConfig(e.level, e.combo);
         while (e.targets.length < cfg.count) {
-          e.targets.push(spawnTarget(width, height, e.level));
+          e.targets.push(spawnTarget(width, height, e.level, e.combo));
         }
 
         for (let i = e.targets.length - 1; i >= 0; i--) {
@@ -503,13 +566,14 @@ export default function TargetSwitchingSwarmClient() {
 
           if (drillTimeout.isEnabled() && t.age >= t.ttl) {
             e.timeouts++;
+            if (drillPenalty.isEnabled()) e.timeLeft -= TIME_PENALTY;
             e.combo = 0;
             e.screenShake = 8;
             setCombo(0);
             drillAudio.playPenalty();
             triggerFlash();
             e.targets.splice(i, 1);
-            e.targets.push(spawnTarget(width, height, e.level));
+            e.targets.push(spawnTarget(width, height, e.level, e.combo));
             continue;
           }
 
@@ -628,7 +692,7 @@ export default function TargetSwitchingSwarmClient() {
         bestScore,
         accuracy: analytics.accuracy,
         bestCombo: analytics.bestCombo,
-        rating: { letter: analytics.grade?.grade || 'C', label: analytics.grade?.label || 'Keep Going', emoji: '🎯' },
+        rating: { letter: analytics.grade?.letter || 'C', label: analytics.grade?.label || 'Keep Going', emoji: '🎯' },
         newBest: isNewBest,
         drillName: 'Target Switching Swarm',
         playerName: getPlayerName(),
@@ -659,7 +723,7 @@ export default function TargetSwitchingSwarmClient() {
               </span>
             </h1>
             <p className="text-xs text-slate-400 mt-1">
-              Hardware Raw Input • 15 Difficulty Levels
+              Hardware Raw Input • Endless Level Progression
             </p>
           </div>
         )}
@@ -673,11 +737,11 @@ export default function TargetSwitchingSwarmClient() {
             </div>
             <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
-              <div className={`text-lg sm:text-xl font-black tabular-nums ${timeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>{timeLeft}s</div>
+              <div className={`text-lg sm:text-xl font-black tabular-nums ${timeLeft <= 10 ? "text-red-400 animate-pulse" : "text-white"}`}>{timeLeft}s</div>
             </div>
             <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Accuracy</div>
-              <div className="text-lg sm:text-xl font-black text-blue-400 tabular-nums">{accuracy}%</div>
+              <div className="text-lg sm:text-xl font-black text-cyan-400 tabular-nums">{accuracy}%</div>
             </div>
             <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
@@ -692,8 +756,8 @@ export default function TargetSwitchingSwarmClient() {
           onContextMenu={(e) => { if (gameState === 'playing' || gameState === 'countdown') e.preventDefault(); }}
           className={`relative overflow-hidden flex flex-col transition-all duration-150 select-none bg-[#080811] text-white border border-white/10 ${
             isFullscreen 
-              ? 'fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#080811] rounded-none border-none flex flex-col items-center justify-center' 
-              : 'w-full rounded-2xl bg-[#080811] aspect-video min-h-[460px] sm:min-h-[500px] max-h-[88vh] relative overflow-hidden flex flex-col'
+              ? "fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#080811] rounded-none border-none flex flex-col items-center justify-center" 
+              : "w-full rounded-2xl bg-[#080811] aspect-video min-h-[460px] sm:min-h-[500px] max-h-[88vh] relative overflow-hidden flex flex-col"
           }`}
           style={{ touchAction: (gameState === 'playing' || gameState === 'countdown') ? 'none' : 'auto' }}
         >
@@ -710,7 +774,7 @@ export default function TargetSwitchingSwarmClient() {
 
               <div className="absolute top-4 right-4 z-30 pointer-events-none text-right">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Time</p>
-                <p className={`text-2xl sm:text-3xl font-bold tabular-nums leading-tight ${timeLeft <= 10 ? 'text-red-400' : 'text-white'}`}>{timeLeft}s</p>
+                <p className={`text-2xl sm:text-3xl font-bold tabular-nums leading-tight ${timeLeft <= 10 ? "text-red-400" : "text-white"}`}>{timeLeft}s</p>
               </div>
             </>
           )}
@@ -773,7 +837,7 @@ export default function TargetSwitchingSwarmClient() {
           <canvas 
             ref={canvasRef} 
             onClick={() => { if (gameState === 'playing' && !pointerLocked) resumeDrill(); }}
-            className={`block absolute top-0 left-0 w-full h-full touch-none z-10 ${gameState === 'playing' ? 'cursor-none' : ''}`} 
+            className={`block absolute top-0 left-0 w-full h-full touch-none z-10 ${gameState === "playing" ? "cursor-none" : ""}`}
           />
 
           {/* Start Overlay */}
@@ -782,93 +846,43 @@ export default function TargetSwitchingSwarmClient() {
               icon={Crosshair}
               accent="cyan"
               title="Target Switching Swarm"
-              subtitle="Hardware Raw Input • 15 Difficulty Levels"
+              subtitle="Hardware Raw Input • Endless Level Progression"
               rules={[
-                { icon: Target, accent: 'cyan', title: 'Objective', text: 'Eliminate Active Swarms' },
-                { icon: AlertCircle, accent: 'red', title: 'Failure Rule', text: 'Missed Click → Resets Combo' },
+                { icon: Target, accent: "cyan", title: "Objective (+100 PTS)", text: "Rapidly Switch & Eliminate Active Swarms" },
+                { icon: AlertCircle, accent: "red", title: "Failure Rule", text: penaltyEnabled ? "Missed Click / Timeout → Resets Combo, -0.5s" : "Missed Click / Timeout → Resets Combo" },
               ]}
               sensitivity={{ value: universalSens, onChange: setUniversalSens, cmPer360 }}
               stats={[
-                { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
-                { icon: Flame, label: 'Best Combo', value: `${bestCombo}x`, color: 'text-cyan-400', accent: 'cyan' },
-                { icon: TrendingUp, label: 'Best Level', value: `Lv. ${bestLevel}`, color: 'text-blue-400', accent: 'blue' },
+                { icon: Trophy, label: "Best Score", value: bestScore, color: "text-white", accent: "slate" },
+                { icon: Flame, label: "Best Combo", value: `${bestCombo}x`, color: "text-cyan-400", accent: "cyan" },
+                { icon: TrendingUp, label: "Best Level", value: `Lv. ${bestLevel}`, color: "text-blue-400", accent: "blue" },
               ]}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
             />
           )}
 
+          {/* END SCREEN — Universal Result Card */}
           {gameState === 'gameOver' && analytics.grade && (
-            <div className="absolute inset-0 z-40 flex bg-neutral-950/98 select-none font-sans" style={{ background: 'rgba(5,5,8,0.97)' }} onPointerDown={e => e.stopPropagation()}>
-              
-              <div className="w-[36%] flex flex-col items-center justify-center gap-1 border-r border-white/5 px-4" style={{ background: 'radial-gradient(ellipse 260px 200px at 50% 30%, rgba(6,182,212,.12), transparent 70%)' }}>
-                {isNewBest && (
-                  <span className="text-[9.5px] font-bold text-yellow-400 bg-yellow-500/10 border border-yellow-500/25 px-2.5 py-0.5 rounded-full mb-1 animate-pulse">
-                    NEW BEST
-                  </span>
-                )}
-                <div className={`text-5xl sm:text-6xl font-black leading-none ${analytics.grade.color}`}>
-                  {analytics.grade.grade}
-                </div>
-                <div className="text-[10px] uppercase tracking-widest text-slate-500 text-center font-bold mt-1">
-                  {analytics.grade.label}
-                </div>
-                <div className="text-3xl sm:text-4xl font-black text-white mt-2 tabular-nums">
-                  {score}
-                </div>
-                <div className="text-[9px] uppercase tracking-widest text-slate-500">Points</div>
-              </div>
-
-              <div className="flex-1 flex flex-col justify-center gap-3 px-6 py-4 min-w-0">
-                
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.accuracy}%</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Accuracy</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.successfulHits}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Targets Destroyed</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.bestCombo}x</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Max Combo</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">Lv. {analytics.levelReached}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Peak Level</p>
-                  </div>
-                </div>
-
-                <div className="flex gap-2">
-                  <button 
-                    onClick={enterDrill} 
-                    className="flex-1 py-3 rounded-[13px] bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold text-xs uppercase tracking-wide cursor-pointer transition-transform active:scale-[0.98] shadow-md flex items-center justify-center gap-1.5"
-                  >
-                    <RefreshCw className="w-3.5 h-3.5" /> Play Again
-                  </button>
-                  <button 
-                    onClick={shareDrillLink} 
-                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform" 
-                    title="Share Score"
-                  >
-                    <Share2 className="w-4 h-4" />
-                  </button>
-                  <button 
-                    onClick={handleExitDrill} 
-                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform" 
-                    title="Exit Fullscreen & Return"
-                  >
-                    <LogOut className="w-4 h-4 text-red-400" />
-                  </button>
-                </div>
-
-              </div>
-            </div>
+            <DrillResultCard
+              accent="cyan"
+              grade={analytics.grade}
+              score={score}
+              isNewBest={isNewBest}
+              stats={[
+                { value: analytics.accuracy, suffix: "%", label: "Accuracy" },
+                { value: analytics.successfulHits, label: "Targets Destroyed" },
+                { value: `${analytics.bestCombo}x`, label: "Max Combo" },
+                { value: `Lv. ${analytics.levelReached}`, label: "Peak Level" },
+              ]}
+              onPlayAgain={enterDrill}
+              onShare={shareDrillLink}
+              onExit={handleExitDrill}
+            />
           )}
         </div>
 
-        {/* ACCORDIONS */}
+        {/* ── ACCORDIONS ── */}
         {!isFullscreen && (
           <div className="[&>div]:!mt-0">
             <DrillAccordion
@@ -878,70 +892,52 @@ export default function TargetSwitchingSwarmClient() {
               onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <RuleItem num="1" text="Target Hit" highlight="+100 PTS Base" result="Destroy active swarm target" />
-                <RuleItem num="2" text="Combo Multiplier" highlight="Up to 3.0x" result="Builds on consecutive hits" />
-                <RuleItem num="3" text="Missed Click" highlight="Resets Combo" result="Resets streak multiplier" />
-                <RuleItem num="4" text="Target Decay" highlight="Resets Combo" result="Clear targets before timer expires" />
+                {RULES_ITEMS.map((item, i) => (
+                  <RuleItem key={i} num={item.num} text={item.text} highlight={item.highlight} result={item.result} />
+                ))}
               </div>
             </DrillAccordion>
 
             <DrillAccordion
               id="about"
-              title="About Target Switching Swarm"
+              title="About Target Switching"
               isOpen={openAccordion === 'about'}
               onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
             >
-              <div className="space-y-8 font-sans">
+              <div className="space-y-8">
                 <section>
                   <h4 className="text-base font-bold text-white mb-2 flex items-center gap-2">
-                    <Eye className="w-4 h-4 text-blue-400" /> What Is Target Switching?
+                    <Crosshair className="w-4 h-4 text-cyan-400" /> What Is Target Switching?
                   </h4>
-                  <p className="text-sm leading-relaxed mb-3">
-                    <strong>Target Switching</strong> is the mechanical ability to quickly transition your crosshair from a neutralized target to a new, active threat with minimal hesitation. Unlike isolated flicking, target switching requires continuous multi-kill execution.
-                  </p>
-                  <p className="text-sm leading-relaxed">
-                    By practicing <strong>target switching swarm drills</strong>, players build motor control for clutch multi-kill situations in competitive shooters like Valorant, CS2, Apex Legends, and Overwatch 2.
-                  </p>
+                  {ABOUT_INTRO.map((para, i) => (
+                    <p key={i} className={`text-sm leading-relaxed text-gray-300 ${i < ABOUT_INTRO.length - 1 ? "mb-3" : ""}`}>{para}</p>
+                  ))}
                 </section>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
-                    <div className="flex items-center gap-2.5 mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Who Should Use This?</h5>
+                  {ABOUT_CARDS.map((card, i) => (
+                    <div key={i} className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                      <div className="flex items-center gap-2.5 mb-2">
+                        <div className={`w-7 h-7 rounded-lg ${card.iconBg} flex items-center justify-center`}>
+                          <card.icon className="w-3.5 h-3.5 text-white" />
+                        </div>
+                        <h5 className="text-xs font-bold text-white">{card.title}</h5>
+                      </div>
+                      <p className="text-xs text-gray-300 leading-relaxed">{card.text}</p>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Entry fraggers, spray transfer specialists, and players taking multi-enemy engagements in tactical or hero shooters.</p>
-                  </div>
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
-                    <div className="flex items-center gap-2.5 mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-fuchsia-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Skills Trained</h5>
-                    </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Target switching, flick transitions, pathing efficiency, deceleration control, and multi-kill rhythm.</p>
-                  </div>
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
-                    <div className="flex items-center gap-2.5 mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-orange-600 flex items-center justify-center"><Zap className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Why It Is Important</h5>
-                    </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Most players lose momentum between kills due to hesitation. Target switching drills eliminate confirmation lag.</p>
-                  </div>
+                  ))}
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-2">
-                  <div>
-                    <h4 className="font-bold text-white text-base mb-2">How To Improve Target Switching</h4>
-                    <p className="text-xs text-gray-400 leading-relaxed">
-                      Focus on snapping your eyes to the next target the moment you click. Allow your hand to follow your eye movement without over-thinking the flick path.
-                    </p>
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-white text-base mb-2">Efficient Target Pathing</h4>
-                    <p className="text-xs text-gray-400 leading-relaxed">
-                      Clear clusters of targets that are closest to each other first. Minimizing large crosshair travel distances maximizes your overall targets eliminated per minute.
-                    </p>
-                  </div>
-                </div>
+                {ABOUT_SECTIONS.map((section, i) => (
+                  <section key={i}>
+                    <h4 className="text-base font-bold text-white mb-2 flex items-center gap-2">
+                      <section.icon className="w-4 h-4 text-cyan-400" /> {section.title}
+                    </h4>
+                    {section.paragraphs.map((para, j) => (
+                      <p key={j} className={`text-sm leading-relaxed text-gray-300 ${j < section.paragraphs.length - 1 ? "mb-3" : ""}`}>{para}</p>
+                    ))}
+                  </section>
+                ))}
               </div>
             </DrillAccordion>
 
@@ -952,30 +948,18 @@ export default function TargetSwitchingSwarmClient() {
               onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FAQItem q="What is target switching in FPS aim training?" a="Target switching is the mechanical skill of rapidly flicking your crosshair from one target to the next and clicking accurately during the transition. It trains continuous movement between different target locations." />
-                <FAQItem q="How does the target swarm format improve multi-kill mechanics?" a="The swarm format presents multiple targets simultaneously, requiring you to engage them in a fluid sequence rather than waiting for each to appear one at a time. This maintains momentum during multi-kills." />
-                <FAQItem q="How is target switching different from a standard flick trainer?" a="A standard flick trainer presents targets one at a time. A target switching trainer presents multiple active targets and measures your ability to transition between them rapidly in sequence." />
-                <FAQItem q="Which games need the best target switching mechanics?" a="Target switching is essential in Valorant and CS2 for multi-peek entry duels and spray transfers, Apex Legends for team wipes, and Overwatch 2 for DPS aggressive positioning." />
-                <FAQItem q="Should I train target switching at higher or lower sensitivity?" a="Train target switching at your standard in-game sensitivity. Focus on accuracy across all switch targets equally rather than tapering off on later targets." />
-                <FAQItem q="Why do I hesitate after eliminating a target?" a="Hesitation occurs because your brain waits for visual confirmation before searching for the next target. Drills train you to trust your shot and move your eyes to the next target immediately." />
-                <FAQItem q="What is target acquisition speed?" a="Target acquisition speed is the combined cognitive process of identifying a threat on screen, predicting its path, and executing the flick to engage it." />
-                <FAQItem q="How does target switching help with CS2 spray transfers?" a="Target switching is the foundation of a spray transfer. Before controlling recoil between targets, your raw crosshair relocation speed must be instantaneous." />
-                <FAQItem q="What is efficient target pathing?" a="Efficient pathing means eliminating a cluster of targets in an order that requires the least amount of overall mouse movement, reducing total time-to-kill." />
-                <FAQItem q="Should my eyes move before my crosshair?" a="Yes. Your eyes should snap to the next target the millisecond you click on the current one. Your hand will naturally follow your eye movement." />
-                <FAQItem q="How does target switching help in Apex Legends?" a="In Apex Legends, target switching allows you to rapidly transfer fire between multiple squad members pushing your position or flying through the air." />
-                <FAQItem q="Does target switching improve general flicking?" a="Yes. Target switching is essentially chaining multiple dynamic flicks together consecutively without returning to a center resting position." />
-                <FAQItem q="How often should I practice target switching?" a="Incorporate 10-15 minutes of pure target switching drills into your daily warm-up routine alongside flicking and tracking exercises." />
-                <FAQItem q="Is this Target Switching Aim Trainer free?" a="Yes, this Target Switching Aim Trainer is 100% free, runs directly in your web browser using raw hardware pointer lock, and requires no downloads." />
-                <FAQItem q="What skills does this target switching drill improve?" a="This drill improves multi-target transitions, target acquisition speed, flick deceleration, visual processing, pathing efficiency, and multi-kill mechanics." />
+                {FAQ_ITEMS.map((item, i) => (
+                  <FAQItem key={i} q={item.q} a={item.a} />
+                ))}
               </div>
             </DrillAccordion>
           </div>
         )}
 
-        {/* RELATED DRILLS GRID */}
+        {/* ── RELATED FPS DRILLS ── */}
         {!isFullscreen && (
           <section className="mt-4">
-            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3 font-sans">
+            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">
               Related FPS Drills
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -998,32 +982,18 @@ export default function TargetSwitchingSwarmClient() {
             </div>
           </section>
         )}
-
-        {/* SITE FOOTER */}
-        {!isFullscreen && <DrillFooter />}
-
       </main>
+
+      {/* ── FOOTER ── */}
+      {!isFullscreen && <DrillFooter />}
     </div>
   );
 }
 
-function StatCard({ icon, value, label, unit = '', accentColor = 'border-white/10' }) {
-  return (
-    <div className={`rounded-xl border ${accentColor} bg-black backdrop-blur-md p-1.5 sm:p-2.5 text-center flex flex-col items-center justify-center transition-all duration-300 shadow-md hover:-translate-y-0.5 pointer-events-none font-sans`}>
-      <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-black border border-white/10 flex items-center justify-center mb-1 shadow-inner">
-        {icon}
-      </div>
-      <p className="text-xs sm:text-lg lg:text-xl font-black tracking-tight text-white leading-none truncate w-full font-sans font-mono tabular-nums">
-        {value}<span className="text-[9px] sm:text-xs font-semibold ml-0.5 text-gray-400 font-sans">{unit}</span>
-      </p>
-      <p className="text-[8px] sm:text-[9.5px] font-bold uppercase tracking-wider text-gray-400 mt-1 truncate w-full">{label}</p>
-    </div>
-  );
-}
-
+// === Subcomponents ===
 function RuleItem({ num, text, highlight = '', result }) {
   return (
-    <div className="flex items-center gap-4 bg-black p-4 rounded-xl border border-white/10 shadow-sm">
+    <div className="flex items-center gap-4 bg-black p-4 rounded-xl border border-white/10 shadow-sm font-sans">
       <div className="w-8 h-8 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-white text-base font-black shadow-lg flex-shrink-0">{num}</div>
       <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <p className="text-sm font-medium text-gray-100 font-sans">
@@ -1037,24 +1007,9 @@ function RuleItem({ num, text, highlight = '', result }) {
   );
 }
 
-function RelatedCard({ href, title, desc }) {
-  return (
-    <Link href={href} className="group p-5 bg-black rounded-2xl border border-gray-800 hover:border-cyan-500/50 hover:bg-white/[0.02] transition-all flex flex-col justify-between">
-      <div>
-        <h4 className="font-bold text-white group-hover:text-cyan-400 transition-colors mb-1 text-base">{title}</h4>
-        <p className="text-xs text-gray-400 leading-relaxed line-clamp-2">{desc}</p>
-      </div>
-      <div className="flex items-center gap-1 mt-4 text-xs text-cyan-400 font-bold font-mono">
-        <span>TRY DRILL</span>
-        <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-      </div>
-    </Link>
-  );
-}
-
 function FAQItem({ q, a }) {
   return (
-    <div className="bg-[#05060b] border border-gray-800 rounded-xl p-5 hover:border-gray-700 transition-colors">
+    <div className="bg-[#05060b] border border-gray-800 rounded-xl p-5 hover:border-gray-700 transition-colors font-sans">
       <h4 className="text-sm font-bold text-gray-200 mb-2">{q}</h4>
       <p className="text-xs text-gray-200 leading-relaxed">{a}</p>
     </div>

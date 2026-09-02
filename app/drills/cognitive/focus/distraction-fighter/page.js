@@ -118,13 +118,13 @@ const howToSchema = {
       "@type": "HowToStep",
       "position": 3,
       "name": "Avoid Impulse Tapping",
-      "text": "Do not rush. Incorrect selections or timeouts never deduct points or reduce your remaining time — but they do cost 1 of your 5 lives, and losing all 5 ends the run immediately."
+      "text": "Do not rush. Clean matches add +0.6s to the clock. Incorrect selections or timeouts cost 1 of your 5 lives (losing all 5 ends the run early) and deduct 0.8s when time penalty is enabled in settings."
     },
     {
       "@type": "HowToStep",
       "position": 4,
       "name": "Scale Difficulty with Milestones",
-      "text": "Every 250 points earned increases your Level, shrinking the trial time window down to a minimum of 380ms."
+      "text": "Score points to level up continuously, shrinking the trial time window dynamically as your streak climbs."
     }
   ]
 };

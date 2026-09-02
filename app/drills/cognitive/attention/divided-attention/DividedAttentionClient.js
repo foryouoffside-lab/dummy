@@ -2,18 +2,17 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
-import {
-  Layers, Volume2, VolumeX, Play, RefreshCw, Share2, Users,
-  TrendingUp, Heart, ArrowLeft, Zap, ZapOff, Flame, Trophy, Target
-} from 'lucide-react';
+import { Layers, Volume2, VolumeX, Play, RefreshCw, Share2, Users, TrendingUp, Heart, ArrowLeft, Zap, ZapOff, Trophy, Target } from 'lucide-react';
 
+import { isIdleFrameSkippable } from '@/lib/performance';
 import generateShareCard, { shareScoreCard } from '../../../../../components/ShareScoreCard';
 import { drillAudio } from '../../../../../lib/drillAudio';
 import { drillFlash } from '../../../../../lib/drillFlash';
 import { drillTimeout } from '../../../../../lib/drillTimeout';
+import { drillPenalty } from '../../../../../lib/drillPenalty';
 import { getPlayerName } from '../../../../../lib/leaderboard';
-import { getFpsScoreGrade } from '../../../../../lib/scoringEngine';
-import { MAX_LEVEL, getDifficultyProgress, getStartLevel } from '../../../../../lib/drillDifficulty';
+import { getFpsScoreGrade, getComboMultiplier } from '../../../../../lib/scoringEngine';
+import { getDifficultyProgress, getStartLevel, ramp } from '../../../../../lib/drillDifficulty';
 import useDrillFlash from '../../../../../lib/useDrillFlash';
 import useUnexpectedExitGuard from '../../../../../lib/useUnexpectedExitGuard';
 import DrillFooter from '../../../../../components/drill/DrillFooter';
@@ -21,20 +20,27 @@ import DrillCountdown from '../../../../../components/drill/DrillCountdown';
 import DrillAccordion from '../../../../../components/drill/DrillAccordion';
 import DrillFlashOverlay from '../../../../../components/drill/DrillFlashOverlay';
 import FpsStartCard from '../../../../../components/drill/FpsStartCard';
+import DrillResultCard from '../../../../../components/drill/DrillResultCard';
 
-const DRILL_DURATION = 45;
+// ============================================================
+// TUNING CONSTANTS
+// ============================================================
+const DRILL_DURATION = 45; // starting clock only; a run grows past this
+const MAX_LIVES = 5;
 const POINTS_PER_HIT = 100;
-const POINTS_PER_LEVEL = 250;
-const ELITE_SCORE = 10000; // Target score for S+ rating (rebalanced after combo removal)
-const STORAGE_KEY = 'skilldrills_divided_attention_v7';
+const POINTS_PER_LEVEL = 1750; // 250 -> 1750 (7x)
+const ELITE_SCORE = 24000; // 10000 -> 24000 (~2.4x)
+const TIME_PER_HIT = 0.6; // +0.6s on clean hit
+const TIME_PENALTY = 0.8; // -0.8s on wrong tap or miss (opt-in gated)
+const STORAGE_KEY = 'skilldrills_divided_attention_v8';
 
 const getSavedData = () => {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { bestScore: 0, bestLevel: 1, totalSessions: 0 };
-    return { bestScore: 0, bestLevel: 1, totalSessions: 0, ...JSON.parse(raw) };
+    if (!raw) return { bestScore: 0, bestCombo: 0, bestLevel: 1, totalSessions: 0 };
+    return { bestScore: 0, bestCombo: 0, bestLevel: 1, totalSessions: 0, ...JSON.parse(raw) };
   } catch (e) {
-    return { bestScore: 0, bestLevel: 1, totalSessions: 0 };
+    return { bestScore: 0, bestCombo: 0, bestLevel: 1, totalSessions: 0 };
   }
 };
 
@@ -44,26 +50,24 @@ const saveData = (data) => {
   } catch (e) {}
 };
 
-// Difficulty scaling L1 -> L15
-const getLevelConfig = (level) => {
-  const p = getDifficultyProgress(level); // 0 -> 1 across L1..L15
+// Continuous unbounded difficulty with streak heat
+const getLevelConfig = (level, combo = 0) => {
+  const p = getDifficultyProgress(level); // 0 at L1, 1 at L15, unbounded above
+  const heat = (getComboMultiplier(combo) - 1) / 2;
   return {
-    ballSpeed: Math.max(700, Math.round(1800 - p * 1100)), // 1800ms -> 700ms
-    numSpeed: Math.max(800, Math.round(2000 - p * 1200)),  // 2000ms -> 800ms
-    ballScale: Math.max(0.6, 1.0 - p * 0.4),               // 1.0 -> 0.6
-    spawnDelayMin: Math.max(120, Math.round(500 - p * 350)), // 500ms -> 120ms
-    spawnDelayMax: Math.max(220, Math.round(700 - p * 420)), // 700ms -> 220ms
+    ballSpeed: Math.max(180, ramp(1800, 240, p) * (1 - heat * 0.25)),
+    numSpeed: Math.max(220, ramp(2000, 300, p) * (1 - heat * 0.25)),
+    ballScale: Math.max(0.45, 1.0 - p * 0.45),
+    spawnDelayMin: Math.max(60, ramp(500, 80, p)),
+    spawnDelayMax: Math.max(100, ramp(700, 140, p))
   };
 };
 
-// ============================================================
-// ACCORDION DATA
-// ============================================================
 const RULES_ITEMS = [
   { title: "Dual-Task Processing", text: "Process two independent streams simultaneously: track moving targets on the visual canvas AND tap MATCH when even numbers appear in the number stream." },
-  { title: "Visual Target Stream", text: "Tap moving blue targets as soon as they appear before their display timer expires." },
-  { title: "Numerical Match Stream", text: "Numbers (0-9) stream continuously on the side panel. Tap MATCH only when an EVEN number is active." },
-  { title: "Precision & Lives", text: "Missed visual targets, missed even numbers, or false matches trigger a red screen alert and deduct 1 life from your 5 available lives." }
+  { title: "Visual Target Stream", text: "Tap moving blue targets as soon as they appear before their display timer expires (+100 PTS × Combo, +0.6s)." },
+  { title: "Numerical Match Stream", text: "Numbers (0-9) stream continuously on the side panel. Tap MATCH only when an EVEN number is active (+100 PTS × Combo, +0.6s)." },
+  { title: "5 Lives & Penalties", text: "You have 5 lives. Missed targets, missed even numbers, or false matches cost 1 life and reset combo (and deduct 0.8s if enabled). Losing all 5 lives ends the drill early." }
 ];
 
 const ABOUT_TEXT = `Divided Attention is a core cognitive drill designed to measure and train multi-channel visual tracking and simultaneous information processing. Based on dual-task psychological paradigms, this exercise forces the brain to allocate attention across two distinct channels at once: spatial motion tracking and numeric categorization.
@@ -99,15 +103,18 @@ export default function DividedAttentionClient() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
+  const [penaltyEnabled, setPenaltyEnabled] = useState(false);
   const [openAccordion, setOpenAccordion] = useState(null);
   const [countdownValue, setCountdownValue] = useState(3);
 
   // Live HUD State
   const [uiScore, setUiScore] = useState(0);
   const [uiLevel, setUiLevel] = useState(1);
-  const [lives, setLives] = useState(5);
+  const [lives, setLives] = useState(MAX_LIVES);
+  const [uiCombo, setUiCombo] = useState(0);
   const [uiTimeLeft, setUiTimeLeft] = useState(DRILL_DURATION);
   const [bestScore, setBestScore] = useState(0);
+  const [bestCombo, setBestCombo] = useState(0);
   const [bestLevel, setBestLevel] = useState(1);
   const [totalSessions, setTotalSessions] = useState(0);
   const [isNewBest, setIsNewBest] = useState(false);
@@ -125,8 +132,8 @@ export default function DividedAttentionClient() {
     numberHits: 0,
     visualAttempts: 0,
     numberAttempts: 0,
-    visAcc: 100,
-    numAcc: 100,
+    maxCombo: 0,
+    livesRemaining: MAX_LIVES,
     finalLevel: 1,
     grade: null
   });
@@ -134,20 +141,24 @@ export default function DividedAttentionClient() {
   // Engine Refs
   const containerRef = useRef(null);
   const bestLevelRunRef = useRef(1);
-  const livesRef = useRef(5);
   const countdownTimeoutsRef = useRef([]);
-  const timerIntervalRef = useRef(null);
   const ballTimerRef = useRef(null);
   const numTimerRef = useRef(null);
+  const startingRef = useRef(false);
+  const gameActiveRef = useRef(false);
+  const lastTimeRef = useRef(DRILL_DURATION);
 
   const engine = useRef({
     score: 0,
     level: 1,
+    combo: 0,
+    maxCombo: 0,
     visualHits: 0,
     numberHits: 0,
     visualAttempts: 0,
     numberAttempts: 0,
     mistakes: 0,
+    lives: MAX_LIVES,
     timeLeft: DRILL_DURATION,
     currentTargetId: null,
     currentNumber: null,
@@ -156,11 +167,31 @@ export default function DividedAttentionClient() {
 
   const { flashes, triggerFlash } = useDrillFlash();
 
+  // Storage & settings init
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setSoundEnabled(drillAudio.isEnabled());
+      setFlashEnabled(drillFlash.isEnabled());
+      setPenaltyEnabled(drillPenalty.isEnabled());
+      const saved = getSavedData();
+      setBestScore(saved.bestScore || 0);
+      setBestCombo(saved.bestCombo || 0);
+      setBestLevel(saved.bestLevel || 1);
+      setTotalSessions(saved.totalSessions || 0);
+    }
+  }, []);
+
+  // Fullscreen listener
+  useEffect(() => {
+    const handleFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
+
   // Clean timers on unmount
   useEffect(() => {
     return () => {
       countdownTimeoutsRef.current.forEach(clearTimeout);
-      if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
       if (ballTimerRef.current) clearTimeout(ballTimerRef.current);
       if (numTimerRef.current) clearTimeout(numTimerRef.current);
     };
@@ -170,9 +201,10 @@ export default function DividedAttentionClient() {
     markIntentionalExit();
     countdownTimeoutsRef.current.forEach(clearTimeout);
     countdownTimeoutsRef.current = [];
-    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
     if (ballTimerRef.current) clearTimeout(ballTimerRef.current);
     if (numTimerRef.current) clearTimeout(numTimerRef.current);
+    startingRef.current = false;
+    gameActiveRef.current = false;
 
     if (document.fullscreenElement) {
       await document.exitFullscreen().catch(() => {});
@@ -186,7 +218,9 @@ export default function DividedAttentionClient() {
   });
 
   const endGame = useCallback(() => {
-    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    markIntentionalExit();
+    gameActiveRef.current = false;
+    startingRef.current = false;
     if (ballTimerRef.current) clearTimeout(ballTimerRef.current);
     if (numTimerRef.current) clearTimeout(numTimerRef.current);
 
@@ -204,10 +238,13 @@ export default function DividedAttentionClient() {
     const totalActs = e.visualAttempts + e.numberAttempts;
     const totalHits = e.visualHits + e.numberHits;
     const acc = totalActs > 0 ? Math.round((totalHits / totalActs) * 100) : 100;
-    const visAccVal = e.visualAttempts > 0 ? Math.round((e.visualHits / e.visualAttempts) * 100) : 100;
-    const numAccVal = e.numberAttempts > 0 ? Math.round((e.numberHits / e.numberAttempts) * 100) : 100;
 
-    const gradeObj = getFpsScoreGrade(e.score, ELITE_SCORE);
+    const rating = getFpsScoreGrade(e.score, ELITE_SCORE);
+    const gradeObj = {
+      letter: rating.grade || rating.letter || 'C',
+      label: rating.label || 'Keep Going',
+      color: rating.color || 'text-blue-400',
+    };
 
     setAnalytics({
       accuracy: acc,
@@ -215,49 +252,97 @@ export default function DividedAttentionClient() {
       numberHits: e.numberHits,
       visualAttempts: e.visualAttempts,
       numberAttempts: e.numberAttempts,
-      visAcc: visAccVal,
-      numAcc: numAccVal,
-      finalLevel: e.level,
+      maxCombo: e.maxCombo,
+      livesRemaining: e.lives,
+      finalLevel: Math.floor(bestLevelRunRef.current),
       grade: gradeObj
     });
 
-    const isNew = e.score > bestScore;
-    if (isNew) {
-      setIsNewBest(true);
-      setBestScore(e.score);
-    } else {
-      setIsNewBest(false);
-    }
+    setUiScore(e.score);
 
-    const newBestLevel = Math.max(bestLevel, bestLevelRunRef.current);
-    setBestLevel(newBestLevel);
+    const prevSaved = getSavedData();
+    const isNew = e.score > prevSaved.bestScore;
+    setIsNewBest(isNew);
 
-    setTotalSessions((prev) => {
-      const next = prev + 1;
-      saveData({
-        bestScore: Math.max(bestScore, e.score),
-        bestLevel: newBestLevel,
-        totalSessions: next
-      });
-      return next;
-    });
+    const runBestLevel = Math.max(prevSaved.bestLevel, Math.floor(bestLevelRunRef.current));
+    const updatedData = {
+      bestScore: Math.max(prevSaved.bestScore, e.score),
+      bestCombo: Math.max(prevSaved.bestCombo || 0, e.maxCombo),
+      bestLevel: runBestLevel,
+      totalSessions: (prevSaved.totalSessions || 0) + 1
+    };
+    saveData(updatedData);
+
+    setBestScore(updatedData.bestScore);
+    setBestCombo(updatedData.bestCombo);
+    setBestLevel(updatedData.bestLevel);
+    setTotalSessions(updatedData.totalSessions);
 
     drillAudio.playSessionEnd();
-  }, [bestScore, bestLevel]);
+  }, [markIntentionalExit]);
+
+  // Main RAF loop for clock draining
+  useEffect(() => {
+    if (gameState !== 'playing') return;
+
+    let animId;
+    let lastTime = performance.now();
+
+    const loop = (now) => {
+      if (isIdleFrameSkippable(gameState === 'playing', now, lastTime)) {
+        animId = requestAnimationFrame(loop);
+        return;
+      }
+
+      const dt = Math.min((now - lastTime) / 1000, 0.1);
+      lastTime = now;
+
+      const e = engine.current;
+      if (gameActiveRef.current) {
+        if (e.timeLeft > 0) e.timeLeft -= dt;
+        if (e.timeLeft <= 0) {
+          e.timeLeft = 0;
+          setUiTimeLeft(0);
+          endGame();
+          return;
+        }
+
+        const ceilSec = Math.ceil(e.timeLeft);
+        if (ceilSec !== lastTimeRef.current) {
+          lastTimeRef.current = ceilSec;
+          setUiTimeLeft(ceilSec);
+        }
+      }
+
+      animId = requestAnimationFrame(loop);
+    };
+
+    animId = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(animId);
+  }, [gameState, endGame]);
 
   const deductLife = useCallback(() => {
-    livesRef.current = Math.max(0, livesRef.current - 1);
-    setLives(livesRef.current);
-    if (livesRef.current <= 0) {
+    const e = engine.current;
+    e.lives = Math.max(0, e.lives - 1);
+    if (drillPenalty.isEnabled()) e.timeLeft -= TIME_PENALTY;
+    e.combo = 0;
+    setUiCombo(0);
+    setLives(e.lives);
+    triggerFlash();
+    drillAudio.playPenalty();
+
+    if (e.lives <= 0) {
       endGame();
     }
-  }, [endGame]);
+  }, [endGame, triggerFlash]);
 
   // Spawning logic
   const spawnBall = useCallback(() => {
     if (ballTimerRef.current) clearTimeout(ballTimerRef.current);
+    if (!gameActiveRef.current) return;
+
     const e = engine.current;
-    const config = getLevelConfig(e.level);
+    const config = getLevelConfig(e.level, e.combo);
 
     const id = Date.now() + Math.random();
     e.currentTargetId = id;
@@ -270,6 +355,7 @@ export default function DividedAttentionClient() {
     setBallScale(config.ballScale);
 
     ballTimerRef.current = setTimeout(function checkBallExpiry() {
+      if (!gameActiveRef.current) return;
       if (!drillTimeout.isEnabled()) {
         ballTimerRef.current = setTimeout(checkBallExpiry, config.ballSpeed);
         return;
@@ -277,30 +363,28 @@ export default function DividedAttentionClient() {
       // Missed target timeout
       e.visualAttempts += 1;
       e.mistakes += 1;
-      triggerFlash();
-      drillAudio.playPenalty();
       deductLife();
-      if (livesRef.current > 0) {
+      if (e.lives > 0) {
         spawnBall();
       }
     }, config.ballSpeed);
-  }, [deductLife, triggerFlash]);
+  }, [deductLife]);
 
   const spawnNumber = useCallback(() => {
     if (numTimerRef.current) clearTimeout(numTimerRef.current);
+    if (!gameActiveRef.current) return;
+
     const e = engine.current;
-    const config = getLevelConfig(e.level);
+    const config = getLevelConfig(e.level, e.combo);
 
     if (e.currentNumber !== null && e.currentNumber % 2 === 0 && !e.wasMatched && drillTimeout.isEnabled()) {
       // Missed an even number
       e.numberAttempts += 1;
       e.mistakes += 1;
-      triggerFlash();
-      drillAudio.playPenalty();
       deductLife();
     }
 
-    if (livesRef.current <= 0) return;
+    if (e.lives <= 0) return;
 
     let newNum;
     do {
@@ -315,11 +399,13 @@ export default function DividedAttentionClient() {
     numTimerRef.current = setTimeout(() => {
       spawnNumber();
     }, config.numSpeed);
-  }, [deductLife, triggerFlash]);
+  }, [deductLife]);
 
   // Interaction handlers
   const handleVisualClick = useCallback((id, e) => {
     if (e) e.stopPropagation();
+    if (!gameActiveRef.current) return;
+
     const eng = engine.current;
     if (eng.currentTargetId !== id) return;
 
@@ -330,25 +416,33 @@ export default function DividedAttentionClient() {
 
     eng.visualHits += 1;
     eng.visualAttempts += 1;
+    eng.combo += 1;
+    if (eng.combo > eng.maxCombo) eng.maxCombo = eng.combo;
 
     const levelMult = 1 + getDifficultyProgress(eng.level) * 0.5;
-    const pts = Math.round(POINTS_PER_HIT * levelMult);
-    eng.score += pts;
+    eng.score += Math.round(POINTS_PER_HIT * getComboMultiplier(eng.combo) * levelMult);
 
-    const rawLevel = Math.floor(eng.score / POINTS_PER_LEVEL) + 1;
+    // Time bonus on clean hit
+    eng.timeLeft += TIME_PER_HIT;
+
+    // Continuous level progression
+    const rawLevel = (eng.score / POINTS_PER_LEVEL) + 1;
     eng.level = Math.max(eng.level, rawLevel);
     bestLevelRunRef.current = Math.max(bestLevelRunRef.current, eng.level);
 
     setUiScore(eng.score);
-    setUiLevel(eng.level);
+    setUiLevel(Math.floor(eng.level));
+    setUiCombo(eng.combo);
     drillAudio.playHit();
 
-    const config = getLevelConfig(eng.level);
+    const config = getLevelConfig(eng.level, eng.combo);
     ballTimerRef.current = setTimeout(spawnBall, config.spawnDelayMin + Math.random() * (config.spawnDelayMax - config.spawnDelayMin));
   }, [spawnBall]);
 
   const handleNumberCheck = useCallback((e) => {
     if (e) e.stopPropagation();
+    if (!gameActiveRef.current) return;
+
     const eng = engine.current;
     const num = eng.currentNumber;
     if (num === null) return;
@@ -357,8 +451,6 @@ export default function DividedAttentionClient() {
       // Double tap on an already-resolved number
       eng.numberAttempts += 1;
       eng.mistakes += 1;
-      triggerFlash();
-      drillAudio.playPenalty();
       deductLife();
       return;
     }
@@ -369,30 +461,37 @@ export default function DividedAttentionClient() {
     if (num % 2 === 0) {
       eng.numberHits += 1;
       eng.numberAttempts += 1;
+      eng.combo += 1;
+      if (eng.combo > eng.maxCombo) eng.maxCombo = eng.combo;
 
       const levelMult = 1 + getDifficultyProgress(eng.level) * 0.5;
-      const pts = Math.round(POINTS_PER_HIT * levelMult);
-      eng.score += pts;
+      eng.score += Math.round(POINTS_PER_HIT * getComboMultiplier(eng.combo) * levelMult);
 
-      const rawLevel = Math.floor(eng.score / POINTS_PER_LEVEL) + 1;
+      // Time bonus on clean hit
+      eng.timeLeft += TIME_PER_HIT;
+
+      // Continuous level progression
+      const rawLevel = (eng.score / POINTS_PER_LEVEL) + 1;
       eng.level = Math.max(eng.level, rawLevel);
       bestLevelRunRef.current = Math.max(bestLevelRunRef.current, eng.level);
 
       setUiScore(eng.score);
-      setUiLevel(eng.level);
+      setUiLevel(Math.floor(eng.level));
+      setUiCombo(eng.combo);
       drillAudio.playHit();
     } else {
       // Wrong match on odd number
       eng.numberAttempts += 1;
       eng.mistakes += 1;
-      triggerFlash();
-      drillAudio.playPenalty();
       deductLife();
     }
-  }, [deductLife, triggerFlash]);
+  }, [deductLife]);
 
   // Enter Drill
   const enterDrill = useCallback(async () => {
+    if (startingRef.current) return;
+    startingRef.current = true;
+
     try {
       if (containerRef.current && !document.fullscreenElement) {
         await containerRef.current.requestFullscreen();
@@ -401,30 +500,33 @@ export default function DividedAttentionClient() {
 
     countdownTimeoutsRef.current.forEach(clearTimeout);
     countdownTimeoutsRef.current = [];
-    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
     if (ballTimerRef.current) clearTimeout(ballTimerRef.current);
     if (numTimerRef.current) clearTimeout(numTimerRef.current);
 
     drillAudio.init();
 
-    const saved = getSavedData();
-    const startLevel = getStartLevel(saved.bestLevel);
+    const startLevel = getStartLevel();
     bestLevelRunRef.current = startLevel;
 
-    livesRef.current = 5;
-    setLives(5);
+    setIsNewBest(false);
     setUiScore(0);
     setUiLevel(startLevel);
+    setUiCombo(0);
     setUiTimeLeft(DRILL_DURATION);
+    lastTimeRef.current = DRILL_DURATION;
+    setLives(MAX_LIVES);
 
     engine.current = {
       score: 0,
       level: startLevel,
+      combo: 0,
+      maxCombo: 0,
       visualHits: 0,
       numberHits: 0,
       visualAttempts: 0,
       numberAttempts: 0,
       mistakes: 0,
+      lives: MAX_LIVES,
       timeLeft: DRILL_DURATION,
       currentTargetId: null,
       currentNumber: null,
@@ -451,46 +553,42 @@ export default function DividedAttentionClient() {
     }, 2100);
 
     const t4 = setTimeout(() => {
+      gameActiveRef.current = true;
+      startingRef.current = false;
       setGameState('playing');
-
-      let remaining = DRILL_DURATION;
-      timerIntervalRef.current = setInterval(() => {
-        remaining -= 1;
-        setUiTimeLeft(remaining);
-        if (remaining <= 0) {
-          endGame();
-        }
-      }, 1000);
-
       spawnBall();
       spawnNumber();
     }, 2450);
 
     countdownTimeoutsRef.current = [t1, t2, t3, t4];
-  }, [endGame, spawnBall, spawnNumber]);
+  }, [spawnBall, spawnNumber]);
 
   const shareResult = useCallback(async () => {
     const url = 'https://skilldrills.online/drills/cognitive/attention/divided-attention';
     try {
       const canvas = generateShareCard({
         score: uiScore,
-        bestScore,
         accuracy: analytics.accuracy,
-        rating: { letter: analytics.grade?.grade || analytics.grade?.letter || 'C', label: analytics.grade?.label || 'Keep Going', emoji: '🎯' },
-        newBest: isNewBest,
+        speed: 0,
         drillName: 'Divided Attention',
+        rank: analytics.grade?.letter || 'A',
+        rankName: analytics.grade?.label || 'DUAL TASK MASTER',
         playerName: getPlayerName(),
+        level: analytics.finalLevel,
+        date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        url: 'skilldrills.online/drills/cognitive/attention/divided-attention'
       });
-      await shareScoreCard(url, canvas);
+      await shareScoreCard(canvas, {
+        title: 'Divided Attention — My Score',
+        text: `I scored ${uiScore} (Grade: ${analytics.grade?.letter || 'A'}, Lv. ${analytics.finalLevel}) on Divided Attention at SkillDrills!`,
+        url
+      });
     } catch (e) {
-      const text = `🎯 I scored ${uiScore} PTS (Level ${analytics.finalLevel}) on Divided Attention! Dual-task accuracy: ${analytics.accuracy}%. Practice free cognitive focus drills at skilldrills.online! ⚡`;
-      if (typeof navigator !== 'undefined' && navigator.share) {
-        navigator.share({ title: 'Divided Attention Score', text, url }).catch(() => {});
-      } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
-        navigator.clipboard.writeText(`${text} ${url}`);
+      if (navigator.share) {
+        navigator.share({ title: 'Divided Attention Score', text: `I scored ${uiScore} on Divided Attention!`, url }).catch(() => {});
       }
     }
-  }, [uiScore, bestScore, analytics, isNewBest]);
+  }, [uiScore, analytics]);
 
   return (
     <div className="min-h-screen bg-[#050508] text-white flex flex-col font-sans select-none">
@@ -552,11 +650,20 @@ export default function DividedAttentionClient() {
             <>
               {/* Score & Lives - Top Left */}
               <div className="absolute top-4 left-4 z-30 pointer-events-none flex flex-col items-start gap-0.5">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Score</p>
-                <p className="text-2xl sm:text-3xl font-black text-white tabular-nums leading-tight">{uiScore}</p>
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Score</p>
+                  <p className="text-2xl sm:text-3xl font-black text-white tabular-nums leading-tight">{uiScore}</p>
+                </div>
                 <div className="flex items-center gap-1 mt-0.5">
-                  {Array.from({ length: Math.max(0, lives) }).map((_, i) => (
-                    <Heart key={i} className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-red-500 fill-red-500 drop-shadow-[0_0_6px_rgba(239,68,68,0.6)]" />
+                  {Array.from({ length: MAX_LIVES }).map((_, i) => (
+                    <Heart
+                      key={i}
+                      className={`w-3.5 h-3.5 sm:w-4 sm:h-4 transition-all duration-200 ${
+                        i < lives
+                          ? 'text-red-500 fill-red-500 drop-shadow-[0_0_6px_rgba(239,68,68,0.6)]'
+                          : 'text-slate-800 fill-slate-800'
+                      }`}
+                    />
                   ))}
                 </div>
               </div>
@@ -687,8 +794,15 @@ export default function DividedAttentionClient() {
               title="Divided Attention"
               subtitle="Dual-Task Stream • Split Focus"
               rules={[
-                { icon: Target, accent: 'blue', title: 'Tap Moving Targets (+100 PTS)', text: 'Track and click dynamic visual targets moving across the screen' },
-                { icon: Zap, accent: 'blue', title: 'Match Target on EVEN Numbers', text: 'Simultaneously monitor the secondary number stream and tap when EVEN' },
+                { icon: Target, accent: 'blue', title: 'Tap Moving Targets (+100 PTS)', text: '+100 PTS × Combo × Level multiplier (+0.6s per hit)' },
+                {
+                  icon: Zap,
+                  accent: 'blue',
+                  title: penaltyEnabled ? '5 Lives & Time Penalty' : 'Match Even Numbers • 5 Lives',
+                  text: penaltyEnabled
+                    ? 'Tap MATCH on EVEN numbers. Misses cost 1 life and deduct 0.8s'
+                    : 'Tap MATCH on EVEN numbers. 5 lives total; misses or wrong matches cost 1 life'
+                },
               ]}
               stats={[
                 { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
@@ -704,77 +818,23 @@ export default function DividedAttentionClient() {
             <DrillCountdown value={countdownValue} subtitle="GET READY" />
           )}
 
-          {/* END SCREEN OVERLAY */}
+          {/* UNIVERSAL RESULT CARD */}
           {gameState === 'gameOver' && analytics.grade && (
-            <div className="absolute inset-0 z-50 flex bg-neutral-950/98 select-none font-sans" style={{ background: 'rgba(5,5,8,0.97)' }} onPointerDown={e => e.stopPropagation()}>
-              
-              {/* Left 36% Grade Panel */}
-              <div className="w-[36%] flex flex-col items-center justify-center gap-1 border-r border-white/5 px-4" style={{ background: 'radial-gradient(ellipse 260px 200px at 50% 30%, rgba(59,130,246,.12), transparent 70%)' }}>
-                {isNewBest && (
-                  <span className="text-[9.5px] font-bold text-yellow-400 bg-yellow-500/10 border border-yellow-500/25 px-2.5 py-0.5 rounded-full mb-1 animate-pulse">
-                    NEW BEST
-                  </span>
-                )}
-                <div className={`text-5xl sm:text-6xl font-black leading-none ${analytics.grade.color}`}>
-                  {analytics.grade.grade || analytics.grade.letter}
-                </div>
-                <div className="text-[10px] uppercase tracking-widest text-slate-500 text-center font-bold mt-1">
-                  {analytics.grade.label}
-                </div>
-                <div className="text-3xl sm:text-4xl font-black text-white mt-2 tabular-nums">
-                  {uiScore}
-                </div>
-                <div className="text-[9px] uppercase tracking-widest text-slate-500">Points</div>
-              </div>
-
-              {/* Right 64% Stats & Actions Panel */}
-              <div className="flex-1 flex flex-col justify-center gap-3 px-6 py-4 min-w-0">
-                
-                {/* 3 Stat Tiles */}
-                <div className="grid grid-cols-3 gap-2">
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.accuracy}%</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Dual Accuracy</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{lives}/5</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Lives Left</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">Lv. {analytics.finalLevel}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Peak Level</p>
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex gap-2">
-                  <button 
-                    type="button"
-                    onClick={enterDrill} 
-                    className="flex-1 py-3 rounded-[13px] bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-xs uppercase tracking-wide cursor-pointer transition-transform active:scale-[0.98] shadow-md flex items-center justify-center gap-1.5"
-                  >
-                    <RefreshCw className="w-3.5 h-3.5" /> Play Again
-                  </button>
-                  <button 
-                    type="button"
-                    onClick={shareResult} 
-                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform" 
-                    title="Share Score"
-                  >
-                    <Share2 className="w-4 h-4" />
-                  </button>
-                  <button 
-                    type="button"
-                    onClick={handleExitDrill} 
-                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform" 
-                    title="Exit Drill"
-                  >
-                    <ArrowLeft className="w-4 h-4 text-red-400" />
-                  </button>
-                </div>
-
-              </div>
-            </div>
+            <DrillResultCard
+              accent="blue"
+              grade={analytics.grade}
+              score={uiScore}
+              isNewBest={isNewBest}
+              stats={[
+                { label: 'Dual Accuracy', value: analytics.accuracy, suffix: '%' },
+                { label: 'Hits', value: analytics.visualHits + analytics.numberHits },
+                { label: 'Lives Left', value: `${analytics.livesRemaining}/${MAX_LIVES}` },
+                { label: 'Peak Level', value: `Lv. ${analytics.finalLevel}` },
+              ]}
+              onPlayAgain={enterDrill}
+              onShare={shareResult}
+              onExit={handleExitDrill}
+            />
           )}
 
         </div>

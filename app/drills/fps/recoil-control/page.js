@@ -128,10 +128,10 @@ export default function RecoilControlPage() {
       },
       {
         "@type": "Question",
-        "name": "Can recoil training improve aim?",
+        "name": "How are errors penalised in Recoil Control Pro?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Yes, aim is a combination of initial flick acquisition and subsequent tracking or recoil compensation. Mastering recoil ensures your follow-up shots connect after the initial flick."
+          "text": "Missing shots or emptying a magazine with less than 40% accuracy resets your combo streak. When the optional Time Penalty setting is enabled, a magazine discipline failure also deducts 0.6s from your clock."
         }
       },
       {

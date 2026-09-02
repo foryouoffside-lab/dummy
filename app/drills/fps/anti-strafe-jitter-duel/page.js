@@ -135,10 +135,10 @@ export default function AntiStrafeJitterPage() {
       },
       {
         "@type": "Question",
-        "name": "Why is tracking important?",
+        "name": "How are errors penalised in Anti-Strafe Jitter Duel?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Tracking aim is critical for fully automatic weapons and high time-to-kill (TTK) games like Apex, Overwatch, and The Finals, where damage output is directly proportional to how long your crosshair remains on the enemy."
+          "text": "Losing tracking contact for 1.0s resets your streak combo multiplier. When the optional Time Penalty setting is enabled in your session preferences, each 1.0s tracking loss also deducts 0.6s from your clock."
         }
       },
       {

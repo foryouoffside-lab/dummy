@@ -16,7 +16,8 @@ import generateShareCard, { shareScoreCard } from '../../../../components/ShareS
 import { getPlayerName } from '../../../../lib/leaderboard';
 import { drillAudio } from '../../../../lib/drillAudio';
 import { drillFlash } from '../../../../lib/drillFlash';
-import { getStartLevel, getDifficultyProgress, getComboBonusLevel } from '../../../../lib/drillDifficulty';
+import { drillPenalty } from '../../../../lib/drillPenalty';
+import { getStartLevel, getDifficultyProgress, ramp } from '../../../../lib/drillDifficulty';
 import { getComboMultiplier, getFpsScoreGrade } from '../../../../lib/scoringEngine';
 import { createBackdropCache, getCanvasDpr, drawPulseRing, drawTacticalTarget } from '../../../../lib/canvasFx';
 import useUnexpectedExitGuard from '../../../../lib/useUnexpectedExitGuard';
@@ -24,22 +25,22 @@ import DrillFooter from '../../../../components/drill/DrillFooter';
 import DrillCountdown from '../../../../components/drill/DrillCountdown';
 import DrillAccordion from '../../../../components/drill/DrillAccordion';
 import FpsStartCard from '../../../../components/drill/FpsStartCard';
+import DrillResultCard from '../../../../components/drill/DrillResultCard';
 
 // ============================================================
 // TUNING CONSTANTS
 // ============================================================
-const DRILL_DURATION = 45;
-const POINTS_PER_LEVEL = 150;
-const ELITE_SCORE = 6000;
-const STORAGE_KEY = 'skilldrills_fps_anti_zigzag_v2';
-const OLD_STORAGE_KEY = 'zigzag_bestScore';
+const DRILL_DURATION = 45; // starting clock only; a run grows past this
+const POINTS_PER_LEVEL = 1400; // 150 -> 1400 (~7x)
+const ELITE_SCORE = 54000; // 18000 -> 54000 (3x)
+const TIME_PER_HIT = 0.4; // +0.1s per 0.25s tracking tick (+0.4s/sec)
+const TIME_PENALTY = 0.6; // opt-in on escape or 1.0s tracking loss
+const STORAGE_KEY = 'skilldrills_fps_anti_zigzag_v3';
 
 const getSavedData = () => {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) return { bestScore: 0, bestCombo: 0, bestLevel: 1, totalSessions: 0, ...JSON.parse(raw) };
-    const legacy = localStorage.getItem(OLD_STORAGE_KEY);
-    if (legacy) return { bestScore: parseInt(legacy, 10) || 0, bestCombo: 0, bestLevel: 1, totalSessions: 0 };
     return { bestScore: 0, bestCombo: 0, bestLevel: 1, totalSessions: 0 };
   } catch (e) {
     return { bestScore: 0, bestCombo: 0, bestLevel: 1, totalSessions: 0 };
@@ -52,14 +53,14 @@ const saveData = (data) => {
   } catch (e) {}
 };
 
-
-const getLevelConfig = (level) => {
-  const p = getDifficultyProgress(level);
+const getLevelConfig = (level, combo = 0) => {
+  const p = getDifficultyProgress(level); // 0 at L1, 1 at L15, unbounded above
+  const heat = (getComboMultiplier(combo) - 1) / 2;
   return {
-    radius: Math.max(9.5, 15.0 - p * 5.5),
-    speedMult: 1.0 + p * 1.6,
-    zigzagInterval: Math.max(0.25, 1.2 - p * 0.95),
-    maxLifespan: Math.max(1.6, 4.0 - p * 2.4)
+    radius: Math.max(8.5, ramp(16.0, 9.5, p) * (1 - heat * 0.15)),
+    speedMult: ramp(1.0, 2.6, p) * (1 + heat * 0.20),
+    zigzagInterval: Math.max(0.20, ramp(1.2, 0.25, p) * (1 - heat * 0.25)),
+    maxLifespan: Math.max(1.5, ramp(4.2, 1.8, p) * (1 - heat * 0.15))
   };
 };
 
@@ -67,10 +68,10 @@ const getLevelConfig = (level) => {
 // ACCORDION DATA
 // ============================================================
 const RULES_ITEMS = [
-  { num: "1", text: "Tracking Alignment", highlight: "+10 PTS", result: "Per 0.25s Locked On Target" },
+  { num: "1", text: "Tracking Alignment", highlight: "+10 PTS / 0.25s", result: "Continuous Crosshair Lock On Target" },
   { num: "2", text: "Target Elimination", highlight: "+25 Bonus PTS", result: "Fully Deplete Target Health" },
-  { num: "3", text: "Target Escape", highlight: "Combo Reset", result: "Before Health Depletion" },
-  { num: "4", text: "Level Progression", highlight: "+1 Level / 150 PTS", result: "Speed, Size & Zigzag Scale" }
+  { num: "3", text: "Continuous Tracking Uptime", highlight: "+0.4s / sec", result: "Chain Streak Multipliers up to 3.0x" },
+  { num: "4", text: "Escape / Tracking Loss", highlight: "Failure Penalty", result: "Combo resets to 0 (-0.6s with Time Penalty enabled)" }
 ];
 
 const ABOUT_INTRO = [
@@ -78,9 +79,9 @@ const ABOUT_INTRO = [
 ];
 
 const ABOUT_CARDS = [
-  { icon: Users, iconBg: 'bg-blue-600', title: "Who Should Use This?", text: "Apex Legends, Warzone, and Call of Duty Mobile players facing opponents who zigzag to desync their hitbox from their visual model." },
-  { icon: TrendingUp, iconBg: 'bg-emerald-600', title: "Skills Improved", text: "Reactive tracking, direction-change correction, and the muscle memory needed to chase V-shaped snap reversals under pressure." },
-  { icon: Target, iconBg: 'bg-purple-600', title: "V-Crossover Targeting", text: "Avoid chasing outer sweeps. Aim at the V-crossover center, wait for the direction change, and maintain lock through the reversal." },
+  { icon: Users, iconBg: "bg-blue-600", title: "Who Should Use This?", text: "Apex Legends, Warzone, and Call of Duty Mobile players facing opponents who zigzag to desync their hitbox from their visual model." },
+  { icon: TrendingUp, iconBg: "bg-emerald-600", title: "Skills Improved", text: "Reactive tracking, direction-change correction, and the muscle memory needed to chase V-shaped snap reversals under pressure." },
+  { icon: Target, iconBg: "bg-purple-600", title: "V-Crossover Targeting", text: "Avoid chasing outer sweeps. Aim at the V-crossover center, wait for the direction change, and maintain lock through the reversal." },
 ];
 
 const ABOUT_SECTIONS = [
@@ -99,12 +100,12 @@ const FAQ_ITEMS = [
   { q: "Is this drill for touch screen or mouse?", a: "Both. The engine dynamically scales the target sizes and hitboxes depending on whether you are swiping on a mobile device or aiming with a desktop mouse." },
   { q: "How do I get a higher accuracy score?", a: "Stop predicting. Reactive tracking means letting your eyes process the direction change first, then snapping to the target. Predicting leads to over-flicking." },
   { q: "What is the V-crossover point?", a: "It's the center of a zigzag strafe path. Instead of chasing the target to each extreme, aim at where the target crosses through the middle of its movement arc." },
-  { q: "How does the level progression work?", a: "Every 150 points increases the level. Higher levels make targets smaller, faster, and perform more frequent direction changes with less time before escape." },
+  { q: "How does the level progression work?", a: "Every 1400 points increases your continuous level. Higher levels make targets smaller, faster, and perform more frequent direction reversals with tighter lifespan windows." },
   { q: "What sensitivity should I use?", a: "For tracking, moderate to low sensitivity (25–45 cm/360) works best. Use the universal sensitivity slider to match your in-game settings before starting." },
   { q: "Do I need to click to damage the target?", a: "No. This drill uses pure dwell-tracking — hold your crosshair inside the target's hitbox and its health drains automatically for as long as you stay locked on. Break contact and the drain pauses until you reacquire it." },
   { q: "What stats does this drill track?", a: "Each run logs your tracking accuracy (frames on-target versus total frames), targets destroyed, targets that escaped, your best combo streak, and the peak level reached — all shown on the results screen after time runs out." },
   { q: "Can this improve my Apex Legends tracking?", a: "Yes significantly. Apex fights require 0.5–2s of continuous tracking to confirm kills. Training reactive tracking against direction changes directly improves your damage output." },
-  { q: "What causes the target to escape?", a: "Each target has a lifespan timer (shown as a red arc). If you don't deplete its health before the timer runs out, it escapes and you lose 1 second from your clock." },
+  { q: "How are errors penalised in Anti-Zigzag Movement?", a: "When a target escapes or tracking contact is broken for 1.0s, your combo resets to zero. When the optional Time Penalty setting is enabled, target escapes and 1.0s tracking losses deduct 0.6s from your clock." },
   { q: "How does the combo multiplier work?", a: "Every full second of unbroken crosshair lock adds +1 to your combo, which raises your score multiplier at fixed thresholds (3, 5, 7, 10, 15, 20, 30, and 50). Losing lock for a full second resets the combo back to zero." },
   { q: "Does this help with recoil control?", a: "Indirectly. The reactive micro-adjustments trained here apply to recoil tracking as well. For dedicated recoil training, try the Recoil Control drill." },
   { q: "Is this aim trainer free?", a: "Yes, this tracking trainer is 100% free, requires no sign-ups or downloads, and runs natively in modern browsers with hardware-level mouse input." },
@@ -129,6 +130,7 @@ export default function AntiZigzagClient() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
+  const [penaltyEnabled, setPenaltyEnabled] = useState(false);
   const [pointerLocked, setPointerLocked] = useState(false);
   const [openAccordion, setOpenAccordion] = useState(null);
   const [isTouchOnlyDevice, setIsTouchOnlyDevice] = useState(false);
@@ -188,6 +190,7 @@ export default function AntiZigzagClient() {
     if (typeof window !== 'undefined') {
       setSoundEnabled(drillAudio.isEnabled());
       setFlashEnabled(drillFlash.isEnabled());
+      setPenaltyEnabled(drillPenalty.isEnabled());
       const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
       const isTouchCapable = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
       setIsTouchOnlyDevice(isTouchCapable && !hasFinePointer);
@@ -215,8 +218,8 @@ export default function AntiZigzagClient() {
     engine.current.hitMarkers.push({ x, y, life: 1.0 });
   }, []);
 
-  const spawnTarget = useCallback((W, H, lvl) => {
-    const cfg = getLevelConfig(lvl);
+  const spawnTarget = useCallback((W, H, lvl, currentCombo = 0) => {
+    const cfg = getLevelConfig(lvl, currentCombo);
     const radius = cfg.radius;
     const baseSpeed = 350 * cfg.speedMult;
 
@@ -240,8 +243,9 @@ export default function AntiZigzagClient() {
 
     const e = engine.current;
     const finalAccuracy = e.totalFrames > 0 ? Math.round((e.framesOnTarget / e.totalFrames) * 100) : 100;
-    const peakLevel = bestLevelRunRef.current;
-    const grade = getFpsScoreGrade(e.score, ELITE_SCORE);
+    const peakLevel = Math.floor(bestLevelRunRef.current);
+    const rating = getFpsScoreGrade(e.score, ELITE_SCORE);
+    const grade = { letter: rating.grade, label: rating.label, color: rating.color };
 
     setAccuracy(finalAccuracy);
     setAnalytics({
@@ -271,6 +275,8 @@ export default function AntiZigzagClient() {
     setBestScore(updatedData.bestScore);
     setBestCombo(updatedData.bestCombo);
     setBestLevel(updatedData.bestLevel);
+
+    drillAudio.playSessionEnd();
   }, []);
 
   const enterDrill = useCallback(async () => {
@@ -290,8 +296,7 @@ export default function AntiZigzagClient() {
     lastTimeRef.current = DRILL_DURATION;
     lastAccuracyRef.current = 100;
 
-    const saved = getSavedData();
-    const startLevel = getStartLevel(saved.bestLevel);
+    const startLevel = getStartLevel();
     bestLevelRunRef.current = startLevel;
     setLevel(startLevel);
 
@@ -312,7 +317,7 @@ export default function AntiZigzagClient() {
       particles: [], hitMarkers: [], screenShake: 0, logicalWidth: w, logicalHeight: h
     };
 
-    spawnTarget(w, h, startLevel);
+    spawnTarget(w, h, startLevel, 0);
 
     try {
       if (containerRef.current && !document.fullscreenElement) {
@@ -430,7 +435,7 @@ export default function AntiZigzagClient() {
             engine.current.crosshair.initialized = true;
           }
           if (gameState === 'start') {
-            spawnTarget(width, height, 1);
+            spawnTarget(width, height, 1, 0);
           }
         }
       }
@@ -467,7 +472,7 @@ export default function AntiZigzagClient() {
           lastTimeRef.current = intTime;
         }
 
-        const cfg = getLevelConfig(e.level);
+        const cfg = getLevelConfig(e.level, e.combo);
         const tgt = e.target;
 
         tgt.lifespan += dt;
@@ -494,12 +499,13 @@ export default function AntiZigzagClient() {
 
         if (tgt.lifespan >= tgt.maxLifespan) {
           e.targetsEscaped++;
+          if (drillPenalty.isEnabled()) e.timeLeft -= TIME_PENALTY;
           e.combo = 0;
           setCombo(0);
           e.screenShake = 6;
           triggerFlash();
           drillAudio.playPenalty();
-          spawnTarget(w, h, e.level);
+          spawnTarget(w, h, e.level, e.combo);
         }
 
         e.totalFrames++;
@@ -511,6 +517,7 @@ export default function AntiZigzagClient() {
           e.framesOnTarget++;
           e.continuousTrackTime += dt;
           tgt.health -= dt * 65;
+          e.msOffTarget = 0;
 
           e.focusTimer += dt;
           if (e.focusTimer >= 0.25) {
@@ -518,12 +525,13 @@ export default function AntiZigzagClient() {
             const levelMult = 1 + getDifficultyProgress(e.level) * 0.5;
             const pts = Math.round(10 * getComboMultiplier(e.combo) * levelMult);
             e.score += pts;
+            e.timeLeft += TIME_PER_HIT * 0.25; // +0.1s per 0.25s locked-on
             setScore(e.score);
 
-            const rawLevel = Math.floor(e.score / POINTS_PER_LEVEL) + 1 + getComboBonusLevel(e.combo);
+            const rawLevel = (e.score / POINTS_PER_LEVEL) + 1;
             e.level = Math.max(e.level, rawLevel);
             bestLevelRunRef.current = Math.max(bestLevelRunRef.current, e.level);
-            setLevel(e.level);
+            setLevel(Math.floor(e.level));
 
             drillAudio.playHit();
             createHitMarker(e.crosshair.x, e.crosshair.y);
@@ -534,7 +542,7 @@ export default function AntiZigzagClient() {
             e.score += Math.round(25 * getComboMultiplier(e.combo));
             setScore(e.score);
             drillAudio.playHit();
-            spawnTarget(w, h, e.level);
+            spawnTarget(w, h, e.level, e.combo);
           }
 
           if (e.continuousTrackTime >= 1.0) {
@@ -550,6 +558,7 @@ export default function AntiZigzagClient() {
           e.msOffTarget += deltaTimeMs;
 
           if (e.msOffTarget >= 1000) {
+            if (drillPenalty.isEnabled()) e.timeLeft -= TIME_PENALTY;
             if (e.combo > 0) {
               e.combo = 0;
               setCombo(0);
@@ -587,7 +596,7 @@ export default function AntiZigzagClient() {
       }
 
       if (gameState === 'playing' || gameState === 'start') {
-        const cfg = getLevelConfig(e.level);
+        const cfg = getLevelConfig(e.level, e.combo);
         const tgt = e.target;
         const dist = Math.hypot(e.crosshair.x - tgt.x, e.crosshair.y - tgt.y);
         const isLocked = dist <= cfg.radius;
@@ -687,7 +696,7 @@ export default function AntiZigzagClient() {
         bestScore,
         accuracy: analytics.accuracy,
         bestCombo: analytics.bestCombo,
-        rating: { letter: analytics.grade?.grade || 'C', label: analytics.grade?.label || 'Keep Going', emoji: '🔥' },
+        rating: { letter: analytics.grade?.letter || 'C', label: analytics.grade?.label || 'Keep Going', emoji: '🔥' },
         newBest: isNewBest,
         drillName: 'Anti-Zigzag Movement',
         playerName: getPlayerName(),
@@ -718,7 +727,7 @@ export default function AntiZigzagClient() {
               </span>
             </h1>
             <p className="text-xs text-slate-400 mt-1">
-              Hardware Raw Input • 15 Difficulty Levels
+              Reactive Direction Snap • Endless Level Progression
             </p>
           </div>
         )}
@@ -732,7 +741,7 @@ export default function AntiZigzagClient() {
             </div>
             <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
-              <div className={`text-lg sm:text-xl font-black tabular-nums ${timeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>{timeLeft}s</div>
+              <div className={`text-lg sm:text-xl font-black tabular-nums ${timeLeft <= 10 ? "text-red-400 animate-pulse" : "text-white"}`}>{timeLeft}s</div>
             </div>
             <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Accuracy</div>
@@ -751,8 +760,8 @@ export default function AntiZigzagClient() {
           onContextMenu={(e) => { if (gameState === 'playing') e.preventDefault(); }}
           className={`relative overflow-hidden flex flex-col transition-all duration-150 select-none bg-[#080811] text-white border border-white/10 ${
             isFullscreen 
-              ? 'fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#080811] rounded-none border-none flex flex-col items-center justify-center' 
-              : 'w-full rounded-2xl bg-[#080811] aspect-video min-h-[460px] sm:min-h-[500px] max-h-[88vh] relative overflow-hidden flex flex-col'
+              ? "fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#080811] rounded-none border-none flex flex-col items-center justify-center" 
+              : "w-full rounded-2xl bg-[#080811] aspect-video min-h-[460px] sm:min-h-[500px] max-h-[88vh] relative overflow-hidden flex flex-col"
           }`}
           style={{ touchAction: gameState === 'playing' ? 'none' : 'auto' }}
         >
@@ -770,7 +779,7 @@ export default function AntiZigzagClient() {
               </div>
               <div className="absolute top-4 right-4 z-30 pointer-events-none text-right">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Time</p>
-                <p className={`text-2xl sm:text-3xl font-bold tabular-nums leading-tight ${timeLeft <= 10 ? 'text-red-400' : 'text-white'}`}>{timeLeft}s</p>
+                <p className={`text-2xl sm:text-3xl font-bold tabular-nums leading-tight ${timeLeft <= 10 ? "text-red-400" : "text-white"}`}>{timeLeft}s</p>
               </div>
             </>
           )}
@@ -829,7 +838,7 @@ export default function AntiZigzagClient() {
           <canvas 
             ref={canvasRef} 
             onClick={() => { if (gameState === 'playing' && !pointerLocked) resumeDrill(); }}
-            className={`block absolute top-0 left-0 w-full h-full touch-none z-10 ${gameState === 'playing' ? 'cursor-none' : ''}`} 
+            className={`block absolute top-0 left-0 w-full h-full touch-none z-10 ${gameState === "playing" ? "cursor-none" : ""}`}
           />
 
           {/* START MODAL */}
@@ -838,16 +847,16 @@ export default function AntiZigzagClient() {
               icon={Crosshair}
               accent="redOrange"
               title="Anti-Zigzag Movement"
-              subtitle="Hardware Raw Input • 15 Difficulty Levels"
+              subtitle="Reactive Direction Snap • Endless Level Progression"
               rules={[
-                { icon: Target, accent: 'redOrange', title: 'Objective', text: 'Track Erratic Strafe Reversals' },
-                { icon: AlertCircle, accent: 'red', title: 'Failure Rule', text: 'Target Escape → Resets Combo' },
+                { icon: Target, accent: "redOrange", title: "Objective (+10 / 0.25s)", text: "Track Erratic Strafe Reversals" },
+                { icon: AlertCircle, accent: "red", title: "Failure Rule", text: penaltyEnabled ? "Target Escape → Resets Combo, -0.6s" : "Target Escape → Resets Combo" },
               ]}
               sensitivity={{ value: universalSens, onChange: setUniversalSens, cmPer360 }}
               stats={[
-                { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
-                { icon: Flame, label: 'Best Combo', value: `${bestCombo}x`, color: 'text-red-400', accent: 'redOrange' },
-                { icon: TrendingUp, label: 'Best Level', value: `Lv. ${bestLevel}`, color: 'text-blue-400', accent: 'blue' },
+                { icon: Trophy, label: "Best Score", value: bestScore, color: "text-white", accent: "slate" },
+                { icon: Flame, label: "Best Combo", value: `${bestCombo}x`, color: "text-red-400", accent: "redOrange" },
+                { icon: TrendingUp, label: "Best Level", value: `Lv. ${bestLevel}`, color: "text-blue-400", accent: "blue" },
               ]}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
@@ -859,78 +868,23 @@ export default function AntiZigzagClient() {
             <DrillCountdown value={countdownValue} subtitle="GET READY" />
           )}
 
-          {/* END SCREEN */}
+          {/* END SCREEN — Universal Result Card */}
           {gameState === 'gameOver' && analytics.grade && (
-            <div className="absolute inset-0 z-40 flex bg-neutral-950/98 select-none font-sans" style={{ background: 'rgba(5,5,8,0.97)' }} onPointerDown={e => e.stopPropagation()}>
-              
-              {/* Left Grade Panel */}
-              <div className="w-[36%] flex flex-col items-center justify-center gap-1 border-r border-white/5 px-4" style={{ background: 'radial-gradient(ellipse 260px 200px at 50% 30%, rgba(239,68,68,.12), transparent 70%)' }}>
-                {isNewBest && (
-                  <span className="text-[9.5px] font-bold text-yellow-400 bg-yellow-500/10 border border-yellow-500/25 px-2.5 py-0.5 rounded-full mb-1 animate-pulse">
-                    NEW BEST
-                  </span>
-                )}
-                <div className={`text-5xl sm:text-6xl font-black leading-none ${analytics.grade.color}`}>
-                  {analytics.grade.grade}
-                </div>
-                <div className="text-[10px] uppercase tracking-widest text-slate-500 text-center font-bold mt-1">
-                  {analytics.grade.label}
-                </div>
-                <div className="text-3xl sm:text-4xl font-black text-white mt-2 tabular-nums">
-                  {score}
-                </div>
-                <div className="text-[9px] uppercase tracking-widest text-slate-500">Points</div>
-              </div>
-
-              {/* Right Stats & Actions Panel */}
-              <div className="flex-1 flex flex-col justify-center gap-3 px-6 py-4 min-w-0">
-                
-                {/* 4 Stat Tiles */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.accuracy}%</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Tracking Accuracy</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.targetsDestroyed}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Targets Destroyed</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.bestCombo}x</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Max Combo</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">Lv. {analytics.levelReached}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Peak Level</p>
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex gap-2">
-                  <button 
-                    onClick={enterDrill} 
-                    className="flex-1 py-3 rounded-[13px] bg-gradient-to-r from-red-500 to-orange-600 text-white font-bold text-xs uppercase tracking-wide cursor-pointer transition-transform active:scale-[0.98] shadow-md flex items-center justify-center gap-1.5"
-                  >
-                    <RefreshCw className="w-3.5 h-3.5" /> Play Again
-                  </button>
-                  <button 
-                    onClick={shareDrillLink} 
-                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform" 
-                    title="Share Score"
-                  >
-                    <Share2 className="w-4 h-4" />
-                  </button>
-                  <button 
-                    onClick={handleExitDrill} 
-                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform" 
-                    title="Exit Fullscreen & Return"
-                  >
-                    <LogOut className="w-4 h-4 text-red-400" />
-                  </button>
-                </div>
-
-              </div>
-            </div>
+            <DrillResultCard
+              accent="red"
+              grade={analytics.grade}
+              score={score}
+              isNewBest={isNewBest}
+              stats={[
+                { value: analytics.accuracy, suffix: "%", label: "Tracking Accuracy" },
+                { value: analytics.targetsDestroyed, label: "Targets Destroyed" },
+                { value: `${analytics.bestCombo}x`, label: "Max Combo" },
+                { value: `Lv. ${analytics.levelReached}`, label: "Peak Level" },
+              ]}
+              onPlayAgain={enterDrill}
+              onShare={shareDrillLink}
+              onExit={handleExitDrill}
+            />
           )}
         </div>
 
@@ -952,17 +906,17 @@ export default function AntiZigzagClient() {
 
             <DrillAccordion
               id="about"
-              title="Countering Zigzag Movement"
+              title="About Anti-Zigzag Movement"
               isOpen={openAccordion === 'about'}
               onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
             >
               <div className="space-y-8">
                 <section>
                   <h4 className="text-base font-bold text-white mb-2 flex items-center gap-2">
-                    <Crosshair className="w-4 h-4 text-red-400" /> What Is Anti-Zigzag Tracking?
+                    <Crosshair className="w-4 h-4 text-red-400" /> Why Train Anti-Zigzag Aim?
                   </h4>
                   {ABOUT_INTRO.map((para, i) => (
-                    <p key={i} className={`text-sm leading-relaxed text-gray-300 ${i < ABOUT_INTRO.length - 1 ? 'mb-3' : ''}`}>{para}</p>
+                    <p key={i} className={`text-sm leading-relaxed text-gray-300 ${i < ABOUT_INTRO.length - 1 ? "mb-3" : ""}`}>{para}</p>
                   ))}
                 </section>
 
@@ -986,7 +940,7 @@ export default function AntiZigzagClient() {
                       <section.icon className="w-4 h-4 text-red-400" /> {section.title}
                     </h4>
                     {section.paragraphs.map((para, j) => (
-                      <p key={j} className={`text-sm leading-relaxed text-gray-300 ${j < section.paragraphs.length - 1 ? 'mb-3' : ''}`}>{para}</p>
+                      <p key={j} className={`text-sm leading-relaxed text-gray-300 ${j < section.paragraphs.length - 1 ? "mb-3" : ""}`}>{para}</p>
                     ))}
                   </section>
                 ))}
@@ -1011,7 +965,7 @@ export default function AntiZigzagClient() {
         {/* ── RELATED FPS DRILLS ── */}
         {!isFullscreen && (
           <section className="mt-4">
-            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3 font-sans">
+            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">
               Related FPS Drills
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -1034,11 +988,10 @@ export default function AntiZigzagClient() {
             </div>
           </section>
         )}
-
-        {/* ── FOOTER ── */}
-        {!isFullscreen && <DrillFooter />}
-
       </main>
+
+      {/* ── FOOTER ── */}
+      {!isFullscreen && <DrillFooter />}
     </div>
   );
 }

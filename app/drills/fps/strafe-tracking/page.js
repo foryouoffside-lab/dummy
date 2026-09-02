@@ -135,10 +135,10 @@ export default function StrafeTrackingPage() {
       },
       {
         "@type": "Question",
-        "name": "How much should I practice tracking?",
+        "name": "How are errors penalised in Strafe Tracking?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "We recommend practicing tracking for 10-15 minutes daily as a pre-game warmup routine to establish muscle memory consistency."
+          "text": "Losing contact with the target resets your active combo multiplier. When the optional Time Penalty setting is enabled, falling off-target for 1.0 cumulative second also deducts 0.6s from your timer."
         }
       },
       {

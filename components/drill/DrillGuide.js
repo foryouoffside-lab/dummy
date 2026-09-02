@@ -1,73 +1,133 @@
 import Link from 'next/link';
 
 /**
- * Server-rendered long-form guide that sits under a drill's interactive client.
+ * DrillGuide — Server-rendered long-form authoritative guide & benchmark table.
  *
- * Why this exists: every drill's instructions, About copy and FAQ used to live
- * inside collapsed <DrillAccordion> bodies in a 'use client' component. The
- * accordion now keeps its children in the DOM, but the visual-tracking drills
- * still only carried ~150 words of drill-specific prose each, which left the 15
- * pages at 0.77 mean pairwise text similarity -- near-duplicates, and all 15
- * were sitting at "Discovered - currently not indexed" in Search Console.
- *
- * This block is a plain server component so the text is in the initial HTML with
- * no hydration involved, and it is keyed off per-drill content so each page
- * carries several hundred words that exist nowhere else on the site.
+ * Sits directly below the interactive drill canvas in server HTML.
+ * Solves the "interactive gaming thin content" problem:
+ * Search crawlers (Googlebot, Bingbot, Perplexity) see hundreds of words of
+ * structured data, benchmark ranking tables, E-E-A-T scientific context, and FAQs
+ * without slowing down or disrupting the interactive drill experience.
  */
 export default function DrillGuide({ guide }) {
   if (!guide) return null;
-  const { heading, intro, steps, audience, faqs, related } = guide;
+  const { heading, intro, benchmarks, techniques, steps, audience, faqs, related } = guide;
 
   return (
-    <section className="max-w-6xl w-full mx-auto px-4 pb-12 font-sans">
-      <div className="border border-gray-800 bg-black rounded-2xl px-6 py-7 space-y-8">
+    <section className="max-w-6xl w-full mx-auto px-4 pb-12 font-sans text-slate-300">
+      <div className="border border-white/10 bg-neutral-950/80 backdrop-blur-md rounded-2xl px-6 py-8 space-y-8 shadow-2xl">
+        {/* Intro */}
         <div>
-          <h2 className="text-xl font-bold text-white tracking-tight mb-3">{heading}</h2>
-          {intro.map((p, i) => (
-            <p key={i} className="text-sm leading-relaxed text-gray-300 mb-3 last:mb-0">{p}</p>
+          <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight mb-3">{heading}</h2>
+          {intro && intro.map((p, i) => (
+            <p key={i} className="text-sm sm:text-base leading-relaxed text-slate-300 mb-3 last:mb-0">{p}</p>
           ))}
         </div>
 
-        <div>
-          <h3 className="text-base font-bold text-white mb-3">How to train with this drill</h3>
-          <ol className="space-y-2.5">
-            {steps.map((s, i) => (
-              <li key={i} className="flex gap-3 text-sm leading-relaxed text-gray-300">
-                <span className="shrink-0 w-6 h-6 rounded-md bg-white/[0.06] border border-gray-800 text-xs font-bold text-white flex items-center justify-center">
-                  {i + 1}
-                </span>
-                <span>{s}</span>
-              </li>
-            ))}
-          </ol>
-        </div>
-
-        <div>
-          <h3 className="text-base font-bold text-white mb-2">Who this drill is for</h3>
-          <p className="text-sm leading-relaxed text-gray-300">{audience}</p>
-        </div>
-
-        <div>
-          <h3 className="text-base font-bold text-white mb-3">Common questions</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {faqs.map((f, i) => (
-              <div key={i} className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
-                <h4 className="text-sm font-bold text-white mb-1.5">{f.q}</h4>
-                <p className="text-xs leading-relaxed text-gray-300">{f.a}</p>
-              </div>
-            ))}
+        {/* Benchmarks Table (Critical for Google AI Overviews and Rich Snippets) */}
+        {benchmarks && (
+          <div>
+            <h3 className="text-base sm:text-lg font-bold text-white mb-3 flex items-center gap-2">
+              📊 {benchmarks.title || 'Performance Benchmarks & Ranking Tiers'}
+            </h3>
+            <div className="overflow-x-auto rounded-xl border border-white/10">
+              <table className="w-full text-left text-xs sm:text-sm">
+                <thead className="bg-white/5 text-white font-bold border-b border-white/10 uppercase tracking-wider text-[11px]">
+                  <tr>
+                    {benchmarks.headers.map((h, i) => (
+                      <th key={i} className="px-4 py-3">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5 font-mono">
+                  {benchmarks.rows.map((row, i) => (
+                    <tr key={i} className="hover:bg-white/[0.02] transition-colors">
+                      {row.map((cell, j) => (
+                        <td key={j} className={`px-4 py-2.5 ${j === 0 ? 'font-bold text-white' : 'text-slate-300'}`}>{cell}</td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {benchmarks.note && (
+              <p className="text-xs text-slate-400 mt-2 italic">{benchmarks.note}</p>
+            )}
           </div>
-        </div>
+        )}
 
+        {/* Techniques / Methodology Comparison */}
+        {techniques && (
+          <div>
+            <h3 className="text-base sm:text-lg font-bold text-white mb-3">
+              ⚡ {techniques.title || 'Techniques & Execution Protocols'}
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {techniques.items.map((tech, i) => (
+                <div key={i} className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
+                  <h4 className="text-sm font-bold text-white mb-1.5">{tech.name}</h4>
+                  <p className="text-xs text-slate-300 leading-relaxed mb-2">{tech.desc}</p>
+                  {tech.tips && (
+                    <span className="text-[11px] font-semibold text-emerald-400 block">
+                      💡 Pro Tip: {tech.tips}
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Steps */}
+        {steps && (
+          <div>
+            <h3 className="text-base sm:text-lg font-bold text-white mb-3">🎯 How to train with this drill</h3>
+            <ol className="space-y-2.5">
+              {steps.map((s, i) => (
+                <li key={i} className="flex gap-3 text-sm leading-relaxed text-slate-300">
+                  <span className="shrink-0 w-6 h-6 rounded-md bg-white/[0.06] border border-white/10 text-xs font-bold text-white flex items-center justify-center font-mono">
+                    {i + 1}
+                  </span>
+                  <span>{s}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+        )}
+
+        {/* Audience */}
+        {audience && (
+          <div>
+            <h3 className="text-base sm:text-lg font-bold text-white mb-2">👥 Who this drill is for</h3>
+            <p className="text-sm leading-relaxed text-slate-300">{audience}</p>
+          </div>
+        )}
+
+        {/* FAQs */}
+        {faqs?.length ? (
+          <div>
+            <h3 className="text-base sm:text-lg font-bold text-white mb-3">❓ Frequently Asked Questions</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {faqs.map((f, i) => (
+                <div key={i} className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
+                  <h4 className="text-sm font-bold text-white mb-1.5">{f.q}</h4>
+                  <p className="text-xs leading-relaxed text-slate-300">{f.a}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        {/* Related Links */}
         {related?.length ? (
           <div>
-            <h3 className="text-base font-bold text-white mb-3">Train the next skill</h3>
+            <h3 className="text-base sm:text-lg font-bold text-white mb-3">🔗 Recommended Skill Progression</h3>
             <div className="flex flex-wrap gap-2">
               {related.map((r) => (
                 <Link
                   key={r.href}
                   href={r.href}
-                  className="text-xs font-semibold text-gray-300 hover:text-white border border-gray-800 hover:border-gray-600 rounded-lg px-3 py-2 transition-colors"
+                  className="text-xs font-semibold text-slate-300 hover:text-white border border-white/10 hover:border-white/30 rounded-lg px-3 py-2 transition-colors bg-white/[0.02]"
                 >
                   {r.label}
                 </Link>
@@ -79,3 +139,4 @@ export default function DrillGuide({ guide }) {
     </section>
   );
 }
+

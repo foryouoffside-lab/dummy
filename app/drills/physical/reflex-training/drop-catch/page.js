@@ -120,7 +120,7 @@ const faqSchema = {
       "name": "How does adaptive difficulty work?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "As your score increases, level rises up to Level 15. Falling velocity accelerates, radiuses shrink, and decoy probability increases."
+        "text": "As your score increases, difficulty scales continuously. Falling velocity accelerates, radiuses shrink, and decoy probability increases."
       }
     },
     {
@@ -128,7 +128,7 @@ const faqSchema = {
       "name": "What happens when I miss or hit a decoy?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Missing a green target or clicking a red decoy resets your combo multiplier back to 1.0x and triggers a red flash overlay. There are no score deductions or time penalties."
+        "text": "Missing a green target or clicking a red decoy resets your combo multiplier back to 1.0x and triggers a red flash overlay. Clean catches add +0.6s to your timer, and missing a target or hitting a decoy deducts 0.8s when time penalty is enabled in settings."
       }
     },
     {
@@ -136,7 +136,7 @@ const faqSchema = {
       "name": "How long does each session run?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Each session runs for a fixed 45 seconds. The game timer counts down steadily from 45s to 0s, providing a standard, reproducible performance benchmark."
+        "text": "Each session starts with a 45-second timer. Catching green targets earns +0.6s time extensions, allowing skilled players to extend runs dynamically as difficulty ramps up."
       }
     },
     {
@@ -174,7 +174,7 @@ const howToSchema = {
   "step": [
     { "@type": "HowToStep", "name": "Watch the Drop Zone", "text": "Balls fall from the top of the screen at increasing speed as your level rises." },
     { "@type": "HowToStep", "name": "Identify the Color", "text": "Green balls are safe scoring targets; red balls marked with an X are decoys." },
-    { "@type": "HowToStep", "name": "Catch Green, Avoid Red", "text": "Click green balls before they fall past, and never click a red decoy, to build your combo." }
+    { "@type": "HowToStep", "name": "Catch Green, Avoid Red", "text": "Click green balls before they fall past to earn +0.6s time extensions, and never click a red decoy to keep your combo streak intact." }
   ]
 };
 

@@ -14,6 +14,10 @@ module.exports = {
           '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial', '"Noto Sans"', 'sans-serif',
           '"Apple Color Emoji"', '"Segoe UI Emoji"', '"Segoe UI Symbol"', '"Noto Color Emoji"',
         ],
+        mono: [
+          'var(--font-jetbrains-mono)',
+          'ui-monospace', 'SFMono-Regular', 'Menlo', 'Consolas', '"Liberation Mono"', 'monospace',
+        ],
       },
       colors: {
         canvas: '#06070B',
@@ -59,7 +63,15 @@ module.exports = {
       },
       // 🔥 Reduce layout shift from font loading
       fontSize: {
+        // Editorial scale for the marketing pages. The defaults jumped
+        // 30px -> 36px -> 48px, which is why every heading had to be `font-black`
+        // to feel distinct; these intermediate steps carry the hierarchy instead.
         '2xs': ['0.625rem', { lineHeight: '0.875rem' }],
+        'eyebrow': ['0.6875rem', { lineHeight: '1rem', letterSpacing: '0.14em' }],
+        'display-1': ['3.25rem', { lineHeight: '1.02', letterSpacing: '-0.03em' }],
+        'display-2': ['2.25rem', { lineHeight: '1.1', letterSpacing: '-0.025em' }],
+        'title': ['1.375rem', { lineHeight: '1.25', letterSpacing: '-0.015em' }],
+        'lead': ['1.0625rem', { lineHeight: '1.65' }],
       },
     },
   },

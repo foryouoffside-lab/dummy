@@ -147,7 +147,7 @@ export default function InstantResponsePage() {
         "name": "Why does missing reset my combo instead of penalizing my time or score?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "To keep every run comparable, this drill never drains your clock or deducts points. Pre-firing, missing, and timing out only reset your combo multiplier, so your final score stays a clean measure of skill."
+          "text": "By default, pre-firing, missing, or timing out only resets your combo multiplier to keep baseline training accessible. If you want a stricter challenge with clock deductions (-0.8s per error), you can enable Time Penalty in the session settings."
         }
       },
       {

@@ -2,7 +2,7 @@ import StrobeLatencyClient from './StrobeLatencyClient';
 
 export const metadata = {
   title: 'Light Reaction Pro - Visual Reflex & Reaction Time Test',
-  description: 'Train visual reflex speed with Light Reaction test. Measure millisecond reaction latency when target flashes white, zero penalties, 45s session. Free.',
+  description: 'Train visual reflex speed with Light Reaction test. Measure millisecond reaction latency when target flashes white, dynamic level scaling, 45s+ session. Free.',
   keywords: [
     'light reaction test',
     'visual reaction time test',
@@ -16,7 +16,7 @@ export const metadata = {
   ],
   openGraph: {
     title: 'Light Reaction Pro - Visual Reflex & Reaction Time Test | SkillDrills',
-    description: 'Train visual reflex speed with Light Reaction test. Measure millisecond reaction latency when target flashes white, zero penalties. Free.',
+    description: 'Train visual reflex speed with Light Reaction test. Measure millisecond reaction latency when target flashes white, dynamic level scaling. Free.',
     type: 'article',
     url: 'https://skilldrills.online/drills/visual/reaction-speed/light-reaction',
     siteName: 'SkillDrills',
@@ -25,7 +25,7 @@ export const metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Light Reaction Pro - Visual Reflex & Reaction Time Test | SkillDrills',
-    description: 'Train visual reflex speed with Light Reaction test. Measure millisecond reaction latency when target flashes white, zero penalties. Free.',
+    description: 'Train visual reflex speed with Light Reaction test. Measure millisecond reaction latency when target flashes white, dynamic level scaling. Free.',
   },
   robots: { index: true, follow: true },
   alternates: {
@@ -61,7 +61,7 @@ export default function StrobeLatencyPage() {
             "@type": "WebApplication",
             "name": "Light Reaction Pro Drill",
             "url": "https://skilldrills.online/drills/visual/reaction-speed/light-reaction",
-            "description": "Free visual reflex speed test. Measure millisecond reaction latency when target flashes white, zero negative penalties, clean 45-second timer.",
+            "description": "Free visual reflex speed test. Measure millisecond reaction latency when target flashes white, dynamic level scaling, clean timer.",
             "applicationCategory": "EducationalApplication",
             "operatingSystem": "All",
             "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
@@ -99,7 +99,7 @@ export default function StrobeLatencyPage() {
                 "name": "How does progressive difficulty work?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Every 5 successful hits you level up, and the flash window shrinks from 300ms down to a 100ms floor. The inter-flash delay stays randomized between 1000ms and 2500ms so the strobe timing can't be anticipated."
+                  "text": "As your score and combo climb, the flash window tightens continuously and the inter-flash delay speeds up dynamically."
                 }
               },
               {
@@ -107,7 +107,7 @@ export default function StrobeLatencyPage() {
                 "name": "Are there negative score or time penalties?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "No. Premature taps or missed flashes never deduct score points or reduce remaining timer seconds — you simply wait for the next flash."
+                  "text": "By default, premature taps or missed flashes only reset your combo multiplier. An opt-in time penalty (-0.8s per error) is available in session settings for hard-mode training."
                 }
               },
               {
@@ -115,7 +115,7 @@ export default function StrobeLatencyPage() {
                 "name": "Does difficulty decrease on mistakes?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "No. Your level only ever goes up — a mistake never takes you back down, so you can safely push your current level to its limit."
+                  "text": "No. Your level progression is monotonic — a mistake never takes you back down, so you can safely push your current level to its limit."
                 }
               },
               {
@@ -131,7 +131,7 @@ export default function StrobeLatencyPage() {
                 "name": "How long does each drill session last?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Each round is timed for exactly 45 seconds of continuous focus."
+                  "text": "Each round starts with 45 seconds on the clock, and successful hits add +0.6s to extend your run."
                 }
               },
               {
@@ -148,6 +148,7 @@ export default function StrobeLatencyPage() {
       />
 
       <StrobeLatencyClient />
+
     </>
   );
 }

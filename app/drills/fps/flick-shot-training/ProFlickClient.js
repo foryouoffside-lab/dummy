@@ -16,7 +16,8 @@ import { getPlayerName } from '../../../../lib/leaderboard';
 import { drillAudio } from '../../../../lib/drillAudio';
 import { drillFlash } from '../../../../lib/drillFlash';
 import { drillTimeout } from '../../../../lib/drillTimeout';
-import { getStartLevel, getDifficultyProgress, getComboBonusLevel } from '../../../../lib/drillDifficulty';
+import { drillPenalty } from '../../../../lib/drillPenalty';
+import { getStartLevel, getDifficultyProgress, ramp } from '../../../../lib/drillDifficulty';
 import { getComboMultiplier, getFpsScoreGrade } from '../../../../lib/scoringEngine';
 import { createBackdropCache, getCanvasDpr, drawPulseRing, drawTacticalTarget } from '../../../../lib/canvasFx';
 import useUnexpectedExitGuard from '../../../../lib/useUnexpectedExitGuard';
@@ -24,14 +25,34 @@ import DrillFooter from '../../../../components/drill/DrillFooter';
 import DrillCountdown from '../../../../components/drill/DrillCountdown';
 import DrillAccordion from '../../../../components/drill/DrillAccordion';
 import FpsStartCard from '../../../../components/drill/FpsStartCard';
+import DrillResultCard from '../../../../components/drill/DrillResultCard';
 
 // ============================================================
 // TUNING CONSTANTS
 // ============================================================
-const DRILL_DURATION = 45; // 45 seconds focused duration
-const POINTS_PER_LEVEL = 250; // Aggressive progression
-const ELITE_SCORE = 17000; // 100% mark for letter grade
-const STORAGE_KEY = 'skilldrills_fps_flick_shot_v2';
+const DRILL_DURATION = 45; // starting clock — a run grows past this by performing
+// Both of these were calibrated for a run that was hard-capped at 45s and so
+// could never climb far past level 15. With an uncapped run the old 250 made
+// difficulty outrun the player in roughly 30 hits, after which the rest of the
+// session was unwinnable flailing — modelled hit rate collapsed to ~14%.
+const POINTS_PER_LEVEL = 1800; // gradual climb: the player meets their ceiling, not a wall
+const ELITE_SCORE = 50000; // 100% mark for letter grade — rescaled for open-ended runs
+
+// The whole balance of the drill. The clock always drains at 1s/s on top of these.
+// Tuned against this drill's spawn cadence — copied to a drill with a different
+// hit rate they will either do nothing or make the run unkillable.
+//
+// TIME_PENALTY is OPT-IN, gated behind the "Time Penalty" toggle on /drills and
+// off by default. Simulation showed a penalty this size inverts session length
+// (elite 87s vs casual 100s): a strong player reaches high difficulty, where
+// everyone misses, far sooner. Off, session length rises with skill as intended;
+// on, it is a hard mode for players who find the drill too easy.
+const TIME_PER_HIT = 0.6;
+const TIME_PENALTY = 0.8;
+
+// Bumped from _v2: sessions are no longer a fixed 45s, so scores from the old
+// fixed-length build are not comparable to these and must not share a best.
+const STORAGE_KEY = 'skilldrills_fps_flick_shot_v3';
 const TARGET_COLOR = '#10b981'; // fixed tactical-sphere color — matches the drill's emerald identity
 
 const getSavedData = () => {
@@ -51,28 +72,34 @@ const saveData = (data) => {
 };
 
 
+// Every parameter decays exponentially from its level-1 value toward a floor it
+// never actually reaches, so difficulty keeps rising for as long as the player
+// survives. The old `Math.max(floor, base - curve * range)` tuning clamped every
+// one of these at p = 1 (level 15) — past that the drill stopped getting harder
+// at all, which is what let a strong run continue indefinitely.
+//
+// The floors are chosen so each value at p = 1 matches the old tuning almost
+// exactly (radius 13px, ttl 380ms, spawn 130/190ms, pad 3px): the first fifteen
+// levels feel identical to before, and the curve simply continues afterwards.
+// `ttl` is the terminal driver — it decays toward 90ms, far under human visual
+// reaction (~200ms), so every run ends eventually no matter who is playing.
 const getLevelConfig = (level, combo = 0) => {
-  const p = getDifficultyProgress(level); // 0 -> 1 across L1..L15
-  const curve = p * p; // ease-in — early levels stay approachable, back half ramps hard
+  const p = getDifficultyProgress(level); // 0 at L1, 1 at L15, unbounded above
 
   // Live "heat": on top of your level, a hot streak keeps tightening things further.
   // Scales with the same tiers as the score combo multiplier (1.0x -> 3.0x maps to 0 -> 1 heat),
   // so max heat lines up with the max 3.0x multiplier at combo 50. A miss/timeout resets combo
   // to 0, which cools heat back to your level's baseline — never below it.
+  // Applied as a proportion rather than a fixed subtraction: at high levels the old
+  // flat "-150ms" wiped out the entire remaining margin in one step.
   const heat = (getComboMultiplier(combo) - 1) / 2;
 
-  const baseRadius   = Math.max(13, 32 - curve * 19);     // 32 -> 13 px
-  const baseTtl      = Math.max(380, 1300 - curve * 920); // 1300 -> 380 ms
-  const baseSpawnMin = 480 - curve * 350;                 // 480 -> 130 ms
-  const baseSpawnMax = 680 - curve * 490;                 // 680 -> 190 ms
-  const baseHitPad   = Math.max(3, 12 - curve * 9);       // 12 -> 3 px
-
   return {
-    targetRadius:  Math.max(9,   baseRadius   - heat * 5),
-    ttl:           Math.max(260, baseTtl      - heat * 150),
-    spawnDelayMin: Math.max(90,  baseSpawnMin - heat * 70),
-    spawnDelayMax: Math.max(140, baseSpawnMax - heat * 90),
-    hitPad:        Math.max(1,   baseHitPad   - heat * 3),
+    targetRadius:  Math.max(4, ramp(32,   7,   p) * (1 - heat * 0.30)),
+    ttl:                       ramp(1300, 90,  p) * (1 - heat * 0.32),
+    spawnDelayMin:             ramp(480,  20,  p) * (1 - heat * 0.31),
+    spawnDelayMax:             ramp(680,  35,  p) * (1 - heat * 0.26),
+    hitPad:                    ramp(12,   0.2, p) * (1 - heat * 0.67),
   };
 };
 
@@ -110,7 +137,7 @@ const ABOUT_SECTIONS = [
     icon: Target,
     title: "What The Drill Tracks",
     paragraphs: [
-      "Average flick time tells you how quickly your motor cortex converts a spotted target into a completed click. Max combo shows how consistently you chain first-shot hits without a miss breaking your rhythm — a better predictor of in-game performance than raw accuracy alone. Peak level reached tells you how far into the 15-level curve your mechanics hold up before target size and time-to-live outpace your reaction speed."
+      "Average flick time tells you how quickly your motor cortex converts a spotted target into a completed click. Max combo shows how consistently you chain first-shot hits without a miss breaking your rhythm — a better predictor of in-game performance than raw accuracy alone. Peak level reached tells you how far up the curve your mechanics held before target size and time-to-live outpaced your reaction speed — the curve has no ceiling, so every run ends here eventually."
     ]
   },
   {
@@ -174,6 +201,7 @@ export default function ProFlickClient() {
   const [bestCombo, setBestCombo] = useState(0);
   const [bestLevel, setBestLevel] = useState(1);
   const [isNewBest, setIsNewBest] = useState(false);
+  const [penaltyEnabled, setPenaltyEnabled] = useState(false);
 
   const [analytics, setAnalytics] = useState({
     accuracy: 100, successfulHits: 0, missedClicks: 0, idleClicks: 0,
@@ -214,6 +242,7 @@ export default function ProFlickClient() {
     if (typeof window !== 'undefined') {
       setSoundEnabled(drillAudio.isEnabled());
       setFlashEnabled(drillFlash.isEnabled());
+      setPenaltyEnabled(drillPenalty.isEnabled());
       const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
       const isTouchCapable = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
       setIsTouchOnlyDevice(isTouchCapable && !hasFinePointer);
@@ -338,7 +367,7 @@ export default function ProFlickClient() {
     setAnalytics({
       accuracy: finalAccuracy, successfulHits: e.successfulHits, missedClicks: e.missedClicks,
       idleClicks: e.idleClicks, timeouts: e.timeouts, avgFlickMs, maxCombo: e.maxCombo,
-      finalLevel: e.level, grade
+      finalLevel: Math.floor(e.level), grade
     });
 
     setUiScore(e.score);
@@ -347,7 +376,7 @@ export default function ProFlickClient() {
     const isNewHigh = e.score > prevSaved.bestScore;
     setIsNewBest(isNewHigh);
 
-    const runBestLevel = Math.max(prevSaved.bestLevel, bestLevelRunRef.current);
+    const runBestLevel = Math.max(prevSaved.bestLevel, Math.floor(bestLevelRunRef.current));
     const updatedData = {
       bestScore: Math.max(prevSaved.bestScore, e.score),
       bestCombo: Math.max(prevSaved.bestCombo, e.maxCombo),
@@ -380,7 +409,7 @@ export default function ProFlickClient() {
     lastTimeRef.current = DRILL_DURATION;
 
     const saved = getSavedData();
-    const startLevel = getStartLevel(saved.bestLevel);
+    const startLevel = getStartLevel(); // always 1 — difficulty is never persisted
     bestLevelRunRef.current = startLevel;
 
     setAnalytics({
@@ -458,6 +487,7 @@ export default function ProFlickClient() {
 
           if (!tgt.active) {
             eRef.idleClicks++;
+            if (drillPenalty.isEnabled()) eRef.timeLeft -= TIME_PENALTY;
             eRef.combo = 0;
             eRef.screenShake = 6;
             triggerFlash();
@@ -476,7 +506,16 @@ export default function ProFlickClient() {
               const levelMult = 1 + getDifficultyProgress(eRef.level) * 0.5;
               eRef.score += Math.round(100 * getComboMultiplier(eRef.combo) * levelMult);
 
-              const rawLevel = Math.floor(eRef.score / POINTS_PER_LEVEL) + 1 + getComboBonusLevel(eRef.combo);
+              // A clean hit buys clock. Nothing ever takes clock away: a miss simply
+              // earns nothing while the timer keeps draining, which keeps the drill's
+              // long-standing "no negative score, no negative time" contract intact.
+              eRef.timeLeft += TIME_PER_HIT;
+
+              // Continuous level — no Math.floor, so difficulty rises with every point
+              // instead of stepping at each 250-point threshold, and no combo bonus
+              // level, which used to add a whole level every 4th consecutive hit. Both
+              // were sudden jumps. Combo still drives the score multiplier and heat.
+              const rawLevel = (eRef.score / POINTS_PER_LEVEL) + 1;
               eRef.level = Math.max(eRef.level, rawLevel);
               bestLevelRunRef.current = Math.max(bestLevelRunRef.current, eRef.level);
 
@@ -491,6 +530,7 @@ export default function ProFlickClient() {
               eRef.nextSpawnTime = performance.now() + (nextConfig.spawnDelayMin + Math.random() * (nextConfig.spawnDelayMax - nextConfig.spawnDelayMin));
             } else {
               eRef.missedClicks++;
+              if (drillPenalty.isEnabled()) eRef.timeLeft -= TIME_PENALTY;
               eRef.combo = 0;
               eRef.screenShake = 6;
               triggerFlash();
@@ -598,6 +638,7 @@ export default function ProFlickClient() {
             tgt.active = false;
             e.timeouts++;
             e.totalActions++;
+            if (drillPenalty.isEnabled()) e.timeLeft -= TIME_PENALTY;
             e.combo = 0;
             e.screenShake = 6;
             triggerFlash();
@@ -873,10 +914,10 @@ export default function ProFlickClient() {
               icon={Crosshair}
               accent="emerald"
               title="Pro Flick Trainer"
-              subtitle="Macro Flicking & Target Acquisition • 15 Levels"
+              subtitle="Macro Flicking & Target Acquisition • Endless Levels"
               rules={[
                 { icon: Target, accent: 'emerald', title: 'Objective', text: 'Snap & Click Targets' },
-                { icon: AlertCircle, accent: 'red', title: 'Failure Rule', text: 'Miss / Timeout → Combo Reset' },
+                { icon: AlertCircle, accent: 'red', title: 'Failure Rule', text: penaltyEnabled ? 'Miss / Timeout → Combo Reset, -0.8s' : 'Miss / Timeout → Combo Reset' },
               ]}
               sensitivity={{ value: universalSens, onChange: setUniversalSens, cmPer360 }}
               stats={[
@@ -894,78 +935,23 @@ export default function ProFlickClient() {
             <DrillCountdown value={countdownValue} subtitle="GET READY" />
           )}
 
-          {/* END SCREEN */}
+          {/* END SCREEN — universal card, shared by every drill */}
           {gameState === 'gameOver' && analytics.grade && (
-            <div className="absolute inset-0 z-40 flex bg-neutral-950/98 select-none font-sans" style={{ background: 'rgba(5,5,8,0.97)' }} onPointerDown={e => e.stopPropagation()}>
-              
-              {/* Left Grade Panel */}
-              <div className="w-[36%] flex flex-col items-center justify-center gap-1 border-r border-white/5 px-4" style={{ background: 'radial-gradient(ellipse 260px 200px at 50% 30%, rgba(16,185,129,.12), transparent 70%)' }}>
-                {isNewBest && (
-                  <span className="text-[9.5px] font-bold text-yellow-400 bg-yellow-500/10 border border-yellow-500/25 px-2.5 py-0.5 rounded-full mb-1 animate-pulse">
-                    NEW BEST
-                  </span>
-                )}
-                <div className={`text-5xl sm:text-6xl font-black leading-none ${analytics.grade.color}`}>
-                  {analytics.grade.letter}
-                </div>
-                <div className="text-[10px] uppercase tracking-widest text-slate-500 text-center font-bold mt-1">
-                  {analytics.grade.label}
-                </div>
-                <div className="text-3xl sm:text-4xl font-black text-white mt-2 tabular-nums">
-                  {uiScore}
-                </div>
-                <div className="text-[9px] uppercase tracking-widest text-slate-500">Points</div>
-              </div>
-
-              {/* Right Stats & Actions Panel */}
-              <div className="flex-1 flex flex-col justify-center gap-3 px-6 py-4 min-w-0">
-                
-                {/* 4 Stat Tiles */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.accuracy}%</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Accuracy</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.avgFlickMs}<span className="text-[10px] text-gray-500">ms</span></p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Avg Flick</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.maxCombo}x</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Max Combo</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">Lv. {analytics.finalLevel}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Peak Level</p>
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex gap-2">
-                  <button 
-                    onClick={enterDrill}
-                    className="flex-1 py-3 rounded-[13px] bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold text-xs uppercase tracking-wide cursor-pointer transition-transform active:scale-[0.98] shadow-md flex items-center justify-center gap-1.5"
-                  >
-                    <RefreshCw className="w-3.5 h-3.5" /> Play Again
-                  </button>
-                  <button 
-                    onClick={shareScore} 
-                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform" 
-                    title="Share Score"
-                  >
-                    <Share2 className="w-4 h-4" />
-                  </button>
-                  <button 
-                    onClick={handleExitDrill} 
-                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform" 
-                    title="Exit Fullscreen & Return"
-                  >
-                    <LogOut className="w-4 h-4 text-red-400" />
-                  </button>
-                </div>
-
-              </div>
-            </div>
+            <DrillResultCard
+              accent="emerald"
+              grade={analytics.grade}
+              score={uiScore}
+              isNewBest={isNewBest}
+              stats={[
+                { value: analytics.accuracy, suffix: '%', label: 'Accuracy' },
+                { value: analytics.avgFlickMs, suffix: 'ms', label: 'Avg Flick' },
+                { value: `${analytics.maxCombo}x`, label: 'Max Combo' },
+                { value: `Lv. ${analytics.finalLevel}`, label: 'Peak Level' },
+              ]}
+              onPlayAgain={enterDrill}
+              onShare={shareScore}
+              onExit={handleExitDrill}
+            />
           )}
 
         </div>

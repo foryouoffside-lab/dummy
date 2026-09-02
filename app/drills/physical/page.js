@@ -1,4 +1,5 @@
 import PhysicalDrillsClient from './PhysicalDrillsClient';
+import { getAlternateLanguages } from '@/lib/i18n/locales';
 
 // ============================================================
 // SEO METADATA OPTIMIZATION — /drills/physical (Sector Hub)
@@ -35,6 +36,7 @@ export const metadata = {
   ],
   alternates: {
     canonical: 'https://skilldrills.online/drills/physical',
+    languages: getAlternateLanguages('/drills/physical'),
   },
   robots: { index: true, follow: true },
   openGraph: {

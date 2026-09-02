@@ -17,20 +17,26 @@ import { getPlayerName } from '../../../../lib/leaderboard';
 import { drillAudio } from '../../../../lib/drillAudio';
 import { drillFlash } from '../../../../lib/drillFlash';
 import { drillTimeout } from '../../../../lib/drillTimeout';
-import { getStartLevel, getDifficultyProgress, getComboBonusLevel } from '../../../../lib/drillDifficulty';
+import { drillPenalty } from '../../../../lib/drillPenalty';
+import { getStartLevel, getDifficultyProgress, ramp } from '../../../../lib/drillDifficulty';
 import { getComboMultiplier, getFpsScoreGrade } from '../../../../lib/scoringEngine';
 import { createBackdropCache, getCanvasDpr, drawPulseRing, drawTacticalTarget } from '../../../../lib/canvasFx';
 import DrillFooter from '../../../../components/drill/DrillFooter';
 import DrillCountdown from '../../../../components/drill/DrillCountdown';
 import DrillAccordion from '../../../../components/drill/DrillAccordion';
 import FpsStartCard from '../../../../components/drill/FpsStartCard';
+import DrillResultCard from '../../../../components/drill/DrillResultCard';
 import useUnexpectedExitGuard from '../../../../lib/useUnexpectedExitGuard';
 
-const DRILL_DURATION = 45; // 45 seconds focused duration
-const POINTS_PER_LEVEL = 200;
-const ELITE_SCORE = 17000;
-const STORAGE_KEY = 'skilldrills_fps_vertical_air_track_v2';
-const OLD_STORAGE_KEY = 'verticalAirTrack_bestScore';
+// ============================================================
+// TUNING CONSTANTS
+// ============================================================
+const DRILL_DURATION = 45; // starting clock only; a run grows past this
+const POINTS_PER_LEVEL = 1400; // 200 -> 1400 (7x)
+const ELITE_SCORE = 54000; // 18000 -> 54000 (3x)
+const TIME_PER_HIT = 0.4; // +0.4s on target destruction
+const TIME_PENALTY = 0.6; // opt-in on target dropped past bottom boundary
+const STORAGE_KEY = 'skilldrills_fps_vertical_air_track_v3';
 
 const RELATED_DRILLS = [
   { id: "flick-shot-training", name: "Pro Flick Trainer", cat: "FPS Flicking", desc: "Snap to targets in time-attack mode with precision flicking.", href: "/drills/fps/flick-shot-training" },
@@ -45,8 +51,6 @@ const getSavedData = () => {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) return { bestScore: 0, bestCombo: 0, bestLevel: 1, totalSessions: 0, ...JSON.parse(raw) };
-    const legacy = localStorage.getItem(OLD_STORAGE_KEY);
-    if (legacy) return { bestScore: parseInt(legacy, 10) || 0, bestCombo: 0, bestLevel: 1, totalSessions: 0 };
     return { bestScore: 0, bestCombo: 0, bestLevel: 1, totalSessions: 0 };
   } catch (e) {
     return { bestScore: 0, bestCombo: 0, bestLevel: 1, totalSessions: 0 };
@@ -59,25 +63,81 @@ const saveData = (data) => {
   } catch (e) {}
 };
 
-
-const getLevelConfig = (level) => {
-  const p = getDifficultyProgress(level); // 0 -> 1 across L1..L15
+const getLevelConfig = (level, combo = 0) => {
+  const p = getDifficultyProgress(level); // 0 at L1, 1 at L15, unbounded above
+  const heat = (getComboMultiplier(combo) - 1) / 2;
   return {
-    radius:       Math.max(12, 32 - p * 20),   // 32 -> 12 px
-    gravity:      700 + p * 400,              // 700 -> 1100 px/s²
-    power:        650 + p * 300,              // 650 -> 950 px/s
-    evasionProb:  0.15 + p * 0.65,            // 0.15 -> 0.80
+    radius:       Math.max(10, ramp(32, 12, p) * (1 - heat * 0.15)),
+    gravity:      ramp(700, 1100, p) * (1 + heat * 0.15),
+    power:        ramp(650, 950, p) * (1 + heat * 0.15),
+    evasionProb:  Math.min(0.85, 0.15 + p * 0.65 + heat * 0.10),
     maxHp:        100,
-    damageRate:   Math.max(140, 300 - p * 160), // Takes longer to kill target at higher level
+    damageRate:   Math.max(120, ramp(300, 140, p) * (1 - heat * 0.15)),
   };
 };
 
+// ============================================================
+// ACCORDION DATA
+// ============================================================
+const RULES_ITEMS = [
+  { num: "1", text: "Airborne Target", highlight: "Destroy Target (+100 PTS / +0.4s)", result: "Track Parabolic Trajectory" },
+  { num: "2", text: "Height Bonus", highlight: "Up to +75 PTS", result: "Higher Destructions Award More Points" },
+  { num: "3", text: "Failure Rule", highlight: "Target Drop (-0.6s)", result: "Resets Combo Streak" },
+  { num: "4", text: "Level Progression", highlight: "+1 Level / 1400 PTS", result: "Continuous Dynamic Gravity & Speed" }
+];
+
+const ABOUT_INTRO = [
+  "Vertical Air-Track trains the specialized eye-hand tracking mechanics required to hit airborne targets moving in parabolic, gravity-governed trajectories.",
+  "By practicing continuous Y-axis tracking against erratic upward evasions, players develop smooth vertical mouse control essential for Apex Legends, Overwatch 2, and Halo Infinite."
+];
+
+const ABOUT_CARDS = [
+  { icon: Users, iconBg: "bg-red-600", title: "Who Should Use This?", text: "FPS players in movement shooters (Apex, Overwatch 2, Halo) who struggle to track jump-padded, grappled, or airborne opponents." },
+  { icon: TrendingUp, iconBg: "bg-fuchsia-600", title: "Skills Trained", text: "Y-axis smooth pursuit, gravity prediction, vertical velocity matching, and mid-air evasion compensation." },
+  { icon: Zap, iconBg: "bg-orange-600", title: "Why It Is Difficult", text: "Human wrists naturally track horizontally with ease, but vertical smooth pursuit requires whole-arm and fingertip micro-repositioning." }
+];
+
+const ABOUT_SECTIONS = [
+  {
+    icon: Eye,
+    title: "The Geometry of Airborne Fights",
+    paragraphs: [
+      "Airborne opponents change vertical velocity continuously under gravity. Training vertical pursuit conditions your tracking arm to decelerate at the apex of a jump and accelerate on the descent."
+    ]
+  },
+  {
+    icon: Target,
+    title: "Height Advantage Scoring",
+    paragraphs: [
+      "Eliminating targets while they are high in their jump arc awards up to +75 bonus points. Punish opponents early in their jump trajectory before they hit the ground."
+    ]
+  }
+];
+
+const FAQ_ITEMS = [
+  { q: "What is vertical aim training in FPS games?", a: "Vertical aim training focuses on the Y-axis (up and down) movement of your mouse, which is systematically under-trained compared to horizontal tracking. Airborne targets require vertical mouse tracking to follow cleanly in games like Apex Legends and Overwatch 2." },
+  { q: "What is popcorn tracking and does this drill train it?", a: "Popcorn tracking is tracking targets that bounce or hop vertically, creating irregular parabolic movement patterns — similar to popcorn kernels popping. This drill trains the specific vertical mouse control needed to track bouncing aerial movement." },
+  { q: "How does vertical aim training help in Apex Legends?", a: "Apex Legends features high vertical movement — grappling hooks, jump pads, Horizon lifts, and air gliding all create aerial targets. Training vertical aim specifically enables you to track and punish opponents in the air rather than losing crosshair alignment." },
+  { q: "What is an elevator peek in FPS shooters?", a: "An elevator peek is when an opponent uses a building's height advantage or zipline to appear above your crosshair level unexpectedly. This drill trains the upward flick and hold motion needed to instantly adjust vertical crosshair position." },
+  { q: "Why is vertical tracking harder than horizontal tracking?", a: "Horizontal mouse movement is practiced constantly in daily computer use. Vertical mouse movement for precise aim is an unnatural motion that receives far less daily muscle memory training, making dedicated vertical practice essential." },
+  { q: "How do Overwatch 2 players train aerial tracking?", a: "Overwatch players practice tracking high-mobility heroes like Pharah, Echo, Mercy, or Winston during leaps. Using vertical aim trainers helps smooth out Y-axis tracking adjustments." },
+  { q: "Does vertical aim training help in Halo Infinite?", a: "Yes, Halo Infinite features grapples, repulsors, and jump pads that launch players high into the air. Vertical tracking practice helps you land consistent shots on airborne targets." },
+  { q: "How are errors penalised in Vertical Air-Track?", a: "Losing tracking contact resets your active combo streak. When the optional Time Penalty setting is enabled, allowing an airborne target to drop past the bottom boundary without destroying it deducts 0.6s from your timer." },
+  { q: "How often should I train vertical tracking?", a: "We recommend 10 to 15 minutes of vertical tracking 3 to 4 times per week to develop smooth Y-axis control and reduce wrist fatigue during vertical engagements." },
+  { q: "Is this drill free?", a: "Yes, this Vertical Air-Track Trainer is 100% free, runs directly in your web browser, and requires no downloads or accounts." },
+  { q: "What skills does this drill improve?", a: "It trains vertical smooth pursuit, parabolic trajectory prediction, Y-axis crosshair control, and mid-air target tracking under gravity." }
+];
+
+// ============================================================
+// MAIN COMPONENT
+// ============================================================
 export default function VerticalAirTrackClient() {
   const [gameState, setGameState] = useState('start'); // start | countdown | playing | gameOver
   const [countdownValue, setCountdownValue] = useState(3);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
+  const [penaltyEnabled, setPenaltyEnabled] = useState(false);
   const [pointerLocked, setPointerLocked] = useState(false);
   const [openAccordion, setOpenAccordion] = useState(null);
   const [isTouchOnlyDevice, setIsTouchOnlyDevice] = useState(false);
@@ -137,6 +197,7 @@ export default function VerticalAirTrackClient() {
     if (typeof window !== 'undefined') {
       setSoundEnabled(drillAudio.isEnabled());
       setFlashEnabled(drillFlash.isEnabled());
+      setPenaltyEnabled(drillPenalty.isEnabled());
       const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
       const isTouchCapable = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
       setIsTouchOnlyDevice(isTouchCapable && !hasFinePointer);
@@ -160,8 +221,8 @@ export default function VerticalAirTrackClient() {
     setTimeout(() => setFlashes((f) => f.filter((x) => x.id !== id)), 480);
   }, []);
 
-  const spawnTarget = useCallback((width, height, currentLevel) => {
-    const cfg = getLevelConfig(currentLevel);
+  const spawnTarget = useCallback((width, height, currentLevel, currentCombo = 0) => {
+    const cfg = getLevelConfig(currentLevel, currentCombo);
     const radius = cfg.radius;
     const gravity = cfg.gravity;
     const power = cfg.power;
@@ -218,7 +279,7 @@ export default function VerticalAirTrackClient() {
     const e = engine.current;
     const finalAccuracy = e.totalTicks > 0 ? Math.round((e.onTargetTicks / e.totalTicks) * 100) : 100;
     const missedTicks = e.totalTicks - e.onTargetTicks;
-    const peakLevel = bestLevelRunRef.current;
+    const peakLevel = Math.floor(bestLevelRunRef.current);
     const grade = getFpsScoreGrade(e.score, ELITE_SCORE);
 
     setAccuracy(finalAccuracy);
@@ -265,8 +326,7 @@ export default function VerticalAirTrackClient() {
     setTimeLeft(DRILL_DURATION);
     lastTimeRef.current = DRILL_DURATION;
 
-    const saved = getSavedData();
-    const startLvl = getStartLevel(saved.bestLevel);
+    const startLvl = getStartLevel();
     setLevel(startLvl);
     bestLevelRunRef.current = startLvl;
 
@@ -275,7 +335,7 @@ export default function VerticalAirTrackClient() {
 
     engine.current = {
       crosshair: { x: w / 2, y: h / 2, initialized: true },
-      targets: [spawnTarget(w, h, startLvl)],
+      targets: [spawnTarget(w, h, startLvl, 0)],
       level: startLvl,
       score: 0,
       timeLeft: DRILL_DURATION,
@@ -327,8 +387,6 @@ export default function VerticalAirTrackClient() {
     setGameState('start');
   }, []);
 
-  // Stop the drill if the player leaves any way other than the in-app Exit
-  // button (back gesture, tab switch, Esc) instead of running invisibly.
   const { markIntentionalExit } = useUnexpectedExitGuard({
     active: gameState === 'playing' || gameState === 'countdown',
     onUnexpectedExit: handleExitDrill,
@@ -463,10 +521,10 @@ export default function VerticalAirTrackClient() {
           lastTimeRef.current = intTime;
         }
 
-        const cfg = getLevelConfig(e.level);
+        const cfg = getLevelConfig(e.level, e.combo);
         const targetCountRequired = e.level >= 5 ? 2 : 1;
         while (e.targets.length < targetCountRequired) {
-          e.targets.push(spawnTarget(width, height, e.level));
+          e.targets.push(spawnTarget(width, height, e.level, e.combo));
         }
 
         // Physics Updates
@@ -512,6 +570,7 @@ export default function VerticalAirTrackClient() {
               continue;
             }
             e.timeouts++;
+            if (drillPenalty.isEnabled()) e.timeLeft -= TIME_PENALTY;
             e.combo = 0;
             e.screenShake = 10;
             setCombo(0);
@@ -560,14 +619,15 @@ export default function VerticalAirTrackClient() {
               const levelMult = 1 + getDifficultyProgress(e.level) * 0.5;
               const gained = Math.round((baseScore + heightBonus) * getComboMultiplier(e.combo) * levelMult);
               e.score += gained;
+              e.timeLeft += TIME_PER_HIT; // +0.4s
               
               setScore(e.score);
               setCombo(e.combo);
 
-              const rawLevel = Math.floor(e.score / POINTS_PER_LEVEL) + 1 + getComboBonusLevel(e.combo);
+              const rawLevel = (e.score / POINTS_PER_LEVEL) + 1;
               e.level = Math.max(e.level, rawLevel);
               bestLevelRunRef.current = Math.max(bestLevelRunRef.current, e.level);
-              setLevel(e.level);
+              setLevel(Math.floor(e.level));
 
               drillAudio.playHit();
               createExplosion(hitTarget.x, hitTarget.y, '#00ff88');
@@ -622,7 +682,7 @@ export default function VerticalAirTrackClient() {
 
           ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
           ctx.fillRect(hbX, hbY, hbW, hbH);
-
+          
           const hpPct = Math.max(0, t.hp / t.maxHp);
           ctx.fillStyle = isHovered ? '#00ff88' : '#ef4444';
           ctx.fillRect(hbX, hbY, hbW * hpPct, hbH);
@@ -719,7 +779,7 @@ export default function VerticalAirTrackClient() {
       cancelAnimationFrame(animationRef.current);
       resizeObserver.disconnect();
     };
-  }, [gameState, pointerLocked, spawnTarget, createExplosion, createSparks, createHitMarker, triggerFlash, endGame]);
+  }, [gameState, pointerLocked, spawnTarget, triggerFlash, endGame]);
 
   const shareDrillLink = useCallback(async () => {
     const url = 'https://skilldrills.online/drills/fps/vertical-air-track';
@@ -729,16 +789,16 @@ export default function VerticalAirTrackClient() {
         bestScore,
         accuracy: analytics.accuracy,
         bestCombo: analytics.bestCombo,
-        rating: { letter: analytics.grade?.grade || 'C', label: analytics.grade?.label || 'Keep Going', emoji: '🎯' },
+        rating: { letter: analytics.grade?.letter || 'C', label: analytics.grade?.label || 'Keep Going', emoji: '🎯' },
         newBest: isNewBest,
-        drillName: 'Vertical Air Track',
+        drillName: 'Vertical Air-Track',
         playerName: getPlayerName(),
       });
       await shareScoreCard(url, canvas);
     } catch (e) {
-      const text = `🎯 I scored ${score} PTS on Vertical Air Track! Accuracy: ${analytics.accuracy}%. Practice your aerial tracking at skilldrills.online!`;
+      const text = `🎯 I scored ${score} PTS on Vertical Air-Track! Accuracy: ${analytics.accuracy}%. Master your aerial tracking at skilldrills.online!`;
       if (typeof navigator !== 'undefined' && navigator.share) {
-        navigator.share({ title: 'My Vertical Air Track Score', text, url }).catch(() => {});
+        navigator.share({ title: 'My Vertical Air-Track Score', text, url }).catch(() => {});
       } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
         navigator.clipboard.writeText(text);
         alert('Score card copied to clipboard!');
@@ -754,13 +814,13 @@ export default function VerticalAirTrackClient() {
         {!isFullscreen && (
           <div className="text-center">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              VERTICAL AIR TRACK
+              VERTICAL AIR-TRACK
               <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
-                Vertical Aim Trainer
+                Vertical Tracking Trainer
               </span>
             </h1>
             <p className="text-xs text-slate-400 mt-1">
-              Hardware Raw Input • 15 Difficulty Levels
+              Hardware Raw Input • Endless Level Progression
             </p>
           </div>
         )}
@@ -774,11 +834,11 @@ export default function VerticalAirTrackClient() {
             </div>
             <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
-              <div className={`text-lg sm:text-xl font-black tabular-nums ${timeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>{timeLeft}s</div>
+              <div className={`text-lg sm:text-xl font-black tabular-nums ${timeLeft <= 10 ? "text-red-400 animate-pulse" : "text-white"}`}>{timeLeft}s</div>
             </div>
             <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Accuracy</div>
-              <div className="text-lg sm:text-xl font-black text-blue-400 tabular-nums">{accuracy}%</div>
+              <div className="text-lg sm:text-xl font-black text-red-400 tabular-nums">{accuracy}%</div>
             </div>
             <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
@@ -793,17 +853,15 @@ export default function VerticalAirTrackClient() {
           onContextMenu={(e) => { if (gameState === 'playing' || gameState === 'countdown') e.preventDefault(); }}
           className={`relative overflow-hidden flex flex-col transition-all duration-150 select-none bg-[#080811] text-white border border-white/10 ${
             isFullscreen 
-              ? 'fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#080811] rounded-none border-none flex flex-col items-center justify-center' 
-              : 'w-full rounded-2xl bg-[#080811] aspect-video min-h-[460px] sm:min-h-[500px] max-h-[88vh] relative overflow-hidden flex flex-col'
+              ? "fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#080811] rounded-none border-none flex flex-col items-center justify-center" 
+              : "w-full rounded-2xl bg-[#080811] aspect-video min-h-[460px] sm:min-h-[500px] max-h-[88vh] relative overflow-hidden flex flex-col"
           }`}
           style={{ touchAction: (gameState === 'playing' || gameState === 'countdown') ? 'none' : 'auto' }}
         >
-          {/* Flash Overlays */}
           {flashes.map((f) => (
             <div key={f.id} className="fx-flash fx-flash-red" />
           ))}
 
-          {/* IN-BOX OVERLAY HUD */}
           {(gameState === 'playing' || gameState === 'countdown') && (
             <>
               <div className="absolute top-4 left-4 z-30 pointer-events-none">
@@ -813,12 +871,11 @@ export default function VerticalAirTrackClient() {
 
               <div className="absolute top-4 right-4 z-30 pointer-events-none text-right">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Time</p>
-                <p className={`text-2xl sm:text-3xl font-bold tabular-nums leading-tight ${timeLeft <= 10 ? 'text-red-400' : 'text-white'}`}>{timeLeft}s</p>
+                <p className={`text-2xl sm:text-3xl font-bold tabular-nums leading-tight ${timeLeft <= 10 ? "text-red-400" : "text-white"}`}>{timeLeft}s</p>
               </div>
             </>
           )}
 
-          {/* IN-GAME HUD SOUND TOGGLE */}
           {(gameState === 'playing' || gameState === 'countdown') && (
             <div className="absolute bottom-4 right-4 z-40 flex items-center gap-2">
               <button
@@ -877,109 +934,55 @@ export default function VerticalAirTrackClient() {
           <canvas 
             ref={canvasRef} 
             onClick={() => { if (gameState === 'playing' && !pointerLocked) resumeDrill(); }}
-            className={`block absolute top-0 left-0 w-full h-full touch-none z-10 ${gameState === 'playing' ? 'cursor-none' : ''}`} 
+            className={`block absolute top-0 left-0 w-full h-full touch-none z-10 ${gameState === "playing" ? "cursor-none" : ""}`}
           />
 
           {/* Start Overlay */}
           {gameState === 'start' && (
             <FpsStartCard
-              icon={Target}
+              icon={Crosshair}
               accent="redOrange"
-              title="Vertical Air Track"
-              subtitle="Hardware Raw Input • 15 Difficulty Levels"
+              title="Vertical Air-Track"
+              subtitle="Hardware Raw Input • Endless Level Progression"
               rules={[
-                { icon: Target, accent: 'redOrange', title: 'Objective', text: 'Track Airborne Targets' },
-                { icon: AlertCircle, accent: 'red', title: 'Failure Rule', text: 'Target Drop → Resets Combo' },
+                { icon: Target, accent: "red", title: "Objective", text: "Hold Laser On Airborne Targets" },
+                { icon: Zap, accent: "orange", title: "Height Bonus", text: "Up to +75 PTS at Jump Peak" },
+                { icon: AlertCircle, accent: "red", title: "Failure Rule", text: penaltyEnabled ? "Target Drop → Resets Combo, -0.6s" : "Target Drop → Resets Combo" },
               ]}
               sensitivity={{ value: universalSens, onChange: setUniversalSens, cmPer360 }}
               stats={[
-                { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
-                { icon: Flame, label: 'Best Combo', value: `${bestCombo}x`, color: 'text-red-400', accent: 'redOrange' },
-                { icon: TrendingUp, label: 'Best Level', value: `Lv. ${bestLevel}`, color: 'text-blue-400', accent: 'blue' },
+                { icon: Trophy, label: "Best Score", value: bestScore, color: "text-white", accent: "slate" },
+                { icon: Flame, label: "Best Combo", value: `${bestCombo}x`, color: "text-red-400", accent: "red" },
+                { icon: TrendingUp, label: "Best Level", value: `Lv. ${bestLevel}`, color: "text-blue-400", accent: "blue" },
               ]}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
             />
           )}
 
-          {/* Game Over / Result Overlay */}
+          {/* END SCREEN — Universal Result Card */}
           {gameState === 'gameOver' && analytics.grade && (
-            <div className="absolute inset-0 z-40 flex bg-neutral-950/98 select-none font-sans" style={{ background: 'rgba(5,5,8,0.97)' }} onPointerDown={e => e.stopPropagation()}>
-              
-              {/* Left Grade Panel */}
-              <div className="w-[36%] flex flex-col items-center justify-center gap-1 border-r border-white/5 px-4" style={{ background: 'radial-gradient(ellipse 260px 200px at 50% 30%, rgba(239,68,68,.12), transparent 70%)' }}>
-                {isNewBest && (
-                  <span className="text-[9.5px] font-bold text-yellow-400 bg-yellow-500/10 border border-yellow-500/25 px-2.5 py-0.5 rounded-full mb-1 animate-pulse">
-                    NEW BEST
-                  </span>
-                )}
-                <div className={`text-5xl sm:text-6xl font-black leading-none ${analytics.grade.color}`}>
-                  {analytics.grade.grade}
-                </div>
-                <div className="text-[10px] uppercase tracking-widest text-slate-500 text-center font-bold mt-1">
-                  {analytics.grade.label}
-                </div>
-                <div className="text-3xl sm:text-4xl font-black text-white mt-2 tabular-nums">
-                  {score}
-                </div>
-                <div className="text-[9px] uppercase tracking-widest text-slate-500">Points</div>
-              </div>
-
-              {/* Right Stats & Actions Panel */}
-              <div className="flex-1 flex flex-col justify-center gap-3 px-6 py-4 min-w-0">
-                
-                {/* Stat Tiles */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.accuracy}%</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Accuracy</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.successfulHits}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Targets Destroyed</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.bestCombo}x</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Max Combo</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">Lv. {analytics.levelReached}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Peak Level</p>
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex gap-2">
-                  <button 
-                    onClick={enterDrill} 
-                    className="flex-1 py-3 rounded-[13px] bg-gradient-to-r from-red-600 to-orange-600 text-white font-bold text-xs uppercase tracking-wide cursor-pointer transition-transform active:scale-[0.98] shadow-md flex items-center justify-center gap-1.5"
-                  >
-                    <RefreshCw className="w-3.5 h-3.5" /> Play Again
-                  </button>
-                  <button 
-                    onClick={shareDrillLink} 
-                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform" 
-                    title="Share Score"
-                  >
-                    <Share2 className="w-4 h-4" />
-                  </button>
-                  <button 
-                    onClick={handleExitDrill} 
-                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform" 
-                    title="Exit Fullscreen & Return"
-                  >
-                    <LogOut className="w-4 h-4 text-red-400" />
-                  </button>
-                </div>
-
-              </div>
-            </div>
+            <DrillResultCard
+              accent="red"
+              grade={analytics.grade}
+              score={score}
+              isNewBest={isNewBest}
+              stats={[
+                { value: analytics.accuracy, suffix: "%", label: "Tracking Accuracy" },
+                { value: analytics.successfulHits, label: "Targets Destroyed" },
+                { value: `${analytics.bestCombo}x`, label: "Max Combo" },
+                { value: `Lv. ${analytics.levelReached}`, label: "Peak Level" },
+              ]}
+              onPlayAgain={enterDrill}
+              onShare={shareDrillLink}
+              onExit={handleExitDrill}
+            />
           )}
         </div>
 
-        {/* ACCORDIONS */}
+        {/* ── ACCORDIONS ── */}
         {!isFullscreen && (
-          <div className="[&>div]:!mt-0">
+          <div className="[&>div]:!mt-0 font-sans">
             <DrillAccordion
               id="rules"
               title="Drill Instructions & Scoring System"
@@ -987,70 +990,52 @@ export default function VerticalAirTrackClient() {
               onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <RuleItem num="1" text="Target Hit" highlight="+100 PTS Base" result="Destroy target by tracking" />
-                <RuleItem num="2" text="Precision Height Bonus" highlight="Up to +75 PTS" result="Hit targets at peak height" />
-                <RuleItem num="3" text="Combo System" highlight="Up to 3.0x Multiplier" result="Builds up every consecutive hit" />
-                <RuleItem num="4" text="Timeouts & Drops" highlight="Resets Combo" result="No time or point loss" />
+                {RULES_ITEMS.map((item, i) => (
+                  <RuleItem key={i} num={item.num} text={item.text} highlight={item.highlight} result={item.result} />
+                ))}
               </div>
             </DrillAccordion>
 
             <DrillAccordion
               id="about"
-              title="About Vertical Air Tracking"
+              title="About Vertical Air-Track"
               isOpen={openAccordion === 'about'}
               onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
             >
-              <div className="space-y-8 font-sans">
+              <div className="space-y-8">
                 <section>
                   <h4 className="text-base font-bold text-white mb-2 flex items-center gap-2">
-                    <Eye className="w-4 h-4 text-blue-400" /> What Is Vertical Aim Training?
+                    <Crosshair className="w-4 h-4 text-red-400" /> What Is Vertical Air-Track?
                   </h4>
-                  <p className="text-sm leading-relaxed mb-3">
-                    <strong>Vertical Aim Training</strong> is a mechanical motor coordination drill focused entirely on the y-axis. Unlike traditional aim drills that emphasize horizontal movements (x-axis), a vertical trainer isolates the muscles in your arm, wrist, and fingers required to translate your mouse up and down cleanly.
-                  </p>
-                  <p className="text-sm leading-relaxed">
-                    By repeatedly performing <strong>air tracking training</strong>, players condition their y-axis tracking control to follow airborne targets in mobility shooters like Apex Legends and Overwatch 2.
-                  </p>
+                  {ABOUT_INTRO.map((para, i) => (
+                    <p key={i} className={`text-sm leading-relaxed text-gray-300 ${i < ABOUT_INTRO.length - 1 ? "mb-3" : ""}`}>{para}</p>
+                  ))}
                 </section>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
-                    <div className="flex items-center gap-2.5 mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Who Should Use This?</h5>
+                  {ABOUT_CARDS.map((card, i) => (
+                    <div key={i} className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                      <div className="flex items-center gap-2.5 mb-2">
+                        <div className={`w-7 h-7 rounded-lg ${card.iconBg} flex items-center justify-center`}>
+                          <card.icon className="w-3.5 h-3.5 text-white" />
+                        </div>
+                        <h5 className="text-xs font-bold text-white">{card.title}</h5>
+                      </div>
+                      <p className="text-xs text-gray-300 leading-relaxed">{card.text}</p>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Esports athletes, entry fraggers, and players facing jumping or airborne enemies in games like Apex Legends, Overwatch 2, and Halo Infinite.</p>
-                  </div>
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
-                    <div className="flex items-center gap-2.5 mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-fuchsia-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Skills Trained</h5>
-                    </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Vertical tracking, popcorn tracking, arc prediction, y-axis alignment correction, and airborne movement prediction.</p>
-                  </div>
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
-                    <div className="flex items-center gap-2.5 mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-orange-600 flex items-center justify-center"><Zap className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Why It Is Harder</h5>
-                    </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Human physiology naturally adapts to horizontal arm swings. Vertical translation triggers unique muscle groups, requiring focused practice to build muscle memory.</p>
-                  </div>
+                  ))}
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-2">
-                  <div>
-                    <h4 className="font-bold text-white text-base mb-2">How To Improve Vertical Tracking</h4>
-                    <p className="text-xs text-gray-400 leading-relaxed">
-                      To build optimal vertical control, avoid tensing your wrist. Maintain a relaxed grip and sweep your entire forearm for large y-axis adjustments while using your fingers for micro-corrections near the apex of the arc.
-                    </p>
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-white text-base mb-2">How Pro Players Train Air Tracking</h4>
-                    <p className="text-xs text-gray-400 leading-relaxed">
-                      Top professional players practice tracking targets in smooth arcs. They use air tracking trainers to isolate gravity-affected trajectories, standardizing their target leading and smoothing out crosshair stutter.
-                    </p>
-                  </div>
-                </div>
+                {ABOUT_SECTIONS.map((section, i) => (
+                  <section key={i}>
+                    <h4 className="text-base font-bold text-white mb-2 flex items-center gap-2">
+                      <section.icon className="w-4 h-4 text-red-400" /> {section.title}
+                    </h4>
+                    {section.paragraphs.map((para, j) => (
+                      <p key={j} className={`text-sm leading-relaxed text-gray-300 ${j < section.paragraphs.length - 1 ? "mb-3" : ""}`}>{para}</p>
+                    ))}
+                  </section>
+                ))}
               </div>
             </DrillAccordion>
 
@@ -1061,30 +1046,18 @@ export default function VerticalAirTrackClient() {
               onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FAQItem q="What is vertical aim training in FPS games?" a="Vertical aim training focuses on the Y-axis (up and down) movement of your mouse, which is systematically under-trained compared to horizontal tracking. Airborne targets require vertical mouse tracking to follow cleanly in games like Apex Legends and Overwatch 2." />
-                <FAQItem q="What is popcorn tracking and does this drill train it?" a="Popcorn tracking is tracking targets that bounce or hop vertically, creating irregular parabolic movement patterns — similar to popcorn kernels popping. This drill trains the specific vertical mouse control needed to track bouncing aerial movement." />
-                <FAQItem q="How does vertical aim training help in Apex Legends?" a="Apex Legends features high vertical movement — grappling hooks, jump pads, Horizon lifts, and air gliding all create aerial targets. Training vertical aim specifically enables you to track and punish opponents in the air rather than losing crosshair alignment." />
-                <FAQItem q="What is an elevator peek in FPS shooters?" a="An elevator peek is when an opponent uses a building's height advantage or zipline to appear above your crosshair level unexpectedly. This drill trains the upward flick and hold motion needed to instantly adjust vertical crosshair position." />
-                <FAQItem q="Why is vertical tracking harder than horizontal tracking?" a="Horizontal mouse movement is practiced constantly in daily computer use. Vertical mouse movement for precise aim is an unnatural motion that receives far less daily muscle memory training, making dedicated vertical practice essential." />
-                <FAQItem q="How do Overwatch 2 players train aerial tracking?" a="Overwatch players practice tracking high-mobility heroes like Pharah, Echo, Mercy, or Winston during leaps. Using vertical aim trainers helps smooth out Y-axis tracking adjustments." />
-                <FAQItem q="Does vertical aim training help in Halo Infinite?" a="Yes, Halo Infinite features grapples, repulsors, and jump pads that launch players high into the air. Vertical tracking practice helps you land consistent shots on airborne targets." />
-                <FAQItem q="Does this drill improve vertical mouse control?" a="Yes, this vertical air track trainer specifically isolates and trains Y-axis micro-adjustments, arc prediction, and vertical mouse speed control." />
-                <FAQItem q="How do professional players track parabolic arcs?" a="Pros anticipate target acceleration at the start of a jump and slow down their tracking near the apex of the arc where vertical velocity drops to zero, securing high-damage tracking ticks." />
-                <FAQItem q="What is Y-axis mouse sensitivity calibration?" a="Y-axis sensitivity calibration ensures your vertical mouse movements feel natural and proportional to horizontal movements. Some players run a 1:1 ratio, while others adjust Y-sensitivity to compensate for wrist biomechanics." />
-                <FAQItem q="Does vertical tracking help in Titanfall 2?" a="Yes, Titanfall 2 features extreme verticality, wall-running, and double jumping, which require excellent vertical tracking skills to counter." />
-                <FAQItem q="How often should I train vertical aim?" a="We recommend training vertical aim for 10-15 minutes daily as part of your FPS warm-up routine to build consistent muscle memory on the Y-axis." />
-                <FAQItem q="Is this vertical aim trainer free?" a="Yes, this Vertical Air Track Aim Trainer is 100% free, runs in any desktop browser using raw hardware pointer input, and contains no ads." />
-                <FAQItem q="What skills does this drill improve?" a="This drill trains vertical tracking, air tracking, parabolic arc prediction, Y-axis mouse control, visual processing speed, and tracking consistency." />
-                <FAQItem q="Can vertical aim training improve overall tracking consistency?" a="Yes, isolating vertical aim training smooths out jittery vertical movements, making your overall mouse tracking more consistent across both axes." />
+                {FAQ_ITEMS.map((item, i) => (
+                  <FAQItem key={i} q={item.q} a={item.a} />
+                ))}
               </div>
             </DrillAccordion>
           </div>
         )}
 
-        {/* RELATED DRILLS GRID */}
+        {/* ── RELATED FPS DRILLS ── */}
         {!isFullscreen && (
           <section className="mt-4">
-            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3 font-sans">
+            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">
               Related FPS Drills
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -1107,34 +1080,18 @@ export default function VerticalAirTrackClient() {
             </div>
           </section>
         )}
-
-        {/* SITE FOOTER */}
-        {!isFullscreen && <DrillFooter />}
-
       </main>
+
+      {/* ── FOOTER ── */}
+      {!isFullscreen && <DrillFooter />}
     </div>
   );
 }
 
 // === Subcomponents ===
-
-function StatCard({ icon, value, label, unit = '', accentColor = 'border-white/10' }) {
-  return (
-    <div className={`rounded-xl border ${accentColor} bg-black backdrop-blur-md p-1.5 sm:p-2.5 text-center flex flex-col items-center justify-center transition-all duration-300 shadow-md hover:-translate-y-0.5 pointer-events-none font-sans`}>
-      <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-black border border-white/10 flex items-center justify-center mb-1 shadow-inner">
-        {icon}
-      </div>
-      <p className="text-xs sm:text-lg lg:text-xl font-black tracking-tight text-white leading-none truncate w-full font-sans font-mono tabular-nums">
-        {value}<span className="text-[9px] sm:text-xs font-semibold ml-0.5 text-gray-400 font-sans">{unit}</span>
-      </p>
-      <p className="text-[8px] sm:text-[9.5px] font-bold uppercase tracking-wider text-gray-400 mt-1 truncate w-full">{label}</p>
-    </div>
-  );
-}
-
 function RuleItem({ num, text, highlight = '', result }) {
   return (
-    <div className="flex items-center gap-4 bg-black p-4 rounded-xl border border-white/10 shadow-sm">
+    <div className="flex items-center gap-4 bg-black p-4 rounded-xl border border-white/10 shadow-sm font-sans">
       <div className="w-8 h-8 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-white text-base font-black shadow-lg flex-shrink-0">{num}</div>
       <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <p className="text-sm font-medium text-gray-100 font-sans">
@@ -1148,24 +1105,9 @@ function RuleItem({ num, text, highlight = '', result }) {
   );
 }
 
-function RelatedCard({ href, title, desc }) {
-  return (
-    <Link href={href} className="group p-5 bg-black rounded-2xl border border-gray-800 hover:border-red-500/50 hover:bg-white/[0.02] transition-all flex flex-col justify-between">
-      <div>
-        <h4 className="font-bold text-white group-hover:text-red-400 transition-colors mb-1 text-base">{title}</h4>
-        <p className="text-xs text-gray-400 leading-relaxed line-clamp-2">{desc}</p>
-      </div>
-      <div className="flex items-center gap-1 mt-4 text-xs text-red-400 font-bold font-mono">
-        <span>TRY DRILL</span>
-        <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-      </div>
-    </Link>
-  );
-}
-
 function FAQItem({ q, a }) {
   return (
-    <div className="bg-[#05060b] border border-gray-800 rounded-xl p-5 hover:border-gray-700 transition-colors">
+    <div className="bg-[#05060b] border border-gray-800 rounded-xl p-5 hover:border-gray-700 transition-colors font-sans">
       <h4 className="text-sm font-bold text-gray-200 mb-2">{q}</h4>
       <p className="text-xs text-gray-200 leading-relaxed">{a}</p>
     </div>

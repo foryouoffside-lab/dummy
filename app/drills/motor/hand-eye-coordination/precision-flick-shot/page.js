@@ -122,7 +122,7 @@ export default function PrecisionFlickShotPage() {
         "name": "How does difficulty scale in this trainer?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Every 200 points earned advances your level from 1 to 15, shrinking target hitboxes, increasing decay rates, and spawning up to 5 simultaneous targets."
+          "text": "Every 1400 points earned advances your level without cap, shrinking target hitboxes and accelerating target decay rates — two targets stay active on screen throughout."
         }
       },
       {
@@ -138,7 +138,7 @@ export default function PrecisionFlickShotPage() {
         "name": "What happens when you miss a click?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Clicking empty space or letting a target decay out resets your combo multiplier to zero and triggers a red error flash without point loss."
+          "text": "Clicking empty space or letting a target decay out resets your combo multiplier to zero and triggers a red error flash. When the optional Time Penalty is enabled, 0.8s is deducted."
         }
       },
       {
@@ -207,10 +207,10 @@ export default function PrecisionFlickShotPage() {
       },
       {
         "@type": "Question",
-        "name": "How does the 45-second session timer work?",
+        "name": "How does the session timer work?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Each session runs for a fixed 45 seconds, giving you a standardized time window to score maximum points and benchmark your performance."
+          "text": "Each session starts with 45 seconds on the clock. Clean target hits add +0.6s to extend your run. When the optional Time Penalty setting is enabled, misses and expirations deduct 0.8s."
         }
       }
     ]

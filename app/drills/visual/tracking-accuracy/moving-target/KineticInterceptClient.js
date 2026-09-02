@@ -3,18 +3,17 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 
-import { 
-  Volume2, VolumeX,
-  Play, RefreshCw, Target,
-  Share2, LogOut, RotateCw, Eye, Users, TrendingUp, Zap, ZapOff, Brain, Move, Trophy
-} from 'lucide-react';
+import { Volume2, VolumeX, Target, Eye, Users, TrendingUp, Zap, ZapOff, Brain, Move, Trophy } from 'lucide-react';
 
+import { isIdleFrameSkippable } from '@/lib/performance';
 import generateShareCard, { shareScoreCard } from '../../../../../components/ShareScoreCard';
 import { getPlayerName } from '../../../../../lib/leaderboard';
 import { drillAudio } from '../../../../../lib/drillAudio';
 import { drillFlash } from '../../../../../lib/drillFlash';
-import { getFpsScoreGrade } from '../../../../../lib/scoringEngine';
-import { MAX_LEVEL } from '../../../../../lib/drillDifficulty';
+import { drillTimeout } from '../../../../../lib/drillTimeout';
+import { drillPenalty } from '../../../../../lib/drillPenalty';
+import { getFpsScoreGrade, getComboMultiplier } from '../../../../../lib/scoringEngine';
+import { getDifficultyProgress, getStartLevel, ramp } from '../../../../../lib/drillDifficulty';
 import { drawTacticalTarget } from '../../../../../lib/canvasFx';
 import useDrillFlash from '../../../../../lib/useDrillFlash';
 import useUnexpectedExitGuard from '../../../../../lib/useUnexpectedExitGuard';
@@ -25,12 +24,18 @@ import DrillFlashOverlay from '../../../../../components/drill/DrillFlashOverlay
 import DrillRuleItem from '../../../../../components/drill/DrillRuleItem';
 import DrillFAQItem from '../../../../../components/drill/DrillFAQItem';
 import FpsStartCard from '../../../../../components/drill/FpsStartCard';
+import DrillResultCard from '../../../../../components/drill/DrillResultCard';
 
-const DRILL_DURATION = 45; // 45 seconds duration
+// ============================================================
+// TUNING CONSTANTS
+// ============================================================
+const DRILL_DURATION = 45; // starting clock only; a run grows past this
 const POINTS_PER_HIT = 150;
-const POINTS_PER_LEVEL = 750; // 5 intercepts per level, matching the old cadence
-const ELITE_SCORE = 1000; // Target score for S+ rating (rebalanced after combo removal)
-const STORAGE_KEY = 'skilldrills_visual_moving_target_v4';
+const POINTS_PER_LEVEL = 5250; // 750 -> 5250 (7x)
+const ELITE_SCORE = 16000; // 1000 -> 16000 (scaled for unbounded continuous runs)
+const TIME_PER_HIT = 0.6; // +0.6s per valid hit
+const TIME_PENALTY = 0.8; // -0.8s on miss / relocation timeout (opt-in gated)
+const STORAGE_KEY = 'skilldrills_visual_moving_target_v5';
 
 const RELATED_DRILLS = [
   { id: "multiple-targets", name: "Multiple Targets", cat: "Visual Tracking", desc: "Track multiple moving targets across dynamic paths.", href: "/drills/visual/tracking-accuracy/multiple-targets" },
@@ -44,10 +49,10 @@ const RELATED_DRILLS = [
 const getSavedData = () => {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { bestScore: 0, bestLevel: 1, totalSessions: 0 };
-    return { bestScore: 0, bestLevel: 1, totalSessions: 0, ...JSON.parse(raw) };
+    if (!raw) return { bestScore: 0, bestCombo: 0, bestLevel: 1, totalSessions: 0 };
+    return { bestScore: 0, bestCombo: 0, bestLevel: 1, totalSessions: 0, ...JSON.parse(raw) };
   } catch (e) {
-    return { bestScore: 0, bestLevel: 1, totalSessions: 0 };
+    return { bestScore: 0, bestCombo: 0, bestLevel: 1, totalSessions: 0 };
   }
 };
 
@@ -57,24 +62,40 @@ const saveData = (data) => {
   } catch (e) {}
 };
 
+// Continuous unbounded difficulty with streak heat
+const getLevelConfig = (level, combo = 0) => {
+  const p = getDifficultyProgress(level);
+  const heat = (getComboMultiplier(combo) - 1) / 2;
+  return {
+    radius: Math.max(8, ramp(26, 8, p) * (1 - heat * 0.25)),
+    speed: ramp(120, 750, p) * (1 + heat * 0.40),
+    moveInterval: Math.max(0.12, ramp(1.0, 0.20, p) * (1 - heat * 0.30)),
+    hitTolerance: Math.max(12, ramp(32, 12, p) * (1 - heat * 0.35)),
+  };
+};
+
 export default function KineticInterceptClient() {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
+  const [penaltyEnabled, setPenaltyEnabled] = useState(false);
   const [openAccordion, setOpenAccordion] = useState(null);
   const [countdownValue, setCountdownValue] = useState(3);
   const { flashes, triggerFlash } = useDrillFlash();
 
   // Target State
-  const [level, setLevel] = useState(1);
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [uiLevel, setUiLevel] = useState(1);
+  const [uiCombo, setUiCombo] = useState(0);
+  const [currentInterval, setCurrentInterval] = useState(1.0);
 
   // HUD & Best Stats State
   const [uiScore, setUiScore] = useState(0);
   const [uiTimeLeft, setUiTimeLeft] = useState(DRILL_DURATION);
   const [bestScore, setBestScore] = useState(0);
+  const [bestCombo, setBestCombo] = useState(0);
   const [bestLevel, setBestLevel] = useState(1);
+  const [totalSessions, setTotalSessions] = useState(0);
   const [isNewBest, setIsNewBest] = useState(false);
 
   const [analytics, setAnalytics] = useState({
@@ -82,6 +103,8 @@ export default function KineticInterceptClient() {
     perfectHits: 0,
     missedClicks: 0,
     finalLevel: 1,
+    maxCombo: 0,
+    finalPace: '1.00',
     grade: null,
   });
 
@@ -92,17 +115,18 @@ export default function KineticInterceptClient() {
 
   const countdownTimeoutsRef = useRef([]);
   const gameTimeoutsRef = useRef([]);
-  const timerIntervalRef = useRef(null);
   const startingRef = useRef(false);
   const gameActiveRef = useRef(false);
-
-  const [currentInterval, setCurrentInterval] = useState(1.0);
+  const bestLevelRunRef = useRef(1);
+  const lastTimeRef = useRef(DRILL_DURATION);
 
   const targetRef = useRef({ x: 150, y: 150, vx: 2, vy: 1.5, radius: 22, active: false, moveInterval: 1.0, lastRelocateTime: 0 });
 
   const engine = useRef({
     score: 0,
     level: 1,
+    combo: 0,
+    maxCombo: 0,
     timeLeft: DRILL_DURATION,
     perfectHits: 0,
     missedClicks: 0,
@@ -113,9 +137,12 @@ export default function KineticInterceptClient() {
     if (typeof window !== 'undefined') {
       setSoundEnabled(drillAudio.isEnabled());
       setFlashEnabled(drillFlash.isEnabled());
+      setPenaltyEnabled(drillPenalty.isEnabled());
       const saved = getSavedData();
       setBestScore(saved.bestScore || 0);
+      setBestCombo(saved.bestCombo || 0);
       setBestLevel(saved.bestLevel || 1);
+      setTotalSessions(saved.totalSessions || 0);
     }
   }, []);
 
@@ -140,7 +167,6 @@ export default function KineticInterceptClient() {
     countdownTimeoutsRef.current.forEach(clearTimeout);
     countdownTimeoutsRef.current = [];
     clearGameTimeouts();
-    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
     startingRef.current = false;
     gameActiveRef.current = false;
 
@@ -157,9 +183,9 @@ export default function KineticInterceptClient() {
 
   // End Game Management
   const endGame = useCallback(() => {
+    markIntentionalExit();
     gameActiveRef.current = false;
     startingRef.current = false;
-    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
     clearGameTimeouts();
     setGameState('gameOver');
 
@@ -172,14 +198,14 @@ export default function KineticInterceptClient() {
       letter: rating.letter || rating.grade || 'C',
       label: rating.label || 'Keep Going',
       color: rating.color || 'text-orange-400',
-      emoji: rating.emoji || '🎯'
     };
 
     setAnalytics({
       accuracy: finalAccuracy,
       perfectHits: e.perfectHits,
       missedClicks: e.missedClicks,
-      finalLevel: e.level,
+      finalLevel: Math.floor(bestLevelRunRef.current),
+      maxCombo: e.maxCombo,
       finalPace: (targetRef.current?.moveInterval || 1.0).toFixed(2),
       grade,
     });
@@ -190,18 +216,22 @@ export default function KineticInterceptClient() {
     const isNewHigh = e.score > prevSaved.bestScore;
     setIsNewBest(isNewHigh);
 
+    const runBestLevel = Math.max(prevSaved.bestLevel, Math.floor(bestLevelRunRef.current));
     const updatedData = {
       bestScore: Math.max(prevSaved.bestScore, e.score),
-      bestLevel: Math.max(prevSaved.bestLevel, e.level),
+      bestCombo: Math.max(prevSaved.bestCombo || 0, e.maxCombo),
+      bestLevel: runBestLevel,
       totalSessions: (prevSaved.totalSessions || 0) + 1,
     };
     saveData(updatedData);
 
     setBestScore(updatedData.bestScore);
+    setBestCombo(updatedData.bestCombo);
     setBestLevel(updatedData.bestLevel);
+    setTotalSessions(updatedData.totalSessions);
 
     drillAudio?.playSessionEnd?.();
-  }, [clearGameTimeouts]);
+  }, [clearGameTimeouts, markIntentionalExit]);
 
   // Spawn Next Kinetic Target
   const spawnTarget = useCallback(() => {
@@ -212,20 +242,15 @@ export default function KineticInterceptClient() {
     const h = cvs.height || 300;
 
     const eng = engine.current;
-    const hits = eng.perfectHits || 0;
-    const lvl = eng.level || 1;
+    const config = getLevelConfig(eng.level, eng.combo);
 
-    // Radius shrinks progressively with hits and level
-    const radius = Math.max(12, 26 - hits * 0.4 - (lvl - 1) * 1.0);
-    
-    // Movement speed accelerates progressively
-    const speedMult = 2.0 + hits * 0.12 + (lvl - 1) * 0.4;
+    const radius = config.radius;
+    const speed = config.speed / 60; // px per frame
     const angle = Math.random() * Math.PI * 2;
-    const vx = Math.cos(angle) * speedMult;
-    const vy = Math.sin(angle) * speedMult;
+    const vx = Math.cos(angle) * speed;
+    const vy = Math.sin(angle) * speed;
 
-    // Relocation interval: starts at 1.0s, reduces down to 0.25s as user performs
-    const moveInterval = Math.max(0.25, 1.0 - (hits * 0.03 + (lvl - 1) * 0.04));
+    const moveInterval = config.moveInterval;
     setCurrentInterval(moveInterval);
 
     // Spawn inside margin
@@ -262,32 +287,41 @@ export default function KineticInterceptClient() {
     const t = targetRef.current;
     if (!t.active) return;
 
-    const dist = Math.hypot(cx - t.x, cy - t.y);
+    const eng = engine.current;
+    const config = getLevelConfig(eng.level, eng.combo);
 
-    // Hit tolerance with generous minimum padding for responsive hits
-    const hitTolerance = Math.max(t.radius + 10, 24);
+    const dist = Math.hypot(cx - t.x, cy - t.y);
+    const hitTolerance = Math.max(t.radius + config.hitTolerance, 20);
 
     if (dist <= hitTolerance) {
       // PERFECT KINETIC TARGET INTERCEPT
-      const eng = engine.current;
       eng.perfectHits++;
-      eng.score += POINTS_PER_HIT;
+      eng.combo += 1;
+      if (eng.combo > eng.maxCombo) eng.maxCombo = eng.combo;
 
-      // Level up every POINTS_PER_LEVEL score earned
-      const nextLevel = Math.floor(eng.score / POINTS_PER_LEVEL) + 1;
-      if (nextLevel > eng.level) {
-        eng.level = nextLevel;
-        setLevel(eng.level);
-      }
+      const levelMult = 1 + getDifficultyProgress(eng.level) * 0.5;
+      eng.score += Math.round(POINTS_PER_HIT * getComboMultiplier(eng.combo) * levelMult);
+
+      // Time bonus on clean hit
+      eng.timeLeft += TIME_PER_HIT;
+
+      // Continuous level progression
+      const nextLevel = (eng.score / POINTS_PER_LEVEL) + 1;
+      eng.level = Math.max(eng.level, nextLevel);
+      bestLevelRunRef.current = Math.max(bestLevelRunRef.current, eng.level);
 
       setUiScore(eng.score);
+      setUiLevel(Math.floor(eng.level));
+      setUiCombo(eng.combo);
       drillAudio?.playHit?.();
 
       spawnTarget();
     } else {
       // MISCLICK
-      const eng = engine.current;
       eng.missedClicks++;
+      if (drillPenalty.isEnabled()) eng.timeLeft -= TIME_PENALTY;
+      eng.combo = 0;
+      setUiCombo(0);
 
       drillAudio?.playPenalty?.();
       triggerFlash();
@@ -318,33 +352,64 @@ export default function KineticInterceptClient() {
     window.addEventListener('resize', updateSize);
     updateSize();
 
-    function draw() {
-      if (!gameActiveRef.current) return;
+    let lastTime = performance.now();
+
+    function draw(now) {
+      if (isIdleFrameSkippable(gameState === 'playing', now, lastTime)) {
+        animationRef.current = requestAnimationFrame(draw);
+        return;
+      }
+
+      const dt = Math.min((now - lastTime) / 1000, 0.1);
+      lastTime = now;
+
+      const e = engine.current;
+      if (gameActiveRef.current) {
+        if (e.timeLeft > 0) e.timeLeft -= dt;
+        if (e.timeLeft <= 0) {
+          e.timeLeft = 0;
+          setUiTimeLeft(0);
+          endGame();
+          return;
+        }
+
+        const ceilSec = Math.ceil(e.timeLeft);
+        if (ceilSec !== lastTimeRef.current) {
+          lastTimeRef.current = ceilSec;
+          setUiTimeLeft(ceilSec);
+        }
+      }
 
       ctx.fillStyle = "#050508";
       ctx.fillRect(0, 0, cvs.width, cvs.height);
 
       const t = targetRef.current;
       if (t.active) {
-        const now = performance.now();
         const elapsed = (now - (t.lastRelocateTime || now)) / 1000;
         const interval = t.moveInterval || 1.0;
 
-        // Instant relocation after 1s (or reduced interval as user performs)
+        // Relocation when time-to-live expires
         if (elapsed >= interval) {
-          const eng = engine.current;
-          const hits = eng.perfectHits || 0;
-          const lvl = eng.level || 1;
+          if (drillTimeout.isEnabled()) {
+            e.missedClicks++;
+            if (drillPenalty.isEnabled()) e.timeLeft -= TIME_PENALTY;
+            e.combo = 0;
+            setUiCombo(0);
+            drillAudio?.playPenalty?.();
+            triggerFlash();
+          }
 
-          const newInterval = Math.max(0.25, 1.0 - (hits * 0.03 + (lvl - 1) * 0.04));
-          const speedMult = 2.0 + hits * 0.12 + (lvl - 1) * 0.4;
-          const radius = Math.max(12, 26 - hits * 0.4 - (lvl - 1) * 1.0);
+          const config = getLevelConfig(e.level, e.combo);
+          const newInterval = config.moveInterval;
+          const speed = config.speed / 60;
+          const radius = config.radius;
           const angle = Math.random() * Math.PI * 2;
 
           t.moveInterval = newInterval;
+          setCurrentInterval(newInterval);
           t.radius = radius;
-          t.vx = Math.cos(angle) * speedMult;
-          t.vy = Math.sin(angle) * speedMult;
+          t.vx = Math.cos(angle) * speed;
+          t.vy = Math.sin(angle) * speed;
           t.x = radius + Math.random() * (cvs.width - radius * 2);
           t.y = radius + Math.random() * (cvs.height - radius * 2);
           t.lastRelocateTime = now;
@@ -388,7 +453,7 @@ export default function KineticInterceptClient() {
         ctx.stroke();
         ctx.shadowBlur = 0;
 
-        // Timestamp badge text above target (e.g. "0.9s", "0.4s")
+        // Timestamp badge text above target
         ctx.font = "bold 10px monospace";
         ctx.fillStyle = progress > 0.75 ? "#fca5a5" : "#fdba74";
         ctx.textAlign = "center";
@@ -404,7 +469,7 @@ export default function KineticInterceptClient() {
       window.removeEventListener('resize', updateSize);
       ro.disconnect();
     };
-  }, [gameState]);
+  }, [gameState, endGame, triggerFlash]);
 
   // Enter Drill (Start Countdown -> Playing)
   const enterDrill = useCallback(() => {
@@ -417,15 +482,22 @@ export default function KineticInterceptClient() {
 
     drillAudio?.init?.();
 
+    const startLevel = getStartLevel();
+    bestLevelRunRef.current = startLevel;
+
     setIsNewBest(false);
     setUiScore(0);
+    setUiLevel(startLevel);
+    setUiCombo(0);
     setUiTimeLeft(DRILL_DURATION);
-    setLevel(1);
+    lastTimeRef.current = DRILL_DURATION;
     setCurrentInterval(1.0);
 
     engine.current = {
       score: 0,
-      level: 1,
+      level: startLevel,
+      combo: 0,
+      maxCombo: 0,
       timeLeft: DRILL_DURATION,
       perfectHits: 0,
       missedClicks: 0,
@@ -460,58 +532,38 @@ export default function KineticInterceptClient() {
       gameActiveRef.current = true;
       startingRef.current = false;
       setGameState('playing');
-
-      // Start 45s decimal timer
-      if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
-      let lastTime = performance.now();
-
-      timerIntervalRef.current = setInterval(() => {
-        const now = performance.now();
-        const deltaSec = (now - lastTime) / 1000;
-        lastTime = now;
-
-        const eRef = engine.current;
-        if (eRef.timeLeft > 0) {
-          eRef.timeLeft = Math.max(0, eRef.timeLeft - deltaSec);
-          setUiTimeLeft(Math.ceil(eRef.timeLeft));
-        }
-
-        if (eRef.timeLeft <= 0) {
-          eRef.timeLeft = 0;
-          setUiTimeLeft(0);
-          endGame();
-        }
-      }, 100);
-
       spawnTarget();
     }, 2450);
 
     countdownTimeoutsRef.current = [t1, t2, t3, t4];
-  }, [clearGameTimeouts, endGame, spawnTarget]);
+  }, [clearGameTimeouts, spawnTarget]);
 
   const shareScore = useCallback(async () => {
     const url = 'https://skilldrills.online/drills/visual/tracking-accuracy/moving-target';
     try {
       const canvas = generateShareCard({
         score: uiScore,
-        bestScore,
         accuracy: analytics.accuracy,
-        rating: { letter: analytics.grade?.letter || 'C', label: analytics.grade?.label || 'Keep Going', emoji: '🎯' },
-        newBest: isNewBest,
+        speed: 0,
         drillName: 'Moving Target Pro',
+        rank: analytics.grade?.letter || 'A',
+        rankName: analytics.grade?.label || 'ELITE REFLEX',
         playerName: getPlayerName(),
+        level: analytics.finalLevel,
+        date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        url: 'skilldrills.online/drills/visual/tracking-accuracy/moving-target'
       });
-      await shareScoreCard(url, canvas);
+      await shareScoreCard(canvas, {
+        title: 'Moving Target Pro — My Score',
+        text: `I scored ${uiScore} (Grade: ${analytics.grade?.letter || 'A'}, Lv. ${analytics.finalLevel}) on Moving Target Pro at SkillDrills!`,
+        url
+      });
     } catch (e) {
-      const text = `🎯 I scored ${uiScore} PTS (Peak Level: Lvl ${analytics.finalLevel}) on Moving Target Pro! Accuracy: ${analytics.accuracy}%. Train kinetic tracking at skilldrills.online!`;
-      if (typeof navigator !== 'undefined' && navigator.share) {
-        navigator.share({ title: 'My Tracking Score', text, url }).catch(() => {});
-      } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
-        navigator.clipboard.writeText(text);
-        alert('Score card copied to clipboard!');
+      if (navigator.share) {
+        navigator.share({ title: 'My Tracking Score', text: `I scored ${uiScore} on Moving Target Pro!`, url }).catch(() => {});
       }
     }
-  }, [uiScore, bestScore, analytics, isNewBest]);
+  }, [uiScore, analytics]);
 
   return (
     <div className="min-h-screen bg-[#050508] text-white flex flex-col font-sans select-none">
@@ -567,15 +619,13 @@ export default function KineticInterceptClient() {
           <DrillFlashOverlay flashes={flashes} />
 
           {/* IN-BOX OVERLAY HUD */}
-          {gameState === 'playing' && (
+          {(gameState === 'playing' || gameState === 'countdown') && (
             <>
-              <div className="absolute top-4 left-4 z-30 pointer-events-none">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Score</p>
-                <p className="text-2xl sm:text-3xl font-black text-white tabular-nums leading-tight">{uiScore}</p>
-              </div>
-              <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 pointer-events-none text-center">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Shift Pace</p>
-                <p className="text-xl sm:text-2xl font-black text-amber-400 tabular-nums leading-tight">{currentInterval.toFixed(2)}s</p>
+              <div className="absolute top-4 left-4 z-30 pointer-events-none flex flex-col gap-1">
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Score</p>
+                  <p className="text-2xl sm:text-3xl font-black text-white tabular-nums leading-tight">{uiScore}</p>
+                </div>
               </div>
               <div className="absolute top-4 right-4 z-30 pointer-events-none text-right">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Time Left</p>
@@ -585,7 +635,7 @@ export default function KineticInterceptClient() {
           )}
 
           {/* IN-GAME HUD SOUND + FLASH TOGGLES */}
-          {gameState === 'playing' && (
+          {(gameState === 'playing' || gameState === 'countdown') && (
             <div className="absolute bottom-4 right-4 z-40 flex items-center gap-2">
               <button
                 onPointerDown={(e) => e.stopPropagation()}
@@ -602,26 +652,23 @@ export default function KineticInterceptClient() {
                 {flashEnabled ? <Zap className="w-4 h-4 text-red-400" /> : <ZapOff className="w-4 h-4 text-slate-500" />}
               </button>
               <button
-              onPointerDown={(e) => e.stopPropagation()}
-              onClick={(e) => {
-                e.stopPropagation();
-                setSoundEnabled((v) => {
-                  drillAudio.setEnabled(!v);
-                  return !v;
-                });
-              }}
-              className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-              title="Toggle Sound"
-            >
-              {soundEnabled ? <Volume2 className="w-4 h-4 text-orange-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSoundEnabled((v) => {
+                    drillAudio.setEnabled(!v);
+                    return !v;
+                  });
+                }}
+                className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title="Toggle Sound"
+              >
+                {soundEnabled ? <Volume2 className="w-4 h-4 text-orange-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
               </button>
             </div>
           )}
 
-          {/* CANVAS — sized directly off the real game-stage container, matching
-              distance-judgment's pattern. The previous extra wrapper box measured
-              a different element than it rendered into, so the target bounced
-              around in a coordinate space bigger than what was visibly clipped. */}
+          {/* CANVAS */}
           <canvas
             ref={canvasRef}
             onPointerDown={handlePointerDown}
@@ -636,8 +683,15 @@ export default function KineticInterceptClient() {
               title="Moving Target Pro"
               subtitle="Kinetic Visual Tracking • Intercept Accuracy"
               rules={[
-                { icon: Target, accent: 'orange', title: 'Intercept Target', text: 'Strike dynamically moving targets before they relocate (+150 PTS)' },
-                { icon: Zap, accent: 'amber', title: 'Escalating Target Pace', text: 'Target relocation speed accelerates from 1s down to 0.25s as you score' },
+                { icon: Target, accent: 'orange', title: 'Intercept Target', text: '+150 PTS × Combo × Level multiplier (+0.6s per hit)' },
+                {
+                  icon: Zap,
+                  accent: 'amber',
+                  title: penaltyEnabled ? 'Time Penalty (-0.8s)' : 'Escalating Target Pace',
+                  text: penaltyEnabled
+                    ? 'Misclicks or relocation timeouts subtract 0.8s and reset combo'
+                    : 'Target relocation speed accelerates. Misclicks reset combo (no time deducted)'
+                },
               ]}
               stats={[
                 { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
@@ -653,93 +707,23 @@ export default function KineticInterceptClient() {
             <DrillCountdown value={countdownValue} subtitle="GET READY" />
           )}
 
-          {/* END SCREEN */}
+          {/* UNIVERSAL RESULT CARD */}
           {gameState === 'gameOver' && analytics.grade && (
-            <div className="absolute inset-0 z-40 flex bg-neutral-950/98 select-none font-sans" style={{ background: 'rgba(5,5,8,0.97)' }} onPointerDown={e => e.stopPropagation()}>
-              
-              {/* Left Grade Panel */}
-              <div className="w-[36%] flex flex-col items-center justify-center gap-1 border-r border-white/5 px-4" style={{ background: 'radial-gradient(ellipse 260px 200px at 50% 30%, rgba(249,115,22,.12), transparent 70%)' }}>
-                {isNewBest && (
-                  <span className="text-[9.5px] font-bold text-yellow-400 bg-yellow-500/10 border border-yellow-500/25 px-2.5 py-0.5 rounded-full mb-1 animate-pulse">
-                    NEW BEST
-                  </span>
-                )}
-                <div className={`text-5xl sm:text-6xl font-black leading-none ${analytics.grade.color}`}>
-                  {analytics.grade.letter}
-                </div>
-                <div className="text-[10px] uppercase tracking-widest text-slate-500 text-center font-bold mt-1">
-                  {analytics.grade.label}
-                </div>
-                <div className="text-3xl sm:text-4xl font-black text-white mt-2 tabular-nums">
-                  {uiScore}
-                </div>
-                <div className="text-[9px] uppercase tracking-widest text-slate-500">Points</div>
-              </div>
-
-              {/* Right Stats & Actions Panel */}
-              <div className="flex-1 flex flex-col justify-center gap-3 px-6 py-4 min-w-0">
-                
-                {/* 4 Stat Tiles */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.accuracy}%</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Accuracy</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">Lvl {analytics.finalLevel}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Peak Level</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.perfectHits}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Intercepts</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-amber-400">{analytics.finalPace || currentInterval.toFixed(2)}s</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Final Pace</p>
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex gap-2">
-                  <button 
-                    type="button"
-                    onPointerDown={(e) => e.stopPropagation()}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      enterDrill();
-                    }} 
-                    className="flex-1 py-3 rounded-[13px] bg-gradient-to-r from-orange-600 to-amber-600 text-white font-bold text-xs uppercase tracking-wide cursor-pointer transition-transform active:scale-[0.98] shadow-md flex items-center justify-center gap-1.5 relative z-50 pointer-events-auto"
-                  >
-                    <RefreshCw className="w-3.5 h-3.5" /> Play Again
-                  </button>
-                  <button 
-                    type="button"
-                    onPointerDown={(e) => e.stopPropagation()}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      shareScore();
-                    }} 
-                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform relative z-50 pointer-events-auto" 
-                    title="Share Score"
-                  >
-                    <Share2 className="w-4 h-4" />
-                  </button>
-                  <button 
-                    type="button"
-                    onPointerDown={(e) => e.stopPropagation()}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleExitDrill();
-                    }} 
-                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform relative z-50 pointer-events-auto" 
-                    title="Return to Options"
-                  >
-                    <LogOut className="w-4 h-4 text-red-400" />
-                  </button>
-                </div>
-
-              </div>
-            </div>
+            <DrillResultCard
+              accent="orange"
+              grade={analytics.grade}
+              score={uiScore}
+              isNewBest={isNewBest}
+              stats={[
+                { label: 'Accuracy', value: analytics.accuracy, suffix: '%' },
+                { label: 'Intercepts', value: analytics.perfectHits },
+                { label: 'Peak Level', value: `Lv. ${analytics.finalLevel}` },
+                { label: 'Max Combo', value: analytics.maxCombo, suffix: 'x' },
+              ]}
+              onPlayAgain={enterDrill}
+              onShare={shareScore}
+              onExit={handleExitDrill}
+            />
           )}
 
         </div>
@@ -754,10 +738,15 @@ export default function KineticInterceptClient() {
               onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <DrillRuleItem num="1" text="Intercept Kinetic Target" highlight="+150 PTS" result="Target Click" />
-                <DrillRuleItem num="2" text="1s Relocation Timer" highlight="Drops to 0.25s" result="Changes location instantly" />
+                <DrillRuleItem num="1" text="Intercept Kinetic Target" highlight="+150 PTS" result="× Combo × Level bonus (+0.6s clock per hit)" />
+                <DrillRuleItem num="2" text="Dynamic Relocation" highlight="Tightens Continuously" result="Changes location faster as streak climbs" />
                 <DrillRuleItem num="3" text="Progressive Difficulty" highlight="Faster & Smaller" result="Speed rises, hitbox shrinks" />
-                <DrillRuleItem num="4" text="Misclick Penalty" highlight="Zero Penalties" result="No score or time loss" />
+                <DrillRuleItem 
+                  num="4" 
+                  text="Misclick / Relocation Penalty" 
+                  highlight={penaltyEnabled ? "-0.8s Penalty" : "Zero Penalties (Default)"} 
+                  result={penaltyEnabled ? "Deducts 0.8s & resets combo" : "Resets combo. Time penalty is opt-in via settings"} 
+                />
               </div>
             </DrillAccordion>
 
@@ -816,10 +805,10 @@ export default function KineticInterceptClient() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <DrillFAQItem q="What is the Moving Target Pro Drill?" a="A free visual tracking exercise. Intercept bouncing target spheres traveling across a 2D bounding viewport." />
                 <DrillFAQItem q="What skills does this drill improve?" a="Smooth pursuit tracking, hand-eye coordination, velocity prediction, and motor interception accuracy under dynamic time limits." />
-                <DrillFAQItem q="How does progressive difficulty work?" a="Every 5 intercepts you level up, target movement velocity accelerates, and hitboxes shrink slightly." />
-                <DrillFAQItem q="Are there negative score or time penalties?" a="No. Misclicks never deduct score points or reduce remaining timer seconds — the screen just flashes red and the target keeps moving." />
-                <DrillFAQItem q="Does difficulty decrease on mistakes?" a="No. Your level only ever goes up — a mistake never takes you back down, so you can safely master your current level." />
-                <DrillFAQItem q="How long does each drill session last?" a="Each round is timed for exactly 45 seconds of continuous focus." />
+                <DrillFAQItem q="How does progressive difficulty work?" a="As your score and combo climb, target movement velocity accelerates and hitboxes shrink continuously." />
+                <DrillFAQItem q="Are there negative score or time penalties?" a="By default, misclicks or timeouts only reset your combo multiplier. An opt-in time penalty (-0.8s per error) is available in session settings for hard-mode training." />
+                <DrillFAQItem q="Does difficulty decrease on mistakes?" a="No. Your level progression is monotonic — a mistake never takes you back down, allowing you to master your current level." />
+                <DrillFAQItem q="How long does each drill session last?" a="Each round starts with 45 seconds on the clock, and successful intercepts add +0.6s to extend your run." />
                 <DrillFAQItem q="Do I need to sign up?" a="No registration required. This drill is completely free and works instantly in your browser." />
               </div>
             </DrillAccordion>

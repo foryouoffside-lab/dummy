@@ -17,7 +17,8 @@ import { getPlayerName } from '../../../../../lib/leaderboard';
 import { drillAudio } from '../../../../../lib/drillAudio';
 import { drillFlash } from '../../../../../lib/drillFlash';
 import { drillTimeout } from '../../../../../lib/drillTimeout';
-import { MAX_LEVEL, getStartLevel, getNextLevel, getDifficultyProgress, getComboBonusLevel } from '../../../../../lib/drillDifficulty';
+import { drillPenalty } from '../../../../../lib/drillPenalty';
+import { MAX_LEVEL, getStartLevel, getDifficultyProgress, ramp } from '../../../../../lib/drillDifficulty';
 import { getComboMultiplier, getFpsScoreGrade } from '../../../../../lib/scoringEngine';
 import { createBackdropCache, getCanvasDpr, drawPulseRing, drawTacticalTarget } from '../../../../../lib/canvasFx';
 import useUnexpectedExitGuard from '../../../../../lib/useUnexpectedExitGuard';
@@ -25,14 +26,17 @@ import DrillFooter from '../../../../../components/drill/DrillFooter';
 import DrillCountdown from '../../../../../components/drill/DrillCountdown';
 import DrillAccordion from '../../../../../components/drill/DrillAccordion';
 import FpsStartCard from '../../../../../components/drill/FpsStartCard';
+import DrillResultCard from '../../../../../components/drill/DrillResultCard';
 
 // ============================================================
 // TUNING CONSTANTS
 // ============================================================
-const DRILL_DURATION = 45; // 45 seconds fixed duration
-const POINTS_PER_LEVEL = 250; // Aggressive progression to L15
-const ELITE_SCORE = 17000; // Target score for S grade
-const STORAGE_KEY = 'skilldrills_physical_speed_drill_v3';
+const DRILL_DURATION = 45; // starting clock only; a run grows past this
+const POINTS_PER_LEVEL = 1750; // 250 -> 1750 (7x)
+const ELITE_SCORE = 24000; // 17000 -> 24000 (1.4x)
+const TIME_PER_HIT = 0.6; // +0.6s on target hit
+const TIME_PENALTY = 0.8; // -0.8s on miss / target expiry (opt-in gated)
+const STORAGE_KEY = 'skilldrills_physical_speed_drill_v4';
 
 const getSavedData = () => {
   try {
@@ -50,25 +54,32 @@ const saveData = (data) => {
   } catch (e) {}
 };
 
+// Continuous unbounded difficulty with streak heat
+const getLevelConfig = (level, combo = 0) => {
+  const p = getDifficultyProgress(level); // 0 at L1, 1 at L15, unbounded above
+  const heat = (getComboMultiplier(combo) - 1) / 2;
+  return {
+    maxRadius: Math.max(12, ramp(45, 14, p) * (1 - heat * 0.15)),
+    speedMulti: ramp(1.0, 3.8, p) * (1 + heat * 0.25),
+    shrinkSpeedFactor: ramp(0.6, 2.2, p) * (1 + heat * 0.20),
+  };
+};
 
-// ============================================================
-// ACCORDION DATA
-// ============================================================
 const RULES_ITEMS = [
-  { title: "Target Acquisition", text: "Click moving shrinking targets before radius decays to zero." },
+  { title: "Target Acquisition", text: "Click moving shrinking targets before radius decays to zero (+0.6s per hit)." },
   { title: "Combo Multiplier", text: "Chain unbroken target hits to build combo multiplier up to 3.0x max." },
-  { title: "Level Progression", text: "Score increases level every 250 PTS. Target velocity & shrink rate accelerate." },
-  { title: "Miss / Target Expiry", text: "Missing a target or letting target shrink to zero resets combo streak to 1.0x." }
+  { title: "Level Progression", text: "Score increases level continuously. Target velocity & shrink rate accelerate dynamically." },
+  { title: "Miss / Target Expiry", text: "Missing a target or letting target shrink to zero resets combo streak (and deducts 0.8s if enabled in settings)." }
 ];
 
 const FAQ_ITEMS = [
   { q: "What is the Speed Drill reflex exercise?", a: "Speed Drill is a high-velocity target acquisition exercise that challenges players to click moving, shrinking targets before they vanish. It measures raw reaction speed, click timing, and tracking precision." },
   { q: "How do target mechanics work?", a: "Yellow targets spawn with random initial velocities and bounce off canvas borders while shrinking over time. You must acquire and click each target before its radius reaches zero." },
-  { q: "How does difficulty scale in Speed Drill?", a: "As your score increases, the level rises up to Level 15. Initial target sizes shrink, target movement speed accelerates up to 3.5x, and target shrinking rates increase." },
-  { q: "What happens when I miss or let a target expire?", a: "Missing a target or letting a target shrink to zero resets your combo multiplier back to 1.0x and triggers a red flash overlay. There are no score deductions or time penalties." },
-  { q: "How long does each session run?", a: "Each session runs for a fixed 45 seconds. The game timer counts down steadily from 45s to 0s, providing a standard, reproducible performance benchmark." },
+  { q: "How does difficulty scale in Speed Drill?", a: "As your score increases, difficulty scales continuously. Initial target sizes shrink, target movement speed accelerates up to 3.8x, and target shrinking rates increase." },
+  { q: "What happens when I miss or let a target expire?", a: "Missing a target or letting a target shrink to zero resets your combo multiplier back to 1.0x and triggers a red flash overlay. Clean hits add +0.6s to your timer, and missing or letting a target expire deducts 0.8s when time penalty is enabled in settings." },
+  { q: "How long does each session run?", a: "Each session starts with a 45-second timer. Every target hit earns a +0.6s extension, rewarding speed and precision with extended sessions." },
   { q: "Does Speed Drill improve gaming performance?", a: "Yes. Rapid target acquisition and micro-burst clicking translate directly to faster time-to-kill (TTK) and sharper flick timing in FPS games like Valorant, CS2, and Apex Legends." },
-  { q: "What is a good score in Speed Drill?", a: "Scoring 8,000+ points earns a Gold or Platinum grade, while reaching 17,000+ points with 90%+ accuracy places you in the Master tier." },
+  { q: "What is a good score in Speed Drill?", a: "Scoring 12,000+ points earns a Gold or Platinum grade, while reaching 24,000+ points with 90%+ accuracy places you in the Master tier." },
   { q: "Do I need special hardware to practice this drill?", a: "No special hardware is required. Any standard computer mouse with 1:1 raw input support works ideally with our pointer lock system." },
   { q: "Is Speed Drill free to play?", a: "Yes, Speed Drill on SkillDrills is 100% free, ad-free, and runs entirely in your web browser with zero downloads." },
   { q: "How often should I practice this drill?", a: "Practicing 5 to 10 minutes daily is recommended for optimal neuromuscular adaptation and consistent click timing improvement." }
@@ -82,14 +93,12 @@ const RELATED_DRILLS = [
   { id: "jump-sequence", name: "Jump Sequence Pro", cat: "Physical Fitness", desc: "Vertical trajectory & mid-air steering exercise.", href: "/drills/physical/fitness/jump-sequence" }
 ];
 
-// ============================================================
-// MAIN COMPONENT
-// ============================================================
 export default function SpeedDrillClient() {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
+  const [penaltyEnabled, setPenaltyEnabled] = useState(false);
   const [pointerLocked, setPointerLocked] = useState(false);
   const [universalSens, setUniversalSens] = useState(1.0);
   const [openAccordion, setOpenAccordion] = useState(null);
@@ -100,6 +109,7 @@ export default function SpeedDrillClient() {
   // HUD & Best Stats State
   const [uiScore, setUiScore] = useState(0);
   const [uiTimeLeft, setUiTimeLeft] = useState(DRILL_DURATION);
+  const [uiLevel, setUiLevel] = useState(1);
   const [bestScore, setBestScore] = useState(0);
   const [bestCombo, setBestCombo] = useState(0);
   const [bestLevel, setBestLevel] = useState(1);
@@ -146,6 +156,7 @@ export default function SpeedDrillClient() {
     if (typeof window !== 'undefined') {
       setSoundEnabled(drillAudio.isEnabled());
       setFlashEnabled(drillFlash.isEnabled());
+      setPenaltyEnabled(drillPenalty.isEnabled());
       const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
       const isTouchCapable = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
       setIsTouchOnlyDevice(isTouchCapable && !hasFinePointer);
@@ -185,6 +196,7 @@ export default function SpeedDrillClient() {
     countdownTimeoutsRef.current.forEach(clearTimeout);
     countdownTimeoutsRef.current = [];
     startingRef.current = false;
+    gameActiveRef.current = false;
 
     if (document.fullscreenElement) {
       await document.exitFullscreen().catch(() => {});
@@ -200,27 +212,9 @@ export default function SpeedDrillClient() {
     onUnexpectedExit: handleExitDrill,
   });
 
-  const resumeDrill = useCallback(async () => {
-    if (containerRef.current && !document.fullscreenElement) {
-      try { await containerRef.current.requestFullscreen(); } catch (e) {}
-    }
-    if (canvasRef.current && !document.pointerLockElement) {
-      try { await canvasRef.current.requestPointerLock(); } catch (e) {}
-    }
-  }, []);
-
-  const getLevelConfig = (level) => {
-    const p = getDifficultyProgress(level);
-    return {
-      maxRadius: Math.max(14, 45 - p * 30),
-      speedMulti: 1.0 + p * 2.5,
-      shrinkSpeedFactor: 0.6 + p * 1.4,
-    };
-  };
-
   const spawnTarget = useCallback((width, height, currentLevel) => {
     const e = engine.current;
-    const config = getLevelConfig(currentLevel);
+    const config = getLevelConfig(currentLevel, e.combo);
     const padding = 60;
 
     let newX, newY;
@@ -261,6 +255,9 @@ export default function SpeedDrillClient() {
   const applyPenalty = useCallback(() => {
     const e = engine.current;
     e.misses++;
+    if (drillPenalty.isEnabled()) {
+      e.timeLeft -= TIME_PENALTY;
+    }
     e.combo = 0;
     e.screenShake = 12;
     triggerFlash();
@@ -268,6 +265,7 @@ export default function SpeedDrillClient() {
   }, [triggerFlash]);
 
   const endGame = useCallback(() => {
+    markIntentionalExit();
     gameActiveRef.current = false;
     startingRef.current = false;
     setGameState('gameOver');
@@ -278,12 +276,12 @@ export default function SpeedDrillClient() {
     const accuracyPct = totalAttempts > 0 ? Math.round((e.hits / totalAttempts) * 100) : 100;
     const rating = getFpsScoreGrade(e.score, ELITE_SCORE);
 
-    const grade = { letter: rating.grade, label: rating.label, color: rating.color };
+    const grade = { letter: rating.grade || rating.letter || 'C', label: rating.label || 'Keep Going', color: rating.color || 'text-amber-400' };
 
     setAnalytics({
       accuracy: accuracyPct, hits: e.hits, misses: e.misses,
       bestReaction: Math.round(e.bestReactionTime), peakSpeed: parseFloat(e.peakSpeed.toFixed(1)),
-      maxCombo: e.bestStreak, finalLevel: e.level, grade
+      maxCombo: e.bestStreak, finalLevel: Math.floor(bestLevelRunRef.current), grade
     });
 
     setUiScore(e.score);
@@ -292,7 +290,7 @@ export default function SpeedDrillClient() {
     const isNewHigh = e.score > prevSaved.bestScore;
     setIsNewBest(isNewHigh);
 
-    const runBestLevel = Math.max(prevSaved.bestLevel, bestLevelRunRef.current);
+    const runBestLevel = Math.max(prevSaved.bestLevel || 1, Math.floor(bestLevelRunRef.current));
     const updatedData = {
       bestScore: Math.max(prevSaved.bestScore, e.score),
       bestCombo: Math.max(prevSaved.bestCombo, e.bestStreak),
@@ -306,7 +304,7 @@ export default function SpeedDrillClient() {
     setBestLevel(updatedData.bestLevel);
 
     drillAudio.playSessionEnd();
-  }, []);
+  }, [markIntentionalExit]);
 
   const enterDrill = useCallback(async () => {
     if (startingRef.current) return;
@@ -317,14 +315,14 @@ export default function SpeedDrillClient() {
 
     drillAudio.init();
 
+    const startLevel = getStartLevel();
+    bestLevelRunRef.current = startLevel;
+
     setIsNewBest(false);
     setUiScore(0);
+    setUiLevel(startLevel);
     setUiTimeLeft(DRILL_DURATION);
     lastTimeRef.current = DRILL_DURATION;
-
-    const saved = getSavedData();
-    const startLevel = getStartLevel(saved.bestLevel);
-    bestLevelRunRef.current = startLevel;
 
     const w = engine.current.logicalWidth || 800;
     const h = engine.current.logicalHeight || 450;
@@ -410,20 +408,22 @@ export default function SpeedDrillClient() {
           if (rxTime < eng.bestReactionTime) eng.bestReactionTime = rxTime;
 
           eng.hits++;
+          eng.timeLeft += TIME_PER_HIT;
           eng.combo++;
           if (eng.combo > eng.bestStreak) eng.bestStreak = eng.combo;
 
           const mult = getComboMultiplier(eng.combo);
-          const basePts = Math.round(100 * mult);
+          const levelBonus = 1 + getDifficultyProgress(eng.level) * 0.5;
+          const basePts = Math.round(100 * mult * levelBonus);
           eng.score += basePts;
-          setUiScore(eng.score);
 
-          const nextLvl = Math.max(eng.level, getNextLevel(eng.score, 1, POINTS_PER_LEVEL) + getComboBonusLevel(eng.combo));
-          if (nextLvl > eng.level) {
-            eng.level = nextLvl;
-            bestLevelRunRef.current = Math.max(bestLevelRunRef.current, nextLvl);
-            drillAudio.playHit();
-          }
+          // Continuous level progression
+          const rawLevel = (eng.score / POINTS_PER_LEVEL) + 1;
+          eng.level = Math.max(eng.level, rawLevel);
+          bestLevelRunRef.current = Math.max(bestLevelRunRef.current, eng.level);
+
+          setUiScore(eng.score);
+          setUiLevel(Math.floor(eng.level));
 
           drillAudio.playHit();
           createExplosion(eng.target.x, eng.target.y, '#eab308');
@@ -512,7 +512,7 @@ export default function SpeedDrillClient() {
           lastTimeRef.current = intTime;
         }
 
-        const cfg = getLevelConfig(e.level);
+        const cfg = getLevelConfig(e.level, e.combo);
         if (cfg.speedMulti > e.peakSpeed) e.peakSpeed = cfg.speedMulti;
 
         if (e.targetState === 'ACTIVE') {
@@ -554,7 +554,7 @@ export default function SpeedDrillClient() {
 
       if (gameState === 'playing' || gameState === 'start') {
         if (e.targetState === 'ACTIVE') {
-          const targetColor = e.combo >= 10 ? '#38bdf8' : '#00ff88';
+          const targetColor = e.combo >= 10 ? '#38bdf8' : '#eab308';
           const age = performance.now() - (e.spawnTime || performance.now());
           const progress = Math.min(1, age / 1500);
 
@@ -615,19 +615,18 @@ export default function SpeedDrillClient() {
         bestScore,
         accuracy: analytics.accuracy,
         bestCombo: analytics.maxCombo,
-        rating: { letter: analytics.grade?.letter || 'C', label: analytics.grade?.label || 'Keep Going', emoji: '🎯' },
+        rating: { letter: analytics.grade?.letter || 'C', label: analytics.grade?.label || 'Keep Going', emoji: '⚡' },
         newBest: isNewBest,
         drillName: 'Speed Drill Pro',
         playerName: getPlayerName(),
       });
       await shareScoreCard(url, canvas);
     } catch (e) {
-      const text = `🎯 I scored ${uiScore} PTS (Level ${analytics.finalLevel}) on Speed Drill! Accuracy: ${analytics.accuracy}%. Test your reaction speed at skilldrills.online!`;
+      const text = `⚡ I scored ${uiScore} PTS (Level ${analytics.finalLevel}) on Speed Drill! Accuracy: ${analytics.accuracy}%. Test your reaction speed at skilldrills.online!`;
       if (typeof navigator !== 'undefined' && navigator.share) {
         navigator.share({ title: 'My Speed Drill Score', text, url }).catch(() => {});
       } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
         navigator.clipboard.writeText(text);
-        alert('Score card copied to clipboard!');
       }
     }
   }, [uiScore, bestScore, analytics, isNewBest]);
@@ -643,7 +642,7 @@ export default function SpeedDrillClient() {
               Speed Drill Pro
             </h1>
             <p className="text-xs text-slate-400 mt-1">
-              Rapid Target Acquisition &amp; High-Velocity Tapping • 15 Levels
+              Rapid Target Acquisition &amp; High-Velocity Tapping • Continuous Scaling
             </p>
           </div>
         )}
@@ -688,9 +687,11 @@ export default function SpeedDrillClient() {
           {/* IN-BOX OVERLAY HUD */}
           {(gameState === 'playing' || gameState === 'countdown') && (
             <>
-              <div className="absolute top-4 left-4 z-30 pointer-events-none">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Score</p>
-                <p className="text-2xl sm:text-3xl font-bold text-white tabular-nums leading-tight">{uiScore}</p>
+              <div className="absolute top-4 left-4 z-30 pointer-events-none flex flex-col gap-1">
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Score</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-white tabular-nums leading-tight">{uiScore}</p>
+                </div>
               </div>
               <div className="absolute top-4 right-4 z-30 pointer-events-none text-right">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Time</p>
@@ -742,12 +743,19 @@ export default function SpeedDrillClient() {
           {gameState === 'start' && (
             <FpsStartCard
               icon={Zap}
-              accent="emerald"
+              accent="amber"
               title="Speed Drill Pro"
-              subtitle="Rapid Target Acquisition & Tapping • 15 Levels"
+              subtitle="Rapid Target Acquisition & Tapping • Continuous Scaling"
               rules={[
-                { icon: Target, accent: 'orange', title: 'Click Shrinking Targets (+100 PTS)', text: 'Acquire and click rapid targets before they shrink away' },
-                { icon: Zap, accent: 'red', title: 'Miss / Expiry Penalty', text: 'Missing or allowing targets to expire resets your combo streak' },
+                { icon: Target, accent: 'orange', title: 'Click Shrinking Targets (+100 PTS)', text: '+100 PTS × Combo × Level multiplier (+0.6s per hit)' },
+                {
+                  icon: Zap,
+                  accent: 'red',
+                  title: penaltyEnabled ? 'Miss & Expiry Penalty (-0.8s)' : 'Miss & Expiry Reset',
+                  text: penaltyEnabled
+                    ? 'Missing clicks or letting targets expire subtracts 0.8s and resets combo'
+                    : 'Missing clicks or letting targets expire resets your combo multiplier'
+                },
               ]}
               sensitivity={{ value: universalSens, onChange: setUniversalSens, cmPer360 }}
               stats={[
@@ -765,78 +773,23 @@ export default function SpeedDrillClient() {
             <DrillCountdown value={countdownValue} subtitle="GET READY" />
           )}
 
-          {/* END SCREEN */}
+          {/* UNIVERSAL RESULT CARD */}
           {gameState === 'gameOver' && analytics.grade && (
-            <div className="absolute inset-0 z-40 flex bg-neutral-950/98 select-none font-sans" style={{ background: 'rgba(5,5,8,0.97)' }} onPointerDown={e => e.stopPropagation()}>
-              
-              {/* Left Grade Panel */}
-              <div className="w-[36%] flex flex-col items-center justify-center gap-1 border-r border-white/5 px-4" style={{ background: 'radial-gradient(ellipse 260px 200px at 50% 30%, rgba(234,179,8,.12), transparent 70%)' }}>
-                {isNewBest && (
-                  <span className="text-[9.5px] font-bold text-yellow-400 bg-yellow-500/10 border border-yellow-500/25 px-2.5 py-0.5 rounded-full mb-1 animate-pulse">
-                    NEW BEST
-                  </span>
-                )}
-                <div className={`text-5xl sm:text-6xl font-black leading-none ${analytics.grade.color}`}>
-                  {analytics.grade.letter}
-                </div>
-                <div className="text-[10px] uppercase tracking-widest text-slate-500 text-center font-bold mt-1">
-                  {analytics.grade.label}
-                </div>
-                <div className="text-3xl sm:text-4xl font-black text-white mt-2 tabular-nums">
-                  {uiScore}
-                </div>
-                <div className="text-[9px] uppercase tracking-widest text-slate-500">Points</div>
-              </div>
-
-              {/* Right Stats & Actions Panel */}
-              <div className="flex-1 flex flex-col justify-center gap-3 px-6 py-4 min-w-0">
-                
-                {/* 4 Stat Tiles */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.accuracy}%</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Accuracy</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.hits}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Hits</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.bestReaction}ms</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Best Reaction</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">Lv. {analytics.finalLevel}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Peak Level</p>
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex gap-2">
-                  <button 
-                    onClick={enterDrill} 
-                    className="flex-1 py-3 rounded-[13px] bg-gradient-to-r from-amber-600 to-yellow-600 text-white font-bold text-xs uppercase tracking-wide cursor-pointer transition-transform active:scale-[0.98] shadow-md flex items-center justify-center gap-1.5"
-                  >
-                    <RefreshCw className="w-3.5 h-3.5" /> Play Again
-                  </button>
-                  <button 
-                    onClick={shareScore} 
-                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform" 
-                    title="Share Score"
-                  >
-                    <Share2 className="w-4 h-4 text-emerald-400" />
-                  </button>
-                  <button 
-                    onClick={handleExitDrill} 
-                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform" 
-                    title="Exit Fullscreen & Return"
-                  >
-                    <LogOut className="w-4 h-4 text-red-400" />
-                  </button>
-                </div>
-
-              </div>
-            </div>
+            <DrillResultCard
+              accent="amber"
+              grade={analytics.grade}
+              score={uiScore}
+              isNewBest={isNewBest}
+              stats={[
+                { label: 'Accuracy', value: analytics.accuracy, suffix: '%' },
+                { label: 'Hits', value: analytics.hits },
+                { label: 'Best Reaction', value: analytics.bestReaction, suffix: 'ms' },
+                { label: 'Peak Level', value: `Lv. ${analytics.finalLevel}` },
+              ]}
+              onPlayAgain={enterDrill}
+              onShare={shareScore}
+              onExit={handleExitDrill}
+            />
           )}
         </div>
 
@@ -874,7 +827,7 @@ export default function SpeedDrillClient() {
                     <strong>Speed Drill</strong> is a high-velocity target acquisition and rapid tapping exercise. It trains your neuromuscular execution speed, visual tracking, and click timing under dynamic shrinking pressure. Yellow targets move erratically across the screen while constantly decreasing in radius.
                   </p>
                   <p className="text-sm leading-relaxed text-gray-300">
-                    As your score increases, the level scales up to Level 15. Initial target radiuses shrink, velocity multipliers increase up to 3.5x, and shrinking speeds accelerate — sharpening the fast, decisive target lock needed to eliminate opponents in high-speed firefights without hesitating.
+                    As your score increases, difficulty scales continuously. Initial target radiuses shrink, velocity multipliers increase up to 3.8x, and shrinking speeds accelerate — sharpening the fast, decisive target lock needed to eliminate opponents in high-speed firefights without hesitating.
                   </p>
                 </section>
 

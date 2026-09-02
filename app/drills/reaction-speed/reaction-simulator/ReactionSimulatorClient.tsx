@@ -2,19 +2,17 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
-import {
-  Volume2, VolumeX,
-  Play, RefreshCw, Target,
-  Share2, LogOut, Eye, Users, TrendingUp, Zap, ZapOff, Trophy
-} from 'lucide-react';
+import { Volume2, VolumeX, Target, Eye, Users, TrendingUp, Zap, ZapOff, Trophy } from 'lucide-react';
 
+import { isIdleFrameSkippable } from '@/lib/performance';
 import generateShareCard, { shareScoreCard } from '../../../../components/ShareScoreCard';
 import { getPlayerName } from '../../../../lib/leaderboard';
 import { drillAudio } from '../../../../lib/drillAudio';
 import { drillFlash } from '../../../../lib/drillFlash';
 import { drillTimeout } from '../../../../lib/drillTimeout';
-import { getFpsScoreGrade } from '../../../../lib/scoringEngine';
-import { getDifficultyProgress, getStartLevel } from '../../../../lib/drillDifficulty';
+import { drillPenalty } from '../../../../lib/drillPenalty';
+import { getFpsScoreGrade, getComboMultiplier } from '../../../../lib/scoringEngine';
+import { getDifficultyProgress, getStartLevel, ramp } from '../../../../lib/drillDifficulty';
 import useDrillFlash from '../../../../lib/useDrillFlash';
 import useUnexpectedExitGuard from '../../../../lib/useUnexpectedExitGuard';
 import DrillFooter from '../../../../components/drill/DrillFooter';
@@ -22,12 +20,18 @@ import DrillCountdown from '../../../../components/drill/DrillCountdown';
 import DrillAccordion from '../../../../components/drill/DrillAccordion';
 import DrillFlashOverlay from '../../../../components/drill/DrillFlashOverlay';
 import FpsStartCard from '../../../../components/drill/FpsStartCard';
+import DrillResultCard from '../../../../components/drill/DrillResultCard';
 
-const DRILL_DURATION = 45; // 45 seconds focused duration
+// ============================================================
+// TUNING CONSTANTS
+// ============================================================
+const DRILL_DURATION = 45; // starting clock only; a run grows past this
 const POINTS_PER_HIT = 100;
-const POINTS_PER_LEVEL = 250;
-const ELITE_SCORE = 6000; // Rebalanced after combo removal
-const STORAGE_KEY = 'skilldrills_reaction_simulator_v2';
+const POINTS_PER_LEVEL = 1750; // 250 -> 1750 (7x)
+const ELITE_SCORE = 18000; // 6000 -> 18000 (3x)
+const TIME_PER_HIT = 0.6; // +0.6s per valid intercept
+const TIME_PENALTY = 0.8; // -0.8s on miss / target escape (opt-in gated)
+const STORAGE_KEY = 'skilldrills_reaction_simulator_v3';
 
 const RELATED_DRILLS = [
   { id: "barrier-sequence-pursuit", name: "Jiggle Peek Trainer", cat: "Reaction Speed", desc: "Train angle holding and cover peeking reaction reflexes.", href: "/drills/reaction-speed/barrier-sequence-pursuit" },
@@ -41,28 +45,30 @@ const RELATED_DRILLS = [
 const getSavedData = () => {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { bestScore: 0, bestLevel: 1, totalSessions: 0 };
-    return { bestScore: 0, bestLevel: 1, totalSessions: 0, ...JSON.parse(raw) };
+    if (!raw) return { bestScore: 0, bestCombo: 0, bestLevel: 1, totalSessions: 0 };
+    return { bestScore: 0, bestCombo: 0, bestLevel: 1, totalSessions: 0, ...JSON.parse(raw) };
   } catch (e) {
-    return { bestScore: 0, bestLevel: 1, totalSessions: 0 };
+    return { bestScore: 0, bestCombo: 0, bestLevel: 1, totalSessions: 0 };
   }
 };
 
-const saveData = (data: { bestScore: number; bestLevel: number; totalSessions: number }) => {
+const saveData = (data: { bestScore: number; bestCombo?: number; bestLevel: number; totalSessions: number }) => {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   } catch (e) {}
 };
 
+// Continuous unbounded difficulty with streak heat
+const getLevelConfig = (level: number, combo = 0) => {
+  const p = getDifficultyProgress(level); // 0 at L1, 1 at L15, unbounded above
+  const heat = (getComboMultiplier(combo) - 1) / 2;
 
-// Smooth difficulty curve parameters driving Level 1 to Level 15
-const getLevelConfig = (level: number) => {
-  const p = getDifficultyProgress(level); // 0 -> 1 across L1..L15
   return {
-    radius: Math.max(12, Math.round(28 - p * 16)),           // 28px -> 12px
-    fallSpeed: 180 + p * 380,                                 // 180px/s -> 560px/s
-    spawnDelayMin: Math.max(150, Math.round(600 - p * 420)), // 600ms -> 180ms
-    spawnDelayMax: Math.max(220, Math.round(850 - p * 580)), // 850ms -> 270ms
+    radius:        Math.max(6, ramp(28, 7, p) * (1 - heat * 0.25)),
+    fallSpeed:     ramp(180, 850, p) * (1 + heat * 0.30),
+    spawnDelayMin: ramp(600, 20, p) * (1 - heat * 0.30),
+    spawnDelayMax: ramp(850, 35, p) * (1 - heat * 0.30),
+    hitPad:        Math.max(4, ramp(14, 2, p) * (1 - heat * 0.50)),
   };
 };
 
@@ -75,6 +81,7 @@ export default function ReactionSimulatorClient() {
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
+  const [penaltyEnabled, setPenaltyEnabled] = useState(false);
   const [openAccordion, setOpenAccordion] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState<boolean>(false);
   const [isPortrait, setIsPortrait] = useState<boolean>(false);
@@ -83,7 +90,10 @@ export default function ReactionSimulatorClient() {
   // HUD & Best Stats State
   const [uiScore, setUiScore] = useState<number>(0);
   const [uiTimeLeft, setUiTimeLeft] = useState<number>(DRILL_DURATION);
+  const [uiLevel, setUiLevel] = useState<number>(1);
+  const [uiCombo, setUiCombo] = useState<number>(0);
   const [bestScore, setBestScore] = useState<number>(0);
+  const [bestCombo, setBestCombo] = useState<number>(0);
   const [bestLevel, setBestLevel] = useState<number>(1);
   const [totalSessions, setTotalSessions] = useState<number>(0);
   const [isNewBest, setIsNewBest] = useState<boolean>(false);
@@ -95,6 +105,7 @@ export default function ReactionSimulatorClient() {
     missedClicks: 0,
     timeouts: 0,
     avgReactionTime: 0,
+    maxCombo: 0,
     finalLevel: 1,
     grade: null as any
   });
@@ -104,11 +115,14 @@ export default function ReactionSimulatorClient() {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const animationRef = useRef<number | null>(null);
   const countdownTimeoutsRef = useRef<NodeJS.Timeout[]>([]);
-  const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const bestLevelRunRef = useRef(1);
+  const lastTimeRef = useRef(DRILL_DURATION);
 
   const engine = useRef({
     score: 0,
     level: 1,
+    combo: 0,
+    maxCombo: 0,
     successfulHits: 0,
     missedClicks: 0,
     timeouts: 0,
@@ -129,6 +143,8 @@ export default function ReactionSimulatorClient() {
     if (typeof window !== 'undefined') {
       setSoundEnabled(drillAudio.isEnabled());
       setFlashEnabled(drillFlash.isEnabled());
+      setPenaltyEnabled(drillPenalty.isEnabled());
+
       const checkDeviceAndOrientation = () => {
         const ua = navigator.userAgent || '';
         const hasTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
@@ -145,6 +161,7 @@ export default function ReactionSimulatorClient() {
 
       const saved = getSavedData();
       setBestScore(saved.bestScore || 0);
+      setBestCombo(saved.bestCombo || 0);
       setBestLevel(saved.bestLevel || 1);
       setTotalSessions(saved.totalSessions || 0);
 
@@ -166,7 +183,6 @@ export default function ReactionSimulatorClient() {
   useEffect(() => {
     return () => {
       countdownTimeoutsRef.current.forEach(clearTimeout);
-      if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
     };
   }, []);
 
@@ -175,7 +191,6 @@ export default function ReactionSimulatorClient() {
     markIntentionalExit();
     countdownTimeoutsRef.current.forEach(clearTimeout);
     countdownTimeoutsRef.current = [];
-    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
 
     if (document.fullscreenElement) {
       await document.exitFullscreen().catch(() => {});
@@ -191,7 +206,6 @@ export default function ReactionSimulatorClient() {
   // Complete Drill Session cleanly
   const endGame = useCallback(() => {
     if (animationRef.current) cancelAnimationFrame(animationRef.current);
-    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
 
     setGameState('gameOver');
 
@@ -211,41 +225,41 @@ export default function ReactionSimulatorClient() {
       missedClicks: e.missedClicks,
       timeouts: e.timeouts,
       avgReactionTime: avgRt,
-      finalLevel: e.level,
+      maxCombo: e.maxCombo,
+      finalLevel: Math.floor(bestLevelRunRef.current),
       grade: gradeObj
     });
 
-    const isNew = e.score > bestScore;
-    if (isNew) {
-      setIsNewBest(true);
-      setBestScore(e.score);
-    } else {
-      setIsNewBest(false);
-    }
+    setUiScore(e.score);
 
-    const newBestLevel = Math.max(bestLevel, e.level);
-    setBestLevel(newBestLevel);
+    const prevSaved = getSavedData();
+    const isNew = e.score > prevSaved.bestScore;
+    setIsNewBest(isNew);
 
-    setTotalSessions((prev) => {
-      const next = prev + 1;
-      saveData({
-        bestScore: Math.max(bestScore, e.score),
-        bestLevel: newBestLevel,
-        totalSessions: next
-      });
-      return next;
-    });
+    const runBestLevel = Math.max(prevSaved.bestLevel, Math.floor(bestLevelRunRef.current));
+    const updatedData = {
+      bestScore: Math.max(prevSaved.bestScore, e.score),
+      bestCombo: Math.max(prevSaved.bestCombo || 0, e.maxCombo),
+      bestLevel: runBestLevel,
+      totalSessions: (prevSaved.totalSessions || 0) + 1
+    };
+    saveData(updatedData);
+
+    setBestScore(updatedData.bestScore);
+    setBestCombo(updatedData.bestCombo);
+    setBestLevel(updatedData.bestLevel);
+    setTotalSessions(updatedData.totalSessions);
 
     drillAudio.playSessionEnd();
-  }, [bestScore, bestLevel]);
+  }, []);
 
   // Target Spawn Logic (Falling vertically from top)
-  const spawnFallingTarget = useCallback((W: number, H: number, level: number) => {
+  const spawnFallingTarget = useCallback((W: number, H: number, level: number, combo: number) => {
     const e = engine.current;
-    const config = getLevelConfig(level);
+    const config = getLevelConfig(level, combo);
 
-    const baseR = isMobile ? 26 : 24;
-    const radius = Math.max(14, Math.round(baseR - (getDifficultyProgress(level) * 8)));
+    const baseR = isMobile ? config.radius + 2 : config.radius;
+    const radius = Math.max(6, baseR);
 
     const margin = W * 0.10;
     const spawnX = margin + Math.random() * (W - margin * 2);
@@ -273,19 +287,24 @@ export default function ReactionSimulatorClient() {
 
     countdownTimeoutsRef.current.forEach(clearTimeout);
     countdownTimeoutsRef.current = [];
-    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
 
     drillAudio.init();
 
-    const saved = getSavedData();
-    const startLevel = getStartLevel(saved.bestLevel);
+    const startLevel = getStartLevel();
+    bestLevelRunRef.current = startLevel;
 
     setUiScore(0);
+    setUiLevel(startLevel);
+    setUiCombo(0);
     setUiTimeLeft(DRILL_DURATION);
+    lastTimeRef.current = DRILL_DURATION;
+    setIsNewBest(false);
 
     engine.current = {
       score: 0,
       level: startLevel,
+      combo: 0,
+      maxCombo: 0,
       successfulHits: 0,
       missedClicks: 0,
       timeouts: 0,
@@ -321,21 +340,11 @@ export default function ReactionSimulatorClient() {
 
     const t4 = setTimeout(() => {
       setGameState('playing');
-
-      // Start 1-second Interval Timer (45 seconds duration)
-      let remaining = DRILL_DURATION;
-      timerIntervalRef.current = setInterval(() => {
-        remaining -= 1;
-        setUiTimeLeft(remaining);
-        if (remaining <= 0) {
-          endGame();
-        }
-      }, 1000);
-
+      engine.current.nextSpawnTime = performance.now() + 200;
     }, 2450);
 
     countdownTimeoutsRef.current = [t1, t2, t3, t4];
-  }, [endGame]);
+  }, []);
 
   // Target Click / Tap Handler
   const handleCanvasInteraction = useCallback((clientX: number, clientY: number) => {
@@ -348,13 +357,14 @@ export default function ReactionSimulatorClient() {
     const clickY = clientY - rect.top;
 
     const e = engine.current;
+    const config = getLevelConfig(e.level, e.combo);
     let hitIndex = -1;
 
     // Check hit against falling targets (bottom-most target priority)
     for (let i = e.targets.length - 1; i >= 0; i--) {
       const t = e.targets[i];
       const dist = Math.hypot(clickX - t.x, clickY - t.y);
-      const hitPad = isMobile ? 24 : 14;
+      const hitPad = isMobile ? config.hitPad + 10 : config.hitPad;
 
       if (dist <= t.radius + hitPad) {
         hitIndex = i;
@@ -367,16 +377,26 @@ export default function ReactionSimulatorClient() {
       const rt = Math.round(performance.now() - hitTarget.spawnTime);
       e.reactionTimes.push(rt);
       e.successfulHits += 1;
-      e.score += POINTS_PER_HIT;
+      e.combo += 1;
+      if (e.combo > e.maxCombo) e.maxCombo = e.combo;
 
-      // Monotonic level progression as user scores points
-      const rawLevel = Math.floor(e.score / POINTS_PER_LEVEL) + 1;
+      const levelMult = 1 + getDifficultyProgress(e.level) * 0.5;
+      e.score += Math.round(POINTS_PER_HIT * getComboMultiplier(e.combo) * levelMult);
+
+      // Time bonus on clean hit
+      e.timeLeft += TIME_PER_HIT;
+
+      // Continuous unbounded level progression
+      const rawLevel = (e.score / POINTS_PER_LEVEL) + 1;
       e.level = Math.max(e.level, rawLevel);
+      bestLevelRunRef.current = Math.max(bestLevelRunRef.current, e.level);
 
       setUiScore(e.score);
+      setUiLevel(Math.floor(e.level));
+      setUiCombo(e.combo);
       drillAudio.playHit();
 
-      // Particles explosion (Constant Red)
+      // Particles explosion (Tactical Rose / Red)
       for (let i = 0; i < 10; i++) {
         const angle = Math.random() * Math.PI * 2;
         const spd = 2 + Math.random() * 4;
@@ -405,8 +425,11 @@ export default function ReactionSimulatorClient() {
       return;
     }
 
-    // Missed click on empty space: no penalty, just flash + audio feedback
+    // Missed click on empty space: optional time penalty + combo reset
     e.missedClicks += 1;
+    if (drillPenalty.isEnabled()) e.timeLeft -= TIME_PENALTY;
+    e.combo = 0;
+    setUiCombo(0);
     e.screenShake = 6;
     triggerFlash();
     drillAudio.playPenalty();
@@ -438,6 +461,11 @@ export default function ReactionSimulatorClient() {
     let lastTime = performance.now();
 
     const draw = (now: number) => {
+      if (isIdleFrameSkippable(gameState === 'playing', now, lastTime)) {
+        animationRef.current = requestAnimationFrame(draw);
+        return;
+      }
+
       const dt = Math.min((now - lastTime) / 1000, 0.1);
       lastTime = now;
 
@@ -445,6 +473,23 @@ export default function ReactionSimulatorClient() {
       const W = rect.width;
       const H = rect.height;
       const e = engine.current;
+
+      // Clock draining in RAF loop
+      if (gameState === 'playing') {
+        if (e.timeLeft > 0) e.timeLeft -= dt;
+        if (e.timeLeft <= 0) {
+          e.timeLeft = 0;
+          setUiTimeLeft(0);
+          endGame();
+          return;
+        }
+
+        const ceilSec = Math.ceil(e.timeLeft);
+        if (ceilSec !== lastTimeRef.current) {
+          lastTimeRef.current = ceilSec;
+          setUiTimeLeft(ceilSec);
+        }
+      }
 
       // Screen Shake Effect
       ctx.save();
@@ -484,8 +529,8 @@ export default function ReactionSimulatorClient() {
 
       // Spawn falling targets dynamically
       if (now >= e.nextSpawnTime) {
-        spawnFallingTarget(W, H, e.level);
-        const config = getLevelConfig(e.level);
+        spawnFallingTarget(W, H, e.level, e.combo);
+        const config = getLevelConfig(e.level, e.combo);
         const delay = config.spawnDelayMin + Math.random() * (config.spawnDelayMax - config.spawnDelayMin);
         e.nextSpawnTime = now + delay;
       }
@@ -496,14 +541,12 @@ export default function ReactionSimulatorClient() {
         t.y += t.vy * dt;
 
         // Target Escaped Bottom Boundary -> Timeout / Penalty
-        if (!drillTimeout.isEnabled() && t.y > H + t.radius) {
-          t.y = H + t.radius;
-          continue;
-        }
-
         if (t.y > H + t.radius) {
           e.targets.splice(i, 1);
           e.timeouts += 1;
+          if (drillPenalty.isEnabled()) e.timeLeft -= TIME_PENALTY;
+          e.combo = 0;
+          setUiCombo(0);
           e.screenShake = 6;
           triggerFlash();
           drillAudio.playPenalty();
@@ -602,7 +645,7 @@ export default function ReactionSimulatorClient() {
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
       ro.disconnect();
     };
-  }, [gameState, spawnFallingTarget, triggerFlash, isMobile]);
+  }, [gameState, endGame, spawnFallingTarget, triggerFlash]);
 
   // Share Score Card helper
   const sharePage = useCallback(async () => {
@@ -610,33 +653,65 @@ export default function ReactionSimulatorClient() {
     try {
       const canvas = generateShareCard({
         score: uiScore,
-        bestScore,
         accuracy: analytics.accuracy,
-        rating: { letter: analytics.grade?.letter || 'C', label: analytics.grade?.label || 'Keep Going', emoji: '🎯' },
-        newBest: isNewBest,
+        speed: analytics.avgReactionTime,
         drillName: 'Reaction Simulator',
+        rank: analytics.grade?.letter || 'A',
+        rankName: analytics.grade?.label || 'ELITE REFLEX',
         playerName: getPlayerName(),
+        level: analytics.finalLevel,
+        date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        url: 'skilldrills.online/drills/reaction-speed/reaction-simulator'
       });
-      await shareScoreCard(url, canvas);
-    } catch (e) {
-      const text = `🎯 I scored ${uiScore} PTS (Level ${analytics.finalLevel}) on Reaction Simulator! Average reaction: ${analytics.avgReactionTime}ms. Practice free reflex drills at skilldrills.online! ⚡`;
-      if (typeof navigator !== 'undefined' && navigator.share) {
-        navigator.share({ title: 'Reaction Simulator Score', text, url }).catch(() => {});
-      } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
-        navigator.clipboard.writeText(`${text} ${url}`);
-        alert('Score & drill link copied to clipboard!');
+
+      await shareScoreCard(canvas, {
+        title: 'Reaction Simulator — My Score',
+        text: `I scored ${uiScore} (Grade: ${analytics.grade?.letter || 'A'}, Lv. ${analytics.finalLevel}) on Reaction Simulator at SkillDrills!`,
+        url
+      });
+    } catch (err) {
+      if (navigator.share) {
+        navigator.share({
+          title: 'Reaction Simulator',
+          text: `I scored ${uiScore} on Reaction Simulator! Can you beat my score?`,
+          url
+        }).catch(() => {});
       }
     }
-  }, [uiScore, bestScore, analytics, isNewBest]);
+  }, [uiScore, analytics]);
 
   return (
-    <div className="min-h-screen bg-[#050508] text-white flex flex-col font-sans select-none">
-      {/* ── MAIN CONTENT AREA ── */}
-      <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
-        {/* Title */}
+    <div className="w-full flex flex-col items-center justify-start min-h-screen bg-[#050508] text-white selection:bg-red-500 selection:text-white">
+      
+      {/* Mobile Orientation Alert */}
+      {isMobile && isPortrait && (
+        <div className="w-full bg-amber-500/10 border-b border-amber-500/20 px-4 py-2 text-center text-xs text-amber-300 flex items-center justify-center gap-2">
+          <span>Rotate to landscape mode for a wider reflex interception field.</span>
+        </div>
+      )}
+
+      {/* Main Container */}
+      <main className="w-full max-w-5xl mx-auto px-3 sm:px-4 py-3 sm:py-6 flex flex-col gap-3 sm:gap-6">
+        
+        {/* Navigation & Header */}
+        {!isFullscreen && (
+          <div className="w-full flex items-center justify-between">
+            <Link 
+              href="/drills/reaction-speed"
+              className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition-colors bg-white/5 px-3 py-1.5 rounded-lg border border-white/5"
+            >
+              ← Back to Reaction Hub
+            </Link>
+            <div className="text-xs text-slate-400 font-mono">
+              Drill ID: <span className="text-red-400">RS-04</span>
+            </div>
+          </div>
+        )}
+
+        {/* Drill Header */}
         {!isFullscreen && (
           <div className="text-center">
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-black uppercase tracking-tight text-white flex items-center justify-center gap-3 flex-wrap">
               REACTION SIMULATOR
               <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
                 Reaction Simulator Game
@@ -663,7 +738,7 @@ export default function ReactionSimulatorClient() {
             </div>
             <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Level</div>
-              <div className="text-lg sm:text-xl font-black text-indigo-400 tabular-nums">L{engine.current.level}</div>
+              <div className="text-lg sm:text-xl font-black text-indigo-400 tabular-nums">L{uiLevel}</div>
             </div>
             <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
@@ -685,7 +760,7 @@ export default function ReactionSimulatorClient() {
           {/* IN-BOX OVERLAY HUD */}
           {(gameState === 'playing' || gameState === 'countdown') && (
             <>
-              <div className="absolute top-4 left-4 z-30 pointer-events-none">
+              <div className="absolute top-4 left-4 z-30 pointer-events-none flex flex-col">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Score</p>
                 <p className="text-2xl sm:text-3xl font-black text-white tabular-nums leading-tight">{uiScore}</p>
               </div>
@@ -745,8 +820,15 @@ export default function ReactionSimulatorClient() {
               title="Reaction Simulator"
               subtitle="Reflex Interception • Vertical Tracking"
               rules={[
-                { icon: Target, accent: 'red', title: 'Intercept Falling Targets', text: 'Strike descending targets before they exit the bottom boundary' },
-                { icon: Zap, accent: 'orange', title: 'Vertical Reflex Tracking', text: 'Track multi-velocity falling nodes across high-speed drops' },
+                { icon: Target, accent: 'red', title: 'Intercept Falling Targets', text: '+100 PTS × Combo × Level multiplier (+0.6s per hit)' },
+                {
+                  icon: Zap,
+                  accent: 'orange',
+                  title: penaltyEnabled ? 'Time Penalty (-0.8s)' : 'Streak & Combo System',
+                  text: penaltyEnabled
+                    ? 'Missing or letting targets escape subtracts 0.8s and resets combo'
+                    : 'Escaping targets reset combo multiplier. No time deducted (enable in session settings)'
+                },
               ]}
               stats={[
                 { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
@@ -762,77 +844,23 @@ export default function ReactionSimulatorClient() {
             <DrillCountdown value={countdownValue} subtitle="GET READY" />
           )}
 
-          {/* END SCREEN */}
+          {/* UNIVERSAL RESULT CARD */}
           {gameState === 'gameOver' && analytics.grade && (
-            <div className="absolute inset-0 z-40 flex bg-neutral-950/98 select-none font-sans" style={{ background: 'rgba(5,5,8,0.97)' }} onPointerDown={e => e.stopPropagation()}>
-              
-              {/* Left Grade Panel */}
-              <div className="w-[36%] flex flex-col items-center justify-center gap-1 border-r border-white/5 px-4" style={{ background: 'radial-gradient(ellipse 260px 200px at 50% 30%, rgba(239,68,68,.12), transparent 70%)' }}>
-                {isNewBest && (
-                  <span className="text-[9.5px] font-bold text-yellow-400 bg-yellow-500/10 border border-yellow-500/25 px-2.5 py-0.5 rounded-full mb-1 animate-pulse">
-                    NEW BEST
-                  </span>
-                )}
-                <div className={`text-5xl sm:text-6xl font-black leading-none ${analytics.grade.color}`}>
-                  {analytics.grade.letter}
-                </div>
-                <div className="text-[10px] uppercase tracking-widest text-slate-500 text-center font-bold mt-1">
-                  {analytics.grade.label}
-                </div>
-                <div className="text-3xl sm:text-4xl font-black text-white mt-2 tabular-nums">
-                  {uiScore}
-                </div>
-                <div className="text-[9px] uppercase tracking-widest text-slate-500">Points</div>
-              </div>
-
-              {/* Right Stats & Actions Panel */}
-              <div className="flex-1 flex flex-col justify-center gap-3 px-6 py-4 min-w-0">
-                
-                {/* 3 Stat Tiles */}
-                <div className="grid grid-cols-3 gap-2">
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.accuracy}%</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Accuracy</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.avgReactionTime}<span className="text-[10px] text-gray-500">ms</span></p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Avg Reaction</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">Lv. {analytics.finalLevel}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Peak Level</p>
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={enterDrill}
-                    className="flex-1 py-3 rounded-[13px] bg-gradient-to-r from-red-600 to-rose-600 text-white font-bold text-xs uppercase tracking-wide cursor-pointer transition-transform active:scale-[0.98] shadow-md flex items-center justify-center gap-1.5"
-                  >
-                    <RefreshCw className="w-3.5 h-3.5" /> Play Again
-                  </button>
-                  <button
-                    type="button"
-                    onClick={sharePage}
-                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform"
-                    title="Share Score"
-                  >
-                    <Share2 className="w-4 h-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleExitDrill}
-                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform"
-                    title="Return to Options"
-                  >
-                    <LogOut className="w-4 h-4 text-red-400" />
-                  </button>
-                </div>
-
-              </div>
-            </div>
+            <DrillResultCard
+              accent="rose"
+              grade={analytics.grade}
+              score={uiScore}
+              isNewBest={isNewBest}
+              stats={[
+                { label: 'Accuracy', value: analytics.accuracy, suffix: '%' },
+                { label: 'Avg Reaction', value: analytics.avgReactionTime, suffix: 'ms' },
+                { label: 'Peak Level', value: `Lv. ${analytics.finalLevel}` },
+                { label: 'Max Combo', value: analytics.maxCombo, suffix: 'x' },
+              ]}
+              onPlayAgain={enterDrill}
+              onShare={sharePage}
+              onExit={handleExitDrill}
+            />
           )}
 
         </div>
@@ -847,10 +875,15 @@ export default function ReactionSimulatorClient() {
               onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-sans">
-                <RuleItem num="1" text="Intercept Falling Targets" highlight="+100 PTS" result="Adds to score & levels you up" />
-                <RuleItem num="2" text="Level Progression" highlight="Every 250 PTS" result="Falling targets speed up & shrink" />
-                <RuleItem num="3" text="Miss / Escape" highlight="No Penalty" result="Triggers red alert, score safe" />
-                <RuleItem num="4" text="Session Length" highlight="45 Seconds" result="Beat your best before time's up" />
+                <RuleItem num="1" text="Intercept Falling Targets" highlight="+100 PTS" result="× Combo × Level bonus (+0.6s clock per hit)" />
+                <RuleItem num="2" text="Combo & Heat System" highlight="Up to 3.0x Multiplier" result="Higher streaks spawn faster, tighter drops" />
+                <RuleItem num="3" text="Level Progression" highlight="Continuous Scaling" result="Targets speed up and shrink dynamically" />
+                <RuleItem 
+                  num="4" 
+                  text="Miss & Escape Rules" 
+                  highlight={penaltyEnabled ? "-0.8s Penalty" : "Zero Penalties (Default)"} 
+                  result={penaltyEnabled ? "Deducts 0.8s & resets combo" : "Resets combo. Time penalty is opt-in via settings"} 
+                />
               </div>
             </DrillAccordion>
 
@@ -920,7 +953,8 @@ export default function ReactionSimulatorClient() {
                 <FAQItem q="Can traditional athletes use this for vision training?" a="Yes. Sports vision research shows vertical reflex training enhances spatial interception skills for volleyball, basketball, and tennis." />
                 <FAQItem q="Should I click targets high up or wait until they drop?" a="Clicking targets high up gives you more margin for error and builds fast-twitch reaction speed before targets reach the danger line." />
                 <FAQItem q="Does this drill support touchscreens?" a="Yes! It features generous touch hitpads and automatic orientation warnings for mobile devices." />
-                <FAQItem q="How does adaptive level difficulty work?" a="As your score increases, falling speeds accelerate, targets shrink in size, and spawn intervals shorten." />
+                <FAQItem q="How does adaptive level difficulty work?" a="Difficulty scales continuously based on your live performance and combo streak, with target velocity ramping up and spawn windows tightening." />
+                <FAQItem q="Is there a time penalty for missing or escaping targets?" a="By default, missing or letting targets escape only resets your combo streak. A time penalty (-0.8s per error) is available as an opt-in toggle in the session settings for players who want a harder challenge." />
               </div>
             </DrillAccordion>
           </div>

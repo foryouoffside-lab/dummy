@@ -11,8 +11,13 @@ falling back to scripts/bing/.bing-key (gitignored). Never hardcode it here.
   python scripts/bing/bing.py pagequeries <url>    queries for one page
   python scripts/bing/bing.py crawl                crawl stats + issues
   python scripts/bing/bing.py quota                URL submission quota
-  python scripts/bing/bing.py keyword <phrase>     keyword research volume
-  python scripts/bing/bing.py related <phrase>     related keyword ideas
+  python scripts/bing/bing.py keyword <phrase> [country]   keyword volume
+  python scripts/bing/bing.py related <phrase> [country]   related keywords
+
+Keyword/related take a market: a trailing country code, or --country=br
+--lang=pt-BR to be explicit. Both commands echo the market they resolved,
+because the failure mode here is silent: a wrong market returns 0 rather
+than an error, and 0 is indistinguishable from "no demand".
   python scripts/bing/bing.py submit <url> [...]   submit URLs for indexing
   python scripts/bing/bing.py submitall [--dry]    submit every sitemap URL
 """
@@ -23,6 +28,16 @@ import sys
 import urllib.error
 import urllib.parse
 import urllib.request
+
+# Windows consoles default to cp1252, which cannot encode the Korean, Japanese
+# and Cyrillic queries this account actually receives. Without this, `queries`
+# died with a UnicodeEncodeError on the second row of 789 and printed nothing
+# further -- the non-English demand was unreadable in the one report that shows
+# it. errors="replace" keeps a stray glyph from taking the whole report down.
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 
@@ -241,10 +256,31 @@ def cmd_quota():
     return q.get("DailyQuota") or 0
 
 
-def keyword_volume(phrase, country="us"):
+# Bing's keyword endpoints take a country AND a language tag. They are not
+# independent: language must be one actually spoken in that country or the
+# call returns 0 impressions rather than an error -- the same silent-zero
+# trap that made `keyword "aim trainer" us` report no demand for a phrase
+# with 4,834. Keys match scripts/keywords/country_keywords.py.
+MARKET_LANG = {
+    "us": "en-US", "gb": "en-GB", "ca": "en-CA", "au": "en-AU", "in": "en-IN",
+    "br": "pt-BR", "pt": "pt-PT", "es": "es-ES", "mx": "es-MX", "ar": "es-AR",
+    "jp": "ja-JP", "kr": "ko-KR", "de": "de-DE", "at": "de-AT", "ch": "de-CH",
+    "fr": "fr-FR", "it": "it-IT", "nl": "nl-NL", "pl": "pl-PL", "ru": "ru-RU",
+    "tr": "tr-TR", "id": "id-ID", "th": "th-TH", "vn": "vi-VN", "tw": "zh-TW",
+}
+
+
+def market(country=None, language=None):
+    """Resolve a (country, language) pair, defaulting language from the map."""
+    c = (country or "us").lower()
+    return c, language or MARKET_LANG.get(c, "en-US")
+
+
+def keyword_volume(phrase, country="us", language=None):
     """Exact and broad Bing impressions per month for a phrase. None on error."""
     start, end = month_range()
-    r = call("GetKeyword", {"q": phrase, "country": country, "language": "en-US",
+    country, language = market(country, language)
+    r = call("GetKeyword", {"q": phrase, "country": country, "language": language,
                             "startDate": start, "endDate": end})
     if "__error" in r:
         return None
@@ -254,21 +290,25 @@ def keyword_volume(phrase, country="us"):
     return {"exact": d.get("Impressions"), "broad": d.get("BroadImpressions")}
 
 
-def cmd_keyword(phrase, country="us"):
-    v = keyword_volume(phrase, country)
+def cmd_keyword(phrase, country="us", language=None):
+    c, lang = market(country, language)
+    v = keyword_volume(phrase, c, lang)
+    tag = "[" + c + "/" + lang + "]"
     if not v:
-        print(phrase.ljust(46) + "no data")
+        print(phrase.ljust(38) + tag.ljust(14) + "no data")
         return None
-    print(phrase.ljust(46) + "exact " + str(v["exact"]).rjust(8)
+    print(phrase.ljust(38) + tag.ljust(14) + "exact " + str(v["exact"]).rjust(8)
           + "   broad " + str(v["broad"]).rjust(8))
     return v
 
 
-def cmd_related(phrase, country="us"):
+def cmd_related(phrase, country="us", language=None):
     start, end = month_range()
+    country, language = market(country, language)
     data = rows("GetRelatedKeywords", {"q": phrase, "country": country,
-                                       "language": "en-US",
+                                       "language": language,
                                        "startDate": start, "endDate": end})
+    print("related to '" + phrase + "' [" + country + "/" + language + "]")
     if not data:
         print(phrase + ": no related keywords")
         return []
@@ -323,6 +363,27 @@ def cmd_submitall(dry=False):
     cmd_quota()
 
 
+def parse_market_args(a):
+    """Split argv into (phrase, country, language).
+
+    Accepts --country=/--lang= flags, or a trailing bare country code. The
+    trailing form is only honoured when it is a known code AND something is
+    left over for the phrase, so `keyword "cs go de"` keeps its last word.
+    """
+    country = language = None
+    rest = []
+    for tok in a:
+        if tok.startswith("--country="):
+            country = tok.split("=", 1)[1]
+        elif tok.startswith("--lang="):
+            language = tok.split("=", 1)[1]
+        else:
+            rest.append(tok)
+    if country is None and len(rest) > 1 and rest[-1].lower() in MARKET_LANG:
+        country = rest.pop()
+    return " ".join(rest), country, language
+
+
 def main():
     cmd = sys.argv[1] if len(sys.argv) > 1 else "traffic"
     a = sys.argv[2:]
@@ -340,10 +401,9 @@ def main():
         cmd_crawl()
     elif cmd == "quota":
         cmd_quota()
-    elif cmd == "keyword":
-        cmd_keyword(" ".join(a))
-    elif cmd == "related":
-        cmd_related(" ".join(a))
+    elif cmd in ("keyword", "related"):
+        phrase, country, language = parse_market_args(a)
+        (cmd_keyword if cmd == "keyword" else cmd_related)(phrase, country, language)
     elif cmd == "submit":
         cmd_submit(a)
     elif cmd == "submitall":

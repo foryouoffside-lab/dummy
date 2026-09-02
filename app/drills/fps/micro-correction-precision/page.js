@@ -145,10 +145,10 @@ export default function MicroCorrectionPage() {
       },
       {
         "@type": "Question",
-        "name": "Why do I miss easy headshots?",
+        "name": "Why does missing or timing out reset my combo and how are penalties applied?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Missing headshots is usually due to clicking before your crosshair has fully stopped on the target's center (poor click-timing) or failing to correct a near-miss flick."
+          "text": "By default, missing a shot or allowing a target to expire resets your combo multiplier without reducing your time or score. If you want a more punishing tactical challenge, you can enable Time Penalty in the session settings to deduct 0.6s per error."
         }
       },
       {

@@ -16,7 +16,9 @@ import generateShareCard, { shareScoreCard } from '@/components/ShareScoreCard';
 import { getPlayerName } from '@/lib/leaderboard';
 import { drillAudio } from '@/lib/drillAudio';
 import { drillFlash } from '@/lib/drillFlash';
-import { MAX_LEVEL, getStartLevel, getNextLevel, getDifficultyProgress } from '@/lib/drillDifficulty';
+import { drillPenalty } from '@/lib/drillPenalty';
+import { drillTimeout } from '@/lib/drillTimeout';
+import { MAX_LEVEL, getStartLevel, getDifficultyProgress, ramp } from '@/lib/drillDifficulty';
 import { getComboMultiplier, getFpsScoreGrade } from '@/lib/scoringEngine';
 import { createBackdropCache, getCanvasDpr, drawPulseRing } from '@/lib/canvasFx';
 import useUnexpectedExitGuard from '@/lib/useUnexpectedExitGuard';
@@ -24,11 +26,17 @@ import DrillFooter from '@/components/drill/DrillFooter';
 import DrillCountdown from '@/components/drill/DrillCountdown';
 import DrillAccordion from '@/components/drill/DrillAccordion';
 import FpsStartCard from '@/components/drill/FpsStartCard';
+import DrillResultCard from '@/components/drill/DrillResultCard';
 
-const DRILL_DURATION = 45;
-const POINTS_PER_LEVEL = 250;
-const ELITE_SCORE = 16000;
-const STORAGE_KEY = 'skilldrills_motor_finger_sequencing_v2';
+// ============================================================
+// TUNING CONSTANTS
+// ============================================================
+const DRILL_DURATION = 45; // starting clock only; a run grows past this
+const POINTS_PER_LEVEL = 1750; // 250 -> 1750 (7x)
+const ELITE_SCORE = 24000; // 16000 -> 24000 (1.5x)
+const TIME_PER_HIT = 0.6; // +0.6s on node hit
+const TIME_PENALTY = 0.8; // -0.8s on miss/timeout (opt-in gated)
+const STORAGE_KEY = 'skilldrills_motor_finger_sequencing_v3';
 
 const getSavedData = () => {
   try {
@@ -46,17 +54,23 @@ const saveData = (data) => {
   } catch (e) {}
 };
 
-const getCoachAdvice = (timeouts, misses, accuracy, avgReactionTime) => {
-  if (timeouts > misses && timeouts > 2) {
-    return "High target sequence timeouts detected — you are analyzing node sizes too slowly before starting your path. Scan target clusters immediately upon spawn.";
-  }
-  if (misses > 4 || accuracy < 75) {
-    return "High missed clicks detected — you are clicking before crosshair deceleration settles on the node hitbox. Ensure precision click landing on small targets.";
-  }
-  if (avgReactionTime > 450) {
-    return "Great accuracy, but transit speed between nodes is holding back your level progression. Focus on smooth, continuous micro-flicks.";
-  }
-  return "Flawless target sequencing and crosshair pathing! Bumping your sensitivity by 0.05x will help break your current speed ceiling.";
+// Continuous unbounded difficulty with streak heat
+const getLevelConfig = (level, combo = 0) => {
+  const p = getDifficultyProgress(level); // 0 at L1, 1 at L15, unbounded above
+  const heat = (getComboMultiplier(combo) - 1) / 2;
+  const nodeCount = level >= 8 ? 5 : (level >= 4 ? 4 : 3);
+  return {
+    nodeCount,
+    r0: Math.max(8, ramp(32, 10, p) * (1 - heat * 0.20)),
+    r1: Math.max(6, ramp(24, 8, p) * (1 - heat * 0.20)),
+    r2: Math.max(5, ramp(18, 7, p) * (1 - heat * 0.20)),
+    r3: Math.max(5, ramp(14, 6, p) * (1 - heat * 0.20)),
+    r4: Math.max(4, ramp(11, 5, p) * (1 - heat * 0.20)),
+    r5: Math.max(4, ramp(9, 4, p) * (1 - heat * 0.20)),
+    maxTime: Math.max(0.6, ramp(3.2, 0.85, p) * (1 - heat * 0.25)),
+    spread: ramp(120, 380, p),
+    hitMargin: Math.max(3, ramp(12, 4, p))
+  };
 };
 
 const FAQ_ITEMS = [
@@ -86,7 +100,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "How does difficulty scaling work in Level 1 to 15?",
-    a: "As your score increases, target node radii shrink, allowed sequence window times tighten, and distance spreads expand across 15 dynamic difficulty levels."
+    a: "As your score increases, target node radii shrink, allowed sequence window times tighten, and distance spreads expand continuously."
   },
   {
     q: "Can I train on mobile or touch screen devices?",
@@ -105,10 +119,6 @@ const FAQ_ITEMS = [
     a: "Node sizes descend from largest to smallest to train initial broad flicking followed by fine micro-correction, mimicking initial enemy target locking followed by headshot refinement."
   },
   {
-    q: "How does the AI Coach Advice feature work?",
-    a: "The engine analyzes your miss frequency, target timeouts, accuracy percentage, and reaction speeds across the session to provide tailored mechanical recommendations."
-  },
-  {
     q: "Is this sequence aim trainer completely free?",
     a: "Yes, SkillDrills Sequence Aim Trainer is 100% free with no sign-ups, downloads, or paywalls required."
   },
@@ -118,7 +128,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "How can I share my score card results?",
-    a: "After completing a 45-second drill session, click the 'Share Score Card' button in the results modal to instantly copy your verified performance summary to share with friends or on social media."
+    a: "After completing a drill session, click the 'Share Score' button in the results modal to instantly copy or share your verified performance summary."
   }
 ];
 
@@ -127,6 +137,7 @@ export default function FingerSequencingClient() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
+  const [penaltyEnabled, setPenaltyEnabled] = useState(false);
   const [pointerLocked, setPointerLocked] = useState(false);
   const [universalSens, setUniversalSens] = useState(1.0);
   const [openAccordion, setOpenAccordion] = useState(null);
@@ -147,7 +158,7 @@ export default function FingerSequencingClient() {
 
   const [analytics, setAnalytics] = useState({
     accuracy: 100, successfulHits: 0, missedClicks: 0, timeouts: 0,
-    avgReactionTime: 0, maxCombo: 0, finalLevel: 1, grade: null, coachAdvice: ''
+    avgReactionTime: 0, maxCombo: 0, finalLevel: 1, grade: null
   });
 
   const canvasRef = useRef(null);
@@ -184,6 +195,7 @@ export default function FingerSequencingClient() {
     if (typeof window !== 'undefined') {
       setSoundEnabled(drillAudio.isEnabled());
       setFlashEnabled(drillFlash.isEnabled());
+      setPenaltyEnabled(drillPenalty.isEnabled());
       const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
       const isTouchCapable = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
       setIsTouchOnlyDevice(isTouchCapable && !hasFinePointer);
@@ -206,8 +218,6 @@ export default function FingerSequencingClient() {
     };
   }, []);
 
-  // Stop the render loop on unmount (e.g. SPA navigation away mid-drill) so it
-  // doesn't keep scheduling requestAnimationFrame callbacks forever.
   useEffect(() => {
     return () => {
       gameActiveRef.current = false;
@@ -251,8 +261,6 @@ export default function FingerSequencingClient() {
     setGameState('start');
   }, []);
 
-  // Stop the drill if the player leaves any way other than the in-app Exit
-  // button (back gesture, tab switch, Esc) instead of running invisibly.
   const { markIntentionalExit } = useUnexpectedExitGuard({
     active: gameState === 'playing' || gameState === 'countdown',
     onUnexpectedExit: handleExitDrill,
@@ -268,27 +276,9 @@ export default function FingerSequencingClient() {
     }
   }, []);
 
-  const getLevelConfig = (level) => {
-    const p = getDifficultyProgress(level);
-    // Node count scales dynamically: 3 nodes (L1-3), 4 nodes (L4-7), 5 nodes (L8-15) -> adds 2 more nodes as player performs well!
-    const nodeCount = level >= 8 ? 5 : (level >= 4 ? 4 : 3);
-    return {
-      nodeCount,
-      r0: Math.max(10, 32 - p * 22),
-      r1: Math.max(8, 24 - p * 16),
-      r2: Math.max(7, 18 - p * 11),
-      r3: Math.max(6, 14 - p * 8),
-      r4: Math.max(5, 11 - p * 6),
-      r5: Math.max(5, 9 - p * 4),
-      maxTime: Math.max(0.9, 3.2 - p * 2.1),
-      spread: 120 + p * 240,
-      hitMargin: Math.max(5, 12 - p * 7)
-    };
-  };
-
   const spawnChain = useCallback((width, height, currentLevel) => {
     const e = engine.current;
-    const config = getLevelConfig(currentLevel);
+    const config = getLevelConfig(currentLevel, e.combo);
     const count = config.nodeCount;
     const pad = 65;
     const chain = [];
@@ -362,6 +352,7 @@ export default function FingerSequencingClient() {
   }, []);
 
   const finishDrillSession = useCallback(() => {
+    markIntentionalExit();
     gameActiveRef.current = false;
     if (animationRef.current) cancelAnimationFrame(animationRef.current);
 
@@ -376,8 +367,7 @@ export default function FingerSequencingClient() {
 
     const finalScore = Math.floor(e.score);
     const rating = getFpsScoreGrade(finalScore, ELITE_SCORE);
-    const grade = { letter: rating.grade, label: rating.label, color: rating.color };
-    const advice = getCoachAdvice(e.timeouts, e.missedClicks, totalAcc, avgRt);
+    const grade = { letter: rating.grade || rating.letter || 'C', label: rating.label || 'Keep Going', color: rating.color || 'text-emerald-400' };
 
     setAnalytics({
       accuracy: totalAcc,
@@ -386,9 +376,8 @@ export default function FingerSequencingClient() {
       timeouts: e.timeouts,
       avgReactionTime: avgRt,
       maxCombo: e.maxCombo,
-      finalLevel: bestLevelRunRef.current,
-      grade,
-      coachAdvice: advice
+      finalLevel: Math.floor(bestLevelRunRef.current),
+      grade
     });
 
     setUiScore(finalScore);
@@ -397,10 +386,11 @@ export default function FingerSequencingClient() {
     const isNewRecord = finalScore > saved.bestScore;
     setIsNewBest(isNewRecord);
 
+    const runBestLevel = Math.max(saved.bestLevel || 1, Math.floor(bestLevelRunRef.current));
     const updatedData = {
       bestScore: Math.max(saved.bestScore, finalScore),
       bestCombo: Math.max(saved.bestCombo, e.maxCombo),
-      bestLevel: Math.max(saved.bestLevel, bestLevelRunRef.current),
+      bestLevel: runBestLevel,
       totalSessions: (saved.totalSessions || 0) + 1
     };
 
@@ -409,7 +399,7 @@ export default function FingerSequencingClient() {
     setBestCombo(updatedData.bestCombo);
     setBestLevel(updatedData.bestLevel);
     setGameState('gameOver');
-  }, []);
+  }, [markIntentionalExit]);
 
   const triggerPenalty = useCallback((type) => {
     const e = engine.current;
@@ -418,6 +408,10 @@ export default function FingerSequencingClient() {
       e.timeouts++;
     } else {
       e.missedClicks++;
+    }
+
+    if (drillPenalty.isEnabled()) {
+      e.timeLeft -= TIME_PENALTY;
     }
 
     e.combo = 0;
@@ -454,19 +448,21 @@ export default function FingerSequencingClient() {
       }
     }
 
-    // Attempt pointer lock in background for desktop mouse, but do NOT block click processing
+    // Attempt pointer lock in background for desktop mouse
     if (!isTouchOnlyDevice && !document.pointerLockElement) {
       cvs.requestPointerLock().catch(() => {});
     }
 
     eng.totalActions++;
     const target = eng.chain[eng.activeIndex];
-    const config = getLevelConfig(eng.level);
+    const config = getLevelConfig(eng.level, eng.combo);
     const dist = Math.hypot(eng.crosshair.x - target.x, eng.crosshair.y - target.y);
     const hitRadius = target.r + config.hitMargin + 6;
 
     if (dist <= hitRadius) {
       eng.successfulHits++;
+      eng.timeLeft += TIME_PER_HIT;
+
       const rt = performance.now() - target.spawnTime;
       eng.reactionTimes.push(rt);
       eng.activeIndex++;
@@ -480,21 +476,17 @@ export default function FingerSequencingClient() {
         if (eng.combo > eng.maxCombo) eng.maxCombo = eng.combo;
 
         const mult = getComboMultiplier(eng.combo);
-        const levelBonus = 1 + (eng.level - 1) * 0.12;
+        const levelBonus = 1 + getDifficultyProgress(eng.level) * 0.5;
         eng.score += Math.round(150 * mult * levelBonus);
 
         spawnParticles(target.x, target.y, '#34d399', 20);
 
-        const earnedLevel = getNextLevel(eng.score, eng.level, POINTS_PER_LEVEL);
-        if (earnedLevel > eng.level) {
-          eng.level = earnedLevel;
-          if (earnedLevel > bestLevelRunRef.current) {
-            bestLevelRunRef.current = earnedLevel;
-          }
-          drillAudio.playGo();
-        }
+        // Continuous level progression
+        const rawLevel = (eng.score / POINTS_PER_LEVEL) + 1;
+        eng.level = Math.max(eng.level, rawLevel);
+        bestLevelRunRef.current = Math.max(bestLevelRunRef.current, eng.level);
 
-        setUiLevel(eng.level);
+        setUiLevel(Math.floor(eng.level));
         setComboMult(mult);
         setUiScore(Math.floor(eng.score));
 
@@ -546,9 +538,11 @@ export default function FingerSequencingClient() {
         }
 
         if (e.chain.length > 0 && e.activeIndex < e.chain.length) {
-          e.sequenceTimer -= dt;
-          if (e.sequenceTimer <= 0) {
-            triggerPenalty('timeout');
+          if (drillTimeout.isEnabled()) {
+            e.sequenceTimer -= dt;
+            if (e.sequenceTimer <= 0) {
+              triggerPenalty('timeout');
+            }
           }
         }
 
@@ -707,8 +701,7 @@ export default function FingerSequencingClient() {
     setIsPaused(false);
     gameActiveRef.current = true;
 
-    const saved = getSavedData();
-    const startLvl = getStartLevel(saved.bestLevel || 1);
+    const startLvl = getStartLevel();
     bestLevelRunRef.current = startLvl;
 
     const e = engine.current;
@@ -867,7 +860,6 @@ export default function FingerSequencingClient() {
         navigator.share({ title: 'Sequence Aim Trainer Score', text, url }).catch(() => {});
       } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
         navigator.clipboard.writeText(text);
-        alert('Score card copied to clipboard!');
       }
     }
   }, [uiScore, analytics, bestScore, isNewBest]);
@@ -883,7 +875,7 @@ export default function FingerSequencingClient() {
               Sequence Aim Trainer
             </h1>
             <p className="text-xs text-slate-400 mt-1">
-              Motor Precision &amp; Sequential Pathing • 15 Levels
+              Motor Precision &amp; Sequential Pathing • Continuous Scaling
             </p>
           </div>
         )}
@@ -929,9 +921,11 @@ export default function FingerSequencingClient() {
           {/* IN-BOX OVERLAY HUD */}
           {(gameState === 'playing' || gameState === 'countdown') && (
             <>
-              <div className="absolute top-4 left-4 z-30 pointer-events-none">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Score</p>
-                <p className="text-2xl sm:text-3xl font-bold text-white tabular-nums leading-tight">{uiScore}</p>
+              <div className="absolute top-4 left-4 z-30 pointer-events-none flex flex-col gap-1">
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Score</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-white tabular-nums leading-tight">{uiScore}</p>
+                </div>
               </div>
               <div className="absolute top-4 right-4 z-30 pointer-events-none text-right">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Time</p>
@@ -1003,10 +997,17 @@ export default function FingerSequencingClient() {
               icon={Target}
               accent="emerald"
               title="Sequence Aim Trainer"
-              subtitle="Motor Precision & Sequential Pathing • 15 Levels"
+              subtitle="Motor Precision & Sequential Pathing • Continuous Scaling"
               rules={[
-                { icon: Target, accent: 'emerald', title: 'Objective', text: 'Click Green Target Nodes' },
-                { icon: Zap, accent: 'teal', title: 'Sequence', text: 'Next Target Revealed On Hit' },
+                { icon: Target, accent: 'emerald', title: 'Click Green Target Nodes in Size Order', text: '+150 PTS × Combo × Level bonus (+0.6s per hit)' },
+                {
+                  icon: Zap,
+                  accent: 'teal',
+                  title: penaltyEnabled ? 'Time Penalty (-0.8s)' : 'Streak & Sequence Rules',
+                  text: penaltyEnabled
+                    ? 'Misses or sequence timeouts subtract 0.8s and reset combo'
+                    : 'Clear node chains before the timer expires. Misses reset combo'
+                },
               ]}
               sensitivity={{ value: universalSens, onChange: setUniversalSens, cmPer360 }}
               stats={[
@@ -1024,78 +1025,23 @@ export default function FingerSequencingClient() {
             <DrillCountdown value={countdownValue} subtitle="GET READY" />
           )}
 
-          {/* END SCREEN */}
+          {/* UNIVERSAL RESULT CARD */}
           {gameState === 'gameOver' && analytics.grade && (
-            <div className="absolute inset-0 z-40 flex bg-neutral-950/98 select-none font-sans" style={{ background: 'rgba(5,5,8,0.97)' }} onPointerDown={e => e.stopPropagation()}>
-
-              {/* Left Grade Panel */}
-              <div className="w-[36%] flex flex-col items-center justify-center gap-1 border-r border-white/5 px-4" style={{ background: 'radial-gradient(ellipse 260px 200px at 50% 30%, rgba(16,185,129,.12), transparent 70%)' }}>
-                {isNewBest && (
-                  <span className="text-[9.5px] font-bold text-yellow-400 bg-yellow-500/10 border border-yellow-500/25 px-2.5 py-0.5 rounded-full mb-1 animate-pulse">
-                    NEW BEST
-                  </span>
-                )}
-                <div className={`text-5xl sm:text-6xl font-black leading-none ${analytics.grade.color}`}>
-                  {analytics.grade.letter}
-                </div>
-                <div className="text-[10px] uppercase tracking-widest text-slate-500 text-center font-bold mt-1">
-                  {analytics.grade.label}
-                </div>
-                <div className="text-3xl sm:text-4xl font-black text-white mt-2 tabular-nums">
-                  {uiScore}
-                </div>
-                <div className="text-[9px] uppercase tracking-widest text-slate-500">Points</div>
-              </div>
-
-              {/* Right Stats & Actions Panel */}
-              <div className="flex-1 flex flex-col justify-center gap-3 px-6 py-4 min-w-0">
-
-                {/* 4 Stat Tiles */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.accuracy}%</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Accuracy</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.successfulHits}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Chains Cleared</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.maxCombo}x</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Max Combo</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">Lv. {analytics.finalLevel}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Peak Level</p>
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex gap-2">
-                  <button
-                    onClick={enterDrill}
-                    className="flex-1 py-3 rounded-[13px] bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold text-xs uppercase tracking-wide cursor-pointer transition-transform active:scale-[0.98] shadow-md flex items-center justify-center gap-1.5"
-                  >
-                    <RefreshCw className="w-3.5 h-3.5" /> Play Again
-                  </button>
-                  <button
-                    onClick={shareScore}
-                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform"
-                    title="Share Score"
-                  >
-                    <Share2 className="w-4 h-4 text-emerald-400" />
-                  </button>
-                  <button
-                    onClick={handleExitDrill}
-                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform"
-                    title="Exit & Return"
-                  >
-                    <LogOut className="w-4 h-4 text-red-400" />
-                  </button>
-                </div>
-
-              </div>
-            </div>
+            <DrillResultCard
+              accent="emerald"
+              grade={analytics.grade}
+              score={uiScore}
+              isNewBest={isNewBest}
+              stats={[
+                { label: 'Accuracy', value: analytics.accuracy, suffix: '%' },
+                { label: 'Chains Cleared', value: analytics.successfulHits },
+                { label: 'Peak Level', value: `Lv. ${analytics.finalLevel}` },
+                { label: 'Max Combo', value: analytics.maxCombo, suffix: 'x' },
+              ]}
+              onPlayAgain={enterDrill}
+              onShare={shareScore}
+              onExit={handleExitDrill}
+            />
           )}
 
         </div>
@@ -1110,10 +1056,10 @@ export default function FingerSequencingClient() {
               onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <RuleItem num="1" text="Ordered Node Hits" highlight="(Green Nodes)" result="Builds score & combo streak" />
+                <RuleItem num="1" text="Ordered Node Hits" highlight="(Green Nodes)" result="+150 PTS × Combo (+0.6s)" />
                 <RuleItem num="2" text="Combo Multiplier" highlight="Up to 3.0x" result="Boosts point earnings exponentially" />
-                <RuleItem num="3" text="Level Progression" highlight="Every 250 PTS" result="Target sizes shrink up to L15" />
-                <RuleItem num="4" text="Miss / Timeout" highlight="Resets Combo to 0x" result="Zero time loss & zero score deduction" />
+                <RuleItem num="3" text="Level Progression" highlight="Continuous PPL" result="Target sizes shrink continuously" />
+                <RuleItem num="4" text="Miss / Timeout" highlight="Resets Combo" result="Deducts 0.8s when enabled in settings" />
               </div>
             </DrillAccordion>
 
@@ -1156,7 +1102,7 @@ export default function FingerSequencingClient() {
                       <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Zap className="w-3.5 h-3.5 text-white" /></div>
                       <h5 className="text-xs font-bold text-white">Difficulty Scaling</h5>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">15 dynamic difficulty levels smoothly tighten sequence timer windows, shrink target node radii, and expand spatial node spreads.</p>
+                    <p className="text-xs text-gray-300 leading-relaxed">Continuous exponential scaling smoothly tightens sequence timer windows, shrinks target node radii, and expands spatial node spreads.</p>
                   </div>
                 </div>
               </div>
@@ -1203,20 +1149,6 @@ export default function FingerSequencingClient() {
 }
 
 // === Subcomponents ===
-function StatCard({ icon, value, label, unit = '', accentColor = 'border-white/10' }) {
-  return (
-    <div className={`rounded-xl border ${accentColor} bg-black backdrop-blur-md p-1.5 sm:p-2.5 text-center flex flex-col items-center justify-center transition-all duration-300 shadow-md hover:-translate-y-0.5 pointer-events-none font-sans`}>
-      <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-black border border-white/10 flex items-center justify-center mb-1 shadow-inner">
-        {icon}
-      </div>
-      <p className="text-xs sm:text-lg lg:text-xl font-black tracking-tight text-white leading-none truncate w-full font-sans font-mono tabular-nums">
-        {value}<span className="text-[9px] sm:text-xs font-semibold ml-0.5 text-gray-400 font-sans">{unit}</span>
-      </p>
-      <p className="text-[8px] sm:text-[9.5px] font-bold uppercase tracking-wider text-gray-400 mt-1 truncate w-full">{label}</p>
-    </div>
-  );
-}
-
 function RuleItem({ num, text, highlight = '', result }) {
   return (
     <div className="flex items-center gap-4 bg-black p-4 rounded-xl border border-white/10 shadow-sm">

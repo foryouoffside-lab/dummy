@@ -1,4 +1,5 @@
 import ReactionSpeedDrillsClient from './ReactionSpeedDrillsClient';
+import { getAlternateLanguages } from '@/lib/i18n/locales';
 
 // ============================================================
 // SEO RESEARCH FINDINGS — reaction-speed category hub
@@ -31,6 +32,7 @@ export const metadata = {
   ],
   alternates: {
     canonical: 'https://skilldrills.online/drills/reaction-speed',
+    languages: getAlternateLanguages('/drills/reaction-speed'),
   },
   robots: { index: true, follow: true },
   openGraph: {

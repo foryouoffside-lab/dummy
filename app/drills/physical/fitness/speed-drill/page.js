@@ -112,7 +112,7 @@ const faqSchema = {
       "name": "How does difficulty scale in Speed Drill?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "As your score increases, the level rises up to Level 15. Initial target sizes shrink, target movement speed accelerates up to 3.5x, and target shrinking rates increase."
+        "text": "As your score increases, difficulty scales continuously. Initial target sizes shrink, target movement speed accelerates up to 3.8x, and target shrinking rates increase."
       }
     },
     {
@@ -120,7 +120,7 @@ const faqSchema = {
       "name": "What happens when I miss or let a target expire?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Missing a target or letting a target shrink to zero resets your combo multiplier back to 1.0x and triggers a red flash overlay. There are no score deductions or time penalties."
+        "text": "Missing a target or letting a target shrink to zero resets your combo multiplier back to 1.0x and triggers a red flash overlay. Clean hits add +0.6s to your timer, and missing or letting a target expire deducts 0.8s when time penalty is enabled in settings."
       }
     },
     {
@@ -128,7 +128,7 @@ const faqSchema = {
       "name": "How long does each session run?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Each session runs for a fixed 45 seconds. The game timer counts down steadily from 45s to 0s, providing a standard, reproducible performance benchmark."
+        "text": "Each session starts with a 45-second timer. Every target hit earns a +0.6s extension, rewarding speed and precision with extended sessions."
       }
     },
     {
@@ -144,7 +144,7 @@ const faqSchema = {
       "name": "What is a good score in Speed Drill?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Scoring 8,000+ points earns a Gold or Platinum grade, while reaching 17,000+ points with 90%+ accuracy places you in the Master tier."
+        "text": "Scoring 12,000+ points earns a Gold or Platinum grade, while reaching 24,000+ points with 90%+ accuracy places you in the Master tier."
       }
     },
     {
@@ -182,7 +182,7 @@ const howToSchema = {
   "step": [
     { "@type": "HowToStep", "name": "Spot the Target", "text": "A yellow target spawns and moves with a bouncing velocity across the canvas." },
     { "@type": "HowToStep", "name": "Track Its Shrinking Radius", "text": "The target continuously shrinks in size as it moves." },
-    { "@type": "HowToStep", "name": "Click Before It Vanishes", "text": "Acquire and click the target before its radius reaches zero to score." }
+    { "@type": "HowToStep", "name": "Click Before It Vanishes", "text": "Acquire and click the target before its radius reaches zero to score points and earn +0.6s clock extensions." }
   ]
 };
 

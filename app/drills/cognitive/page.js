@@ -1,5 +1,6 @@
 import CognitiveHubClient from './CognitiveHubClient';
 import { DRILLS } from '../../../lib/drillsRegistry';
+import { getAlternateLanguages } from '@/lib/i18n/locales';
 
 const cognitiveDrills = DRILLS.filter((d) => d.category === 'cognitive');
 const cognitiveDrillCount = cognitiveDrills.length;
@@ -40,7 +41,10 @@ export const metadata = {
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
-  alternates: { canonical: 'https://skilldrills.online/drills/cognitive' },
+  alternates: {
+    canonical: 'https://skilldrills.online/drills/cognitive',
+    languages: getAlternateLanguages('/drills/cognitive'),
+  },
 };
 
 export default function CognitiveDrillsPage() {

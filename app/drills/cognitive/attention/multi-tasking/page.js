@@ -124,7 +124,7 @@ const howToSchema = {
       "@type": "HowToStep",
       "position": 4,
       "name": "Survive the Speed Scaling",
-      "text": "You have a fixed 45-second session. Stream speed and target divergence increase as your score climbs, so stay accurate on both channels to push your score higher before time runs out."
+      "text": "Each session starts with a 45-second clock, with clean hits adding +0.6s. Stream speed and target divergence scale continuously. Misclicks or missed targets reset your combo (with an opt-in -0.8s time penalty in settings)."
     }
   ]
 };

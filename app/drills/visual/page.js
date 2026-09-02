@@ -1,5 +1,6 @@
 import VisualDrillsClient from './VisualDrillsClient';
 import { DRILLS } from '../../../lib/drillsRegistry';
+import { getAlternateLanguages } from '@/lib/i18n/locales';
 
 const visualDrillCount = DRILLS.filter((d) => d.category === 'visual').length;
 
@@ -39,7 +40,10 @@ export const metadata = {
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: { index: true, follow: true },
-  alternates: { canonical: 'https://skilldrills.online/drills/visual' },
+  alternates: {
+    canonical: 'https://skilldrills.online/drills/visual',
+    languages: getAlternateLanguages('/drills/visual'),
+  },
 };
 
 export default function VisualDrillsPage() {

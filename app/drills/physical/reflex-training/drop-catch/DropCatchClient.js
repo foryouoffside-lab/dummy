@@ -17,7 +17,8 @@ import { getPlayerName } from '../../../../../lib/leaderboard';
 import { drillAudio } from '../../../../../lib/drillAudio';
 import { drillFlash } from '../../../../../lib/drillFlash';
 import { drillTimeout } from '../../../../../lib/drillTimeout';
-import { MAX_LEVEL, getStartLevel, getNextLevel, getDifficultyProgress } from '../../../../../lib/drillDifficulty';
+import { drillPenalty } from '../../../../../lib/drillPenalty';
+import { MAX_LEVEL, getStartLevel, getDifficultyProgress, ramp } from '../../../../../lib/drillDifficulty';
 import { getComboMultiplier, getFpsScoreGrade } from '../../../../../lib/scoringEngine';
 import { createBackdropCache, getCanvasDpr, drawPulseRing, drawTacticalTarget } from '../../../../../lib/canvasFx';
 import useUnexpectedExitGuard from '../../../../../lib/useUnexpectedExitGuard';
@@ -25,14 +26,17 @@ import DrillFooter from '../../../../../components/drill/DrillFooter';
 import DrillCountdown from '../../../../../components/drill/DrillCountdown';
 import DrillAccordion from '../../../../../components/drill/DrillAccordion';
 import FpsStartCard from '../../../../../components/drill/FpsStartCard';
+import DrillResultCard from '../../../../../components/drill/DrillResultCard';
 
 // ============================================================
 // TUNING CONSTANTS
 // ============================================================
-const DRILL_DURATION = 45; // 45 seconds fixed duration
-const POINTS_PER_LEVEL = 250; // Aggressive progression to L15
-const ELITE_SCORE = 17000; // Target score for S grade
-const STORAGE_KEY = 'skilldrills_physical_drop_catch_v3';
+const DRILL_DURATION = 45; // starting clock only; a run grows past this
+const POINTS_PER_LEVEL = 1750; // 250 -> 1750 (7x)
+const ELITE_SCORE = 24000; // 17000 -> 24000 (1.4x)
+const TIME_PER_HIT = 0.6; // +0.6s on green catch
+const TIME_PENALTY = 0.8; // -0.8s on missed green or red decoy click (opt-in gated)
+const STORAGE_KEY = 'skilldrills_physical_drop_catch_v4';
 
 const getSavedData = () => {
   try {
@@ -50,20 +54,28 @@ const saveData = (data) => {
   } catch (e) {}
 };
 
+// Continuous unbounded difficulty with streak heat
+const getLevelConfig = (level, combo = 0) => {
+  const p = getDifficultyProgress(level); // 0 at L1, 1 at L15, unbounded above
+  const heat = (getComboMultiplier(combo) - 1) / 2;
+  return {
+    baseSpeed: ramp(400, 1250, p) * (1 + heat * 0.25),
+    spawnDelay: Math.max(0.18, ramp(0.8, 0.22, p) * (1 - heat * 0.25)),
+    fakeProb: Math.min(0.45, 0.15 + p * 0.25),
+    ballRadius: Math.max(12, ramp(28, 14, p) * (1 - heat * 0.15))
+  };
+};
 
-// ============================================================
-// ACCORDION DATA
-// ============================================================
 const RULES_ITEMS = [
-  { title: "Catch Green Target", text: "Click falling green targets to score +100 Base PTS scaled with combo multiplier." },
+  { title: "Catch Green Target", text: "Click falling green targets to score +100 Base PTS scaled with combo multiplier (+0.6s per catch)." },
   { title: "Combo System", text: "Chain unbroken catches to build combo multiplier up to 3.0x max." },
-  { title: "Level Progression", text: "Score increases level every 250 PTS. Falling speed & decoy traps accelerate." },
-  { title: "Miss / Decoy Trap", text: "Missing green target or clicking red decoy resets combo streak to 1.0x." }
+  { title: "Level Progression", text: "Score increases level continuously. Falling speed & decoy traps accelerate dynamically." },
+  { title: "Miss / Decoy Trap", text: "Missing green target or clicking red decoy resets combo streak (and deducts 0.8s if enabled in settings)." }
 ];
 
 const ABOUT_TEXT = `Reflex Drop Catch trains visual discrimination and impulse control. By forcing you to rapidly differentiate between valid green targets and red decoys moving at high speeds, you build the cognitive override necessary to prevent misclicks and friendly-fire incidents in high-pressure scenarios.
 
-As you score points, the engine adaptively accelerates falling velocities from 400 px/s up to 1200 px/s, shrinks target radiuses, and increases the frequency of decoy traps.
+As you score points, the engine adaptively accelerates falling velocities from 400 px/s up to 1250 px/s, shrinks target radiuses, and increases the frequency of decoy traps.
 
 Instantly distinguish between enemies, teammates, and decoy utility in chaos without sacrificing click execution time.`;
 
@@ -71,9 +83,9 @@ const FAQ_ITEMS = [
   { q: "What is a reflex test?", a: "A reflex test measures the speed and accuracy of your neuromuscular response to sudden visual stimuli, filtering out decoy targets." },
   { q: "How does target recognition improve gaming?", a: "In competitive FPS games like Valorant or CS2, you must rapidly distinguish between enemies, teammates, and utility (like flashes)." },
   { q: "Why are there red decoy balls?", a: "The red decoys test your impulse control. Pure reaction speed is useless if you shoot the wrong target." },
-  { q: "How does adaptive difficulty work?", a: "As your score increases, level rises up to Level 15. Falling velocity accelerates, radiuses shrink, and decoy probability increases." },
-  { q: "What happens when I miss or hit a decoy?", a: "Missing a green target or clicking a red decoy resets your combo multiplier back to 1.0x and triggers a red flash overlay. There are no score deductions or time penalties." },
-  { q: "How long does each session run?", a: "Each session runs for a fixed 45 seconds. The game timer counts down steadily from 45s to 0s, providing a standard, reproducible performance benchmark." },
+  { q: "How does adaptive difficulty work?", a: "As your score increases, difficulty scales continuously. Falling velocity accelerates, radiuses shrink, and decoy probability increases." },
+  { q: "What happens when I miss or hit a decoy?", a: "Missing a green target or clicking a red decoy resets your combo multiplier back to 1.0x and triggers a red flash overlay. Clean catches add +0.6s to your timer, and missing a target or hitting a decoy deducts 0.8s when time penalty is enabled in settings." },
+  { q: "How long does each session run?", a: "Each session starts with a 45-second timer. Catching green targets earns +0.6s time extensions, allowing skilled players to extend runs dynamically as difficulty ramps up." },
   { q: "What is impulse control training?", a: "Impulse control training conditions your brain to suppress an automatic physical reaction (clicking) until your visual cortex verifies the stimulus is correct (green vs red)." },
   { q: "Is this reflex game free to play?", a: "Yes! The SkillDrills Reflex Test is entirely free, open-source, and runs purely in your web browser with zero downloads required." },
   { q: "How long should I practice reflex training daily?", a: "For optimal cognitive adaptation and motor learning, practicing this drill for 5 to 10 minutes a day is more effective than occasional hour-long sessions." }
@@ -87,14 +99,12 @@ const RELATED_DRILLS = [
   { id: "speed-drill", name: "Speed Drill Pro", cat: "Physical Fitness", desc: "Rapid target acquisition & high-velocity tapping exercise.", href: "/drills/physical/fitness/speed-drill" }
 ];
 
-// ============================================================
-// MAIN COMPONENT
-// ============================================================
 export default function DropCatchClient() {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
+  const [penaltyEnabled, setPenaltyEnabled] = useState(false);
   const [pointerLocked, setPointerLocked] = useState(false);
   const [universalSens, setUniversalSens] = useState(1.0);
   const [openAccordion, setOpenAccordion] = useState(null);
@@ -105,6 +115,7 @@ export default function DropCatchClient() {
   // HUD & Best Stats State
   const [uiScore, setUiScore] = useState(0);
   const [uiTimeLeft, setUiTimeLeft] = useState(DRILL_DURATION);
+  const [uiLevel, setUiLevel] = useState(1);
   const [bestScore, setBestScore] = useState(0);
   const [bestCombo, setBestCombo] = useState(0);
   const [bestLevel, setBestLevel] = useState(1);
@@ -149,6 +160,7 @@ export default function DropCatchClient() {
     if (typeof window !== 'undefined') {
       setSoundEnabled(drillAudio.isEnabled());
       setFlashEnabled(drillFlash.isEnabled());
+      setPenaltyEnabled(drillPenalty.isEnabled());
       const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
       const isTouchCapable = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
       setIsTouchOnlyDevice(isTouchCapable && !hasFinePointer);
@@ -204,28 +216,9 @@ export default function DropCatchClient() {
     onUnexpectedExit: handleExitDrill,
   });
 
-  const resumeDrill = useCallback(async () => {
-    if (containerRef.current && !document.fullscreenElement) {
-      try { await containerRef.current.requestFullscreen(); } catch (e) {}
-    }
-    if (canvasRef.current && !document.pointerLockElement) {
-      try { await canvasRef.current.requestPointerLock(); } catch (e) {}
-    }
-  }, []);
-
-  const getLevelConfig = (level) => {
-    const p = getDifficultyProgress(level);
-    return {
-      baseSpeed: 400 + p * 800,
-      spawnDelay: Math.max(0.25, 0.8 - p * 0.55),
-      fakeProb: Math.min(0.40, 0.15 + p * 0.25),
-      ballRadius: Math.max(14, 28 - p * 14),
-    };
-  };
-
   const spawnBall = useCallback((width, currentLevel) => {
     const e = engine.current;
-    const config = getLevelConfig(currentLevel);
+    const config = getLevelConfig(currentLevel, e.combo);
     const padding = 60;
 
     const isFake = Math.random() < config.fakeProb;
@@ -252,6 +245,9 @@ export default function DropCatchClient() {
 
   const applyPenalty = useCallback(() => {
     const e = engine.current;
+    if (drillPenalty.isEnabled()) {
+      e.timeLeft -= TIME_PENALTY;
+    }
     e.combo = 0;
     e.screenShake = 12;
     triggerFlash();
@@ -259,6 +255,7 @@ export default function DropCatchClient() {
   }, [triggerFlash]);
 
   const endGame = useCallback(() => {
+    markIntentionalExit();
     gameActiveRef.current = false;
     startingRef.current = false;
     setGameState('gameOver');
@@ -269,11 +266,11 @@ export default function DropCatchClient() {
     const accuracyPct = totalAttempts > 0 ? Math.round((e.catches / totalAttempts) * 100) : 100;
     const rating = getFpsScoreGrade(e.score, ELITE_SCORE);
 
-    const grade = { letter: rating.grade, label: rating.label, color: rating.color };
+    const grade = { letter: rating.grade || rating.letter || 'C', label: rating.label || 'Keep Going', color: rating.color || 'text-emerald-400' };
 
     setAnalytics({
       accuracy: accuracyPct, catches: e.catches, misses: e.misses, decoyHits: e.decoyHits,
-      peakSpeed: Math.round(e.peakSpeed), maxCombo: e.maxCombo, finalLevel: e.level, grade
+      peakSpeed: Math.round(e.peakSpeed), maxCombo: e.maxCombo, finalLevel: Math.floor(bestLevelRunRef.current), grade
     });
 
     setUiScore(e.score);
@@ -282,7 +279,7 @@ export default function DropCatchClient() {
     const isNewHigh = e.score > prevSaved.bestScore;
     setIsNewBest(isNewHigh);
 
-    const runBestLevel = Math.max(prevSaved.bestLevel, bestLevelRunRef.current);
+    const runBestLevel = Math.max(prevSaved.bestLevel || 1, Math.floor(bestLevelRunRef.current));
     const updatedData = {
       bestScore: Math.max(prevSaved.bestScore, e.score),
       bestCombo: Math.max(prevSaved.bestCombo, e.maxCombo),
@@ -296,7 +293,7 @@ export default function DropCatchClient() {
     setBestLevel(updatedData.bestLevel);
 
     drillAudio.playSessionEnd();
-  }, []);
+  }, [markIntentionalExit]);
 
   const enterDrill = useCallback(async () => {
     if (startingRef.current) return;
@@ -307,14 +304,14 @@ export default function DropCatchClient() {
 
     drillAudio.init();
 
+    const startLevel = getStartLevel();
+    bestLevelRunRef.current = startLevel;
+
     setIsNewBest(false);
     setUiScore(0);
+    setUiLevel(startLevel);
     setUiTimeLeft(DRILL_DURATION);
     lastTimeRef.current = DRILL_DURATION;
-
-    const saved = getSavedData();
-    const startLevel = getStartLevel(saved.bestLevel);
-    bestLevelRunRef.current = startLevel;
 
     const w = engine.current.logicalWidth || 800;
     const h = engine.current.logicalHeight || 450;
@@ -401,20 +398,22 @@ export default function DropCatchClient() {
             createExplosion(b.x, b.y, '#ef4444');
           } else {
             eng.catches++;
+            eng.timeLeft += TIME_PER_HIT;
             eng.combo++;
             if (eng.combo > eng.maxCombo) eng.maxCombo = eng.combo;
 
             const mult = getComboMultiplier(eng.combo);
-            const basePts = Math.round(100 * mult);
+            const levelBonus = 1 + getDifficultyProgress(eng.level) * 0.5;
+            const basePts = Math.round(100 * mult * levelBonus);
             eng.score += basePts;
-            setUiScore(eng.score);
 
-            const nextLvl = getNextLevel(eng.score, eng.level, POINTS_PER_LEVEL);
-            if (nextLvl > eng.level) {
-              eng.level = nextLvl;
-              bestLevelRunRef.current = Math.max(bestLevelRunRef.current, nextLvl);
-              drillAudio.playHit();
-            }
+            // Continuous level progression
+            const rawLevel = (eng.score / POINTS_PER_LEVEL) + 1;
+            eng.level = Math.max(eng.level, rawLevel);
+            bestLevelRunRef.current = Math.max(bestLevelRunRef.current, eng.level);
+
+            setUiScore(eng.score);
+            setUiLevel(Math.floor(eng.level));
 
             drillAudio.playHit();
             createExplosion(b.x, b.y, '#10b981');
@@ -504,7 +503,7 @@ export default function DropCatchClient() {
           lastTimeRef.current = intTime;
         }
 
-        const cfg = getLevelConfig(e.level);
+        const cfg = getLevelConfig(e.level, e.combo);
         if (cfg.baseSpeed > e.peakSpeed) e.peakSpeed = cfg.baseSpeed;
 
         e.spawnTimer += dt;
@@ -634,7 +633,6 @@ export default function DropCatchClient() {
         navigator.share({ title: 'My Reflex Drop Catch Score', text, url }).catch(() => {});
       } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
         navigator.clipboard.writeText(text);
-        alert('Score card copied to clipboard!');
       }
     }
   }, [uiScore, bestScore, analytics, isNewBest]);
@@ -653,7 +651,7 @@ export default function DropCatchClient() {
               </span>
             </h1>
             <p className="text-xs text-slate-400 mt-1">
-              Visual Discrimination &amp; Impulse Control • 15 Levels
+              Visual Discrimination &amp; Impulse Control • Continuous Scaling
             </p>
           </div>
         )}
@@ -698,9 +696,11 @@ export default function DropCatchClient() {
           {/* IN-BOX OVERLAY HUD */}
           {(gameState === 'playing' || gameState === 'countdown') && (
             <>
-              <div className="absolute top-4 left-4 z-30 pointer-events-none">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Score</p>
-                <p className="text-2xl sm:text-3xl font-bold text-white tabular-nums leading-tight">{uiScore}</p>
+              <div className="absolute top-4 left-4 z-30 pointer-events-none flex flex-col gap-1">
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Score</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-white tabular-nums leading-tight">{uiScore}</p>
+                </div>
               </div>
               <div className="absolute top-4 right-4 z-30 pointer-events-none text-right">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Time</p>
@@ -754,10 +754,17 @@ export default function DropCatchClient() {
               icon={Target}
               accent="emerald"
               title="Reflex Drop Catch"
-              subtitle="Visual Discrimination & Impulse Control • 15 Levels"
+              subtitle="Visual Discrimination & Impulse Control • Continuous Scaling"
               rules={[
-                { icon: Zap, accent: 'emerald', title: 'Catch Green Target (+100 PTS)', text: 'Intercept falling green targets with your crosshair' },
-                { icon: ShieldAlert, accent: 'red', title: 'Decoy Trap', text: 'Ignore red X targets to avoid combo resets & penalties' },
+                { icon: Zap, accent: 'emerald', title: 'Catch Green Target (+100 PTS)', text: '+100 PTS × Combo × Level multiplier (+0.6s per catch)' },
+                {
+                  icon: ShieldAlert,
+                  accent: 'red',
+                  title: penaltyEnabled ? 'Decoy Traps & Time Penalty' : 'Decoy Traps & Combo Reset',
+                  text: penaltyEnabled
+                    ? 'Ignore red decoys. Missed targets or decoys subtract 0.8s and reset combo'
+                    : 'Ignore red decoys marked X. Missed targets or decoys reset combo streak'
+                },
               ]}
               sensitivity={{ value: universalSens, onChange: setUniversalSens, cmPer360 }}
               stats={[
@@ -775,78 +782,23 @@ export default function DropCatchClient() {
             <DrillCountdown value={countdownValue} subtitle="GET READY" />
           )}
 
-          {/* END SCREEN */}
+          {/* UNIVERSAL RESULT CARD */}
           {gameState === 'gameOver' && analytics.grade && (
-            <div className="absolute inset-0 z-40 flex bg-neutral-950/98 select-none font-sans" style={{ background: 'rgba(5,5,8,0.97)' }} onPointerDown={e => e.stopPropagation()}>
-              
-              {/* Left Grade Panel */}
-              <div className="w-[36%] flex flex-col items-center justify-center gap-1 border-r border-white/5 px-4" style={{ background: 'radial-gradient(ellipse 260px 200px at 50% 30%, rgba(245,158,11,.12), transparent 70%)' }}>
-                {isNewBest && (
-                  <span className="text-[9.5px] font-bold text-yellow-400 bg-yellow-500/10 border border-yellow-500/25 px-2.5 py-0.5 rounded-full mb-1 animate-pulse">
-                    NEW BEST
-                  </span>
-                )}
-                <div className={`text-5xl sm:text-6xl font-black leading-none ${analytics.grade.color}`}>
-                  {analytics.grade.letter}
-                </div>
-                <div className="text-[10px] uppercase tracking-widest text-slate-500 text-center font-bold mt-1">
-                  {analytics.grade.label}
-                </div>
-                <div className="text-3xl sm:text-4xl font-black text-white mt-2 tabular-nums">
-                  {uiScore}
-                </div>
-                <div className="text-[9px] uppercase tracking-widest text-slate-500">Points</div>
-              </div>
-
-              {/* Right Stats & Actions Panel */}
-              <div className="flex-1 flex flex-col justify-center gap-3 px-6 py-4 min-w-0">
-                
-                {/* 4 Stat Tiles */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.accuracy}%</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Accuracy</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.catches}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Catches</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-red-400">{analytics.decoyHits}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Fatal Decoys</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">Lv. {analytics.finalLevel}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Peak Level</p>
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex gap-2">
-                  <button 
-                    onClick={enterDrill} 
-                    className="flex-1 py-3 rounded-[13px] bg-gradient-to-r from-amber-600 to-orange-600 text-white font-bold text-xs uppercase tracking-wide cursor-pointer transition-transform active:scale-[0.98] shadow-md flex items-center justify-center gap-1.5"
-                  >
-                    <RefreshCw className="w-3.5 h-3.5" /> Play Again
-                  </button>
-                  <button 
-                    onClick={shareScore} 
-                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform" 
-                    title="Share Score"
-                  >
-                    <Share2 className="w-4 h-4 text-emerald-400" />
-                  </button>
-                  <button 
-                    onClick={handleExitDrill} 
-                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform" 
-                    title="Exit Fullscreen & Return"
-                  >
-                    <LogOut className="w-4 h-4 text-red-400" />
-                  </button>
-                </div>
-
-              </div>
-            </div>
+            <DrillResultCard
+              accent="emerald"
+              grade={analytics.grade}
+              score={uiScore}
+              isNewBest={isNewBest}
+              stats={[
+                { label: 'Accuracy', value: analytics.accuracy, suffix: '%' },
+                { label: 'Catches', value: analytics.catches },
+                { label: 'Fatal Decoys', value: analytics.decoyHits },
+                { label: 'Peak Level', value: `Lv. ${analytics.finalLevel}` },
+              ]}
+              onPlayAgain={enterDrill}
+              onShare={shareScore}
+              onExit={handleExitDrill}
+            />
           )}
         </div>
 

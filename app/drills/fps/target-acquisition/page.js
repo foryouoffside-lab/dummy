@@ -128,10 +128,10 @@ export default function TargetAcquisitionPage() {
       },
       {
         "@type": "Question",
-        "name": "Can target acquisition be trained independently of mechanical aim?",
+        "name": "How are errors penalised in Target Acquisition Pro?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Yes, target acquisition isolates the visual identification and decision phase of aim. Training target acquisition helps your brain recognize threat patterns faster, allowing your existing mechanical aim to execute with higher confidence."
+          "text": "Clicking a darker target out of order or clicking empty space resets your streak combo multiplier. When the optional Time Penalty setting is enabled in your session preferences, each mistake also deducts 0.6s from your clock."
         }
       },
       {

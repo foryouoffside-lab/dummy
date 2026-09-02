@@ -151,10 +151,10 @@ export default function ProSmoothPursuitPage() {
       },
       {
         "@type": "Question",
-        "name": "How often should I train tracking?",
+        "name": "How are errors penalised in Pro Smooth Pursuit?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "We recommend training tracking for 10–15 minutes daily as a warm-up before matches, or 30 minutes for deep aim training to build muscle memory."
+          "text": "Losing lock-on with the target resets your combo multiplier. When the optional Time Penalty setting is enabled, falling off-target for 1.0 cumulative second also deducts 0.6s from your timer."
         }
       },
       {

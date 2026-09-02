@@ -232,6 +232,11 @@ export default function FingerSequencingPage() {
         "@type": "HowToStep",
         "name": "Execute Sequential Flicks",
         "text": "Flick smoothly and click each node in strict descending order before the sequence countdown expires."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Extend Clock & Scale Difficulty",
+        "text": "Clean node hits add +0.6s to the clock. Target radii shrink and timers tighten continuously as your score and combo grow."
       }
     ]
   };

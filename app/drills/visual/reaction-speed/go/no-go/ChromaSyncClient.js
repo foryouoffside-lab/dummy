@@ -3,19 +3,17 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 
-import {
-  Volume2, VolumeX,
-  Play, RefreshCw, Target,
-  Share2, ArrowLeft, RotateCw, Eye, Users, TrendingUp, Zap, ZapOff, Brain, Crosshair, Heart, Trophy
-} from 'lucide-react';
+import { Volume2, VolumeX, Target, Eye, Users, TrendingUp, Zap, ZapOff, Brain, Crosshair, Heart, Trophy } from 'lucide-react';
 
+import { isIdleFrameSkippable } from '@/lib/performance';
 import generateShareCard, { shareScoreCard } from '../../../../../../components/ShareScoreCard';
 import { getPlayerName } from '../../../../../../lib/leaderboard';
 import { drillAudio } from '../../../../../../lib/drillAudio';
 import { drillFlash } from '../../../../../../lib/drillFlash';
 import { drillTimeout } from '../../../../../../lib/drillTimeout';
-import { getFpsScoreGrade } from '../../../../../../lib/scoringEngine';
-import { MAX_LEVEL } from '../../../../../../lib/drillDifficulty';
+import { drillPenalty } from '../../../../../../lib/drillPenalty';
+import { getFpsScoreGrade, getComboMultiplier } from '../../../../../../lib/scoringEngine';
+import { getDifficultyProgress, getStartLevel, ramp } from '../../../../../../lib/drillDifficulty';
 import { getCanvasDpr } from '../../../../../../lib/canvasFx';
 import useDrillFlash from '../../../../../../lib/useDrillFlash';
 import useUnexpectedExitGuard from '../../../../../../lib/useUnexpectedExitGuard';
@@ -26,13 +24,19 @@ import DrillFlashOverlay from '../../../../../../components/drill/DrillFlashOver
 import DrillRuleItem from '../../../../../../components/drill/DrillRuleItem';
 import DrillFAQItem from '../../../../../../components/drill/DrillFAQItem';
 import FpsStartCard from '../../../../../../components/drill/FpsStartCard';
+import DrillResultCard from '../../../../../../components/drill/DrillResultCard';
 
-const DRILL_DURATION = 45; // 45 seconds duration
+// ============================================================
+// TUNING CONSTANTS
+// ============================================================
+const DRILL_DURATION = 45; // starting clock only; a run grows past this
 const POINTS_PER_GO_HIT = 150;
 const POINTS_PER_NOGO_HOLD = 100;
-const POINTS_PER_LEVEL = 900; // roughly matches the old every-5-GO-hits cadence
-const ELITE_SCORE = 1000; // Target score for S+ rating (rebalanced after combo removal)
-const STORAGE_KEY = 'skilldrills_visual_go_nogo_v4';
+const POINTS_PER_LEVEL = 6300; // 900 -> 6300 (7x)
+const ELITE_SCORE = 16000; // 1000 -> 16000 (scaled for unbounded continuous runs)
+const TIME_PER_HIT = 0.6; // +0.6s per valid hit / correct hold
+const TIME_PENALTY = 0.8; // -0.8s on error / commission / timeout (opt-in gated)
+const STORAGE_KEY = 'skilldrills_visual_go_nogo_v5';
 const MAX_LIVES = 5;
 
 // Clean 2D Target Renderer matching deploy style (104px diameter / 52px radius)
@@ -90,10 +94,10 @@ const RELATED_DRILLS = [
 const getSavedData = () => {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { bestScore: 0, bestLevel: 1, totalSessions: 0 };
-    return { bestScore: 0, bestLevel: 1, totalSessions: 0, ...JSON.parse(raw) };
+    if (!raw) return { bestScore: 0, bestCombo: 0, bestLevel: 1, totalSessions: 0 };
+    return { bestScore: 0, bestCombo: 0, bestLevel: 1, totalSessions: 0, ...JSON.parse(raw) };
   } catch (e) {
-    return { bestScore: 0, bestLevel: 1, totalSessions: 0 };
+    return { bestScore: 0, bestCombo: 0, bestLevel: 1, totalSessions: 0 };
   }
 };
 
@@ -103,20 +107,32 @@ const saveData = (data) => {
   } catch (e) {}
 };
 
+// Continuous unbounded difficulty with streak heat
+const getLevelConfig = (level, combo = 0) => {
+  const p = getDifficultyProgress(level);
+  const heat = (getComboMultiplier(combo) - 1) / 2;
+  return {
+    flashWindow: Math.max(100, ramp(600, 160, p) * (1 - heat * 0.25)),
+    minDelay: Math.max(120, ramp(400, 150, p) * (1 - heat * 0.20)),
+    maxDelay: Math.max(200, ramp(800, 280, p) * (1 - heat * 0.20)),
+  };
+};
+
 export default function ChromaSyncClient() {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
+  const [penaltyEnabled, setPenaltyEnabled] = useState(false);
   const [openAccordion, setOpenAccordion] = useState(null);
   const [countdownValue, setCountdownValue] = useState(3);
   const { flashes, triggerFlash } = useDrillFlash();
 
   // Signal & Target State
-  const [level, setLevel] = useState(1);
+  const [uiLevel, setUiLevel] = useState(1);
+  const [uiCombo, setUiCombo] = useState(0);
   const [targetType, setTargetType] = useState(null); // null | 'GO' | 'NO_GO'
   const [targetVisible, setTargetVisible] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
   const [isSpamming, setIsSpamming] = useState(false);
 
   // HUD & Best Stats State
@@ -124,7 +140,9 @@ export default function ChromaSyncClient() {
   const [uiTimeLeft, setUiTimeLeft] = useState(DRILL_DURATION);
   const [uiLives, setUiLives] = useState(MAX_LIVES);
   const [bestScore, setBestScore] = useState(0);
+  const [bestCombo, setBestCombo] = useState(0);
   const [bestLevel, setBestLevel] = useState(1);
+  const [totalSessions, setTotalSessions] = useState(0);
   const [isNewBest, setIsNewBest] = useState(false);
 
   const [analytics, setAnalytics] = useState({
@@ -132,6 +150,7 @@ export default function ChromaSyncClient() {
     perfectHits: 0,
     missedClicks: 0,
     finalLevel: 1,
+    maxCombo: 0,
     livesLeft: MAX_LIVES,
     outOfLives: false,
     grade: null,
@@ -142,12 +161,13 @@ export default function ChromaSyncClient() {
   const targetCanvasRef = useRef(null);
   const countdownTimeoutsRef = useRef([]);
   const gameTimeoutsRef = useRef([]);
-  const timerIntervalRef = useRef(null);
   const spawnTimeoutRef = useRef(null);
   const signalTimeoutRef = useRef(null);
   const spamCooldownTimerRef = useRef(null);
   const startingRef = useRef(false);
   const gameActiveRef = useRef(false);
+  const bestLevelRunRef = useRef(1);
+  const lastTimeRef = useRef(DRILL_DURATION);
 
   const currentTypeRef = useRef(null);
   const hasRespondedRef = useRef(false);
@@ -157,6 +177,8 @@ export default function ChromaSyncClient() {
   const engine = useRef({
     score: 0,
     level: 1,
+    combo: 0,
+    maxCombo: 0,
     timeLeft: DRILL_DURATION,
     perfectHits: 0,
     missedClicks: 0,
@@ -207,9 +229,12 @@ export default function ChromaSyncClient() {
     if (typeof window !== 'undefined') {
       setSoundEnabled(drillAudio.isEnabled());
       setFlashEnabled(drillFlash.isEnabled());
+      setPenaltyEnabled(drillPenalty.isEnabled());
       const saved = getSavedData();
       setBestScore(saved.bestScore || 0);
+      setBestCombo(saved.bestCombo || 0);
       setBestLevel(saved.bestLevel || 1);
+      setTotalSessions(saved.totalSessions || 0);
     }
   }, []);
 
@@ -233,7 +258,6 @@ export default function ChromaSyncClient() {
     countdownTimeoutsRef.current.forEach(clearTimeout);
     countdownTimeoutsRef.current = [];
     clearGameTimeouts();
-    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
     startingRef.current = false;
     gameActiveRef.current = false;
 
@@ -253,7 +277,6 @@ export default function ChromaSyncClient() {
     markIntentionalExit();
     gameActiveRef.current = false;
     startingRef.current = false;
-    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
     clearGameTimeouts();
     setGameState('gameOver');
 
@@ -272,7 +295,8 @@ export default function ChromaSyncClient() {
       accuracy: finalAccuracy,
       perfectHits: e.perfectHits,
       missedClicks: e.missedClicks,
-      finalLevel: e.level,
+      finalLevel: Math.floor(bestLevelRunRef.current),
+      maxCombo: e.maxCombo,
       livesLeft: e.lives,
       outOfLives: e.lives <= 0,
       grade,
@@ -284,18 +308,62 @@ export default function ChromaSyncClient() {
     const isNewHigh = e.score > prevSaved.bestScore;
     setIsNewBest(isNewHigh);
 
+    const runBestLevel = Math.max(prevSaved.bestLevel, Math.floor(bestLevelRunRef.current));
     const updatedData = {
       bestScore: Math.max(prevSaved.bestScore, e.score),
-      bestLevel: Math.max(prevSaved.bestLevel, e.level),
+      bestCombo: Math.max(prevSaved.bestCombo || 0, e.maxCombo),
+      bestLevel: runBestLevel,
       totalSessions: (prevSaved.totalSessions || 0) + 1,
     };
     saveData(updatedData);
 
     setBestScore(updatedData.bestScore);
+    setBestCombo(updatedData.bestCombo);
     setBestLevel(updatedData.bestLevel);
+    setTotalSessions(updatedData.totalSessions);
 
     drillAudio?.playSessionEnd?.();
   }, [clearGameTimeouts, markIntentionalExit]);
+
+  // Main RAF loop for clock draining
+  useEffect(() => {
+    if (gameState !== 'playing') return;
+
+    let animId;
+    let lastTime = performance.now();
+
+    const loop = (now) => {
+      if (isIdleFrameSkippable(gameState === 'playing', now, lastTime)) {
+        animId = requestAnimationFrame(loop);
+        return;
+      }
+
+      const dt = Math.min((now - lastTime) / 1000, 0.1);
+      lastTime = now;
+
+      const e = engine.current;
+      if (gameActiveRef.current) {
+        if (e.timeLeft > 0) e.timeLeft -= dt;
+        if (e.timeLeft <= 0) {
+          e.timeLeft = 0;
+          setUiTimeLeft(0);
+          endGame();
+          return;
+        }
+
+        const ceilSec = Math.ceil(e.timeLeft);
+        if (ceilSec !== lastTimeRef.current) {
+          lastTimeRef.current = ceilSec;
+          setUiTimeLeft(ceilSec);
+        }
+      }
+
+      animId = requestAnimationFrame(loop);
+    };
+
+    animId = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(animId);
+  }, [gameState, endGame]);
 
   // Spawn Next Signal Target (Green GO vs Red NO-GO)
   const spawnNextSignal = useCallback(() => {
@@ -304,8 +372,11 @@ export default function ChromaSyncClient() {
     setTargetVisible(false);
     hasRespondedRef.current = false;
 
-    // Random inter-stimulus interval (400ms to 800ms)
-    const delay = Math.floor(400 + Math.random() * 400);
+    const e = engine.current;
+    const config = getLevelConfig(e.level, e.combo);
+
+    // Random inter-stimulus interval
+    const delay = Math.floor(config.minDelay + Math.random() * (config.maxDelay - config.minDelay));
 
     spawnTimeoutRef.current = setTimeout(() => {
       if (!gameActiveRef.current || isSpammingRef.current) return;
@@ -315,11 +386,10 @@ export default function ChromaSyncClient() {
       currentTypeRef.current = type;
       setTargetType(type);
 
-      // Fixed at center — no position randomization, only color/identity varies
+      // Fixed at center
       setTargetVisible(true);
 
-      // Flash display window (shrinks from 600ms down to 350ms as level advances)
-      const flashWindow = Math.max(350, 600 - engine.current.level * 20);
+      const flashWindow = config.flashWindow;
 
       signalTimeoutRef.current = setTimeout(() => {
         if (!gameActiveRef.current || isSpammingRef.current) return;
@@ -327,24 +397,31 @@ export default function ChromaSyncClient() {
 
         // If it was a NO-GO signal and user correctly inhibited response: AWARD POINTS!
         if (currentTypeRef.current === 'NO_GO' && !hasRespondedRef.current) {
-          const e = engine.current;
           e.perfectHits++;
-          e.score += POINTS_PER_NOGO_HOLD;
+          e.combo += 1;
+          if (e.combo > e.maxCombo) e.maxCombo = e.combo;
 
-          // Level up every POINTS_PER_LEVEL score earned (score-based, monotonic)
-          const nextLevel = Math.floor(e.score / POINTS_PER_LEVEL) + 1;
-          if (nextLevel > e.level) {
-            e.level = nextLevel;
-            setLevel(e.level);
-          }
+          const levelMult = 1 + getDifficultyProgress(e.level) * 0.5;
+          e.score += Math.round(POINTS_PER_NOGO_HOLD * getComboMultiplier(e.combo) * levelMult);
+
+          // Time bonus on successful hold
+          e.timeLeft += TIME_PER_HIT;
+
+          // Continuous level progression
+          const nextLevel = (e.score / POINTS_PER_LEVEL) + 1;
+          e.level = Math.max(e.level, nextLevel);
+          bestLevelRunRef.current = Math.max(bestLevelRunRef.current, e.level);
 
           setUiScore(e.score);
+          setUiLevel(Math.floor(e.level));
+          setUiCombo(e.combo);
           drillAudio?.playHit?.();
         } else if (currentTypeRef.current === 'GO' && !hasRespondedRef.current && drillTimeout.isEnabled()) {
-          // Missed GO signal (timeout / omission error): NO score, time, or
-          // life penalty for letting a GO signal expire.
-          const e = engine.current;
+          // Missed GO signal (timeout / omission error)
           e.missedClicks++;
+          if (drillPenalty.isEnabled()) e.timeLeft -= TIME_PENALTY;
+          e.combo = 0;
+          setUiCombo(0);
           drillAudio?.playPenalty?.();
           triggerFlash();
         }
@@ -372,12 +449,19 @@ export default function ChromaSyncClient() {
     const isRapidClick = timeSinceLastClick > 0 && timeSinceLastClick < 320;
     const isClickingIdleGap = !targetVisible;
 
+    const e = engine.current;
+
     if (isRapidClick || isClickingIdleGap || hasRespondedRef.current || isSpammingRef.current) {
       // Continuous / spam clicking detected — hide target & delay spawn
       isSpammingRef.current = true;
       setIsSpamming(true);
       setTargetVisible(false);
       hasRespondedRef.current = true;
+
+      e.missedClicks++;
+      if (drillPenalty.isEnabled()) e.timeLeft -= TIME_PENALTY;
+      e.combo = 0;
+      setUiCombo(0);
 
       // Clear active timers so target DOES NOT APPEAR
       if (spawnTimeoutRef.current) clearTimeout(spawnTimeoutRef.current);
@@ -399,34 +483,40 @@ export default function ChromaSyncClient() {
     }
 
     hasRespondedRef.current = true;
-
-    const e = engine.current;
     const type = currentTypeRef.current;
 
     if (type === 'GO' && targetVisible) {
       // PERFECT HIT ON GREEN GO SIGNAL
       e.perfectHits++;
-      e.score += POINTS_PER_GO_HIT;
+      e.combo += 1;
+      if (e.combo > e.maxCombo) e.maxCombo = e.combo;
 
-      // Level up every POINTS_PER_LEVEL score earned (score-based, monotonic —
-      // never gated on a streak, so a miss can never take a level away)
-      const nextLevel = Math.floor(e.score / POINTS_PER_LEVEL) + 1;
-      if (nextLevel > e.level) {
-        e.level = nextLevel;
-        setLevel(e.level);
-      }
+      const levelMult = 1 + getDifficultyProgress(e.level) * 0.5;
+      e.score += Math.round(POINTS_PER_GO_HIT * getComboMultiplier(e.combo) * levelMult);
+
+      // Time bonus on clean hit
+      e.timeLeft += TIME_PER_HIT;
+
+      // Continuous level progression
+      const nextLevel = (e.score / POINTS_PER_LEVEL) + 1;
+      e.level = Math.max(e.level, nextLevel);
+      bestLevelRunRef.current = Math.max(bestLevelRunRef.current, e.level);
 
       setUiScore(e.score);
+      setUiLevel(Math.floor(e.level));
+      setUiCombo(e.combo);
       drillAudio?.playHit?.();
       setTargetVisible(false);
 
       if (signalTimeoutRef.current) clearTimeout(signalTimeoutRef.current);
       spawnNextSignal();
     } else if (type === 'NO_GO' && targetVisible) {
-      // WRONG CLICK ON RED NO-GO SIGNAL — a commission error costs 1 life.
-      // No score or time deduction — lives are the only penalty.
+      // WRONG CLICK ON RED NO-GO SIGNAL — costs 1 life.
       e.missedClicks++;
       e.lives = Math.max(0, e.lives - 1);
+      if (drillPenalty.isEnabled()) e.timeLeft -= TIME_PENALTY;
+      e.combo = 0;
+      setUiCombo(0);
       setUiLives(e.lives);
 
       drillAudio?.playPenalty?.();
@@ -459,16 +549,23 @@ export default function ChromaSyncClient() {
 
     drillAudio?.init?.();
 
+    const startLevel = getStartLevel();
+    bestLevelRunRef.current = startLevel;
+
     setIsNewBest(false);
     setUiScore(0);
+    setUiLevel(startLevel);
+    setUiCombo(0);
     setUiTimeLeft(DRILL_DURATION);
     setUiLives(MAX_LIVES);
-    setLevel(1);
+    lastTimeRef.current = DRILL_DURATION;
     setTargetVisible(false);
 
     engine.current = {
       score: 0,
-      level: 1,
+      level: startLevel,
+      combo: 0,
+      maxCombo: 0,
       timeLeft: DRILL_DURATION,
       perfectHits: 0,
       missedClicks: 0,
@@ -506,57 +603,38 @@ export default function ChromaSyncClient() {
       gameActiveRef.current = true;
       startingRef.current = false;
       setGameState('playing');
-
-      // Start 45s decimal timer
-      if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
-      let lastTime = performance.now();
-
-      timerIntervalRef.current = setInterval(() => {
-        const now = performance.now();
-        const deltaSec = (now - lastTime) / 1000;
-        lastTime = now;
-
-        const eRef = engine.current;
-        if (eRef.timeLeft > 0) {
-          eRef.timeLeft = Math.max(0, eRef.timeLeft - deltaSec);
-          setUiTimeLeft(Math.ceil(eRef.timeLeft));
-        }
-
-        if (eRef.timeLeft <= 0) {
-          eRef.timeLeft = 0;
-          setUiTimeLeft(0);
-          endGame();
-        }
-      }, 100);
-
       spawnNextSignal();
     }, 2450);
 
     countdownTimeoutsRef.current = [t1, t2, t3, t4];
-  }, [clearGameTimeouts, endGame, spawnNextSignal]);
+  }, [clearGameTimeouts, spawnNextSignal]);
 
   const shareScore = useCallback(async () => {
     const url = 'https://skilldrills.online/drills/visual/reaction-speed/go/no-go';
     try {
       const canvas = generateShareCard({
         score: uiScore,
-        bestScore,
         accuracy: analytics.accuracy,
-        rating: { letter: analytics.grade?.letter || 'C', label: analytics.grade?.label || 'Keep Going', emoji: '🎯' },
-        newBest: isNewBest,
+        speed: 0,
         drillName: 'Go/No-Go Pro',
+        rank: analytics.grade?.letter || 'A',
+        rankName: analytics.grade?.label || 'ELITE REFLEX',
         playerName: getPlayerName(),
+        level: analytics.finalLevel,
+        date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        url: 'skilldrills.online/drills/visual/reaction-speed/go/no-go'
       });
-      await shareScoreCard(url, canvas);
+      await shareScoreCard(canvas, {
+        title: 'Go/No-Go Pro — My Score',
+        text: `I scored ${uiScore} (Grade: ${analytics.grade?.letter || 'A'}, Lv. ${analytics.finalLevel}) on Go/No-Go Pro at SkillDrills!`,
+        url
+      });
     } catch (e) {
-      const text = `🎯 I scored ${uiScore} PTS (Peak Level: Lvl ${analytics.finalLevel}) on Go/No-Go Pro! Accuracy: ${analytics.accuracy}%. Train response inhibition at skilldrills.online!`;
-      if (typeof navigator !== 'undefined' && navigator.share) {
-        navigator.share({ title: 'My Reaction Score', text, url }).catch(() => {});
-      } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
-        navigator.clipboard.writeText(text);
+      if (navigator.share) {
+        navigator.share({ title: 'My Reaction Score', text: `I scored ${uiScore} on Go/No-Go Pro!`, url }).catch(() => {});
       }
     }
-  }, [uiScore, bestScore, analytics, isNewBest]);
+  }, [uiScore, analytics]);
 
   return (
     <div className="min-h-screen bg-[#050508] text-white flex flex-col font-sans select-none">
@@ -612,12 +690,14 @@ export default function ChromaSyncClient() {
           <DrillFlashOverlay flashes={flashes} />
 
           {/* IN-BOX OVERLAY HUD */}
-          {gameState === 'playing' && (
+          {(gameState === 'playing' || gameState === 'countdown') && (
             <>
               {/* TOP-LEFT: SCORE & LIVES */}
-              <div className="absolute top-4 left-4 z-30 pointer-events-none">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Score</p>
-                <p className="text-2xl sm:text-3xl font-black text-white tabular-nums leading-tight">{uiScore}</p>
+              <div className="absolute top-4 left-4 z-30 pointer-events-none flex flex-col gap-1">
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Score</p>
+                  <p className="text-2xl sm:text-3xl font-black text-white tabular-nums leading-tight">{uiScore}</p>
+                </div>
                 <div className="flex items-center gap-1 mt-1">
                   {Array.from({ length: MAX_LIVES }).map((_, i) => (
                     <Heart
@@ -641,7 +721,7 @@ export default function ChromaSyncClient() {
           )}
 
           {/* IN-GAME HUD SOUND + FLASH TOGGLES */}
-          {gameState === 'playing' && (
+          {(gameState === 'playing' || gameState === 'countdown') && (
             <div className="absolute bottom-4 right-4 z-40 flex items-center gap-2">
               <button
                 onPointerDown={(e) => e.stopPropagation()}
@@ -695,8 +775,8 @@ export default function ChromaSyncClient() {
               title="Go/No-Go Pro"
               subtitle="Response Inhibition • Impulse Control"
               rules={[
-                { icon: Target, accent: 'emerald', title: 'Green GO Stimulus', text: 'Tap instantly when target flashes green (+150 PTS)' },
-                { icon: Zap, accent: 'red', title: 'Red STOP Stimulus', text: 'Withhold response when target flashes red (+100 PTS)' },
+                { icon: Target, accent: 'emerald', title: 'Green GO Stimulus', text: '+150 PTS × Combo × Level multiplier (+0.6s per tap)' },
+                { icon: Zap, accent: 'red', title: 'Red STOP Stimulus', text: '+100 PTS on successful restraint (+0.6s). Wrong tap costs 1 life' },
               ]}
               stats={[
                 { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
@@ -712,78 +792,23 @@ export default function ChromaSyncClient() {
             <DrillCountdown value={countdownValue} subtitle="GET READY" />
           )}
 
-          {/* END SCREEN */}
+          {/* UNIVERSAL RESULT CARD */}
           {gameState === 'gameOver' && analytics.grade && (
-            <div className="absolute inset-0 z-40 flex bg-neutral-950/98 select-none font-sans" style={{ background: 'rgba(5,5,8,0.97)' }} onPointerDown={e => e.stopPropagation()}>
-              
-              {/* Left Grade Panel */}
-              <div className="w-[36%] flex flex-col items-center justify-center gap-1 border-r border-white/5 px-4" style={{ background: 'radial-gradient(ellipse 260px 200px at 50% 30%, rgba(16,185,129,.12), transparent 70%)' }}>
-                {isNewBest && (
-                  <span className="text-[9.5px] font-bold text-yellow-400 bg-yellow-500/10 border border-yellow-500/25 px-2.5 py-0.5 rounded-full mb-1 animate-pulse">
-                    NEW BEST
-                  </span>
-                )}
-                <div className={`text-5xl sm:text-6xl font-black leading-none ${analytics.grade?.color || 'text-emerald-400'}`}>
-                  {analytics.grade?.grade || analytics.grade?.letter || 'C'}
-                </div>
-                <div className="text-[10px] uppercase tracking-widest text-slate-500 text-center font-bold mt-1">
-                  {analytics.grade?.label || 'Good Effort'}
-                </div>
-                <div className="text-3xl sm:text-4xl font-black text-white mt-2 tabular-nums">
-                  {uiScore}
-                </div>
-                <div className="text-[9px] uppercase tracking-widest text-slate-500">Points</div>
-              </div>
-
-              {/* Right Stats & Actions Panel */}
-              <div className="flex-1 flex flex-col justify-center gap-3 px-6 py-4 min-w-0">
-                
-                {/* 4 Stat Tiles */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.accuracy}%</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Accuracy</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">Lvl {analytics.finalLevel}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Peak Level</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.perfectHits}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Perfects</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-rose-400">{analytics.livesLeft}/{MAX_LIVES}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Lives Left</p>
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex gap-2">
-                  <button 
-                    onClick={enterDrill} 
-                    className="flex-1 py-3 rounded-[13px] bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold text-xs uppercase tracking-wide cursor-pointer transition-transform active:scale-[0.98] shadow-md flex items-center justify-center gap-1.5"
-                  >
-                    <RefreshCw className="w-3.5 h-3.5" /> Play Again
-                  </button>
-                  <button 
-                    onClick={shareScore} 
-                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform" 
-                    title="Share Score"
-                  >
-                    <Share2 className="w-4 h-4" />
-                  </button>
-                  <button 
-                    onClick={handleExitDrill} 
-                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform" 
-                    title="Return to Options"
-                  >
-                    <ArrowLeft className="w-4 h-4 text-red-400" />
-                  </button>
-                </div>
-
-              </div>
-            </div>
+            <DrillResultCard
+              accent="emerald"
+              grade={analytics.grade}
+              score={uiScore}
+              isNewBest={isNewBest}
+              stats={[
+                { label: 'Accuracy', value: analytics.accuracy, suffix: '%' },
+                { label: 'Lives Left', value: `${analytics.livesLeft}/${MAX_LIVES}` },
+                { label: 'Peak Level', value: `Lv. ${analytics.finalLevel}` },
+                { label: 'Max Combo', value: analytics.maxCombo, suffix: 'x' },
+              ]}
+              onPlayAgain={enterDrill}
+              onShare={shareScore}
+              onExit={handleExitDrill}
+            />
           )}
 
         </div>
@@ -798,10 +823,15 @@ export default function ChromaSyncClient() {
               onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <DrillRuleItem num="1" text="Green GO Signal" highlight="+150 PTS" result="Tap Immediately" />
-                <DrillRuleItem num="2" text="Red NO-GO Signal" highlight="+100 PTS" result="Restrain Response" />
-                <DrillRuleItem num="3" text="Wrong Click (False Alarm)" highlight="-1 Life" result="No score or time penalty" />
-                <DrillRuleItem num="4" text="Missed GO (Timeout)" highlight="Zero Penalties" result="No score, time, or life lost" />
+                <DrillRuleItem num="1" text="Green GO Signal" highlight="+150 PTS" result="× Combo × Level bonus (+0.6s clock per hit)" />
+                <DrillRuleItem num="2" text="Red NO-GO Signal" highlight="+100 PTS" result="Restrain response (+0.6s clock)" />
+                <DrillRuleItem 
+                  num="3" 
+                  text="Wrong Click (False Alarm)" 
+                  highlight={penaltyEnabled ? "-1 Life & -0.8s" : "-1 Life"} 
+                  result={penaltyEnabled ? "Costs 1 life, deducts 0.8s, resets combo" : "Costs 1 life & resets combo. No time loss (default)"} 
+                />
+                <DrillRuleItem num="4" text="Missed GO (Timeout)" highlight="Streak Reset" result="No life lost. Resets combo multiplier" />
                 <DrillRuleItem num="5" text="5 Lives Per Run" highlight="Game Over at 0" result="Drill ends early if lives run out" />
               </div>
             </DrillAccordion>
@@ -860,11 +890,11 @@ export default function ChromaSyncClient() {
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <DrillFAQItem q="What is the Go/No-Go Drill?" a="A free response inhibition task. React instantly to Green 'GO' targets while suppressing motor actions when Red 'STOP' targets spawn." />
-                <DrillFAQItem q="How does progressive difficulty work?" a="Every 900 points earned you level up, and signal flash windows accelerate from 600ms down to 350ms, challenging your impulse control boundaries." />
-                <DrillFAQItem q="Are there negative score or time penalties?" a="No. Wrong clicks and missed signals never deduct score points or reduce remaining timer seconds — a wrong click on a red NO-GO signal instead costs 1 of your 5 lives." />
+                <DrillFAQItem q="How does progressive difficulty work?" a="As your score and combo climb, signal display windows tighten continuously, challenging your impulse control boundaries." />
+                <DrillFAQItem q="Are there negative score or time penalties?" a="By default, wrong clicks on red NO-GO signals cost 1 life without deducting time. An opt-in time penalty (-0.8s per error) is available in session settings for hard-mode training." />
                 <DrillFAQItem q="What happens if I run out of lives?" a="You start each run with 5 lives. Every wrong click on a red NO-GO signal costs 1 life; missing a green GO signal (timeout) costs no life at all. Reach 0 lives and the drill ends immediately, even if time remains." />
-                <DrillFAQItem q="Does difficulty decrease on mistakes?" a="No. Your level only ever goes up — a mistake never takes you back down, so you can safely master your current level." />
-                <DrillFAQItem q="How long does each drill session last?" a="Each round is timed for exactly 45 seconds, or until your 5 lives run out — whichever comes first." />
+                <DrillFAQItem q="Does difficulty decrease on mistakes?" a="No. Your level progression is monotonic — a mistake never takes you back down, so you can safely master your current level." />
+                <DrillFAQItem q="How long does each drill session last?" a="Each round starts with 45 seconds on the clock (extendable by hitting GO targets and holding NO-GOs), or until your 5 lives run out." />
                 <DrillFAQItem q="Do I need to sign up?" a="No registration required. This drill runs directly in your browser with instant response." />
               </div>
             </DrillAccordion>

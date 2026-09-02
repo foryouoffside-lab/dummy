@@ -127,10 +127,10 @@ export default function TargetPrioritizationPage() {
       },
       {
         "@type": "Question",
-        "name": "How can I improve target selection?",
+        "name": "How are errors penalised in Target Prioritization?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "You can improve target selection by training with cognitive aim tools that actively punish you for shooting decoys, helping you build impulse control and target confirmation habits."
+          "text": "Shooting a friendly green target, clicking a yellow target while a red threat is active, or missing clicks resets your combo streak. When the optional Time Penalty setting is enabled, each error deducts 0.6s from your clock."
         }
       },
       {

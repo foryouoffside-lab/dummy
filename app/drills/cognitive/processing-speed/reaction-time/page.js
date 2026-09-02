@@ -118,7 +118,7 @@ const howToSchema = {
       "@type": "HowToStep",
       "position": 3,
       "name": "Keep Up the Pace",
-      "text": "Each session runs on a fixed 45-second clock. Tapping the wrong target or letting one expire never costs points or time — it's simply logged as a miss, so stay focused for the full run."
+      "text": "Each session starts with a 45-second clock, with clean hits extending time (+0.6s). Tapping the wrong target resets your combo streak (time penalty of 0.8s is opt-in via session settings)."
     }
   ]
 };

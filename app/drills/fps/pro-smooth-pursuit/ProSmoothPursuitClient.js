@@ -16,7 +16,8 @@ import generateShareCard, { shareScoreCard } from '../../../../components/ShareS
 import { getPlayerName } from '../../../../lib/leaderboard';
 import { drillAudio } from '../../../../lib/drillAudio';
 import { drillFlash } from '../../../../lib/drillFlash';
-import { getStartLevel, getDifficultyProgress, getComboBonusLevel } from '../../../../lib/drillDifficulty';
+import { drillPenalty } from '../../../../lib/drillPenalty';
+import { getStartLevel, getDifficultyProgress, ramp } from '../../../../lib/drillDifficulty';
 import { getComboMultiplier, getFpsScoreGrade } from '../../../../lib/scoringEngine';
 import { createBackdropCache, getCanvasDpr, drawPulseRing, drawTacticalTarget } from '../../../../lib/canvasFx';
 import useUnexpectedExitGuard from '../../../../lib/useUnexpectedExitGuard';
@@ -24,22 +25,22 @@ import DrillFooter from '../../../../components/drill/DrillFooter';
 import DrillCountdown from '../../../../components/drill/DrillCountdown';
 import DrillAccordion from '../../../../components/drill/DrillAccordion';
 import FpsStartCard from '../../../../components/drill/FpsStartCard';
+import DrillResultCard from '../../../../components/drill/DrillResultCard';
 
 // ============================================================
 // TUNING CONSTANTS
 // ============================================================
-const DRILL_DURATION = 45;
-const POINTS_PER_LEVEL = 60;
-const ELITE_SCORE = 4200;
-const STORAGE_KEY = 'skilldrills_fps_pro_smooth_pursuit_v2';
-const OLD_STORAGE_KEY = 'proPursuit_bestScore';
+const DRILL_DURATION = 45; // starting clock only; a run grows past this
+const POINTS_PER_LEVEL = 1400; // 200 -> 1400 (7x)
+const ELITE_SCORE = 54000; // 18000 -> 54000 (3x)
+const TIME_PER_HIT = 0.4; // +0.1s per 0.25s on-target tick (+0.4s/sec)
+const TIME_PENALTY = 0.6; // opt-in on 1.0s continuous off-target
+const STORAGE_KEY = 'skilldrills_fps_pro_smooth_pursuit_v3';
 
 const getSavedData = () => {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) return { bestScore: 0, bestCombo: 0, bestLevel: 1, totalSessions: 0, ...JSON.parse(raw) };
-    const legacy = localStorage.getItem(OLD_STORAGE_KEY);
-    if (legacy) return { bestScore: parseInt(legacy, 10) || 0, bestCombo: 0, bestLevel: 1, totalSessions: 0 };
     return { bestScore: 0, bestCombo: 0, bestLevel: 1, totalSessions: 0 };
   } catch (e) {
     return { bestScore: 0, bestCombo: 0, bestLevel: 1, totalSessions: 0 };
@@ -52,14 +53,14 @@ const saveData = (data) => {
   } catch (e) {}
 };
 
-
-const getLevelConfig = (level) => {
-  const p = getDifficultyProgress(level);
+const getLevelConfig = (level, combo = 0) => {
+  const p = getDifficultyProgress(level); // 0 at L1, 1 at L15, unbounded above
+  const heat = (getComboMultiplier(combo) - 1) / 2;
   return {
-    speed: 0.8 + p * 1.6,
-    radius: Math.max(9.5, 15.0 - p * 5.5),
-    horizontalFreq: 0.3 + p * 0.6,
-    verticalFreq: 0.7 + p * 1.8
+    speed:          ramp(0.8, 2.4, p) * (1 + heat * 0.15),
+    radius:         Math.max(8.0, ramp(15.0, 9.5, p) * (1 - heat * 0.15)),
+    horizontalFreq: ramp(0.3, 0.9, p) * (1 + heat * 0.10),
+    verticalFreq:   ramp(0.7, 2.5, p) * (1 + heat * 0.10),
   };
 };
 
@@ -67,10 +68,10 @@ const getLevelConfig = (level) => {
 // ACCORDION DATA
 // ============================================================
 const RULES_ITEMS = [
-  { title: "Tracking Alignment", text: "Score +10 PTS × Combo × Level for every 0.25s locked on the Lissajous curve target." },
+  { title: "Tracking Alignment", text: "Score +50 PTS × Combo × Level (+0.4s/s) while locked on the Lissajous curve target." },
   { title: "Continuous Combo", text: "Chain continuous tracking uptime to build combo multiplier up to 3.0x max." },
-  { title: "Off-Target Time", text: "Falling off target for 1.0s resets active combo multiplier chain." },
-  { title: "Level Progression", text: "You level up every 60 PTS scored. Target speed accelerates & curves sharpen." }
+  { title: "Off-Target Penalty", text: "Falling off target for 1.0s resets active combo multiplier chain and deducts time when enabled." },
+  { title: "Level Progression", text: "Level up every 1400 PTS scored. Target speed accelerates & curves sharpen dynamically." }
 ];
 
 const FAQ_ITEMS = [
@@ -81,7 +82,7 @@ const FAQ_ITEMS = [
   { q: "Can tracking drills improve Apex aim?", a: "Yes. Apex Legends has a very high time-to-kill (TTK), meaning you must track enemies through multiple strafes and jumps. Smooth pursuit drills are critical to mastering weapons like the R-99, Volt, and Flatline." },
   { q: "Does this help Overwatch players?", a: "Absolutely. Overwatch 2 features heroes with high movement speed and no inertia, meaning players must track Soldier: 76, Tracer, Zarya, and Sombra continuously to secure kills." },
   { q: "Why is tracking harder than flicking?", a: "Tracking is harder because it requires visual feedback processing and muscular speed adjustments over several seconds, whereas flicking is a single rapid muscle command that happens in a fraction of a second." },
-  { q: "How often should I train tracking?", a: "We recommend training tracking for 10–15 minutes daily as a warm-up before matches, or 30 minutes for deep aim training to build muscle memory." },
+  { q: "How are errors penalised in Pro Smooth Pursuit?", a: "Losing lock-on with the target resets your combo multiplier. When the optional Time Penalty setting is enabled, falling off-target for 1.0 cumulative second also deducts 0.6s from your timer." },
   { q: "What skills does smooth pursuit improve?", a: "This drill improves smooth pursuit, visual response latency, ADAD strafe reading, target reacquisition speed, wrist micro-corrections, and tracking stability under pressure." },
   { q: "Is this smooth pursuit trainer free?", a: "Yes, this tracking trainer is 100% free, requires no sign-ups or downloads, and runs natively in modern desktop browsers with 1:1 raw mouse input." }
 ];
@@ -104,6 +105,7 @@ export default function ProSmoothPursuitClient() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
+  const [penaltyEnabled, setPenaltyEnabled] = useState(false);
   const [pointerLocked, setPointerLocked] = useState(false);
   const [openAccordion, setOpenAccordion] = useState(null);
   const [isTouchOnlyDevice, setIsTouchOnlyDevice] = useState(false);
@@ -164,6 +166,7 @@ export default function ProSmoothPursuitClient() {
     if (typeof window !== 'undefined') {
       setSoundEnabled(drillAudio.isEnabled());
       setFlashEnabled(drillFlash.isEnabled());
+      setPenaltyEnabled(drillPenalty.isEnabled());
       const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
       const isTouchCapable = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
       setIsTouchOnlyDevice(isTouchCapable && !hasFinePointer);
@@ -198,7 +201,7 @@ export default function ProSmoothPursuitClient() {
 
     const e = engine.current;
     const finalAccuracy = e.totalFrames > 0 ? Math.round((e.framesOnTarget / e.totalFrames) * 100) : 100;
-    const peakLevel = bestLevelRunRef.current;
+    const peakLevel = Math.floor(bestLevelRunRef.current);
     const grade = getFpsScoreGrade(e.score, ELITE_SCORE);
 
     setAccuracy(finalAccuracy);
@@ -245,8 +248,7 @@ export default function ProSmoothPursuitClient() {
     lastTimeRef.current = DRILL_DURATION;
     lastAccuracyRef.current = 100;
 
-    const saved = getSavedData();
-    const startLevel = getStartLevel(saved.bestLevel);
+    const startLevel = getStartLevel();
     bestLevelRunRef.current = startLevel;
     setLevel(startLevel);
 
@@ -304,8 +306,6 @@ export default function ProSmoothPursuitClient() {
     setGameState('start');
   }, []);
 
-  // Stop the drill if the player leaves any way other than the in-app Exit
-  // button (back gesture, tab switch, Esc) instead of running invisibly.
   const { markIntentionalExit } = useUnexpectedExitGuard({
     active: gameState === 'playing' || gameState === 'countdown',
     onUnexpectedExit: handleExitDrill,
@@ -417,7 +417,7 @@ export default function ProSmoothPursuitClient() {
           lastTimeRef.current = intTime;
         }
 
-        const cfg = getLevelConfig(e.level);
+        const cfg = getLevelConfig(e.level, e.combo);
         e.t += dt * cfg.speed;
 
         const targetX = w / 2 + Math.sin(e.t * cfg.horizontalFreq) * (w * 0.35);
@@ -435,15 +435,17 @@ export default function ProSmoothPursuitClient() {
           e.onTargetTimer += dt;
           if (e.onTargetTimer >= 0.25) {
             e.onTargetTimer -= 0.25;
+            const baseScore = 50;
             const levelMult = 1 + getDifficultyProgress(e.level) * 0.5;
-            const pts = Math.round(10 * getComboMultiplier(e.combo) * levelMult);
+            const pts = Math.round(baseScore * getComboMultiplier(e.combo) * levelMult);
             e.score += pts;
+            e.timeLeft += 0.1; // +0.1s per 0.25s = +0.4s per full second on target
             setScore(e.score);
 
-            const rawLevel = Math.floor(e.score / POINTS_PER_LEVEL) + 1 + getComboBonusLevel(e.combo);
+            const rawLevel = (e.score / POINTS_PER_LEVEL) + 1;
             e.level = Math.max(e.level, rawLevel);
             bestLevelRunRef.current = Math.max(bestLevelRunRef.current, e.level);
-            setLevel(e.level);
+            setLevel(Math.floor(e.level));
 
             drillAudio.playHit();
             createHitMarker(e.crosshair.x, e.crosshair.y);
@@ -456,6 +458,7 @@ export default function ProSmoothPursuitClient() {
             setBestCombo(e.bestCombo);
             e.continuousTrackTime -= 1.0;
           }
+          e.msOffTarget = 0;
         } else {
           e.continuousTrackTime = 0;
           e.onTargetTimer = 0;
@@ -470,6 +473,7 @@ export default function ProSmoothPursuitClient() {
               triggerFlash();
               drillAudio.playPenalty();
             }
+            if (drillPenalty.isEnabled()) e.timeLeft -= TIME_PENALTY;
             e.msOffTarget = 0;
           }
         }
@@ -500,7 +504,7 @@ export default function ProSmoothPursuitClient() {
       }
 
       if (gameState === 'playing' || gameState === 'start') {
-        const cfg = getLevelConfig(e.level);
+        const cfg = getLevelConfig(e.level, e.combo);
         const targetX = w / 2 + Math.sin(e.t * cfg.horizontalFreq) * (w * 0.35);
         const targetY = h / 2 + Math.cos(e.t * cfg.verticalFreq) * (h * 0.30);
 
@@ -601,7 +605,7 @@ export default function ProSmoothPursuitClient() {
               </span>
             </h1>
             <p className="text-xs text-slate-400 mt-1">
-              Lissajous Curve Smooth Pursuit • 15 Levels
+              Lissajous Curve Smooth Pursuit • Endless Level Progression
             </p>
           </div>
         )}
@@ -615,7 +619,7 @@ export default function ProSmoothPursuitClient() {
             </div>
             <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
-              <div className={`text-lg sm:text-xl font-black tabular-nums ${timeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>{timeLeft}s</div>
+              <div className={`text-lg sm:text-xl font-black tabular-nums ${timeLeft <= 10 ? "text-red-400 animate-pulse" : "text-white"}`}>{timeLeft}s</div>
             </div>
             <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Accuracy</div>
@@ -634,8 +638,8 @@ export default function ProSmoothPursuitClient() {
           onContextMenu={(e) => { if (gameState === 'playing') e.preventDefault(); }}
           className={`relative overflow-hidden flex flex-col transition-all duration-150 select-none bg-[#080811] text-white border border-white/10 ${
             isFullscreen 
-              ? 'fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#080811] rounded-none border-none flex flex-col items-center justify-center' 
-              : 'w-full rounded-2xl bg-[#080811] aspect-video min-h-[460px] sm:min-h-[500px] max-h-[88vh] relative overflow-hidden flex flex-col'
+              ? "fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#080811] rounded-none border-none flex flex-col items-center justify-center" 
+              : "w-full rounded-2xl bg-[#080811] aspect-video min-h-[460px] sm:min-h-[500px] max-h-[88vh] relative overflow-hidden flex flex-col"
           }`}
           style={{ touchAction: gameState === 'playing' ? 'none' : 'auto' }}
         >
@@ -653,7 +657,7 @@ export default function ProSmoothPursuitClient() {
               </div>
               <div className="absolute top-4 right-4 z-30 pointer-events-none text-right">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Time</p>
-                <p className={`text-2xl sm:text-3xl font-bold tabular-nums leading-tight ${timeLeft <= 10 ? 'text-red-400' : 'text-white'}`}>{timeLeft}s</p>
+                <p className={`text-2xl sm:text-3xl font-bold tabular-nums leading-tight ${timeLeft <= 10 ? "text-red-400" : "text-white"}`}>{timeLeft}s</p>
               </div>
             </>
           )}
@@ -712,7 +716,7 @@ export default function ProSmoothPursuitClient() {
           <canvas 
             ref={canvasRef} 
             onClick={() => { if (gameState === 'playing' && !pointerLocked) resumeDrill(); }}
-            className={`block absolute top-0 left-0 w-full h-full touch-none z-10 ${gameState === 'playing' ? 'cursor-none' : ''}`} 
+            className={`block absolute top-0 left-0 w-full h-full touch-none z-10 ${gameState === "playing" ? "cursor-none" : ""}`}
           />
 
           {/* START MODAL */}
@@ -721,15 +725,16 @@ export default function ProSmoothPursuitClient() {
               icon={Crosshair}
               accent="green"
               title="Pro Smooth Pursuit"
-              subtitle="Lissajous Curve Smooth Pursuit • 15 Levels"
+              subtitle="Lissajous Curve Smooth Pursuit • Endless Level Progression"
               rules={[
-                { icon: Target, accent: 'green', title: 'Objective', text: 'Track Lissajous Curve (+10)' },
+                { icon: Target, accent: "green", title: "Objective", text: "Track Lissajous Curve (+0.4s/s)" },
+                { icon: AlertCircle, accent: "red", title: "Failure Rule", text: penaltyEnabled ? "Off-Target 1s → Resets Combo, -0.6s" : "Off-Target 1s → Resets Combo" },
               ]}
               sensitivity={{ value: universalSens, onChange: setUniversalSens, cmPer360 }}
               stats={[
-                { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
-                { icon: Flame, label: 'Best Combo', value: `${bestCombo}x`, color: 'text-green-400', accent: 'green' },
-                { icon: TrendingUp, label: 'Best Level', value: `Lv. ${bestLevel}`, color: 'text-blue-400', accent: 'blue' },
+                { icon: Trophy, label: "Best Score", value: bestScore, color: "text-white", accent: "slate" },
+                { icon: Flame, label: "Best Combo", value: `${bestCombo}x`, color: "text-green-400", accent: "green" },
+                { icon: TrendingUp, label: "Best Level", value: `Lv. ${bestLevel}`, color: "text-blue-400", accent: "blue" },
               ]}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
@@ -741,84 +746,29 @@ export default function ProSmoothPursuitClient() {
             <DrillCountdown value={countdownValue} subtitle="GET READY" />
           )}
 
-          {/* END SCREEN */}
+          {/* END SCREEN — Universal Result Card */}
           {gameState === 'gameOver' && analytics.grade && (
-            <div className="absolute inset-0 z-40 flex bg-neutral-950/98 select-none font-sans" style={{ background: 'rgba(5,5,8,0.97)' }} onPointerDown={e => e.stopPropagation()}>
-              
-              {/* Left Grade Panel */}
-              <div className="w-[36%] flex flex-col items-center justify-center gap-1 border-r border-white/5 px-4" style={{ background: 'radial-gradient(ellipse 260px 200px at 50% 30%, rgba(16,185,129,.12), transparent 70%)' }}>
-                {isNewBest && (
-                  <span className="text-[9.5px] font-bold text-yellow-400 bg-yellow-500/10 border border-yellow-500/25 px-2.5 py-0.5 rounded-full mb-1 animate-pulse">
-                    NEW BEST
-                  </span>
-                )}
-                <div className={`text-5xl sm:text-6xl font-black leading-none ${analytics.grade.color}`}>
-                  {analytics.grade.grade}
-                </div>
-                <div className="text-[10px] uppercase tracking-widest text-slate-500 text-center font-bold mt-1">
-                  {analytics.grade.label}
-                </div>
-                <div className="text-3xl sm:text-4xl font-black text-white mt-2 tabular-nums">
-                  {score}
-                </div>
-                <div className="text-[9px] uppercase tracking-widest text-slate-500">Points</div>
-              </div>
-
-              {/* Right Stats & Actions Panel */}
-              <div className="flex-1 flex flex-col justify-center gap-3 px-6 py-4 min-w-0">
-                
-                {/* 4 Stat Tiles */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.accuracy}%</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Tracking Accuracy</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.offTargetTime}s</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Off-Target Time</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{analytics.bestCombo}x</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Max Combo</p>
-                  </div>
-                  <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">Lv. {analytics.levelReached}</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Peak Level</p>
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex gap-2">
-                  <button 
-                    onClick={enterDrill} 
-                    className="flex-1 py-3 rounded-[13px] bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold text-xs uppercase tracking-wide cursor-pointer transition-transform active:scale-[0.98] shadow-md flex items-center justify-center gap-1.5"
-                  >
-                    <RefreshCw className="w-3.5 h-3.5" /> Play Again
-                  </button>
-                  <button 
-                    onClick={shareDrillLink} 
-                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform" 
-                    title="Share Score"
-                  >
-                    <Share2 className="w-4 h-4" />
-                  </button>
-                  <button 
-                    onClick={handleExitDrill} 
-                    className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform" 
-                    title="Exit Fullscreen & Return"
-                  >
-                    <LogOut className="w-4 h-4 text-red-400" />
-                  </button>
-                </div>
-
-              </div>
-            </div>
+            <DrillResultCard
+              accent="green"
+              grade={analytics.grade}
+              score={score}
+              isNewBest={isNewBest}
+              stats={[
+                { value: analytics.accuracy, suffix: "%", label: "Tracking Accuracy" },
+                { value: `${analytics.offTargetTime}s`, label: "Off-Target Time" },
+                { value: `${analytics.bestCombo}s`, label: "Max Combo" },
+                { value: `Lv. ${analytics.levelReached}`, label: "Peak Level" },
+              ]}
+              onPlayAgain={enterDrill}
+              onShare={shareDrillLink}
+              onExit={handleExitDrill}
+            />
           )}
         </div>
 
         {/* ── ACCORDIONS ── */}
         {!isFullscreen && (
-          <div className="[&>div]:!mt-0">
+          <div className="[&>div]:!mt-0 font-sans">
             <DrillAccordion
               id="rules"
               title="Drill Instructions & Scoring System"
@@ -849,34 +799,10 @@ export default function ProSmoothPursuitClient() {
                   <p className="text-sm leading-relaxed mb-3">
                     <strong>Smooth Pursuit Training</strong> isolates your eyes' ability to follow a moving coordinate without quick saccadic jerks. In fast-paced FPS shooters, players who master <strong>smooth pursuit</strong> keep their weapons locked onto targets at various ranges, matching their exact path velocity.
                   </p>
-                  <p className="text-sm leading-relaxed">
-                    By training on mathematically continuous Lissajous curves, you learn to read target speed transitions seamlessly, converting visual speed tracking directly into stable mouse adjustments. Lissajous curves alter horizontal and vertical velocity constantly, requiring unbroken visual pursuit and smooth forearm stability.
+                  <p className="text-sm leading-relaxed text-gray-300">
+                    The Lissajous curve provides a harmonically oscillating trajectory that forces you to constantly adapt both horizontal and vertical mouse velocities simultaneously.
                   </p>
                 </section>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
-                    <div className="flex items-center gap-2.5 mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Who Should Use This?</h5>
-                    </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">FPS gamers who need to hold a lock on strafing enemies in Apex Legends, Overwatch 2, or Valorant, plus esports players sharpening high-TTK weapon control.</p>
-                  </div>
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
-                    <div className="flex items-center gap-2.5 mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Skills Improved</h5>
-                    </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Smooth pursuit, visual response latency, target reacquisition speed, wrist micro-corrections, and tracking stability under pressure.</p>
-                  </div>
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
-                    <div className="flex items-center gap-2.5 mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-purple-600 flex items-center justify-center"><Timer className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Tracking Consistency</h5>
-                    </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Keep unbroken contact on the target for a full second to build your combo — jitter or drift off-target for 1.0s resets the chain.</p>
-                  </div>
-                </div>
               </div>
             </DrillAccordion>
 
@@ -886,10 +812,10 @@ export default function ProSmoothPursuitClient() {
               isOpen={openAccordion === 'faq'}
               onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
             >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {FAQ_ITEMS.map((item, i) => (
-                  <div key={i} className="bg-[#05060b] border border-gray-800 rounded-xl p-5">
-                    <h4 className="text-sm font-bold text-gray-200 mb-2">{item.q}</h4>
+              <div className="space-y-4">
+                {FAQ_ITEMS.map((item, idx) => (
+                  <div key={idx} className="border-b border-gray-800/80 pb-3 last:border-0 last:pb-0">
+                    <h5 className="text-xs font-bold text-white mb-1">{item.q}</h5>
                     <p className="text-xs text-gray-400 leading-relaxed">{item.a}</p>
                   </div>
                 ))}
@@ -901,7 +827,7 @@ export default function ProSmoothPursuitClient() {
         {/* ── RELATED FPS DRILLS ── */}
         {!isFullscreen && (
           <section className="mt-4">
-            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3 font-sans">
+            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">
               Related FPS Drills
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -924,11 +850,10 @@ export default function ProSmoothPursuitClient() {
             </div>
           </section>
         )}
-
-        {/* ── FOOTER ── */}
-        {!isFullscreen && <DrillFooter />}
-
       </main>
+
+      {/* ── FOOTER ── */}
+      {!isFullscreen && <DrillFooter />}
     </div>
   );
 }
