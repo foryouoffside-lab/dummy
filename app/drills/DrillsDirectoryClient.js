@@ -10,10 +10,12 @@ import SiteFooter from '@/components/SiteFooter';
 import Reveal from '@/components/Reveal';
 import DrillGlobalSettings from '@/components/drill/DrillGlobalSettings';
 import { DRILLS, DESKTOP_ONLY_CATEGORIES } from '@/lib/drillsRegistry';
+import { useTranslation } from '@/lib/i18n/useTranslation';
 
 const categoryData = [
   {
     name: 'FPS Gaming',
+    tagline: 'Aim, flick and tracking practice',
     cat: 'fps',
     color: 'from-red-500 to-orange-600',
     ring: 'group-hover:shadow-red-500/20',
@@ -21,12 +23,13 @@ const categoryData = [
     accent: 'text-red-400',
     icon: Gamepad2,
     description: 'Aim trainer, flick shots, tracking and recoil control for competitive shooters',
-    actionText: 'Track and flick-click moving target nodes in precision space',
+    actionText: 'Track and flick-click moving targets under time pressure',
     goals: ['aim', '5min'],
     href: '/drills/fps'
   },
   {
     name: 'Cognitive Drills',
+    tagline: 'Focus, attention and processing speed',
     cat: 'cognitive',
     color: 'from-purple-500 to-indigo-600',
     ring: 'group-hover:shadow-purple-500/20',
@@ -40,6 +43,7 @@ const categoryData = [
   },
   {
     name: 'Memory Training',
+    tagline: 'Digit span, n-back and spatial recall',
     cat: 'memory',
     color: 'from-indigo-500 to-purple-600',
     ring: 'group-hover:shadow-indigo-500/20',
@@ -53,6 +57,7 @@ const categoryData = [
   },
   {
     name: 'Motor Skills',
+    tagline: 'Mouse precision and click speed',
     cat: 'motor',
     color: 'from-emerald-500 to-teal-600',
     ring: 'group-hover:shadow-emerald-500/20',
@@ -66,6 +71,7 @@ const categoryData = [
   },
   {
     name: 'Physical Drills',
+    tagline: 'Reflex, balance and coordination',
     cat: 'physical',
     color: 'from-rose-500 to-red-600',
     ring: 'group-hover:shadow-rose-500/20',
@@ -79,6 +85,7 @@ const categoryData = [
   },
   {
     name: 'Visual Training',
+    tagline: 'Reaction, search and depth perception',
     cat: 'visual',
     color: 'from-fuchsia-500 to-pink-600',
     ring: 'group-hover:shadow-fuchsia-500/20',
@@ -92,6 +99,7 @@ const categoryData = [
   },
   {
     name: 'Visual Tracking',
+    tagline: 'Smooth pursuit and gaze stability',
     cat: 'visual-tracking',
     color: 'from-cyan-500 to-blue-600',
     ring: 'group-hover:shadow-cyan-500/20',
@@ -105,6 +113,7 @@ const categoryData = [
   },
   {
     name: 'Reaction Speed',
+    tagline: 'Reaction time tests and reflex drills',
     cat: 'reaction-speed',
     color: 'from-amber-500 to-yellow-600',
     ring: 'group-hover:shadow-amber-500/20',
@@ -112,7 +121,7 @@ const categoryData = [
     accent: 'text-amber-400',
     icon: Zap,
     description: 'Simple & choice stimulus response, barrier pursuit, and reflex calibration',
-    actionText: 'React to instant visual color triggers and latency spikes',
+    actionText: 'React to sudden colour triggers and see your response time',
     goals: ['react', '5min', 'new'],
     href: '/drills/reaction-speed'
   },
@@ -140,6 +149,7 @@ function handleCardMouseMove(e) {
 }
 
 export default function DrillsDirectoryClient() {
+  const { t, localizeHref } = useTranslation();
   const [selectedGoal, setSelectedGoal] = useState('all');
   const [isMobile, setIsMobile] = useState(false);
 
@@ -207,10 +217,10 @@ export default function DrillsDirectoryClient() {
             <span>Complete Training Hub Directory</span>
           </div>
           <h1 className="text-4xl sm:text-6xl font-black text-ink-1 uppercase tracking-tight leading-[0.95]">
-            Free <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400">Online Drills</span>
+            {t('directory.h1Prefix', 'Free')} <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400">{t('directory.h1Highlight', 'Online Drills')}</span>
           </h1>
           <p className="text-ink-2 text-base sm:text-lg leading-relaxed max-w-2xl mx-auto">
-            {totalDrills} scientific, browser-native performance drills across 8 specialized categories. Zero installs, instant start.
+            {totalDrills} {t('directory.subtitle', 'free training drills across 8 categories. No sign-up, no installs, instant start.')}
           </p>
 
           {/* Trust Strip */}
@@ -264,14 +274,15 @@ export default function DrillsDirectoryClient() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-20">
           {sortedCategories.map((cat, idx) => {
             const Icon = cat.icon;
-            const catDrillsCount = DRILLS.filter(d => d.category === cat.cat).length;
             const isMatch = selectedGoal === 'all' || cat.goals.includes(selectedGoal);
             const isDesktopOnly = DESKTOP_ONLY_CATEGORIES.includes(cat.cat);
+            const catTitle = t('sectors.' + cat.cat + '.title', cat.name);
+            const catHref = localizeHref(cat.href);
 
             return (
               <Reveal key={cat.cat} delay={idx * 40} className="h-full">
                 <Link
-                  href={cat.href}
+                  href={catHref}
                   onMouseMove={handleCardMouseMove}
                   className={`group relative isolate flex h-full flex-col justify-between overflow-hidden rounded-3xl border bg-surface-1/70 backdrop-blur-xl p-6 transition-all duration-300 hover:-translate-y-1.5 shadow-xl ${cat.ring} hover:shadow-2xl ${
                     isMatch ? 'border-hairline hover:border-hairline-2 opacity-100' : 'border-hairline/50 opacity-55 hover:opacity-90'
@@ -285,41 +296,24 @@ export default function DrillsDirectoryClient() {
                   />
 
                   <div className="relative">
-                    <div className="flex items-center justify-between mb-5 gap-3">
-                      <div className="flex items-center gap-3.5 min-w-0">
-                        <div className={`relative shrink-0 w-13 h-13 rounded-2xl bg-gradient-to-br ${cat.color} flex items-center justify-center text-white shadow-lg group-hover:scale-105 transition-transform duration-300`}>
-                          <div className={`absolute -inset-1.5 rounded-2xl bg-gradient-to-br ${cat.color} opacity-40 blur-md -z-10 group-hover:opacity-70 transition-opacity`} />
-                          <Icon className="w-6 h-6" />
-                        </div>
-                        <h2 className={`text-xl font-bold text-ink-1 transition-colors group-hover:${cat.accent} truncate`}>
-                          {cat.name}
-                        </h2>
+                    <div className="flex items-center gap-3.5 min-w-0 mb-4">
+                      <div className={`shrink-0 w-12 h-12 rounded-2xl bg-gradient-to-br ${cat.color} flex items-center justify-center text-white group-hover:scale-105 transition-transform duration-300`}>
+                        <Icon className="w-6 h-6" />
                       </div>
-                      <div className="flex flex-col items-end gap-1.5 shrink-0">
-                        {isDesktopOnly && (
-                          <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-red-500/10 text-red-400 border border-red-500/20">
-                            Desktop Only
-                          </span>
-                        )}
-                        <span className="text-2xs font-mono font-semibold px-2.5 py-1 rounded-full bg-surface-2 text-ink-3 border border-hairline">
-                          {catDrillsCount} Drills
+                      <div className="min-w-0">
+                        <h2 className="text-lg font-bold text-ink-1 truncate">{catTitle}</h2>
+                        <p className="text-xs text-ink-3 truncate mt-0.5">{cat.tagline}</p>
+                      </div>
+                      {isDesktopOnly && (
+                        <span className="ml-auto shrink-0 text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-red-500/10 text-red-400 border border-red-500/20">
+                          Desktop
                         </span>
-                      </div>
-                    </div>
-
-                    <p className="text-xs text-ink-2 leading-relaxed mb-3.5 line-clamp-2">
-                      {cat.description}
-                    </p>
-
-                    {/* Action Description Line */}
-                    <div className="p-3 rounded-xl bg-canvas/80 border border-hairline text-2xs text-ink-3 font-mono mb-5">
-                      <span className={`${cat.accent} font-bold block mb-0.5`}>What you do:</span>
-                      <span className="text-ink-2">{cat.actionText}</span>
+                      )}
                     </div>
                   </div>
 
                   <div className={`relative pt-4 border-t border-hairline flex items-center justify-between text-xs font-semibold ${cat.accent}`}>
-                    <span>Enter Hub</span>
+                    <span>{t('home.viewHub', 'Enter Hub')}</span>
                     <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </div>
                 </Link>

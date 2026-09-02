@@ -43,6 +43,36 @@
   }
 }
 
+/* Hide the scrollbar on horizontal snap tracks (drill carousels, the goal-pill
+   bar) while keeping the element scrollable and swipeable. This class was in use
+   before it existed, so the tracks were showing a native scrollbar. */
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+/* Continuously scrolling row (home page "what's inside" ticker). The track holds
+   the item list twice, so translating it -50% loops seamlessly. */
+@keyframes marqueeScroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.marquee-track {
+  animation: marqueeScroll var(--marquee-duration, 60s) linear infinite;
+  width: max-content;
+}
+.marquee-viewport:hover .marquee-track,
+.marquee-viewport:focus-within .marquee-track {
+  animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track { animation: none; }
+  .marquee-viewport { overflow-x: auto; }
+}
+
 /* ─────────────────────────────────────────────────────────────────────────────
    GAMEPLAY JUICE — reusable adrenaline FX (screen shake, hit flash, danger vignette)
    Any drill can trigger these by toggling a key/class; not scoped to one drill.

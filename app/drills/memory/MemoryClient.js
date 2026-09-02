@@ -2,13 +2,15 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { ArrowLeft, Clock, Play, Brain, Target, Star, Home, ChevronRight, Cpu, Sparkles } from "lucide-react";
+import { ArrowLeft, Brain, Target, Home, ChevronRight, Sparkles } from "lucide-react";
 import { DRILLS } from "@/lib/drillsRegistry";
 import { getDifficultyRank } from "@/lib/scoringEngine";
+import { getDrillTagline, sortByInterest } from "@/lib/drillCatalog";
 import SiteFooter from "@/components/SiteFooter";
 import Reveal from "@/components/Reveal";
+import DrillCarousel from "@/components/drill/DrillCarousel";
 import StickyMobileCta from "@/components/StickyMobileCta";
-import ResetDrillButton from "@/components/drill/ResetDrillButton";
+import { useTranslation } from '@/lib/i18n/useTranslation';
 
 const memDrills = DRILLS.filter(d => d.category === 'memory');
 
@@ -16,10 +18,6 @@ const memDrills = DRILLS.filter(d => d.category === 'memory');
 // (level 1 / smallest grid) regardless of saved best level — the saved value
 // is display-only, never read back to raise the starting difficulty. So
 // there's nothing an adaptive-difficulty reset would meaningfully change.
-const NO_ADAPTIVE_DIFFICULTY = new Set([
-  'color-sequence', 'digit-span', 'word-recall',
-  'grid-memorization', 'object-location', 'path-tracing', 'n-back',
-]);
 
 const memoryCategories = [
   {
@@ -54,13 +52,17 @@ const memoryCategories = [
   }
 ];
 
-function handleCardMouseMove(e) {
-  const rect = e.currentTarget.getBoundingClientRect();
-  e.currentTarget.style.setProperty('--mx', `${e.clientX - rect.left}px`);
-  e.currentTarget.style.setProperty('--my', `${e.clientY - rect.top}px`);
-}
+// Flat, interest-ordered list for the picker. The category grouping above still
+// drives the JSON-LD item list and each drill's icon; it no longer splits the
+// page into three separate walls of cards.
+const orderedMemoryDrills = sortByInterest(
+  memoryCategories.flatMap((category) =>
+    category.drills.map((drill) => ({ ...drill, icon: category.icon }))
+  )
+);
 
 export default function MemoryClient() {
+  const { t } = useTranslation();
   const [isClient, setIsClient] = useState(false);
   const [drillLevels, setDrillLevels] = useState({});
   const canvasRef = useRef(null);
@@ -148,21 +150,6 @@ export default function MemoryClient() {
       window.removeEventListener("resize", resize);
     };
   }, [isClient]);
-
-  const getDifficultyColor = (difficulty) => {
-    switch (difficulty) {
-      case "Easy":
-        return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
-      case "Medium":
-        return "bg-amber-500/10 text-amber-400 border-amber-500/20";
-      case "Hard":
-        return "bg-orange-500/10 text-orange-400 border-orange-500/20";
-      case "Expert":
-        return "bg-rose-500/10 text-rose-400 border-rose-500/20";
-      default:
-        return "bg-slate-500/10 text-slate-400 border-slate-500/20";
-    }
-  };
 
   const totalDrills = memoryCategories.reduce((acc, cat) => acc + cat.drills.length, 0);
 
@@ -259,21 +246,15 @@ export default function MemoryClient() {
           <div className="mb-8 bg-surface-1 border border-hairline rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden backdrop-blur-xl shadow-xl">
             <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-indigo-500 to-purple-500 opacity-70" />
             <div className="flex items-start gap-4">
-              <div className="relative p-3.5 bg-indigo-500/10 border border-indigo-500/30 rounded-2xl text-indigo-400 shadow-inner shrink-0">
-                <div className="absolute -inset-2 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-500 opacity-40 blur-lg -z-10" />
+              <div className="p-3.5 bg-indigo-500/10 border border-indigo-500/30 rounded-2xl text-indigo-400 shrink-0">
                 <Brain className="w-8 h-8" />
               </div>
               <div>
-                <div className="inline-flex items-center gap-2 mb-1">
-                  <h1 className="text-2xl sm:text-4xl font-extrabold text-ink-1 tracking-tight uppercase">
-                    Memory Training &amp; Recall
-                  </h1>
-                  <span className="px-2.5 py-0.5 rounded-full text-2xs font-mono font-bold bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
-                    {totalDrills} DRILLS ONLINE
-                  </span>
-                </div>
+                <h1 className="text-2xl sm:text-4xl font-extrabold text-ink-1 tracking-tight uppercase">
+                  {t('hubs.memory.h1', 'Memory Training & Recall')}
+                </h1>
                 <p className="text-ink-2 mt-2 text-sm sm:text-base max-w-xl leading-relaxed">
-                  Train working memory recall buffers, digit recall span, and spatial pattern traces.
+                  {t('hubs.memory.desc', 'Train working memory recall buffers, digit recall span, and spatial pattern traces.')}
                 </p>
               </div>
             </div>
@@ -312,120 +293,25 @@ export default function MemoryClient() {
           </div>
         </Reveal>
 
-        {/* Drills Grid by Category */}
-        {memoryCategories.filter((category) => category.drills.length > 0).map((category) => {
-          const categoryDrills = category.drills;
-
-          return (
-            <Reveal key={category.name} className="mb-12 relative">
-              <div className="flex items-center gap-2 mb-6 border-b border-hairline pb-3">
-                <div className="w-1 h-6 rounded-full bg-indigo-500" />
-                <h2 className="text-lg font-bold uppercase tracking-wider text-ink-1 font-mono">{category.name}</h2>
-                <span className="px-2 py-0.5 text-2xs font-mono rounded bg-surface-2 border border-hairline text-indigo-400 font-bold">
-                  {categoryDrills.length} DRILL{categoryDrills.length > 1 ? "S" : ""}
-                </span>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {categoryDrills.map((drill, index) => {
-                  const bestLevel = drillLevels[drill.folderName];
-                  const storageKeys = [
-                    `skilldrills_memory_${drill.folderName.replace(/-/g, '_')}_v4`,
-                    `skilldrills_memory_${drill.folderName.replace(/-/g, '_')}_v3`,
-                    `skilldrills_${drill.folderName.replace(/-/g, '_')}`,
-                  ];
-                  return (
-                  <Link
-                    key={index}
-                    href={`/drills/memory/${category.folderName}/${drill.folderName}`}
-                    onMouseMove={handleCardMouseMove}
-                    className="group relative isolate overflow-hidden bg-surface-1 backdrop-blur-xl border border-hairline hover:border-indigo-500/40 rounded-2xl transition-all duration-300 hover:-translate-y-1.5 focus:outline-none focus:ring-1 focus:ring-indigo-500/50 shadow-xl hover:shadow-2xl hover:shadow-indigo-500/10"
-                  >
-                    {/* Top accent hairline */}
-                    <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-indigo-500 to-purple-500 opacity-0 group-hover:opacity-70 transition-opacity duration-300" />
-
-                    {/* Cursor-tracked spotlight */}
-                    <span
-                      aria-hidden="true"
-                      className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                      style={{ background: 'radial-gradient(260px circle at var(--mx, 50%) var(--my, 50%), rgba(99,102,241,0.16), transparent 70%)' }}
-                    />
-
-                    {/* Tactical corner brackets */}
-                    <span aria-hidden="true" className="absolute top-2.5 left-2.5 w-3 h-3 border-t-2 border-l-2 border-indigo-500/0 group-hover:border-indigo-500/70 transition-colors duration-300 rounded-tl-sm" />
-                    <span aria-hidden="true" className="absolute top-2.5 right-2.5 w-3 h-3 border-t-2 border-r-2 border-indigo-500/0 group-hover:border-indigo-500/70 transition-colors duration-300 rounded-tr-sm" />
-                    <span aria-hidden="true" className="absolute bottom-2.5 left-2.5 w-3 h-3 border-b-2 border-l-2 border-indigo-500/0 group-hover:border-indigo-500/70 transition-colors duration-300 rounded-bl-sm" />
-                    <span aria-hidden="true" className="absolute bottom-2.5 right-2.5 w-3 h-3 border-b-2 border-r-2 border-indigo-500/0 group-hover:border-indigo-500/70 transition-colors duration-300 rounded-br-sm" />
-
-                    <div className="relative p-6">
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="relative p-2.5 rounded-lg border bg-indigo-500/10 border-indigo-500/20 text-indigo-400 group-hover:scale-110 group-hover:border-indigo-500/40 transition-transform">
-                          <div className="absolute -inset-1.5 rounded-xl bg-indigo-500/30 opacity-0 group-hover:opacity-60 blur-md -z-10 transition-opacity" />
-                          <Brain className="w-5 h-5" />
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                          {!NO_ADAPTIVE_DIFFICULTY.has(drill.folderName) && (
-                          <ResetDrillButton
-                            storageKeys={storageKeys}
-                            drillName={drill.name}
-                            onReset={() => setDrillLevels((prev) => {
-                              const next = { ...prev };
-                              delete next[drill.folderName];
-                              return next;
-                            })}
-                          />
-                          )}
-                          {bestLevel && (
-                            <div className="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold tracking-wide border border-indigo-500/20 bg-indigo-500/10 text-indigo-400">
-                              Lv. {bestLevel}
-                            </div>
-                          )}
-                          <div
-                            className={`px-2.5 py-0.5 rounded-full text-[9px] font-mono font-bold tracking-wide border uppercase ${getDifficultyColor(
-                              drill.difficulty
-                            )}`}
-                          >
-                            {drill.difficulty}
-                          </div>
-                        </div>
-                      </div>
-
-                      <h3 className="text-base font-bold text-ink-1 mb-2 group-hover:text-indigo-400 transition-colors uppercase tracking-tight font-mono">
-                        {drill.name}
-                      </h3>
-
-                      <p className="text-xs text-ink-2 mb-4 leading-relaxed min-h-[48px]">
-                        {drill.description}
-                      </p>
-
-                      <div className="flex items-center gap-4 mb-4 text-2xs font-mono text-ink-3 border-b border-hairline pb-3">
-                        <div className="flex items-center gap-1">
-                          <Clock className="w-3.5 h-3.5 text-indigo-400" />
-                          <span>{drill.duration}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Cpu className="w-3.5 h-3.5 text-indigo-400" />
-                          <span>Memory Bank</span>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <span className="text-2xs font-bold text-ink-3 uppercase tracking-widest">
-                          {category.name}
-                        </span>
-                        <div className="flex items-center gap-1 text-indigo-400 group-hover:gap-2 transition-all font-bold text-xs uppercase tracking-widest font-mono">
-                          <span>EXEC_DRILL</span>
-                          <Play className="w-3.5 h-3.5 fill-current" />
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-                  );
-                })}
-              </div>
-            </Reveal>
-          );
-        })}
+        {/* Drill picker: one drill at a time, arrows to move, "View all" for the grid */}
+        <Reveal>
+          <DrillCarousel
+            headingId="memory-drills"
+            heading="Memory drills"
+            accent="indigo"
+            icon={Brain}
+            allLabel="View all"
+            drills={orderedMemoryDrills.map((drill) => ({
+              href: drill.href,
+              name: drill.name,
+              tagline: getDrillTagline(drill.href, drill.description),
+              difficulty: drill.difficulty,
+              duration: drill.duration,
+              icon: drill.icon,
+              badge: drillLevels[drill.folderName] ? `Lv. ${drillLevels[drill.folderName]}` : null,
+            }))}
+          />
+        </Reveal>
 
         {/* Benefits Grid */}
         <Reveal className="mb-12">

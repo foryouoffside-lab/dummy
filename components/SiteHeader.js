@@ -6,23 +6,26 @@ import { useRouter, usePathname } from 'next/navigation';
 import { Search, X, Menu, ChevronRight } from 'lucide-react';
 import { searchDrills } from '@/lib/searchDrills';
 import { DRILLS, DESKTOP_ONLY_CATEGORIES } from '@/lib/drillsRegistry';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
+import { useTranslation } from '@/lib/i18n/useTranslation';
 
 const DRILL_HREFS = new Set(DRILLS.map((drill) => drill.href));
 
 const navCategories = [
-  { name: 'FPS', href: '/drills/fps', color: 'text-red-400', activeBg: 'bg-red-500/10 border-red-500/30 text-red-400' },
-  { name: 'Cognitive', href: '/drills/cognitive', color: 'text-purple-400', activeBg: 'bg-purple-500/10 border-purple-500/30 text-purple-400' },
-  { name: 'Memory', href: '/drills/memory', color: 'text-indigo-400', activeBg: 'bg-indigo-500/10 border-indigo-500/30 text-indigo-400' },
-  { name: 'Motor', href: '/drills/motor', color: 'text-emerald-400', activeBg: 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' },
-  { name: 'Physical', href: '/drills/physical', color: 'text-rose-400', activeBg: 'bg-rose-500/10 border-rose-500/30 text-rose-400' },
-  { name: 'Visual', href: '/drills/visual', color: 'text-fuchsia-400', activeBg: 'bg-fuchsia-500/10 border-fuchsia-500/30 text-fuchsia-400' },
-  { name: 'Tracking', href: '/drills/visual-tracking', color: 'text-cyan-400', activeBg: 'bg-cyan-500/10 border-cyan-500/30 text-cyan-400' },
-  { name: 'Reaction', href: '/drills/reaction-speed', color: 'text-amber-400', activeBg: 'bg-amber-500/10 border-amber-500/30 text-amber-400' },
+  { id: 'fps', name: 'FPS', href: '/drills/fps', color: 'text-red-400', activeBg: 'bg-red-500/10 border-red-500/30 text-red-400' },
+  { id: 'cognitive', name: 'Cognitive', href: '/drills/cognitive', color: 'text-purple-400', activeBg: 'bg-purple-500/10 border-purple-500/30 text-purple-400' },
+  { id: 'memory', name: 'Memory', href: '/drills/memory', color: 'text-indigo-400', activeBg: 'bg-indigo-500/10 border-indigo-500/30 text-indigo-400' },
+  { id: 'motor', name: 'Motor', href: '/drills/motor', color: 'text-emerald-400', activeBg: 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' },
+  { id: 'physical', name: 'Physical', href: '/drills/physical', color: 'text-rose-400', activeBg: 'bg-rose-500/10 border-rose-500/30 text-rose-400' },
+  { id: 'visual', name: 'Visual', href: '/drills/visual', color: 'text-fuchsia-400', activeBg: 'bg-fuchsia-500/10 border-fuchsia-500/30 text-fuchsia-400' },
+  { id: 'tracking', name: 'Tracking', href: '/drills/visual-tracking', color: 'text-cyan-400', activeBg: 'bg-cyan-500/10 border-cyan-500/30 text-cyan-400' },
+  { id: 'reaction', name: 'Reaction', href: '/drills/reaction-speed', color: 'text-amber-400', activeBg: 'bg-amber-500/10 border-amber-500/30 text-amber-400' },
 ];
 
 export default function SiteHeader() {
   const router = useRouter();
   const pathname = usePathname();
+  const { t, localizeHref } = useTranslation();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -125,19 +128,19 @@ export default function SiteHeader() {
           
           {/* Logo Mark */}
           <Link
-            href="/"
+            href={localizeHref('/')}
             className="flex items-center gap-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg group shrink-0"
             aria-label="SkillDrills Home"
           >
             <img
-              src="/icons/icon-192x192.png"
+              src="/logo.svg"
               alt="SkillDrills"
-              width={32}
-              height={32}
-              className="w-8 h-8 shrink-0 group-hover:scale-105 transition-transform"
+              width={30}
+              height={30}
+              className="w-[30px] h-[30px] shrink-0"
             />
-            <span className="text-lg font-black tracking-tight text-white uppercase">
-              Skill<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">Drills</span>
+            <span className="text-lg font-bold tracking-tight text-white">
+              Skill<span className="text-blue-400">Drills</span>
             </span>
           </Link>
 
@@ -152,7 +155,7 @@ export default function SiteHeader() {
                 onChange={(e) => setQuery(e.target.value)}
                 onFocus={() => query.trim() && setIsOpen(true)}
                 onKeyDown={handleKeyDownInput}
-                placeholder={`Search ${totalDrillsCount} drills... (Ctrl+K)`}
+                placeholder={t('header.searchPlaceholder', `Search ${totalDrillsCount} drills... (Ctrl+K)`)}
                 className="w-full pl-9 pr-8 py-1.5 text-xs sm:text-sm bg-surface-1 border border-hairline rounded-xl text-ink-1 placeholder:text-ink-3 focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 transition-all"
               />
               {query && (
@@ -176,7 +179,7 @@ export default function SiteHeader() {
                       {results.slice(0, 8).map((drill, idx) => (
                         <div
                           key={drill.id}
-                          onClick={() => handleSelectResult(drill.href)}
+                          onClick={() => handleSelectResult(localizeHref(drill.href))}
                           onMouseEnter={() => setSelectedIndex(idx)}
                           className={`flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-0 p-3 cursor-pointer transition-colors ${
                             idx === selectedIndex ? 'bg-blue-600/20 text-white' : 'hover:bg-white/5 text-ink-2'
@@ -222,35 +225,41 @@ export default function SiteHeader() {
           {/* Desktop Nav Links */}
           <nav className="hidden lg:flex items-center gap-1.5">
             {navCategories.map((cat) => {
-              const isActive = pathname === cat.href || pathname?.startsWith(`${cat.href}/`);
+              const targetHref = localizeHref(cat.href);
+              const isActive = pathname === cat.href || pathname === targetHref || pathname?.startsWith(`${targetHref}/`);
+              const label = t('header.' + cat.id, cat.name);
               return (
                 <Link
-                  key={cat.name}
-                  href={cat.href}
+                  key={cat.id}
+                  href={targetHref}
                   className={`text-xs font-medium px-2.5 py-1.5 rounded-lg border transition-all ${
                     isActive 
                       ? `${cat.activeBg} font-semibold` 
                       : 'border-transparent text-ink-2 hover:text-white hover:bg-white/5'
                   }`}
                 >
-                  {cat.name}
+                  {label}
                 </Link>
               );
             })}
             <Link
-              href="/drills"
+              href={localizeHref('/drills')}
               className={`text-xs font-semibold px-3 py-1.5 rounded-lg transition-all ml-1.5 ${
-                pathname === '/drills'
+                pathname === '/drills' || pathname === localizeHref('/drills')
                   ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
                   : 'bg-white/5 hover:bg-white/10 text-white border border-hairline'
               }`}
             >
-              All Hubs
+              {t('header.allHubs', 'All Hubs')}
             </Link>
+            <div className="ml-2 border-l border-white/10 pl-2">
+              <LanguageSwitcher />
+            </div>
           </nav>
 
           {/* Mobile Right Controls */}
           <div className="flex items-center gap-1 sm:hidden">
+            <LanguageSwitcher />
             <button
               type="button"
               onClick={() => setMobileSearchExpanded(!mobileSearchExpanded)}
@@ -274,19 +283,21 @@ export default function SiteHeader() {
         {mobileMenuOpen && (
           <div className="lg:hidden py-4 border-t border-hairline grid grid-cols-2 gap-2">
             {navCategories.map((cat) => {
-              const isActive = pathname === cat.href || pathname?.startsWith(`${cat.href}/`);
+              const targetHref = localizeHref(cat.href);
+              const isActive = pathname === cat.href || pathname === targetHref || pathname?.startsWith(`${targetHref}/`);
               const isDesktopOnly = DESKTOP_ONLY_CATEGORIES.some((d) => cat.href.endsWith(`/${d}`));
+              const label = t('header.' + cat.id, cat.name);
               return (
                 <Link
-                  key={cat.name}
-                  href={cat.href}
+                  key={cat.id}
+                  href={targetHref}
                   onClick={() => setMobileMenuOpen(false)}
                   className={`px-3 py-2 text-xs font-medium rounded-lg transition-colors flex items-center justify-between gap-1.5 ${
                     isActive ? cat.activeBg : 'text-ink-2 hover:text-white hover:bg-white/5'
                   }`}
                 >
                   <span className="flex items-center gap-1.5 min-w-0">
-                    <span className="truncate">{cat.name}</span>
+                    <span className="truncate">{label}</span>
                     {isDesktopOnly && (
                       <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded-full bg-red-500/10 text-red-400 border border-red-500/20 shrink-0">
                         Desktop
@@ -298,11 +309,11 @@ export default function SiteHeader() {
               );
             })}
             <Link
-              href="/drills"
+              href={localizeHref('/drills')}
               onClick={() => setMobileMenuOpen(false)}
               className="col-span-2 mt-2 px-3 py-2.5 text-center text-xs font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl shadow-lg"
             >
-              All Hubs Directory ({totalDrillsCount} Drills)
+              {t('header.allHubs', 'All Hubs Directory')} ({totalDrillsCount} Drills)
             </Link>
           </div>
         )}

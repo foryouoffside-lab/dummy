@@ -28,14 +28,14 @@ export default function SiteFooter() {
           <div className="md:col-span-4 space-y-4">
             <Link href="/" className="flex items-center gap-2.5">
               <img
-                src="/icons/icon-192x192.png"
+                src="/logo.svg"
                 alt="SkillDrills"
                 width={32}
                 height={32}
                 className="w-8 h-8 shrink-0"
               />
-              <span className="text-xl font-black tracking-tight text-white uppercase">
-                Skill<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">Drills</span>
+              <span className="text-xl font-bold tracking-tight text-white">
+                Skill<span className="text-blue-400">Drills</span>
               </span>
             </Link>
             <p className="text-sm text-ink-2 leading-relaxed">

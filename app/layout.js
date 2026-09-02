@@ -1,20 +1,33 @@
 import './../styles/globals.css';
-import { Inter } from 'next/font/google';
+import { Inter, JetBrains_Mono } from 'next/font/google';
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import SiteHeader from '@/components/SiteHeader';
 import ZoomGuard from '@/components/ZoomGuard';
+import AutoLanguageDetector from '@/components/AutoLanguageDetector';
 import { DRILLS } from '@/lib/drillsRegistry';
 
 const totalDrillsCount = DRILLS.length;
 
 const inter = Inter({
   subsets: ['latin'],
-  display: 'block',
+  display: 'swap',
   preload: true,
   fallback: ['system-ui', 'arial'],
   adjustFontFallback: true,
   variable: '--font-inter',
+});
+
+// The UI leans on a monospaced register for readouts, timings and eyebrow labels.
+// Without this it fell through to whatever the OS ships (Consolas on Windows,
+// Menlo on macOS), so the same page looked like a different product per platform.
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  display: 'swap',
+  preload: true,
+  weight: ['400', '500', '700'],
+  fallback: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Consolas', 'monospace'],
+  variable: '--font-jetbrains-mono',
 });
 
 export const metadata = {
@@ -22,7 +35,7 @@ export const metadata = {
     default: 'SkillDrills - Free FPS Aim Trainer & Cognitive Brain Training Platform',
     template: '%s',
   },
-  description: `Master your mind and mechanics with ${totalDrillsCount} free online training drills. Improve FPS aim, reaction time, memory, focus, typing speed, and cognitive skills. No sign-up required. Practice directly in your browser.`,
+  description: `Master your mind and mechanics with ${totalDrillsCount} free online training drills. Improve FPS aim, reaction time, memory, focus, and cognitive skills. No sign-up required. Practice directly in your browser.`,
   keywords: [
     'free aim trainer', 'FPS aim trainer', 'aim trainer online', 'flick shot training',
     'tracking aim trainer', 'reaction time test', 'headshot trainer', 'mouse accuracy trainer',
@@ -33,17 +46,10 @@ export const metadata = {
     'cognitive assessment', 'neuroplasticity training', 'brain fitness', 'mental agility',
     'memory improvement', 'short term memory test', 'spatial memory games',
     'memory recall practice', 'pattern recognition test', 'digit span test',
-    'typing speed test', 'free typing test online', 'speed reading practice',
-    'reading comprehension drills', 'mental math practice', 'math speed test',
-    'free LSAT practice', 'GMAT verbal practice', 'critical reasoning practice',
-    'logic puzzles online', 'free sudoku', 'problem solving exercises',
-    'logical reasoning test', 'critical thinking exercises', 'analytical reasoning',
-    'focus timer', 'deep work timer', 'flow state training', 'cognitive training',
-    'concentration exercises', 'flow state training', 'task switching practice',
+    'focus timer', 'deep work timer', 'flow state training',
+    'concentration exercises', 'task switching practice',
     'hand eye coordination test', 'mouse precision trainer', 'visual tracking exercises',
     'peripheral vision test', 'depth perception test', 'reaction speed test',
-    'breathing exercises online', 'stress management tools', 'box breathing timer',
-    'mental fitness training', 'biofeedback training free',
     'free online drills', 'skill training platform', 'free brain training website',
     'cognitive skill development', 'online practice exercises', 'skilldrills',
   ],
@@ -56,7 +62,7 @@ export const metadata = {
   },
   openGraph: {
     title: 'SkillDrills - Free FPS Aim Trainer & Cognitive Brain Training Platform',
-    description: `Master your mind and mechanics. ${totalDrillsCount} free drills for FPS gaming, cognitive enhancement, memory, typing speed, and mental fitness. No sign-up, instant browser access.`,
+    description: `Master your mind and mechanics. ${totalDrillsCount} free drills for FPS gaming, cognitive enhancement, memory, and reflex fitness. No sign-up, instant browser access.`,
     url: 'https://skilldrills.online',
     siteName: 'SkillDrills',
     images: [{
@@ -71,7 +77,7 @@ export const metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'SkillDrills - Free FPS Aim & Brain Training',
-    description: `${totalDrillsCount} free drills. FPS aim trainer, brain games, memory exercises, typing tests. No sign-up.`,
+    description: `${totalDrillsCount} free drills. FPS aim trainer, brain games, memory exercises, reflex tests. No sign-up.`,
     images: ['https://skilldrills.online/icons/icon-512x512.png'],
   },
   robots: {
@@ -118,9 +124,11 @@ export default function RootLayout({ children }) {
         <link rel="dns-prefetch" href="//cdn.vercel-insights.com" />
         <link rel="preconnect" href="https://cdn.vercel-insights.com" crossOrigin="anonymous" />
         
-        {/* Favicon & Icons */}
+        {/* Favicon & Icons — the SVG is the crisp one browsers prefer; the PNG
+            and .ico stay as the fallback for clients that ignore SVG icons. */}
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="icon" type="image/png" href="/icons/icon-192x192.png" />
-        <link rel="shortcut icon" href="/icons/icon-192x192.png" />
+        <link rel="shortcut icon" href="/favicon.ico" />
         <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-192x192.png" />
         
         {/* PWA */}
@@ -141,9 +149,10 @@ export default function RootLayout({ children }) {
         <meta name="language" content="English" />
         <meta name="rating" content="general" />
       </head>
-      <body className={`${inter.className} antialiased`}>
+      <body className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased`}>
         <ZoomGuard />
         <SiteHeader />
+        <AutoLanguageDetector />
         <main id="main-content">
           {children}
         </main>
