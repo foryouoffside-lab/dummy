@@ -866,6 +866,7 @@ export default function KeyboardRecognitionClient() {
                 { icon: Timer, label: 'Duration', value: '60s', color: 'text-blue-400', accent: 'blue' },
               ]}
               isTouchOnlyDevice={isTouchOnlyDevice}
+              touchBlockedLabel="Keyboard Required"
               onStart={enterDrill}
             />
           )}

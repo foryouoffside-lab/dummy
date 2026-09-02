@@ -220,6 +220,9 @@ function getAccent(name) {
  * @param {string} subtitle
  * @param {{value:number, onChange:(v:number)=>void, cmPer360:string}|null} sensitivity - omit to hide the slider block
  * @param {boolean} isTouchOnlyDevice
+ * @param {string} touchBlockedLabel - what the drill actually needs, shown in place
+ *   of the start button on a touch-only device. Most of these drills aim with a
+ *   pointer-locked mouse, hence the default; a few need something else.
  * @param {() => void} onStart
  */
 export default function FpsStartCard({
@@ -229,6 +232,7 @@ export default function FpsStartCard({
   subtitle,
   sensitivity = null,
   isTouchOnlyDevice = false,
+  touchBlockedLabel = 'Mouse Required for Pointer Lock',
   onStart,
   maxWidthClassName = 'max-w-[360px]',
 }) {
@@ -289,7 +293,7 @@ export default function FpsStartCard({
 
           {isTouchOnlyDevice ? (
             <div className="w-full py-2.5 rounded-[13px] bg-red-950/60 border border-red-500/30 font-bold text-[11px] text-red-400 flex items-center justify-center gap-2 mt-0.5">
-              <AlertCircle className="w-4 h-4 text-red-400" /> Mouse Required for Pointer Lock
+              <AlertCircle className="w-4 h-4 text-red-400" /> {touchBlockedLabel}
             </div>
           ) : (
             <button
