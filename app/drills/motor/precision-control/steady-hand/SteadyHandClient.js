@@ -19,6 +19,7 @@ import DrillFooter from '@/components/drill/DrillFooter';
 import DrillCountdown from '@/components/drill/DrillCountdown';
 import DrillAccordion from '@/components/drill/DrillAccordion';
 import FpsStartCard from '@/components/drill/FpsStartCard';
+import useImmersiveMode from '@/lib/useImmersiveMode';
 
 const DRILL_DURATION = 45; // Fixed 45-second session
 
@@ -29,6 +30,7 @@ export default function SteadyHandClient() {
   // === UI & Viewport State ===
   const [gameState, setGameState] = useState('start'); 
   const [isFullscreen, setIsFullscreen] = useState(false);
+  useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
   const [pointerLocked, setPointerLocked] = useState(false);
   const [flashes, setFlashes] = useState([]);
   const [soundEnabled, setSoundEnabled] = useState(true);
@@ -191,11 +193,7 @@ export default function SteadyHandClient() {
     setAnalytics({ laps: 0, mistakes: 0, maxStreak: 0, speedLevel: 1, grade: null });
     setTimeLeft(DRILL_DURATION);
 
-    try {
-      if (containerRef.current && !document.fullscreenElement) {
-        await containerRef.current.requestFullscreen();
-      }
-    } catch {}
+    setIsFullscreen(true);
 
     countdownTimeoutsRef.current.forEach(clearTimeout);
 
@@ -214,9 +212,7 @@ export default function SteadyHandClient() {
 
   const handleExitDrill = useCallback(() => {
     markIntentionalExit();
-    if (document.fullscreenElement) {
-      document.exitFullscreen().catch(() => {});
-    }
+    setIsFullscreen(false);
     if (document.pointerLockElement) {
       document.exitPointerLock();
     }
@@ -255,12 +251,6 @@ export default function SteadyHandClient() {
       }
     }
   }, [analytics, bestScore, isNewBest]);
-
-  useEffect(() => {
-    const fsListener = () => setIsFullscreen(!!document.fullscreenElement);
-    document.addEventListener('fullscreenchange', fsListener);
-    return () => document.removeEventListener('fullscreenchange', fsListener);
-  }, []);
 
   // Strict Timer Management
   useEffect(() => {
@@ -470,9 +460,6 @@ export default function SteadyHandClient() {
                 Steady Hand Game
               </span>
             </h1>
-            <p className="text-xs text-slate-400 mt-1">
-              Motor Precision & Line Tracking • Dynamic Tightrope
-            </p>
           </div>
         )}
 

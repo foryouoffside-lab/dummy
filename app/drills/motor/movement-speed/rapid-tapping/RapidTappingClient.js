@@ -23,6 +23,7 @@ import DrillFooter from '@/components/drill/DrillFooter';
 import DrillCountdown from '@/components/drill/DrillCountdown';
 import DrillAccordion from '@/components/drill/DrillAccordion';
 import FpsStartCard from '@/components/drill/FpsStartCard';
+import useImmersiveMode from '@/lib/useImmersiveMode';
 
 const DRILL_DURATION = 45;
 const ELITE_SCORE = 80;
@@ -123,6 +124,7 @@ const FAQ_ITEMS = [
 export default function RapidTappingClient() {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
+  useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
   const [pointerLocked, setPointerLocked] = useState(false);
@@ -227,12 +229,6 @@ export default function RapidTappingClient() {
     }
   }, [universalSens, gameState]);
 
-  useEffect(() => {
-    const handleFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
-  }, []);
-
   const handleExitDrill = useCallback(async () => {
     markIntentionalExit();
     countdownTimeoutsRef.current.forEach(clearTimeout);
@@ -241,9 +237,7 @@ export default function RapidTappingClient() {
     gameActiveRef.current = false;
     setIsPaused(false);
 
-    if (document.fullscreenElement) {
-      await document.exitFullscreen().catch(() => {});
-    }
+    setIsFullscreen(false);
     if (document.pointerLockElement) {
       document.exitPointerLock();
     }
@@ -259,9 +253,7 @@ export default function RapidTappingClient() {
 
   const resumeDrill = useCallback(async () => {
     setIsPaused(false);
-    if (containerRef.current && !document.fullscreenElement) {
-      try { await containerRef.current.requestFullscreen(); } catch (e) {}
-    }
+    setIsFullscreen(true);
     if (canvasRef.current && !document.pointerLockElement) {
       try { await canvasRef.current.requestPointerLock(); } catch (e) {}
     }
@@ -634,9 +626,7 @@ export default function RapidTappingClient() {
     if (startingRef.current) return;
     startingRef.current = true;
 
-    if (containerRef.current && !document.fullscreenElement) {
-      try { await containerRef.current.requestFullscreen(); } catch (e) {}
-    }
+    setIsFullscreen(true);
 
     if (canvasRef.current && !isTouchOnlyDevice && !document.pointerLockElement) {
       try { await canvasRef.current.requestPointerLock(); } catch (e) {}
@@ -775,9 +765,6 @@ export default function RapidTappingClient() {
                 CPS Test &amp; Click Speed Test
               </span>
             </h1>
-            <p className="text-xs text-slate-400 mt-1">
-              CPS Click Speed Trainer • Hardware Raw Input
-            </p>
           </div>
         )}
 

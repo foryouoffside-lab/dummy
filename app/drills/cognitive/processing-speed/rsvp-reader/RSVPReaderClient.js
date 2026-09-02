@@ -20,6 +20,7 @@ import DrillCountdown from '../../../../../components/drill/DrillCountdown';
 import DrillAccordion from '../../../../../components/drill/DrillAccordion';
 import DrillFlashOverlay from '../../../../../components/drill/DrillFlashOverlay';
 import FpsStartCard from '../../../../../components/drill/FpsStartCard';
+import useImmersiveMode from '@/lib/useImmersiveMode';
 
 const DRILL_DURATION = 45;
 
@@ -133,6 +134,7 @@ const RELATED_DRILLS = [
 export default function RSVPReaderClient() {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
+  useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
   const [openAccordion, setOpenAccordion] = useState(null);
@@ -199,9 +201,7 @@ export default function RSVPReaderClient() {
     if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
     if (streamTimerRef.current) clearTimeout(streamTimerRef.current);
 
-    if (document.fullscreenElement) {
-      await document.exitFullscreen().catch(() => {});
-    }
+    setIsFullscreen(false);
     setGameState('start');
   }, []);
 
@@ -342,11 +342,7 @@ export default function RSVPReaderClient() {
 
   // Enter Drill
   const enterDrill = useCallback(async () => {
-    try {
-      if (containerRef.current && !document.fullscreenElement) {
-        await containerRef.current.requestFullscreen();
-      }
-    } catch (e) {}
+    setIsFullscreen(true);
 
     countdownTimeoutsRef.current.forEach(clearTimeout);
     countdownTimeoutsRef.current = [];
@@ -455,9 +451,6 @@ export default function RSVPReaderClient() {
               Reading Speed Test
             </span>
           </h1>
-          <p className="text-xs text-slate-400 mt-1">
-            Rapid Serial Visual Presentation & High-Speed Text Processing
-          </p>
         </div>
         )}
 

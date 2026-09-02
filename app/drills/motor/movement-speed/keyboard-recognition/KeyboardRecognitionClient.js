@@ -21,6 +21,7 @@ import DrillFooter from '@/components/drill/DrillFooter';
 import DrillCountdown from '@/components/drill/DrillCountdown';
 import DrillAccordion from '@/components/drill/DrillAccordion';
 import FpsStartCard from '@/components/drill/FpsStartCard';
+import useImmersiveMode from '@/lib/useImmersiveMode';
 
 // ============================================================
 // TUNING CONSTANTS
@@ -179,6 +180,7 @@ const RELATED_DRILLS = [
 export default function KeyboardRecognitionClient() {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
+  useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
   const [openAccordion, setOpenAccordion] = useState(null);
@@ -249,12 +251,6 @@ export default function KeyboardRecognitionClient() {
     };
   }, []);
 
-  useEffect(() => {
-    const handleFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
-  }, []);
-
   const handleExitDrill = useCallback(async () => {
     markIntentionalExit();
     countdownTimeoutsRef.current.forEach(clearTimeout);
@@ -262,9 +258,7 @@ export default function KeyboardRecognitionClient() {
     if (engine.current.promptTimer) clearTimeout(engine.current.promptTimer);
     startingRef.current = false;
 
-    if (document.fullscreenElement) {
-      await document.exitFullscreen().catch(() => {});
-    }
+    setIsFullscreen(false);
     setGameState('start');
   }, []);
 
@@ -520,11 +514,7 @@ export default function KeyboardRecognitionClient() {
       totalPromptsCount: 0, correctSequencesCount: 0, failedSequencesCount: 0, fakeIgnoredCount: 0, fakeFailsCount: 0
     };
 
-    try {
-      if (containerRef.current && !document.fullscreenElement) {
-        await containerRef.current.requestFullscreen();
-      }
-    } catch(e) {}
+    setIsFullscreen(true);
 
     setGameState('countdown');
     setCountdownValue(3);
@@ -712,9 +702,6 @@ export default function KeyboardRecognitionClient() {
                 Keyboard Speed Test
               </span>
             </h1>
-            <p className="text-xs text-slate-400 mt-1">
-              Keybind Muscle Memory &amp; Response Inhibition • 45s Timer
-            </p>
           </div>
         )}
 
@@ -952,7 +939,7 @@ export default function KeyboardRecognitionClient() {
                   <button 
                     onClick={handleExitDrill} 
                     className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform" 
-                    title="Exit Fullscreen & Return"
+                    title="Exit Drill & Return"
                   >
                     <LogOut className="w-4 h-4 text-red-400" />
                   </button>

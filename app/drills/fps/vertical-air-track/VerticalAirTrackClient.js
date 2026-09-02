@@ -27,6 +27,7 @@ import DrillAccordion from '../../../../components/drill/DrillAccordion';
 import FpsStartCard from '../../../../components/drill/FpsStartCard';
 import DrillResultCard from '../../../../components/drill/DrillResultCard';
 import useUnexpectedExitGuard from '../../../../lib/useUnexpectedExitGuard';
+import useImmersiveMode from '@/lib/useImmersiveMode';
 
 // ============================================================
 // TUNING CONSTANTS
@@ -135,6 +136,7 @@ export default function VerticalAirTrackClient() {
   const [gameState, setGameState] = useState('start'); // start | countdown | playing | gameOver
   const [countdownValue, setCountdownValue] = useState(3);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
   const [penaltyEnabled, setPenaltyEnabled] = useState(false);
@@ -370,9 +372,7 @@ export default function VerticalAirTrackClient() {
 
     countdownTimeoutsRef.current = [t1, t2, t3, t4];
 
-    if (containerRef.current && !document.fullscreenElement) {
-      try { await containerRef.current.requestFullscreen(); } catch (e) {}
-    }
+    setIsFullscreen(true);
     if (canvasRef.current && !document.pointerLockElement) {
       try { await canvasRef.current.requestPointerLock(); } catch (e) {}
     }
@@ -382,7 +382,7 @@ export default function VerticalAirTrackClient() {
     markIntentionalExit();
     countdownTimeoutsRef.current.forEach(clearTimeout);
     startingRef.current = false;
-    if (document.fullscreenElement) await document.exitFullscreen().catch(() => {});
+    setIsFullscreen(false);
     if (document.pointerLockElement) document.exitPointerLock();
     setGameState('start');
   }, []);
@@ -393,9 +393,7 @@ export default function VerticalAirTrackClient() {
   });
 
   const resumeDrill = useCallback(async () => {
-    if (containerRef.current && !document.fullscreenElement) {
-      try { await containerRef.current.requestFullscreen(); } catch (e) {}
-    }
+    setIsFullscreen(true);
     if (canvasRef.current && !document.pointerLockElement) {
       try { await canvasRef.current.requestPointerLock(); } catch (e) {}
     }
@@ -444,12 +442,6 @@ export default function VerticalAirTrackClient() {
       document.removeEventListener('mouseup', handleMouseUp);
     };
   }, [gameState, pointerLocked, universalSens, resumeDrill]);
-
-  useEffect(() => {
-    const fsListener = () => setIsFullscreen(!!document.fullscreenElement);
-    document.addEventListener('fullscreenchange', fsListener);
-    return () => document.removeEventListener('fullscreenchange', fsListener);
-  }, []);
 
   useEffect(() => {
     const cvs = canvasRef.current;
@@ -819,9 +811,6 @@ export default function VerticalAirTrackClient() {
                 Vertical Tracking Trainer
               </span>
             </h1>
-            <p className="text-xs text-slate-400 mt-1">
-              Hardware Raw Input • Endless Level Progression
-            </p>
           </div>
         )}
 
@@ -926,7 +915,7 @@ export default function VerticalAirTrackClient() {
               <div className="text-center animate-pulse pointer-events-none">
                 <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-3" />
                 <h2 className="text-2xl font-black text-white tracking-widest uppercase mb-1">Game Paused</h2>
-                <p className="text-xs text-gray-300 font-medium">Click to resume — fullscreen and cursor lock will re-engage.</p>
+                <p className="text-xs text-gray-300 font-medium">Click to resume — cursor lock will re-engage.</p>
               </div>
             </div>
           )}

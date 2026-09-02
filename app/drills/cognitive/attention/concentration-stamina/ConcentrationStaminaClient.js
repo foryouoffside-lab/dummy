@@ -20,6 +20,7 @@ import DrillAccordion from '../../../../../components/drill/DrillAccordion';
 import DrillFlashOverlay from '../../../../../components/drill/DrillFlashOverlay';
 import FpsStartCard from '../../../../../components/drill/FpsStartCard';
 import generateShareCard, { shareScoreCard } from '../../../../../components/ShareScoreCard';
+import useImmersiveMode from '@/lib/useImmersiveMode';
 
 // ============================================================
 // TUNING CONSTANTS
@@ -96,6 +97,7 @@ export default function ConcentrationStaminaClient() {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
 
   // Gameplay State
   const [currentStim, setCurrentStim] = useState('');
@@ -319,9 +321,7 @@ export default function ConcentrationStaminaClient() {
   }, [endGame, spawnStimulus]);
 
   const enterDrill = useCallback(async () => {
-    if (containerRef.current && !document.fullscreenElement) {
-      try { await containerRef.current.requestFullscreen(); } catch (e) {}
-    }
+    setIsFullscreen(true);
 
     drillAudio.init();
 
@@ -381,9 +381,7 @@ export default function ConcentrationStaminaClient() {
     countdownTimeoutsRef.current.forEach(clearTimeout);
     countdownTimeoutsRef.current = [];
     clearAllTimers();
-    if (document.fullscreenElement) {
-      await document.exitFullscreen().catch(() => {});
-    }
+    setIsFullscreen(false);
     phaseRef.current = 'start';
     setPhase('start');
   }, [clearAllTimers]);
@@ -430,9 +428,6 @@ export default function ConcentrationStaminaClient() {
               Focus Test
             </span>
           </h1>
-          <p className="text-xs text-slate-400 mt-1">
-            Continuous Category Rule Switching & Inhibitory Control
-          </p>
         </div>
         )}
 

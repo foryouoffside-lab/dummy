@@ -27,6 +27,7 @@ import DrillCountdown from '../../../../../components/drill/DrillCountdown';
 import DrillAccordion from '../../../../../components/drill/DrillAccordion';
 import FpsStartCard from '../../../../../components/drill/FpsStartCard';
 import DrillResultCard from '../../../../../components/drill/DrillResultCard';
+import useImmersiveMode from '@/lib/useImmersiveMode';
 
 // ============================================================
 // TUNING CONSTANTS
@@ -96,6 +97,7 @@ const RELATED_DRILLS = [
 export default function SpeedDrillClient() {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
+  useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
   const [penaltyEnabled, setPenaltyEnabled] = useState(false);
@@ -185,12 +187,6 @@ export default function SpeedDrillClient() {
     }
   }, [universalSens, gameState]);
 
-  useEffect(() => {
-    const handleFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
-  }, []);
-
   const handleExitDrill = useCallback(async () => {
     markIntentionalExit();
     countdownTimeoutsRef.current.forEach(clearTimeout);
@@ -198,9 +194,7 @@ export default function SpeedDrillClient() {
     startingRef.current = false;
     gameActiveRef.current = false;
 
-    if (document.fullscreenElement) {
-      await document.exitFullscreen().catch(() => {});
-    }
+    setIsFullscreen(false);
     if (document.pointerLockElement) {
       document.exitPointerLock();
     }
@@ -341,11 +335,7 @@ export default function SpeedDrillClient() {
 
     spawnTarget(w, h, startLevel);
 
-    try {
-      if (containerRef.current && !document.fullscreenElement) {
-        await containerRef.current.requestFullscreen();
-      }
-    } catch(e) {}
+    setIsFullscreen(true);
 
     setGameState('countdown');
     setCountdownValue(3);
@@ -641,9 +631,6 @@ export default function SpeedDrillClient() {
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white uppercase">
               Speed Drill Pro
             </h1>
-            <p className="text-xs text-slate-400 mt-1">
-              Rapid Target Acquisition &amp; High-Velocity Tapping • Continuous Scaling
-            </p>
           </div>
         )}
 

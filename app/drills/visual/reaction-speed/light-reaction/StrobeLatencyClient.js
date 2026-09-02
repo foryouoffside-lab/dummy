@@ -25,6 +25,7 @@ import DrillRuleItem from '../../../../../components/drill/DrillRuleItem';
 import DrillFAQItem from '../../../../../components/drill/DrillFAQItem';
 import FpsStartCard from '../../../../../components/drill/FpsStartCard';
 import DrillResultCard from '../../../../../components/drill/DrillResultCard';
+import useImmersiveMode from '@/lib/useImmersiveMode';
 
 // ============================================================
 // TUNING CONSTANTS
@@ -114,6 +115,7 @@ function draw2dLightTarget(ctx, x, y, targetState) {
 export default function StrobeLatencyClient() {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
+  useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
   const [penaltyEnabled, setPenaltyEnabled] = useState(false);
@@ -228,13 +230,6 @@ export default function StrobeLatencyClient() {
     }
   }, []);
 
-  // Fullscreen change listener
-  useEffect(() => {
-    const handleFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
-  }, []);
-
   const clearGameTimeouts = useCallback(() => {
     gameTimeoutsRef.current.forEach(clearTimeout);
     gameTimeoutsRef.current = [];
@@ -251,9 +246,7 @@ export default function StrobeLatencyClient() {
     startingRef.current = false;
     gameActiveRef.current = false;
 
-    if (document.fullscreenElement) {
-      await document.exitFullscreen().catch(() => {});
-    }
+    setIsFullscreen(false);
     setGameState('start');
   }, [clearGameTimeouts]);
 
@@ -527,12 +520,7 @@ export default function StrobeLatencyClient() {
       reactionTimes: [],
     };
 
-    // Auto Fullscreen on Start
-    try {
-      if (containerRef.current && !document.fullscreenElement) {
-        await containerRef.current.requestFullscreen();
-      }
-    } catch (e) {}
+    setIsFullscreen(true);
 
     // Countdown sequence: 3 -> 2 -> 1 -> GO
     setGameState('countdown');
@@ -604,9 +592,6 @@ export default function StrobeLatencyClient() {
                 Light Reaction Reflex Test
               </span>
             </h1>
-            <p className="text-xs text-slate-400 mt-1">
-              Visual Strobe Latency & Millisecond Reflex Speed
-            </p>
           </div>
         )}
 

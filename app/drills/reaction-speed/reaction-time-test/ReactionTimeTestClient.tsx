@@ -23,6 +23,7 @@ import DrillCountdown from '../../../../components/drill/DrillCountdown';
 import DrillAccordion from '../../../../components/drill/DrillAccordion';
 import DrillFlashOverlay from '../../../../components/drill/DrillFlashOverlay';
 import FpsStartCard from '../../../../components/drill/FpsStartCard';
+import useImmersiveMode from '@/lib/useImmersiveMode';
 
 const FpsStartCardAny = FpsStartCard as React.ComponentType<any>;
 
@@ -59,6 +60,7 @@ type Particle = { x: number; y: number; vx: number; vy: number; color: string; l
 export default function ReactionTimeTestClient() {
   const [gameState, setGameState] = useState<'start' | 'countdown' | 'playing' | 'gameOver'>('start');
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+  useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
   const [openAccordion, setOpenAccordion] = useState<string | null>(null);
@@ -123,13 +125,6 @@ export default function ReactionTimeTestClient() {
 
   const { flashes, triggerFlash } = useDrillFlash();
 
-  // Fullscreen Listener
-  useEffect(() => {
-    const handleFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
-  }, []);
-
   // Cleanup Timeouts on Unmount
   useEffect(() => {
     return () => {
@@ -143,9 +138,7 @@ export default function ReactionTimeTestClient() {
     countdownTimeoutsRef.current.forEach(clearTimeout);
     countdownTimeoutsRef.current = [];
 
-    if (document.fullscreenElement) {
-      await document.exitFullscreen().catch(() => {});
-    }
+    setIsFullscreen(false);
     setGameState('start');
   }, []);
 
@@ -218,11 +211,7 @@ export default function ReactionTimeTestClient() {
 
   // Enter Drill (Full Screen -> 321GO Countdown with Sound -> Playing)
   const enterDrill = useCallback(async () => {
-    try {
-      if (containerRef.current && !document.fullscreenElement) {
-        await containerRef.current.requestFullscreen().catch(() => {});
-      }
-    } catch (e) {}
+    setIsFullscreen(true);
 
     countdownTimeoutsRef.current.forEach(clearTimeout);
     countdownTimeoutsRef.current = [];
@@ -627,9 +616,6 @@ export default function ReactionTimeTestClient() {
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
               REACTION TIME TEST
             </h1>
-            <p className="text-xs text-slate-400 mt-1">
-              Visual Latency & Mental Chronometry • Unlimited Practice
-            </p>
           </div>
         )}
 

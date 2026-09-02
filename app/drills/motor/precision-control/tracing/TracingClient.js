@@ -18,6 +18,7 @@ import DrillFooter from '@/components/drill/DrillFooter';
 import DrillCountdown from '@/components/drill/DrillCountdown';
 import DrillAccordion from '@/components/drill/DrillAccordion';
 import FpsStartCard from '@/components/drill/FpsStartCard';
+import useImmersiveMode from '@/lib/useImmersiveMode';
 
 // ============================================================
 // CORE DRILL LOGIC VARIABLES
@@ -64,6 +65,7 @@ export default function FineMotorClient() {
   // === UI & Viewport State ===
   const [gameState, setGameState] = useState('start'); 
   const [isFullscreen, setIsFullscreen] = useState(false);
+  useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
   const [pointerLocked, setPointerLocked] = useState(false);
   
   // === Settings State ===
@@ -184,9 +186,7 @@ export default function FineMotorClient() {
 
   const handleExitDrill = useCallback(async () => {
     markIntentionalExit();
-    if (document.fullscreenElement) {
-      await document.exitFullscreen().catch(() => {});
-    }
+    setIsFullscreen(false);
     if (document.pointerLockElement) {
       document.exitPointerLock();
     }
@@ -265,11 +265,7 @@ export default function FineMotorClient() {
     setIsNewBest(false);
     setFeedback('');
 
-    try {
-      if (containerRef.current && !document.fullscreenElement) {
-        await containerRef.current.requestFullscreen();
-      }
-    } catch {}
+    setIsFullscreen(true);
 
     setGameState('countdown');
     setCountdownValue(3);
@@ -282,12 +278,6 @@ export default function FineMotorClient() {
   }, [startActualDrill]);
 
 
-
-  useEffect(() => {
-    const fsListener = () => setIsFullscreen(!!document.fullscreenElement);
-    document.addEventListener('fullscreenchange', fsListener);
-    return () => document.removeEventListener('fullscreenchange', fsListener);
-  }, []);
 
   // Strict Timer Management
   useEffect(() => {
@@ -514,9 +504,6 @@ export default function FineMotorClient() {
                 Mouse Tracing Game
               </span>
             </h1>
-            <p className="text-xs text-slate-400 mt-1">
-              Raw Input Continuous Tracking • Dynamic Waveforms
-            </p>
           </div>
         )}
 
@@ -720,7 +707,7 @@ export default function FineMotorClient() {
                   <button
                     onClick={handleExitDrill}
                     className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform"
-                    title="Exit Fullscreen & Return"
+                    title="Exit Drill & Return"
                   >
                     <LogOut className="w-4 h-4 text-red-400" />
                   </button>

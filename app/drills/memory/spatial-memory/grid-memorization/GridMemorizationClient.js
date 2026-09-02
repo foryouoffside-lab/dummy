@@ -22,6 +22,7 @@ import DrillFlashOverlay from '../../../../../components/drill/DrillFlashOverlay
 import DrillRuleItem from '../../../../../components/drill/DrillRuleItem';
 import DrillFAQItem from '../../../../../components/drill/DrillFAQItem';
 import FpsStartCard from '../../../../../components/drill/FpsStartCard';
+import useImmersiveMode from '@/lib/useImmersiveMode';
 
 const DRILL_DURATION = 45; // 45 seconds duration
 const POINTS_PER_HIT = 150;
@@ -47,6 +48,7 @@ const saveData = (data) => {
 export default function GridMemorizationClient() {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
+  useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
   const [openAccordion, setOpenAccordion] = useState(null);
@@ -112,9 +114,7 @@ export default function GridMemorizationClient() {
     startingRef.current = false;
     gameActiveRef.current = false;
 
-    if (document.fullscreenElement) {
-      await document.exitFullscreen().catch(() => {});
-    }
+    setIsFullscreen(false);
     setGameState('start');
   }, [clearGameTimeouts]);
 
@@ -124,7 +124,7 @@ export default function GridMemorizationClient() {
   });
 
   // Stop all timers/intervals on unmount (e.g. in-app nav away mid-drill) —
-  // visibilitychange/pagehide/fullscreenchange don't fire on SPA route changes.
+  // visibilitychange/pagehide don't fire on SPA route changes.
   useEffect(() => {
     return () => {
       countdownTimeoutsRef.current.forEach(clearTimeout);
@@ -336,12 +336,7 @@ export default function GridMemorizationClient() {
       userSelections: new Set(),
     };
 
-    // Auto Fullscreen on Start
-    try {
-      if (containerRef.current && !document.fullscreenElement) {
-        await containerRef.current.requestFullscreen();
-      }
-    } catch (e) {}
+    setIsFullscreen(true);
 
     // Countdown sequence: 3 -> 2 -> 1 -> GO
     setGameState('countdown');
@@ -433,9 +428,6 @@ export default function GridMemorizationClient() {
               Visual Memory Test
             </span>
           </h1>
-          <p className="text-xs text-slate-400 mt-1">
-            Spatial Pattern Recall Under Speed Constraints
-          </p>
         </div>
         )}
 
@@ -669,7 +661,7 @@ export default function GridMemorizationClient() {
                   <button 
                     onClick={handleExitDrill} 
                     className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform" 
-                    title="Exit Fullscreen & Return"
+                    title="Exit Drill & Return"
                   >
                     <ArrowLeft className="w-4 h-4 text-red-400" />
                   </button>

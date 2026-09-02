@@ -16,6 +16,7 @@ import { drawTacticalTarget } from '../../../../lib/canvasFx';
 import { generateSessionCard, shareScoreCard } from '../../../../components/ShareScoreCard';
 import { getPlayerName } from '../../../../lib/leaderboard';
 import useUnexpectedExitGuard from '../../../../lib/useUnexpectedExitGuard';
+import useImmersiveMode from '@/lib/useImmersiveMode';
 
 const STORAGE_KEY = 'skilldrills_visual_tracking_strobe_prediction_pursuit_v2';
 
@@ -47,6 +48,7 @@ const saveData = (data: { totalSessions: number }) => {
 export default function StrobePredictionPursuitClient() {
   const [gameState, setGameState] = useState<'start' | 'countdown' | 'playing' | 'gameOver'>('start');
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+  useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
   const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
   const [openAccordion, setOpenAccordion] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState<boolean>(false);
@@ -128,13 +130,6 @@ export default function StrobePredictionPursuitClient() {
     }
   }, []);
 
-  // Fullscreen Change Listener
-  useEffect(() => {
-    const handleFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
-  }, []);
-
   // Cleanup Timeouts on Unmount
   useEffect(() => {
     return () => {
@@ -177,9 +172,7 @@ export default function StrobePredictionPursuitClient() {
     countdownTimeoutsRef.current = [];
     if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
 
-    if (document.fullscreenElement) {
-      await document.exitFullscreen().catch(() => {});
-    }
+    setIsFullscreen(false);
     setGameState('start');
   }, []);
 
@@ -194,7 +187,6 @@ export default function StrobePredictionPursuitClient() {
     if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
 
     setGameState('gameOver');
-    // Fullscreen is preserved on result display until user clicks Exit/Return button
 
     setTotalTrials((prev) => {
       const next = prev + 1;
@@ -204,14 +196,8 @@ export default function StrobePredictionPursuitClient() {
     drillAudio.playSessionEnd();
   }, []);
 
-  // Enter Drill (Auto Fullscreen -> 321GO Countdown with Sound -> Playing)
   const enterDrill = useCallback(async () => {
-    // 1. Auto Fullscreen on Start
-    try {
-      if (containerRef.current && !document.fullscreenElement) {
-        await containerRef.current.requestFullscreen();
-      }
-    } catch (e) {}
+    setIsFullscreen(true);
 
     countdownTimeoutsRef.current.forEach(clearTimeout);
     countdownTimeoutsRef.current = [];
@@ -439,9 +425,6 @@ export default function StrobePredictionPursuitClient() {
                 Strobe Vision Training Drill
               </span>
             </h1>
-            <p className="text-xs text-slate-400 mt-1">
-              Periodic Strobe Occlusion & Trajectory Extrapolation
-            </p>
           </div>
         )}
 
