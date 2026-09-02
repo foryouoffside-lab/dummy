@@ -20,6 +20,7 @@ import DrillCountdown from '@/components/drill/DrillCountdown';
 import DrillAccordion from '@/components/drill/DrillAccordion';
 import FpsStartCard from '@/components/drill/FpsStartCard';
 import useImmersiveMode from '@/lib/useImmersiveMode';
+import { useIsTouchOnly, useTouchAim } from '@/lib/useTouchAim';
 
 const DRILL_DURATION = 45; // Fixed 45-second session
 
@@ -32,6 +33,7 @@ export default function SteadyHandClient() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
   const [pointerLocked, setPointerLocked] = useState(false);
+  const isTouchOnly = useIsTouchOnly();
   const [flashes, setFlashes] = useState([]);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
@@ -180,12 +182,15 @@ export default function SteadyHandClient() {
       laps: 0, mistakes: 0, maxStreak: 0, screenShake: 0
     };
 
-    if (canvasRef.current && !document.pointerLockElement) {
+    if (!canvasRef.current) return;
+    if (isTouchOnly) {
+      setPointerLocked(true);
+    } else if (!document.pointerLockElement) {
       canvasRef.current.requestPointerLock().catch(() => {});
-      engine.current.path = generatePath(canvasRef.current.width, canvasRef.current.height, 0);
-      resetCrosshairToStart(canvasRef.current.height);
     }
-  }, [generatePath, resetCrosshairToStart]);
+    engine.current.path = generatePath(canvasRef.current.width, canvasRef.current.height, 0);
+    resetCrosshairToStart(canvasRef.current.height);
+  }, [generatePath, resetCrosshairToStart, isTouchOnly]);
 
   const startGame = useCallback(async () => {
     drillAudio.init();
@@ -251,6 +256,12 @@ export default function SteadyHandClient() {
       }
     }
   }, [analytics, bestScore, isNewBest]);
+
+  const aimAt = useCallback((x, y) => {
+    engine.current.crosshair.x = x;
+    engine.current.crosshair.y = y;
+  }, []);
+  useTouchAim({ active: isTouchOnly && gameState === 'playing', canvasRef, onMove: aimAt });
 
   // Strict Timer Management
   useEffect(() => {
@@ -568,7 +579,7 @@ export default function SteadyHandClient() {
           {/* Core Canvas */}
           <canvas 
             ref={canvasRef} 
-            onClick={() => { if (gameState === 'playing' && !pointerLocked) canvasRef.current?.requestPointerLock(); }}
+            onClick={() => { if (gameState === 'playing' && !pointerLocked && !isTouchOnly) canvasRef.current?.requestPointerLock(); }}
             className={`block absolute top-0 left-0 w-full h-full touch-none z-10 ${gameState === 'playing' ? 'cursor-none' : ''}`} 
           />
 

@@ -19,6 +19,7 @@ import DrillCountdown from '@/components/drill/DrillCountdown';
 import DrillAccordion from '@/components/drill/DrillAccordion';
 import FpsStartCard from '@/components/drill/FpsStartCard';
 import useImmersiveMode from '@/lib/useImmersiveMode';
+import { useIsTouchOnly, useTouchAim } from '@/lib/useTouchAim';
 
 // ============================================================
 // CORE DRILL LOGIC VARIABLES
@@ -67,6 +68,7 @@ export default function FineMotorClient() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
   const [pointerLocked, setPointerLocked] = useState(false);
+  const isTouchOnly = useIsTouchOnly();
   
   // === Settings State ===
   const [universalSens, setUniversalSens] = useState(1.0);
@@ -242,8 +244,12 @@ export default function FineMotorClient() {
     setFlowState(100);
     setTimeLeft(DRILL_DURATION);
 
-    if (canvasRef.current && !document.pointerLockElement) {
-      canvasRef.current.requestPointerLock().catch(() => {});
+    if (canvasRef.current) {
+      if (isTouchOnly) {
+        setPointerLocked(true);
+      } else if (!document.pointerLockElement) {
+        canvasRef.current.requestPointerLock().catch(() => {});
+      }
 
       const width = canvasRef.current.width;
       const height = canvasRef.current.height;
@@ -257,7 +263,7 @@ export default function FineMotorClient() {
       }
       pointsRef.current = pts;
     }
-  }, []);
+  }, [isTouchOnly]);
 
   const startGame = useCallback(async () => {
     drillAudio.init(); 
@@ -297,6 +303,12 @@ export default function FineMotorClient() {
     }
     return () => clearInterval(timerRef.current);
   }, [gameState, pointerLocked, endGame]);
+
+  const aimAt = useCallback((x, y) => {
+    virtualCrosshair.current.x = x;
+    virtualCrosshair.current.y = y;
+  }, []);
+  useTouchAim({ active: isTouchOnly && gameState === 'playing', canvasRef, onMove: aimAt });
 
   // Raw Mouse Input Listeners
   useEffect(() => {
@@ -620,7 +632,7 @@ export default function FineMotorClient() {
           {/* Core Canvas */}
           <canvas 
             ref={canvasRef} 
-            onClick={() => { if (gameState === 'playing' && !pointerLocked) canvasRef.current?.requestPointerLock(); }}
+            onClick={() => { if (gameState === 'playing' && !pointerLocked && !isTouchOnly) canvasRef.current?.requestPointerLock(); }}
             className={`block absolute top-0 left-0 w-full h-full touch-none z-10 ${gameState === 'playing' ? 'cursor-none' : ''}`} 
           />
 
