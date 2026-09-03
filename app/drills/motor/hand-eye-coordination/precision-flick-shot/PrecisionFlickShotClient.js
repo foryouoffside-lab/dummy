@@ -15,6 +15,7 @@ import {
 import generateShareCard, { shareScoreCard } from '../../../../../components/ShareScoreCard';
 import { getPlayerName } from '../../../../../lib/leaderboard';
 import { drillAudio } from '../../../../../lib/drillAudio';
+import { useDrillSensitivity } from '../../../../../lib/drillSensitivity';
 import { drillFlash } from '../../../../../lib/drillFlash';
 import { drillTimeout } from '../../../../../lib/drillTimeout';
 import { drillPenalty } from '../../../../../lib/drillPenalty';
@@ -89,7 +90,7 @@ const FAQ_ITEMS = [
   { q: "What is the Bulls-eye mechanic?", a: "Clicking within the inner 8-pixel center of a target awards double points (+200 PTS) and spawns yellow spark effects." },
   { q: "What happens when you miss a click?", a: "Clicking empty space or letting a target decay out resets your combo multiplier to zero and triggers a red error flash. When the optional Time Penalty is enabled, 0.8s is deducted." },
   { q: "How is flick accuracy calculated?", a: "Accuracy is calculated as total target hits divided by total clicks, displayed as a real-time percentage." },
-  { q: "Does this trainer support raw mouse input sensitivity?", a: "Yes, the Universal Sens slider allows you to match your raw input multiplier and cm/360 sensitivity setting." },
+  { q: "Does this trainer support raw mouse input sensitivity?", a: "Yes — the Mouse Sensitivity slider in Session Settings on the drills hub matches your raw input multiplier and cm/360, and applies to every mouse-aimed drill." },
   { q: "Is this precision flick shot drill free?", a: "Yes, the drill is 100% free with no sign-ups or downloads required, running directly in modern web browsers." },
   { q: "How do combo multipliers work?", a: "Sustaining consecutive target hits without missing builds combo multipliers up to 3.0x bonus points per successful flick." },
   { q: "Does this drill support touch screen input?", a: "This drill requires pointer-lock mouse input for crosshair control, so it is not playable on touch-only phones or tablets. Use a desktop or laptop with a mouse for the full experience." },
@@ -119,7 +120,7 @@ export default function PrecisionFlickShotClient() {
   const [flashEnabled, setFlashEnabled] = useState(true);
   const [penaltyEnabled, setPenaltyEnabled] = useState(false);
   const [pointerLocked, setPointerLocked] = useState(false);
-  const [universalSens, setUniversalSens] = useState(1.0);
+  const universalSens = useDrillSensitivity();
   const [openAccordion, setOpenAccordion] = useState(null);
   const [isTouchOnlyDevice, setIsTouchOnlyDevice] = useState(false);
   const [countdownValue, setCountdownValue] = useState(3);
@@ -159,8 +160,6 @@ export default function PrecisionFlickShotClient() {
     particles: [], hitMarkers: [], screenShake: 0,
     logicalWidth: 800, logicalHeight: 450
   });
-
-  const cmPer360 = (30 / universalSens).toFixed(1);
 
   const triggerFlash = useCallback(() => {
     if (!drillFlash.isEnabled()) return;
@@ -225,11 +224,6 @@ export default function PrecisionFlickShotClient() {
       const isTouchCapable = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
       setIsTouchOnlyDevice(isTouchCapable && !hasFinePointer);
 
-      try {
-        const savedSens = localStorage.getItem('precisionFlick_sens');
-        if (savedSens) setUniversalSens(parseFloat(savedSens));
-      } catch (e) {}
-
       const saved = getSavedData();
       setBestScore(saved.bestScore || 0);
       setBestCombo(saved.bestCombo || 0);
@@ -243,12 +237,6 @@ export default function PrecisionFlickShotClient() {
       countdownTimeoutsRef.current.forEach(clearTimeout);
     };
   }, []);
-
-  useEffect(() => {
-    if (gameState !== 'playing') {
-      try { localStorage.setItem('precisionFlick_sens', universalSens.toString()); } catch (e) {}
-    }
-  }, [universalSens, gameState]);
 
   const handleExitDrill = useCallback(async () => {
     markIntentionalExit();
@@ -837,7 +825,6 @@ export default function PrecisionFlickShotClient() {
                 { icon: Target, accent: "emerald", title: "Bulls-eye Hit (+200 PTS)", text: "Micro-flick to target centers for double bonus points (+0.6s)" },
                 { icon: Zap, accent: "red", title: "Miss / Timeout Penalty", text: penaltyEnabled ? "Missing or target decay expiration resets combo & deducts 0.8s" : "Missing or target decay expiration resets combo streak" },
               ]}
-              sensitivity={{ value: universalSens, onChange: setUniversalSens, cmPer360 }}
               stats={[
                 { icon: Trophy, label: "Best Score", value: bestScore, color: "text-white", accent: "slate" },
                 { icon: Flame, label: "Best Combo", value: `${bestCombo}x`, color: "text-emerald-400", accent: "emerald" },

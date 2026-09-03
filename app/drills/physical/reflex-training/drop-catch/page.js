@@ -1,4 +1,5 @@
 import DropCatchClient from './DropCatchClient';
+import { getAlternateLanguages } from '@/lib/i18n/locales';
 
 // ============================================================
 // SEO RESEARCH FINDINGS — drop-catch
@@ -14,25 +15,26 @@ import DropCatchClient from './DropCatchClient';
 // ============================================================
 
 export const metadata = {
-  title: 'Reflex Drop Catch — Free Reflex Test Online & Game',
-  description: 'Free reflex test online. Catch falling green targets and avoid red decoys in this reflex training game for reaction speed and visual discrimination.',
+  title: 'Reflex Drop Catch Test — Free Online Reflex Training Game',
+  description: 'Free online reflex drop catch test. Catch falling green targets and avoid red decoys in this high-speed reflex training game for reaction time and visual discrimination.',
   keywords: [
     // Primary / Head terms
-    'reflex test online', 'reflex training game',
+    'reflex drop catch', 'reflex drop catch test', 'reflex training game',
     // Secondary / LSI terms
     'reaction speed game', 'reaction time drill', 'hand eye coordination training',
     'free reflex test online', 'visual reflex test', 'visual discrimination training',
     // Long-tail variants
-    'free online visual reflex test', 'improve clicking reflex speed gaming',
+    'falling targets reflex game', 'improve clicking reflex speed gaming',
     'impulse control target recognition game', 'esports vertical reflex acquisition drill'
   ],
   alternates: {
     canonical: 'https://skilldrills.online/drills/physical/reflex-training/drop-catch',
+    languages: getAlternateLanguages('/drills/physical/reflex-training/drop-catch'),
   },
   robots: { index: true, follow: true },
   openGraph: {
-    title: 'Reflex Drop Catch — Free Reflex Test Online & Game',
-    description: 'Free reflex test online. Catch falling green targets and avoid red decoys in this reflex training game for reaction speed and visual discrimination.',
+    title: 'Reflex Drop Catch Test — Free Online Reflex Training Game',
+    description: 'Free online reflex drop catch test. Catch falling green targets and avoid red decoys in this high-speed reflex training game for reaction time and visual discrimination.',
     url: 'https://skilldrills.online/drills/physical/reflex-training/drop-catch',
     siteName: 'SkillDrills',
     locale: 'en_US',
@@ -40,8 +42,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Reflex Drop Catch — Free Reflex Test Online & Game',
-    description: 'Free reflex test online. Catch falling green targets and avoid red decoys in this reflex training game for reaction speed and visual discrimination.',
+    title: 'Reflex Drop Catch Test — Free Online Reflex Training Game',
+    description: 'Free online reflex drop catch test. Catch falling green targets and avoid red decoys in this high-speed reflex training game for reaction time and visual discrimination.',
   },
 };
 

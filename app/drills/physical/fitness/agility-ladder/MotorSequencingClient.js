@@ -15,6 +15,7 @@ import {
 import generateShareCard, { shareScoreCard } from '../../../../../components/ShareScoreCard';
 import { getPlayerName } from '../../../../../lib/leaderboard';
 import { drillAudio } from '../../../../../lib/drillAudio';
+import { useDrillSensitivity } from '../../../../../lib/drillSensitivity';
 import { drillFlash } from '../../../../../lib/drillFlash';
 import { MAX_LEVEL, getStartLevel, getNextLevel, getDifficultyProgress, getComboBonusLevel } from '../../../../../lib/drillDifficulty';
 import { getComboMultiplier, getFpsScoreGrade } from '../../../../../lib/scoringEngine';
@@ -201,7 +202,7 @@ export default function MotorSequencingClient() {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
   const [pointerLocked, setPointerLocked] = useState(false);
-  const [universalSens, setUniversalSens] = useState(1.0);
+  const universalSens = useDrillSensitivity();
   const [openAccordion, setOpenAccordion] = useState(null);
   const [isTouchOnlyDevice, setIsTouchOnlyDevice] = useState(false);
   const [countdownValue, setCountdownValue] = useState(3);
@@ -241,8 +242,6 @@ export default function MotorSequencingClient() {
     logicalWidth: 800, logicalHeight: 450, peakSpeed: 150
   });
 
-  const cmPer360 = (30 / universalSens).toFixed(1);
-
   const triggerFlash = useCallback(() => {
     if (!drillFlash.isEnabled()) return;
     const id = Date.now() + Math.random();
@@ -258,11 +257,6 @@ export default function MotorSequencingClient() {
       const isTouchCapable = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
       setIsTouchOnlyDevice(isTouchCapable && !hasFinePointer);
 
-      try {
-        const savedSens = localStorage.getItem('motorSequencing_sens');
-        if (savedSens) setUniversalSens(parseFloat(savedSens));
-      } catch (e) {}
-
       const saved = getSavedData();
       setBestScore(saved.bestScore || 0);
       setBestCombo(saved.bestCombo || 0);
@@ -275,12 +269,6 @@ export default function MotorSequencingClient() {
       countdownTimeoutsRef.current.forEach(clearTimeout);
     };
   }, []);
-
-  useEffect(() => {
-    if (gameState !== 'playing') {
-      try { localStorage.setItem('motorSequencing_sens', universalSens.toString()); } catch (e) {}
-    }
-  }, [universalSens, gameState]);
 
   const handleExitDrill = useCallback(async () => {
     markIntentionalExit();
@@ -800,7 +788,6 @@ export default function MotorSequencingClient() {
                 { icon: Target, accent: 'rose', title: 'Step Rungs Left/Right in Sequence', text: 'Match the target ladder rungs with precise timing and cadence' },
                 { icon: Zap, accent: 'red', title: 'Miss Penalty', text: 'Stepping off-sequence resets your combo streak' },
               ]}
-              sensitivity={{ value: universalSens, onChange: setUniversalSens, cmPer360 }}
               stats={[
                 { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
                 { icon: Flame, label: 'Best Combo', value: `${bestCombo}x`, color: 'text-rose-400', accent: 'rose' },

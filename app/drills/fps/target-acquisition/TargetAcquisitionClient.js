@@ -13,6 +13,7 @@ import {
 import generateShareCard, { shareScoreCard } from '../../../../components/ShareScoreCard';
 import { getPlayerName } from '../../../../lib/leaderboard';
 import { drillAudio } from '../../../../lib/drillAudio';
+import { useDrillSensitivity } from '../../../../lib/drillSensitivity';
 import { drillFlash } from '../../../../lib/drillFlash';
 import { drillPenalty } from '../../../../lib/drillPenalty';
 import { getStartLevel, getDifficultyProgress, ramp } from '../../../../lib/drillDifficulty';
@@ -102,7 +103,7 @@ export default function TargetAcquisitionClient() {
   const [flashEnabled, setFlashEnabled] = useState(true);
   const [penaltyEnabled, setPenaltyEnabled] = useState(false);
   const [pointerLocked, setPointerLocked] = useState(false);
-  const [universalSens, setUniversalSens] = useState(1.0);
+  const universalSens = useDrillSensitivity();
   const [openAccordion, setOpenAccordion] = useState(null);
   const [isTouchOnlyDevice, setIsTouchOnlyDevice] = useState(false);
   const [countdownValue, setCountdownValue] = useState(3);
@@ -142,8 +143,6 @@ export default function TargetAcquisitionClient() {
     logicalWidth: 800, logicalHeight: 450
   });
 
-  const cmPer360 = (30 / universalSens).toFixed(1);
-
   const triggerFlash = useCallback(() => {
     if (!drillFlash.isEnabled()) return;
     const id = Date.now() + Math.random();
@@ -161,11 +160,6 @@ export default function TargetAcquisitionClient() {
       const isTouchCapable = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
       setIsTouchOnlyDevice(isTouchCapable && !hasFinePointer);
 
-      try {
-        const savedSens = localStorage.getItem('targetacq_sens');
-        if (savedSens) setUniversalSens(parseFloat(savedSens));
-      } catch (e) {}
-
       const saved = getSavedData();
       setBestScore(saved.bestScore || 0);
       setBestCombo(saved.bestCombo || 0);
@@ -179,12 +173,6 @@ export default function TargetAcquisitionClient() {
       countdownTimeoutsRef.current.forEach(clearTimeout);
     };
   }, []);
-
-  useEffect(() => {
-    if (gameState !== 'playing') {
-      try { localStorage.setItem('targetacq_sens', universalSens.toString()); } catch (e) {}
-    }
-  }, [universalSens, gameState]);
 
   const handleExitDrill = useCallback(async () => {
     markIntentionalExit();
@@ -838,7 +826,6 @@ export default function TargetAcquisitionClient() {
                 { icon: Target, accent: "amber", title: "Objective (+100 PTS)", text: "Click Brightest Target First" },
                 { icon: AlertCircle, accent: "red", title: "Failure Rule", text: penaltyEnabled ? "Wrong Click / Miss → Resets Combo, -0.6s" : "Wrong Click / Miss → Resets Combo" },
               ]}
-              sensitivity={{ value: universalSens, onChange: setUniversalSens, cmPer360 }}
               stats={[
                 { icon: Trophy, label: "Best Score", value: bestScore, color: "text-white", accent: "slate" },
                 { icon: Flame, label: "Best Combo", value: `${bestCombo}x`, color: "text-amber-400", accent: "amber" },

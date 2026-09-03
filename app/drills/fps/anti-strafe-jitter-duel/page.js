@@ -225,7 +225,7 @@ export default function AntiStrafeJitterPage() {
       {
         "@type": "HowToStep",
         "name": "Adjust Sensitivity",
-        "text": "Set your Universal Sens slider to match your primary game."
+        "text": "Set the Mouse Sensitivity slider in Session Settings on the drills hub to match your primary game."
       },
       {
         "@type": "HowToStep",

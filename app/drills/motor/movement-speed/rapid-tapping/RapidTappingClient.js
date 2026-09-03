@@ -15,6 +15,7 @@ import {
 import generateShareCard, { shareScoreCard } from '@/components/ShareScoreCard';
 import { getPlayerName } from '@/lib/leaderboard';
 import { drillAudio } from '@/lib/drillAudio';
+import { useDrillSensitivity } from '@/lib/drillSensitivity';
 import { drillFlash } from '@/lib/drillFlash';
 import { drillTimeout } from '@/lib/drillTimeout';
 import { createBackdropCache, getCanvasDpr, drawPulseRing } from '@/lib/canvasFx';
@@ -129,7 +130,7 @@ export default function RapidTappingClient() {
   const [flashEnabled, setFlashEnabled] = useState(true);
   const [pointerLocked, setPointerLocked] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
-  const [universalSens, setUniversalSens] = useState(1.0);
+  const universalSens = useDrillSensitivity();
   const [openAccordion, setOpenAccordion] = useState(null);
   const [isTouchOnlyDevice, setIsTouchOnlyDevice] = useState(false);
   const [countdownValue, setCountdownValue] = useState(3);
@@ -176,8 +177,6 @@ export default function RapidTappingClient() {
     logicalHeight: 450
   });
 
-  const cmPer360 = (30 / universalSens).toFixed(1);
-
   useEffect(() => {
     isPausedRef.current = isPaused;
   }, [isPaused]);
@@ -196,11 +195,6 @@ export default function RapidTappingClient() {
       const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
       const isTouchCapable = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
       setIsTouchOnlyDevice(isTouchCapable && !hasFinePointer);
-
-      try {
-        const savedSens = localStorage.getItem('skilldrills_rapid_tapping_sens');
-        if (savedSens) setUniversalSens(parseFloat(savedSens));
-      } catch (e) {}
 
       const saved = getSavedData();
       setBestScore(saved.bestScore || 0);
@@ -222,12 +216,6 @@ export default function RapidTappingClient() {
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
     };
   }, []);
-
-  useEffect(() => {
-    if (gameState !== 'playing') {
-      try { localStorage.setItem('skilldrills_rapid_tapping_sens', universalSens.toString()); } catch (e) {}
-    }
-  }, [universalSens, gameState]);
 
   const handleExitDrill = useCallback(async () => {
     markIntentionalExit();
@@ -706,8 +694,8 @@ export default function RapidTappingClient() {
       const cvs = canvasRef.current;
 
       if (document.pointerLockElement) {
-        eng.crosshair.x = Math.max(0, Math.min(eng.logicalWidth, eng.crosshair.x + e.movementX));
-        eng.crosshair.y = Math.max(0, Math.min(eng.logicalHeight, eng.crosshair.y + e.movementY));
+        eng.crosshair.x = Math.max(0, Math.min(eng.logicalWidth, eng.crosshair.x + e.movementX * universalSens));
+        eng.crosshair.y = Math.max(0, Math.min(eng.logicalHeight, eng.crosshair.y + e.movementY * universalSens));
       } else if (cvs) {
         const rect = cvs.getBoundingClientRect();
         eng.crosshair.x = Math.max(0, Math.min(eng.logicalWidth, e.clientX - rect.left));

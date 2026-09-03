@@ -15,6 +15,7 @@ import {
 import generateShareCard, { shareScoreCard } from '../../../../../components/ShareScoreCard';
 import { getPlayerName } from '../../../../../lib/leaderboard';
 import { drillAudio } from '../../../../../lib/drillAudio';
+import { useDrillSensitivity } from '../../../../../lib/drillSensitivity';
 import { drillFlash } from '../../../../../lib/drillFlash';
 import { drillTimeout } from '../../../../../lib/drillTimeout';
 import { MAX_LEVEL, getStartLevel, getDifficultyProgress, getComboBonusLevel } from '../../../../../lib/drillDifficulty';
@@ -156,7 +157,7 @@ const FAQ_ITEMS = [
   { q: "How does difficulty scale in this drill?", a: "As your score increases, the level scales from 1 to 15, shrinking target containers, accelerating movement speed, and shortening target lifespan." },
   { q: "What happens when a drop misses the target?", a: "Releasing outside the target zone resets your current combo multiplier to zero and triggers a red error flash without point loss." },
   { q: "How is drag accuracy calculated?", a: "Accuracy is calculated as total successful target drops divided by total drop attempts, displayed as a real-time percentage." },
-  { q: "Can I adjust mouse sensitivity for this drill?", a: "Yes, the Universal Sens slider allows you to match your raw input multiplier and cm/360 sensitivity setting." },
+  { q: "Can I adjust mouse sensitivity for this drill?", a: "Yes — the Mouse Sensitivity slider in Session Settings on the drills hub matches your raw input multiplier and cm/360, and applies to every mouse-aimed drill." },
   { q: "Is this drag and drop drill free?", a: "Yes, the drill is 100% free with no sign-ups or downloads required, running directly in modern web browsers." },
   { q: "How do combo multipliers work?", a: "Sustaining consecutive accurate drops builds combo multipliers up to 3.0x bonus points per successful placement." },
   { q: "Can graphic designers and editors benefit from this drill?", a: "Yes, designers and editors build high-precision dragging dexterity needed for adjusting nodes, layers, and clip placement on timelines." },
@@ -186,7 +187,7 @@ export default function DragAndDropClient() {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
   const [pointerLocked, setPointerLocked] = useState(false);
-  const [universalSens, setUniversalSens] = useState(1.0);
+  const universalSens = useDrillSensitivity();
   const [openAccordion, setOpenAccordion] = useState(null);
   const [isTouchOnlyDevice, setIsTouchOnlyDevice] = useState(false);
   const [countdownValue, setCountdownValue] = useState(3);
@@ -226,8 +227,6 @@ export default function DragAndDropClient() {
     particles: [], hitMarkers: [], screenShake: 0,
     logicalWidth: 800, logicalHeight: 450
   });
-
-  const cmPer360 = (30 / universalSens).toFixed(1);
 
   const triggerFlash = useCallback(() => {
     if (!drillFlash.isEnabled()) return;
@@ -290,11 +289,6 @@ export default function DragAndDropClient() {
       const isTouchCapable = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
       setIsTouchOnlyDevice(isTouchCapable && !hasFinePointer);
 
-      try {
-        const savedSens = localStorage.getItem('dragAndDropPro_sens');
-        if (savedSens) setUniversalSens(parseFloat(savedSens));
-      } catch (e) {}
-
       const saved = getSavedData();
       setBestScore(saved.bestScore || 0);
       setBestCombo(saved.bestCombo || 0);
@@ -308,12 +302,6 @@ export default function DragAndDropClient() {
       countdownTimeoutsRef.current.forEach(clearTimeout);
     };
   }, []);
-
-  useEffect(() => {
-    if (gameState !== 'playing') {
-      try { localStorage.setItem('dragAndDropPro_sens', universalSens.toString()); } catch (e) {}
-    }
-  }, [universalSens, gameState]);
 
   const handleExitDrill = useCallback(async () => {
     markIntentionalExit();
@@ -876,7 +864,6 @@ export default function DragAndDropClient() {
                 { icon: Target, accent: 'blue', title: 'Drag Blue Ball into Moving Bucket (+100 PTS)', text: 'Grab the blue ball and drop it cleanly inside the hollow moving blue bucket' },
                 { icon: Zap, accent: 'red', title: 'Miss / Timeout Penalty', text: 'Dropping off-target or timing out resets your combo streak' },
               ]}
-              sensitivity={{ value: universalSens, onChange: setUniversalSens, cmPer360 }}
               stats={[
                 { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
                 { icon: Flame, label: 'Best Combo', value: `${bestCombo}x`, color: 'text-blue-400', accent: 'blue' },

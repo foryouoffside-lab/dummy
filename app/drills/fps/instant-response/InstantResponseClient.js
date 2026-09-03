@@ -12,6 +12,7 @@ import {
 import generateShareCard, { shareScoreCard } from '../../../../components/ShareScoreCard';
 import { getPlayerName } from '../../../../lib/leaderboard';
 import { drillAudio } from '../../../../lib/drillAudio';
+import { useDrillSensitivity } from '../../../../lib/drillSensitivity';
 import { drillFlash } from '../../../../lib/drillFlash';
 import { drillTimeout } from '../../../../lib/drillTimeout';
 import { drillPenalty } from '../../../../lib/drillPenalty';
@@ -144,6 +145,7 @@ export default function InstantResponseClient() {
   const [flashEnabled, setFlashEnabled] = useState(true);
   const [penaltyEnabled, setPenaltyEnabled] = useState(false);
   const [pointerLocked, setPointerLocked] = useState(false);
+  const universalSens = useDrillSensitivity();
   const [openAccordion, setOpenAccordion] = useState(null);
   const [isTouchOnlyDevice, setIsTouchOnlyDevice] = useState(false);
   const [countdownValue, setCountdownValue] = useState(3);
@@ -399,8 +401,8 @@ export default function InstantResponseClient() {
       if (gameState !== 'playing' || !pointerLocked || !canvasRef.current) return;
       const w = engine.current.logicalWidth;
       const h = engine.current.logicalHeight;
-      engine.current.crosshair.x = Math.max(0, Math.min(w, engine.current.crosshair.x + e.movementX));
-      engine.current.crosshair.y = Math.max(0, Math.min(h, engine.current.crosshair.y + e.movementY));
+      engine.current.crosshair.x = Math.max(0, Math.min(w, engine.current.crosshair.x + e.movementX * universalSens));
+      engine.current.crosshair.y = Math.max(0, Math.min(h, engine.current.crosshair.y + e.movementY * universalSens));
     };
 
     const handleMouseDown = (e) => {
@@ -485,7 +487,7 @@ export default function InstantResponseClient() {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mousedown', handleMouseDown);
     };
-  }, [gameState, pointerLocked, triggerFlash, resumeDrill]);
+  }, [gameState, pointerLocked, universalSens, triggerFlash, resumeDrill]);
 
   // Main Physics & Canvas Render Loop
   useEffect(() => {

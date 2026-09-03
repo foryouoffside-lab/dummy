@@ -15,6 +15,7 @@ import {
 import generateShareCard, { shareScoreCard } from '../../../../components/ShareScoreCard';
 import { getPlayerName } from '../../../../lib/leaderboard';
 import { drillAudio } from '../../../../lib/drillAudio';
+import { useDrillSensitivity } from '../../../../lib/drillSensitivity';
 import { drillFlash } from '../../../../lib/drillFlash';
 import { drillTimeout } from '../../../../lib/drillTimeout';
 import { drillPenalty } from '../../../../lib/drillPenalty';
@@ -149,7 +150,7 @@ export default function TargetPrioritizationClient() {
   const [openAccordion, setOpenAccordion] = useState(null);
   const [isTouchOnlyDevice, setIsTouchOnlyDevice] = useState(false);
   
-  const [universalSens, setUniversalSens] = useState(1.0);
+  const universalSens = useDrillSensitivity();
 
   const [score, setScore] = useState(0);
   const [bestScore, setBestScore] = useState(0);
@@ -186,14 +187,7 @@ export default function TargetPrioritizationClient() {
     logicalWidth: 0, logicalHeight: 0
   });
 
-  const cmPer360 = (30 / universalSens).toFixed(1);
-
   useEffect(() => {
-    try {
-      const savedSens = localStorage.getItem('targetPrioritization_sens');
-      if (savedSens) setUniversalSens(parseFloat(savedSens));
-    } catch (e) {}
-
     const saved = getSavedData();
     setBestScore(saved.bestScore || 0);
     setBestCombo(saved.bestCombo || 0);
@@ -214,12 +208,6 @@ export default function TargetPrioritizationClient() {
   useEffect(() => {
     return () => countdownTimeoutsRef.current.forEach(clearTimeout);
   }, []);
-
-  useEffect(() => {
-    if (gameState !== 'playing' && gameState !== 'countdown') {
-      try { localStorage.setItem('targetPrioritization_sens', universalSens.toString()); } catch (e) {}
-    }
-  }, [universalSens, gameState]);
 
   const triggerFlash = useCallback(() => {
     if (!drillFlash.isEnabled()) return;
@@ -907,7 +895,6 @@ export default function TargetPrioritizationClient() {
                 { icon: Shield, accent: "green", title: "Green Unit", text: "Friendly — DO NOT SHOOT" },
                 { icon: AlertCircle, accent: "red", title: "Failure Rule", text: penaltyEnabled ? "Friendly / Wrong / Miss → Resets Combo, -0.6s" : "Friendly / Wrong / Miss → Resets Combo" },
               ]}
-              sensitivity={{ value: universalSens, onChange: setUniversalSens, cmPer360 }}
               stats={[
                 { icon: Trophy, label: "Best Score", value: bestScore, color: "text-white", accent: "slate" },
                 { icon: Flame, label: "Best Combo", value: `${bestCombo}x`, color: "text-blue-400", accent: "indigo" },

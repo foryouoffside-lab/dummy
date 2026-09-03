@@ -13,6 +13,7 @@ import {
 import generateShareCard, { shareScoreCard } from '@/components/ShareScoreCard';
 import { getPlayerName } from '@/lib/leaderboard';
 import { drillAudio } from '@/lib/drillAudio';
+import { useDrillSensitivity } from '@/lib/drillSensitivity';
 import { drillFlash } from '@/lib/drillFlash';
 import useUnexpectedExitGuard from '@/lib/useUnexpectedExitGuard';
 import DrillFooter from '@/components/drill/DrillFooter';
@@ -39,7 +40,7 @@ export default function SteadyHandClient() {
   const [flashEnabled, setFlashEnabled] = useState(true);
 
   // === Settings State ===
-  const [universalSens, setUniversalSens] = useState(1.0);
+  const universalSens = useDrillSensitivity();
   const [openAccordion, setOpenAccordion] = useState(null);
   const [countdownValue, setCountdownValue] = useState(3);
 
@@ -79,25 +80,15 @@ export default function SteadyHandClient() {
     screenShake: 0
   });
 
-  const cmPer360 = (30 / universalSens).toFixed(1);
-
   // === Initialization & Local Storage ===
   useEffect(() => {
     try {
-      const savedSens = localStorage.getItem('steadyHand_sens');
-      if (savedSens) setUniversalSens(parseFloat(savedSens));
       const savedBest = localStorage.getItem('steadyHand_bestScore');
       if (savedBest) setBestScore(parseInt(savedBest, 10));
     } catch {}
     setSoundEnabled(drillAudio.isEnabled());
     setFlashEnabled(drillFlash.isEnabled());
   }, []);
-
-  useEffect(() => {
-    if (gameState !== 'playing') {
-      try { localStorage.setItem('steadyHand_sens', universalSens.toString()); } catch {}
-    }
-  }, [universalSens, gameState]);
 
   const triggerRedFlash = useCallback(() => {
     if (!drillFlash.isEnabled()) return;
@@ -594,7 +585,6 @@ export default function SteadyHandClient() {
                 { icon: Target, accent: 'cyan', title: 'Objective', text: 'Trace Glowing Cyan Line to Reach Goal Zone' },
                 { icon: Zap, accent: 'blue', title: 'Reaching Goal', text: 'Resets Timer to 45s & Advances Difficulty' },
               ]}
-              sensitivity={{ value: universalSens, onChange: setUniversalSens, cmPer360 }}
               stats={[
                 { icon: Trophy, label: 'Best Laps', value: `${bestScore || 0}`, color: 'text-white', accent: 'slate' },
                 { icon: Flame, label: 'Current Laps', value: `${analytics.laps || 0}`, color: 'text-cyan-400', accent: 'cyan' },

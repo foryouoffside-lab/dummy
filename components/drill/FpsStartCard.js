@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { AlertCircle, Play, Sliders } from 'lucide-react';
+import { AlertCircle, Play } from 'lucide-react';
 
 // Static, fully-literal per-accent Tailwind classes — never string-concatenated at
 // runtime, so Tailwind's content scanner picks up every variant regardless of which
@@ -215,10 +215,9 @@ function getAccent(name) {
  * Drop it in wherever `gameState === 'start'`.
  *
  * @param {React.ComponentType} icon - main badge icon
- * @param {keyof ACCENTS} accent - card-wide theme (badge, subtitle, slider, button)
+ * @param {keyof ACCENTS} accent - card-wide theme (badge, subtitle, button)
  * @param {string} title
  * @param {string} subtitle
- * @param {{value:number, onChange:(v:number)=>void, cmPer360:string}|null} sensitivity - omit to hide the slider block
  * @param {boolean} isTouchOnlyDevice
  * @param {string} touchBlockedLabel - what the drill actually needs, shown in place
  *   of the start button on a touch-only device. Most of these drills aim with a
@@ -230,7 +229,6 @@ export default function FpsStartCard({
   accent = 'emerald',
   title,
   subtitle,
-  sensitivity = null,
   isTouchOnlyDevice = false,
   touchBlockedLabel = 'Mouse Required for Pointer Lock',
   onStart,
@@ -268,28 +266,6 @@ export default function FpsStartCard({
               <p className={`text-[10px] ${a.subtitleText} uppercase tracking-[0.15em] font-semibold mt-1`}>{subtitle}</p>
             )}
           </div>
-
-          {sensitivity && (
-            <div className="bg-black/40 border border-white/5 p-3 rounded-xl text-left text-xs mt-0.5">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-[10px] font-bold text-slate-300 uppercase flex items-center gap-1.5">
-                  <div className={`w-5 h-5 rounded-md ${a.chipBg} flex items-center justify-center`}>
-                    <Sliders className={`w-3 h-3 ${a.chipText}`} />
-                  </div>
-                  Universal Sens
-                </span>
-                <span className={`${a.chipText} font-bold text-xs ${a.chipBg} border ${a.chipBorder} rounded-md px-2 py-0.5`}>
-                  {sensitivity.value.toFixed(2)}x <span className="text-[9px] text-slate-500">({sensitivity.cmPer360} cm/360)</span>
-                </span>
-              </div>
-              <input
-                type="range" min="0.1" max="3.0" step="0.05"
-                value={sensitivity.value}
-                onChange={(e) => sensitivity.onChange(parseFloat(e.target.value))}
-                className={`w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer ${a.sliderAccent}`}
-              />
-            </div>
-          )}
 
           {isTouchOnlyDevice ? (
             <div className="w-full py-2.5 rounded-[13px] bg-red-950/60 border border-red-500/30 font-bold text-[11px] text-red-400 flex items-center justify-center gap-2 mt-0.5">

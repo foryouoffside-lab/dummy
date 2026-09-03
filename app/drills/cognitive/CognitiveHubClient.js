@@ -226,55 +226,15 @@ export default function CognitiveHubClient() {
           </ol>
         </nav>
 
-        {/* Header with compact inline chip next to H1 */}
-        <Reveal>
-          <div className="mb-8 bg-surface-1 border border-hairline rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden backdrop-blur-xl shadow-xl">
-            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-violet-500 to-indigo-500 opacity-70" />
-            <div className="flex items-start gap-4">
-              <div className="p-3.5 bg-violet-500/10 border border-violet-500/30 rounded-2xl text-violet-400 shrink-0">
-                <Brain className="w-8 h-8" />
-              </div>
-              <div>
-                <h1 className="text-2xl sm:text-4xl font-extrabold text-ink-1 tracking-tight uppercase">{t('hubs.cognitive.h1', 'Brain Training & Decision Speed')}</h1>
-                <p className="text-ink-2 mt-2 text-sm sm:text-base max-w-xl leading-relaxed">
-                  {t('hubs.cognitive.desc', 'Train reaction speeds, selective attention thresholds, and cognitive processing flexibility.')}
-                </p>
-              </div>
-            </div>
-          </div>
-        </Reveal>
-
-        {/* Start Here Band */}
-        <Reveal className="mb-10">
-          <div className="p-5 rounded-3xl bg-surface-1 border border-hairline backdrop-blur-xl shadow-xl">
-            <h2 className="text-xs font-mono font-bold uppercase tracking-wider text-violet-400 mb-3">
-              Recommended Start Routines
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <Link
-                href="/drills/cognitive/focus/distraction-fighter"
-                className="p-3.5 rounded-xl bg-surface-2 border border-hairline hover:border-violet-500/40 hover:-translate-y-0.5 active:scale-[0.98] transition-all group"
-              >
-                <p className="text-xs font-bold text-ink-1 group-hover:text-violet-400 transition-colors">New to Cognitive Training</p>
-                <p className="text-[10px] text-ink-3 mt-1">Stroop task interference &amp; focus check</p>
-              </Link>
-              <Link
-                href="/drills/cognitive/focus/concentration-grid"
-                className="p-3.5 rounded-xl bg-surface-2 border border-hairline hover:border-violet-500/40 hover:-translate-y-0.5 active:scale-[0.98] transition-all group"
-              >
-                <p className="text-xs font-bold text-ink-1 group-hover:text-violet-400 transition-colors">Concentration Grid Warm-up</p>
-                <p className="text-[10px] text-ink-3 mt-1">Sequential scanning &amp; visual search</p>
-              </Link>
-              <Link
-                href="/drills/cognitive/processing-speed/reaction-time"
-                className="p-3.5 rounded-xl bg-surface-2 border border-hairline hover:border-violet-500/40 hover:-translate-y-0.5 active:scale-[0.98] transition-all group"
-              >
-                <p className="text-xs font-bold text-ink-1 group-hover:text-violet-400 transition-colors">Full Cognitive Circuit</p>
-                <p className="text-[10px] text-ink-3 mt-1">Reflex & attention finisher</p>
-              </Link>
-            </div>
-          </div>
-        </Reveal>
+        {/* Page heading */}
+        <div className="mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-ink-1">
+            {t('hubs.cognitive.h1', 'Brain Training & Decision Speed')}
+          </h1>
+          <p className="mt-2 text-sm sm:text-base text-ink-2 max-w-2xl leading-relaxed">
+            {t('hubs.cognitive.desc', 'Train reaction speeds, selective attention thresholds, and cognitive processing flexibility.')}
+          </p>
+        </div>
 
         {/* Drill picker: one drill at a time, arrows to move, "View all" for the grid */}
         <Reveal>

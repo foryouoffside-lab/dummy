@@ -14,6 +14,7 @@ import {
 import generateShareCard, { shareScoreCard } from '../../../../components/ShareScoreCard';
 import { getPlayerName } from '../../../../lib/leaderboard';
 import { drillAudio } from '../../../../lib/drillAudio';
+import { useDrillSensitivity } from '../../../../lib/drillSensitivity';
 import { drillFlash } from '../../../../lib/drillFlash';
 import { drillTimeout } from '../../../../lib/drillTimeout';
 import { drillPenalty } from '../../../../lib/drillPenalty';
@@ -145,7 +146,7 @@ const ABOUT_SECTIONS = [
     icon: Eye,
     title: "Runs Client-Side, Zero Install",
     paragraphs: [
-      "Everything runs client-side with raw, unaccelerated mouse input captured through the Pointer Lock API, so there's no server lag distorting your times and nothing to install. Play in fullscreen with your in-game sensitivity dialed in through the universal cm/360 converter, and your results — best score, best combo, best level — persist locally so you can chart real progress over weeks of practice."
+      "Everything runs client-side with raw, unaccelerated mouse input captured through the Pointer Lock API, so there's no server lag distorting your times and nothing to install. Play in fullscreen with your in-game sensitivity dialed in through the universal cm/360 converter in the drills-hub session settings, and your results — best score, best combo, best level — persist locally so you can chart real progress over weeks of practice."
     ]
   }
 ];
@@ -189,7 +190,7 @@ export default function ProFlickClient() {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
   const [pointerLocked, setPointerLocked] = useState(false);
-  const [universalSens, setUniversalSens] = useState(1.0);
+  const universalSens = useDrillSensitivity();
   const [openAccordion, setOpenAccordion] = useState(null);
   const [isTouchOnlyDevice, setIsTouchOnlyDevice] = useState(false);
   const [countdownValue, setCountdownValue] = useState(3);
@@ -230,8 +231,6 @@ export default function ProFlickClient() {
     logicalWidth: 800, logicalHeight: 450
   });
 
-  const cmPer360 = (30 / universalSens).toFixed(1);
-
   const triggerFlash = useCallback(() => {
     if (!drillFlash.isEnabled()) return;
     const id = Date.now() + Math.random();
@@ -249,11 +248,6 @@ export default function ProFlickClient() {
       const isTouchCapable = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
       setIsTouchOnlyDevice(isTouchCapable && !hasFinePointer);
 
-      try {
-        const savedSens = localStorage.getItem('flickAim_sens');
-        if (savedSens) setUniversalSens(parseFloat(savedSens));
-      } catch (e) {}
-
       const saved = getSavedData();
       setBestScore(saved.bestScore || 0);
       setBestCombo(saved.bestCombo || 0);
@@ -267,12 +261,6 @@ export default function ProFlickClient() {
       countdownTimeoutsRef.current.forEach(clearTimeout);
     };
   }, []);
-
-  useEffect(() => {
-    if (gameState !== 'playing') {
-      try { localStorage.setItem('flickAim_sens', universalSens.toString()); } catch (e) {}
-    }
-  }, [universalSens, gameState]);
 
   const handleExitDrill = useCallback(async () => {
     markIntentionalExit();
@@ -903,7 +891,6 @@ export default function ProFlickClient() {
                 { icon: Target, accent: 'emerald', title: 'Objective', text: 'Snap & Click Targets' },
                 { icon: AlertCircle, accent: 'red', title: 'Failure Rule', text: penaltyEnabled ? 'Miss / Timeout → Combo Reset, -0.8s' : 'Miss / Timeout → Combo Reset' },
               ]}
-              sensitivity={{ value: universalSens, onChange: setUniversalSens, cmPer360 }}
               stats={[
                 { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
                 { icon: Flame, label: 'Best Combo', value: `${bestCombo}x`, color: 'text-emerald-400', accent: 'emerald' },

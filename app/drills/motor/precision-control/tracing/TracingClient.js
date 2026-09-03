@@ -12,6 +12,7 @@ import {
 import generateShareCard, { shareScoreCard } from '@/components/ShareScoreCard';
 import { getPlayerName } from '@/lib/leaderboard';
 import { drillAudio } from '@/lib/drillAudio';
+import { useDrillSensitivity } from '@/lib/drillSensitivity';
 import { drillFlash } from '@/lib/drillFlash';
 import useUnexpectedExitGuard from '@/lib/useUnexpectedExitGuard';
 import DrillFooter from '@/components/drill/DrillFooter';
@@ -71,7 +72,7 @@ export default function FineMotorClient() {
   const isTouchOnly = useIsTouchOnly();
   
   // === Settings State ===
-  const [universalSens, setUniversalSens] = useState(1.0);
+  const universalSens = useDrillSensitivity();
   const [openAccordion, setOpenAccordion] = useState(null);
   const [countdownValue, setCountdownValue] = useState(3);
   const [soundEnabled, setSoundEnabled] = useState(true);
@@ -123,25 +124,15 @@ export default function FineMotorClient() {
   const isOffPathRef = useRef(false);
   const globalTimeRef = useRef(0);
 
-  const cmPer360 = (30 / universalSens).toFixed(1);
-
   // === Initialization & Local Storage ===
   useEffect(() => {
     try {
-      const savedSens = localStorage.getItem('waveTracing_sens');
-      if (savedSens) setUniversalSens(parseFloat(savedSens));
       const savedBest = localStorage.getItem('waveTracing_bestScore');
       if (savedBest) setBestScore(parseInt(savedBest, 10));
     } catch {}
     setSoundEnabled(drillAudio.isEnabled());
     setFlashEnabled(drillFlash.isEnabled());
   }, []);
-
-  useEffect(() => {
-    if (gameState !== 'playing') {
-      try { localStorage.setItem('waveTracing_sens', universalSens.toString()); } catch {}
-    }
-  }, [universalSens, gameState]);
 
   const showFeedback = useCallback((msg, type = 'success') => {
     setFeedback(msg);
@@ -647,7 +638,6 @@ export default function FineMotorClient() {
                 { icon: Target, accent: 'redOrange', title: 'Objective', text: 'Keep Crosshair Perfectly Aligned with Wave' },
                 { icon: Zap, accent: 'purple', title: 'Continuous Flow', text: 'Wave Never Stops, Re-acquire to Maintain Flow' },
               ]}
-              sensitivity={{ value: universalSens, onChange: setUniversalSens, cmPer360 }}
               stats={[
                 { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
                 { icon: Flame, label: 'Peak Flow', value: `${analytics.peakFlow}%`, color: 'text-rose-400', accent: 'redOrange' },

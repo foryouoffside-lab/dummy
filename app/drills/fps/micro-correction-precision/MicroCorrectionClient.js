@@ -15,6 +15,7 @@ import {
 import generateShareCard, { shareScoreCard } from '../../../../components/ShareScoreCard';
 import { getPlayerName } from '../../../../lib/leaderboard';
 import { drillAudio } from '../../../../lib/drillAudio';
+import { useDrillSensitivity } from '../../../../lib/drillSensitivity';
 import { drillFlash } from '../../../../lib/drillFlash';
 import { drillTimeout } from '../../../../lib/drillTimeout';
 import { drillPenalty } from '../../../../lib/drillPenalty';
@@ -152,7 +153,7 @@ export default function MicroCorrectionClient() {
   const [openAccordion, setOpenAccordion] = useState(null);
   const [isTouchOnlyDevice, setIsTouchOnlyDevice] = useState(false);
   
-  const [universalSens, setUniversalSens] = useState(1.0);
+  const universalSens = useDrillSensitivity();
 
   const [score, setScore] = useState(0);
   const [bestScore, setBestScore] = useState(0);
@@ -192,14 +193,7 @@ export default function MicroCorrectionClient() {
     microSpawnTime: 0, particles: [], hitMarkers: [], screenShake: 0, logicalWidth: 0, logicalHeight: 0
   });
 
-  const cmPer360 = (30 / universalSens).toFixed(1);
-
   useEffect(() => {
-    try {
-      const savedSens = localStorage.getItem('microcorr_sens');
-      if (savedSens) setUniversalSens(parseFloat(savedSens));
-    } catch (e) {}
-
     const saved = getSavedData();
     setBestScore(saved.bestScore || 0);
     setBestCombo(saved.bestCombo || 0);
@@ -220,12 +214,6 @@ export default function MicroCorrectionClient() {
   useEffect(() => {
     return () => countdownTimeoutsRef.current.forEach(clearTimeout);
   }, []);
-
-  useEffect(() => {
-    if (gameState !== 'playing' && gameState !== 'countdown') {
-      try { localStorage.setItem('microcorr_sens', universalSens.toString()); } catch (e) {}
-    }
-  }, [universalSens, gameState]);
 
   const triggerFlash = useCallback(() => {
     if (!drillFlash.isEnabled()) return;
@@ -895,7 +883,6 @@ export default function MicroCorrectionClient() {
                 { icon: Target, accent: "cyan", title: "Objective (+10 Anchor / +100+ Micro)", text: "Hit Anchor → Snap-Click Adjacent Micro" },
                 { icon: AlertCircle, accent: "red", title: "Failure Rule", text: penaltyEnabled ? "Miss / Timeout → Resets Combo, -0.6s" : "Miss / Timeout → Resets Combo" },
               ]}
-              sensitivity={{ value: universalSens, onChange: setUniversalSens, cmPer360 }}
               stats={[
                 { icon: Trophy, label: "Best Score", value: bestScore, color: "text-white", accent: "slate" },
                 { icon: Flame, label: "Best Combo", value: `${bestCombo}x`, color: "text-cyan-400", accent: "cyan" },

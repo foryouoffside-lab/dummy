@@ -146,7 +146,7 @@ export default function DragAndDropPage() {
         "name": "Can I adjust mouse sensitivity for this drill?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Yes, the Universal Sens slider allows you to match your raw input multiplier and cm/360 sensitivity setting."
+          "text": "Yes — the Mouse Sensitivity slider in Session Settings on the drills hub matches your raw input multiplier and cm/360, and applies to every mouse-aimed drill."
         }
       },
       {
@@ -225,7 +225,7 @@ export default function DragAndDropPage() {
       {
         "@type": "HowToStep",
         "name": "Adjust Sensitivity",
-        "text": "Set your Universal Sens slider to match your raw input multiplier."
+        "text": "Set the Mouse Sensitivity slider in Session Settings on the drills hub to match your raw input multiplier."
       },
       {
         "@type": "HowToStep",

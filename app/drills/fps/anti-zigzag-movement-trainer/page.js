@@ -146,7 +146,7 @@ export default function AntiZigzagPage() {
         "name": "What sensitivity should I use?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "For tracking, moderate to low sensitivity (25–45 cm/360) works best. Use the universal sensitivity slider to match your in-game settings before starting."
+          "text": "For tracking, moderate to low sensitivity (25–45 cm/360) works best. Set the Mouse Sensitivity slider in Session Settings on the drills hub to match your in-game settings — it applies to every mouse-aimed drill."
         }
       },
       {
@@ -225,7 +225,7 @@ export default function AntiZigzagPage() {
       {
         "@type": "HowToStep",
         "name": "Adjust Sensitivity",
-        "text": "Set your Universal Sens slider to match your primary game."
+        "text": "Set the Mouse Sensitivity slider in Session Settings on the drills hub to match your primary game."
       },
       {
         "@type": "HowToStep",

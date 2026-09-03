@@ -3,129 +3,19 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
-  Target, Sparkles, Gamepad2, Brain, Eye, Dumbbell, Database,
-  ChevronRight, Activity, Zap, Compass, ShieldCheck, MousePointerClick, Timer, Infinity as InfinityIcon
+  Target, Sparkles, Database, ChevronRight, Activity, Zap,
+  ShieldCheck, MousePointerClick, Timer, Infinity as InfinityIcon
 } from 'lucide-react';
 import SiteFooter from '@/components/SiteFooter';
 import Reveal from '@/components/Reveal';
 import DrillGlobalSettings from '@/components/drill/DrillGlobalSettings';
 import { DRILLS, DESKTOP_ONLY_CATEGORIES } from '@/lib/drillsRegistry';
+import { SITE_CATEGORIES, getCategoryCount, getCategorySampleNames } from '@/lib/siteCategories';
 import { useTranslation } from '@/lib/i18n/useTranslation';
 
-const categoryData = [
-  {
-    name: 'FPS Gaming',
-    tagline: 'Aim, flick and tracking practice',
-    cat: 'fps',
-    color: 'from-red-500 to-orange-600',
-    ring: 'group-hover:shadow-red-500/20',
-    glow: 'rgba(239,68,68,0.28)',
-    accent: 'text-red-400',
-    icon: Gamepad2,
-    description: 'Aim trainer, flick shots, tracking and recoil control for competitive shooters',
-    actionText: 'Track and flick-click moving targets under time pressure',
-    goals: ['aim', '5min'],
-    href: '/drills/fps'
-  },
-  {
-    name: 'Cognitive Drills',
-    tagline: 'Focus, attention and processing speed',
-    cat: 'cognitive',
-    color: 'from-purple-500 to-indigo-600',
-    ring: 'group-hover:shadow-purple-500/20',
-    glow: 'rgba(168,85,247,0.28)',
-    accent: 'text-purple-400',
-    icon: Brain,
-    description: 'Executive control, attention stamina, focus, and multi-tasking exercises',
-    actionText: 'Process rapid rule switches and dual-stimulus streams',
-    goals: ['new', 'remember', '5min'],
-    href: '/drills/cognitive'
-  },
-  {
-    name: 'Memory Training',
-    tagline: 'Digit span, n-back and spatial recall',
-    cat: 'memory',
-    color: 'from-indigo-500 to-purple-600',
-    ring: 'group-hover:shadow-indigo-500/20',
-    glow: 'rgba(99,102,241,0.28)',
-    accent: 'text-indigo-400',
-    icon: Database,
-    description: 'Short-term digit span, working memory N-back, and spatial pattern recall',
-    actionText: 'Hold and repeat progressive digit and spatial sequences',
-    goals: ['remember', 'new'],
-    href: '/drills/memory'
-  },
-  {
-    name: 'Motor Skills',
-    tagline: 'Mouse precision and click speed',
-    cat: 'motor',
-    color: 'from-emerald-500 to-teal-600',
-    ring: 'group-hover:shadow-emerald-500/20',
-    glow: 'rgba(16,185,129,0.28)',
-    accent: 'text-emerald-400',
-    icon: Dumbbell,
-    description: 'Hand-eye coordination, timing accuracy, precision control, and finger speed',
-    actionText: 'Perform micro-target snaps and rhythm timing clicks',
-    goals: ['aim', '5min'],
-    href: '/drills/motor'
-  },
-  {
-    name: 'Physical Drills',
-    tagline: 'Reflex, balance and coordination',
-    cat: 'physical',
-    color: 'from-rose-500 to-red-600',
-    ring: 'group-hover:shadow-rose-500/20',
-    glow: 'rgba(251,113,133,0.28)',
-    accent: 'text-rose-400',
-    icon: Compass,
-    description: 'Balance training, WASD directional reflex, and body coordination challenges',
-    actionText: 'Execute directional WASD key reflexes and spatial evasion',
-    goals: ['react', 'new'],
-    href: '/drills/physical'
-  },
-  {
-    name: 'Visual Training',
-    tagline: 'Reaction, search and depth perception',
-    cat: 'visual',
-    color: 'from-fuchsia-500 to-pink-600',
-    ring: 'group-hover:shadow-fuchsia-500/20',
-    glow: 'rgba(232,121,249,0.28)',
-    accent: 'text-fuchsia-400',
-    icon: Eye,
-    description: 'Peripheral vision flash detection, discrete saccade snaps, and visual recognition',
-    actionText: 'Find and fixate on flash stimuli across wide visual fields',
-    goals: ['react', '5min'],
-    href: '/drills/visual'
-  },
-  {
-    name: 'Visual Tracking',
-    tagline: 'Smooth pursuit and gaze stability',
-    cat: 'visual-tracking',
-    color: 'from-cyan-500 to-blue-600',
-    ring: 'group-hover:shadow-cyan-500/20',
-    glow: 'rgba(34,211,238,0.28)',
-    accent: 'text-cyan-400',
-    icon: Activity,
-    description: 'Continuous pursuit smooth tracking, gaze stability, and trajectory prediction',
-    actionText: 'Maintain continuous cursor pursuit on smooth motion paths',
-    goals: ['aim', 'react'],
-    href: '/drills/visual-tracking'
-  },
-  {
-    name: 'Reaction Speed',
-    tagline: 'Reaction time tests and reflex drills',
-    cat: 'reaction-speed',
-    color: 'from-amber-500 to-yellow-600',
-    ring: 'group-hover:shadow-amber-500/20',
-    glow: 'rgba(245,158,11,0.28)',
-    accent: 'text-amber-400',
-    icon: Zap,
-    description: 'Simple & choice stimulus response, barrier pursuit, and reflex calibration',
-    actionText: 'React to sudden colour triggers and see your response time',
-    goals: ['react', '5min', 'new'],
-    href: '/drills/reaction-speed'
-  },
-];
+// Categories come from lib/siteCategories.js — the same list the home page and
+// footer render, so a new category or a renamed one only has to be edited once.
+
 
 const goalsList = [
   { id: 'all', label: 'All Categories', icon: InfinityIcon },
@@ -166,13 +56,13 @@ export default function DrillsDirectoryClient() {
 
   // On mobile, mobile-supported categories lead and desktop-only ones move to the end
   const baseCategories = isMobile
-    ? [...categoryData].sort((a, b) => {
+    ? [...SITE_CATEGORIES].sort((a, b) => {
         const aDesktopOnly = DESKTOP_ONLY_CATEGORIES.includes(a.cat);
         const bDesktopOnly = DESKTOP_ONLY_CATEGORIES.includes(b.cat);
         if (aDesktopOnly === bDesktopOnly) return 0;
         return aDesktopOnly ? 1 : -1;
       })
-    : categoryData;
+    : SITE_CATEGORIES;
 
   // Re-sort categories based on selected goal
   const sortedCategories = [...baseCategories].sort((a, b) => {
@@ -237,11 +127,6 @@ export default function DrillsDirectoryClient() {
           </div>
         </Reveal>
 
-        {/* Universal Session Settings (sound / red flash / target timeouts) */}
-        <Reveal className="max-w-2xl mx-auto mb-10">
-          <DrillGlobalSettings />
-        </Reveal>
-
         {/* Goal Picker Pills Bar (Horizontal scrollable on mobile) */}
         <Reveal className="mb-12">
           <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none justify-start sm:justify-center">
@@ -278,6 +163,7 @@ export default function DrillsDirectoryClient() {
             const isDesktopOnly = DESKTOP_ONLY_CATEGORIES.includes(cat.cat);
             const catTitle = t('sectors.' + cat.cat + '.title', cat.name);
             const catHref = localizeHref(cat.href);
+            const drillCount = getCategoryCount(cat.cat);
 
             return (
               <Reveal key={cat.cat} delay={idx * 40} className="h-full">
@@ -310,10 +196,23 @@ export default function DrillsDirectoryClient() {
                         </span>
                       )}
                     </div>
+
+                    <p className="text-sm text-ink-2 leading-relaxed mb-4">{cat.blurb}</p>
+
+                    {/* Real drill names, so the card answers "what is in here?"
+                        without costing a click. */}
+                    <ul className="space-y-1.5 text-xs text-ink-3 font-mono">
+                      {getCategorySampleNames(cat.cat, 3).map((name) => (
+                        <li key={name} className="truncate">— {name}</li>
+                      ))}
+                      {drillCount > 3 && (
+                        <li className="text-ink-3/70">+ {drillCount - 3} more</li>
+                      )}
+                    </ul>
                   </div>
 
-                  <div className={`relative pt-4 border-t border-hairline flex items-center justify-between text-xs font-semibold ${cat.accent}`}>
-                    <span>{t('home.viewHub', 'Enter Hub')}</span>
+                  <div className={`relative mt-5 pt-4 border-t border-hairline flex items-center justify-between text-xs font-semibold ${cat.accent}`}>
+                    <span>{t('home.viewHub', 'Enter hub')} · {drillCount} drills</span>
                     <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </div>
                 </Link>
@@ -321,6 +220,16 @@ export default function DrillsDirectoryClient() {
             );
           })}
         </div>
+
+        {/* Session preferences live below the categories. They matter to people
+            who already train here; they were previously the second thing a
+            first-time visitor saw, ahead of the drills themselves. */}
+        <Reveal className="max-w-2xl mx-auto pb-4">
+          <h2 className="text-xs font-mono font-bold uppercase tracking-widest text-ink-3 mb-3 text-center">
+            Session preferences
+          </h2>
+          <DrillGlobalSettings />
+        </Reveal>
       </main>
 
       <SiteFooter />

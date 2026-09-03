@@ -1,19 +1,21 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import Reveal from '@/components/Reveal';
 import SiteFooter from '@/components/SiteFooter';
 import { DRILLS, DESKTOP_ONLY_CATEGORIES } from '@/lib/drillsRegistry';
+import { SITE_CATEGORIES, getCategoryCount, getCategorySampleNames } from '@/lib/siteCategories';
 import { useTranslation } from '@/lib/i18n/useTranslation';
 import { LOCALES } from '@/lib/i18n/locales';
+import { HOME_FAQ_ITEMS } from '@/lib/homeFaq';
 import {
-  Target, ArrowRight, Zap, Trophy, BarChart3, Sparkles,
-  Brain, Crosshair, Shield, CheckCircle2, Globe,
-  Check, Play, RotateCcw, Award, ChevronDown, ChevronRight,
-  MousePointer, Timer, Layers, Sliders, Gamepad2, Database,
-  Dumbbell, Compass, Eye, Activity, ShieldCheck, MousePointerClick,
-  Infinity as InfinityIcon
+  ArrowRight, Zap, Trophy, Brain, Crosshair,
+  Check, ChevronDown, ChevronRight, Sliders,
+  ShieldCheck, MousePointerClick, Activity, RotateCcw, Monitor,
+  Sparkles, Target, Compass, Gauge, Clock, Eye, Layers, Shield,
+  Play, Flame, BarChart3, Terminal, Cpu, CheckCircle2, ChevronUp,
+  Volume2, VolumeX, Smartphone, Laptop, Info
 } from 'lucide-react';
 
 function handleCardMouseMove(e) {
@@ -22,788 +24,843 @@ function handleCardMouseMove(e) {
   e.currentTarget.style.setProperty('--my', `${e.clientY - rect.top}px`);
 }
 
-// Verifiable platform facts, derived from the drill registry and locale config
-const CATEGORY_COUNT = new Set(DRILLS.map((d) => d.category)).size;
+const TOTAL_DRILLS = DRILLS.length;
+const CATEGORY_COUNT = SITE_CATEGORIES.length;
 const LANGUAGE_COUNT = LOCALES.length;
 
-// Headline platform facts
-const PLATFORM_FACTS = [
+// Curated 5-minute warm-up routines (human-designed protocols)
+const CURATED_PROTOCOLS = [
   {
-    value: `${DRILLS.length}`,
-    label: 'Interactive Drills',
-    detail: 'Aim, reaction, memory, attention, coordination, and visual tracking — every drill playable immediately.',
-    icon: Target,
-    gradient: 'from-blue-500 to-cyan-500',
-    accent: 'text-cyan-400',
-    hoverBorder: 'hover:border-blue-500/40',
-  },
-  {
-    value: `${CATEGORY_COUNT}`,
-    label: 'Skill Categories',
-    detail: 'Dedicated hubs grouping drills by cognitive and motor discipline for structured daily progression.',
-    icon: Layers,
-    gradient: 'from-purple-500 to-indigo-600',
-    accent: 'text-purple-400',
-    hoverBorder: 'hover:border-purple-500/40',
-  },
-  {
-    value: `${LANGUAGE_COUNT}`,
-    label: 'World Languages',
-    detail: 'English, Português, Español, 日本語, Deutsch, and 한국어 across all hubs with native locale routing.',
-    icon: Globe,
-    gradient: 'from-emerald-500 to-teal-500',
-    accent: 'text-emerald-400',
-    hoverBorder: 'hover:border-emerald-500/40',
-  },
-  {
-    value: '0',
-    label: 'Accounts & Installs',
-    detail: 'No registration, no software downloads, no paywalls. Everything executes locally in your browser tab.',
-    icon: Shield,
-    gradient: 'from-amber-500 to-orange-500',
-    accent: 'text-amber-400',
-    hoverBorder: 'hover:border-amber-500/40',
-  },
-];
-
-// 8 Primary Training Categories matching DrillsDirectoryClient
-const categoryData = [
-  {
-    name: 'FPS Gaming',
-    cat: 'fps',
-    color: 'from-red-500 to-orange-600',
-    ring: 'group-hover:shadow-red-500/20',
-    glow: 'rgba(239,68,68,0.28)',
-    accent: 'text-red-400',
-    icon: Gamepad2,
-    description: 'Aim trainer, flick shots, tracking and recoil control for competitive shooters',
-    actionText: 'Track and flick-click moving targets under time pressure',
-    goals: ['aim', '5min'],
-    href: '/drills/fps'
-  },
-  {
-    name: 'Cognitive Drills',
-    cat: 'cognitive',
-    color: 'from-purple-500 to-indigo-600',
-    ring: 'group-hover:shadow-purple-500/20',
-    glow: 'rgba(168,85,247,0.28)',
-    accent: 'text-purple-400',
-    icon: Brain,
-    description: 'Executive control, attention stamina, focus, and multi-tasking exercises',
-    actionText: 'Process rapid rule switches and dual-stimulus streams',
-    goals: ['new', 'remember', '5min'],
-    href: '/drills/cognitive'
-  },
-  {
-    name: 'Memory Training',
-    cat: 'memory',
-    color: 'from-indigo-500 to-purple-600',
-    ring: 'group-hover:shadow-indigo-500/20',
-    glow: 'rgba(99,102,241,0.28)',
-    accent: 'text-indigo-400',
-    icon: Database,
-    description: 'Short-term digit span, working memory N-back, and spatial pattern recall',
-    actionText: 'Hold and repeat progressive digit and spatial sequences',
-    goals: ['remember', 'new'],
-    href: '/drills/memory'
-  },
-  {
-    name: 'Motor Skills',
-    cat: 'motor',
-    color: 'from-emerald-500 to-teal-600',
-    ring: 'group-hover:shadow-emerald-500/20',
-    glow: 'rgba(16,185,129,0.28)',
-    accent: 'text-emerald-400',
-    icon: Dumbbell,
-    description: 'Hand-eye coordination, timing accuracy, precision control, and finger speed',
-    actionText: 'Perform micro-target snaps and rhythm timing clicks',
-    goals: ['aim', '5min'],
-    href: '/drills/motor'
-  },
-  {
-    name: 'Physical Drills',
-    cat: 'physical',
-    color: 'from-rose-500 to-red-600',
-    ring: 'group-hover:shadow-rose-500/20',
-    glow: 'rgba(251,113,133,0.28)',
-    accent: 'text-rose-400',
-    icon: Compass,
-    description: 'Balance training, WASD directional reflex, and body coordination challenges',
-    actionText: 'Execute directional WASD key reflexes and spatial evasion',
-    goals: ['react', 'new'],
-    href: '/drills/physical'
-  },
-  {
-    name: 'Visual Training',
-    cat: 'visual',
-    color: 'from-fuchsia-500 to-pink-600',
-    ring: 'group-hover:shadow-fuchsia-500/20',
-    glow: 'rgba(232,121,249,0.28)',
-    accent: 'text-fuchsia-400',
-    icon: Eye,
-    description: 'Peripheral vision flash detection, discrete saccade snaps, and visual recognition',
-    actionText: 'Find and fixate on flash stimuli across wide visual fields',
-    goals: ['react', '5min'],
-    href: '/drills/visual'
-  },
-  {
-    name: 'Visual Tracking',
-    cat: 'visual-tracking',
-    color: 'from-cyan-500 to-blue-600',
-    ring: 'group-hover:shadow-cyan-500/20',
-    glow: 'rgba(34,211,238,0.28)',
-    accent: 'text-cyan-400',
-    icon: Activity,
-    description: 'Continuous pursuit smooth tracking, gaze stability, and trajectory prediction',
-    actionText: 'Maintain continuous cursor pursuit on smooth motion paths',
-    goals: ['aim', 'react'],
-    href: '/drills/visual-tracking'
-  },
-  {
-    name: 'Reaction Speed',
-    cat: 'reaction-speed',
-    color: 'from-amber-500 to-yellow-600',
-    ring: 'group-hover:shadow-amber-500/20',
-    glow: 'rgba(245,158,11,0.28)',
-    accent: 'text-amber-400',
-    icon: Zap,
-    description: 'Simple & choice stimulus response, barrier pursuit, and reflex calibration',
-    actionText: 'React to sudden colour triggers and see your response time',
-    goals: ['react', '5min', 'new'],
-    href: '/drills/reaction-speed'
-  },
-];
-
-// Goal filter pills
-const goalsList = [
-  { id: 'all', label: 'All Categories', icon: InfinityIcon },
-  { id: 'new', label: 'New Here', icon: Sparkles },
-  { id: 'aim', label: 'Improve My Aim', icon: Target },
-  { id: 'react', label: 'React Faster', icon: Zap },
-  { id: 'remember', label: 'Remember More', icon: Database },
-  { id: '5min', label: 'Just 5 Minutes', icon: Timer },
-];
-
-// Trust badges strip
-const trustStrip = [
-  { icon: ShieldCheck, label: 'No sign-up, ever' },
-  { icon: MousePointerClick, label: 'Instant start, zero installs' },
-  { icon: Activity, label: '100% runs in your browser' },
-];
-
-// Flagship Featured Showcase
-const FLAGSHIP_DRILLS = [
-  {
-    id: 'fps-precision',
-    category: 'FPS Precision',
-    badge: 'Flagship Aim Drill',
-    title: '180° Peripheral Scan & Flick Acquisition',
-    href: '/drills/fps/180-degree-awareness',
-    difficulty: 'Intermediate',
-    duration: '45s+',
-    paradigm: "Fitts's Law Target Acquisition",
-    description: 'Calibrates spatial saccades and high-angle flick shots against spontaneous peripheral threats. Simulates tactical arena wide swings with zero input delay.',
-    metrics: [
-      { label: 'Stimulus Window', value: '400 - 800ms' },
-      { label: 'Target Arc', value: '180° Horizontal' },
-      { label: 'Evaluation', value: 'Time-to-hit' },
-      { label: 'Primary Benefit', value: 'Peripheral Saccades' },
+    id: 'fps-tactical',
+    title: 'Pre-Match Tactical Aim',
+    duration: '5 min',
+    target: 'Valorant • CS2 • Apex',
+    objective: 'Flick acquisition, micro-adjustments & smooth cursor tracking.',
+    categoryAccent: 'text-red-400 border-red-500/30 bg-red-500/10',
+    drills: [
+      { name: 'Flick Shot Training', href: '/drills/fps/flick-shot-training', time: '90s', tag: 'Micro-snaps' },
+      { name: 'Rapid Tapping', href: '/drills/motor/movement-speed/rapid-tapping', time: '60s', tag: 'Trigger cadence' },
+      { name: 'Constant Slow Pursuit', href: '/drills/visual-tracking/constant-slow-pursuit', time: '90s', tag: 'Smooth pursuit' },
     ],
-    accentGradient: 'from-red-500 via-orange-500 to-amber-500',
-    accentColor: 'text-red-400',
-    previewType: 'fps'
+  },
+  {
+    id: 'reflex-awakening',
+    title: 'High-Velocity Reflex Reset',
+    duration: '3 min',
+    target: 'Twitch Reflexes • Latency Calibration',
+    objective: 'Stimulus discrimination, visual impulse control & pure reaction speed.',
+    categoryAccent: 'text-amber-400 border-amber-500/30 bg-amber-500/10',
+    drills: [
+      { name: 'Reaction Time Test', href: '/drills/reaction-speed/reaction-time-test', time: '60s', tag: 'Simple reaction' },
+      { name: 'Go / No-Go Test', href: '/drills/visual/reaction-speed/go/no-go', time: '60s', tag: 'Inhibitory control' },
+      { name: 'Stability Challenge', href: '/drills/physical/balance-training/stability-challenge', time: '60s', tag: 'Motor stability' },
+    ],
   },
   {
     id: 'cognitive-focus',
-    category: 'Cognitive Control',
-    badge: 'Attention Endurance',
-    title: 'Concentration Stamina & Rule-Switching',
-    href: '/drills/cognitive/attention/concentration-stamina',
-    difficulty: 'Advanced',
-    duration: '45s',
-    paradigm: 'Executive Function & Task Switching',
-    description: 'Forces your prefrontal cortex to alternate cognitive rules between Vowels and Prime numbers under rapid auditory and visual distraction stressors.',
-    metrics: [
-      { label: 'Rule Interval', value: 'Every 10s' },
-      { label: 'Stimulus Shift', value: 'Bimodal Audio/Visual' },
-      { label: 'Evaluation', value: 'Switching Cost ms' },
-      { label: 'Primary Benefit', value: 'Cognitive Flexibility' },
+    title: 'Executive Focus & Memory',
+    duration: '5 min',
+    target: 'Deep Work • Coding • Studying',
+    objective: 'Expand working memory buffers and build sustained task-switching stamina.',
+    categoryAccent: 'text-purple-400 border-purple-500/30 bg-purple-500/10',
+    drills: [
+      { name: 'Concentration Stamina', href: '/drills/cognitive/attention/concentration-stamina', time: '90s', tag: 'Rule switching' },
+      { name: 'Digit Span', href: '/drills/memory/short-term-memory/digit-span', time: '90s', tag: 'Working memory' },
+      { name: 'Divided Attention', href: '/drills/cognitive/attention/divided-attention', time: '90s', tag: 'Dual-task load' },
     ],
-    accentGradient: 'from-purple-500 via-indigo-500 to-blue-500',
-    accentColor: 'text-purple-400',
-    previewType: 'cognitive'
   },
   {
-    id: 'memory-nback',
-    category: 'Working Memory',
-    badge: 'Neuropsych Benchmark',
-    title: 'Digit Span & Spatial Chunking Matrix',
-    href: '/drills/memory/short-term-memory/digit-span',
-    difficulty: 'Adaptive',
-    duration: '45s',
-    paradigm: "Miller's Law (7 ± 2 Items)",
-    description: 'Tests and systematically expands your working memory buffer using forward and reverse rapid number sequences that dynamically adapt to your performance ceiling.',
-    metrics: [
-      { label: 'Starting Span', value: '3 Digits' },
-      { label: 'Max Span', value: '12+ Digits' },
-      { label: 'Evaluation', value: 'Sequence Recall %' },
-      { label: 'Primary Benefit', value: 'Short-Term Capacity' },
+    id: 'ocular-tracking',
+    title: 'Dynamic Visual & Spatial Acuity',
+    duration: '4 min',
+    target: 'Visual Field • Peripheral Speed',
+    objective: 'Expand peripheral awareness and strengthen dynamic gaze stability.',
+    categoryAccent: 'text-cyan-400 border-cyan-500/30 bg-cyan-500/10',
+    drills: [
+      { name: 'Constant Slow Pursuit', href: '/drills/visual-tracking/constant-slow-pursuit', time: '90s', tag: 'Gaze hold' },
+      { name: 'Go / No-Go Test', href: '/drills/visual/reaction-speed/go/no-go', time: '60s', tag: 'Foveal detection' },
+      { name: 'Flick Shot Training', href: '/drills/fps/flick-shot-training', time: '90s', tag: 'Peripheral snap' },
     ],
-    accentGradient: 'from-indigo-500 via-blue-500 to-cyan-500',
-    accentColor: 'text-indigo-400',
-    previewType: 'memory'
   },
-  {
-    id: 'reaction-strobe',
-    category: 'Reaction Speed',
-    badge: 'Neural Latency Benchmark',
-    title: 'Chroma-Sync Go / No-Go Discrimination',
-    href: '/drills/visual/reaction-speed/go/no-go',
-    difficulty: 'Intermediate',
-    duration: '45s+',
-    paradigm: 'Hick-Hyman Law (Choice Reaction)',
-    description: 'Isolates motor response inhibition. React instantly to positive chromatic triggers while suppressing false flicks on high-speed distractor stimuli.',
-    metrics: [
-      { label: 'Target Window', value: '180 - 320ms' },
-      { label: 'False Positives', value: 'Zero Tolerance' },
-      { label: 'Evaluation', value: 'Mean RT & Misses' },
-      { label: 'Primary Benefit', value: 'Inhibitory Control' },
-    ],
-    accentGradient: 'from-amber-500 via-emerald-500 to-cyan-500',
-    accentColor: 'text-amber-400',
-    previewType: 'reaction'
-  }
 ];
 
-// Marquee Ticker Hrefs
-const TICKER_HREFS = [
-  '/drills/fps/180-degree-awareness',
-  '/drills/reaction-speed/barrier-sequence-pursuit',
-  '/drills/memory/short-term-memory/digit-span',
-  '/drills/motor/hand-eye-coordination/aim-trainer',
-  '/drills/cognitive/attention/concentration-stamina',
-  '/drills/visual-tracking/constant-slow-pursuit',
-  '/drills/visual/depth-perception/distance-judgment',
-  '/drills/physical/balance-training/stability-challenge',
-  '/drills/fps/angle-hold-trainer',
-  '/drills/cognitive/attention/divided-attention',
-  '/drills/visual/reaction-speed/go/no-go',
-  '/drills/motor/hand-eye-coordination/precision-flick-shot',
-];
-
-const CATEGORY_ACCENTS = {
-  fps: 'text-red-400',
-  cognitive: 'text-purple-400',
-  memory: 'text-indigo-400',
-  motor: 'text-emerald-400',
-  physical: 'text-rose-400',
-  visual: 'text-fuchsia-400',
-  'visual-tracking': 'text-cyan-400',
-  'reaction-speed': 'text-amber-400',
-};
-
-const tickerDrills = TICKER_HREFS
-  .map((href) => DRILLS.find((d) => d.href === href))
-  .filter(Boolean);
-
-// Frequently Asked Questions
-const FAQ_ITEMS = [
+// Honest comparison matrix: SkillDrills vs Heavy Desktop Suites
+const COMPARISON_SPECS = [
   {
-    q: 'Are all the drills really free, with no account?',
-    a: 'Yes. Every drill on the site is 100% open — no sign-up, no email wall, and no paid tier. Drills execute entirely inside your local browser tab rather than on an external server, eliminating any usage fees.'
+    feature: 'Startup to First Click',
+    skilldrills: '0.0s (Instant in browser tab)',
+    desktopSuites: '45s+ (Launcher, Steam, patch checks)',
+    highlight: true,
   },
   {
-    q: 'How does the site measure reaction time?',
-    a: 'Drills time your input with the browser’s high-precision Performance API (performance.now()) and render on HTML5 canvas at your monitor’s native refresh rate. Scores provide a consistent, reproducible benchmark to track your personal performance trajectory.'
+    feature: 'Storage Footprint',
+    skilldrills: '0 KB (Browser-native)',
+    desktopSuites: '12 GB – 18 GB on SSD',
+    highlight: true,
   },
   {
-    q: 'Where are my scores and progress stored?',
-    a: 'Directly in your browser’s localStorage on the device you train with. Your personal bests, XP, and completed session history are never uploaded or synced to external databases.'
+    feature: 'Input Latency Timing',
+    skilldrills: 'Native performance.now() sub-ms clock',
+    desktopSuites: 'Engine overhead + 3D frame queues',
+    highlight: false,
   },
   {
-    q: 'Can this replace desktop aim trainers like Aim Lab or KovaaK’s?',
-    a: 'Desktop trainers excel at 3D custom engine hooks and game-specific sensitivity clones. SkillDrills is engineered for immediate zero-install reflex calibration, warmup routines, and cognitive training that launches in under a second in any tab.'
+    feature: 'Account & Sign-Up',
+    skilldrills: 'None. Never required.',
+    desktopSuites: 'Mandatory login & email capture',
+    highlight: true,
   },
   {
-    q: 'What is the recommended daily training routine?',
-    a: 'A proven 5-to-10 minute session consists of: 1 baseline reaction speed test, 2 aim or tracking drills, and 1 memory or cognitive focus challenge. Consistent daily calibration produces measurable improvement over time.'
-  }
+    feature: 'Data Privacy',
+    skilldrills: '100% on-device (localStorage only)',
+    desktopSuites: 'Cloud telemetry & gameplay logging',
+    highlight: false,
+  },
+  {
+    feature: 'Hardware Portability',
+    skilldrills: 'Any PC, Mac, Linux, hotel/work laptop',
+    desktopSuites: 'Dedicated Windows gaming rigs only',
+    highlight: false,
+  },
+  {
+    feature: 'Price & Tiers',
+    skilldrills: 'Free forever. All 81 drills included.',
+    desktopSuites: '$9.99/mo or paid battle-passes',
+    highlight: true,
+  },
 ];
 
 export default function HomePageClient() {
   const { t, localizeHref } = useTranslation();
-  const [selectedGoal, setSelectedGoal] = useState('all');
-  const [isMobile, setIsMobile] = useState(false);
   const [profile, setProfile] = useState(null);
-  const [activeFlagshipTab, setActiveFlagshipTab] = useState('fps-precision');
-  const [openFaq, setOpenFaq] = useState(0);
+  const [openFaq, setOpenFaq] = useState(-1);
+  const [selectedCategoryTab, setSelectedCategoryTab] = useState('all');
 
-  // Playable Mini-Drill State (5-target reaction sandbox)
-  const [sandboxState, setSandboxState] = useState('idle'); // 'idle' | 'running' | 'completed'
+  // Interactive 5-Target Calibration Workbench
+  const [sandboxState, setSandboxState] = useState('idle'); // 'idle' | 'running' | 'done'
   const [currentTarget, setCurrentTarget] = useState(null);
-  const [targetCount, setTargetCount] = useState(0);
+  const [hitCount, setHitCount] = useState(0);
   const [latencies, setLatencies] = useState([]);
-  const [lastClickMs, setLastClickMs] = useState(0);
-  const targetSpawnTimeRef = useRef(0);
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [rippleFeedback, setRippleFeedback] = useState(null);
+  const spawnTimeRef = useRef(0);
+  const audioCtxRef = useRef(null);
 
-  const totalDrillsCount = DRILLS.length;
-
-  // Mobile viewport detection for responsive category sorting
-  useEffect(() => {
-    const mq = window.matchMedia('(max-width: 767px)');
-    const updateIsMobile = () => setIsMobile(mq.matches);
-    updateIsMobile();
-    mq.addEventListener('change', updateIsMobile);
-    return () => mq.removeEventListener('change', updateIsMobile);
-  }, []);
-
-  // On mobile, mobile-supported categories lead; desktop-only ones move to the end
-  const baseCategories = isMobile
-    ? [...categoryData].sort((a, b) => {
-        const aDesktopOnly = DESKTOP_ONLY_CATEGORIES.includes(a.cat);
-        const bDesktopOnly = DESKTOP_ONLY_CATEGORIES.includes(b.cat);
-        if (aDesktopOnly === bDesktopOnly) return 0;
-        return aDesktopOnly ? 1 : -1;
-      })
-    : categoryData;
-
-  // Re-sort categories based on selected goal
-  const sortedCategories = [...baseCategories].sort((a, b) => {
-    if (selectedGoal === 'all') return 0;
-    const aMatch = a.goals.includes(selectedGoal);
-    const bMatch = b.goals.includes(selectedGoal);
-    if (aMatch && !bMatch) return -1;
-    if (!aMatch && bMatch) return 1;
-    return 0;
-  });
-
-  // Load returning athlete dashboard from local storage
+  // Read local progress
   useEffect(() => {
     try {
-      const keys = Object.keys(localStorage);
-      let totalDrillsPlayed = 0;
-      let totalLevel = 0;
+      let totalGames = 0;
+      let levelSum = 0;
       let maxLevel = 1;
-      let totalXp = 0;
       let drillCount = 0;
-      
-      const sectorStats = {
-        fps: { name: 'FPS Aim', count: 0, levels: 0, games: 0 },
-        cognitive: { name: 'Cognitive', count: 0, levels: 0, games: 0 },
-        memory: { name: 'Memory', count: 0, levels: 0, games: 0 },
-        visual: { name: 'Visual', count: 0, levels: 0, games: 0 },
-        'visual-tracking': { name: 'Visual Tracking', count: 0, levels: 0, games: 0 },
-        motor: { name: 'Motor Skills', count: 0, levels: 0, games: 0 },
-        physical: { name: 'Physical', count: 0, levels: 0, games: 0 },
-        'reaction-speed': { name: 'Reaction Speed', count: 0, levels: 0, games: 0 },
-      };
-      
-      keys.forEach(key => {
-        if (key.endsWith('_progression')) {
-          const data = localStorage.getItem(key);
-          if (data) {
-            try {
-              const parsed = JSON.parse(data);
-              totalDrillsPlayed += parsed.totalGames || 0;
-              totalLevel += parsed.level || 1;
-              totalXp += parsed.xp || 0;
-              if (parsed.level > maxLevel) maxLevel = parsed.level;
-              drillCount++;
-              
-              for (const sector in sectorStats) {
-                if (key.includes('/' + sector + '/')) {
-                  sectorStats[sector].count++;
-                  sectorStats[sector].levels += parsed.level || 1;
-                  sectorStats[sector].games += parsed.totalGames || 0;
-                  break;
-                }
-              }
-            } catch (e) {}
-          }
-        }
+
+      Object.keys(localStorage).forEach((key) => {
+        if (!key.endsWith('_progression')) return;
+        const raw = localStorage.getItem(key);
+        if (!raw) return;
+        try {
+          const parsed = JSON.parse(raw);
+          totalGames += parsed.totalGames || 0;
+          levelSum += parsed.level || 1;
+          if (parsed.level > maxLevel) maxLevel = parsed.level;
+          drillCount++;
+        } catch (e) {}
       });
 
-      if (totalDrillsPlayed > 0 || drillCount > 0) {
+      if (drillCount > 0) {
         setProfile({
-          gamesPlayed: totalDrillsPlayed,
-          avgLevel: drillCount > 0 ? Math.round(totalLevel / drillCount) : 1,
-          maxLevel,
+          gamesPlayed: totalGames,
           drillsCount: drillCount,
-          totalXp,
-          sectors: sectorStats
+          avgLevel: Math.round(levelSum / drillCount),
+          maxLevel,
         });
       }
     } catch (e) {}
   }, []);
 
-  // Sandbox Target Spawner
-  const spawnNextTarget = useCallback((index) => {
+  // Synthetic haptic audio click via Web Audio API (zero external assets needed)
+  const playHitSound = useCallback(() => {
+    if (!soundEnabled || typeof window === 'undefined') return;
+    try {
+      if (!audioCtxRef.current) {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (AudioCtx) audioCtxRef.current = new AudioCtx();
+      }
+      if (audioCtxRef.current && audioCtxRef.current.state === 'suspended') {
+        audioCtxRef.current.resume();
+      }
+      if (audioCtxRef.current) {
+        const ctx = audioCtxRef.current;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(880, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.05);
+        gain.gain.setValueAtTime(0.12, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.05);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.05);
+      }
+    } catch (e) {}
+  }, [soundEnabled]);
+
+  const spawnTarget = useCallback((index) => {
     if (index >= 5) {
-      setSandboxState('completed');
+      setSandboxState('done');
       setCurrentTarget(null);
       return;
     }
+    // Well-distributed tactical target coordinates
+    const positions = [
+      { x: 30, y: 35, size: 52 },
+      { x: 72, y: 62, size: 48 },
+      { x: 26, y: 68, size: 54 },
+      { x: 70, y: 30, size: 46 },
+      { x: 50, y: 50, size: 50 },
+    ];
+    const pos = positions[index] || {
+      x: Math.floor(Math.random() * 58) + 21,
+      y: Math.floor(Math.random() * 52) + 24,
+      size: Math.floor(Math.random() * 8) + 48,
+    };
 
-    const x = Math.floor(Math.random() * 66) + 17;
-    const y = Math.floor(Math.random() * 60) + 20;
-    const size = Math.floor(Math.random() * 10) + 44; // Touch-friendly 44px-54px
-
-    setCurrentTarget({ x, y, size, id: Date.now() });
-    targetSpawnTimeRef.current = performance.now();
+    setCurrentTarget({
+      ...pos,
+      id: index,
+    });
+    spawnTimeRef.current = performance.now();
   }, []);
 
-  const startSandboxTest = () => {
+  const startSandbox = () => {
     setSandboxState('running');
-    setTargetCount(0);
+    setHitCount(0);
     setLatencies([]);
-    setLastClickMs(0);
-    spawnNextTarget(0);
+    setRippleFeedback(null);
+    spawnTarget(0);
   };
 
-  const handleTargetClick = (e) => {
+  const handleTargetHit = (e) => {
     e.stopPropagation();
-    if (sandboxState !== 'running') return;
+    if (sandboxState !== 'running' || !currentTarget) return;
 
-    const hitTime = performance.now();
-    const delta = Math.round(hitTime - targetSpawnTimeRef.current);
-    
+    const delta = Math.round(performance.now() - spawnTimeRef.current);
+    playHitSound();
+
+    // Trigger visual hit ripple
+    setRippleFeedback({
+      x: currentTarget.x,
+      y: currentTarget.y,
+      latency: delta,
+    });
+
     setLatencies((prev) => [...prev, delta]);
-    setLastClickMs(delta);
-    const nextCount = targetCount + 1;
-    setTargetCount(nextCount);
-
-    spawnNextTarget(nextCount);
+    const next = hitCount + 1;
+    setHitCount(next);
+    spawnTarget(next);
   };
 
-  const avgLatency = latencies.length > 0 
-    ? Math.round(latencies.reduce((a, b) => a + b, 0) / latencies.length) 
+  const avgLatency = latencies.length
+    ? Math.round(latencies.reduce((a, b) => a + b, 0) / latencies.length)
+    : 0;
+  const bestLatency = latencies.length ? Math.min(...latencies) : 0;
+  const latencySpread = latencies.length > 1
+    ? Math.max(...latencies) - bestLatency
     : 0;
 
-  const activeFlagship = FLAGSHIP_DRILLS.find(d => d.id === activeFlagshipTab) || FLAGSHIP_DRILLS[0];
+  // Evaluation tier calculation
+  const getRatingTier = (ms) => {
+    if (ms < 210) return { label: 'Elite Tier', rank: 'S-Rank', badge: 'Top 1% Reflex', color: 'text-amber-400 border-amber-500/30 bg-amber-500/10' };
+    if (ms < 250) return { label: 'Competitive Tier', rank: 'A-Rank', badge: 'High Precision', color: 'text-cyan-400 border-cyan-500/30 bg-cyan-500/10' };
+    if (ms < 300) return { label: 'Solid Baseline', rank: 'B-Rank', badge: 'Balanced Reflex', color: 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10' };
+    return { label: 'Calibration Needed', rank: 'Developing', badge: 'Warm Up Required', color: 'text-purple-400 border-purple-500/30 bg-purple-500/10' };
+  };
+
+  const rating = getRatingTier(avgLatency);
+
+  // Category filter tabs
+  const filteredCategories = useMemo(() => {
+    if (selectedCategoryTab === 'aim') {
+      return SITE_CATEGORIES.filter((c) => ['fps', 'motor', 'physical'].includes(c.cat));
+    }
+    if (selectedCategoryTab === 'reflex') {
+      return SITE_CATEGORIES.filter((c) => ['reaction-speed', 'visual'].includes(c.cat));
+    }
+    if (selectedCategoryTab === 'cognitive') {
+      return SITE_CATEGORIES.filter((c) => ['cognitive', 'memory', 'visual-tracking'].includes(c.cat));
+    }
+    return SITE_CATEGORIES;
+  }, [selectedCategoryTab]);
 
   return (
-    <div className="min-h-screen bg-canvas text-ink-1 font-sans relative overflow-x-hidden selection:bg-blue-500/30 selection:text-cyan-300">
-      
-      {/* ─────────────────────────────────────────────────────────────
-          LAYERED MESH BACKGROUND (Matching DrillsDirectoryClient)
-          ───────────────────────────────────────────────────────────── */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
-        <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[1100px] h-[520px] bg-blue-600/[0.14] rounded-full blur-[150px]" />
-        <div className="absolute top-[22%] -left-40 w-[520px] h-[520px] bg-purple-600/[0.10] rounded-full blur-[140px]" />
-        <div className="absolute top-[38%] -right-40 w-[520px] h-[480px] bg-cyan-500/[0.08] rounded-full blur-[140px]" />
+    <div className="min-h-screen bg-canvas text-ink-1 font-sans relative overflow-x-hidden selection:bg-blue-500/25 selection:text-cyan-300">
+
+      {/* ─────────────────────────────────────────────────────────
+          PRECISION BACKGROUND ARCHITECTURE (ENGINEERED GRID)
+          Subtle mathematical grid + atmospheric lighting
+          ───────────────────────────────────────────────────────── */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden z-0" aria-hidden="true">
+        {/* Subtle atmospheric ambient glow */}
+        <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[1200px] h-[550px] bg-blue-600/[0.12] rounded-full blur-[160px]" />
+        <div className="absolute top-[28%] -left-36 w-[560px] h-[560px] bg-indigo-600/[0.08] rounded-full blur-[150px]" />
+        <div className="absolute top-[48%] -right-36 w-[560px] h-[520px] bg-cyan-600/[0.07] rounded-full blur-[150px]" />
+
+        {/* Precision millimeter line grid */}
         <div
-          className="absolute inset-0 opacity-[0.35]"
+          className="absolute inset-0 opacity-[0.22]"
           style={{
-            backgroundImage: 'linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px)',
-            backgroundSize: '44px 44px',
-            maskImage: 'radial-gradient(ellipse 80% 60% at 50% 20%, black 40%, transparent 90%)',
-            WebkitMaskImage: 'radial-gradient(ellipse 80% 60% at 50% 20%, black 40%, transparent 90%)',
+            backgroundImage: `
+              linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+              linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px)
+            `,
+            backgroundSize: '48px 48px',
+            maskImage: 'radial-gradient(ellipse 85% 70% at 50% 25%, black 40%, transparent 95%)',
+            WebkitMaskImage: 'radial-gradient(ellipse 85% 70% at 50% 25%, black 40%, transparent 95%)',
           }}
         />
-        <div
-          className="absolute inset-0 opacity-[0.04] mix-blend-overlay"
-          style={{
-            backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
-          }}
-        />
+
+        {/* Micro coordinate markers */}
+        <div className="absolute top-24 left-8 text-[10px] font-mono text-white/[0.08] select-none tracking-widest hidden lg:block">
+          COORD // 40.7128° N, 74.0060° W [SYS.01]
+        </div>
+        <div className="absolute top-24 right-8 text-[10px] font-mono text-white/[0.08] select-none tracking-widest hidden lg:block">
+          CALIBRATION // 1000Hz TIMER READY
+        </div>
       </div>
 
-      {/* SEO Semantic Header */}
-      <section className="sr-only" aria-label="Platform overview">
-        <h2>SkillDrills - Free FPS Aim Trainer & Cognitive Brain Training Platform</h2>
-        <p>
-          Master your flick mechanics, reaction speed, memory span, and visual tracking with {totalDrillsCount} free interactive training drills. Zero download, 100% client-side precision.
-        </p>
-      </section>
+      {/* ─────────────────────────────────────────────────────────
+          1. HERO — COMMAND BAR & THE LIVE CALIBRATOR
+          Confidence, typographic discipline, and instant tactile utility
+          ───────────────────────────────────────────────────────── */}
+      <section
+        className="relative pt-8 pb-16 sm:pt-14 sm:pb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10"
+        aria-labelledby="hero-title"
+      >
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
 
-      {/* ─────────────────────────────────────────────────────────────
-          1. HERO SECTION (Unified Professional Typography & Mobile CTAs)
-          ───────────────────────────────────────────────────────────── */}
-      <section className="relative pt-12 pb-14 sm:pt-16 sm:pb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10" aria-labelledby="hero-heading">
-        <Reveal>
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
-            
-            {/* Left Main Copy Column */}
-            <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
-              
-              {/* Eyebrow Badge matching DrillsDirectoryClient */}
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-xs font-mono text-blue-400 font-bold uppercase tracking-wider shadow-[0_0_20px_-6px_rgba(59,130,246,0.5)] mx-auto lg:mx-0">
-                <Sparkles className="w-4 h-4 text-cyan-400" />
-                <span>{t('home.badge', `${totalDrillsCount} Free Drills • No Account • Instant Start`)}</span>
-              </div>
-              
-              {/* Master Headline matching DrillsDirectoryClient font scale */}
-              <h1 id="hero-heading" className="text-4xl sm:text-6xl lg:text-7xl font-black text-ink-1 uppercase tracking-tight leading-[0.95]">
-                {t('home.heroTitlePrefix', 'Master Your')}{' '}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400">
-                  {t('home.heroTitleHighlight', 'Mind & Mechanics')}
-                </span>
-              </h1>
-              
-              {/* Professional Subtitle */}
-              <p className="text-ink-2 text-base sm:text-lg leading-relaxed max-w-2xl mx-auto lg:mx-0 font-normal">
-                {t('home.heroSubtitle', `${totalDrillsCount} free training drills across 8 categories. FPS aim, reaction speed, working memory, attention, and visual tracking. Powered by high-resolution browser clocks with zero installs and instant access.`)}
-              </p>
+          {/* Left Column: Command & Rationale */}
+          <div className="lg:col-span-6 space-y-6 text-center lg:text-left">
 
-              {/* Trust Strip matching DrillsDirectoryClient */}
-              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-x-6 gap-y-2 pt-1">
-                {trustStrip.map((item, i) => {
-                  const Icon = item.icon;
-                  return (
-                    <div key={i} className="flex items-center gap-1.5 text-2xs sm:text-xs font-mono font-semibold text-ink-3 uppercase tracking-wider">
-                      <Icon className="w-3.5 h-3.5 text-emerald-400" />
-                      <span>{item.label}</span>
-                    </div>
-                  );
-                })}
-              </div>
-              
-              {/* Action Buttons (Full-width on mobile, side-by-side on desktop) */}
-              <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start pt-2">
-                <Link 
-                  href={localizeHref('/drills')} 
-                  className="group relative inline-flex items-center justify-center gap-2.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-500 text-white px-7 py-3.5 sm:px-8 sm:py-4 rounded-2xl font-bold text-sm sm:text-base shadow-xl shadow-blue-600/30 hover:shadow-blue-500/45 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all duration-200 w-full sm:w-auto"
-                >
-                  <Sparkles className="w-4 h-4 text-cyan-300 group-hover:rotate-12 transition-transform" aria-hidden="true" />
-                  <span>{t('home.exploreBtn', `Browse All ${totalDrillsCount} Free Drills`)}</span>
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
-                </Link>
-                
-                <Link 
-                  href={localizeHref('/drills/reaction-speed/reaction-time-test')} 
-                  className="inline-flex items-center justify-center gap-2 bg-surface-1/90 backdrop-blur-md border border-hairline-2 text-ink-1 hover:text-white px-6 py-3.5 sm:px-7 sm:py-4 rounded-2xl font-bold text-sm sm:text-base hover:bg-surface-2 hover:border-blue-500/40 active:scale-[0.98] transition-all shadow-lg w-full sm:w-auto"
-                >
-                  <Zap className="w-4 h-4 text-amber-400" aria-hidden="true" />
-                  <span>{t('home.quickStartBtn', 'Take Reaction Test')}</span>
-                </Link>
-              </div>
-
-              {/* Quick Launch Hotlinks */}
-              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2 pt-1 text-xs font-mono text-ink-3">
-                <span className="uppercase tracking-wider mr-1">Popular:</span>
-                <Link 
-                  href={localizeHref('/drills/motor/movement-speed/rapid-tapping')}
-                  className="px-3 py-1.5 rounded-xl bg-surface-1/80 border border-hairline hover:border-emerald-500/40 hover:text-emerald-300 transition-colors text-ink-2"
-                >
-                  ⚡ CPS Test
-                </Link>
-                <Link 
-                  href={localizeHref('/drills/fps/flick-shot-training')}
-                  className="px-3 py-1.5 rounded-xl bg-surface-1/80 border border-hairline hover:border-red-500/40 hover:text-red-300 transition-colors text-ink-2"
-                >
-                  🎯 Flick Aim
-                </Link>
-                <Link 
-                  href={localizeHref('/drills/reaction-speed/reaction-time-test')}
-                  className="px-3 py-1.5 rounded-xl bg-surface-1/80 border border-hairline hover:border-amber-500/40 hover:text-amber-300 transition-colors text-ink-2"
-                >
-                  ⚡ Reaction Speed
-                </Link>
-                <Link 
-                  href={localizeHref('/drills/memory/short-term-memory/digit-span')}
-                  className="px-3 py-1.5 rounded-xl bg-surface-1/80 border border-hairline hover:border-indigo-500/40 hover:text-indigo-300 transition-colors text-ink-2"
-                >
-                  🧠 Digit Span
-                </Link>
-              </div>
-              
-              {/* Stat Chips */}
-              <div className="grid grid-cols-3 gap-2.5 sm:gap-3 max-w-xl mx-auto lg:mx-0 pt-4 border-t border-hairline/80">
-                <div className="text-left bg-surface-1/70 backdrop-blur-xl rounded-2xl p-3.5 sm:p-4 border border-hairline shadow-lg">
-                  <p className="text-2xl sm:text-4xl font-black text-ink-1 tracking-tight leading-none">{totalDrillsCount}</p>
-                  <p className="text-2xs sm:text-xs font-mono font-bold text-ink-3 uppercase tracking-wider mt-1.5">{t('home.statsDrills', 'Free Drills')}</p>
-                </div>
-                <div className="text-left bg-surface-1/70 backdrop-blur-xl rounded-2xl p-3.5 sm:p-4 border border-hairline shadow-lg">
-                  <p className="text-2xl sm:text-4xl font-black text-cyan-400 tracking-tight leading-none">{CATEGORY_COUNT}</p>
-                  <p className="text-2xs sm:text-xs font-mono font-bold text-ink-3 uppercase tracking-wider mt-1.5">{t('home.statsCategories', 'Categories')}</p>
-                </div>
-                <div className="text-left bg-surface-1/70 backdrop-blur-xl rounded-2xl p-3.5 sm:p-4 border border-hairline shadow-lg">
-                  <p className="text-2xl sm:text-4xl font-black text-emerald-400 tracking-tight leading-none">$0</p>
-                  <p className="text-2xs sm:text-xs font-mono font-bold text-ink-3 uppercase tracking-wider mt-1.5">{t('home.statsCost', 'Forever Free')}</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Desktop Visualizer & Aim Telemetry Panel */}
-            <div className="lg:col-span-5 hidden lg:block">
-              <div className="relative bg-surface-1/85 backdrop-blur-2xl border border-hairline-2 rounded-3xl p-6 shadow-2xl overflow-hidden hover:border-blue-500/30 transition-all duration-300">
-                
-                <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-blue-500 via-cyan-400 to-purple-500" />
-                
-                <div className="flex items-center justify-between pb-3.5 mb-3.5 border-b border-hairline text-xs font-mono">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
-                    <span className="text-ink-1 font-bold tracking-wider uppercase">Drill Engine</span>
-                  </div>
-                  <span className="px-2 py-0.5 rounded bg-blue-500/10 text-cyan-300 border border-blue-500/20 font-bold">
-                    CLIENT-SIDE
-                  </span>
-                </div>
-
-                <div className="relative aspect-square max-w-[270px] mx-auto bg-canvas/90 rounded-full border border-blue-500/20 flex items-center justify-center overflow-hidden shadow-inner">
-                  <div className="absolute inset-2 border border-blue-500/10 rounded-full" />
-                  <div className="absolute inset-12 border border-blue-500/15 rounded-full" />
-                  <div className="absolute inset-24 border border-blue-500/10 rounded-full" />
-                  
-                  <div className="absolute inset-x-0 top-1/2 h-[1px] bg-blue-500/20" />
-                  <div className="absolute inset-y-0 left-1/2 w-[1px] bg-blue-500/20" />
-
-                  <div className="absolute w-[2px] h-1/2 bg-gradient-to-t from-cyan-400 via-blue-500 to-transparent top-0 left-1/2 origin-bottom animate-[spin_3.5s_linear_infinite]" />
-                  
-                  <div className="absolute w-4 h-4 bg-emerald-400 rounded-full top-1/4 left-1/3 animate-ping shadow-[0_0_14px_#4ade80]" />
-                  <div className="absolute w-2 h-2 bg-emerald-500 rounded-full top-1/4 left-1/3 shadow-[0_0_8px_#22c55e]" />
-                  
-                  <div className="absolute w-3.5 h-3.5 bg-red-400 rounded-full bottom-1/3 right-1/4 animate-ping shadow-[0_0_12px_#f87171]" style={{ animationDelay: '1.2s' }} />
-                  <div className="absolute w-1.5 h-1.5 bg-red-500 rounded-full bottom-1/3 right-1/4 shadow-[0_0_6px_#ef4444]" />
-
-                  <div className="absolute w-4 h-4 bg-purple-400 rounded-full top-1/2 right-1/3 animate-ping shadow-[0_0_14px_#c084fc]" style={{ animationDelay: '2.4s' }} />
-                  <div className="absolute w-2 h-2 bg-purple-500 rounded-full top-1/2 right-1/3 shadow-[0_0_8px_#a855f7]" />
-                  
-                  <div className="absolute text-cyan-400 w-8 h-8 flex items-center justify-center font-light">
-                    <Crosshair className="w-6 h-6 animate-pulse" />
-                  </div>
-                </div>
-
-                <div className="mt-4 bg-canvas/95 rounded-2xl border border-hairline p-4 font-mono text-xs space-y-2.5 text-ink-2">
-                  <div className="flex justify-between items-center gap-3">
-                    <span className="text-cyan-300 font-bold">&gt; DRILLS:</span>
-                    <span className="text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">{totalDrillsCount} live</span>
-                  </div>
-                  <div className="flex justify-between items-center gap-3">
-                    <span className="text-cyan-300 font-bold">&gt; RENDER:</span>
-                    <span className="text-ink-1 font-bold">Canvas @ native Hz</span>
-                  </div>
-                  <div className="flex justify-between items-center gap-3">
-                    <span className="text-cyan-300 font-bold">&gt; TIMER:</span>
-                    <span className="text-ink-1 font-bold">performance.now()</span>
-                  </div>
-                  <div className="flex justify-between items-center gap-3">
-                    <span className="text-cyan-300 font-bold">&gt; SCORES:</span>
-                    <span className="text-purple-300 font-bold">Browser localStorage</span>
-                  </div>
-                </div>
-
-              </div>
-            </div>
-
-          </div>
-        </Reveal>
-      </section>
-
-      {/* ─────────────────────────────────────────────────────────────
-          2. TRAINING DISCIPLINES / CATEGORY HUBS DIRECTORY
-             (Exact font sizes, cards, and spotlight effects from DrillsDirectoryClient)
-          ───────────────────────────────────────────────────────────── */}
-      <section className="py-14 sm:py-20 border-t border-hairline relative z-10" aria-labelledby="categories-heading">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          
-          <Reveal className="text-center max-w-3xl mx-auto mb-10 space-y-4">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-xs font-mono text-blue-400 font-bold uppercase tracking-wider shadow-[0_0_20px_-6px_rgba(59,130,246,0.5)]">
-              <Sparkles className="w-4 h-4 text-cyan-400" />
-              <span>{t('home.sectorsBadge', 'Training Disciplines')}</span>
-            </div>
-            <h2 id="categories-heading" className="text-3xl sm:text-5xl font-black text-ink-1 uppercase tracking-tight leading-[0.95]">
-              {t('home.sectorsTitlePrefix', 'Explore All')}{' '}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400">
-                {t('home.sectorsTitleHighlight', '8 Disciplines')}
+            {/* System Status Eyebrow */}
+            <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-surface-1/90 border border-hairline-2 shadow-sm backdrop-blur-md">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
               </span>
-            </h2>
-            <p className="text-ink-2 text-base sm:text-lg leading-relaxed max-w-2xl mx-auto">
-              {t('home.sectorsSubtitle', 'Targeted interactive drills for aim, reaction speed, memory, focus, and visual coordination. Choose a discipline to begin.')}
+              <span className="text-[11px] font-mono font-bold tracking-wider uppercase text-ink-2">
+                {t('home.badge', `${TOTAL_DRILLS} browser-native drills · zero account · zero install`)}
+              </span>
+            </div>
+
+            {/* Editorial Headline */}
+            <h1
+              id="hero-title"
+              className="text-4xl sm:text-5xl lg:text-[4rem] font-extrabold text-ink-1 tracking-tight leading-[1.02]"
+            >
+              Train your reflexes, aim, and attention at the{' '}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-indigo-300 font-black">
+                speed of thought.
+              </span>
+            </h1>
+
+            {/* Grounded Subtitle */}
+            <p className="text-ink-2 text-base sm:text-lg leading-relaxed max-w-xl mx-auto lg:mx-0">
+              {t('home.heroSubtitle', `High-precision online drills for tactical FPS aim, reaction latency, working memory, and ocular tracking. No sign-up, no 15GB downloads, no telemetry. Calibrate below in 10 seconds.`)}
             </p>
-          </Reveal>
 
-          {/* Goal Picker Pills Bar (Horizontal scrollable on mobile) */}
-          <Reveal className="mb-10">
-            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none justify-start sm:justify-center">
-              <span className="text-2xs font-mono font-bold text-ink-3 uppercase tracking-wider shrink-0 mr-1 hidden sm:inline">
-                Filter Goal:
-              </span>
-              {goalsList.map((goal) => {
-                const isSelected = selectedGoal === goal.id;
-                const GoalIcon = goal.icon;
+            {/* Hardware & Privacy Trust Badges */}
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-x-5 gap-y-2.5 pt-1">
+              {[
+                { icon: ShieldCheck, text: '100% On-Device Storage' },
+                { icon: Clock, text: 'Sub-ms performance.now()' },
+                { icon: Monitor, text: '144Hz / 240Hz Display-Sync' },
+              ].map((item) => {
+                const Icon = item.icon;
                 return (
-                  <button
-                    key={goal.id}
-                    type="button"
-                    onClick={() => setSelectedGoal(goal.id)}
-                    className={`inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all shrink-0 border ${
-                      isSelected
-                        ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white border-blue-400/50 shadow-lg shadow-blue-500/25'
-                        : 'bg-surface-1/80 backdrop-blur text-ink-2 border-hairline hover:border-hairline-2 hover:text-ink-1 hover:bg-surface-2'
-                    }`}
-                  >
-                    <GoalIcon className={`w-3.5 h-3.5 ${isSelected ? 'text-white' : 'text-ink-3'}`} />
-                    {goal.label}
-                  </button>
+                  <div key={item.text} className="flex items-center gap-1.5 text-2xs sm:text-xs font-mono font-medium text-ink-3 tracking-wide">
+                    <Icon className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                    <span>{item.text}</span>
+                  </div>
                 );
               })}
             </div>
+
+            {/* Call to Actions */}
+            <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start pt-2">
+              <Link
+                href={localizeHref('/drills')}
+                className="group inline-flex items-center justify-center gap-2.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-500 text-white px-8 py-4 rounded-xl font-bold text-sm sm:text-base shadow-xl shadow-blue-600/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all duration-200"
+              >
+                <span>Browse All {TOTAL_DRILLS} Drills</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
+              </Link>
+
+              <Link
+                href={localizeHref('/drills/reaction-speed/reaction-time-test')}
+                className="inline-flex items-center justify-center gap-2.5 bg-surface-1/90 backdrop-blur-xl border border-hairline-2 text-ink-1 hover:text-white px-6 py-4 rounded-xl font-bold text-sm sm:text-base hover:bg-surface-2 hover:border-hairline-2 active:scale-[0.98] transition-all shadow-md"
+              >
+                <Zap className="w-4 h-4 text-amber-400" aria-hidden="true" />
+                <span>Reaction Time Benchmark</span>
+              </Link>
+            </div>
+
+            {/* Hardware Metrics Row */}
+            <dl className="grid grid-cols-3 gap-3 pt-6 border-t border-hairline max-w-lg mx-auto lg:mx-0">
+              <div className="bg-surface-1/50 border border-hairline/60 rounded-xl p-3 text-left">
+                <dd className="text-2xl sm:text-3xl font-black text-ink-1 font-mono tracking-tight leading-none">{TOTAL_DRILLS}</dd>
+                <dt className="text-2xs font-mono font-bold text-ink-3 uppercase tracking-wider mt-1.5">Free Drills</dt>
+              </div>
+              <div className="bg-surface-1/50 border border-hairline/60 rounded-xl p-3 text-left">
+                <dd className="text-2xl sm:text-3xl font-black text-cyan-400 font-mono tracking-tight leading-none">0.0<span className="text-sm font-sans text-ink-3 ml-0.5">s</span></dd>
+                <dt className="text-2xs font-mono font-bold text-ink-3 uppercase tracking-wider mt-1.5">Launch Time</dt>
+              </div>
+              <div className="bg-surface-1/50 border border-hairline/60 rounded-xl p-3 text-left">
+                <dd className="text-2xl sm:text-3xl font-black text-emerald-400 font-mono tracking-tight leading-none">0<span className="text-sm font-sans text-ink-3 ml-0.5">KB</span></dd>
+                <dt className="text-2xs font-mono font-bold text-ink-3 uppercase tracking-wider mt-1.5">Disk Footprint</dt>
+              </div>
+            </dl>
+          </div>
+
+          {/* Right Column: The Tactical Calibration Console */}
+          <div className="lg:col-span-6">
+            <div className="relative bg-surface-1/90 backdrop-blur-2xl border border-hairline-2 rounded-2xl shadow-2xl overflow-hidden ring-1 ring-white/5">
+
+              {/* Console Header Bar */}
+              <div className="flex items-center justify-between px-4 py-3 bg-[#0A0E17]/80 border-b border-hairline text-xs font-mono">
+                <div className="flex items-center gap-2">
+                  <div className="w-2.5 h-2.5 rounded-sm bg-blue-500/20 border border-blue-400 flex items-center justify-center">
+                    <div className="w-1 h-1 bg-cyan-400 rounded-full" />
+                  </div>
+                  <span className="font-bold text-ink-1 tracking-wider uppercase text-[11px]">
+                    SYS.CALIBRATE // 5-SHOT BENCHMARK
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  {/* Sound feedback toggle */}
+                  <button
+                    type="button"
+                    onClick={() => setSoundEnabled(!soundEnabled)}
+                    className="p-1 rounded text-ink-3 hover:text-ink-1 transition-colors"
+                    title={soundEnabled ? 'Audio cues enabled' : 'Audio cues muted'}
+                    aria-label="Toggle calibration audio"
+                  >
+                    {soundEnabled ? <Volume2 className="w-3.5 h-3.5 text-cyan-400" /> : <VolumeX className="w-3.5 h-3.5 text-ink-3" />}
+                  </button>
+
+                  <span className="px-2 py-0.5 rounded bg-surface-2 border border-hairline text-2xs font-mono text-ink-3">
+                    {sandboxState === 'running' ? `TARGET ${hitCount + 1}/5` : '1000Hz CLOCK'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Console Screen Canvas */}
+              <div className="relative aspect-[4/3] sm:aspect-[16/11] bg-[#05080E] select-none overflow-hidden">
+
+                {/* Tactical Reticle Grid Lines */}
+                <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+                  <div className="absolute inset-x-0 top-1/2 h-px bg-cyan-500/[0.08]" />
+                  <div className="absolute inset-y-0 left-1/2 w-px bg-cyan-500/[0.08]" />
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 rounded-full border border-cyan-500/[0.05]" />
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full border border-cyan-500/[0.03]" />
+                  <div className="absolute top-3 left-3 text-[9px] font-mono text-white/10">[Q1]</div>
+                  <div className="absolute top-3 right-3 text-[9px] font-mono text-white/10">[Q2]</div>
+                  <div className="absolute bottom-3 left-3 text-[9px] font-mono text-white/10">[Q3]</div>
+                  <div className="absolute bottom-3 right-3 text-[9px] font-mono text-white/10">[Q4]</div>
+                </div>
+
+                {/* IDLE STATE: Calibration Ready */}
+                {sandboxState === 'idle' && (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center z-10">
+                    <div className="relative mb-5 group cursor-pointer" onClick={startSandbox}>
+                      {/* Pulse ring */}
+                      <div className="absolute -inset-3 rounded-full bg-cyan-400/20 blur-md animate-pulse" />
+                      
+                      {/* Tactical Target Button */}
+                      <button
+                        type="button"
+                        className="relative w-16 h-16 rounded-full bg-gradient-to-br from-blue-600 to-cyan-500 shadow-xl shadow-cyan-500/20 border-2 border-white/20 flex items-center justify-center group-hover:scale-105 active:scale-95 transition-all duration-150"
+                        aria-label="Click to start 5-shot calibration"
+                      >
+                        <Crosshair className="w-7 h-7 text-white" />
+                        <span className="absolute inset-[30%] rounded-full border border-white/40" />
+                        <span className="w-1.5 h-1.5 bg-white rounded-full shadow-sm" />
+                      </button>
+                    </div>
+
+                    <h2 className="text-base sm:text-lg font-bold text-ink-1 tracking-tight mb-1.5">
+                      Click the target to start calibration
+                    </h2>
+                    <p className="text-xs text-ink-2 max-w-sm leading-relaxed mb-4">
+                      Five dynamic targets will appear across the grid. Measures your reaction latency, target acquisition speed, and cursor micro-corrections.
+                    </p>
+
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-1 border border-hairline text-2xs font-mono text-ink-3">
+                      <Terminal className="w-3 h-3 text-cyan-400" />
+                      <span>Zero network latency · Native event loop</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* RUNNING STATE: Active Targets */}
+                {sandboxState === 'running' && currentTarget && (
+                  <div className="absolute inset-0">
+                    {/* Live shot latency feedback banner */}
+                    <div className="absolute top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-surface-1/90 border border-hairline text-2xs font-mono text-cyan-300 flex items-center gap-2 shadow-lg">
+                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping" />
+                      <span>CLICK TARGET {hitCount + 1} OF 5</span>
+                    </div>
+
+                    {/* Ripple feedback from previous hit */}
+                    {rippleFeedback && (
+                      <div
+                        className="absolute pointer-events-none -translate-x-1/2 -translate-y-1/2"
+                        style={{ left: `${rippleFeedback.x}%`, top: `${rippleFeedback.y}%` }}
+                      >
+                        <div className="w-16 h-16 rounded-full border-2 border-cyan-400/60 animate-ping" />
+                        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-full text-[11px] font-mono font-bold text-cyan-300 bg-surface-1/90 px-1.5 py-0.5 rounded border border-hairline whitespace-nowrap shadow">
+                          {rippleFeedback.latency} ms
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Active Target */}
+                    <button
+                      type="button"
+                      onClick={handleTargetHit}
+                      className="absolute rounded-full bg-gradient-to-br from-blue-500 via-cyan-400 to-indigo-500 shadow-[0_0_32px_rgba(34,211,238,0.7)] border border-white/60 active:scale-90 transition-transform cursor-crosshair group"
+                      style={{
+                        left: `${currentTarget.x}%`,
+                        top: `${currentTarget.y}%`,
+                        width: currentTarget.size,
+                        height: currentTarget.size,
+                        transform: 'translate(-50%, -50%)',
+                      }}
+                      aria-label={`Target ${hitCount + 1} of 5`}
+                    >
+                      {/* Outer target ring */}
+                      <span className="absolute inset-[15%] rounded-full border border-black/30 group-hover:border-black/50" />
+                      {/* Center core */}
+                      <span className="absolute inset-[36%] rounded-full bg-white shadow-sm flex items-center justify-center">
+                        <span className="w-1.5 h-1.5 bg-blue-600 rounded-full" />
+                      </span>
+                    </button>
+                  </div>
+                )}
+
+                {/* COMPLETED STATE: Diagnostic Evaluation Card */}
+                {sandboxState === 'done' && (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center z-10 bg-canvas/95 backdrop-blur-md">
+                    <div className="space-y-4 max-w-sm w-full">
+                      
+                      {/* Tier Badge */}
+                      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border text-xs font-mono font-bold uppercase tracking-wider mx-auto shadow-sm"
+                           style={{ borderColor: 'rgba(255,255,255,0.15)' }}>
+                        <Trophy className="w-3.5 h-3.5 text-amber-400" />
+                        <span className="text-ink-1">{rating.label}</span>
+                        <span className="text-ink-3">·</span>
+                        <span className="text-cyan-400">{rating.rank}</span>
+                      </div>
+
+                      {/* Giant Latency Display */}
+                      <div>
+                        <div className="text-5xl sm:text-6xl font-black text-ink-1 font-mono tracking-tight leading-none">
+                          {avgLatency}
+                          <span className="text-xl text-ink-3 font-sans font-medium ml-1.5">ms</span>
+                        </div>
+                        <p className="text-xs font-mono text-ink-3 uppercase tracking-wider mt-2">
+                          Average 5-shot acquisition latency
+                        </p>
+                      </div>
+
+                      {/* Stat Breakdown Grid */}
+                      <div className="grid grid-cols-2 gap-2 font-mono text-xs">
+                        <div className="bg-surface-1 border border-hairline p-2.5 rounded-xl">
+                          <span className="text-2xs text-ink-3 uppercase block mb-0.5">Best Single Shot</span>
+                          <span className="text-sm font-bold text-emerald-400">{bestLatency} ms</span>
+                        </div>
+                        <div className="bg-surface-1 border border-hairline p-2.5 rounded-xl">
+                          <span className="text-2xs text-ink-3 uppercase block mb-0.5">Latency Spread</span>
+                          <span className="text-sm font-bold text-cyan-300">± {latencySpread} ms</span>
+                        </div>
+                      </div>
+
+                      <p className="text-[11px] text-ink-3 leading-relaxed">
+                        Includes mouse transit time. Pure reaction time without moving the mouse is typically 40–70ms faster.
+                      </p>
+
+                      {/* Action Buttons */}
+                      <div className="flex flex-col sm:flex-row gap-2 pt-1">
+                        <button
+                          type="button"
+                          onClick={startSandbox}
+                          className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-surface-2 border border-hairline text-ink-1 text-xs font-bold hover:bg-surface-1 active:scale-[0.98] transition-all"
+                        >
+                          <RotateCcw className="w-3.5 h-3.5" /> Recalibrate
+                        </button>
+                        <Link
+                          href={localizeHref('/drills/reaction-speed/reaction-time-test')}
+                          className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-bold shadow-lg shadow-blue-500/25 active:scale-[0.98] transition-all"
+                        >
+                          Pure Reflex Test <ArrowRight className="w-3.5 h-3.5" />
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Console Status Footer */}
+              <div className="px-4 py-2.5 bg-[#0A0E17]/90 border-t border-hairline flex items-center justify-between text-[11px] font-mono text-ink-3">
+                <span className="flex items-center gap-1.5">
+                  <Cpu className="w-3 h-3 text-cyan-400" />
+                  <span>Hardware polling: Native OS clock</span>
+                </span>
+                <span className="text-emerald-400">Zero data leaves this device</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* ─────────────────────────────────────────────────────────
+          2. RETURNING VISITOR DOSSIER (IF LOCAL DATA EXISTS)
+          Grounded, respectful, 100% private
+          ───────────────────────────────────────────────────────── */}
+      {profile && (
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 relative z-10" aria-label="Your local training history">
+          <div className="bg-surface-1/90 border border-hairline-2 rounded-2xl p-5 sm:p-6 backdrop-blur-xl shadow-xl flex flex-col md:flex-row items-center justify-between gap-5">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shrink-0 shadow-lg shadow-blue-600/20">
+                <Brain className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-base sm:text-lg font-bold text-ink-1 tracking-tight">Pilot Dossier Active</h2>
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-mono">
+                    Local Device
+                  </span>
+                </div>
+                <p className="text-xs text-ink-3 mt-0.5">Read directly from this browser session — zero tracking cookies or cloud telemetry.</p>
+              </div>
+            </div>
+
+            <dl className="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full md:w-auto font-mono text-center">
+              {[
+                ['Rounds Played', profile.gamesPlayed],
+                ['Drills Explored', profile.drillsCount],
+                ['Avg Level', profile.avgLevel],
+                ['Peak Level', profile.maxLevel],
+              ].map(([label, value]) => (
+                <div key={label} className="bg-canvas border border-hairline px-4 py-2.5 rounded-xl">
+                  <dd className="text-lg sm:text-xl font-black text-ink-1 leading-none">{value}</dd>
+                  <dt className="text-[10px] font-bold text-ink-3 uppercase tracking-wider mt-1">{label}</dt>
+                </div>
+              ))}
+            </dl>
+          </div>
+        </section>
+      )}
+
+      {/* ─────────────────────────────────────────────────────────
+          3. CURATED 5-MINUTE PROTOCOLS (HUMAN TRAINING ROUTINES)
+          Give users clear, verified routines tailored to their goals
+          ───────────────────────────────────────────────────────── */}
+      <section className="py-14 sm:py-20 border-t border-hairline relative z-10 bg-surface-1/30" aria-labelledby="protocols-title">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Reveal className="max-w-2xl mb-10 space-y-3">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-1 border border-hairline text-2xs font-mono text-cyan-400 font-bold uppercase tracking-wider">
+              <Flame className="w-3.5 h-3.5 text-amber-400" />
+              <span>Targeted Warm-Up Protocols</span>
+            </div>
+            <h2 id="protocols-title" className="text-2xl sm:text-4xl font-extrabold text-ink-1 tracking-tight">
+              Pick a verified 5-minute routine
+            </h2>
+            <p className="text-ink-2 text-sm sm:text-base leading-relaxed">
+              Don&rsquo;t know where to begin among {TOTAL_DRILLS} drills? These human-curated protocols target specific neuromuscular mechanisms.
+            </p>
           </Reveal>
 
-          {/* Category Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {sortedCategories.map((cat, idx) => {
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {CURATED_PROTOCOLS.map((protocol, idx) => (
+              <Reveal key={protocol.id} delay={idx * 60} className="h-full">
+                <div className="h-full flex flex-col bg-surface-1/80 backdrop-blur-xl border border-hairline-2 rounded-2xl p-6 hover:border-hairline-2 transition-all shadow-lg">
+                  <div className="flex items-start justify-between gap-3 mb-3">
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className={`text-[11px] font-mono font-bold px-2 py-0.5 rounded-full border ${protocol.categoryAccent}`}>
+                          {protocol.duration} PROTOCOL
+                        </span>
+                        <span className="text-2xs font-mono text-ink-3">{protocol.target}</span>
+                      </div>
+                      <h3 className="text-lg font-bold text-ink-1 tracking-tight">{protocol.title}</h3>
+                    </div>
+                  </div>
+
+                  <p className="text-xs text-ink-2 leading-relaxed mb-5">{protocol.objective}</p>
+
+                  {/* Drill Sequence */}
+                  <div className="space-y-2 mt-auto">
+                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-ink-3 block">
+                      Sequence (3 drills):
+                    </span>
+                    <div className="space-y-1.5">
+                      {protocol.drills.map((d, dIdx) => (
+                        <Link
+                          key={d.name}
+                          href={localizeHref(d.href)}
+                          className="flex items-center justify-between p-2.5 rounded-xl bg-canvas/70 border border-hairline hover:border-hairline-2 hover:bg-surface-2 transition-all group"
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <span className="w-5 h-5 rounded bg-surface-1 border border-hairline text-[10px] font-mono font-bold text-ink-3 flex items-center justify-center shrink-0">
+                              0{dIdx + 1}
+                            </span>
+                            <span className="text-xs font-semibold text-ink-1 group-hover:text-blue-400 transition-colors truncate">
+                              {d.name}
+                            </span>
+                            <span className="text-[10px] font-mono text-ink-3 hidden sm:inline">({d.tag})</span>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <span className="text-[10px] font-mono text-ink-3">{d.time}</span>
+                            <ChevronRight className="w-3.5 h-3.5 text-ink-3 group-hover:text-ink-1 group-hover:translate-x-0.5 transition-all" />
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="pt-4 mt-4 border-t border-hairline flex items-center justify-between">
+                    <span className="text-2xs font-mono text-ink-3">Opens directly in current tab</span>
+                    <Link
+                      href={localizeHref(protocol.drills[0].href)}
+                      className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-400 hover:text-cyan-300 transition-colors"
+                    >
+                      <span>Start routine</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </Link>
+                  </div>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ─────────────────────────────────────────────────────────
+          4. THE 8 TRAINING DISCIPLINES (INTERACTIVE DIRECTORY MATRIX)
+          Filterable by objective tab, full category depth
+          ───────────────────────────────────────────────────────── */}
+      <section className="py-14 sm:py-20 border-t border-hairline relative z-10" aria-labelledby="disciplines-title">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Reveal className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+            <div className="max-w-2xl space-y-3">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-1 border border-hairline text-2xs font-mono text-blue-400 font-bold uppercase tracking-wider">
+                <Layers className="w-3.5 h-3.5 text-blue-400" />
+                <span>8 Disciplines · {TOTAL_DRILLS} Interactive Drills</span>
+              </div>
+              <h2 id="disciplines-title" className="text-2xl sm:text-4xl font-extrabold text-ink-1 tracking-tight">
+                Calibrated for specific physical & cognitive functions
+              </h2>
+              <p className="text-ink-2 text-sm sm:text-base leading-relaxed">
+                Choose the exact faculty you want to train. Every drill opens straight into play with zero preamble.
+              </p>
+            </div>
+
+            {/* Filter Tabs */}
+            <div className="flex flex-wrap gap-1.5 p-1 bg-surface-1/90 border border-hairline rounded-xl backdrop-blur-md self-start md:self-auto">
+              {[
+                { id: 'all', label: 'All Disciplines (8)' },
+                { id: 'aim', label: 'Aim & Mechanics (3)' },
+                { id: 'reflex', label: 'Reflex & Latency (2)' },
+                { id: 'cognitive', label: 'Mind & Memory (3)' },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setSelectedCategoryTab(tab.id)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition-all ${
+                    selectedCategoryTab === tab.id
+                      ? 'bg-blue-600 text-white shadow-md'
+                      : 'text-ink-3 hover:text-ink-1 hover:bg-white/5'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </Reveal>
+
+          {/* Categories Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+            {filteredCategories.map((cat, idx) => {
               const Icon = cat.icon;
-              const catDrillsCount = DRILLS.filter(d => d.category === cat.cat).length;
-              const isMatch = selectedGoal === 'all' || cat.goals.includes(selectedGoal);
+              const count = getCategoryCount(cat.cat);
+              const samples = getCategorySampleNames(cat.cat, 3);
               const isDesktopOnly = DESKTOP_ONLY_CATEGORIES.includes(cat.cat);
-              const catTitle = t('sectors.' + cat.cat + '.title', cat.name);
-              const catDesc = t('sectors.' + cat.cat + '.desc', cat.description);
-              const catHref = localizeHref(cat.href);
 
               return (
                 <Reveal key={cat.cat} delay={idx * 30} className="h-full">
                   <Link
-                    href={catHref}
+                    href={localizeHref(cat.href)}
                     onMouseMove={handleCardMouseMove}
-                    className={`group relative isolate flex h-full flex-col justify-between overflow-hidden rounded-3xl border bg-surface-1/70 backdrop-blur-xl p-6 transition-all duration-300 hover:-translate-y-1.5 shadow-xl ${cat.ring} hover:shadow-2xl ${
-                      isMatch ? 'border-hairline hover:border-hairline-2 opacity-100' : 'border-hairline/50 opacity-55 hover:opacity-90'
-                    }`}
+                    className={`group relative isolate flex h-full flex-col overflow-hidden rounded-2xl border border-hairline bg-surface-1/80 backdrop-blur-xl p-5 transition-all duration-300 hover:-translate-y-1 hover:border-hairline-2 shadow-lg ${cat.ring} hover:shadow-2xl`}
                   >
-                    {/* Spotlight tracking cursor */}
+                    {/* Hover radial glow */}
                     <span
                       aria-hidden="true"
                       className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                       style={{ background: `radial-gradient(280px circle at var(--mx, 50%) var(--my, 50%), ${cat.glow}, transparent 70%)` }}
                     />
 
-                    <div className="relative">
-                      <div className="flex items-center justify-between mb-5 gap-3">
-                        <div className="flex items-center gap-3.5 min-w-0">
-                          <div className={`relative shrink-0 w-13 h-13 rounded-2xl bg-gradient-to-br ${cat.color} flex items-center justify-center text-white shadow-lg group-hover:scale-105 transition-transform duration-300`}>
-                            <div className={`absolute -inset-1.5 rounded-2xl bg-gradient-to-br ${cat.color} opacity-40 blur-md -z-10 group-hover:opacity-70 transition-opacity`} />
-                            <Icon className="w-6 h-6" />
-                          </div>
-                          <h3 className={`text-xl font-bold text-ink-1 transition-colors group-hover:${cat.accent} truncate`}>
-                            {catTitle}
+                    {/* Header */}
+                    <div className="relative flex items-start gap-3.5 mb-3">
+                      <div className={`shrink-0 w-11 h-11 rounded-xl bg-gradient-to-br ${cat.color} flex items-center justify-center text-white group-hover:scale-105 transition-transform duration-300 shadow-md`}>
+                        <Icon className="w-5 h-5" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center justify-between gap-1">
+                          <h3 className="text-base font-bold text-ink-1 leading-tight group-hover:text-white transition-colors truncate">
+                            {cat.name}
                           </h3>
                         </div>
-                        <div className="flex flex-col items-end gap-1.5 shrink-0">
-                          {isDesktopOnly && (
-                            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-red-500/10 text-red-400 border border-red-500/20">
-                              Desktop Only
-                            </span>
-                          )}
-                          <span className="text-2xs font-mono font-semibold px-2.5 py-1 rounded-full bg-surface-2 text-ink-3 border border-hairline">
-                            {catDrillsCount} Drills
+                        <div className="flex items-center gap-1.5 mt-1">
+                          <span className="text-2xs font-mono font-bold text-ink-3 uppercase">
+                            {count} Drills
+                          </span>
+                          <span className="text-ink-3/40">·</span>
+                          <span className={`text-[10px] font-mono flex items-center gap-1 ${isDesktopOnly ? 'text-amber-400' : 'text-emerald-400'}`}>
+                            {isDesktopOnly ? <Laptop className="w-3 h-3" /> : <Smartphone className="w-3 h-3" />}
+                            <span>{isDesktopOnly ? 'Desktop' : 'Touch/Mobile'}</span>
                           </span>
                         </div>
                       </div>
-
-                      <p className="text-xs text-ink-2 leading-relaxed mb-3.5 line-clamp-2">
-                        {catDesc}
-                      </p>
-
-                      {/* Action Description Line */}
-                      <div className="p-3 rounded-xl bg-canvas/80 border border-hairline text-2xs text-ink-3 font-mono mb-5">
-                        <span className={`${cat.accent} font-bold block mb-0.5`}>What you do:</span>
-                        <span className="text-ink-2">{cat.actionText}</span>
-                      </div>
                     </div>
 
-                    <div className={`relative pt-4 border-t border-hairline flex items-center justify-between text-xs font-semibold ${cat.accent}`}>
-                      <span>{t('home.viewHub', 'Enter Hub')}</span>
+                    {/* Blurb */}
+                    <p className="relative text-xs text-ink-2 leading-relaxed mb-4 line-clamp-2">
+                      {cat.blurb}
+                    </p>
+
+                    {/* Direct Sample Jump Links */}
+                    <div className="relative mt-auto pt-3 border-t border-hairline space-y-1">
+                      <span className="text-[10px] font-mono text-ink-3 uppercase tracking-wider block mb-1">
+                        Featured Drills:
+                      </span>
+                      <ul className="space-y-1 text-2xs text-ink-2 font-mono">
+                        {samples.map((name) => (
+                          <li key={name} className="truncate flex items-center gap-1.5 hover:text-white transition-colors">
+                            <span className="w-1 h-1 rounded-full bg-cyan-400" />
+                            <span>{name}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    {/* Footer link */}
+                    <div className={`relative mt-4 pt-3 border-t border-hairline flex items-center justify-between text-xs font-semibold ${cat.accent}`}>
+                      <span>Enter Hub</span>
                       <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </div>
                   </Link>
@@ -814,802 +871,238 @@ export default function HomePageClient() {
         </div>
       </section>
 
-      {/* ─────────────────────────────────────────────────────────────
-          3. PLAYABLE IN-PAGE MINI DRILL (Interactive Reaction Sandbox)
-          ───────────────────────────────────────────────────────────── */}
-      <section className="py-14 sm:py-20 border-t border-hairline bg-surface-1/40 relative overflow-hidden" aria-labelledby="sandbox-heading">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <Reveal>
-            <div className="bg-surface-1/90 border border-hairline-2 rounded-3xl p-6 sm:p-8 backdrop-blur-2xl shadow-2xl overflow-hidden relative">
-              
-              <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-amber-400 via-rose-500 to-cyan-400" />
-              
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-                
-                {/* Left Info Column */}
-                <div className="lg:col-span-5 space-y-4">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-xs font-mono text-amber-400 font-bold uppercase tracking-wider">
-                    <Zap className="w-3.5 h-3.5 text-amber-400" />
-                    <span>Instant Live Benchmark</span>
-                  </div>
-
-                  <h2 id="sandbox-heading" className="text-2xl sm:text-4xl font-black text-ink-1 uppercase tracking-tight leading-tight">
-                    Test Your Reaction &amp; Aim Right Now
-                  </h2>
-
-                  <p className="text-sm sm:text-base text-ink-2 leading-relaxed">
-                    Click or tap the 5 glowing targets sequentially as fast as they appear. Measures stimulus-to-click latency via the browser&rsquo;s high-resolution timer.
-                  </p>
-
-                  {/* Latency feedback stats */}
-                  <div className="grid grid-cols-2 gap-3 pt-1 font-mono">
-                    <div className="p-3 rounded-xl bg-canvas border border-hairline">
-                      <p className="text-2xs text-ink-3 uppercase tracking-wider font-bold">Last Target</p>
-                      <p className="text-xl font-black text-cyan-400 mt-0.5">
-                        {lastClickMs > 0 ? `${lastClickMs} ms` : '--'}
-                      </p>
-                    </div>
-                    <div className="p-3 rounded-xl bg-canvas border border-hairline">
-                      <p className="text-2xs text-ink-3 uppercase tracking-wider font-bold">Average Latency</p>
-                      <p className="text-xl font-black text-emerald-400 mt-0.5">
-                        {avgLatency > 0 ? `${avgLatency} ms` : '--'}
-                      </p>
-                    </div>
-                  </div>
-
-                  {sandboxState === 'completed' && (
-                    <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs space-y-2">
-                      <div className="flex items-center gap-2 text-emerald-400 font-bold font-mono">
-                        <Award className="w-4 h-4" />
-                        <span>Calibration Complete! Average: {avgLatency}ms</span>
-                      </div>
-                      <p className="text-ink-2 text-xs leading-relaxed">
-                        {avgLatency < 220 
-                          ? '🔥 Elite reaction tier — well inside competitive esports reflex ranges.' 
-                          : avgLatency < 280 
-                          ? '⚡ Solid reflex speed. Consistent flick sessions will push you sub-220ms.' 
-                          : '🎯 Good foundational baseline. Train your saccadic response in the Reaction Speed hub.'}
-                      </p>
-                      <Link 
-                        href={localizeHref('/drills/reaction-speed')}
-                        className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-cyan-400 hover:text-cyan-300 pt-1"
-                      >
-                        Train Reaction Drills <ArrowRight className="w-3 h-3" />
-                      </Link>
-                    </div>
-                  )}
-                </div>
-
-                {/* Right Interactive Target Arena */}
-                <div className="lg:col-span-7">
-                  <div 
-                    className="relative w-full aspect-[4/3] sm:aspect-[16/10] bg-canvas/95 rounded-2xl border border-hairline-2 overflow-hidden shadow-inner flex items-center justify-center select-none touch-manipulation"
-                  >
-                    {/* Tech Grid Backdrop */}
-                    <div 
-                      className="absolute inset-0 opacity-20 pointer-events-none"
-                      style={{
-                        backgroundImage: 'linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px)',
-                        backgroundSize: '24px 24px',
-                      }}
-                    />
-
-                    {/* State 1: Idle Screen */}
-                    {sandboxState === 'idle' && (
-                      <div className="text-center space-y-4 p-6 z-10">
-                        <div className="w-14 h-14 rounded-2xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center mx-auto text-cyan-400 shadow-lg shadow-blue-500/10">
-                          <MousePointer className="w-7 h-7 animate-bounce" />
-                        </div>
-                        <div>
-                          <p className="text-base font-bold text-ink-1 uppercase tracking-wider">Ready For Calibration?</p>
-                          <p className="text-xs text-ink-3 mt-1">Acquire 5 targets sequentially to benchmark your reaction speed.</p>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={startSandboxTest}
-                          className="px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-500 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:scale-105 active:scale-95 transition-all"
-                        >
-                          Start 5-Target Test
-                        </button>
-                      </div>
-                    )}
-
-                    {/* State 2: Running Target Mode */}
-                    {sandboxState === 'running' && currentTarget && (
-                      <>
-                        <div className="absolute top-3 left-4 text-xs font-mono text-ink-3 z-10 flex items-center gap-2">
-                          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                          <span>TARGET {targetCount + 1} OF 5</span>
-                        </div>
-
-                        {/* Interactive Target (Touch-friendly minimum size) */}
-                        <button
-                          type="button"
-                          onClick={handleTargetClick}
-                          className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-br from-red-500 to-rose-600 border-2 border-white flex items-center justify-center shadow-[0_0_20px_#ef4444] hover:scale-110 active:scale-90 transition-transform cursor-crosshair group touch-manipulation"
-                          style={{
-                            left: `${currentTarget.x}%`,
-                            top: `${currentTarget.y}%`,
-                            width: `${currentTarget.size}px`,
-                            height: `${currentTarget.size}px`,
-                          }}
-                          aria-label="Click target"
-                        >
-                          <span className="w-2.5 h-2.5 rounded-full bg-white group-hover:scale-125 transition-transform" />
-                          <span className="absolute inset-0 rounded-full border border-red-300 animate-ping pointer-events-none opacity-75" />
-                        </button>
-                      </>
-                    )}
-
-                    {/* State 3: Completed Screen */}
-                    {sandboxState === 'completed' && (
-                      <div className="text-center space-y-4 p-6 z-10">
-                        <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mx-auto text-emerald-400">
-                          <Trophy className="w-7 h-7" />
-                        </div>
-                        <div>
-                          <p className="text-xl font-black text-ink-1 tracking-tight">{avgLatency} ms Avg Reaction</p>
-                          <p className="text-xs text-ink-3 mt-0.5">5 of 5 Targets Acquired Successfully</p>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={startSandboxTest}
-                          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-surface-1 border border-hairline-2 text-ink-1 font-bold text-xs hover:bg-surface-2 transition-all active:scale-95"
-                        >
-                          <RotateCcw className="w-3.5 h-3.5" /> Retest Latency
-                        </button>
-                      </div>
-                    )}
-
-                  </div>
-                </div>
-
-              </div>
-            </div>
-          </Reveal>
-        </div>
-      </section>
-
-      {/* ─────────────────────────────────────────────────────────────
-          4. PLATFORM FACTS (Verified Architecture)
-          ───────────────────────────────────────────────────────────── */}
-      <section className="py-14 sm:py-20 border-t border-hairline relative z-10" aria-labelledby="facts-heading">
+      {/* ─────────────────────────────────────────────────────────
+          5. THE HONEST COMPARISON (WHY BROWSER-NATIVE WINS)
+          Clean engineering matrix: SkillDrills vs Bloated Desktop Software
+          ───────────────────────────────────────────────────────── */}
+      <section className="py-14 sm:py-20 border-t border-hairline bg-surface-1/40 relative z-10" aria-labelledby="comparison-title">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          
-          <Reveal className="text-center max-w-3xl mx-auto mb-12 space-y-3">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-xs font-mono text-cyan-300 font-bold uppercase tracking-wider">
-              <BarChart3 className="w-3.5 h-3.5 text-cyan-300" />
-              <span>Platform Specifications</span>
+          <Reveal className="max-w-2xl mb-12 space-y-3">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-1 border border-hairline text-2xs font-mono text-emerald-400 font-bold uppercase tracking-wider">
+              <Shield className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Architecture & Speed</span>
             </div>
-
-            <h2 id="facts-heading" className="text-3xl sm:text-5xl font-black text-ink-1 uppercase tracking-tight leading-[0.95]">
-              The Entire Library, <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400">100% Open</span>
+            <h2 id="comparison-title" className="text-2xl sm:text-4xl font-extrabold text-ink-1 tracking-tight">
+              A warm-up shouldn&rsquo;t take 10 minutes to load
             </h2>
-
-            <p className="text-ink-2 text-base sm:text-lg leading-relaxed max-w-2xl mx-auto">
-              Zero paywalls, zero accounts, and zero bloated installers. What you see is available immediately in your browser.
+            <p className="text-ink-2 text-sm sm:text-base leading-relaxed">
+              Traditional training software demands multi-gigabyte downloads, mandatory account logins, and constant launcher updates. We built SkillDrills because we just wanted to warm up instantly before a match.
             </p>
           </Reveal>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {PLATFORM_FACTS.map((fact, index) => {
-              const Icon = fact.icon;
-              return (
-                <Reveal key={fact.label} delay={index * 50}>
-                  <div
-                    onMouseMove={handleCardMouseMove}
-                    className={`group relative h-full bg-surface-1/70 backdrop-blur-xl border border-hairline rounded-3xl p-6 hover:-translate-y-1.5 transition-all duration-300 shadow-xl overflow-hidden ${fact.hoverBorder}`}
-                  >
-                    <div className={`absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r ${fact.gradient}`} />
-                    <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${fact.gradient} flex items-center justify-center text-white shadow-lg mb-4`}>
-                      <Icon className="w-5 h-5" />
-                    </div>
-                    <p className="text-3xl sm:text-4xl font-black text-ink-1 tracking-tight leading-none">{fact.value}</p>
-                    <h3 className={`text-xs font-mono font-bold uppercase tracking-wider mt-2.5 mb-2 ${fact.accent}`}>{fact.label}</h3>
-                    <p className="text-xs sm:text-sm text-ink-2 leading-relaxed">{fact.detail}</p>
-                  </div>
-                </Reveal>
-              );
-            })}
-          </div>
-
-          <Reveal delay={200}>
-            <p className="mt-8 text-center text-xs sm:text-sm text-ink-3 max-w-3xl mx-auto leading-relaxed">
-              Drill and category counts are derived dynamically from the build registry. Your metrics remain strictly on your personal device.
-            </p>
-          </Reveal>
-        </div>
-      </section>
-
-      {/* ─────────────────────────────────────────────────────────────
-          5. FLAGSHIP SHOWCASE (Interactive Tabbed Drill Deep-Dive)
-          ───────────────────────────────────────────────────────────── */}
-      <section className="py-14 sm:py-20 border-t border-hairline bg-surface-1/40 relative overflow-hidden" aria-labelledby="flagship-heading">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          
-          <Reveal className="text-center mb-10 space-y-3">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-xs font-mono text-indigo-400 font-bold uppercase tracking-wider">
-              <Layers className="w-3.5 h-3.5 text-indigo-400" />
-              <span>Flagship Mechanics</span>
-            </div>
-            
-            <h2 id="flagship-heading" className="text-3xl sm:text-5xl font-black text-ink-1 uppercase tracking-tight leading-[0.95]">
-              Science-Backed Training Formats
-            </h2>
-            
-            <p className="text-ink-2 text-base sm:text-lg leading-relaxed max-w-2xl mx-auto">
-              Structured on validated experimental neuropsychology paradigms and Fitts&rsquo;s motor targeting principles.
-            </p>
-
-            {/* Interactive Tab Switcher */}
-            <div className="flex flex-wrap justify-center gap-2 pt-4">
-              {FLAGSHIP_DRILLS.map((drill) => (
-                <button
-                  key={drill.id}
-                  type="button"
-                  onClick={() => setActiveFlagshipTab(drill.id)}
-                  className={`px-4 py-2.5 rounded-xl text-xs font-mono font-bold uppercase tracking-wider transition-all duration-200 ${
-                    activeFlagshipTab === drill.id
-                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/20 scale-105'
-                      : 'bg-surface-1/80 border border-hairline text-ink-3 hover:text-ink-1 hover:border-hairline-2'
-                  }`}
-                >
-                  {drill.category}
-                </button>
-              ))}
-            </div>
-          </Reveal>
-
-          {/* Active Flagship Display Card */}
+          {/* Spec Comparison Table */}
           <Reveal>
-            <div className="bg-surface-1/90 border border-hairline-2 rounded-3xl p-6 sm:p-10 backdrop-blur-2xl shadow-2xl overflow-hidden relative">
-              <div className={`absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r ${activeFlagship.accentGradient}`} />
-              
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-                
-                {/* Left Detail Column */}
-                <div className="lg:col-span-7 space-y-4">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className={`text-2xs font-mono font-bold px-2.5 py-1 rounded-full bg-white/5 border border-hairline ${activeFlagship.accentColor}`}>
-                      {activeFlagship.badge}
-                    </span>
-                    <span className="text-2xs font-mono text-ink-3 bg-canvas px-2.5 py-1 rounded-full border border-hairline">
-                      Paradigm: {activeFlagship.paradigm}
-                    </span>
-                  </div>
-
-                  <h3 className="text-2xl sm:text-3xl font-black text-ink-1 tracking-tight">
-                    {activeFlagship.title}
-                  </h3>
-
-                  <p className="text-sm sm:text-base text-ink-2 leading-relaxed">
-                    {activeFlagship.description}
-                  </p>
-
-                  {/* 4 Metric Badges */}
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-2">
-                    {activeFlagship.metrics.map((m) => (
-                      <div key={m.label} className="p-2.5 rounded-xl bg-canvas border border-hairline text-center">
-                        <p className="text-2xs font-mono text-ink-3 uppercase">{m.label}</p>
-                        <p className="text-xs font-bold text-ink-1 mt-0.5">{m.value}</p>
-                      </div>
+            <div className="bg-surface-1/80 border border-hairline-2 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-xl">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm">
+                  <thead>
+                    <tr className="border-b border-hairline bg-canvas/80 font-mono text-2xs uppercase tracking-wider text-ink-3">
+                      <th className="py-4 px-6 font-bold">Metric / Feature</th>
+                      <th className="py-4 px-6 font-bold text-cyan-400 bg-cyan-500/5">
+                        <div className="flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full bg-cyan-400" />
+                          <span>SkillDrills Web Engine</span>
+                        </div>
+                      </th>
+                      <th className="py-4 px-6 font-bold text-ink-3">
+                        Traditional Desktop Trainers (Aim Lab / Kovaak&rsquo;s)
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-hairline">
+                    {COMPARISON_SPECS.map((row) => (
+                      <tr key={row.feature} className="hover:bg-white/[0.02] transition-colors">
+                        <td className="py-4 px-6 font-semibold text-ink-1">
+                          {row.feature}
+                        </td>
+                        <td className="py-4 px-6 font-mono text-xs font-bold text-emerald-400 bg-cyan-500/5">
+                          <div className="flex items-center gap-2">
+                            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                            <span>{row.skilldrills}</span>
+                          </div>
+                        </td>
+                        <td className="py-4 px-6 font-mono text-xs text-ink-3">
+                          {row.desktopSuites}
+                        </td>
+                      </tr>
                     ))}
-                  </div>
-
-                  <div className="pt-2">
-                    <Link
-                      href={localizeHref(activeFlagship.href)}
-                      className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-500 text-white px-7 py-3.5 rounded-2xl font-bold text-xs uppercase tracking-wider hover:shadow-lg shadow-blue-500/25 active:scale-95 transition-all"
-                    >
-                      <Play className="w-4 h-4 fill-white" /> Launch {activeFlagship.category} Drill
-                    </Link>
-                  </div>
-                </div>
-
-                {/* Right Animated Simulation Graphic */}
-                <div className="lg:col-span-5">
-                  <div className="relative aspect-video bg-canvas/95 rounded-2xl border border-hairline-2 overflow-hidden shadow-2xl p-4 flex flex-col justify-between">
-                    <div className="flex items-center justify-between text-2xs font-mono text-ink-3 border-b border-hairline pb-2">
-                      <span className="text-cyan-300 font-bold">DRILL SIMULATION</span>
-                      <span>PREVIEW</span>
-                    </div>
-
-                    <div className="relative w-full h-36 flex items-center justify-center">
-                      <div 
-                        className="absolute inset-0 opacity-15"
-                        style={{
-                          backgroundImage: 'radial-gradient(#38bdf8 1px, transparent 1px)',
-                          backgroundSize: '16px 16px',
-                        }}
-                      />
-
-                      {activeFlagship.previewType === 'fps' && (
-                        <>
-                          <div className="absolute top-1/4 left-1/4 w-8 h-8 rounded-full border-2 border-red-500 bg-red-500/20 animate-ping" />
-                          <div className="absolute top-1/4 left-1/4 w-6 h-6 rounded-full bg-red-500 border border-white flex items-center justify-center shadow-lg shadow-red-500/50">
-                            <div className="w-1 h-1 bg-white rounded-full" />
-                          </div>
-                          <div className="absolute bottom-1/4 right-1/3 w-5 h-5 rounded-full bg-amber-400 border border-white shadow-md animate-pulse" />
-                        </>
-                      )}
-
-                      {activeFlagship.previewType === 'cognitive' && (
-                        <div className="grid grid-cols-3 gap-2">
-                          <div className="w-12 h-12 rounded-xl bg-purple-500/20 border border-purple-500 flex items-center justify-center font-mono font-black text-purple-300 text-lg">A</div>
-                          <div className="w-12 h-12 rounded-xl bg-indigo-500/20 border border-indigo-500 flex items-center justify-center font-mono font-black text-indigo-300 text-lg">7</div>
-                          <div className="w-12 h-12 rounded-xl bg-blue-500/20 border border-blue-500 flex items-center justify-center font-mono font-black text-cyan-300 text-lg">E</div>
-                        </div>
-                      )}
-
-                      {activeFlagship.previewType === 'memory' && (
-                        <div className="flex gap-2 font-mono">
-                          {['4', '9', '2', '7', '?'].map((d, i) => (
-                            <div key={i} className={`w-10 h-12 rounded-lg border flex items-center justify-center font-bold text-base ${i === 4 ? 'border-cyan-400 bg-cyan-500/20 text-cyan-300 animate-pulse' : 'border-hairline bg-surface-1 text-white'}`}>
-                              {d}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-
-                      {activeFlagship.previewType === 'reaction' && (
-                        <div className="relative flex items-center justify-center">
-                          <div className="w-20 h-20 rounded-full bg-emerald-500/20 border-2 border-emerald-400 flex items-center justify-center animate-ping" />
-                          <div className="absolute w-14 h-14 rounded-full bg-emerald-500 border-2 border-white flex items-center justify-center text-white font-mono font-bold text-xs shadow-[0_0_20px_#10b981]">
-                            GO!
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="flex items-center justify-between text-2xs font-mono text-ink-3 border-t border-hairline pt-2">
-                      <span>STIMULUS PROTOCOL</span>
-                      <span className="text-emerald-400 font-bold">CLIENT RUNTIME</span>
-                    </div>
-                  </div>
-                </div>
-
-              </div>
-            </div>
-          </Reveal>
-
-        </div>
-      </section>
-
-      {/* ─────────────────────────────────────────────────────────────
-          6. THE 3-STEP ROUTINE ("How Daily Skill Mastery Works")
-          ───────────────────────────────────────────────────────────── */}
-      <section className="py-14 sm:py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10" aria-labelledby="steps-heading">
-        <Reveal className="text-center mb-12 space-y-3">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-xs font-mono text-emerald-400 font-bold uppercase tracking-wider">
-            <Timer className="w-3.5 h-3.5 text-emerald-400" />
-            <span>The 5-Minute Daily Routine</span>
-          </div>
-
-          <h2 id="steps-heading" className="text-3xl sm:text-5xl font-black text-ink-1 uppercase tracking-tight leading-[0.95]">
-            How Daily Skill Mastery Works
-          </h2>
-
-          <p className="text-ink-2 text-base sm:text-lg leading-relaxed max-w-2xl mx-auto">
-            Zero complex setups or driver installations. Complete your daily warmup or cognitive training session in three streamlined steps.
-          </p>
-        </Reveal>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Reveal delay={0}>
-            <div className="h-full bg-surface-1/70 backdrop-blur-xl border border-hairline rounded-3xl p-6 sm:p-7 relative overflow-hidden shadow-xl hover:border-blue-500/40 transition-all">
-              <span className="text-5xl font-black text-white/5 absolute top-4 right-5 font-mono select-none">01</span>
-              <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400 mb-5">
-                <Crosshair className="w-6 h-6" />
-              </div>
-              <h3 className="text-base sm:text-lg font-bold text-ink-1 uppercase tracking-tight mb-2">
-                1. Calibrate Your Baseline
-              </h3>
-              <p className="text-xs sm:text-sm text-ink-2 leading-relaxed">
-                Open any drill directly in your browser. Complete a 45-second calibration round to establish your current reaction latency, flick accuracy, or memory span.
-              </p>
-            </div>
-          </Reveal>
-
-          <Reveal delay={100}>
-            <div className="h-full bg-surface-1/70 backdrop-blur-xl border border-hairline rounded-3xl p-6 sm:p-7 relative overflow-hidden shadow-xl hover:border-purple-500/40 transition-all">
-              <span className="text-5xl font-black text-white/5 absolute top-4 right-5 font-mono select-none">02</span>
-              <div className="w-12 h-12 rounded-2xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 mb-5">
-                <Sliders className="w-6 h-6" />
-              </div>
-              <h3 className="text-base sm:text-lg font-bold text-ink-1 uppercase tracking-tight mb-2">
-                2. Adaptive Progressive Drills
-              </h3>
-              <p className="text-xs sm:text-sm text-ink-2 leading-relaxed">
-                As your accuracy improves, our client engine dynamically tightens stimulus intervals, shrinks target radii, and introduces multi-tasking stressors.
-              </p>
-            </div>
-          </Reveal>
-
-          <Reveal delay={200}>
-            <div className="h-full bg-surface-1/70 backdrop-blur-xl border border-hairline rounded-3xl p-6 sm:p-7 relative overflow-hidden shadow-xl hover:border-emerald-500/40 transition-all">
-              <span className="text-5xl font-black text-white/5 absolute top-4 right-5 font-mono select-none">03</span>
-              <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mb-5">
-                <Trophy className="w-6 h-6" />
-              </div>
-              <h3 className="text-base sm:text-lg font-bold text-ink-1 uppercase tracking-tight mb-2">
-                3. Private Local Progression
-              </h3>
-              <p className="text-xs sm:text-sm text-ink-2 leading-relaxed">
-                Review your session logs, reaction graphs and personal bests. Everything is written to your browser&rsquo;s local storage on this device &mdash; private and instant.
-              </p>
-            </div>
-          </Reveal>
-        </div>
-      </section>
-
-      {/* ─────────────────────────────────────────────────────────────
-          7. RETURNING ATHLETE LOCAL DASHBOARD (If Data Exists)
-          ───────────────────────────────────────────────────────────── */}
-      {profile && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <Reveal>
-            <div className="bg-surface-1/85 border border-hairline-2 rounded-3xl p-6 sm:p-8 backdrop-blur-xl shadow-2xl relative overflow-hidden">
-              <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 opacity-70" />
-              <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-                <div className="flex items-center gap-4">
-                  <div className="relative w-14 h-14 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/20 shrink-0">
-                    <Brain className="w-7 h-7 text-white" />
-                  </div>
-                  <div>
-                    <h2 className="text-lg sm:text-xl font-bold text-ink-1 uppercase tracking-tight">Your Local Training Dashboard</h2>
-                    <p className="text-xs text-ink-3">Locally stored metrics across completed sessions</p>
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full md:w-auto font-mono">
-                  <div className="bg-canvas border border-hairline p-3.5 rounded-2xl text-center">
-                    <p className="text-xl font-black text-ink-1">{profile.gamesPlayed}</p>
-                    <p className="text-2xs font-bold text-ink-3 uppercase tracking-widest mt-0.5">Sessions</p>
-                  </div>
-                  <div className="bg-canvas border border-hairline p-3.5 rounded-2xl text-center">
-                    <p className="text-xl font-black text-ink-1">{profile.drillsCount}</p>
-                    <p className="text-2xs font-bold text-ink-3 uppercase tracking-widest mt-0.5">Drills</p>
-                  </div>
-                  <div className="bg-canvas border border-hairline p-3.5 rounded-2xl text-center">
-                    <p className="text-xl font-black text-ink-1">Lvl {profile.avgLevel}</p>
-                    <p className="text-2xs font-bold text-ink-3 uppercase tracking-widest mt-0.5">Avg Level</p>
-                  </div>
-                  <div className="bg-canvas border border-hairline p-3.5 rounded-2xl text-center">
-                    <p className="text-xl font-black text-amber-400 flex items-center justify-center gap-1">
-                      <Trophy className="w-4 h-4" />
-                      {profile.maxLevel}
-                    </p>
-                    <p className="text-2xs font-bold text-ink-3 uppercase tracking-widest mt-0.5">Best Level</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </Reveal>
-        </section>
-      )}
-
-      {/* ─────────────────────────────────────────────────────────────
-          8. LIVE DRILL TICKER (Continuously scrolling library marquee)
-          ───────────────────────────────────────────────────────────── */}
-      <section className="py-14 sm:py-20 border-t border-hairline overflow-hidden" aria-labelledby="ticker-heading">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Reveal className="text-center mb-10 space-y-2">
-            <h2 id="ticker-heading" className="text-3xl sm:text-5xl font-black text-ink-1 uppercase tracking-tight leading-[0.95]">
-              Inside The Library
-            </h2>
-            <p className="text-ink-2 text-base sm:text-lg max-w-2xl mx-auto">
-              A preview of the {totalDrillsCount} drills available to launch right now. Hover to pause, click any card to begin.
-            </p>
-          </Reveal>
-        </div>
-
-        <div
-          className="marquee-viewport relative w-full"
-          style={{
-            maskImage: 'linear-gradient(90deg, transparent, black 8%, black 92%, transparent)',
-            WebkitMaskImage: 'linear-gradient(90deg, transparent, black 8%, black 92%, transparent)',
-          }}
-        >
-          <div className="marquee-track flex" style={{ '--marquee-duration': '65s' }}>
-            {[0, 1].map((pass) => (
-              <div key={pass} className="flex shrink-0" aria-hidden={pass === 1 ? 'true' : undefined}>
-                {tickerDrills.map((drill) => {
-                  const accent = CATEGORY_ACCENTS[drill.category] || 'text-blue-400';
-                  const card = (
-                    <>
-                      <div className="flex items-center justify-between gap-3 mb-3">
-                        <span className={`text-2xs font-mono font-bold uppercase tracking-wider ${accent}`}>
-                          {drill.categoryLabel}
-                        </span>
-                        <span className="text-2xs font-mono px-2 py-0.5 rounded-full bg-white/5 text-ink-3 border border-hairline shrink-0">
-                          {drill.difficulty}
-                        </span>
-                      </div>
-                      <h3 className="text-base font-bold text-ink-1 mb-1.5 tracking-tight">{drill.name}</h3>
-                      <p className="text-xs text-ink-2 leading-relaxed line-clamp-3">{drill.description}</p>
-                      <div className="mt-4 pt-3 border-t border-hairline flex items-center justify-between text-2xs font-mono text-ink-3">
-                        <span>{drill.subcategory || 'Drill'}</span>
-                        <span className="text-cyan-400 font-semibold">{drill.duration}</span>
-                      </div>
-                    </>
-                  );
-                  const cls = 'w-[280px] shrink-0 mr-4 bg-surface-1/70 backdrop-blur-xl border border-hairline rounded-3xl p-5 shadow-lg';
-                  return pass === 1 ? (
-                    <div key={`${drill.id}-clone`} className={cls}>{card}</div>
-                  ) : (
-                    <Link
-                      key={drill.id}
-                      href={localizeHref(drill.href)}
-                      className={`${cls} block hover:border-hairline-2 hover:bg-surface-2/80 hover:-translate-y-1 transition-all duration-200`}
-                    >
-                      {card}
-                    </Link>
-                  );
-                })}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ─────────────────────────────────────────────────────────────
-          9. ARCHITECTURE MANIFESTO & THE REAL COMPARISON
-          ───────────────────────────────────────────────────────────── */}
-      <section className="py-14 sm:py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <Reveal>
-          <div className="bg-surface-1/70 border border-hairline-2 rounded-3xl p-6 sm:p-10 backdrop-blur-xl shadow-2xl relative overflow-hidden">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-              
-              {/* Left Column: Mission Story */}
-              <div className="lg:col-span-7 space-y-4">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-xs font-mono text-blue-400 font-bold uppercase tracking-wider">
-                  <Sparkles className="w-3.5 h-3.5 text-blue-400" />
-                  <span>Why We Built This</span>
-                </div>
-
-                <h2 className="text-2xl sm:text-4xl font-black text-ink-1 uppercase tracking-tight">
-                  Aim Trainers &amp; Brain Apps Got Bloated. We Built Pure Performance.
-                </h2>
-
-                <p className="text-sm sm:text-base text-ink-2 leading-relaxed">
-                  Too many training utilities require subscriptions, multi-gigabyte client installs, or email capture before you ever interact with a drill. A warmup for your reaction speed, aim mechanics, and working memory should execute the moment you open a tab.
-                </p>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                  <div className="flex items-start gap-2.5 p-3.5 rounded-2xl bg-canvas/60 border border-hairline">
-                    <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                    <div>
-                      <p className="text-xs font-bold text-ink-1">Instant Browser Launch</p>
-                      <p className="text-2xs text-ink-3">Zero installation or wait times.</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-2.5 p-3.5 rounded-2xl bg-canvas/60 border border-hairline">
-                    <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                    <div>
-                      <p className="text-xs font-bold text-ink-1">Scientific Formats</p>
-                      <p className="text-2xs text-ink-3">Digit span, N-back &amp; Fitts targeting.</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-2.5 p-3.5 rounded-2xl bg-canvas/60 border border-hairline">
-                    <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                    <div>
-                      <p className="text-xs font-bold text-ink-1">Privacy By Design</p>
-                      <p className="text-2xs text-ink-3">Scores stay strictly on your device.</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-2.5 p-3.5 rounded-2xl bg-canvas/60 border border-hairline">
-                    <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                    <div>
-                      <p className="text-xs font-bold text-ink-1">100% Free Forever</p>
-                      <p className="text-2xs text-ink-3">No hidden trials or premium tiers.</p>
-                    </div>
-                  </div>
-                </div>
+                  </tbody>
+                </table>
               </div>
 
-              {/* Right column: The Deal Summary */}
-              <div className="lg:col-span-5 bg-canvas/90 border border-hairline-2 rounded-3xl p-6 shadow-xl space-y-4">
-                <div className="flex items-center justify-between pb-3 border-b border-hairline text-xs font-mono">
-                  <span className="text-ink-3 uppercase tracking-wider font-bold">The Deal</span>
-                  <span className="text-cyan-300 font-bold">No Asterisks</span>
-                </div>
-
-                <div className="space-y-2.5 text-xs sm:text-sm">
-                  <div className="flex items-center justify-between gap-3 p-3 rounded-xl bg-surface-1 border border-hairline">
-                    <span className="text-ink-2">Price</span>
-                    <span className="text-emerald-400 font-bold font-mono">$0, all drills</span>
-                  </div>
-
-                  <div className="flex items-center justify-between gap-3 p-3 rounded-xl bg-surface-1 border border-hairline">
-                    <span className="text-ink-2">Account</span>
-                    <span className="text-emerald-400 font-bold font-mono">Not required</span>
-                  </div>
-
-                  <div className="flex items-center justify-between gap-3 p-3 rounded-xl bg-surface-1 border border-hairline">
-                    <span className="text-ink-2">Install size</span>
-                    <span className="text-emerald-400 font-bold font-mono">0 KB (web)</span>
-                  </div>
-
-                  <div className="flex items-center justify-between gap-3 p-3 rounded-xl bg-surface-1 border border-hairline">
-                    <span className="text-ink-2">Your scores</span>
-                    <span className="text-emerald-400 font-bold font-mono">Stored locally</span>
-                  </div>
-                </div>
-
+              {/* Clarifying engineer note */}
+              <div className="p-4 bg-canvas/90 border-t border-hairline flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-ink-3 font-mono">
+                <span className="flex items-center gap-2">
+                  <Info className="w-4 h-4 text-blue-400 shrink-0" />
+                  <span>Honest note: Desktop 3D engines are required for exact 3D in-game FOV/sens translation. SkillDrills is built for 2D reaction, micro-mechanics, and instant warmup.</span>
+                </span>
                 <Link
                   href={localizeHref('/drills')}
-                  className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-xs flex items-center justify-center gap-2 hover:shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-all uppercase tracking-wider"
+                  className="shrink-0 text-cyan-300 font-bold hover:underline inline-flex items-center gap-1"
                 >
-                  Start Training Now <ArrowRight className="w-3.5 h-3.5" />
+                  Start training now <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </div>
-
             </div>
-          </div>
-        </Reveal>
-      </section>
-
-      {/* ─────────────────────────────────────────────────────────────
-          10. GLOBAL REACH & ACCESSIBILITY
-          ───────────────────────────────────────────────────────────── */}
-      <section className="py-14 sm:py-20 border-t border-hairline bg-surface-1/40 relative overflow-hidden" aria-labelledby="reach-heading">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-
-          <Reveal className="text-center mb-12 space-y-3">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-xs font-mono text-cyan-300 font-bold uppercase tracking-wider">
-              <Globe className="w-3.5 h-3.5 text-cyan-300" />
-              <span>Reach &amp; Availability</span>
-            </div>
-
-            <h2 id="reach-heading" className="text-3xl sm:text-5xl font-black tracking-tight text-ink-1 uppercase leading-[0.95]">
-              Open To <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400">Anyone</span> With A Browser
-            </h2>
-
-            <p className="text-ink-2 text-base sm:text-lg leading-relaxed max-w-2xl mx-auto">
-              No region lock, no waitlists, and no special hardware requirements beyond modern web standards.
-            </p>
           </Reveal>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            <Reveal delay={0}>
-              <div
-                onMouseMove={handleCardMouseMove}
-                className="group relative h-full bg-surface-1/70 backdrop-blur-xl border border-hairline rounded-3xl p-6 sm:p-7 hover:border-blue-500/40 hover:-translate-y-1.5 transition-all duration-300 shadow-xl overflow-hidden"
-              >
-                <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-blue-500 to-cyan-400" />
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white shadow-lg mb-5">
-                  <Globe className="w-6 h-6" />
-                </div>
-                <h3 className="text-lg font-bold text-ink-1 tracking-tight mb-2">Six Languages</h3>
-                <p className="text-xs sm:text-sm text-ink-2 leading-relaxed">
-                  The home page and every category hub are translated into English, Português, Español, 日本語, Deutsch, and 한국어 with native SEO hreflang tags.
-                </p>
-              </div>
-            </Reveal>
-
-            <Reveal delay={80}>
-              <div
-                onMouseMove={handleCardMouseMove}
-                className="group relative h-full bg-surface-1/70 backdrop-blur-xl border border-hairline rounded-3xl p-6 sm:p-7 hover:border-purple-500/40 hover:-translate-y-1.5 transition-all duration-300 shadow-xl overflow-hidden"
-              >
-                <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-purple-500 to-indigo-400" />
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white shadow-lg mb-5">
-                  <MousePointer className="w-6 h-6" />
-                </div>
-                <h3 className="text-lg font-bold text-ink-1 tracking-tight mb-2">Desktop &amp; Mobile Responsive</h3>
-                <p className="text-xs sm:text-sm text-ink-2 leading-relaxed">
-                  Memory, cognitive, visual, and tracking drills are fully calibrated for mobile touch. FPS and precision motor drills are labeled desktop-only for mouse inputs.
-                </p>
-              </div>
-            </Reveal>
-
-            <Reveal delay={160}>
-              <div
-                onMouseMove={handleCardMouseMove}
-                className="group relative h-full bg-surface-1/70 backdrop-blur-xl border border-hairline rounded-3xl p-6 sm:p-7 hover:border-emerald-500/40 hover:-translate-y-1.5 transition-all duration-300 shadow-xl overflow-hidden"
-              >
-                <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-emerald-500 to-teal-400" />
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center text-white shadow-lg mb-5">
-                  <Shield className="w-6 h-6" />
-                </div>
-                <h3 className="text-lg font-bold text-ink-1 tracking-tight mb-2">On-Device Privacy</h3>
-                <p className="text-xs sm:text-sm text-ink-2 leading-relaxed">
-                  No tracking profiles or personal identifiable data. Drill performance remains securely on your machine in local browser storage.
-                </p>
-              </div>
-            </Reveal>
-          </div>
-
         </div>
       </section>
 
-      {/* ─────────────────────────────────────────────────────────────
-          11. FREQUENTLY ASKED QUESTIONS (Interactive Accordion)
-          ───────────────────────────────────────────────────────────── */}
-      <section className="py-14 sm:py-20 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10" aria-labelledby="faq-heading">
-        <Reveal className="text-center mb-12 space-y-3">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-xs font-mono text-cyan-400 font-bold uppercase tracking-wider">
-            <CheckCircle2 className="w-3.5 h-3.5 text-cyan-400" />
-            <span>Common Questions</span>
+      {/* ─────────────────────────────────────────────────────────
+          6. SCIENTIFIC & TECHNICAL UNDERPINNINGS
+          Real credibility: event loop, sub-ms clock, privacy
+          ───────────────────────────────────────────────────────── */}
+      <section className="py-14 sm:py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10" aria-labelledby="engineering-title">
+        <Reveal className="max-w-2xl mb-12 space-y-3">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-1 border border-hairline text-2xs font-mono text-purple-400 font-bold uppercase tracking-wider">
+            <Cpu className="w-3.5 h-3.5 text-purple-400" />
+            <span>Engineered Credibility</span>
           </div>
-
-          <h2 id="faq-heading" className="text-3xl sm:text-5xl font-black text-ink-1 uppercase tracking-tight leading-[0.95]">
-            Frequently Asked Questions
+          <h2 id="engineering-title" className="text-2xl sm:text-4xl font-extrabold text-ink-1 tracking-tight">
+            How the browser timing loop works
           </h2>
-
-          <p className="text-ink-2 text-base sm:text-lg leading-relaxed">
-            Everything you need to know about our browser drills, scoring accuracy, and local data privacy.
+          <p className="text-ink-2 text-sm sm:text-base leading-relaxed">
+            Standard web timers drift and lag. Here is how SkillDrills delivers precision measurement directly in a browser tab.
           </p>
         </Reveal>
 
-        <div className="space-y-3.5">
-          {FAQ_ITEMS.map((item, idx) => {
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          {[
+            {
+              step: '01',
+              title: 'Sub-Millisecond Clock',
+              body: 'We measure input timestamps using window.performance.now() with microsecond resolution relative to navigation start. It is immune to system clock adjustments and OS clock skew.',
+              tag: 'performance.now()',
+            },
+            {
+              step: '02',
+              title: 'Display Refresh Synchronization',
+              body: 'Drills render on native HTML5 Canvas synced with requestAnimationFrame, executing at your monitor’s native refresh rate (60Hz, 144Hz, 240Hz) without synthetic frame drops.',
+              tag: '144Hz / 240Hz Ready',
+            },
+            {
+              step: '03',
+              title: 'Zero-Knowledge Local Storage',
+              body: 'Personal bests, levels, and progression records never leave your computer. Everything is stored in your browser’s localStorage. Clearing site data erases your records cleanly.',
+              tag: 'Zero Telemetry',
+            },
+          ].map((item, i) => (
+            <Reveal key={item.step} delay={i * 80} className="h-full">
+              <div className="h-full bg-surface-1/80 backdrop-blur-xl border border-hairline rounded-2xl p-6 relative overflow-hidden shadow-lg flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-xs font-mono font-bold text-blue-400 px-2 py-0.5 rounded bg-blue-500/10 border border-blue-500/20">
+                      SYS // {item.step}
+                    </span>
+                    <span className="text-2xs font-mono text-ink-3">{item.tag}</span>
+                  </div>
+                  <h3 className="text-base font-bold text-ink-1 tracking-tight mb-2">{item.title}</h3>
+                  <p className="text-xs sm:text-sm text-ink-2 leading-relaxed">{item.body}</p>
+                </div>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </section>
+
+      {/* ─────────────────────────────────────────────────────────
+          7. FREQUENTLY ASKED QUESTIONS (GROUNDED & HONEST)
+          Rendered in DOM for SEO FAQPage schema compliance
+          ───────────────────────────────────────────────────────── */}
+      <section className="py-14 sm:py-20 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10" aria-labelledby="faq-title">
+        <Reveal className="mb-10 space-y-3">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-1 border border-hairline text-2xs font-mono text-cyan-400 font-bold uppercase tracking-wider">
+            <ShieldCheck className="w-3.5 h-3.5 text-cyan-400" />
+            <span>Clear Answers</span>
+          </div>
+          <h2 id="faq-title" className="text-2xl sm:text-4xl font-extrabold text-ink-1 tracking-tight">
+            Frequently asked questions
+          </h2>
+          <p className="text-ink-2 text-sm sm:text-base leading-relaxed">
+            Honest answers about hardware accuracy, browser input lag, and how scores are preserved.
+          </p>
+        </Reveal>
+
+        <div className="space-y-3">
+          {HOME_FAQ_ITEMS.map((item, idx) => {
             const isOpen = openFaq === idx;
             return (
-              <Reveal key={idx} delay={idx * 30}>
-                <div className="bg-surface-1/70 backdrop-blur-xl border border-hairline rounded-2xl overflow-hidden transition-all">
+              <div
+                key={item.q}
+                className="bg-surface-1/80 backdrop-blur-xl border border-hairline rounded-2xl overflow-hidden shadow-sm transition-all"
+              >
+                <h3>
                   <button
                     type="button"
                     onClick={() => setOpenFaq(isOpen ? -1 : idx)}
-                    className="w-full p-5 sm:p-6 text-left flex items-center justify-between gap-4 text-sm sm:text-base font-bold text-ink-1 hover:text-cyan-300 transition-colors"
+                    aria-expanded={isOpen}
+                    aria-controls={`faq-answer-${idx}`}
+                    className="w-full p-5 text-left flex items-center justify-between gap-4 text-sm sm:text-base font-bold text-ink-1 hover:text-cyan-300 transition-colors"
                   >
                     <span>{item.q}</span>
-                    <ChevronDown className={`w-5 h-5 text-ink-3 shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180 text-cyan-400' : ''}`} />
+                    <ChevronDown
+                      className={`w-5 h-5 text-ink-3 shrink-0 transition-transform duration-200 ${
+                        isOpen ? 'rotate-180 text-cyan-400' : ''
+                      }`}
+                    />
                   </button>
+                </h3>
 
-                  {isOpen && (
-                    <div className="px-5 sm:px-6 pb-5 pt-3 text-xs sm:text-sm text-ink-2 leading-relaxed border-t border-hairline/60">
-                      {item.a}
-                    </div>
-                  )}
+                <div
+                  id={`faq-answer-${idx}`}
+                  hidden={!isOpen}
+                  className="px-5 pb-5 pt-1 text-xs sm:text-sm text-ink-2 leading-relaxed border-t border-hairline/60"
+                >
+                  {item.a}
                 </div>
-              </Reveal>
+              </div>
             );
           })}
         </div>
       </section>
 
-      {/* ─────────────────────────────────────────────────────────────
-          12. CALL TO ACTION (Fast One-Click Entry)
-          ───────────────────────────────────────────────────────────── */}
-      <section className="py-16 sm:py-24 border-t border-hairline bg-surface-1/40 relative overflow-hidden" aria-labelledby="cta-heading">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-blue-600/[0.18] rounded-full blur-[150px] pointer-events-none" />
+      {/* ─────────────────────────────────────────────────────────
+          8. CLOSING CALL TO ACTION
+          Sleek, direct, non-condescending closing statement
+          ───────────────────────────────────────────────────────── */}
+      <section className="py-16 sm:py-24 border-t border-hairline bg-surface-1/40 relative overflow-hidden" aria-labelledby="closing-title">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[350px] bg-blue-600/[0.14] rounded-full blur-[160px] pointer-events-none" />
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-4 z-10">
-          <Reveal>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-xs font-mono text-cyan-400 font-bold uppercase tracking-wider mb-2">
-              <Play className="w-3.5 h-3.5 text-cyan-400" />
-              <span>Ready In Under 2 Seconds</span>
+        <div className="relative max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center z-10">
+          <Reveal className="space-y-6">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-xs font-mono text-blue-400 font-bold uppercase tracking-wider">
+              <span>Ready in 1 second · No account needed</span>
             </div>
 
-            <h2 id="cta-heading" className="text-3xl sm:text-5xl font-black text-ink-1 uppercase tracking-tight leading-[0.95]">
-              Start Sharpening Your Reflexes Today
+            <h2 id="closing-title" className="text-3xl sm:text-5xl font-extrabold text-ink-1 tracking-tight">
+              Start your warm-up right now.
             </h2>
-            
-            <p className="text-ink-2 text-base sm:text-lg leading-relaxed max-w-2xl mx-auto">
-              No registration forms. No credit cards. Zero setup time. Open any drill and test your limits instantly.
+
+            <p className="text-ink-2 text-sm sm:text-base leading-relaxed max-w-xl mx-auto">
+              Open any drill in this tab. Your scores stay on this machine, and the clock starts on your first click.
             </p>
-            
-            <div className="pt-6 flex flex-col sm:flex-row gap-3.5 justify-center items-center">
-              <Link 
-                href={localizeHref('/drills')} 
-                className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-500 text-white px-9 py-4 rounded-2xl font-bold text-sm sm:text-base shadow-xl shadow-blue-600/30 hover:shadow-blue-500/40 active:scale-[0.98] transition-all w-full sm:w-auto"
+
+            <div className="pt-2 flex flex-col sm:flex-row gap-3 justify-center items-center">
+              <Link
+                href={localizeHref('/drills')}
+                className="inline-flex items-center justify-center gap-2.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-500 text-white px-8 py-4 rounded-xl font-bold text-sm sm:text-base shadow-xl shadow-blue-600/30 hover:shadow-blue-500/40 active:scale-[0.98] transition-all w-full sm:w-auto"
               >
-                Browse All {totalDrillsCount} Drills
+                <span>Browse all {TOTAL_DRILLS} drills</span>
                 <ArrowRight className="w-4 h-4" aria-hidden="true" />
               </Link>
-              <Link 
-                href={localizeHref('/drills/fps')} 
-                className="inline-flex items-center justify-center gap-2 bg-surface-1 border border-hairline text-ink-1 hover:text-white px-8 py-4 rounded-2xl font-bold text-sm sm:text-base hover:bg-surface-2 hover:border-hairline-2 active:scale-[0.98] transition-all w-full sm:w-auto"
+              <Link
+                href={localizeHref('/drills/fps')}
+                className="inline-flex items-center justify-center gap-2 bg-surface-1 border border-hairline text-ink-1 hover:text-white px-7 py-4 rounded-xl font-bold text-sm sm:text-base hover:bg-surface-2 hover:border-hairline-2 active:scale-[0.98] transition-all w-full sm:w-auto"
               >
-                <Crosshair className="w-4.5 h-4.5 text-red-400" />
-                FPS Aim Hub
+                <Crosshair className="w-4 h-4 text-red-400" />
+                <span>FPS Aim Trainer Hub</span>
               </Link>
             </div>
           </Reveal>
         </div>
       </section>
 
+      {/* Global Site Footer */}
       <SiteFooter />
     </div>
   );

@@ -15,6 +15,7 @@ import {
 import generateShareCard, { shareScoreCard } from '../../../../components/ShareScoreCard';
 import { getPlayerName } from '../../../../lib/leaderboard';
 import { drillAudio } from '../../../../lib/drillAudio';
+import { useDrillSensitivity } from '../../../../lib/drillSensitivity';
 import { drillFlash } from '../../../../lib/drillFlash';
 import { drillTimeout } from '../../../../lib/drillTimeout';
 import { drillPenalty } from '../../../../lib/drillPenalty';
@@ -144,7 +145,7 @@ export default function TargetSwitchingSwarmClient() {
   const [openAccordion, setOpenAccordion] = useState(null);
   const [isTouchOnlyDevice, setIsTouchOnlyDevice] = useState(false);
   
-  const [universalSens, setUniversalSens] = useState(1.0);
+  const universalSens = useDrillSensitivity();
 
   const [score, setScore] = useState(0);
   const [bestScore, setBestScore] = useState(0);
@@ -181,14 +182,7 @@ export default function TargetSwitchingSwarmClient() {
     logicalWidth: 0, logicalHeight: 0
   });
 
-  const cmPer360 = (30 / universalSens).toFixed(1);
-
   useEffect(() => {
-    try {
-      const savedSens = localStorage.getItem('targetSwarm_sens');
-      if (savedSens) setUniversalSens(parseFloat(savedSens));
-    } catch (e) {}
-
     const saved = getSavedData();
     setBestScore(saved.bestScore || 0);
     setBestCombo(saved.bestCombo || 0);
@@ -209,12 +203,6 @@ export default function TargetSwitchingSwarmClient() {
   useEffect(() => {
     return () => countdownTimeoutsRef.current.forEach(clearTimeout);
   }, []);
-
-  useEffect(() => {
-    if (gameState !== 'playing' && gameState !== 'countdown') {
-      try { localStorage.setItem('targetSwarm_sens', universalSens.toString()); } catch (e) {}
-    }
-  }, [universalSens, gameState]);
 
   const triggerFlash = useCallback(() => {
     if (!drillFlash.isEnabled()) return;
@@ -840,7 +828,6 @@ export default function TargetSwitchingSwarmClient() {
                 { icon: Target, accent: "cyan", title: "Objective (+100 PTS)", text: "Rapidly Switch & Eliminate Active Swarms" },
                 { icon: AlertCircle, accent: "red", title: "Failure Rule", text: penaltyEnabled ? "Missed Click / Timeout → Resets Combo, -0.5s" : "Missed Click / Timeout → Resets Combo" },
               ]}
-              sensitivity={{ value: universalSens, onChange: setUniversalSens, cmPer360 }}
               stats={[
                 { icon: Trophy, label: "Best Score", value: bestScore, color: "text-white", accent: "slate" },
                 { icon: Flame, label: "Best Combo", value: `${bestCombo}x`, color: "text-cyan-400", accent: "cyan" },

@@ -15,6 +15,7 @@ import {
 import generateShareCard, { shareScoreCard } from '../../../../components/ShareScoreCard';
 import { getPlayerName } from '../../../../lib/leaderboard';
 import { drillAudio } from '../../../../lib/drillAudio';
+import { useDrillSensitivity } from '../../../../lib/drillSensitivity';
 import { drillFlash } from '../../../../lib/drillFlash';
 import { drillPenalty } from '../../../../lib/drillPenalty';
 import { getStartLevel, getDifficultyProgress, ramp } from '../../../../lib/drillDifficulty';
@@ -102,7 +103,7 @@ const FAQ_ITEMS = [
   { q: "How do I get a higher accuracy score?", a: "Stop predicting. Reactive tracking means letting your eyes process the direction change first, then snapping to the target. Predicting leads to over-flicking." },
   { q: "What is the V-crossover point?", a: "It's the center of a zigzag strafe path. Instead of chasing the target to each extreme, aim at where the target crosses through the middle of its movement arc." },
   { q: "How does the level progression work?", a: "Every 1400 points increases your continuous level. Higher levels make targets smaller, faster, and perform more frequent direction reversals with tighter lifespan windows." },
-  { q: "What sensitivity should I use?", a: "For tracking, moderate to low sensitivity (25–45 cm/360) works best. Use the universal sensitivity slider to match your in-game settings before starting." },
+  { q: "What sensitivity should I use?", a: "For tracking, moderate to low sensitivity (25–45 cm/360) works best. Set the Mouse Sensitivity slider in Session Settings on the drills hub to match your in-game settings — it applies to every mouse-aimed drill." },
   { q: "Do I need to click to damage the target?", a: "No. This drill uses pure dwell-tracking — hold your crosshair inside the target's hitbox and its health drains automatically for as long as you stay locked on. Break contact and the drain pauses until you reacquire it." },
   { q: "What stats does this drill track?", a: "Each run logs your tracking accuracy (frames on-target versus total frames), targets destroyed, targets that escaped, your best combo streak, and the peak level reached — all shown on the results screen after time runs out." },
   { q: "Can this improve my Apex Legends tracking?", a: "Yes significantly. Apex fights require 0.5–2s of continuous tracking to confirm kills. Training reactive tracking against direction changes directly improves your damage output." },
@@ -137,7 +138,7 @@ export default function AntiZigzagClient() {
   const [openAccordion, setOpenAccordion] = useState(null);
   const [isTouchOnlyDevice, setIsTouchOnlyDevice] = useState(false);
   
-  const [universalSens, setUniversalSens] = useState(1.0);
+  const universalSens = useDrillSensitivity();
 
   const [score, setScore] = useState(0);
   const [bestScore, setBestScore] = useState(0);
@@ -174,14 +175,7 @@ export default function AntiZigzagClient() {
     particles: [], hitMarkers: [], screenShake: 0, logicalWidth: 0, logicalHeight: 0
   });
 
-  const cmPer360 = (30 / universalSens).toFixed(1);
-
   useEffect(() => {
-    try {
-      const savedSens = localStorage.getItem('zigzag_sens');
-      if (savedSens) setUniversalSens(parseFloat(savedSens));
-    } catch (e) {}
-
     const saved = getSavedData();
     setBestScore(saved.bestScore || 0);
     setBestCombo(saved.bestCombo || 0);
@@ -202,12 +196,6 @@ export default function AntiZigzagClient() {
   useEffect(() => {
     return () => countdownTimeoutsRef.current.forEach(clearTimeout);
   }, []);
-
-  useEffect(() => {
-    if (gameState !== 'playing' && gameState !== 'countdown') {
-      try { localStorage.setItem('zigzag_sens', universalSens.toString()); } catch (e) {}
-    }
-  }, [universalSens, gameState]);
 
   const triggerFlash = useCallback(() => {
     if (!drillFlash.isEnabled()) return;
@@ -837,7 +825,6 @@ export default function AntiZigzagClient() {
                 { icon: Target, accent: "redOrange", title: "Objective (+10 / 0.25s)", text: "Track Erratic Strafe Reversals" },
                 { icon: AlertCircle, accent: "red", title: "Failure Rule", text: penaltyEnabled ? "Target Escape → Resets Combo, -0.6s" : "Target Escape → Resets Combo" },
               ]}
-              sensitivity={{ value: universalSens, onChange: setUniversalSens, cmPer360 }}
               stats={[
                 { icon: Trophy, label: "Best Score", value: bestScore, color: "text-white", accent: "slate" },
                 { icon: Flame, label: "Best Combo", value: `${bestCombo}x`, color: "text-red-400", accent: "redOrange" },
