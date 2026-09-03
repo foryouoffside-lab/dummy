@@ -490,7 +490,7 @@ export default function NBackClient() {
 
           {/* IN-GAME HUD SOUND + FLASH TOGGLES */}
           {(gameState === 'playing' || gameState === 'countdown') && (
-            <div className="absolute bottom-4 right-4 z-40 flex items-center gap-2">
+            <div className="absolute bottom-4 max-sm:bottom-28 right-4 z-40 flex items-center gap-2">
               <button
                 onPointerDown={(e) => e.stopPropagation()}
                 onClick={(e) => {
