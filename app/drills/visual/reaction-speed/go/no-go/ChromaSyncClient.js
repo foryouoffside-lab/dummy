@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 
-import { Volume2, VolumeX, Target, Eye, Users, TrendingUp, Zap, ZapOff, Brain, Crosshair, Heart, Trophy } from 'lucide-react';
+import { Volume2, VolumeX, Target, Eye, Users, TrendingUp, Zap, ZapOff, Brain, Crosshair, Trophy } from 'lucide-react';
 
 import { isIdleFrameSkippable } from '@/lib/performance';
 import generateShareCard, { shareScoreCard } from '../../../../../../components/ShareScoreCard';
@@ -38,7 +38,6 @@ const ELITE_SCORE = 16000; // 1000 -> 16000 (scaled for unbounded continuous run
 const TIME_PER_HIT = 0.6; // +0.6s per valid hit / correct hold
 const TIME_PENALTY = 0.8; // -0.8s on error / commission / timeout (opt-in gated)
 const STORAGE_KEY = 'skilldrills_visual_go_nogo_v5';
-const MAX_LIVES = 5;
 
 // Clean 2D Target Renderer matching deploy style (104px diameter / 52px radius)
 function draw2dTarget(ctx, x, y, targetVisible, targetType) {
@@ -140,7 +139,6 @@ export default function ChromaSyncClient() {
   // HUD & Best Stats State
   const [uiScore, setUiScore] = useState(0);
   const [uiTimeLeft, setUiTimeLeft] = useState(DRILL_DURATION);
-  const [uiLives, setUiLives] = useState(MAX_LIVES);
   const [bestScore, setBestScore] = useState(0);
   const [bestCombo, setBestCombo] = useState(0);
   const [bestLevel, setBestLevel] = useState(1);
@@ -153,8 +151,6 @@ export default function ChromaSyncClient() {
     missedClicks: 0,
     finalLevel: 1,
     maxCombo: 0,
-    livesLeft: MAX_LIVES,
-    outOfLives: false,
     grade: null,
   });
 
@@ -184,7 +180,6 @@ export default function ChromaSyncClient() {
     timeLeft: DRILL_DURATION,
     perfectHits: 0,
     missedClicks: 0,
-    lives: MAX_LIVES,
   });
 
   // Precision 2D target renderer (fixed 104px diameter, 52px radius)
@@ -290,8 +285,6 @@ export default function ChromaSyncClient() {
       missedClicks: e.missedClicks,
       finalLevel: Math.floor(bestLevelRunRef.current),
       maxCombo: e.maxCombo,
-      livesLeft: e.lives,
-      outOfLives: e.lives <= 0,
       grade,
     });
 
@@ -504,13 +497,11 @@ export default function ChromaSyncClient() {
       if (signalTimeoutRef.current) clearTimeout(signalTimeoutRef.current);
       spawnNextSignal();
     } else if (type === 'NO_GO' && targetVisible) {
-      // WRONG CLICK ON RED NO-GO SIGNAL — costs 1 life.
+      // WRONG CLICK ON RED NO-GO SIGNAL — breaks the combo.
       e.missedClicks++;
-      e.lives = Math.max(0, e.lives - 1);
       if (drillPenalty.isEnabled()) e.timeLeft -= TIME_PENALTY;
       e.combo = 0;
       setUiCombo(0);
-      setUiLives(e.lives);
 
       drillAudio?.playPenalty?.();
       triggerFlash();
@@ -518,13 +509,9 @@ export default function ChromaSyncClient() {
 
       if (signalTimeoutRef.current) clearTimeout(signalTimeoutRef.current);
 
-      if (e.lives <= 0) {
-        endGame();
-        return;
-      }
       spawnNextSignal();
     }
-  }, [targetVisible, spawnNextSignal, triggerFlash, endGame]);
+  }, [targetVisible, spawnNextSignal, triggerFlash]);
 
   // Enter Drill (Start Countdown -> Playing)
   const enterDrill = useCallback(async () => {
@@ -550,7 +537,6 @@ export default function ChromaSyncClient() {
     setUiLevel(startLevel);
     setUiCombo(0);
     setUiTimeLeft(DRILL_DURATION);
-    setUiLives(MAX_LIVES);
     lastTimeRef.current = DRILL_DURATION;
     setTargetVisible(false);
 
@@ -562,7 +548,6 @@ export default function ChromaSyncClient() {
       timeLeft: DRILL_DURATION,
       perfectHits: 0,
       missedClicks: 0,
-      lives: MAX_LIVES,
     };
 
     setIsFullscreen(true);
@@ -654,8 +639,8 @@ export default function ChromaSyncClient() {
               </div>
             </div>
             <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Lives</div>
-              <div className={`text-lg sm:text-xl font-black tabular-nums ${uiLives <= 1 ? 'text-red-400 animate-pulse' : 'text-rose-400'}`}>{uiLives}</div>
+              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Combo</div>
+              <div className="text-lg sm:text-xl font-black tabular-nums text-rose-400">{uiCombo}x</div>
             </div>
             <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
@@ -677,23 +662,11 @@ export default function ChromaSyncClient() {
           {/* IN-BOX OVERLAY HUD */}
           {(gameState === 'playing' || gameState === 'countdown') && (
             <>
-              {/* TOP-LEFT: SCORE & LIVES */}
+              {/* TOP-LEFT: SCORE */}
               <div className="absolute top-4 left-4 z-30 pointer-events-none flex flex-col gap-1">
                 <div>
                   <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Score</p>
                   <p className="text-2xl sm:text-3xl font-black text-white tabular-nums leading-tight">{uiScore}</p>
-                </div>
-                <div className="flex items-center gap-1 mt-1">
-                  {Array.from({ length: MAX_LIVES }).map((_, i) => (
-                    <Heart
-                      key={i}
-                      className={`w-3.5 h-3.5 sm:w-4 sm:h-4 transition-all duration-200 ${
-                        i < uiLives
-                          ? 'text-red-500 fill-red-500 drop-shadow-[0_0_6px_rgba(239,68,68,0.6)]'
-                          : 'text-gray-700 fill-gray-800/40'
-                      }`}
-                    />
-                  ))}
                 </div>
               </div>
 
@@ -786,7 +759,7 @@ export default function ChromaSyncClient() {
               isNewBest={isNewBest}
               stats={[
                 { label: 'Accuracy', value: analytics.accuracy, suffix: '%' },
-                { label: 'Lives Left', value: `${analytics.livesLeft}/${MAX_LIVES}` },
+                { label: 'Misses', value: analytics.missedClicks },
                 { label: 'Peak Level', value: `Lv. ${analytics.finalLevel}` },
                 { label: 'Max Combo', value: analytics.maxCombo, suffix: 'x' },
               ]}
@@ -817,7 +790,7 @@ export default function ChromaSyncClient() {
                   result={penaltyEnabled ? "Costs 1 life, deducts 0.8s, resets combo" : "Costs 1 life & resets combo. No time loss (default)"} 
                 />
                 <DrillRuleItem num="4" text="Missed GO (Timeout)" highlight="Streak Reset" result="No life lost. Resets combo multiplier" />
-                <DrillRuleItem num="5" text="5 Lives Per Run" highlight="Game Over at 0" result="Drill ends early if lives run out" />
+                <DrillRuleItem num="5" text="Wrong NO-GO Click" highlight="Combo reset" result="Costs your combo — the run always lasts the full clock" />
               </div>
             </DrillAccordion>
 
@@ -877,9 +850,9 @@ export default function ChromaSyncClient() {
                 <DrillFAQItem q="What is the Go/No-Go Drill?" a="A free response inhibition task. React instantly to Green 'GO' targets while suppressing motor actions when Red 'STOP' targets spawn." />
                 <DrillFAQItem q="How does progressive difficulty work?" a="As your score and combo climb, signal display windows tighten continuously, challenging your impulse control boundaries." />
                 <DrillFAQItem q="Are there negative score or time penalties?" a="By default, wrong clicks on red NO-GO signals cost 1 life without deducting time. An opt-in time penalty (-0.8s per error) is available in session settings for hard-mode training." />
-                <DrillFAQItem q="What happens if I run out of lives?" a="You start each run with 5 lives. Every wrong click on a red NO-GO signal costs 1 life; missing a green GO signal (timeout) costs no life at all. Reach 0 lives and the drill ends immediately, even if time remains." />
+                <DrillFAQItem q="Can a bad run end early?" a="No. A wrong click on a red NO-GO signal resets your combo (and deducts time if penalties are on), but nothing cuts the session short — every run plays until the clock reaches zero." />
                 <DrillFAQItem q="Does difficulty decrease on mistakes?" a="No. Your level progression is monotonic — a mistake never takes you back down, so you can safely master your current level." />
-                <DrillFAQItem q="How long does each drill session last?" a="Each round starts with 45 seconds on the clock (extendable by hitting GO targets and holding NO-GOs), or until your 5 lives run out." />
+                <DrillFAQItem q="How long does each drill session last?" a="Each round starts with 45 seconds on the clock, extendable by hitting GO targets and holding NO-GOs. The clock is the only thing that ends a run." />
                 <DrillFAQItem q="Do I need to sign up?" a="No registration required. This drill runs directly in your browser with instant response." />
               </div>
             </DrillAccordion>

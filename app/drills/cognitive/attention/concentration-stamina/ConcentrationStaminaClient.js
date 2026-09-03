@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import {
-  Brain, Volume2, VolumeX, Eye, Zap, ZapOff, Heart,
+  Brain, Volume2, VolumeX, Eye, Zap, ZapOff,
   Share2, ArrowLeft, RefreshCw, Layers, Users, TrendingUp, Repeat, Flame, Trophy, Target
 } from 'lucide-react';
 
@@ -60,7 +60,7 @@ const saveData = (data) => {
 const RULES_ITEMS = [
   { title: "Dynamic Rule Switching", text: "Target rule shifts every 10 seconds between VOWELS (A, E, I, O, U) and PRIMES (2, 3, 5, 7)." },
   { title: "Target Tap & Spacebar", text: "Tap screen or press Spacebar as soon as a target stimulus matching the active rule appears." },
-  { title: "Inhibitory Control", text: "Ignore non-matching stimuli. False alarms or missed targets cost one life — you have 5 lives per session." }
+  { title: "Inhibitory Control", text: "Ignore non-matching stimuli. False alarms and missed targets count against your accuracy, but never end the session early." }
 ];
 
 const ABOUT_TEXT = `Concentration Stamina is an advanced Continuous Performance Test (CPT) designed to evaluate sustained visual attention, working memory updating, and task-set switching under speed pressure. Originating from clinical neuropsychology and cognitive ergonomics, continuous stamina tests challenge the brain's executive control network to maintain high vigilance over extended sequences.
@@ -104,7 +104,6 @@ export default function ConcentrationStaminaClient() {
   const [activeRule, setActiveRule] = useState('VOWELS');
   const [score, setScore] = useState(0);
   const [level, setLevel] = useState(1);
-  const [lives, setLives] = useState(5);
   const [timeRemaining, setTimeRemaining] = useState(DRILL_DURATION);
   const [countdownValue, setCountdownValue] = useState(3);
   const [openAccordion, setOpenAccordion] = useState(null);
@@ -129,7 +128,6 @@ export default function ConcentrationStaminaClient() {
   const timeLeftRef = useRef(DRILL_DURATION);
   const levelRef = useRef(1);
   const maxLevelRef = useRef(1);
-  const livesRef = useRef(5);
 
   const activeRuleRef = useRef('VOWELS');
   const currentStimRef = useRef('');
@@ -189,6 +187,7 @@ export default function ConcentrationStaminaClient() {
       score: finalScore,
       accuracy: accuracyVal,
       peakLevel,
+      misses: missesRef.current + falseAlarmsRef.current,
       isNewBest
     });
   }, [clearAllTimers]);
@@ -223,12 +222,6 @@ export default function ConcentrationStaminaClient() {
           drillAudio.playPenalty();
           triggerFlash('red');
           missesRef.current += 1;
-          livesRef.current = Math.max(0, livesRef.current - 1);
-          setLives(livesRef.current);
-          if (livesRef.current <= 0) {
-            endGame();
-            return;
-          }
         }
 
         setCurrentStim('');
@@ -237,7 +230,7 @@ export default function ConcentrationStaminaClient() {
         }, config.intervalSpeed);
       }
     }, config.displaySpeed);
-  }, [endGame, triggerFlash]);
+  }, [triggerFlash]);
 
   const handleInteraction = useCallback((e) => {
     if (e) {
@@ -267,12 +260,6 @@ export default function ConcentrationStaminaClient() {
       drillAudio.playPenalty();
       triggerFlash('red');
       falseAlarmsRef.current += 1;
-      livesRef.current = Math.max(0, livesRef.current - 1);
-      setLives(livesRef.current);
-      if (livesRef.current <= 0) {
-        endGame();
-        return;
-      }
     }
 
     if (stimTimerRef.current) clearTimeout(stimTimerRef.current);
@@ -281,7 +268,7 @@ export default function ConcentrationStaminaClient() {
     stimTimerRef.current = setTimeout(() => {
       if (phaseRef.current === 'playing') spawnStimulus();
     }, 120);
-  }, [endGame, spawnStimulus, triggerFlash]);
+  }, [spawnStimulus, triggerFlash]);
 
   // Keyboard spacebar listener
   useEffect(() => {
@@ -336,14 +323,12 @@ export default function ConcentrationStaminaClient() {
 
     scoreRef.current = 0;
     timeLeftRef.current = DRILL_DURATION;
-    livesRef.current = 5;
     hitsRef.current = 0;
     missesRef.current = 0;
     falseAlarmsRef.current = 0;
     activeRuleRef.current = 'VOWELS';
 
     setScore(0);
-    setLives(5);
     setLevel(startLevel);
     setTimeRemaining(DRILL_DURATION);
     setActiveRule('VOWELS');
@@ -470,15 +455,10 @@ export default function ConcentrationStaminaClient() {
           {/* IN-BOX HUD */}
           {(phase === 'playing' || phase === 'countdown') && (
             <>
-              {/* Score & Lives - Top Left */}
+              {/* Score - Top Left */}
               <div className="absolute top-4 left-4 z-30 pointer-events-none flex flex-col items-start gap-0.5">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Score</p>
                 <p className="text-2xl sm:text-3xl font-black text-white tabular-nums leading-tight">{score}</p>
-                <div className="flex items-center gap-1 mt-0.5">
-                  {Array.from({ length: Math.max(0, lives) }).map((_, i) => (
-                    <Heart key={i} className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-red-500 fill-red-500 drop-shadow-[0_0_6px_rgba(239,68,68,0.6)]" />
-                  ))}
-                </div>
               </div>
 
               {/* Active Rule - Centered at Top */}
@@ -506,7 +486,7 @@ export default function ConcentrationStaminaClient() {
               subtitle="Category Rule Switching CPT"
               rules={[
                 { icon: Zap, accent: 'emerald', title: 'Dynamic Rule Shifts (10s)', text: 'Category rule shifts between VOWELS and PRIMES every 10 seconds' },
-                { icon: Target, accent: 'red', title: 'Impulse Control Penalty', text: 'Tapping invalid targets or missing valid targets loses lives' },
+                { icon: Target, accent: 'red', title: 'Impulse Control Penalty', text: 'Tapping invalid targets or missing valid ones costs accuracy, not the run' },
               ]}
               stats={[
                 { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
@@ -604,8 +584,8 @@ export default function ConcentrationStaminaClient() {
                     <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Accuracy</p>
                   </div>
                   <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-sm sm:text-base font-black text-white">{lives}/5</p>
-                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Lives Left</p>
+                    <p className="text-sm sm:text-base font-black text-white">{endSummary.misses}</p>
+                    <p className="text-[7.5px] sm:text-[8.5px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Misses</p>
                   </div>
                   <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
                     <p className="text-sm sm:text-base font-black text-white">Lv. {endSummary.peakLevel}</p>

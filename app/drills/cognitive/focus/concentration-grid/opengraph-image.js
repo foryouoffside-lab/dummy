@@ -93,7 +93,7 @@ export default async function Image() {
 
         {/* Stat strip */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          {['45-SECOND DRILL', 'EXPANDING MATRICES', '3 LIVES MECHANIC', 'FREE — NO SIGN-UP'].map((label) => (
+          {['45-SECOND DRILL', 'EXPANDING MATRICES', 'FULL 45s EVERY RUN', 'FREE — NO SIGN-UP'].map((label) => (
             <div
               key={label}
               style={{

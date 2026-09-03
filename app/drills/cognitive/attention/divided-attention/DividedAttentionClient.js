@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
-import { Layers, Volume2, VolumeX, Play, RefreshCw, Share2, Users, TrendingUp, Heart, ArrowLeft, Zap, ZapOff, Trophy, Target } from 'lucide-react';
+import { Layers, Volume2, VolumeX, Play, RefreshCw, Share2, Users, TrendingUp, ArrowLeft, Zap, ZapOff, Trophy, Target } from 'lucide-react';
 
 import { isIdleFrameSkippable } from '@/lib/performance';
 import generateShareCard, { shareScoreCard } from '../../../../../components/ShareScoreCard';
@@ -27,7 +27,6 @@ import useImmersiveMode from '@/lib/useImmersiveMode';
 // TUNING CONSTANTS
 // ============================================================
 const DRILL_DURATION = 45; // starting clock only; a run grows past this
-const MAX_LIVES = 5;
 const POINTS_PER_HIT = 100;
 const POINTS_PER_LEVEL = 1750; // 250 -> 1750 (7x)
 const ELITE_SCORE = 24000; // 10000 -> 24000 (~2.4x)
@@ -68,7 +67,7 @@ const RULES_ITEMS = [
   { title: "Dual-Task Processing", text: "Process two independent streams simultaneously: track moving targets on the visual canvas AND tap MATCH when even numbers appear in the number stream." },
   { title: "Visual Target Stream", text: "Tap moving blue targets as soon as they appear before their display timer expires (+100 PTS × Combo, +0.6s)." },
   { title: "Numerical Match Stream", text: "Numbers (0-9) stream continuously on the side panel. Tap MATCH only when an EVEN number is active (+100 PTS × Combo, +0.6s)." },
-  { title: "5 Lives & Penalties", text: "You have 5 lives. Missed targets, missed even numbers, or false matches cost 1 life and reset combo (and deduct 0.8s if enabled). Losing all 5 lives ends the drill early." }
+  { title: "Misses & Penalties", text: "Missed targets, missed even numbers, and false matches reset your combo (and deduct 0.8s if enabled). Nothing ends the run early — you play until the clock reaches zero." }
 ];
 
 const ABOUT_TEXT = `Divided Attention is a core cognitive drill designed to measure and train multi-channel visual tracking and simultaneous information processing. Based on dual-task psychological paradigms, this exercise forces the brain to allocate attention across two distinct channels at once: spatial motion tracking and numeric categorization.
@@ -112,7 +111,6 @@ export default function DividedAttentionClient() {
   // Live HUD State
   const [uiScore, setUiScore] = useState(0);
   const [uiLevel, setUiLevel] = useState(1);
-  const [lives, setLives] = useState(MAX_LIVES);
   const [uiCombo, setUiCombo] = useState(0);
   const [uiTimeLeft, setUiTimeLeft] = useState(DRILL_DURATION);
   const [bestScore, setBestScore] = useState(0);
@@ -135,7 +133,7 @@ export default function DividedAttentionClient() {
     visualAttempts: 0,
     numberAttempts: 0,
     maxCombo: 0,
-    livesRemaining: MAX_LIVES,
+    mistakes: 0,
     finalLevel: 1,
     grade: null
   });
@@ -160,7 +158,6 @@ export default function DividedAttentionClient() {
     visualAttempts: 0,
     numberAttempts: 0,
     mistakes: 0,
-    lives: MAX_LIVES,
     timeLeft: DRILL_DURATION,
     currentTargetId: null,
     currentNumber: null,
@@ -246,7 +243,7 @@ export default function DividedAttentionClient() {
       visualAttempts: e.visualAttempts,
       numberAttempts: e.numberAttempts,
       maxCombo: e.maxCombo,
-      livesRemaining: e.lives,
+      mistakes: e.mistakes,
       finalLevel: Math.floor(bestLevelRunRef.current),
       grade: gradeObj
     });
@@ -314,20 +311,14 @@ export default function DividedAttentionClient() {
     return () => cancelAnimationFrame(animId);
   }, [gameState, endGame]);
 
-  const deductLife = useCallback(() => {
+  const registerMiss = useCallback(() => {
     const e = engine.current;
-    e.lives = Math.max(0, e.lives - 1);
     if (drillPenalty.isEnabled()) e.timeLeft -= TIME_PENALTY;
     e.combo = 0;
     setUiCombo(0);
-    setLives(e.lives);
     triggerFlash();
     drillAudio.playPenalty();
-
-    if (e.lives <= 0) {
-      endGame();
-    }
-  }, [endGame, triggerFlash]);
+  }, [triggerFlash]);
 
   // Spawning logic
   const spawnBall = useCallback(() => {
@@ -356,12 +347,10 @@ export default function DividedAttentionClient() {
       // Missed target timeout
       e.visualAttempts += 1;
       e.mistakes += 1;
-      deductLife();
-      if (e.lives > 0) {
-        spawnBall();
-      }
+      registerMiss();
+      spawnBall();
     }, config.ballSpeed);
-  }, [deductLife]);
+  }, [registerMiss]);
 
   const spawnNumber = useCallback(() => {
     if (numTimerRef.current) clearTimeout(numTimerRef.current);
@@ -374,10 +363,8 @@ export default function DividedAttentionClient() {
       // Missed an even number
       e.numberAttempts += 1;
       e.mistakes += 1;
-      deductLife();
+      registerMiss();
     }
-
-    if (e.lives <= 0) return;
 
     let newNum;
     do {
@@ -392,7 +379,7 @@ export default function DividedAttentionClient() {
     numTimerRef.current = setTimeout(() => {
       spawnNumber();
     }, config.numSpeed);
-  }, [deductLife]);
+  }, [registerMiss]);
 
   // Interaction handlers
   const handleVisualClick = useCallback((id, e) => {
@@ -444,7 +431,7 @@ export default function DividedAttentionClient() {
       // Double tap on an already-resolved number
       eng.numberAttempts += 1;
       eng.mistakes += 1;
-      deductLife();
+      registerMiss();
       return;
     }
 
@@ -476,9 +463,9 @@ export default function DividedAttentionClient() {
       // Wrong match on odd number
       eng.numberAttempts += 1;
       eng.mistakes += 1;
-      deductLife();
+      registerMiss();
     }
-  }, [deductLife]);
+  }, [registerMiss]);
 
   // Enter Drill
   const enterDrill = useCallback(async () => {
@@ -503,7 +490,6 @@ export default function DividedAttentionClient() {
     setUiCombo(0);
     setUiTimeLeft(DRILL_DURATION);
     lastTimeRef.current = DRILL_DURATION;
-    setLives(MAX_LIVES);
 
     engine.current = {
       score: 0,
@@ -515,8 +501,7 @@ export default function DividedAttentionClient() {
       visualAttempts: 0,
       numberAttempts: 0,
       mistakes: 0,
-      lives: MAX_LIVES,
-      timeLeft: DRILL_DURATION,
+        timeLeft: DRILL_DURATION,
       currentTargetId: null,
       currentNumber: null,
       wasMatched: true
@@ -634,23 +619,11 @@ export default function DividedAttentionClient() {
           {/* IN-BOX OVERLAY HUD */}
           {(gameState === 'playing' || gameState === 'countdown') && (
             <>
-              {/* Score & Lives - Top Left */}
+              {/* Score - Top Left */}
               <div className="absolute top-4 left-4 z-30 pointer-events-none flex flex-col items-start gap-0.5">
                 <div>
                   <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Score</p>
                   <p className="text-2xl sm:text-3xl font-black text-white tabular-nums leading-tight">{uiScore}</p>
-                </div>
-                <div className="flex items-center gap-1 mt-0.5">
-                  {Array.from({ length: MAX_LIVES }).map((_, i) => (
-                    <Heart
-                      key={i}
-                      className={`w-3.5 h-3.5 sm:w-4 sm:h-4 transition-all duration-200 ${
-                        i < lives
-                          ? 'text-red-500 fill-red-500 drop-shadow-[0_0_6px_rgba(239,68,68,0.6)]'
-                          : 'text-slate-800 fill-slate-800'
-                      }`}
-                    />
-                  ))}
                 </div>
               </div>
 
@@ -784,10 +757,10 @@ export default function DividedAttentionClient() {
                 {
                   icon: Zap,
                   accent: 'blue',
-                  title: penaltyEnabled ? '5 Lives & Time Penalty' : 'Match Even Numbers • 5 Lives',
+                  title: penaltyEnabled ? 'Match Even Numbers • Time Penalty' : 'Match Even Numbers',
                   text: penaltyEnabled
-                    ? 'Tap MATCH on EVEN numbers. Misses cost 1 life and deduct 0.8s'
-                    : 'Tap MATCH on EVEN numbers. 5 lives total; misses or wrong matches cost 1 life'
+                    ? 'Tap MATCH on EVEN numbers. A miss resets your combo and deducts 0.8s'
+                    : 'Tap MATCH on EVEN numbers. A miss resets your combo; the run lasts the full clock'
                 },
               ]}
               stats={[
@@ -814,7 +787,7 @@ export default function DividedAttentionClient() {
               stats={[
                 { label: 'Dual Accuracy', value: analytics.accuracy, suffix: '%' },
                 { label: 'Hits', value: analytics.visualHits + analytics.numberHits },
-                { label: 'Lives Left', value: `${analytics.livesRemaining}/${MAX_LIVES}` },
+                { label: 'Misses', value: analytics.mistakes },
                 { label: 'Peak Level', value: `Lv. ${analytics.finalLevel}` },
               ]}
               onPlayAgain={enterDrill}

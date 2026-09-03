@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import {
-  Compass, Volume2, VolumeX, Eye, Zap, ZapOff, Ban, Heart,
+  Compass, Volume2, VolumeX, Eye, Zap, ZapOff, Ban,
   Share2, ArrowLeft, Trophy, Target, Timer, TrendingUp, RefreshCw, Layers, Users, Play, Flame
 } from 'lucide-react';
 
@@ -26,7 +26,6 @@ import useImmersiveMode from '@/lib/useImmersiveMode';
 // TUNING CONSTANTS
 // ============================================================
 const DRILL_DURATION = 45;
-const MAX_LIVES = 3;
 const ELITE_SCORE = 8000; // Target score for S+ rating (rebalanced: fixed 45s session, no time refill)
 const STORAGE_KEY = 'skilldrills_concentration_grid_v4';
 
@@ -53,7 +52,7 @@ const RULES_ITEMS = [
   { title: "Sequential Search", text: "Tap numbers in strict numerical order starting from 1 up to the highest number on the grid." },
   { title: "Expanding Grids", text: "Clearing a full grid advances you to larger dimensions (3x3 → 4x4 → 5x5...), testing broader peripheral vision." },
   { title: "One Fixed Session", text: "You get a single 45-second window. Clearing a grid grows the board to the next size but never changes the clock." },
-  { title: "Precision & Lives", text: "Wrong taps cost one of your 3 lives and flash a warning. Run out of lives and the session ends immediately, so scan before you tap." }
+  { title: "Precision", text: "Wrong taps flash a warning and count against your accuracy, but never end the session — scan before you tap and play the full clock." }
 ];
 
 const ABOUT_TEXT = `Concentration Grid is a foundational cognitive training drill designed to measure and improve visual search speed, spatial awareness, and sustained attention under time pressure. Originating from sports psychology performance labs, grid scanning exercises are widely used by elite athletes, pilots, and esports competitors to sharpen rapid visual information processing and mental focus.
@@ -67,7 +66,7 @@ const FAQ_ITEMS = [
   { q: "How is score calculated?", a: "Score is awarded for each correct sequential tap, with a speed bonus for fast reaction time. Completing a full grid also grants a large clear bonus based on grid dimension." },
   { q: "Why do grid sizes change?", a: "As you complete smaller grids, the board expands to larger sizes. Tighter spacing and more numbers increase visual clutter, forcing your brain to expand its peripheral scanning field." },
   { q: "Does the timer ever change during a session?", a: "No. Every session runs on one fixed 45-second clock with zero time bonuses or penalties. Clearing a grid grows the board to the next size, but the clock keeps counting down the whole time — chain clears together to rack up as many grids as you can before time's up." },
-  { q: "What happens when I run out of lives?", a: "You start each session with 3 lives, shown as hearts in the HUD. Every wrong tap costs one life; losing your last life ends the run immediately, regardless of time remaining." },
+  { q: "Can a wrong tap end my session early?", a: "No. A wrong tap flashes a warning and counts against your accuracy, but every session runs until the timer reaches zero no matter how many you miss." },
   { q: "What cognitive skill does Concentration Grid actually train?", a: "It primarily trains visual search efficiency — the speed at which your brain scans a cluttered field and locates a specific target among distractors. This relies on efficient micro-saccadic eye movements and peripheral vision rather than central foveal focus alone." },
   { q: "Where did the concentration grid exercise originate?", a: "Numbered scanning grids trace back to sports psychology performance labs and are a staple warm-up in football, tennis, and combat sports training. Coaches use them to sharpen an athlete's ability to process a busy visual field quickly before switching attention to the actual game action." },
   { q: "Why do the numbers rotate at larger grid sizes?", a: "From the 5x5 grid onward, each number tile is rendered at a slight random rotation. This removes the shortcut of recognizing a number purely by its shape and orientation, forcing genuine digit recognition and keeping visual search difficulty climbing alongside grid size." },
@@ -100,7 +99,6 @@ export default function ConcentrationGridClient() {
   const [currentNumber, setCurrentNumber] = useState(1);
   const [score, setScore] = useState(0);
   const [timeRemaining, setTimeRemaining] = useState(DRILL_DURATION);
-  const [lives, setLives] = useState(MAX_LIVES);
   const [countdownValue, setCountdownValue] = useState(3);
   const [openAccordion, setOpenAccordion] = useState(null);
 
@@ -121,7 +119,6 @@ export default function ConcentrationGridClient() {
 
   const scoreRef = useRef(0);
   const timeLeftRef = useRef(DRILL_DURATION);
-  const livesRef = useRef(MAX_LIVES);
   const gridsClearedRef = useRef(0);
   const gridSizeRef = useRef(3);
   const startGridRef = useRef(3);
@@ -258,13 +255,6 @@ export default function ConcentrationGridClient() {
       drillAudio.playPenalty();
       triggerFlash('red');
       penaltyCountRef.current += 1;
-
-      livesRef.current = Math.max(0, livesRef.current - 1);
-      setLives(livesRef.current);
-
-      if (livesRef.current <= 0) {
-        endGame();
-      }
     }
   };
 
@@ -313,7 +303,6 @@ export default function ConcentrationGridClient() {
 
     scoreRef.current = 0;
     timeLeftRef.current = DRILL_DURATION;
-    livesRef.current = MAX_LIVES;
     gridsClearedRef.current = 0;
     correctClicksRef.current = 0;
     totalClicksRef.current = 0;
@@ -321,7 +310,6 @@ export default function ConcentrationGridClient() {
 
     setScore(0);
     setTimeRemaining(DRILL_DURATION);
-    setLives(MAX_LIVES);
     setEndSummary(null);
 
     setPhase('countdown');
@@ -448,15 +436,10 @@ export default function ConcentrationGridClient() {
           {/* IN-BOX HUD */}
           {(phase === 'playing' || phase === 'countdown') && (
             <>
-              {/* Score & Lives - Top Left */}
+              {/* Score - Top Left */}
               <div className="absolute top-4 left-4 z-30 pointer-events-none flex flex-col items-start gap-0.5">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Score</p>
                 <p className="text-2xl sm:text-3xl font-black text-white tabular-nums leading-tight">{score}</p>
-                <div className="flex items-center gap-1 mt-0.5">
-                  {Array.from({ length: Math.max(0, lives) }).map((_, i) => (
-                    <Heart key={i} className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-red-500 fill-red-500 drop-shadow-[0_0_6px_rgba(239,68,68,0.6)]" />
-                  ))}
-                </div>
               </div>
 
               {/* Target Indicator - Top Center */}

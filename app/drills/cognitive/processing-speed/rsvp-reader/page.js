@@ -214,7 +214,7 @@ export default function RSVPReaderPage() {
               {
                 "@type": "HowToStep",
                 "name": "Tap on Detection",
-                "text": "Tap 'Target Detected' immediately when the designated target word flashes. Every 200 points earned increases your level and reading speed, up to 850 WPM. Wrong taps and missed targets cost 1 of your 5 lives."
+                "text": "Tap 'Target Detected' immediately when the designated target word flashes. Every 200 points earned increases your level and reading speed, up to 850 WPM. Wrong taps and missed targets count against your accuracy but never end the run early."
               }
             ]
           })

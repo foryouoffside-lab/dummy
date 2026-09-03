@@ -5,7 +5,7 @@ import Link from 'next/link';
 
 import {
   Brain, Play, RefreshCw, TrendingUp, Volume2, VolumeX,
-  Zap, ZapOff, Users, Share2, ArrowLeft, Heart, Target, Trophy
+  Zap, ZapOff, Users, Share2, ArrowLeft, Target, Trophy
 } from 'lucide-react';
 
 import generateShareCard, { shareScoreCard } from '../../../../../components/ShareScoreCard';
@@ -25,7 +25,6 @@ import FpsStartCard from '../../../../../components/drill/FpsStartCard';
 import useImmersiveMode from '@/lib/useImmersiveMode';
 
 const DRILL_DURATION = 45; // 45 seconds duration
-const MAX_LIVES = 5;
 const POINTS_PER_HIT = 150;
 const POINTS_PER_LEVEL = 1200; // 8 matches per level, matching the old cadence
 const START_LEVEL = 3; // 3-Back is the starting difficulty
@@ -67,7 +66,6 @@ export default function NBackClient() {
 
   // HUD & Best Stats State
   const [uiScore, setUiScore] = useState(0);
-  const [uiLives, setUiLives] = useState(MAX_LIVES);
   const [uiTimeLeft, setUiTimeLeft] = useState(DRILL_DURATION);
   const [bestScore, setBestScore] = useState(0);
   const [bestLevel, setBestLevel] = useState(3);
@@ -96,7 +94,6 @@ export default function NBackClient() {
   const engine = useRef({
     score: 0,
     level: 3,
-    lives: MAX_LIVES,
     timeLeft: DRILL_DURATION,
     perfectHits: 0,
     missedClicks: 0,
@@ -226,18 +223,6 @@ export default function NBackClient() {
       drillAudio?.playPenalty?.();
       triggerFlash();
 
-      if (!isTimeout) {
-        // Wrong click deducts 1 life! Timeouts cost no lives.
-        e.lives -= 1;
-        const remainingLives = Math.max(0, e.lives);
-        setUiLives(remainingLives);
-
-        if (remainingLives <= 0) {
-          endGame();
-          return;
-        }
-      }
-
       setPhase('result');
       phaseRef.current = 'result';
 
@@ -248,7 +233,7 @@ export default function NBackClient() {
       }, 600);
       gameTimeoutsRef.current.push(tNext);
     }
-  }, [clearGameTimeouts, triggerFlash, endGame]);
+  }, [clearGameTimeouts, triggerFlash]);
 
   // Generate and Display Next Letter
   const startNextLetter = useCallback(() => {
@@ -317,7 +302,6 @@ export default function NBackClient() {
 
     setIsNewBest(false);
     setUiScore(0);
-    setUiLives(MAX_LIVES);
     setUiTimeLeft(DRILL_DURATION);
     setNBackLevel(3);
     setPhase('memorize');
@@ -327,8 +311,7 @@ export default function NBackClient() {
     engine.current = {
       score: 0,
       level: 3,
-      lives: MAX_LIVES,
-      timeLeft: DRILL_DURATION,
+        timeLeft: DRILL_DURATION,
       perfectHits: 0,
       missedClicks: 0,
     };
@@ -467,18 +450,6 @@ export default function NBackClient() {
               <div className="absolute top-4 left-4 z-30 pointer-events-none">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Score</p>
                 <p className="text-2xl sm:text-3xl font-bold text-white tabular-nums leading-tight">{uiScore}</p>
-                <div className="flex items-center gap-1 mt-1">
-                  {Array.from({ length: MAX_LIVES }).map((_, i) => (
-                    <Heart
-                      key={i}
-                      className={`w-3.5 h-3.5 sm:w-4 sm:h-4 transition-all duration-200 ${
-                        i < uiLives
-                          ? 'text-red-500 fill-red-500 drop-shadow-[0_0_6px_rgba(239,68,68,0.6)]'
-                          : 'text-gray-700 fill-gray-800/40'
-                      }`}
-                    />
-                  ))}
-                </div>
               </div>
 
               <div className="absolute top-4 right-4 z-30 pointer-events-none text-right">
@@ -686,7 +657,7 @@ export default function NBackClient() {
               <DrillRuleItem num="2" text="Level Progression" highlight="3-Back → 4-Back+" result="Every 1200 points earned" />
               <DrillRuleItem num="3" text="Display Speeds Up" highlight="2000ms → 1200ms Floor" result="Faster letters at higher levels" />
               <DrillRuleItem num="4" text="Timeout (No Response)" highlight="Zero Penalties" result="No score, time, or life lost" />
-              <DrillRuleItem num="5" text="Wrong Judgment" highlight="-1 Life (5 total)" result="Drill ends early if lives reach 0" />
+              <DrillRuleItem num="5" text="Wrong Judgment" highlight="Breaks your streak" result="Costs no score and no time — the run lasts the full clock" />
             </div>
           </DrillAccordion>
 
@@ -748,8 +719,8 @@ export default function NBackClient() {
               <DrillFAQItem q="What is the 3-Back Training Pro Drill?" a="A free N-Back working memory task. Letters appear every 2 seconds. Compare current letter to the one from 3 steps back." />
               <DrillFAQItem q="Why is N-Back considered the gold standard?" a="It requires continuous working memory updating and executive control. Neuroscientific research shows improvements in working memory capacity and fluid intelligence." />
               <DrillFAQItem q="How does progressive difficulty work?" a="Starts at 3-Back. Every 1200 points earned (roughly 8 correct judgments) automatically increments the N-Back level to 4-Back and beyond, and the letter display speeds up." />
-              <DrillFAQItem q="Are there negative score or time penalties?" a="No incorrect judgment ever deducts score points or reduces remaining timer seconds. A timed-out (unanswered) letter costs nothing at all. A wrong Match/No Match click costs 1 of your 5 lives, though — see the next question." />
-              <DrillFAQItem q="What are the hearts / lives for?" a="You start each run with 5 lives. A wrong Match/No Match judgment costs 1 life (a timeout costs none); if you run out, the drill ends immediately and shows your results. This keeps a bad guessing streak from dragging the full 45 seconds." />
+              <DrillFAQItem q="Are there negative score or time penalties?" a="No. An incorrect judgment never deducts score points or timer seconds, and a timed-out letter costs nothing either. A wrong answer only breaks your accuracy and your streak." />
+              <DrillFAQItem q="Can the drill end before the timer does?" a="No. Every run lasts the full 45 seconds no matter how many judgments you get wrong, so a bad start never cuts your session short — keep going and the accuracy score reflects the whole run." />
               <DrillFAQItem q="Does difficulty decrease on mistakes?" a="No. Your N-Back level only ever goes up — a mistake never takes you back down, so you can safely master your current level." />
               <DrillFAQItem q="How long does each drill session last?" a="Each round is timed for exactly 45 seconds of continuous focus." />
               <DrillFAQItem q="Do I need to sign up?" a="No registration required. This drill runs directly in your browser with instant response." />

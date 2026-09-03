@@ -169,7 +169,7 @@ const RELATED_DRILLS = [
   { id: "finger-sequencing", name: "Sequence Aim Trainer", cat: "Motor Speed", desc: "Train multi-target ordered clicking and finger dexterity under time pressure.", href: "/drills/motor/movement-speed/finger-sequencing" },
   { id: "rapid-tapping", name: "Rapid Tapping Test", cat: "Motor Speed", desc: "Test finger tapping velocity and neuromuscular speed.", href: "/drills/motor/movement-speed/rapid-tapping" },
   { id: "drag-and-drop", name: "Drag & Drop Precision", cat: "Motor Coordination", desc: "Master mouse spatial drag control and release timing.", href: "/drills/motor/hand-eye-coordination/drag-and-drop" },
-  { id: "aim-trainer", name: "Aim Trainer Elite", cat: "Motor Coordination", desc: "Dynamic targets that shrink with streak and lives system.", href: "/drills/motor/hand-eye-coordination/aim-trainer" },
+  { id: "aim-trainer", name: "Aim Trainer Elite", cat: "Motor Coordination", desc: "Dynamic targets that shrink as your streak grows.", href: "/drills/motor/hand-eye-coordination/aim-trainer" },
   { id: "steady-hand", name: "Steady Hand Trainer", cat: "Motor Control", desc: "Trace a winding path corridor with shrinking width on streak.", href: "/drills/motor/precision-control/steady-hand" },
   { id: "tracing", name: "Tracing Control", cat: "Motor Control", desc: "Precision cursor tracking and path stability trainer.", href: "/drills/motor/precision-control/tracing" }
 ];

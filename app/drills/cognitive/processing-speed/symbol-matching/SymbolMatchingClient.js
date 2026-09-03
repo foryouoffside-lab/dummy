@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
-import { Target, Volume2, VolumeX, Play, RefreshCw, Share2, ArrowLeft, Heart, Users, TrendingUp, Repeat, Zap, ZapOff, Trophy } from 'lucide-react';
+import { Target, Volume2, VolumeX, Play, RefreshCw, Share2, ArrowLeft, Users, TrendingUp, Repeat, Zap, ZapOff, Trophy } from 'lucide-react';
 
 import { isIdleFrameSkippable } from '@/lib/performance';
 import generateShareCard, { shareScoreCard } from '../../../../../components/ShareScoreCard';
@@ -27,7 +27,6 @@ import useImmersiveMode from '@/lib/useImmersiveMode';
 // TUNING CONSTANTS
 // ============================================================
 const DRILL_DURATION = 45; // starting clock only; a run grows past this
-const MAX_LIVES = 5;
 const POINTS_PER_HIT = 100;
 const POINTS_PER_LEVEL = 1750; // 250 -> 1750 (7x)
 const ELITE_SCORE = 24000; // 7500 -> 24000 (~3.2x)
@@ -65,7 +64,7 @@ const getLevelConfig = (level, combo = 0) => {
 const RULES_ITEMS = [
   { title: "Symbol Digit Modality", text: "A key mapping bar at the top assigns 6 unique Greek symbols to digits 1 through 6." },
   { title: "Target Symbol Prompt", text: "A target symbol appears in the center. Tap the matching digit (+100 PTS × Combo, +0.6s)." },
-  { title: "5 Lives Safeguard", text: "You have 5 lives. Tapping the wrong digit costs 1 life and resets your combo. Losing all 5 lives ends the drill early." },
+  { title: "Wrong Answers", text: "Tapping the wrong digit resets your combo (and deducts time if penalties are on). Nothing ends the run early — you play until the clock reaches zero." },
   { title: "Streak & Penalty Rules", text: "Building streaks multiplies your score. Timeouts and wrong taps deduct 0.8s when enabled in settings." }
 ];
 
@@ -109,7 +108,6 @@ export default function SymbolMatchingClient() {
 
   // Live HUD State
   const [uiScore, setUiScore] = useState(0);
-  const [uiLives, setUiLives] = useState(MAX_LIVES);
   const [uiTimeLeft, setUiTimeLeft] = useState(DRILL_DURATION);
   const [uiLevel, setUiLevel] = useState(1);
   const [uiCombo, setUiCombo] = useState(0);
@@ -130,7 +128,7 @@ export default function SymbolMatchingClient() {
     mistakes: 0,
     timeouts: 0,
     maxCombo: 0,
-    livesRemaining: MAX_LIVES,
+    mistakes: 0,
     finalLevel: 1,
     grade: null
   });
@@ -149,7 +147,6 @@ export default function SymbolMatchingClient() {
     level: 1,
     combo: 0,
     maxCombo: 0,
-    lives: MAX_LIVES,
     successfulHits: 0,
     mistakes: 0,
     timeouts: 0,
@@ -224,7 +221,7 @@ export default function SymbolMatchingClient() {
       mistakes: e.mistakes,
       timeouts: e.timeouts,
       maxCombo: e.maxCombo,
-      livesRemaining: e.lives,
+      mistakes: e.mistakes,
       finalLevel: Math.floor(bestLevelRunRef.current),
       grade: gradeObj
     });
@@ -308,7 +305,7 @@ export default function SymbolMatchingClient() {
         trialTimerRef.current = setTimeout(checkTrialExpiry, config.ttl);
         return;
       }
-      // Timeout miss - NO life lost (timeouts do not cost lives)
+      // Timeout miss - breaks the combo like any other miss
       e.timeouts += 1;
       if (drillPenalty.isEnabled()) e.timeLeft -= TIME_PENALTY;
       e.combo = 0;
@@ -348,23 +345,16 @@ export default function SymbolMatchingClient() {
       drillAudio.playHit();
       spawnTrial();
     } else {
-      // Wrong click / mistake: lose 1 life!
+      // Wrong click: costs the combo, never the run.
       eng.mistakes += 1;
-      eng.lives -= 1;
       if (drillPenalty.isEnabled()) eng.timeLeft -= TIME_PENALTY;
       eng.combo = 0;
       setUiCombo(0);
-      setUiLives(Math.max(0, eng.lives));
       triggerFlash();
       drillAudio.playPenalty();
-
-      if (eng.lives <= 0) {
-        endGame();
-      } else {
-        spawnTrial();
-      }
+      spawnTrial();
     }
-  }, [spawnTrial, triggerFlash, endGame]);
+  }, [spawnTrial, triggerFlash]);
 
   // Enter Drill
   const enterDrill = useCallback(async () => {
@@ -391,7 +381,6 @@ export default function SymbolMatchingClient() {
     setUiScore(0);
     setUiLevel(startLevel);
     setUiCombo(0);
-    setUiLives(MAX_LIVES);
     setUiTimeLeft(DRILL_DURATION);
     lastTimeRef.current = DRILL_DURATION;
 
@@ -400,7 +389,6 @@ export default function SymbolMatchingClient() {
       level: startLevel,
       combo: 0,
       maxCombo: 0,
-      lives: MAX_LIVES,
       successfulHits: 0,
       mistakes: 0,
       timeouts: 0,
@@ -518,26 +506,11 @@ export default function SymbolMatchingClient() {
           {/* IN-BOX OVERLAY HUD */}
           {(gameState === 'playing' || gameState === 'countdown') && (
             <>
-              {/* Top Left: Score & 5 Hearts */}
+              {/* Top Left: Score */}
               <div className="absolute top-4 left-4 z-30 pointer-events-none flex flex-col items-start gap-1">
                 <div>
                   <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Score</p>
                   <p className="text-2xl sm:text-3xl font-black text-white tabular-nums leading-tight">{uiScore}</p>
-                </div>
-                <div className="flex items-center gap-1 mt-0.5">
-                  {Array.from({ length: MAX_LIVES }).map((_, idx) => {
-                    const active = idx < uiLives;
-                    return (
-                      <Heart
-                        key={idx}
-                        className={`w-3.5 h-3.5 sm:w-4 sm:h-4 transition-all duration-200 ${
-                          active
-                            ? 'fill-red-500 text-red-500 drop-shadow-[0_0_6px_rgba(239,68,68,0.7)]'
-                            : 'fill-slate-800 text-slate-800'
-                        }`}
-                      />
-                    );
-                  })}
                 </div>
               </div>
 
@@ -637,10 +610,10 @@ export default function SymbolMatchingClient() {
                 {
                   icon: Zap,
                   accent: 'blue',
-                  title: penaltyEnabled ? '5 Lives & Time Penalty' : '5 Lives System',
+                  title: penaltyEnabled ? 'Wrong Answers & Time Penalty' : 'Wrong Answers',
                   text: penaltyEnabled
-                    ? 'Wrong clicks lose 1 life and subtract 0.8s. Run ends if lives reach 0'
-                    : '5 lives total. Wrong clicks cost 1 life and reset combo. Run ends if lives reach 0'
+                    ? 'Wrong clicks reset your combo and subtract 0.8s. The run lasts the full clock'
+                    : 'Wrong clicks reset your combo. The run always lasts the full clock'
                 },
               ]}
               stats={[
@@ -667,7 +640,7 @@ export default function SymbolMatchingClient() {
               stats={[
                 { label: 'Accuracy', value: analytics.accuracy, suffix: '%' },
                 { label: 'Hits', value: analytics.successfulHits },
-                { label: 'Lives Left', value: `${analytics.livesRemaining}/${MAX_LIVES}` },
+                { label: 'Misses', value: analytics.mistakes },
                 { label: 'Peak Level', value: `Lv. ${analytics.finalLevel}` },
               ]}
               onPlayAgain={enterDrill}

@@ -118,7 +118,7 @@ const howToSchema = {
       "@type": "HowToStep",
       "position": 3,
       "name": "Enter the Match",
-      "text": "Tap the corresponding digit button (1-6) to submit. Each session starts with 45 seconds on the clock, with clean matches adding +0.6s. A wrong tap costs 1 of your 5 lives (losing all 5 ends the run early), and opt-in time penalty (-0.8s) applies when enabled in settings."
+      "text": "Tap the corresponding digit button (1-6) to submit. Each session starts with 45 seconds on the clock, with clean matches adding +0.6s. A wrong tap resets your combo, and opt-in time penalty (-0.8s) applies when enabled in settings; the run always lasts the full clock."
     }
   ]
 };
