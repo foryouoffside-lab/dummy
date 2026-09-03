@@ -15,6 +15,7 @@ import {
 import generateShareCard, { shareScoreCard } from '../../../../components/ShareScoreCard';
 import { getPlayerName } from '../../../../lib/leaderboard';
 import { drillAudio } from '../../../../lib/drillAudio';
+import { useDrillSensitivity } from '../../../../lib/drillSensitivity';
 import { drillFlash } from '../../../../lib/drillFlash';
 import { drillTimeout } from '../../../../lib/drillTimeout';
 import { drillPenalty } from '../../../../lib/drillPenalty';
@@ -27,6 +28,7 @@ import DrillAccordion from '../../../../components/drill/DrillAccordion';
 import FpsStartCard from '../../../../components/drill/FpsStartCard';
 import DrillResultCard from '../../../../components/drill/DrillResultCard';
 import useUnexpectedExitGuard from '../../../../lib/useUnexpectedExitGuard';
+import useImmersiveMode from '@/lib/useImmersiveMode';
 
 // ============================================================
 // TUNING CONSTANTS
@@ -135,6 +137,7 @@ export default function VerticalAirTrackClient() {
   const [gameState, setGameState] = useState('start'); // start | countdown | playing | gameOver
   const [countdownValue, setCountdownValue] = useState(3);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
   const [penaltyEnabled, setPenaltyEnabled] = useState(false);
@@ -142,7 +145,7 @@ export default function VerticalAirTrackClient() {
   const [openAccordion, setOpenAccordion] = useState(null);
   const [isTouchOnlyDevice, setIsTouchOnlyDevice] = useState(false);
   
-  const [universalSens, setUniversalSens] = useState(1.0);
+  const universalSens = useDrillSensitivity();
 
   const [score, setScore] = useState(0);
   const [bestScore, setBestScore] = useState(0);
@@ -179,14 +182,7 @@ export default function VerticalAirTrackClient() {
     logicalWidth: 0, logicalHeight: 0
   });
 
-  const cmPer360 = (30 / universalSens).toFixed(1);
-
   useEffect(() => {
-    try {
-      const savedSens = localStorage.getItem('verticalAirTrack_sens');
-      if (savedSens) setUniversalSens(parseFloat(savedSens));
-    } catch (e) {}
-
     const saved = getSavedData();
     setBestScore(saved.bestScore || 0);
     setBestCombo(saved.bestCombo || 0);
@@ -207,12 +203,6 @@ export default function VerticalAirTrackClient() {
   useEffect(() => {
     return () => countdownTimeoutsRef.current.forEach(clearTimeout);
   }, []);
-
-  useEffect(() => {
-    if (gameState !== 'playing' && gameState !== 'countdown') {
-      try { localStorage.setItem('verticalAirTrack_sens', universalSens.toString()); } catch (e) {}
-    }
-  }, [universalSens, gameState]);
 
   const triggerFlash = useCallback(() => {
     if (!drillFlash.isEnabled()) return;
@@ -370,9 +360,7 @@ export default function VerticalAirTrackClient() {
 
     countdownTimeoutsRef.current = [t1, t2, t3, t4];
 
-    if (containerRef.current && !document.fullscreenElement) {
-      try { await containerRef.current.requestFullscreen(); } catch (e) {}
-    }
+    setIsFullscreen(true);
     if (canvasRef.current && !document.pointerLockElement) {
       try { await canvasRef.current.requestPointerLock(); } catch (e) {}
     }
@@ -382,7 +370,7 @@ export default function VerticalAirTrackClient() {
     markIntentionalExit();
     countdownTimeoutsRef.current.forEach(clearTimeout);
     startingRef.current = false;
-    if (document.fullscreenElement) await document.exitFullscreen().catch(() => {});
+    setIsFullscreen(false);
     if (document.pointerLockElement) document.exitPointerLock();
     setGameState('start');
   }, []);
@@ -393,9 +381,7 @@ export default function VerticalAirTrackClient() {
   });
 
   const resumeDrill = useCallback(async () => {
-    if (containerRef.current && !document.fullscreenElement) {
-      try { await containerRef.current.requestFullscreen(); } catch (e) {}
-    }
+    setIsFullscreen(true);
     if (canvasRef.current && !document.pointerLockElement) {
       try { await canvasRef.current.requestPointerLock(); } catch (e) {}
     }
@@ -444,12 +430,6 @@ export default function VerticalAirTrackClient() {
       document.removeEventListener('mouseup', handleMouseUp);
     };
   }, [gameState, pointerLocked, universalSens, resumeDrill]);
-
-  useEffect(() => {
-    const fsListener = () => setIsFullscreen(!!document.fullscreenElement);
-    document.addEventListener('fullscreenchange', fsListener);
-    return () => document.removeEventListener('fullscreenchange', fsListener);
-  }, []);
 
   useEffect(() => {
     const cvs = canvasRef.current;
@@ -819,9 +799,6 @@ export default function VerticalAirTrackClient() {
                 Vertical Tracking Trainer
               </span>
             </h1>
-            <p className="text-xs text-slate-400 mt-1">
-              Hardware Raw Input • Endless Level Progression
-            </p>
           </div>
         )}
 
@@ -851,7 +828,7 @@ export default function VerticalAirTrackClient() {
         <div 
           ref={containerRef} 
           onContextMenu={(e) => { if (gameState === 'playing' || gameState === 'countdown') e.preventDefault(); }}
-          className={`relative overflow-hidden flex flex-col transition-all duration-150 select-none bg-[#080811] text-white border border-white/10 ${
+          className={`overflow-hidden flex flex-col transition-all duration-150 select-none bg-[#080811] text-white border border-white/10 ${
             isFullscreen 
               ? "fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#080811] rounded-none border-none flex flex-col items-center justify-center" 
               : "w-full rounded-2xl bg-[#080811] aspect-video min-h-[460px] sm:min-h-[500px] max-h-[88vh] relative overflow-hidden flex flex-col"
@@ -926,7 +903,7 @@ export default function VerticalAirTrackClient() {
               <div className="text-center animate-pulse pointer-events-none">
                 <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-3" />
                 <h2 className="text-2xl font-black text-white tracking-widest uppercase mb-1">Game Paused</h2>
-                <p className="text-xs text-gray-300 font-medium">Click to resume — fullscreen and cursor lock will re-engage.</p>
+                <p className="text-xs text-gray-300 font-medium">Click to resume — cursor lock will re-engage.</p>
               </div>
             </div>
           )}
@@ -949,7 +926,6 @@ export default function VerticalAirTrackClient() {
                 { icon: Zap, accent: "orange", title: "Height Bonus", text: "Up to +75 PTS at Jump Peak" },
                 { icon: AlertCircle, accent: "red", title: "Failure Rule", text: penaltyEnabled ? "Target Drop → Resets Combo, -0.6s" : "Target Drop → Resets Combo" },
               ]}
-              sensitivity={{ value: universalSens, onChange: setUniversalSens, cmPer360 }}
               stats={[
                 { icon: Trophy, label: "Best Score", value: bestScore, color: "text-white", accent: "slate" },
                 { icon: Flame, label: "Best Combo", value: `${bestCombo}x`, color: "text-red-400", accent: "red" },

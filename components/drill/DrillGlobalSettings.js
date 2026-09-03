@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Volume2, VolumeX, Zap, ZapOff, Timer, TimerOff } from 'lucide-react';
+import { Volume2, VolumeX, Zap, ZapOff, Timer, TimerOff, MousePointer2 } from 'lucide-react';
 import { drillAudio } from '@/lib/drillAudio';
 import { drillFlash } from '@/lib/drillFlash';
 import { drillTimeout } from '@/lib/drillTimeout';
+import { drillSensitivity, cmPer360, SENS_MIN, SENS_MAX, SENS_STEP, SENS_DEFAULT } from '@/lib/drillSensitivity';
 
 function ToggleSwitch({ checked, onChange, label }) {
   return (
@@ -47,11 +48,20 @@ export default function DrillGlobalSettings() {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
   const [timeoutEnabled, setTimeoutEnabled] = useState(true);
+  const [sens, setSens] = useState(SENS_DEFAULT);
+  // Touch-only devices tap the target directly — there is no cursor to speed up,
+  // so the slider never renders for them. Same test the drills use to decide
+  // whether a pointer-lock drill is playable at all.
+  const [hasMousePointer, setHasMousePointer] = useState(false);
 
   useEffect(() => {
     setSoundEnabled(drillAudio.isEnabled());
     setFlashEnabled(drillFlash.isEnabled());
     setTimeoutEnabled(drillTimeout.isEnabled());
+    setSens(drillSensitivity.get());
+    const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
+    const isTouchCapable = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    setHasMousePointer(!(isTouchCapable && !hasFinePointer));
   }, []);
 
   return (
@@ -85,6 +95,35 @@ export default function DrillGlobalSettings() {
           onChange={(v) => { setTimeoutEnabled(v); drillTimeout.setEnabled(v); }}
         />
       </div>
+
+      {hasMousePointer && (
+        <div className="flex items-center gap-3 py-3 px-4 border-t border-hairline">
+          <div className="shrink-0 w-9 h-9 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center">
+            <MousePointer2 className="w-4 h-4" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center justify-between gap-3 mb-2">
+              <div className="min-w-0">
+                <div className="text-xs font-semibold text-ink-1">Mouse Sensitivity</div>
+                <div className="text-2xs text-ink-3 truncate">Cursor speed in every mouse-aimed drill</div>
+              </div>
+              <span className="shrink-0 font-mono text-2xs font-bold text-blue-400 bg-blue-500/10 border border-blue-500/20 rounded-md px-2 py-0.5">
+                {sens.toFixed(2)}x <span className="text-ink-3 font-normal">({cmPer360(sens)} cm/360)</span>
+              </span>
+            </div>
+            <input
+              type="range"
+              min={SENS_MIN}
+              max={SENS_MAX}
+              step={SENS_STEP}
+              value={sens}
+              aria-label="Mouse sensitivity"
+              onChange={(e) => { const v = parseFloat(e.target.value); setSens(v); drillSensitivity.set(v); }}
+              className="w-full h-1.5 bg-surface-2 rounded-lg appearance-none cursor-pointer accent-blue-500"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

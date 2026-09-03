@@ -15,6 +15,7 @@ import {
 import generateShareCard, { shareScoreCard } from '@/components/ShareScoreCard';
 import { getPlayerName } from '@/lib/leaderboard';
 import { drillAudio } from '@/lib/drillAudio';
+import { useDrillSensitivity } from '@/lib/drillSensitivity';
 import { drillFlash } from '@/lib/drillFlash';
 import { drillTimeout } from '@/lib/drillTimeout';
 import { createBackdropCache, getCanvasDpr, drawPulseRing } from '@/lib/canvasFx';
@@ -23,6 +24,7 @@ import DrillFooter from '@/components/drill/DrillFooter';
 import DrillCountdown from '@/components/drill/DrillCountdown';
 import DrillAccordion from '@/components/drill/DrillAccordion';
 import FpsStartCard from '@/components/drill/FpsStartCard';
+import useImmersiveMode from '@/lib/useImmersiveMode';
 
 const DRILL_DURATION = 45;
 const ELITE_SCORE = 80;
@@ -123,11 +125,12 @@ const FAQ_ITEMS = [
 export default function RapidTappingClient() {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
+  useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
   const [pointerLocked, setPointerLocked] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
-  const [universalSens, setUniversalSens] = useState(1.0);
+  const universalSens = useDrillSensitivity();
   const [openAccordion, setOpenAccordion] = useState(null);
   const [isTouchOnlyDevice, setIsTouchOnlyDevice] = useState(false);
   const [countdownValue, setCountdownValue] = useState(3);
@@ -174,8 +177,6 @@ export default function RapidTappingClient() {
     logicalHeight: 450
   });
 
-  const cmPer360 = (30 / universalSens).toFixed(1);
-
   useEffect(() => {
     isPausedRef.current = isPaused;
   }, [isPaused]);
@@ -194,11 +195,6 @@ export default function RapidTappingClient() {
       const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
       const isTouchCapable = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
       setIsTouchOnlyDevice(isTouchCapable && !hasFinePointer);
-
-      try {
-        const savedSens = localStorage.getItem('skilldrills_rapid_tapping_sens');
-        if (savedSens) setUniversalSens(parseFloat(savedSens));
-      } catch (e) {}
 
       const saved = getSavedData();
       setBestScore(saved.bestScore || 0);
@@ -221,18 +217,6 @@ export default function RapidTappingClient() {
     };
   }, []);
 
-  useEffect(() => {
-    if (gameState !== 'playing') {
-      try { localStorage.setItem('skilldrills_rapid_tapping_sens', universalSens.toString()); } catch (e) {}
-    }
-  }, [universalSens, gameState]);
-
-  useEffect(() => {
-    const handleFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
-  }, []);
-
   const handleExitDrill = useCallback(async () => {
     markIntentionalExit();
     countdownTimeoutsRef.current.forEach(clearTimeout);
@@ -241,9 +225,7 @@ export default function RapidTappingClient() {
     gameActiveRef.current = false;
     setIsPaused(false);
 
-    if (document.fullscreenElement) {
-      await document.exitFullscreen().catch(() => {});
-    }
+    setIsFullscreen(false);
     if (document.pointerLockElement) {
       document.exitPointerLock();
     }
@@ -259,9 +241,7 @@ export default function RapidTappingClient() {
 
   const resumeDrill = useCallback(async () => {
     setIsPaused(false);
-    if (containerRef.current && !document.fullscreenElement) {
-      try { await containerRef.current.requestFullscreen(); } catch (e) {}
-    }
+    setIsFullscreen(true);
     if (canvasRef.current && !document.pointerLockElement) {
       try { await canvasRef.current.requestPointerLock(); } catch (e) {}
     }
@@ -634,9 +614,7 @@ export default function RapidTappingClient() {
     if (startingRef.current) return;
     startingRef.current = true;
 
-    if (containerRef.current && !document.fullscreenElement) {
-      try { await containerRef.current.requestFullscreen(); } catch (e) {}
-    }
+    setIsFullscreen(true);
 
     if (canvasRef.current && !isTouchOnlyDevice && !document.pointerLockElement) {
       try { await canvasRef.current.requestPointerLock(); } catch (e) {}
@@ -716,8 +694,8 @@ export default function RapidTappingClient() {
       const cvs = canvasRef.current;
 
       if (document.pointerLockElement) {
-        eng.crosshair.x = Math.max(0, Math.min(eng.logicalWidth, eng.crosshair.x + e.movementX));
-        eng.crosshair.y = Math.max(0, Math.min(eng.logicalHeight, eng.crosshair.y + e.movementY));
+        eng.crosshair.x = Math.max(0, Math.min(eng.logicalWidth, eng.crosshair.x + e.movementX * universalSens));
+        eng.crosshair.y = Math.max(0, Math.min(eng.logicalHeight, eng.crosshair.y + e.movementY * universalSens));
       } else if (cvs) {
         const rect = cvs.getBoundingClientRect();
         eng.crosshair.x = Math.max(0, Math.min(eng.logicalWidth, e.clientX - rect.left));
@@ -775,9 +753,6 @@ export default function RapidTappingClient() {
                 CPS Test &amp; Click Speed Test
               </span>
             </h1>
-            <p className="text-xs text-slate-400 mt-1">
-              CPS Click Speed Trainer • Hardware Raw Input
-            </p>
           </div>
         )}
 
@@ -807,7 +782,7 @@ export default function RapidTappingClient() {
         <div
           ref={containerRef}
           onContextMenu={(e) => { if (gameActiveRef.current) e.preventDefault(); }}
-          className={`relative overflow-hidden flex flex-col transition-all duration-150 select-none bg-[#080811] text-white border border-white/10 ${
+          className={`overflow-hidden flex flex-col transition-all duration-150 select-none bg-[#080811] text-white border border-white/10 ${
             isFullscreen
               ? 'fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#080811] rounded-none border-none flex flex-col items-center justify-center'
               : 'w-full rounded-2xl bg-[#080811] aspect-video min-h-[460px] sm:min-h-[500px] max-h-[88vh] relative overflow-hidden flex flex-col'

@@ -241,57 +241,15 @@ export default function MemoryClient() {
           </ol>
         </nav>
 
-        {/* Header with compact inline chip next to H1 */}
-        <Reveal>
-          <div className="mb-8 bg-surface-1 border border-hairline rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden backdrop-blur-xl shadow-xl">
-            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-indigo-500 to-purple-500 opacity-70" />
-            <div className="flex items-start gap-4">
-              <div className="p-3.5 bg-indigo-500/10 border border-indigo-500/30 rounded-2xl text-indigo-400 shrink-0">
-                <Brain className="w-8 h-8" />
-              </div>
-              <div>
-                <h1 className="text-2xl sm:text-4xl font-extrabold text-ink-1 tracking-tight uppercase">
-                  {t('hubs.memory.h1', 'Memory Training & Recall')}
-                </h1>
-                <p className="text-ink-2 mt-2 text-sm sm:text-base max-w-xl leading-relaxed">
-                  {t('hubs.memory.desc', 'Train working memory recall buffers, digit recall span, and spatial pattern traces.')}
-                </p>
-              </div>
-            </div>
-          </div>
-        </Reveal>
-
-        {/* Start Here Band */}
-        <Reveal className="mb-10">
-          <div className="p-5 rounded-3xl bg-surface-1 backdrop-blur-xl border border-hairline shadow-xl">
-            <h2 className="text-xs font-mono font-bold uppercase tracking-wider text-indigo-400 mb-3">
-              Recommended Start Routines
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <Link
-                href="/drills/memory/short-term-memory/digit-span"
-                className="p-3.5 rounded-xl bg-surface-2 border border-hairline hover:border-indigo-500/40 hover:-translate-y-0.5 active:scale-[0.98] transition-all group"
-              >
-                <p className="text-xs font-bold text-ink-1 group-hover:text-indigo-400 transition-colors">New to Memory Training</p>
-                <p className="text-[10px] text-ink-3 mt-1">Single-digit recall span check</p>
-              </Link>
-              <Link
-                href="/drills/memory/working-memory/n-back"
-                className="p-3.5 rounded-xl bg-surface-2 border border-hairline hover:border-indigo-500/40 hover:-translate-y-0.5 active:scale-[0.98] transition-all group"
-              >
-                <p className="text-xs font-bold text-ink-1 group-hover:text-indigo-400 transition-colors">N-Back Working Memory</p>
-                <p className="text-[10px] text-ink-3 mt-1">2-Back stimulus match test</p>
-              </Link>
-              <Link
-                href="/drills/memory/spatial-memory/grid-memorization"
-                className="p-3.5 rounded-xl bg-surface-2 border border-hairline hover:border-indigo-500/40 hover:-translate-y-0.5 active:scale-[0.98] transition-all group"
-              >
-                <p className="text-xs font-bold text-ink-1 group-hover:text-indigo-400 transition-colors">Full Memory Circuit</p>
-                <p className="text-[10px] text-ink-3 mt-1">Spatial grid pattern &amp; sequence routine</p>
-              </Link>
-            </div>
-          </div>
-        </Reveal>
+        {/* Page heading */}
+        <div className="mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-ink-1">
+            {t('hubs.memory.h1', 'Memory Training & Recall')}
+          </h1>
+          <p className="mt-2 text-sm sm:text-base text-ink-2 max-w-2xl leading-relaxed">
+            {t('hubs.memory.desc', 'Train working memory recall buffers, digit recall span, and spatial pattern traces.')}
+          </p>
+        </div>
 
         {/* Drill picker: one drill at a time, arrows to move, "View all" for the grid */}
         <Reveal>

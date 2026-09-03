@@ -13,12 +13,15 @@ import {
 import generateShareCard, { shareScoreCard } from '@/components/ShareScoreCard';
 import { getPlayerName } from '@/lib/leaderboard';
 import { drillAudio } from '@/lib/drillAudio';
+import { useDrillSensitivity } from '@/lib/drillSensitivity';
 import { drillFlash } from '@/lib/drillFlash';
 import useUnexpectedExitGuard from '@/lib/useUnexpectedExitGuard';
 import DrillFooter from '@/components/drill/DrillFooter';
 import DrillCountdown from '@/components/drill/DrillCountdown';
 import DrillAccordion from '@/components/drill/DrillAccordion';
 import FpsStartCard from '@/components/drill/FpsStartCard';
+import useImmersiveMode from '@/lib/useImmersiveMode';
+import { useIsTouchOnly, useTouchAim } from '@/lib/useTouchAim';
 
 const DRILL_DURATION = 45; // Fixed 45-second session
 
@@ -29,13 +32,15 @@ export default function SteadyHandClient() {
   // === UI & Viewport State ===
   const [gameState, setGameState] = useState('start'); 
   const [isFullscreen, setIsFullscreen] = useState(false);
+  useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
   const [pointerLocked, setPointerLocked] = useState(false);
+  const isTouchOnly = useIsTouchOnly();
   const [flashes, setFlashes] = useState([]);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
 
   // === Settings State ===
-  const [universalSens, setUniversalSens] = useState(1.0);
+  const universalSens = useDrillSensitivity();
   const [openAccordion, setOpenAccordion] = useState(null);
   const [countdownValue, setCountdownValue] = useState(3);
 
@@ -75,25 +80,15 @@ export default function SteadyHandClient() {
     screenShake: 0
   });
 
-  const cmPer360 = (30 / universalSens).toFixed(1);
-
   // === Initialization & Local Storage ===
   useEffect(() => {
     try {
-      const savedSens = localStorage.getItem('steadyHand_sens');
-      if (savedSens) setUniversalSens(parseFloat(savedSens));
       const savedBest = localStorage.getItem('steadyHand_bestScore');
       if (savedBest) setBestScore(parseInt(savedBest, 10));
     } catch {}
     setSoundEnabled(drillAudio.isEnabled());
     setFlashEnabled(drillFlash.isEnabled());
   }, []);
-
-  useEffect(() => {
-    if (gameState !== 'playing') {
-      try { localStorage.setItem('steadyHand_sens', universalSens.toString()); } catch {}
-    }
-  }, [universalSens, gameState]);
 
   const triggerRedFlash = useCallback(() => {
     if (!drillFlash.isEnabled()) return;
@@ -178,12 +173,15 @@ export default function SteadyHandClient() {
       laps: 0, mistakes: 0, maxStreak: 0, screenShake: 0
     };
 
-    if (canvasRef.current && !document.pointerLockElement) {
+    if (!canvasRef.current) return;
+    if (isTouchOnly) {
+      setPointerLocked(true);
+    } else if (!document.pointerLockElement) {
       canvasRef.current.requestPointerLock().catch(() => {});
-      engine.current.path = generatePath(canvasRef.current.width, canvasRef.current.height, 0);
-      resetCrosshairToStart(canvasRef.current.height);
     }
-  }, [generatePath, resetCrosshairToStart]);
+    engine.current.path = generatePath(canvasRef.current.width, canvasRef.current.height, 0);
+    resetCrosshairToStart(canvasRef.current.height);
+  }, [generatePath, resetCrosshairToStart, isTouchOnly]);
 
   const startGame = useCallback(async () => {
     drillAudio.init();
@@ -191,11 +189,7 @@ export default function SteadyHandClient() {
     setAnalytics({ laps: 0, mistakes: 0, maxStreak: 0, speedLevel: 1, grade: null });
     setTimeLeft(DRILL_DURATION);
 
-    try {
-      if (containerRef.current && !document.fullscreenElement) {
-        await containerRef.current.requestFullscreen();
-      }
-    } catch {}
+    setIsFullscreen(true);
 
     countdownTimeoutsRef.current.forEach(clearTimeout);
 
@@ -214,9 +208,7 @@ export default function SteadyHandClient() {
 
   const handleExitDrill = useCallback(() => {
     markIntentionalExit();
-    if (document.fullscreenElement) {
-      document.exitFullscreen().catch(() => {});
-    }
+    setIsFullscreen(false);
     if (document.pointerLockElement) {
       document.exitPointerLock();
     }
@@ -256,11 +248,11 @@ export default function SteadyHandClient() {
     }
   }, [analytics, bestScore, isNewBest]);
 
-  useEffect(() => {
-    const fsListener = () => setIsFullscreen(!!document.fullscreenElement);
-    document.addEventListener('fullscreenchange', fsListener);
-    return () => document.removeEventListener('fullscreenchange', fsListener);
+  const aimAt = useCallback((x, y) => {
+    engine.current.crosshair.x = x;
+    engine.current.crosshair.y = y;
   }, []);
+  useTouchAim({ active: isTouchOnly && gameState === 'playing', canvasRef, onMove: aimAt });
 
   // Strict Timer Management
   useEffect(() => {
@@ -470,9 +462,6 @@ export default function SteadyHandClient() {
                 Steady Hand Game
               </span>
             </h1>
-            <p className="text-xs text-slate-400 mt-1">
-              Motor Precision & Line Tracking • Dynamic Tightrope
-            </p>
           </div>
         )}
 
@@ -501,7 +490,7 @@ export default function SteadyHandClient() {
         {/* Game Stage Container */}
         <div 
           ref={containerRef} 
-          className={`relative overflow-hidden transition-all duration-150 select-none bg-[#080811] text-white border border-white/10 ${
+          className={`overflow-hidden transition-all duration-150 select-none bg-[#080811] text-white border border-white/10 ${
             isFullscreen
               ? 'fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#080811] rounded-none border-none flex flex-col items-center justify-center'
               : 'w-full rounded-2xl bg-[#080811] aspect-video min-h-[460px] sm:min-h-[500px] max-h-[88vh] relative overflow-hidden flex flex-col'
@@ -581,7 +570,7 @@ export default function SteadyHandClient() {
           {/* Core Canvas */}
           <canvas 
             ref={canvasRef} 
-            onClick={() => { if (gameState === 'playing' && !pointerLocked) canvasRef.current?.requestPointerLock(); }}
+            onClick={() => { if (gameState === 'playing' && !pointerLocked && !isTouchOnly) canvasRef.current?.requestPointerLock(); }}
             className={`block absolute top-0 left-0 w-full h-full touch-none z-10 ${gameState === 'playing' ? 'cursor-none' : ''}`} 
           />
 
@@ -596,7 +585,6 @@ export default function SteadyHandClient() {
                 { icon: Target, accent: 'cyan', title: 'Objective', text: 'Trace Glowing Cyan Line to Reach Goal Zone' },
                 { icon: Zap, accent: 'blue', title: 'Reaching Goal', text: 'Resets Timer to 45s & Advances Difficulty' },
               ]}
-              sensitivity={{ value: universalSens, onChange: setUniversalSens, cmPer360 }}
               stats={[
                 { icon: Trophy, label: 'Best Laps', value: `${bestScore || 0}`, color: 'text-white', accent: 'slate' },
                 { icon: Flame, label: 'Current Laps', value: `${analytics.laps || 0}`, color: 'text-cyan-400', accent: 'cyan' },

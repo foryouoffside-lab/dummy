@@ -15,6 +15,7 @@ import {
 import generateShareCard, { shareScoreCard } from '../../../../../components/ShareScoreCard';
 import { getPlayerName } from '../../../../../lib/leaderboard';
 import { drillAudio } from '../../../../../lib/drillAudio';
+import { useDrillSensitivity } from '../../../../../lib/drillSensitivity';
 import { drillFlash } from '../../../../../lib/drillFlash';
 import { drillTimeout } from '../../../../../lib/drillTimeout';
 import { drillPenalty } from '../../../../../lib/drillPenalty';
@@ -27,6 +28,7 @@ import DrillCountdown from '../../../../../components/drill/DrillCountdown';
 import DrillAccordion from '../../../../../components/drill/DrillAccordion';
 import FpsStartCard from '../../../../../components/drill/FpsStartCard';
 import DrillResultCard from '../../../../../components/drill/DrillResultCard';
+import useImmersiveMode from '@/lib/useImmersiveMode';
 
 // ============================================================
 // TUNING CONSTANTS
@@ -105,7 +107,7 @@ const FAQ_ITEMS = [
   { q: "What happens when a target times out?", a: "When a target expires before you click it, your combo streak resets and a red error flash triggers. If the optional Time Penalty is enabled, 0.8s is deducted." },
   { q: "How is tracking accuracy calculated?", a: "Accuracy is calculated as the ratio of successful target hits divided by total clicks, displayed as a percentage on the result dashboard." },
   { q: "Can I play this aim trainer on mobile devices?", a: "This drill requires pointer-lock mouse input for crosshair control, so it is not playable on touch-only phones or tablets. Use a desktop or laptop with a mouse for the full experience." },
-  { q: "Does this trainer support universal mouse sensitivity?", a: "Yes, you can adjust the Universal Sens slider to calibrate raw input cm/360 sensitivity before starting your session." },
+  { q: "Does this trainer support universal mouse sensitivity?", a: "Yes — the Mouse Sensitivity slider in Session Settings on the drills hub calibrates raw input cm/360 for this and every other mouse-aimed drill." },
   { q: "What is the best way to practice with Aim Trainer Elite?", a: "Focus on accuracy first before building speed. Rushed clicks reset your combo, while clean centered clicks build combo multipliers." },
   { q: "How often should I warm up with this aim trainer?", a: "A 10-15 minute session before playing competitive matches helps prime your motor cortex and eye-hand coordination." },
   { q: "Is this aim trainer completely free?", a: "Yes, Aim Trainer Elite is 100% free, requires no downloads or account registration, and runs natively in any modern web browser." },
@@ -130,11 +132,12 @@ const RELATED_DRILLS = [
 export default function AimTrainerClient() {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
+  useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
   const [penaltyEnabled, setPenaltyEnabled] = useState(false);
   const [pointerLocked, setPointerLocked] = useState(false);
-  const [universalSens, setUniversalSens] = useState(1.0);
+  const universalSens = useDrillSensitivity();
   const [openAccordion, setOpenAccordion] = useState(null);
   const [isTouchOnlyDevice, setIsTouchOnlyDevice] = useState(false);
   const [countdownValue, setCountdownValue] = useState(3);
@@ -172,8 +175,6 @@ export default function AimTrainerClient() {
     particles: [], hitMarkers: [], screenShake: 0, logicalWidth: 800, logicalHeight: 450
   });
 
-  const cmPer360 = (30 / universalSens).toFixed(1);
-
   const triggerFlash = useCallback(() => {
     if (!drillFlash.isEnabled()) return;
     const id = Date.now() + Math.random();
@@ -209,11 +210,6 @@ export default function AimTrainerClient() {
       const isTouchCapable = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
       setIsTouchOnlyDevice(isTouchCapable && !hasFinePointer);
 
-      try {
-        const savedSens = localStorage.getItem('aimTrainerElite_sens');
-        if (savedSens) setUniversalSens(parseFloat(savedSens));
-      } catch (e) {}
-
       const saved = getSavedData();
       setBestScore(saved.bestScore || 0);
       setBestCombo(saved.bestCombo || 0);
@@ -228,28 +224,13 @@ export default function AimTrainerClient() {
     };
   }, []);
 
-  useEffect(() => {
-    if (gameState !== 'playing') {
-      try { localStorage.setItem('aimTrainerElite_sens', universalSens.toString()); } catch (e) {}
-    }
-  }, [universalSens, gameState]);
-
-  // Fullscreen Listener
-  useEffect(() => {
-    const handleFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
-  }, []);
-
   const handleExitDrill = useCallback(async () => {
     markIntentionalExit();
     countdownTimeoutsRef.current.forEach(clearTimeout);
     countdownTimeoutsRef.current = [];
     startingRef.current = false;
 
-    if (document.fullscreenElement) {
-      await document.exitFullscreen().catch(() => {});
-    }
+    setIsFullscreen(false);
     if (document.pointerLockElement) {
       document.exitPointerLock();
     }
@@ -262,9 +243,7 @@ export default function AimTrainerClient() {
   });
 
   const resumeDrill = useCallback(async () => {
-    if (containerRef.current && !document.fullscreenElement) {
-      try { await containerRef.current.requestFullscreen(); } catch (e) {}
-    }
+    setIsFullscreen(true);
     if (canvasRef.current && !document.pointerLockElement) {
       try { await canvasRef.current.requestPointerLock(); } catch (e) {}
     }
@@ -352,11 +331,7 @@ export default function AimTrainerClient() {
       particles: [], hitMarkers: [], screenShake: 0, logicalWidth: w, logicalHeight: h
     };
 
-    try {
-      if (containerRef.current && !document.fullscreenElement) {
-        await containerRef.current.requestFullscreen();
-      }
-    } catch(e) {}
+    setIsFullscreen(true);
 
     setGameState('countdown');
     setCountdownValue(3);
@@ -672,9 +647,6 @@ export default function AimTrainerClient() {
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white uppercase">
               Aim Trainer Elite
             </h1>
-            <p className="text-xs text-slate-400 mt-1">
-              Dynamic Moving Targets &amp; Precision Click Timing • Endless Level Progression
-            </p>
           </div>
         )}
 
@@ -704,7 +676,7 @@ export default function AimTrainerClient() {
         <div 
           ref={containerRef} 
           onContextMenu={(e) => { if (gameActiveRef.current) e.preventDefault(); }}
-          className={`relative overflow-hidden flex flex-col transition-all duration-150 select-none bg-[#080811] text-white border border-white/10 ${
+          className={`overflow-hidden flex flex-col transition-all duration-150 select-none bg-[#080811] text-white border border-white/10 ${
             isFullscreen 
               ? "fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#080811] rounded-none border-none flex flex-col items-center justify-center" 
               : "w-full rounded-2xl bg-[#080811] aspect-video min-h-[460px] sm:min-h-[500px] max-h-[88vh] relative overflow-hidden flex flex-col"
@@ -776,7 +748,7 @@ export default function AimTrainerClient() {
               <div className="text-center animate-pulse pointer-events-none">
                 <AlertCircle className="w-12 h-12 text-green-400 mx-auto mb-3" />
                 <h2 className="text-2xl font-black text-white tracking-widest uppercase mb-1">Game Paused</h2>
-                <p className="text-xs text-gray-300 font-medium">Click to resume — fullscreen and cursor lock will re-engage.</p>
+                <p className="text-xs text-gray-300 font-medium">Click to resume — cursor lock will re-engage.</p>
               </div>
             </div>
           )}
@@ -798,7 +770,6 @@ export default function AimTrainerClient() {
                 { icon: Target, accent: "emerald", title: "Hit Targets (+100 PTS)", text: "Acquire and click moving targets rapidly before they disappear (+0.6s)" },
                 { icon: Zap, accent: "red", title: "Miss / Timeout Penalty", text: penaltyEnabled ? "Missing or timing out resets combo streak & deducts 0.8s" : "Missing or timing out resets combo streak" },
               ]}
-              sensitivity={{ value: universalSens, onChange: setUniversalSens, cmPer360 }}
               stats={[
                 { icon: Trophy, label: "Best Score", value: bestScore, color: "text-white", accent: "slate" },
                 { icon: Flame, label: "Best Combo", value: `${bestCombo}x`, color: "text-emerald-400", accent: "emerald" },

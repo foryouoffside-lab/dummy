@@ -5,7 +5,6 @@ import Link from 'next/link';
 import {
   ArrowLeft,
   Target,
-  Activity,
   Home,
   ChevronRight
 } from 'lucide-react';
@@ -15,6 +14,7 @@ import SiteFooter from '@/components/SiteFooter';
 import Reveal from '@/components/Reveal';
 import DrillCarousel from '@/components/drill/DrillCarousel';
 import StickyMobileCta from '@/components/StickyMobileCta';
+import AdjacentHubs from '@/components/AdjacentHubs';
 import { useTranslation } from '@/lib/i18n/useTranslation';
 
 export default function VisualTrackingDrillsClient() {
@@ -80,59 +80,15 @@ export default function VisualTrackingDrillsClient() {
           </ol>
         </nav>
 
-        {/* Hero Section with compact inline chip next to H1 */}
-        <Reveal>
-          <div className="relative mb-8 p-6 sm:p-8 rounded-2xl bg-surface-1 border border-hairline shadow-2xl backdrop-blur-xl overflow-hidden">
-            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-cyan-500 to-blue-500 opacity-70" />
-            <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl pointer-events-none" />
-
-            <div className="relative flex items-start gap-4">
-              <div className="p-3.5 bg-cyan-500/10 border border-cyan-500/30 rounded-2xl shrink-0">
-                <Activity className="w-8 h-8 text-cyan-400" />
-              </div>
-              <div>
-                <h1 className="text-2xl sm:text-4xl font-extrabold text-ink-1 tracking-tight uppercase">
-                  {t('hubs.visual-tracking.h1', 'Visual Tracking Training')}
-                </h1>
-                <p className="text-ink-2 mt-2 text-sm sm:text-base max-w-2xl leading-relaxed">
-                  {t('hubs.visual-tracking.desc', 'Train smooth ocular pursuit, continuous trajectory prediction, and gaze stability.')}
-                </p>
-              </div>
-            </div>
-          </div>
-        </Reveal>
-
-        {/* Start Here Band */}
-        <Reveal className="mb-10">
-          <div className="p-5 rounded-2xl bg-surface-1/80 backdrop-blur-xl border border-hairline shadow-lg">
-            <h2 className="text-xs font-mono font-bold uppercase tracking-wider text-cyan-400 mb-3">
-              Recommended Start Routines
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <Link
-                href="/drills/visual-tracking/constant-slow-pursuit"
-                className="p-3.5 rounded-xl bg-surface-2/80 border border-hairline hover:border-cyan-500/40 hover:-translate-y-0.5 active:scale-[0.98] transition-all group"
-              >
-                <p className="text-xs font-bold text-ink-1 group-hover:text-cyan-400 transition-colors">New to Visual Tracking</p>
-                <p className="text-[10px] text-ink-3 mt-1">Constant slow pursuit baseline</p>
-              </Link>
-              <Link
-                href="/drills/visual-tracking/sine-wave-pursuit"
-                className="p-3.5 rounded-xl bg-surface-2/80 border border-hairline hover:border-cyan-500/40 hover:-translate-y-0.5 active:scale-[0.98] transition-all group"
-              >
-                <p className="text-xs font-bold text-ink-1 group-hover:text-cyan-400 transition-colors">Smooth Pursuit Warm-up</p>
-                <p className="text-[10px] text-ink-3 mt-1">Sinusoidal motion path tracking</p>
-              </Link>
-              <Link
-                href="/drills/visual-tracking/directional-chaos-pursuit"
-                className="p-3.5 rounded-xl bg-surface-2/80 border border-hairline hover:border-cyan-500/40 hover:-translate-y-0.5 active:scale-[0.98] transition-all group"
-              >
-                <p className="text-xs font-bold text-ink-1 group-hover:text-cyan-400 transition-colors">Full Tracking Circuit</p>
-                <p className="text-[10px] text-ink-3 mt-1">Advanced directional chaos pursuit</p>
-              </Link>
-            </div>
-          </div>
-        </Reveal>
+        {/* Page heading */}
+        <div className="mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-ink-1">
+            {t('hubs.visual-tracking.h1', 'Visual Tracking Training')}
+          </h1>
+          <p className="mt-2 text-sm sm:text-base text-ink-2 max-w-2xl leading-relaxed">
+            {t('hubs.visual-tracking.desc', 'Train smooth ocular pursuit, continuous trajectory prediction, and gaze stability.')}
+          </p>
+        </div>
 
         {/* Drill picker: one drill at a time, arrows to move, "View all" for the grid */}
         <Reveal>
@@ -151,6 +107,8 @@ export default function VisualTrackingDrillsClient() {
             }))}
           />
         </Reveal>
+
+        <AdjacentHubs currentCat="visual-tracking" />
 
         {/* Back Link */}
         <div className="mt-12 border-t border-hairline pt-6">

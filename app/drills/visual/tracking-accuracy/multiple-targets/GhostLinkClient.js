@@ -23,6 +23,7 @@ import { getFpsScoreGrade } from '../../../../../lib/scoringEngine';
 import generateShareCard, { shareScoreCard } from '../../../../../components/ShareScoreCard';
 import { getPlayerName } from '../../../../../lib/leaderboard';
 import FpsStartCard from '../../../../../components/drill/FpsStartCard';
+import useImmersiveMode from '@/lib/useImmersiveMode';
 
 const STORAGE_KEY = 'skilldrills_visual_multiple_targets_v1';
 const LEGACY_BEST_KEY = 'ghostLinkBestScore'; // pre-migration key — read once so returning players keep their best score
@@ -89,6 +90,7 @@ export default function GhostLinkClient() {
   const [openAccordion, setOpenAccordion] = useState(null);
 
   const [isFullscreen, setIsFullscreen] = useState(false);
+  useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [isBoxDarkMode, setIsBoxDarkMode] = useState(true);
   const [soundEnabled, setSoundEnabled] = useState(true);
@@ -229,12 +231,6 @@ export default function GhostLinkClient() {
     return () => { if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); };
   }, [gameState, triggerIdentificationPhase]);
 
-  useEffect(() => {
-    const handleFsChange = () => setIsFullscreen(!!document.fullscreenElement);
-    document.addEventListener('fullscreenchange', handleFsChange);
-    return () => document.removeEventListener('fullscreenchange', handleFsChange);
-  }, []);
-
   const handleExitDrill = useCallback(async () => {
     markIntentionalExit();
     countdownTimeoutsRef.current.forEach(clearTimeout);
@@ -242,9 +238,7 @@ export default function GhostLinkClient() {
     if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
     isActiveRef.current = false;
 
-    if (document.fullscreenElement) {
-      await document.exitFullscreen().catch(() => {});
-    }
+    setIsFullscreen(false);
     setGameState('start');
   }, []);
 
@@ -573,12 +567,7 @@ export default function GhostLinkClient() {
     hasInitializedRoundRef.current = false;
     isActiveRef.current = false;
 
-    // Auto Fullscreen before the countdown starts
-    try {
-      if (containerRef.current && !document.fullscreenElement) {
-        await containerRef.current.requestFullscreen();
-      }
-    } catch (e) {}
+    setIsFullscreen(true);
 
     // Countdown sequence: 3 -> 2 -> 1 -> GO with Audio Cues
     setGameState('countdown');
@@ -667,9 +656,6 @@ diagnostics = "Low target identification accuracy. Anchor your gaze centrally an
                 Multiple Object Tracking Test
               </span>
             </h1>
-            <p className="text-xs text-slate-400 mt-1">
-              Multi-Object Tracking & Visual Working Memory
-            </p>
           </div>
         )}
 

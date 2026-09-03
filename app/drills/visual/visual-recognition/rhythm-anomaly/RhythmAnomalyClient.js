@@ -26,6 +26,7 @@ import DrillFlashOverlay from '../../../../../components/drill/DrillFlashOverlay
 import DrillRuleItem from '../../../../../components/drill/DrillRuleItem';
 import DrillFAQItem from '../../../../../components/drill/DrillFAQItem';
 import FpsStartCard from '../../../../../components/drill/FpsStartCard';
+import useImmersiveMode from '@/lib/useImmersiveMode';
 
 const DRILL_DURATION = 45; // Exactly 45 seconds round duration
 const ELITE_SCORE = 200; // Target score for S+ rating (20 hits x 10 PTS = 200 PTS)
@@ -97,6 +98,7 @@ class GameErrorBoundary extends React.Component {
 export default function RhythmAnomalyClient() {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
+  useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
   const [openAccordion, setOpenAccordion] = useState(null);
@@ -162,13 +164,6 @@ export default function RhythmAnomalyClient() {
     }
   }, []);
 
-  // Fullscreen change listener
-  useEffect(() => {
-    const handleFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
-  }, []);
-
   const clearGameTimeouts = useCallback(() => {
     gameTimeoutsRef.current.forEach(clearTimeout);
     gameTimeoutsRef.current = [];
@@ -187,9 +182,7 @@ export default function RhythmAnomalyClient() {
     startingRef.current = false;
     isActiveRef.current = false;
 
-    if (document.fullscreenElement) {
-      await document.exitFullscreen().catch(() => {});
-    }
+    setIsFullscreen(false);
     setGameState('start');
   }, [clearGameTimeouts]);
 
@@ -527,12 +520,7 @@ export default function RhythmAnomalyClient() {
 
     initGrid();
 
-    // Auto Fullscreen on Start
-    try {
-      if (containerRef.current && !document.fullscreenElement) {
-        await containerRef.current.requestFullscreen();
-      }
-    } catch (e) {}
+    setIsFullscreen(true);
 
     // Countdown sequence: 3 -> 2 -> 1 -> GO
     setGameState('countdown');
@@ -600,9 +588,6 @@ export default function RhythmAnomalyClient() {
                 Rhythm Anomaly Timing Test
               </span>
             </h1>
-            <p className="text-xs text-slate-400 mt-1">
-              45-Second Visual Temporal Perception & Flicker Discrimination
-            </p>
           </div>
         )}
 

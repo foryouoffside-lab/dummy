@@ -109,15 +109,15 @@ export default function NBackPage() {
                 "name": "Are there negative score or time penalties?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "No incorrect judgment ever deducts score points or reduces remaining timer seconds. A timed-out (unanswered) letter costs nothing at all. A wrong Match/No Match click costs 1 of your 5 lives instead."
+                  "text": "No. An incorrect judgment never deducts score points or timer seconds, and a timed-out letter costs nothing either. A wrong answer only breaks your accuracy and your streak."
                 }
               },
               {
                 "@type": "Question",
-                "name": "What are the hearts / lives for?",
+                "name": "Can the drill end before the timer does?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "You start each run with 5 lives. A wrong Match/No Match judgment costs 1 life (a timeout costs none); if you run out, the drill ends immediately and shows your results."
+                  "text": "No. Every run lasts the full 45 seconds no matter how many judgments you get wrong, so a bad start never cuts your session short."
                 }
               },
               {

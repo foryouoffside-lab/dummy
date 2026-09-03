@@ -119,10 +119,10 @@ export default function ConcentrationGridPage() {
       },
       {
         "@type": "Question",
-        "name": "What happens when I run out of lives?",
+        "name": "Can a wrong tap end my session early?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "You start each session with 3 lives, shown as hearts in the HUD. Every wrong tap costs one life; losing your last life ends the run immediately, regardless of time remaining."
+          "text": "No. A wrong tap flashes a warning and counts against your accuracy, but every session runs until the timer reaches zero no matter how many you miss."
         }
       },
       {
@@ -187,7 +187,7 @@ export default function ConcentrationGridPage() {
       {
         "@type": "HowToStep",
         "name": "Clear and Advance",
-        "text": "Clearing a full grid advances you to a larger grid, testing broader peripheral vision, all within one fixed 45-second clock. Avoid wrong taps — you only have 3 lives."
+        "text": "Clearing a full grid advances you to a larger grid, testing broader peripheral vision, all within one fixed 45-second clock. Avoid wrong taps — each one costs accuracy."
       }
     ]
   };

@@ -26,6 +26,7 @@ import DrillFlashOverlay from '../../../../../components/drill/DrillFlashOverlay
 import DrillRuleItem from '../../../../../components/drill/DrillRuleItem';
 import DrillFAQItem from '../../../../../components/drill/DrillFAQItem';
 import FpsStartCard from '../../../../../components/drill/FpsStartCard';
+import useImmersiveMode from '@/lib/useImmersiveMode';
 
 const DRILL_DURATION = 45; // 45 seconds duration
 const POINTS_PER_HIT = 150;
@@ -79,6 +80,7 @@ const SEARCH_PAIRS = [
 export default function VisualSearchClient() {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
+  useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
   const [openAccordion, setOpenAccordion] = useState(null);
@@ -137,13 +139,6 @@ export default function VisualSearchClient() {
     }
   }, []);
 
-  // Fullscreen change listener
-  useEffect(() => {
-    const handleFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
-  }, []);
-
   const clearGameTimeouts = useCallback(() => {
     gameTimeoutsRef.current.forEach(clearTimeout);
     gameTimeoutsRef.current = [];
@@ -158,9 +153,7 @@ export default function VisualSearchClient() {
     startingRef.current = false;
     gameActiveRef.current = false;
 
-    if (document.fullscreenElement) {
-      await document.exitFullscreen().catch(() => {});
-    }
+    setIsFullscreen(false);
     setGameState('start');
   }, [clearGameTimeouts]);
 
@@ -326,12 +319,7 @@ export default function VisualSearchClient() {
       missedClicks: 0,
     };
 
-    // Auto Fullscreen on Start
-    try {
-      if (containerRef.current && !document.fullscreenElement) {
-        await containerRef.current.requestFullscreen();
-      }
-    } catch (e) {}
+    setIsFullscreen(true);
 
     // Countdown sequence: 3 -> 2 -> 1 -> GO
     setGameState('countdown');
@@ -423,9 +411,6 @@ export default function VisualSearchClient() {
                 Conjunctive Visual Search Test
               </span>
             </h1>
-            <p className="text-xs text-slate-400 mt-1">
-              Conjunctive Target Scanning & Feature Discrimination
-            </p>
           </div>
         )}
 

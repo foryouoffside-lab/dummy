@@ -123,8 +123,8 @@ const howToSchema = {
     {
       "@type": "HowToStep",
       "position": 4,
-      "name": "Protect Your Lives",
-      "text": "You start each session with 5 lives. Clean hits on both channels add +0.6s to the clock. Missing a target or making a false match costs 1 life (and deducts 0.8s when time penalty is enabled in settings)."
+      "name": "Protect Your Combo",
+      "text": "Clean hits on both channels add +0.6s to the clock and build your combo multiplier. Missing a target or making a false match resets that combo (and deducts 0.8s when time penalty is enabled in settings), but the run always lasts the full clock."
     }
   ]
 };

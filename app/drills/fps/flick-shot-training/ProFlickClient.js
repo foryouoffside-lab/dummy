@@ -14,6 +14,7 @@ import {
 import generateShareCard, { shareScoreCard } from '../../../../components/ShareScoreCard';
 import { getPlayerName } from '../../../../lib/leaderboard';
 import { drillAudio } from '../../../../lib/drillAudio';
+import { useDrillSensitivity } from '../../../../lib/drillSensitivity';
 import { drillFlash } from '../../../../lib/drillFlash';
 import { drillTimeout } from '../../../../lib/drillTimeout';
 import { drillPenalty } from '../../../../lib/drillPenalty';
@@ -26,6 +27,7 @@ import DrillCountdown from '../../../../components/drill/DrillCountdown';
 import DrillAccordion from '../../../../components/drill/DrillAccordion';
 import FpsStartCard from '../../../../components/drill/FpsStartCard';
 import DrillResultCard from '../../../../components/drill/DrillResultCard';
+import useImmersiveMode from '@/lib/useImmersiveMode';
 
 // ============================================================
 // TUNING CONSTANTS
@@ -144,7 +146,7 @@ const ABOUT_SECTIONS = [
     icon: Eye,
     title: "Runs Client-Side, Zero Install",
     paragraphs: [
-      "Everything runs client-side with raw, unaccelerated mouse input captured through the Pointer Lock API, so there's no server lag distorting your times and nothing to install. Play in fullscreen with your in-game sensitivity dialed in through the universal cm/360 converter, and your results — best score, best combo, best level — persist locally so you can chart real progress over weeks of practice."
+      "Everything runs client-side with raw, unaccelerated mouse input captured through the Pointer Lock API, so there's no server lag distorting your times and nothing to install. Play in fullscreen with your in-game sensitivity dialed in through the universal cm/360 converter in the drills-hub session settings, and your results — best score, best combo, best level — persist locally so you can chart real progress over weeks of practice."
     ]
   }
 ];
@@ -184,10 +186,11 @@ const RELATED_DRILLS = [
 export default function ProFlickClient() {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
+  useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
   const [pointerLocked, setPointerLocked] = useState(false);
-  const [universalSens, setUniversalSens] = useState(1.0);
+  const universalSens = useDrillSensitivity();
   const [openAccordion, setOpenAccordion] = useState(null);
   const [isTouchOnlyDevice, setIsTouchOnlyDevice] = useState(false);
   const [countdownValue, setCountdownValue] = useState(3);
@@ -228,8 +231,6 @@ export default function ProFlickClient() {
     logicalWidth: 800, logicalHeight: 450
   });
 
-  const cmPer360 = (30 / universalSens).toFixed(1);
-
   const triggerFlash = useCallback(() => {
     if (!drillFlash.isEnabled()) return;
     const id = Date.now() + Math.random();
@@ -247,11 +248,6 @@ export default function ProFlickClient() {
       const isTouchCapable = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
       setIsTouchOnlyDevice(isTouchCapable && !hasFinePointer);
 
-      try {
-        const savedSens = localStorage.getItem('flickAim_sens');
-        if (savedSens) setUniversalSens(parseFloat(savedSens));
-      } catch (e) {}
-
       const saved = getSavedData();
       setBestScore(saved.bestScore || 0);
       setBestCombo(saved.bestCombo || 0);
@@ -266,28 +262,13 @@ export default function ProFlickClient() {
     };
   }, []);
 
-  useEffect(() => {
-    if (gameState !== 'playing') {
-      try { localStorage.setItem('flickAim_sens', universalSens.toString()); } catch (e) {}
-    }
-  }, [universalSens, gameState]);
-
-  // Fullscreen change listener
-  useEffect(() => {
-    const handleFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
-  }, []);
-
   const handleExitDrill = useCallback(async () => {
     markIntentionalExit();
     countdownTimeoutsRef.current.forEach(clearTimeout);
     countdownTimeoutsRef.current = [];
     startingRef.current = false;
 
-    if (document.fullscreenElement) {
-      await document.exitFullscreen().catch(() => {});
-    }
+    setIsFullscreen(false);
     if (document.pointerLockElement) {
       document.exitPointerLock();
     }
@@ -302,9 +283,7 @@ export default function ProFlickClient() {
   });
 
   const resumeDrill = useCallback(async () => {
-    if (containerRef.current && !document.fullscreenElement) {
-      try { await containerRef.current.requestFullscreen(); } catch (e) {}
-    }
+    setIsFullscreen(true);
     if (canvasRef.current && !document.pointerLockElement) {
       try { await canvasRef.current.requestPointerLock(); } catch (e) {}
     }
@@ -429,11 +408,7 @@ export default function ProFlickClient() {
       particles: [], hitMarkers: [], hitRings: [], screenShake: 0, logicalWidth: w, logicalHeight: h
     };
 
-    try {
-      if (containerRef.current && !document.fullscreenElement) {
-        await containerRef.current.requestFullscreen();
-      }
-    } catch(e) {}
+    setIsFullscreen(true);
 
     setGameState('countdown');
     setCountdownValue(3);
@@ -793,9 +768,6 @@ export default function ProFlickClient() {
                 Flick Shot Trainer
               </span>
             </h1>
-            <p className="text-xs text-slate-400 mt-1">
-              Macro Flicking &amp; Target Acquisition • 15 Levels
-            </p>
           </div>
         )}
 
@@ -825,7 +797,7 @@ export default function ProFlickClient() {
         <div 
           ref={containerRef} 
           onContextMenu={(e) => { if (gameActiveRef.current) e.preventDefault(); }}
-          className={`relative overflow-hidden flex flex-col transition-all duration-150 select-none bg-[#080811] text-white border border-white/10 ${
+          className={`overflow-hidden flex flex-col transition-all duration-150 select-none bg-[#080811] text-white border border-white/10 ${
             isFullscreen 
               ? 'fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#080811] rounded-none border-none flex flex-col items-center justify-center' 
               : 'w-full rounded-2xl bg-[#080811] aspect-video min-h-[460px] sm:min-h-[500px] max-h-[88vh] relative overflow-hidden flex flex-col'
@@ -897,7 +869,7 @@ export default function ProFlickClient() {
               <div className="text-center animate-pulse pointer-events-none">
                 <AlertCircle className="w-12 h-12 text-emerald-400 mx-auto mb-3" />
                 <h2 className="text-2xl font-black text-white tracking-widest uppercase mb-1">Game Paused</h2>
-                <p className="text-xs text-gray-300 font-medium">Click to resume — fullscreen and cursor lock will re-engage.</p>
+                <p className="text-xs text-gray-300 font-medium">Click to resume — cursor lock will re-engage.</p>
               </div>
             </div>
           )}
@@ -919,7 +891,6 @@ export default function ProFlickClient() {
                 { icon: Target, accent: 'emerald', title: 'Objective', text: 'Snap & Click Targets' },
                 { icon: AlertCircle, accent: 'red', title: 'Failure Rule', text: penaltyEnabled ? 'Miss / Timeout → Combo Reset, -0.8s' : 'Miss / Timeout → Combo Reset' },
               ]}
-              sensitivity={{ value: universalSens, onChange: setUniversalSens, cmPer360 }}
               stats={[
                 { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
                 { icon: Flame, label: 'Best Combo', value: `${bestCombo}x`, color: 'text-emerald-400', accent: 'emerald' },

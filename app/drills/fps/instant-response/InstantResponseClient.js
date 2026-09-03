@@ -12,6 +12,7 @@ import {
 import generateShareCard, { shareScoreCard } from '../../../../components/ShareScoreCard';
 import { getPlayerName } from '../../../../lib/leaderboard';
 import { drillAudio } from '../../../../lib/drillAudio';
+import { useDrillSensitivity } from '../../../../lib/drillSensitivity';
 import { drillFlash } from '../../../../lib/drillFlash';
 import { drillTimeout } from '../../../../lib/drillTimeout';
 import { drillPenalty } from '../../../../lib/drillPenalty';
@@ -24,6 +25,7 @@ import DrillCountdown from '../../../../components/drill/DrillCountdown';
 import DrillAccordion from '../../../../components/drill/DrillAccordion';
 import FpsStartCard from '../../../../components/drill/FpsStartCard';
 import DrillResultCard from '../../../../components/drill/DrillResultCard';
+import useImmersiveMode from '@/lib/useImmersiveMode';
 
 // ============================================================
 // TUNING CONSTANTS
@@ -138,10 +140,12 @@ const RELATED_DRILLS = [
 export default function InstantResponseClient() {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
+  useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
   const [penaltyEnabled, setPenaltyEnabled] = useState(false);
   const [pointerLocked, setPointerLocked] = useState(false);
+  const universalSens = useDrillSensitivity();
   const [openAccordion, setOpenAccordion] = useState(null);
   const [isTouchOnlyDevice, setIsTouchOnlyDevice] = useState(false);
   const [countdownValue, setCountdownValue] = useState(3);
@@ -213,22 +217,13 @@ export default function InstantResponseClient() {
     };
   }, []);
 
-  // Fullscreen change listener
-  useEffect(() => {
-    const handleFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
-  }, []);
-
   const handleExitDrill = useCallback(async () => {
     markIntentionalExit();
     countdownTimeoutsRef.current.forEach(clearTimeout);
     countdownTimeoutsRef.current = [];
     startingRef.current = false;
 
-    if (document.fullscreenElement) {
-      await document.exitFullscreen().catch(() => {});
-    }
+    setIsFullscreen(false);
     if (document.pointerLockElement) {
       document.exitPointerLock();
     }
@@ -243,9 +238,7 @@ export default function InstantResponseClient() {
   });
 
   const resumeDrill = useCallback(async () => {
-    if (containerRef.current && !document.fullscreenElement) {
-      try { await containerRef.current.requestFullscreen(); } catch (e) {}
-    }
+    setIsFullscreen(true);
     if (canvasRef.current && !document.pointerLockElement) {
       try { await canvasRef.current.requestPointerLock(); } catch (e) {}
     }
@@ -361,11 +354,7 @@ export default function InstantResponseClient() {
       logicalWidth: w, logicalHeight: h
     };
 
-    try {
-      if (containerRef.current && !document.fullscreenElement) {
-        await containerRef.current.requestFullscreen();
-      }
-    } catch(e) {}
+    setIsFullscreen(true);
 
     // Countdown sequence: 3 -> 2 -> 1 -> GO
     setGameState('countdown');
@@ -412,8 +401,8 @@ export default function InstantResponseClient() {
       if (gameState !== 'playing' || !pointerLocked || !canvasRef.current) return;
       const w = engine.current.logicalWidth;
       const h = engine.current.logicalHeight;
-      engine.current.crosshair.x = Math.max(0, Math.min(w, engine.current.crosshair.x + e.movementX));
-      engine.current.crosshair.y = Math.max(0, Math.min(h, engine.current.crosshair.y + e.movementY));
+      engine.current.crosshair.x = Math.max(0, Math.min(w, engine.current.crosshair.x + e.movementX * universalSens));
+      engine.current.crosshair.y = Math.max(0, Math.min(h, engine.current.crosshair.y + e.movementY * universalSens));
     };
 
     const handleMouseDown = (e) => {
@@ -498,7 +487,7 @@ export default function InstantResponseClient() {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mousedown', handleMouseDown);
     };
-  }, [gameState, pointerLocked, triggerFlash, resumeDrill]);
+  }, [gameState, pointerLocked, universalSens, triggerFlash, resumeDrill]);
 
   // Main Physics & Canvas Render Loop
   useEffect(() => {
@@ -748,9 +737,6 @@ export default function InstantResponseClient() {
                 FPS Reaction Time Test
               </span>
             </h1>
-            <p className="text-xs text-slate-400 mt-1">
-              Visual Reaction Latency &amp; Reflex • Endless Level Progression
-            </p>
           </div>
         )}
 
@@ -780,7 +766,7 @@ export default function InstantResponseClient() {
         <div 
           ref={containerRef} 
           onContextMenu={(e) => { if (gameActiveRef.current) e.preventDefault(); }}
-          className={`relative overflow-hidden flex flex-col transition-all duration-150 select-none bg-[#080811] text-white border border-white/10 ${
+          className={`overflow-hidden flex flex-col transition-all duration-150 select-none bg-[#080811] text-white border border-white/10 ${
             isFullscreen 
               ? "fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#080811] rounded-none border-none flex flex-col items-center justify-center" 
               : "w-full rounded-2xl bg-[#080811] aspect-video min-h-[460px] sm:min-h-[500px] max-h-[88vh] relative overflow-hidden flex flex-col"
@@ -852,7 +838,7 @@ export default function InstantResponseClient() {
               <div className="text-center animate-pulse pointer-events-none">
                 <AlertCircle className="w-12 h-12 text-emerald-400 mx-auto mb-3" />
                 <h2 className="text-2xl font-black text-white tracking-widest uppercase mb-1">Game Paused</h2>
-                <p className="text-xs text-gray-300 font-medium">Click to resume — fullscreen and cursor lock will re-engage.</p>
+                <p className="text-xs text-gray-300 font-medium">Click to resume — cursor lock will re-engage.</p>
               </div>
             </div>
           )}

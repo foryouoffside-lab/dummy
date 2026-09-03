@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import {
   Volume2, VolumeX,
-  Play, RefreshCw, Share2, ArrowLeft, BookOpen, Heart, Users, TrendingUp, Zap, ZapOff, Target, Trophy
+  Play, RefreshCw, Share2, ArrowLeft, BookOpen, Users, TrendingUp, Zap, ZapOff, Target, Trophy
 } from 'lucide-react';
 
 import generateShareCard, { shareScoreCard } from '../../../../../components/ShareScoreCard';
@@ -20,6 +20,7 @@ import DrillCountdown from '../../../../../components/drill/DrillCountdown';
 import DrillAccordion from '../../../../../components/drill/DrillAccordion';
 import DrillFlashOverlay from '../../../../../components/drill/DrillFlashOverlay';
 import FpsStartCard from '../../../../../components/drill/FpsStartCard';
+import useImmersiveMode from '@/lib/useImmersiveMode';
 
 const DRILL_DURATION = 45;
 
@@ -51,7 +52,6 @@ const saveData = (data) => {
 };
 
 const MAX_LEVEL = 5;
-const MAX_LIVES = 5;
 const POINTS_PER_HIT = 100;
 const POINTS_PER_LEVEL = 200;
 const ELITE_SCORE = 2500; // Target score for S+ rating in 5-level system
@@ -133,6 +133,7 @@ const RELATED_DRILLS = [
 export default function RSVPReaderClient() {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
+  useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
   const [openAccordion, setOpenAccordion] = useState(null);
@@ -140,7 +141,6 @@ export default function RSVPReaderClient() {
 
   // Live HUD State
   const [uiScore, setUiScore] = useState(0);
-  const [uiLives, setUiLives] = useState(MAX_LIVES);
   const [uiTimeLeft, setUiTimeLeft] = useState(DRILL_DURATION);
   const [uiWpm, setUiWpm] = useState(300);
   const [bestScore, setBestScore] = useState(0);
@@ -199,9 +199,7 @@ export default function RSVPReaderClient() {
     if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
     if (streamTimerRef.current) clearTimeout(streamTimerRef.current);
 
-    if (document.fullscreenElement) {
-      await document.exitFullscreen().catch(() => {});
-    }
+    setIsFullscreen(false);
     setGameState('start');
   }, []);
 
@@ -301,13 +299,8 @@ export default function RSVPReaderClient() {
 
     if (eng.wasResponded) {
       eng.falseAlarms += 1;
-      eng.lives -= 1;
-      setUiLives(Math.max(0, eng.lives));
       triggerFlash();
       drillAudio.playPenalty();
-      if (eng.lives <= 0) {
-        endGame();
-      }
       return;
     }
 
@@ -328,25 +321,17 @@ export default function RSVPReaderClient() {
 
       assignNextTarget(eng.wordIdx);
     } else {
-      // Wrong click (tapped when current word is NOT target word): lose 1 life!
+      // Wrong click (tapped when current word is NOT the target): counts against
+      // accuracy, but the run always plays out the clock.
       eng.falseAlarms += 1;
-      eng.lives -= 1;
-      setUiLives(Math.max(0, eng.lives));
       triggerFlash();
       drillAudio.playPenalty();
-      if (eng.lives <= 0) {
-        endGame();
-      }
     }
-  }, [triggerFlash, assignNextTarget, endGame]);
+  }, [triggerFlash, assignNextTarget]);
 
   // Enter Drill
   const enterDrill = useCallback(async () => {
-    try {
-      if (containerRef.current && !document.fullscreenElement) {
-        await containerRef.current.requestFullscreen();
-      }
-    } catch (e) {}
+    setIsFullscreen(true);
 
     countdownTimeoutsRef.current.forEach(clearTimeout);
     countdownTimeoutsRef.current = [];
@@ -361,7 +346,6 @@ export default function RSVPReaderClient() {
     const initialTarget = pickUpcomingTarget(0);
 
     setUiScore(0);
-    setUiLives(MAX_LIVES);
     setUiTimeLeft(DRILL_DURATION);
     setUiWpm(initialConfig.wpm);
     setTargetWord(initialTarget.clean);
@@ -369,7 +353,6 @@ export default function RSVPReaderClient() {
     engine.current = {
       score: 0,
       level: startLevel,
-      lives: MAX_LIVES,
       successfulHits: 0,
       misses: 0,
       falseAlarms: 0,
@@ -455,9 +438,6 @@ export default function RSVPReaderClient() {
               Reading Speed Test
             </span>
           </h1>
-          <p className="text-xs text-slate-400 mt-1">
-            Rapid Serial Visual Presentation & High-Speed Text Processing
-          </p>
         </div>
         )}
 
@@ -498,25 +478,10 @@ export default function RSVPReaderClient() {
           {/* IN-BOX OVERLAY HUD */}
           {(gameState === 'playing' || gameState === 'countdown') && (
             <>
-              {/* Top Left: Score & 5 Hearts */}
+              {/* Top Left: Score */}
               <div className="absolute top-4 left-4 z-30 pointer-events-none flex flex-col items-start gap-1">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Score</p>
                 <p className="text-2xl sm:text-3xl font-black text-white tabular-nums leading-tight">{uiScore}</p>
-                <div className="flex items-center gap-1 mt-0.5">
-                  {Array.from({ length: MAX_LIVES }).map((_, idx) => {
-                    const active = idx < uiLives;
-                    return (
-                      <Heart
-                        key={idx}
-                        className={`w-3.5 h-3.5 sm:w-4 sm:h-4 transition-all duration-200 ${
-                          active
-                            ? 'fill-red-500 text-red-500 drop-shadow-[0_0_6px_rgba(239,68,68,0.7)]'
-                            : 'fill-slate-800 text-slate-800'
-                        }`}
-                      />
-                    );
-                  })}
-                </div>
               </div>
 
               {/* Top Right: Time Left */}
@@ -529,7 +494,7 @@ export default function RSVPReaderClient() {
 
           {/* IN-GAME HUD SOUND + FLASH TOGGLES */}
           {gameState === 'playing' && (
-            <div className="absolute bottom-4 right-4 z-40 flex items-center gap-2">
+            <div className="absolute bottom-4 max-sm:bottom-28 right-4 z-40 flex items-center gap-2">
               <button
                 onPointerDown={(e) => e.stopPropagation()}
                 onClick={(e) => {

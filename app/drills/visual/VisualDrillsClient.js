@@ -125,59 +125,15 @@ export default function VisualDrillsClient() {
           </ol>
         </nav>
 
-        {/* Hero Section with compact inline chip next to H1 */}
-        <Reveal>
-          <div className="relative mb-8 p-6 sm:p-8 rounded-3xl bg-surface-1 border border-hairline shadow-2xl backdrop-blur-xl overflow-hidden">
-            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-fuchsia-500 to-pink-500 opacity-70" />
-            <div className="absolute top-0 right-0 w-96 h-96 bg-fuchsia-500/5 rounded-full blur-3xl pointer-events-none" />
-
-            <div className="relative flex items-start gap-4">
-              <div className="p-3.5 bg-fuchsia-500/10 border border-fuchsia-500/30 rounded-2xl shrink-0">
-                <Eye className="w-8 h-8 text-fuchsia-400" />
-              </div>
-              <div>
-                <h1 className="text-2xl sm:text-4xl font-extrabold text-ink-1 tracking-tight uppercase">
-                  {t('hubs.visual.h1', 'Visual Training & Recognition')}
-                </h1>
-                <p className="text-ink-2 mt-2 text-sm sm:text-base max-w-2xl leading-relaxed">
-                  {t('hubs.visual.desc', 'Calibrate foveal detection, saccadic recognition, and peripheral awareness.')}
-                </p>
-              </div>
-            </div>
-          </div>
-        </Reveal>
-
-        {/* Start Here Band */}
-        <Reveal className="mb-10">
-          <div className="p-5 rounded-2xl bg-surface-1 border border-hairline">
-            <h2 className="text-xs font-mono font-bold uppercase tracking-wider text-fuchsia-400 mb-3">
-              Recommended Start Routines
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <Link
-                href="/drills/visual/reaction-speed/light-reaction"
-                className="p-3.5 rounded-xl bg-surface-2 border border-hairline hover:border-fuchsia-500/40 active:scale-[0.98] transition-all group"
-              >
-                <p className="text-xs font-bold text-ink-1 group-hover:text-fuchsia-400 transition-colors">New to Visual Training</p>
-                <p className="text-[10px] text-ink-3 mt-1">Light reaction reflex baseline test</p>
-              </Link>
-              <Link
-                href="/drills/visual/depth-perception/distance-judgment"
-                className="p-3.5 rounded-xl bg-surface-2 border border-hairline hover:border-fuchsia-500/40 active:scale-[0.98] transition-all group"
-              >
-                <p className="text-xs font-bold text-ink-1 group-hover:text-fuchsia-400 transition-colors">Depth Perception Warm-Up</p>
-                <p className="text-[10px] text-ink-3 mt-1">Judge 3D approaching target distance</p>
-              </Link>
-              <Link
-                href="/drills/visual/visual-recognition/visual-search"
-                className="p-3.5 rounded-xl bg-surface-2 border border-hairline hover:border-fuchsia-500/40 active:scale-[0.98] transition-all group"
-              >
-                <p className="text-xs font-bold text-ink-1 group-hover:text-fuchsia-400 transition-colors">Conjunctive Search Challenge</p>
-                <p className="text-[10px] text-ink-3 mt-1">Find target letters under time pressure</p>
-              </Link>
-            </div>
-          </div>
-        </Reveal>
+        {/* Page heading */}
+        <div className="mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-ink-1">
+            {t('hubs.visual.h1', 'Visual Training & Recognition')}
+          </h1>
+          <p className="mt-2 text-sm sm:text-base text-ink-2 max-w-2xl leading-relaxed">
+            {t('hubs.visual.desc', 'Calibrate foveal detection, saccadic recognition, and peripheral awareness.')}
+          </p>
+        </div>
 
         {/* Drill picker: one drill at a time, arrows to move, "View all" for the grid */}
         <Reveal>

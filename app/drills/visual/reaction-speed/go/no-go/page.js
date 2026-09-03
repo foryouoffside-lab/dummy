@@ -105,10 +105,10 @@ export default function ChromaSyncPage() {
               },
               {
                 "@type": "Question",
-                "name": "What happens if I run out of lives?",
+                "name": "Can a bad run end early?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "You start each run with 5 lives. Every wrong click on a red NO-GO signal costs 1 life; missing a green GO signal (timeout) costs no life at all. Reach 0 lives and the drill ends immediately, even if time remains."
+                  "text": "No. A wrong click on a red NO-GO signal resets your combo (and deducts time if penalties are on), but nothing cuts the session short — every run plays until the clock reaches zero."
                 }
               },
               {
@@ -124,7 +124,7 @@ export default function ChromaSyncPage() {
                 "name": "How long does each drill session last?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Each round starts with 45 seconds on the clock (extendable by hitting GO targets and holding NO-GOs), or until your 5 lives run out."
+                  "text": "Each round starts with 45 seconds on the clock, extendable by hitting GO targets and holding NO-GOs. The clock is the only thing that ends a run."
                 }
               },
               {

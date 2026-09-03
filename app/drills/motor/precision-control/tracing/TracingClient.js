@@ -12,12 +12,15 @@ import {
 import generateShareCard, { shareScoreCard } from '@/components/ShareScoreCard';
 import { getPlayerName } from '@/lib/leaderboard';
 import { drillAudio } from '@/lib/drillAudio';
+import { useDrillSensitivity } from '@/lib/drillSensitivity';
 import { drillFlash } from '@/lib/drillFlash';
 import useUnexpectedExitGuard from '@/lib/useUnexpectedExitGuard';
 import DrillFooter from '@/components/drill/DrillFooter';
 import DrillCountdown from '@/components/drill/DrillCountdown';
 import DrillAccordion from '@/components/drill/DrillAccordion';
 import FpsStartCard from '@/components/drill/FpsStartCard';
+import useImmersiveMode from '@/lib/useImmersiveMode';
+import { useIsTouchOnly, useTouchAim } from '@/lib/useTouchAim';
 
 // ============================================================
 // CORE DRILL LOGIC VARIABLES
@@ -64,10 +67,12 @@ export default function FineMotorClient() {
   // === UI & Viewport State ===
   const [gameState, setGameState] = useState('start'); 
   const [isFullscreen, setIsFullscreen] = useState(false);
+  useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
   const [pointerLocked, setPointerLocked] = useState(false);
+  const isTouchOnly = useIsTouchOnly();
   
   // === Settings State ===
-  const [universalSens, setUniversalSens] = useState(1.0);
+  const universalSens = useDrillSensitivity();
   const [openAccordion, setOpenAccordion] = useState(null);
   const [countdownValue, setCountdownValue] = useState(3);
   const [soundEnabled, setSoundEnabled] = useState(true);
@@ -119,25 +124,15 @@ export default function FineMotorClient() {
   const isOffPathRef = useRef(false);
   const globalTimeRef = useRef(0);
 
-  const cmPer360 = (30 / universalSens).toFixed(1);
-
   // === Initialization & Local Storage ===
   useEffect(() => {
     try {
-      const savedSens = localStorage.getItem('waveTracing_sens');
-      if (savedSens) setUniversalSens(parseFloat(savedSens));
       const savedBest = localStorage.getItem('waveTracing_bestScore');
       if (savedBest) setBestScore(parseInt(savedBest, 10));
     } catch {}
     setSoundEnabled(drillAudio.isEnabled());
     setFlashEnabled(drillFlash.isEnabled());
   }, []);
-
-  useEffect(() => {
-    if (gameState !== 'playing') {
-      try { localStorage.setItem('waveTracing_sens', universalSens.toString()); } catch {}
-    }
-  }, [universalSens, gameState]);
 
   const showFeedback = useCallback((msg, type = 'success') => {
     setFeedback(msg);
@@ -184,9 +179,7 @@ export default function FineMotorClient() {
 
   const handleExitDrill = useCallback(async () => {
     markIntentionalExit();
-    if (document.fullscreenElement) {
-      await document.exitFullscreen().catch(() => {});
-    }
+    setIsFullscreen(false);
     if (document.pointerLockElement) {
       document.exitPointerLock();
     }
@@ -242,8 +235,12 @@ export default function FineMotorClient() {
     setFlowState(100);
     setTimeLeft(DRILL_DURATION);
 
-    if (canvasRef.current && !document.pointerLockElement) {
-      canvasRef.current.requestPointerLock().catch(() => {});
+    if (canvasRef.current) {
+      if (isTouchOnly) {
+        setPointerLocked(true);
+      } else if (!document.pointerLockElement) {
+        canvasRef.current.requestPointerLock().catch(() => {});
+      }
 
       const width = canvasRef.current.width;
       const height = canvasRef.current.height;
@@ -257,7 +254,7 @@ export default function FineMotorClient() {
       }
       pointsRef.current = pts;
     }
-  }, []);
+  }, [isTouchOnly]);
 
   const startGame = useCallback(async () => {
     drillAudio.init(); 
@@ -265,11 +262,7 @@ export default function FineMotorClient() {
     setIsNewBest(false);
     setFeedback('');
 
-    try {
-      if (containerRef.current && !document.fullscreenElement) {
-        await containerRef.current.requestFullscreen();
-      }
-    } catch {}
+    setIsFullscreen(true);
 
     setGameState('countdown');
     setCountdownValue(3);
@@ -282,12 +275,6 @@ export default function FineMotorClient() {
   }, [startActualDrill]);
 
 
-
-  useEffect(() => {
-    const fsListener = () => setIsFullscreen(!!document.fullscreenElement);
-    document.addEventListener('fullscreenchange', fsListener);
-    return () => document.removeEventListener('fullscreenchange', fsListener);
-  }, []);
 
   // Strict Timer Management
   useEffect(() => {
@@ -307,6 +294,12 @@ export default function FineMotorClient() {
     }
     return () => clearInterval(timerRef.current);
   }, [gameState, pointerLocked, endGame]);
+
+  const aimAt = useCallback((x, y) => {
+    virtualCrosshair.current.x = x;
+    virtualCrosshair.current.y = y;
+  }, []);
+  useTouchAim({ active: isTouchOnly && gameState === 'playing', canvasRef, onMove: aimAt });
 
   // Raw Mouse Input Listeners
   useEffect(() => {
@@ -514,9 +507,6 @@ export default function FineMotorClient() {
                 Mouse Tracing Game
               </span>
             </h1>
-            <p className="text-xs text-slate-400 mt-1">
-              Raw Input Continuous Tracking • Dynamic Waveforms
-            </p>
           </div>
         )}
 
@@ -554,7 +544,7 @@ export default function FineMotorClient() {
         {/* Game Stage Container */}
         <div 
           ref={containerRef} 
-          className={`relative overflow-hidden transition-all duration-150 select-none bg-[#080811] text-white border border-white/10 ${
+          className={`overflow-hidden transition-all duration-150 select-none bg-[#080811] text-white border border-white/10 ${
             isFullscreen
               ? 'fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#080811] rounded-none border-none flex flex-col items-center justify-center'
               : 'w-full rounded-2xl bg-[#080811] aspect-video min-h-[460px] sm:min-h-[500px] max-h-[88vh] relative overflow-hidden flex flex-col'
@@ -633,7 +623,7 @@ export default function FineMotorClient() {
           {/* Core Canvas */}
           <canvas 
             ref={canvasRef} 
-            onClick={() => { if (gameState === 'playing' && !pointerLocked) canvasRef.current?.requestPointerLock(); }}
+            onClick={() => { if (gameState === 'playing' && !pointerLocked && !isTouchOnly) canvasRef.current?.requestPointerLock(); }}
             className={`block absolute top-0 left-0 w-full h-full touch-none z-10 ${gameState === 'playing' ? 'cursor-none' : ''}`} 
           />
 
@@ -648,7 +638,6 @@ export default function FineMotorClient() {
                 { icon: Target, accent: 'redOrange', title: 'Objective', text: 'Keep Crosshair Perfectly Aligned with Wave' },
                 { icon: Zap, accent: 'purple', title: 'Continuous Flow', text: 'Wave Never Stops, Re-acquire to Maintain Flow' },
               ]}
-              sensitivity={{ value: universalSens, onChange: setUniversalSens, cmPer360 }}
               stats={[
                 { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
                 { icon: Flame, label: 'Peak Flow', value: `${analytics.peakFlow}%`, color: 'text-rose-400', accent: 'redOrange' },
@@ -720,7 +709,7 @@ export default function FineMotorClient() {
                   <button
                     onClick={handleExitDrill}
                     className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform"
-                    title="Exit Fullscreen & Return"
+                    title="Exit Drill & Return"
                   >
                     <LogOut className="w-4 h-4 text-red-400" />
                   </button>

@@ -21,6 +21,7 @@ import DrillAccordion from '../../../../../components/drill/DrillAccordion';
 import DrillFlashOverlay from '../../../../../components/drill/DrillFlashOverlay';
 import FpsStartCard from '../../../../../components/drill/FpsStartCard';
 import DrillResultCard from '../../../../../components/drill/DrillResultCard';
+import useImmersiveMode from '@/lib/useImmersiveMode';
 
 // ============================================================
 // TUNING CONSTANTS
@@ -99,6 +100,7 @@ const RELATED_DRILLS = [
 export default function DualTargetFlowClient() {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
+  useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
   const [penaltyEnabled, setPenaltyEnabled] = useState(false);
@@ -181,13 +183,9 @@ export default function DualTargetFlowClient() {
       setBestLevel(saved.bestLevel || 1);
       setTotalSessions(saved.totalSessions || 0);
 
-      const handleFs = () => setIsFullscreen(!!document.fullscreenElement);
-      document.addEventListener('fullscreenchange', handleFs);
-
       return () => {
         window.removeEventListener('resize', checkDevice);
         window.removeEventListener('orientationchange', checkDevice);
-        document.removeEventListener('fullscreenchange', handleFs);
       };
     }
   }, []);
@@ -219,9 +217,7 @@ export default function DualTargetFlowClient() {
     if (leftContainerRef.current) leftContainerRef.current.innerHTML = '';
     if (rightContainerRef.current) rightContainerRef.current.innerHTML = '';
 
-    if (document.fullscreenElement) {
-      await document.exitFullscreen().catch(() => {});
-    }
+    setIsFullscreen(false);
     setGameState('start');
   }, []);
 
@@ -482,11 +478,7 @@ export default function DualTargetFlowClient() {
     if (startingRef.current) return;
     startingRef.current = true;
 
-    try {
-      if (containerRef.current && !document.fullscreenElement) {
-        await containerRef.current.requestFullscreen();
-      }
-    } catch (e) {}
+    setIsFullscreen(true);
 
     countdownTimeoutsRef.current.forEach(clearTimeout);
     countdownTimeoutsRef.current = [];
@@ -600,9 +592,6 @@ export default function DualTargetFlowClient() {
               Multitasking Test
             </span>
           </h1>
-          <p className="text-xs text-slate-400 mt-1">
-            Dual-Stream Visual Tracking & Bilateral Hemispheric Focus
-          </p>
         </div>
         )}
 

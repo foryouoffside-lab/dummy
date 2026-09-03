@@ -21,6 +21,7 @@ import DrillFooter from '@/components/drill/DrillFooter';
 import DrillCountdown from '@/components/drill/DrillCountdown';
 import DrillAccordion from '@/components/drill/DrillAccordion';
 import FpsStartCard from '@/components/drill/FpsStartCard';
+import useImmersiveMode from '@/lib/useImmersiveMode';
 
 // ============================================================
 // TUNING CONSTANTS
@@ -168,7 +169,7 @@ const RELATED_DRILLS = [
   { id: "finger-sequencing", name: "Sequence Aim Trainer", cat: "Motor Speed", desc: "Train multi-target ordered clicking and finger dexterity under time pressure.", href: "/drills/motor/movement-speed/finger-sequencing" },
   { id: "rapid-tapping", name: "Rapid Tapping Test", cat: "Motor Speed", desc: "Test finger tapping velocity and neuromuscular speed.", href: "/drills/motor/movement-speed/rapid-tapping" },
   { id: "drag-and-drop", name: "Drag & Drop Precision", cat: "Motor Coordination", desc: "Master mouse spatial drag control and release timing.", href: "/drills/motor/hand-eye-coordination/drag-and-drop" },
-  { id: "aim-trainer", name: "Aim Trainer Elite", cat: "Motor Coordination", desc: "Dynamic targets that shrink with streak and lives system.", href: "/drills/motor/hand-eye-coordination/aim-trainer" },
+  { id: "aim-trainer", name: "Aim Trainer Elite", cat: "Motor Coordination", desc: "Dynamic targets that shrink as your streak grows.", href: "/drills/motor/hand-eye-coordination/aim-trainer" },
   { id: "steady-hand", name: "Steady Hand Trainer", cat: "Motor Control", desc: "Trace a winding path corridor with shrinking width on streak.", href: "/drills/motor/precision-control/steady-hand" },
   { id: "tracing", name: "Tracing Control", cat: "Motor Control", desc: "Precision cursor tracking and path stability trainer.", href: "/drills/motor/precision-control/tracing" }
 ];
@@ -179,6 +180,7 @@ const RELATED_DRILLS = [
 export default function KeyboardRecognitionClient() {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
+  useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
   const [openAccordion, setOpenAccordion] = useState(null);
@@ -249,12 +251,6 @@ export default function KeyboardRecognitionClient() {
     };
   }, []);
 
-  useEffect(() => {
-    const handleFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
-  }, []);
-
   const handleExitDrill = useCallback(async () => {
     markIntentionalExit();
     countdownTimeoutsRef.current.forEach(clearTimeout);
@@ -262,9 +258,7 @@ export default function KeyboardRecognitionClient() {
     if (engine.current.promptTimer) clearTimeout(engine.current.promptTimer);
     startingRef.current = false;
 
-    if (document.fullscreenElement) {
-      await document.exitFullscreen().catch(() => {});
-    }
+    setIsFullscreen(false);
     setGameState('start');
   }, []);
 
@@ -520,11 +514,7 @@ export default function KeyboardRecognitionClient() {
       totalPromptsCount: 0, correctSequencesCount: 0, failedSequencesCount: 0, fakeIgnoredCount: 0, fakeFailsCount: 0
     };
 
-    try {
-      if (containerRef.current && !document.fullscreenElement) {
-        await containerRef.current.requestFullscreen();
-      }
-    } catch(e) {}
+    setIsFullscreen(true);
 
     setGameState('countdown');
     setCountdownValue(3);
@@ -712,9 +702,6 @@ export default function KeyboardRecognitionClient() {
                 Keyboard Speed Test
               </span>
             </h1>
-            <p className="text-xs text-slate-400 mt-1">
-              Keybind Muscle Memory &amp; Response Inhibition • 45s Timer
-            </p>
           </div>
         )}
 
@@ -744,7 +731,7 @@ export default function KeyboardRecognitionClient() {
         <div 
           ref={containerRef} 
           onContextMenu={(e) => { if (gameActiveRef.current) e.preventDefault(); }}
-          className={`relative overflow-hidden flex flex-col transition-all duration-150 select-none bg-[#080811] text-white border border-white/10 ${
+          className={`overflow-hidden flex flex-col transition-all duration-150 select-none bg-[#080811] text-white border border-white/10 ${
             isFullscreen 
               ? 'fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#080811] rounded-none border-none flex flex-col items-center justify-center' 
               : 'w-full rounded-2xl bg-[#080811] aspect-video min-h-[460px] sm:min-h-[500px] max-h-[88vh] relative overflow-hidden flex flex-col'
@@ -879,6 +866,7 @@ export default function KeyboardRecognitionClient() {
                 { icon: Timer, label: 'Duration', value: '60s', color: 'text-blue-400', accent: 'blue' },
               ]}
               isTouchOnlyDevice={isTouchOnlyDevice}
+              touchBlockedLabel="Keyboard Required"
               onStart={enterDrill}
             />
           )}
@@ -952,7 +940,7 @@ export default function KeyboardRecognitionClient() {
                   <button 
                     onClick={handleExitDrill} 
                     className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform" 
-                    title="Exit Fullscreen & Return"
+                    title="Exit Drill & Return"
                   >
                     <LogOut className="w-4 h-4 text-red-400" />
                   </button>

@@ -21,6 +21,7 @@ import DrillAccordion from '../../../../components/drill/DrillAccordion';
 import DrillFlashOverlay from '../../../../components/drill/DrillFlashOverlay';
 import FpsStartCard from '../../../../components/drill/FpsStartCard';
 import DrillResultCard from '../../../../components/drill/DrillResultCard';
+import useImmersiveMode from '@/lib/useImmersiveMode';
 
 // ============================================================
 // TUNING CONSTANTS
@@ -79,6 +80,7 @@ type Door = { x: number; y: number; w: number; h: number };
 export default function MarketDoorsPursuitClient() {
   const [gameState, setGameState] = useState<'start' | 'countdown' | 'playing' | 'gameOver'>('start');
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+  useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
   const [penaltyEnabled, setPenaltyEnabled] = useState(false);
@@ -180,13 +182,6 @@ export default function MarketDoorsPursuitClient() {
     }
   }, []);
 
-  // Fullscreen Listener
-  useEffect(() => {
-    const handleFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
-  }, []);
-
   // Cleanup Timeouts on Unmount
   useEffect(() => {
     return () => {
@@ -200,9 +195,7 @@ export default function MarketDoorsPursuitClient() {
     countdownTimeoutsRef.current.forEach(clearTimeout);
     countdownTimeoutsRef.current = [];
 
-    if (document.fullscreenElement) {
-      await document.exitFullscreen().catch(() => {});
-    }
+    setIsFullscreen(false);
     setGameState('start');
   }, []);
 
@@ -291,11 +284,7 @@ export default function MarketDoorsPursuitClient() {
 
   // Enter Drill (Full Screen -> 321GO Countdown with Sound -> Playing)
   const enterDrill = useCallback(async () => {
-    try {
-      if (containerRef.current && !document.fullscreenElement) {
-        await containerRef.current.requestFullscreen();
-      }
-    } catch (e) {}
+    setIsFullscreen(true);
 
     countdownTimeoutsRef.current.forEach(clearTimeout);
     countdownTimeoutsRef.current = [];
@@ -786,9 +775,6 @@ export default function MarketDoorsPursuitClient() {
                 Corner Checking & Doorway Clearing Aim Trainer
               </span>
             </h1>
-            <p className="text-xs text-slate-400 mt-1">
-              Horizontal Saccadic Sweeps • Doorway Clearing • Crosshair Placement
-            </p>
           </div>
         )}
 

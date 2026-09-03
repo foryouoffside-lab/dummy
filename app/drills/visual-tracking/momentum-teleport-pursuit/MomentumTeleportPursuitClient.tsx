@@ -2,10 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
-import {
-  Play, RefreshCw, Timer, Share2, LogOut, Check, Sun, Moon, Volume2, VolumeX,
-  Target, Trophy, TrendingUp, Zap
-} from 'lucide-react';
+import { Play, RefreshCw, Timer, Share2, LogOut, Check, Sun, Moon, Volume2, VolumeX, Target, Trophy, TrendingUp, Zap } from 'lucide-react';
 
 import DrillFooter from '../../../../components/drill/DrillFooter';
 import DrillCountdown from '../../../../components/drill/DrillCountdown';
@@ -16,6 +13,7 @@ import { drawTacticalTarget } from '../../../../lib/canvasFx';
 import { generateSessionCard, shareScoreCard } from '../../../../components/ShareScoreCard';
 import { getPlayerName } from '../../../../lib/leaderboard';
 import useUnexpectedExitGuard from '../../../../lib/useUnexpectedExitGuard';
+import useImmersiveMode from '@/lib/useImmersiveMode';
 
 const STORAGE_KEY = 'skilldrills_visual_tracking_momentum_teleport_pursuit_v2';
 
@@ -47,6 +45,7 @@ const saveData = (data: { totalSessions: number }) => {
 export default function MomentumTeleportPursuitClient() {
   const [gameState, setGameState] = useState<'start' | 'countdown' | 'playing' | 'gameOver'>('start');
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+  useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
   const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
   const [openAccordion, setOpenAccordion] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState<boolean>(false);
@@ -97,6 +96,7 @@ export default function MomentumTeleportPursuitClient() {
   });
 
   useEffect(() => {
+    setSoundEnabled(drillAudio.isEnabled());
     settingsRef.current = {
       speedMultiplier,
       targetSize,
@@ -126,13 +126,6 @@ export default function MomentumTeleportPursuitClient() {
 
       return () => window.removeEventListener('resize', checkMobile);
     }
-  }, []);
-
-  // Fullscreen Change Listener
-  useEffect(() => {
-    const handleFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
 
   // Cleanup Timeouts on Unmount
@@ -177,9 +170,7 @@ export default function MomentumTeleportPursuitClient() {
     countdownTimeoutsRef.current = [];
     if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
 
-    if (document.fullscreenElement) {
-      await document.exitFullscreen().catch(() => {});
-    }
+    setIsFullscreen(false);
     setGameState('start');
   }, []);
 
@@ -194,7 +185,6 @@ export default function MomentumTeleportPursuitClient() {
     if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
 
     setGameState('gameOver');
-    // Fullscreen is preserved on result display until user clicks Exit/Return button
 
     setTotalTrials((prev) => {
       const next = prev + 1;
@@ -204,14 +194,8 @@ export default function MomentumTeleportPursuitClient() {
     drillAudio.playSessionEnd();
   }, []);
 
-  // Enter Drill (Auto Fullscreen -> 321GO Countdown with Sound -> Playing)
   const enterDrill = useCallback(async () => {
-    // 1. Auto Fullscreen on Start
-    try {
-      if (containerRef.current && !document.fullscreenElement) {
-        await containerRef.current.requestFullscreen();
-      }
-    } catch (e) {}
+    setIsFullscreen(true);
 
     countdownTimeoutsRef.current.forEach(clearTimeout);
     countdownTimeoutsRef.current = [];
@@ -442,9 +426,6 @@ export default function MomentumTeleportPursuitClient() {
                 Anticipatory Eye Tracking Drill
               </span>
             </h1>
-            <p className="text-xs text-slate-400 mt-1">
-              Instant Saccadic Snap & Continuous Vector Prediction
-            </p>
           </div>
         )}
 
@@ -477,19 +458,40 @@ export default function MomentumTeleportPursuitClient() {
         {/* Game Stage Container */}
         <div 
           ref={containerRef} 
-          className={`relative overflow-hidden flex flex-col transition-all duration-150 select-none border border-white/10 ${
+          className={`overflow-hidden flex flex-col transition-all duration-150 select-none border border-white/10 ${
             dayMode ? 'bg-[#ffffff]' : 'bg-[#080811]'
           } ${dayMode ? 'text-slate-900' : 'text-white'} ${
             isFullscreen ? 'fixed inset-0 z-[100] w-screen h-[100dvh] rounded-none border-none flex flex-col items-center justify-center' : 'w-full rounded-2xl aspect-video min-h-[460px] md:min-h-[500px] max-h-[88vh] max-md:aspect-[3/4] max-md:min-h-[420px] max-md:max-h-[76vh] relative overflow-hidden flex flex-col'
           }`}
         >
 
-          {/* IN-BOX OVERLAY HUD: ONLY TIMER WHEN PLAYING */}
+          {/* IN-BOX OVERLAY HUD: LABELLED TIMER, AS EVERY OTHER DRILL */}
           {gameState === 'playing' && (
             <div className="absolute top-4 right-4 z-30 pointer-events-none text-right">
+              <p className={`text-[10px] font-semibold uppercase tracking-wider ${dayMode ? 'text-slate-500' : 'text-white/50'}`}>Time Left</p>
               <p className={`text-3xl sm:text-4xl font-black font-sans tabular-nums leading-none ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : (dayMode ? 'text-slate-900' : 'text-white/90')}`}>
                 {uiTimeLeft}s
               </p>
+            </div>
+          )}
+
+          {/* IN-GAME HUD SOUND TOGGLE — these drills have no miss-flash, so no flash toggle */}
+          {(gameState === 'playing' || gameState === 'countdown') && (
+            <div className="absolute bottom-4 right-4 z-40 flex items-center gap-2">
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSoundEnabled((v) => {
+                    drillAudio.setEnabled(!v);
+                    return !v;
+                  });
+                }}
+                className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title="Toggle Sound"
+              >
+                {soundEnabled ? <Volume2 className="w-4 h-4 text-blue-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
+              </button>
             </div>
           )}
 
@@ -563,8 +565,8 @@ export default function MomentumTeleportPursuitClient() {
                     <p className="text-[8px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Base Speed</p>
                   </div>
                   <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-xs sm:text-sm font-black text-white">{mathInvisible ? 'Invisible' : 'Visible'}</p>
-                    <p className="text-[8px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Math Line</p>
+                    <p className="text-sm sm:text-base font-black text-white">{totalTrials}</p>
+                    <p className="text-[8px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Sessions Completed</p>
                   </div>
                   <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
                     <p className="text-xs sm:text-sm font-black text-white">{randomSpeed ? 'Enabled' : 'Fixed'}</p>

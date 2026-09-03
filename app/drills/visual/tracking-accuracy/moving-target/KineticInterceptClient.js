@@ -25,6 +25,7 @@ import DrillRuleItem from '../../../../../components/drill/DrillRuleItem';
 import DrillFAQItem from '../../../../../components/drill/DrillFAQItem';
 import FpsStartCard from '../../../../../components/drill/FpsStartCard';
 import DrillResultCard from '../../../../../components/drill/DrillResultCard';
+import useImmersiveMode from '@/lib/useImmersiveMode';
 
 // ============================================================
 // TUNING CONSTANTS
@@ -77,6 +78,7 @@ const getLevelConfig = (level, combo = 0) => {
 export default function KineticInterceptClient() {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
+  useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
   const [penaltyEnabled, setPenaltyEnabled] = useState(false);
@@ -146,13 +148,6 @@ export default function KineticInterceptClient() {
     }
   }, []);
 
-  // Fullscreen change listener
-  useEffect(() => {
-    const handleFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
-  }, []);
-
   const clearGameTimeouts = useCallback(() => {
     gameTimeoutsRef.current.forEach(clearTimeout);
     gameTimeoutsRef.current = [];
@@ -170,9 +165,7 @@ export default function KineticInterceptClient() {
     startingRef.current = false;
     gameActiveRef.current = false;
 
-    if (document.fullscreenElement) {
-      await document.exitFullscreen().catch(() => {});
-    }
+    setIsFullscreen(false);
     setGameState('start');
   }, [clearGameTimeouts]);
 
@@ -503,10 +496,7 @@ export default function KineticInterceptClient() {
       missedClicks: 0,
     };
 
-    // Auto Fullscreen on Start (non-blocking)
-    if (containerRef.current && !document.fullscreenElement) {
-      containerRef.current.requestFullscreen().catch(() => {});
-    }
+    setIsFullscreen(true);
 
     // Countdown sequence: 3 -> 2 -> 1 -> GO
     setGameState('countdown');
@@ -578,9 +568,6 @@ export default function KineticInterceptClient() {
                 Moving Target Intercept Test
               </span>
             </h1>
-            <p className="text-xs text-slate-400 mt-1">
-              Kinetic Visual Tracking & Smooth Pursuit Interception
-            </p>
           </div>
         )}
 

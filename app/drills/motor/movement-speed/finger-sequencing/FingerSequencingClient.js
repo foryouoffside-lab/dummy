@@ -15,6 +15,7 @@ import {
 import generateShareCard, { shareScoreCard } from '@/components/ShareScoreCard';
 import { getPlayerName } from '@/lib/leaderboard';
 import { drillAudio } from '@/lib/drillAudio';
+import { useDrillSensitivity } from '@/lib/drillSensitivity';
 import { drillFlash } from '@/lib/drillFlash';
 import { drillPenalty } from '@/lib/drillPenalty';
 import { drillTimeout } from '@/lib/drillTimeout';
@@ -27,6 +28,7 @@ import DrillCountdown from '@/components/drill/DrillCountdown';
 import DrillAccordion from '@/components/drill/DrillAccordion';
 import FpsStartCard from '@/components/drill/FpsStartCard';
 import DrillResultCard from '@/components/drill/DrillResultCard';
+import useImmersiveMode from '@/lib/useImmersiveMode';
 
 // ============================================================
 // TUNING CONSTANTS
@@ -135,11 +137,12 @@ const FAQ_ITEMS = [
 export default function FingerSequencingClient() {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
+  useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
   const [penaltyEnabled, setPenaltyEnabled] = useState(false);
   const [pointerLocked, setPointerLocked] = useState(false);
-  const [universalSens, setUniversalSens] = useState(1.0);
+  const universalSens = useDrillSensitivity();
   const [openAccordion, setOpenAccordion] = useState(null);
   const [isTouchOnlyDevice, setIsTouchOnlyDevice] = useState(false);
   const [countdownValue, setCountdownValue] = useState(3);
@@ -182,8 +185,6 @@ export default function FingerSequencingClient() {
     particles: [], hitMarkers: [], screenShake: 0, logicalWidth: 800, logicalHeight: 450
   });
 
-  const cmPer360 = (30 / universalSens).toFixed(1);
-
   const triggerFlash = useCallback(() => {
     if (!drillFlash.isEnabled()) return;
     const id = Date.now() + Math.random();
@@ -199,11 +200,6 @@ export default function FingerSequencingClient() {
       const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
       const isTouchCapable = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
       setIsTouchOnlyDevice(isTouchCapable && !hasFinePointer);
-
-      try {
-        const savedSens = localStorage.getItem('skilldrills_finger_seq_sens');
-        if (savedSens) setUniversalSens(parseFloat(savedSens));
-      } catch (e) {}
 
       const saved = getSavedData();
       setBestScore(saved.bestScore || 0);
@@ -225,18 +221,6 @@ export default function FingerSequencingClient() {
     };
   }, []);
 
-  useEffect(() => {
-    if (gameState !== 'playing') {
-      try { localStorage.setItem('skilldrills_finger_seq_sens', universalSens.toString()); } catch (e) {}
-    }
-  }, [universalSens, gameState]);
-
-  useEffect(() => {
-    const handleFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
-  }, []);
-
   const [isPaused, setIsPaused] = useState(false);
   const isPausedRef = useRef(false);
 
@@ -252,9 +236,7 @@ export default function FingerSequencingClient() {
     gameActiveRef.current = false;
     setIsPaused(false);
 
-    if (document.fullscreenElement) {
-      await document.exitFullscreen().catch(() => {});
-    }
+    setIsFullscreen(false);
     if (document.pointerLockElement) {
       document.exitPointerLock();
     }
@@ -268,9 +250,7 @@ export default function FingerSequencingClient() {
 
   const resumeDrill = useCallback(async () => {
     setIsPaused(false);
-    if (containerRef.current && !document.fullscreenElement) {
-      try { await containerRef.current.requestFullscreen(); } catch (e) {}
-    }
+    setIsFullscreen(true);
     if (canvasRef.current && !document.pointerLockElement) {
       try { await canvasRef.current.requestPointerLock(); } catch (e) {}
     }
@@ -737,9 +717,7 @@ export default function FingerSequencingClient() {
     if (startingRef.current) return;
     startingRef.current = true;
 
-    if (containerRef.current && !document.fullscreenElement) {
-      try { await containerRef.current.requestFullscreen(); } catch (e) {}
-    }
+    setIsFullscreen(true);
 
     if (canvasRef.current && !isTouchOnlyDevice && !document.pointerLockElement) {
       try { await canvasRef.current.requestPointerLock(); } catch (e) {}
@@ -874,9 +852,6 @@ export default function FingerSequencingClient() {
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white uppercase">
               Sequence Aim Trainer
             </h1>
-            <p className="text-xs text-slate-400 mt-1">
-              Motor Precision &amp; Sequential Pathing • Continuous Scaling
-            </p>
           </div>
         )}
 
@@ -906,7 +881,7 @@ export default function FingerSequencingClient() {
         <div
           ref={containerRef}
           onContextMenu={(e) => { if (gameActiveRef.current) e.preventDefault(); }}
-          className={`relative overflow-hidden flex flex-col transition-all duration-150 select-none bg-[#080811] text-white border border-white/10 ${
+          className={`overflow-hidden flex flex-col transition-all duration-150 select-none bg-[#080811] text-white border border-white/10 ${
             isFullscreen
               ? 'fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#080811] rounded-none border-none flex flex-col items-center justify-center'
               : 'w-full rounded-2xl bg-[#080811] aspect-video min-h-[460px] sm:min-h-[500px] max-h-[88vh] relative overflow-hidden flex flex-col'
@@ -980,7 +955,7 @@ export default function FingerSequencingClient() {
               <div className="text-center animate-pulse pointer-events-none">
                 <AlertCircle className="w-12 h-12 text-emerald-400 mx-auto mb-3" />
                 <h2 className="text-2xl font-black text-white tracking-widest uppercase mb-1">Game Paused</h2>
-                <p className="text-xs text-gray-300 font-medium">Click to resume — fullscreen and cursor lock will re-engage.</p>
+                <p className="text-xs text-gray-300 font-medium">Click to resume — cursor lock will re-engage.</p>
               </div>
             </div>
           )}
@@ -1009,7 +984,6 @@ export default function FingerSequencingClient() {
                     : 'Clear node chains before the timer expires. Misses reset combo'
                 },
               ]}
-              sensitivity={{ value: universalSens, onChange: setUniversalSens, cmPer360 }}
               stats={[
                 { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
                 { icon: Flame, label: 'Best Combo', value: `${bestCombo}x`, color: 'text-emerald-400', accent: 'emerald' },

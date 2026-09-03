@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
-import { Volume2, VolumeX, Play, RefreshCw, Share2, ArrowLeft, ShieldCheck, Users, TrendingUp, Brain, Heart, Trophy, Target, Zap, ZapOff } from 'lucide-react';
+import { Volume2, VolumeX, Play, RefreshCw, Share2, ArrowLeft, ShieldCheck, Users, TrendingUp, Brain, Trophy, Target, Zap, ZapOff } from 'lucide-react';
 
 import { isIdleFrameSkippable } from '@/lib/performance';
 import generateShareCard, { shareScoreCard } from '../../../../../components/ShareScoreCard';
@@ -21,12 +21,12 @@ import DrillAccordion from '../../../../../components/drill/DrillAccordion';
 import DrillFlashOverlay from '../../../../../components/drill/DrillFlashOverlay';
 import FpsStartCard from '../../../../../components/drill/FpsStartCard';
 import DrillResultCard from '../../../../../components/drill/DrillResultCard';
+import useImmersiveMode from '@/lib/useImmersiveMode';
 
 // ============================================================
 // TUNING CONSTANTS
 // ============================================================
 const DRILL_DURATION = 45; // starting clock only; a run grows past this
-const MAX_LIVES = 5;
 const POINTS_PER_HIT = 100;
 const POINTS_PER_LEVEL = 1750; // 250 -> 1750 (7x)
 const ELITE_SCORE = 24000; // 7500 -> 24000 (~3.2x)
@@ -73,7 +73,7 @@ const getLevelConfig = (level, combo = 0) => {
 const RULES_ITEMS = [
   { title: "Stroop Effect Challenge", text: "A color word flashes on screen (e.g. 'BLUE'), printed in a conflicting ink color (e.g. RED ink)." },
   { title: "Target Selection Rule", text: "Tap the button matching the INK COLOR (e.g., tap Red), ignoring the semantic word meaning (+100 PTS × Combo, +0.6s)." },
-  { title: "5 Lives Safeguard", text: "You have 5 lives. Wrong selections cost 1 life and reset your combo. Losing all 5 lives ends the drill early." },
+  { title: "Wrong Selections", text: "A wrong selection resets your combo (and deducts time if penalties are on). Nothing ends the run early — you play until the clock reaches zero." },
   { title: "Streak & Penalty Rules", text: "Building streaks multiplies your score. Timeouts and wrong taps deduct 0.8s when enabled in settings." }
 ];
 
@@ -108,6 +108,7 @@ const RELATED_DRILLS = [
 export default function DistractionFighterClient() {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
+  useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
   const [penaltyEnabled, setPenaltyEnabled] = useState(false);
@@ -117,7 +118,6 @@ export default function DistractionFighterClient() {
   // Live HUD State
   const [uiScore, setUiScore] = useState(0);
   const [uiTimeLeft, setUiTimeLeft] = useState(DRILL_DURATION);
-  const [lives, setLives] = useState(MAX_LIVES);
   const [uiLevel, setUiLevel] = useState(1);
   const [uiCombo, setUiCombo] = useState(0);
   const [bestScore, setBestScore] = useState(0);
@@ -137,7 +137,7 @@ export default function DistractionFighterClient() {
     mistakes: 0,
     timeouts: 0,
     maxCombo: 0,
-    livesRemaining: MAX_LIVES,
+    mistakes: 0,
     finalLevel: 1,
     grade: null
   });
@@ -159,7 +159,6 @@ export default function DistractionFighterClient() {
     successfulHits: 0,
     mistakes: 0,
     timeouts: 0,
-    lives: MAX_LIVES,
     timeLeft: DRILL_DURATION,
     currentPrompt: { textName: 'Blue', inkName: 'Red' }
   });
@@ -180,13 +179,6 @@ export default function DistractionFighterClient() {
     }
   }, []);
 
-  // Fullscreen listener
-  useEffect(() => {
-    const handleFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
-  }, []);
-
   // Clean timers on unmount
   useEffect(() => {
     return () => {
@@ -203,9 +195,7 @@ export default function DistractionFighterClient() {
     startingRef.current = false;
     gameActiveRef.current = false;
 
-    if (document.fullscreenElement) {
-      await document.exitFullscreen().catch(() => {});
-    }
+    setIsFullscreen(false);
     setGameState('start');
   }, []);
 
@@ -239,7 +229,7 @@ export default function DistractionFighterClient() {
       mistakes: e.mistakes,
       timeouts: e.timeouts,
       maxCombo: e.maxCombo,
-      livesRemaining: e.lives,
+      mistakes: e.mistakes,
       finalLevel: Math.floor(bestLevelRunRef.current),
       grade: gradeObj
     });
@@ -340,21 +330,14 @@ export default function DistractionFighterClient() {
       }
       // Trial timeout miss
       e.timeouts += 1;
-      e.lives -= 1;
       if (drillPenalty.isEnabled()) e.timeLeft -= TIME_PENALTY;
       e.combo = 0;
       setUiCombo(0);
-      setLives(e.lives);
       triggerFlash();
       drillAudio.playPenalty();
-
-      if (e.lives <= 0) {
-        endGame();
-      } else {
-        spawnTrial();
-      }
+      spawnTrial();
     }, config.ttl);
-  }, [triggerFlash, endGame]);
+  }, [triggerFlash]);
 
   const handleOptionClick = useCallback((selectedColor, ev) => {
     if (ev) ev.stopPropagation();
@@ -387,32 +370,21 @@ export default function DistractionFighterClient() {
       spawnTrial();
     } else {
       eng.mistakes += 1;
-      eng.lives -= 1;
       if (drillPenalty.isEnabled()) eng.timeLeft -= TIME_PENALTY;
       eng.combo = 0;
       setUiCombo(0);
-      setLives(eng.lives);
       triggerFlash();
       drillAudio.playPenalty();
-
-      if (eng.lives <= 0) {
-        endGame();
-      } else {
-        spawnTrial();
-      }
+      spawnTrial();
     }
-  }, [spawnTrial, triggerFlash, endGame]);
+  }, [spawnTrial, triggerFlash]);
 
   // Enter Drill
   const enterDrill = useCallback(async () => {
     if (startingRef.current) return;
     startingRef.current = true;
 
-    try {
-      if (containerRef.current && !document.fullscreenElement) {
-        await containerRef.current.requestFullscreen();
-      }
-    } catch (e) {}
+    setIsFullscreen(true);
 
     countdownTimeoutsRef.current.forEach(clearTimeout);
     countdownTimeoutsRef.current = [];
@@ -429,7 +401,6 @@ export default function DistractionFighterClient() {
     setUiCombo(0);
     setUiTimeLeft(DRILL_DURATION);
     lastTimeRef.current = DRILL_DURATION;
-    setLives(MAX_LIVES);
 
     engine.current = {
       score: 0,
@@ -439,7 +410,6 @@ export default function DistractionFighterClient() {
       successfulHits: 0,
       mistakes: 0,
       timeouts: 0,
-      lives: MAX_LIVES,
       timeLeft: DRILL_DURATION,
       currentPrompt: { textName: 'Blue', inkName: 'Red' }
     };
@@ -513,9 +483,6 @@ export default function DistractionFighterClient() {
               Stroop Test Online
             </span>
           </h1>
-          <p className="text-xs text-slate-400 mt-1">
-            High-Interference Stroop Categorization & Impulse Control
-          </p>
         </div>
         )}
 
@@ -556,23 +523,11 @@ export default function DistractionFighterClient() {
           {/* IN-BOX OVERLAY HUD */}
           {(gameState === 'playing' || gameState === 'countdown') && (
             <>
-              {/* Score & Lives - Top Left */}
+              {/* Score - Top Left */}
               <div className="absolute top-4 left-4 z-30 pointer-events-none flex flex-col items-start gap-0.5">
                 <div>
                   <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">Score</p>
                   <p className="text-2xl sm:text-3xl font-black text-white tabular-nums leading-tight">{uiScore}</p>
-                </div>
-                <div className="flex items-center gap-1 mt-0.5">
-                  {Array.from({ length: MAX_LIVES }).map((_, i) => (
-                    <Heart
-                      key={i}
-                      className={`w-3.5 h-3.5 sm:w-4 sm:h-4 transition-all duration-200 ${
-                        i < lives
-                          ? 'text-red-500 fill-red-500 drop-shadow-[0_0_6px_rgba(239,68,68,0.6)]'
-                          : 'text-slate-800 fill-slate-800'
-                      }`}
-                    />
-                  ))}
                 </div>
               </div>
 
@@ -586,7 +541,7 @@ export default function DistractionFighterClient() {
 
           {/* IN-GAME HUD SOUND + FLASH TOGGLES */}
           {(gameState === 'playing' || gameState === 'countdown') && (
-            <div className="absolute bottom-4 right-4 z-40 flex items-center gap-2">
+            <div className="absolute bottom-4 max-sm:bottom-40 right-4 z-40 flex items-center gap-2">
               <button
                 onPointerDown={(e) => e.stopPropagation()}
                 onClick={(e) => {
@@ -661,10 +616,10 @@ export default function DistractionFighterClient() {
                 {
                   icon: Zap,
                   accent: 'red',
-                  title: penaltyEnabled ? '5 Lives & Time Penalty' : '5 Lives System',
+                  title: penaltyEnabled ? 'Wrong Selections & Time Penalty' : 'Wrong Selections',
                   text: penaltyEnabled
-                    ? 'Wrong selections lose 1 life and subtract 0.8s. Run ends if lives reach 0'
-                    : '5 lives total. Wrong clicks cost 1 life and reset combo. Run ends if lives reach 0'
+                    ? 'Wrong selections reset your combo and subtract 0.8s. The run lasts the full clock'
+                    : 'Wrong selections reset your combo. The run always lasts the full clock'
                 },
               ]}
               stats={[
@@ -691,7 +646,7 @@ export default function DistractionFighterClient() {
               stats={[
                 { label: 'Accuracy', value: analytics.accuracy, suffix: '%' },
                 { label: 'Hits', value: analytics.successfulHits },
-                { label: 'Lives Left', value: `${analytics.livesRemaining}/${MAX_LIVES}` },
+                { label: 'Misses', value: analytics.mistakes },
                 { label: 'Peak Level', value: `Lv. ${analytics.finalLevel}` },
               ]}
               onPlayAgain={enterDrill}

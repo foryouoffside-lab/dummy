@@ -225,7 +225,7 @@ export default function TargetPrioritizationPage() {
       {
         "@type": "HowToStep",
         "name": "Adjust Sensitivity",
-        "text": "Set your Universal Sens to match your main game."
+        "text": "Set the Mouse Sensitivity slider in Session Settings on the drills hub to match your main game."
       },
       {
         "@type": "HowToStep",

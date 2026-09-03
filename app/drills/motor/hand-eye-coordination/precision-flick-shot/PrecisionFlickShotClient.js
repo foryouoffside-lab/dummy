@@ -15,6 +15,7 @@ import {
 import generateShareCard, { shareScoreCard } from '../../../../../components/ShareScoreCard';
 import { getPlayerName } from '../../../../../lib/leaderboard';
 import { drillAudio } from '../../../../../lib/drillAudio';
+import { useDrillSensitivity } from '../../../../../lib/drillSensitivity';
 import { drillFlash } from '../../../../../lib/drillFlash';
 import { drillTimeout } from '../../../../../lib/drillTimeout';
 import { drillPenalty } from '../../../../../lib/drillPenalty';
@@ -27,6 +28,7 @@ import DrillCountdown from '../../../../../components/drill/DrillCountdown';
 import DrillAccordion from '../../../../../components/drill/DrillAccordion';
 import FpsStartCard from '../../../../../components/drill/FpsStartCard';
 import DrillResultCard from '../../../../../components/drill/DrillResultCard';
+import useImmersiveMode from '@/lib/useImmersiveMode';
 
 // ============================================================
 // TUNING CONSTANTS
@@ -88,7 +90,7 @@ const FAQ_ITEMS = [
   { q: "What is the Bulls-eye mechanic?", a: "Clicking within the inner 8-pixel center of a target awards double points (+200 PTS) and spawns yellow spark effects." },
   { q: "What happens when you miss a click?", a: "Clicking empty space or letting a target decay out resets your combo multiplier to zero and triggers a red error flash. When the optional Time Penalty is enabled, 0.8s is deducted." },
   { q: "How is flick accuracy calculated?", a: "Accuracy is calculated as total target hits divided by total clicks, displayed as a real-time percentage." },
-  { q: "Does this trainer support raw mouse input sensitivity?", a: "Yes, the Universal Sens slider allows you to match your raw input multiplier and cm/360 sensitivity setting." },
+  { q: "Does this trainer support raw mouse input sensitivity?", a: "Yes — the Mouse Sensitivity slider in Session Settings on the drills hub matches your raw input multiplier and cm/360, and applies to every mouse-aimed drill." },
   { q: "Is this precision flick shot drill free?", a: "Yes, the drill is 100% free with no sign-ups or downloads required, running directly in modern web browsers." },
   { q: "How do combo multipliers work?", a: "Sustaining consecutive target hits without missing builds combo multipliers up to 3.0x bonus points per successful flick." },
   { q: "Does this drill support touch screen input?", a: "This drill requires pointer-lock mouse input for crosshair control, so it is not playable on touch-only phones or tablets. Use a desktop or laptop with a mouse for the full experience." },
@@ -113,11 +115,12 @@ const RELATED_DRILLS = [
 export default function PrecisionFlickShotClient() {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
+  useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
   const [penaltyEnabled, setPenaltyEnabled] = useState(false);
   const [pointerLocked, setPointerLocked] = useState(false);
-  const [universalSens, setUniversalSens] = useState(1.0);
+  const universalSens = useDrillSensitivity();
   const [openAccordion, setOpenAccordion] = useState(null);
   const [isTouchOnlyDevice, setIsTouchOnlyDevice] = useState(false);
   const [countdownValue, setCountdownValue] = useState(3);
@@ -157,8 +160,6 @@ export default function PrecisionFlickShotClient() {
     particles: [], hitMarkers: [], screenShake: 0,
     logicalWidth: 800, logicalHeight: 450
   });
-
-  const cmPer360 = (30 / universalSens).toFixed(1);
 
   const triggerFlash = useCallback(() => {
     if (!drillFlash.isEnabled()) return;
@@ -223,11 +224,6 @@ export default function PrecisionFlickShotClient() {
       const isTouchCapable = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
       setIsTouchOnlyDevice(isTouchCapable && !hasFinePointer);
 
-      try {
-        const savedSens = localStorage.getItem('precisionFlick_sens');
-        if (savedSens) setUniversalSens(parseFloat(savedSens));
-      } catch (e) {}
-
       const saved = getSavedData();
       setBestScore(saved.bestScore || 0);
       setBestCombo(saved.bestCombo || 0);
@@ -242,28 +238,13 @@ export default function PrecisionFlickShotClient() {
     };
   }, []);
 
-  useEffect(() => {
-    if (gameState !== 'playing') {
-      try { localStorage.setItem('precisionFlick_sens', universalSens.toString()); } catch (e) {}
-    }
-  }, [universalSens, gameState]);
-
-  // Fullscreen Listener
-  useEffect(() => {
-    const handleFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
-  }, []);
-
   const handleExitDrill = useCallback(async () => {
     markIntentionalExit();
     countdownTimeoutsRef.current.forEach(clearTimeout);
     countdownTimeoutsRef.current = [];
     startingRef.current = false;
 
-    if (document.fullscreenElement) {
-      await document.exitFullscreen().catch(() => {});
-    }
+    setIsFullscreen(false);
     if (document.pointerLockElement) {
       document.exitPointerLock();
     }
@@ -276,9 +257,7 @@ export default function PrecisionFlickShotClient() {
   });
 
   const resumeDrill = useCallback(async () => {
-    if (containerRef.current && !document.fullscreenElement) {
-      try { await containerRef.current.requestFullscreen(); } catch (e) {}
-    }
+    setIsFullscreen(true);
     if (canvasRef.current && !document.pointerLockElement) {
       try { await canvasRef.current.requestPointerLock(); } catch (e) {}
     }
@@ -366,11 +345,7 @@ export default function PrecisionFlickShotClient() {
       particles: [], hitMarkers: [], screenShake: 0, logicalWidth: w, logicalHeight: h
     };
 
-    try {
-      if (containerRef.current && !document.fullscreenElement) {
-        await containerRef.current.requestFullscreen();
-      }
-    } catch(e) {}
+    setIsFullscreen(true);
 
     setGameState('countdown');
     setCountdownValue(3);
@@ -727,9 +702,6 @@ export default function PrecisionFlickShotClient() {
                 Mouse Accuracy Test
               </span>
             </h1>
-            <p className="text-xs text-slate-400 mt-1">
-              Target Decay &amp; Bulls-Eye Micro-Flicks • Endless Level Progression
-            </p>
           </div>
         )}
 
@@ -759,7 +731,7 @@ export default function PrecisionFlickShotClient() {
         <div 
           ref={containerRef} 
           onContextMenu={(e) => { if (gameActiveRef.current) e.preventDefault(); }}
-          className={`relative overflow-hidden flex flex-col transition-all duration-150 select-none bg-[#080811] text-white border border-white/10 ${
+          className={`overflow-hidden flex flex-col transition-all duration-150 select-none bg-[#080811] text-white border border-white/10 ${
             isFullscreen 
               ? "fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#080811] rounded-none border-none flex flex-col items-center justify-center" 
               : "w-full rounded-2xl bg-[#080811] aspect-video min-h-[460px] sm:min-h-[500px] max-h-[88vh] relative overflow-hidden flex flex-col"
@@ -831,7 +803,7 @@ export default function PrecisionFlickShotClient() {
               <div className="text-center animate-pulse pointer-events-none">
                 <AlertCircle className="w-12 h-12 text-cyan-400 mx-auto mb-3" />
                 <h2 className="text-2xl font-black text-white tracking-widest uppercase mb-1">Game Paused</h2>
-                <p className="text-xs text-gray-300 font-medium">Click to resume — fullscreen and cursor lock will re-engage.</p>
+                <p className="text-xs text-gray-300 font-medium">Click to resume — cursor lock will re-engage.</p>
               </div>
             </div>
           )}
@@ -853,7 +825,6 @@ export default function PrecisionFlickShotClient() {
                 { icon: Target, accent: "emerald", title: "Bulls-eye Hit (+200 PTS)", text: "Micro-flick to target centers for double bonus points (+0.6s)" },
                 { icon: Zap, accent: "red", title: "Miss / Timeout Penalty", text: penaltyEnabled ? "Missing or target decay expiration resets combo & deducts 0.8s" : "Missing or target decay expiration resets combo streak" },
               ]}
-              sensitivity={{ value: universalSens, onChange: setUniversalSens, cmPer360 }}
               stats={[
                 { icon: Trophy, label: "Best Score", value: bestScore, color: "text-white", accent: "slate" },
                 { icon: Flame, label: "Best Combo", value: `${bestCombo}x`, color: "text-emerald-400", accent: "emerald" },

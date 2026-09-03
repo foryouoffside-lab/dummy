@@ -15,6 +15,7 @@ import {
 import generateShareCard, { shareScoreCard } from '../../../../../components/ShareScoreCard';
 import { getPlayerName } from '../../../../../lib/leaderboard';
 import { drillAudio } from '../../../../../lib/drillAudio';
+import { useDrillSensitivity } from '../../../../../lib/drillSensitivity';
 import { drillFlash } from '../../../../../lib/drillFlash';
 import { MAX_LEVEL, getStartLevel, getNextLevel, getDifficultyProgress, getComboBonusLevel } from '../../../../../lib/drillDifficulty';
 import { getComboMultiplier, getFpsScoreGrade } from '../../../../../lib/scoringEngine';
@@ -24,6 +25,7 @@ import DrillFooter from '../../../../../components/drill/DrillFooter';
 import DrillCountdown from '../../../../../components/drill/DrillCountdown';
 import DrillAccordion from '../../../../../components/drill/DrillAccordion';
 import FpsStartCard from '../../../../../components/drill/FpsStartCard';
+import useImmersiveMode from '@/lib/useImmersiveMode';
 
 // ============================================================
 // TUNING CONSTANTS
@@ -109,10 +111,11 @@ const getLevelConfig = (level, combo = 0) => {
 export default function ComplexPatternClient() {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
+  useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [flashEnabled, setFlashEnabled] = useState(true);
   const [pointerLocked, setPointerLocked] = useState(false);
-  const [universalSens, setUniversalSens] = useState(1.0);
+  const universalSens = useDrillSensitivity();
   const [openAccordion, setOpenAccordion] = useState(null);
   const [isTouchOnlyDevice, setIsTouchOnlyDevice] = useState(false);
   const [countdownValue, setCountdownValue] = useState(3);
@@ -155,8 +158,6 @@ export default function ComplexPatternClient() {
     logicalWidth: 800, logicalHeight: 450, peakSpeed: 100
   });
 
-  const cmPer360 = (30 / universalSens).toFixed(1);
-
   const triggerFlash = useCallback((color = 'red') => {
     if (!drillFlash.isEnabled()) return;
     const id = Date.now() + Math.random();
@@ -172,11 +173,6 @@ export default function ComplexPatternClient() {
       const isTouchCapable = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
       setIsTouchOnlyDevice(isTouchCapable && !hasFinePointer);
 
-      try {
-        const savedSens = localStorage.getItem('complexPattern_sens');
-        if (savedSens) setUniversalSens(parseFloat(savedSens));
-      } catch (e) {}
-
       const saved = getSavedData();
       setBestScore(saved.bestScore || 0);
       setBestCombo(saved.bestCombo || 0);
@@ -188,18 +184,6 @@ export default function ComplexPatternClient() {
     return () => {
       countdownTimeoutsRef.current.forEach(clearTimeout);
     };
-  }, []);
-
-  useEffect(() => {
-    if (gameState !== 'playing') {
-      try { localStorage.setItem('complexPattern_sens', universalSens.toString()); } catch (e) {}
-    }
-  }, [universalSens, gameState]);
-
-  useEffect(() => {
-    const handleFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
 
   const generatePattern = useCallback((w, h, level) => {
@@ -270,9 +254,7 @@ export default function ComplexPatternClient() {
     countdownTimeoutsRef.current = [];
     startingRef.current = false;
 
-    if (document.fullscreenElement) {
-      await document.exitFullscreen().catch(() => {});
-    }
+    setIsFullscreen(false);
     if (document.pointerLockElement) {
       document.exitPointerLock();
     }
@@ -496,11 +478,7 @@ export default function ComplexPatternClient() {
 
     startNewPattern(w, h, startLevel, 0);
 
-    try {
-      if (containerRef.current && !document.fullscreenElement) {
-        await containerRef.current.requestFullscreen();
-      }
-    } catch(e) {}
+    setIsFullscreen(true);
 
     setGameState('countdown');
     setCountdownValue(3);
@@ -830,9 +808,6 @@ export default function ComplexPatternClient() {
                 Pattern Memory Game
               </span>
             </h1>
-            <p className="text-xs text-slate-400 mt-1">
-              Spatial Working Memory &amp; Vector Tracing • 15 Levels
-            </p>
           </div>
         )}
 
@@ -862,7 +837,7 @@ export default function ComplexPatternClient() {
         <div 
           ref={containerRef} 
           onContextMenu={(e) => { if (gameActiveRef.current) e.preventDefault(); }}
-          className={`relative overflow-hidden flex flex-col transition-all duration-150 select-none bg-[#080811] text-white border border-white/10 ${
+          className={`overflow-hidden flex flex-col transition-all duration-150 select-none bg-[#080811] text-white border border-white/10 ${
             isFullscreen 
               ? 'fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#080811] rounded-none border-none flex flex-col items-center justify-center' 
               : 'w-full rounded-2xl bg-[#080811] aspect-video min-h-[460px] sm:min-h-[500px] max-h-[88vh] relative overflow-hidden flex flex-col'
@@ -937,7 +912,6 @@ export default function ComplexPatternClient() {
                 { icon: Target, accent: 'purple', title: 'Memorize Vector Path', text: 'Study multi-node geometric pattern shown briefly on canvas' },
                 { icon: Zap, accent: 'emerald', title: 'Trace & Recreate', text: 'Click and drag from cyan start node to magenta end node' },
               ]}
-              sensitivity={{ value: universalSens, onChange: setUniversalSens, cmPer360 }}
               stats={[
                 { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
                 { icon: Flame, label: 'Best Combo', value: `${bestCombo}x`, color: 'text-rose-400', accent: 'rose' },
@@ -1017,7 +991,7 @@ export default function ComplexPatternClient() {
                   <button 
                     onClick={handleExitDrill} 
                     className="w-11 flex-shrink-0 rounded-[13px] bg-white/[0.04] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer active:scale-90 transition-transform" 
-                    title="Exit Fullscreen & Return"
+                    title="Exit Drill & Return"
                   >
                     <LogOut className="w-4 h-4 text-red-400" />
                   </button>

@@ -154,7 +154,7 @@ export default function AimTrainerPage() {
         "name": "Does this trainer support universal mouse sensitivity?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Yes, you can adjust the Universal Sens slider to calibrate raw input cm/360 sensitivity before starting your session."
+          "text": "Yes — the Mouse Sensitivity slider in Session Settings on the drills hub calibrates raw input cm/360 for this and every other mouse-aimed drill."
         }
       },
       {
@@ -225,7 +225,7 @@ export default function AimTrainerPage() {
       {
         "@type": "HowToStep",
         "name": "Adjust Sensitivity",
-        "text": "Set your Universal Sens slider to match your primary game."
+        "text": "Set the Mouse Sensitivity slider in Session Settings on the drills hub to match your primary game."
       },
       {
         "@type": "HowToStep",

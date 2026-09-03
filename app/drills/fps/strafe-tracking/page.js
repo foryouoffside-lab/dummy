@@ -225,7 +225,7 @@ export default function StrafeTrackingPage() {
       {
         "@type": "HowToStep",
         "name": "Calibrate Sensitivity",
-        "text": "Set your Universal Sens to match your main game sensitivity."
+        "text": "Set the Mouse Sensitivity slider in Session Settings on the drills hub to match your main game sensitivity."
       },
       {
         "@type": "HowToStep",

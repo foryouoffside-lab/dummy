@@ -996,3 +996,26 @@ python scratchpad/gsc_index.py           # watch "Discovered - not indexed" drai
   the project from this repo if it is dead.
 - Off-site work remains the real constraint on the 100k/month goal. Nothing
   on-page moves `aim trainer online` from position 65.
+
+---
+
+# SESSION 5 — 2026-09-02 (mobile pass — drill header trimmed to two lines)
+
+## The Session 3 H1 keyword line is intact; the descriptive tagline under it is gone
+
+Drill headers were three stacked lines on a phone — name, target search phrase,
+then a descriptive tagline — before any content. The tagline (`<p class="text-xs
+text-slate-400 mt-1">`, e.g. "Dual-Task Target Tracking & Numerical Match
+Stream") was removed from all 80 pages that had one. It was decorative copy that
+appeared in no measured query.
+
+**The `data-seo-kw` span stays on all 75 pages that carry it.** It is the one
+line in the header that earns anything, so H1 keyword coverage is unchanged:
+
+| | Session 3 → 4 | Now |
+|---|---|---|
+| Drill H1s containing their full target phrase | 81 / 81 | 81 / 81 |
+| `data-seo-kw` spans in the tree | 75 | 75 |
+| Descriptive `<p>` taglines under the H1 | 80 | 0 |
+
+Word count per drill page drops by roughly 6-9 words. Nothing else on-page moved.

@@ -1,6 +1,7 @@
 import HomePageClient from './HomePageClient';
 import { DRILLS } from '@/lib/drillsRegistry';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
+import { HOME_FAQ_ITEMS } from '@/lib/homeFaq';
 
 export const metadata = {
   title: 'Free Aim Trainer & Brain Training Drills | SkillDrills',
@@ -37,9 +38,25 @@ export const metadata = {
   },
 };
 
+// FAQPage schema built from the same array the page renders, so the structured
+// data can never drift from the visible answers.
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: HOME_FAQ_ITEMS.map((item) => ({
+    '@type': 'Question',
+    name: item.q,
+    acceptedAnswer: { '@type': 'Answer', text: item.a },
+  })),
+};
+
 export default function HomePage() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
       <HomePageClient />
     </>
   );

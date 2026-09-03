@@ -118,7 +118,7 @@ const howToSchema = {
       "@type": "HowToStep",
       "position": 3,
       "name": "Avoid Impulse Tapping",
-      "text": "Do not rush. Clean matches add +0.6s to the clock. Incorrect selections or timeouts cost 1 of your 5 lives (losing all 5 ends the run early) and deduct 0.8s when time penalty is enabled in settings."
+      "text": "Do not rush. Clean matches add +0.6s to the clock. Incorrect selections and timeouts reset your combo and deduct 0.8s when time penalty is enabled in settings; neither ends the run early."
     },
     {
       "@type": "HowToStep",
