@@ -2,10 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
-import {
-  Play, RefreshCw, Timer, Share2, LogOut, Check, Sun, Moon, Volume2, VolumeX,
-  Target, Trophy, TrendingUp, Zap
-} from 'lucide-react';
+import { Play, RefreshCw, Timer, Share2, LogOut, Check, Sun, Moon, Volume2, VolumeX, Target, Trophy, TrendingUp, Zap } from 'lucide-react';
 
 import DrillFooter from '../../../../components/drill/DrillFooter';
 import DrillCountdown from '../../../../components/drill/DrillCountdown';
@@ -98,6 +95,7 @@ export default function TriangularPursuitClient() {
   });
 
   useEffect(() => {
+    setSoundEnabled(drillAudio.isEnabled());
     settingsRef.current = {
       speedMultiplier,
       targetSize,
@@ -450,19 +448,40 @@ export default function TriangularPursuitClient() {
         {/* Game Stage Container */}
         <div 
           ref={containerRef} 
-          className={`relative overflow-hidden flex flex-col transition-all duration-150 select-none border border-white/10 ${
+          className={`overflow-hidden flex flex-col transition-all duration-150 select-none border border-white/10 ${
             dayMode ? 'bg-[#ffffff]' : 'bg-[#080811]'
           } ${dayMode ? 'text-slate-900' : 'text-white'} ${
             isFullscreen ? 'fixed inset-0 z-[100] w-screen h-[100dvh] rounded-none border-none flex flex-col items-center justify-center' : 'w-full rounded-2xl aspect-video min-h-[460px] md:min-h-[500px] max-h-[88vh] max-md:aspect-[3/4] max-md:min-h-[420px] max-md:max-h-[76vh] relative overflow-hidden flex flex-col'
           }`}
         >
 
-          {/* IN-BOX OVERLAY HUD: ONLY TIMER WHEN PLAYING */}
+          {/* IN-BOX OVERLAY HUD: LABELLED TIMER, AS EVERY OTHER DRILL */}
           {gameState === 'playing' && (
             <div className="absolute top-4 right-4 z-30 pointer-events-none text-right">
+              <p className={`text-[10px] font-semibold uppercase tracking-wider ${dayMode ? 'text-slate-500' : 'text-white/50'}`}>Time Left</p>
               <p className={`text-3xl sm:text-4xl font-black font-sans tabular-nums leading-none ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : (dayMode ? 'text-slate-900' : 'text-white/90')}`}>
                 {uiTimeLeft}s
               </p>
+            </div>
+          )}
+
+          {/* IN-GAME HUD SOUND TOGGLE — these drills have no miss-flash, so no flash toggle */}
+          {(gameState === 'playing' || gameState === 'countdown') && (
+            <div className="absolute bottom-4 right-4 z-40 flex items-center gap-2">
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSoundEnabled((v) => {
+                    drillAudio.setEnabled(!v);
+                    return !v;
+                  });
+                }}
+                className="p-2.5 rounded-full bg-black/60 border border-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title="Toggle Sound"
+              >
+                {soundEnabled ? <Volume2 className="w-4 h-4 text-blue-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
+              </button>
             </div>
           )}
 
@@ -536,8 +555,8 @@ export default function TriangularPursuitClient() {
                     <p className="text-[8px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Base Speed</p>
                   </div>
                   <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
-                    <p className="text-xs sm:text-sm font-black text-white">{mathInvisible ? 'Invisible' : 'Visible'}</p>
-                    <p className="text-[8px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Math Line</p>
+                    <p className="text-sm sm:text-base font-black text-white">{totalTrials}</p>
+                    <p className="text-[8px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">Sessions Completed</p>
                   </div>
                   <div className="bg-black border border-white/5 p-2.5 rounded-xl text-center">
                     <p className="text-xs sm:text-sm font-black text-white">{randomSpeed ? 'Enabled' : 'Fixed'}</p>
