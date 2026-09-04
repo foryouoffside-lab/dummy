@@ -174,7 +174,12 @@ export default function ReactionSpeedDrillsPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
-      <ReactionSpeedDrillsClient />
+      {/* Single source of truth: the visible FAQ below is mapped from the same
+          faqSchema object emitted above, so the structured data can never
+          advertise a question the page does not show. */}
+      <ReactionSpeedDrillsClient
+        faqs={faqSchema.mainEntity.map((e) => ({ q: e.name, a: e.acceptedAnswer.text }))}
+      />
     </>
   );
 }

@@ -26,7 +26,9 @@ const FOLDER_TO_STORAGE_KEY: Record<string, string> = {
   'reaction-game': 'skilldrills_reaction_simulator_v3',
 };
 
-export default function ReactionSpeedDrillsClient() {
+type HubFaq = { q: string; a: string };
+
+export default function ReactionSpeedDrillsClient({ faqs = [] }: { faqs?: HubFaq[] }) {
   const { locale, localizeHref, t } = useTranslation();
   const [isClient, setIsClient] = useState(false);
   const [drillLevels, setDrillLevels] = useState<Record<string, number>>({});
@@ -152,6 +154,36 @@ export default function ReactionSpeedDrillsClient() {
             })}
           />
         </Reveal>
+
+        {/* The hub emits FAQPage JSON-LD, so these Q&As have to be on the page:
+            Google requires FAQ structured data to be visible to the visitor.
+            `faqs` is mapped straight from that same schema object in page.tsx,
+            so the two cannot drift apart. Rendered open rather than in an
+            accordion -- this is the hub's only body copy, and it is one of the
+            few URLs Google has actually indexed. */}
+        {faqs.length > 0 && (
+          <Reveal>
+            <section className="mt-16" aria-labelledby="hub-faq-heading">
+              <h2
+                id="hub-faq-heading"
+                className="text-lg font-mono font-bold uppercase tracking-wider text-ink-1"
+              >
+                {t('home.faqTitle', 'Frequently Asked Questions')}
+              </h2>
+              <dl className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+                {faqs.map((f) => (
+                  <div
+                    key={f.q}
+                    className="rounded-2xl border border-hairline bg-surface-1 p-5"
+                  >
+                    <dt className="text-sm font-bold text-ink-1">{f.q}</dt>
+                    <dd className="mt-1.5 text-xs leading-relaxed text-ink-3">{f.a}</dd>
+                  </div>
+                ))}
+              </dl>
+            </section>
+          </Reveal>
+        )}
 
         <AdjacentHubs currentCat="reaction-speed" />
 
