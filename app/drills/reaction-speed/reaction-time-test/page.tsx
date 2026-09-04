@@ -3,13 +3,11 @@ import DrillGuide from '@/components/drill/DrillGuide';
 
 // ============================================================
 // SEO RESEARCH FINDINGS — reaction-time-test
-// PRIMARY: "reaction time test" ~90,500/mo US, KD ~80-85% (Very Hard)
-//          "reflex test" ~18,100/mo US, KD ~52% (Moderate)
+// PRIMARY: "reaction time test" — 8,223 exact / 8,350 broad US, 1,229 exact GB (Bing API 2026-09-04)
+//          "reflex test"        — 127 exact / 190 broad US, 17 exact GB (Bing API 2026-09-04)
 // SECONDARY / LSI:
-//   "reaction test"                   ~22,200/mo, KD ~72%
-//   "f1 reaction time test"           ~14,800/mo, KD ~35%
-//   "average reaction time"           ~9,900/mo,  KD ~55%
-//   "reaction speed test"             ~5,400/mo,  KD ~48%
+//   "reaction speed test"   — 594 exact / 594 broad US, 106 exact GB (Bing API 2026-09-04)
+//   "average reaction time" — 209 exact / 288 broad US, 45 exact GB (Bing API 2026-09-04)
 // ============================================================
 
 export const metadata = {
@@ -234,10 +232,10 @@ const reactionGuide = {
   heading: "Reaction Time Test Guide & Human Benchmark Millisecond Standards",
   intro: [
     "Reaction time is the elapsed interval between the presentation of a sensory stimulus and the initiation of a corresponding motor response. In competitive esports (Valorant, CS2, League of Legends, F1 racing), response latency measured in milliseconds determines who lands the opening headshot, executes flash dodges, or avoids catastrophic collision.",
-    "Our visual reaction speed test measures your neuro-motor latency with sub-millisecond precision directly in your browser with zero input lag."
+    "Our visual reaction speed test measures your neuro-motor latency using high-resolution browser performance timestamps directly on your device."
   ],
   benchmarks: {
-    title: "Official Human Visual Reaction Time Benchmarks (ms)",
+    title: "Visual Reaction Time Reference Tiers (ms)",
     headers: ["Latency (ms)", "Rank Classification", "Percentile", "Esports Tier Equivalent", "Neurological Profile"],
     rows: [
       ["< 150 ms", "Superhuman / Godlike", "Top 0.1%", "Radiant / F1 Driver", "Instantaneous reflex; near physical limit of retinal-to-cortex transmission"],
@@ -246,7 +244,7 @@ const reactionGuide = {
       ["240 – 280 ms", "Average Human", "Median 50%", "Gold / Platinum", "Typical healthy adult response time under standard conditions"],
       ["> 300 ms", "Developing / Casual", "Bottom 20%", "Silver / Bronze", "Delayed impulse gating or high hardware/display input lag"]
     ],
-    note: "Benchmarks calibrated across millions of visual reaction trials. Standard 60Hz displays add ~16.6ms of hardware display latency; 144Hz/240Hz monitors yield lower measured latency."
+    note: "These performance tiers are an editorial reference guide. Standard 60Hz displays introduce ~16.7ms of display buffering delay per frame; 144Hz and 240Hz monitors reduce hardware frame latency."
   },
   techniques: {
     title: "Sensory Latency & Scientific Reaction Limits",

@@ -1,17 +1,12 @@
 import FPSTrackingTrainerWrapper from './FPSTrackingTrainerWrapper';
+import DrillGuide from '@/components/drill/DrillGuide';
 
 // ============================================================
 // SEO RESEARCH FINDINGS — fps-tracking-trainer
-// PRIMARY: "aim tracking trainer" ~650/mo US, KD ~28% (Moderate)
-//          "fps tracking trainer" ~300/mo US, KD ~22% (Low-Moderate)
+// PRIMARY: "fps tracking trainer" — 0 exact / 0 broad US, 0 exact GB (Bing API 2026-09-04)
+//          "aim tracking trainer" — unverified niche phrase
 // SECONDARY / LSI:
-//   "shaky aim fix"                   ~800/mo,  KD ~18%
-//   "aim trainer tracking"            ~550/mo,  KD ~27%
-//   "apex tracking routine"           ~600/mo,  KD ~26%
-//   "how to track aim"                ~350/mo,  KD ~32%
-//   "best tracking aim trainer"       ~250/mo,  KD ~24%
-//   "reactive tracking scenarios"     ~180/mo,  KD ~16%
-//   "smoothness routine aim"          ~150/mo,  KD ~15%
+//   "strafe tracking aim" / "smooth pursuit aim"
 // ============================================================
 
 export const metadata = {
@@ -154,6 +149,66 @@ const faqSchema = {
   ]
 };
 
+const fpsTrackingGuide = {
+  heading: "FPS Tracking Trainer Guide: Mastering Smooth Pursuit Aim & Reactive Strafe Tracking",
+  intro: [
+    "Tracking aim is the mechanical ability to keep your crosshair centered on an enemy moving across your field of view. While flick aiming requires a single explosive adjustment, tracking requires continuous neuromuscular feedback—your eyes must read the target's velocity, your brain must calculate trajectory changes, and your hand must execute micro-adjustments without jitter.",
+    "In modern competitive shooters such as Apex Legends, Overwatch 2, Call of Duty, and Fortnite, targets rarely stand still. Enemy players utilize counter-strafing, directional air-strafing, and erratic momentum shifts. This FPS tracking trainer isolates smooth pursuit and reactive direction changes without the visual clutter of gun models or map geometry."
+  ],
+  benchmarks: {
+    title: "FPS Tracking Aim Performance Reference Tiers",
+    headers: ["Tracking Accuracy", "Skill Tier", "Equivalent Game Rank", "Mechanical Characteristics", "Key Training Need"],
+    rows: [
+      ["> 75%", "Grandmaster / Pro", "Predator / Top 500 / Radiant", "Zero visual hesitation on direction change; buttery smooth motor output", "Maintain stamina through extended high-velocity tracking duels"],
+      ["60% – 74%", "Diamond / Master", "Master / Immortal", "Clean tracking on predictable glides with minor recovery delay on reversals", "Shorten direction-swap reaction latency"],
+      ["45% – 59%", "Platinum / Gold", "Diamond / Platinum", "Adequate tracking on smooth strafes; tendency to jitter or over-correct", "Focus on smoothness routines to eliminate hand tension"],
+      ["30% – 44%", "Silver / Bronze", "Gold / Silver", "Frequent crosshair detachment; reactive trailing behind the target", "Lower mouse sensitivity and practice read-before-move"],
+      ["< 30%", "Beginner", "Bronze / Iron", "Erratic snapping rather than smooth tracking; constant overshoots", "Establish consistent mouse grip and arm-pivot ergonomics"]
+    ],
+    note: "These accuracy benchmarks represent an editorial reference guide for continuous visual tracking drills. Scores vary with mouse DPI, in-game sensitivity conversion, and monitor refresh rate."
+  },
+  techniques: {
+    title: "Core Aim Tracking Disciplines",
+    items: [
+      {
+        name: "Smooth Pursuit vs. Micro-Flicking",
+        desc: "Smooth pursuit is the continuous matching of crosshair velocity to target velocity. Resist the urge to micro-flick back onto the target when you fall slightly behind; instead, smoothly accelerate your tracking speed.",
+        tips: "Breathe steadily and consciously relax your grip hand to avoid micro-stuttering."
+      },
+      {
+        name: "Reading Strafe Acceleration Cues",
+        desc: "Human and in-game targets cannot reverse direction instantaneously without decelerating. Learning to recognize deceleration cues allows you to anticipate the turnaround rather than reacting purely after the reversal occurs.",
+        tips: "Focus your foveal vision directly on the leading edge of the target."
+      },
+      {
+        name: "Arm Pivot vs. Wrist Tracking",
+        desc: "Long, sweeping target strafes require arm movement pivoted from the elbow or shoulder, while fine tracking corrections require wrist and fingertip articulation.",
+        tips: "Keep your forearm resting comfortably on your mousepad to maintain uniform friction."
+      },
+      {
+        name: "Hardware & Polling Rate Calibration",
+        desc: "Tracking reveals sensor jitter and mousepad inconsistencies. A 1000Hz+ mouse sensor, clean PTFE skates, and a high-refresh display (144Hz+) drastically improve tracking clarity.",
+        tips: "Match your drill sensitivity to your primary competitive shooter sensitivity using standard 360-distance formulas."
+      }
+    ]
+  },
+  steps: [
+    "Select your target speed and difficulty mode, then launch fullscreen.",
+    "Center your crosshair on the moving target and press Start Drill.",
+    "Match the target's velocity with smooth, continuous cursor movement.",
+    "When the target reverses direction, smoothly redirect your crosshair without panic flicking.",
+    "Review your session tracking percentage, time on target, and accuracy stability across levels."
+  ],
+  audience: "FPS competitive players (CS2, Valorant, Apex Legends, Overwatch 2, The Finals), aim training enthusiasts, and gamers seeking to eliminate shaky, jittery aim.",
+  faqs: faqSchema.mainEntity.map(e => ({ q: e.name, a: e.acceptedAnswer.text })),
+  related: [
+    { href: "/drills/reaction-speed/reaction-time-test", label: "Reaction Time Test" },
+    { href: "/drills/reaction-speed/visual-tracking-speed-test", label: "Visual Tracking Speed Test" },
+    { href: "/drills/reaction-speed/reaction-game", label: "Reaction Game" },
+    { href: "/drills/reaction-speed/saccadic-gallery", label: "Saccadic Gallery" }
+  ]
+};
+
 export default function FPSTrackingTrainerPage() {
   return (
     <>
@@ -174,6 +229,7 @@ export default function FPSTrackingTrainerPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
       <FPSTrackingTrainerWrapper />
+      <DrillGuide guide={fpsTrackingGuide} />
     </>
   );
 }

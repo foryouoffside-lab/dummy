@@ -1,15 +1,13 @@
 import MarketDoorsPursuitWrapper from './MarketDoorsPursuitWrapper';
+import DrillGuide from '@/components/drill/DrillGuide';
 
 // ============================================================
 // SEO RESEARCH FINDINGS — market-doors-pursuit
-// PRIMARY: "saccadic eye movement training" ~250/mo US, KD ~22% (Low-Moderate)
-//          "corner checking trainer" — highly targeted niche tool
+// PRIMARY: "corner checking trainer" — 0 exact / 0 broad US, 0 exact GB (Bing API 2026-09-04)
+//          "saccadic eye movement training" — 0 exact / 0 broad US, 0 exact GB (Bing API 2026-09-04)
 // SECONDARY / LSI:
-//   "slicing the pie"                 ~1,900/mo, KD ~22%
-//   "saccadic eye exercises"          ~480/mo,   KD ~25%
-//   "visual tracking exercises"       ~1,300/mo, KD ~30%
-//   "clearing angles"                 ~210/mo,   KD ~12%
-//   "sports vision training"          ~720/mo,   KD ~26%
+//   "slicing the pie" — 0 exact / 0 broad US, 0 exact GB (Bing API 2026-09-04)
+//   "clearing angles" — 0 exact / 0 broad US, 0 exact GB (Bing API 2026-09-04)
 // ============================================================
 
 export const metadata = {
@@ -154,6 +152,66 @@ const faqSchema = {
   ]
 };
 
+const marketDoorsGuide = {
+  heading: "Corner Checking Trainer Guide: Slicing the Pie & Clearing Tactical Angles",
+  intro: [
+    "Corner checking is a foundational tactical discipline in close-quarters battle (CQB), tactical sports, and first-person shooters (CS2, Valorant, Rainbow Six Siege). Entering a room or corridor without methodically clearing angles exposes you to ambushes from blind spots.",
+    "Known as 'slicing the pie', angle clearance involves systematically checking small sectors of an opening from outside the threshold before committing forward. The Corner Checking Trainer gamifies this discipline by presenting five tactical doorways where targets flash unpredictably, conditioning your visual sweeping speed and threat engagement."
+  ],
+  benchmarks: {
+    title: "Corner Checking & Angle Clearing Reference Tiers",
+    headers: ["Clear & Engagement Latency", "Tactical Tier", "Threat Recognition Rate", "Tactical Equivalent", "Key Area of Improvement"],
+    rows: [
+      ["< 210 ms", "Apex Operator", "98%+", "Pro CS2 Entry Fragger / Radiant", "Flawless crosshair placement with instantaneous target confirmation"],
+      ["210 – 260 ms", "Tactical Specialist", "92% – 97%", "Faceit Level 10 / Immortal", "Consistent angle sweep discipline with minimal prefire over-commitment"],
+      ["261 – 320 ms", "Competent Fragger", "84% – 91%", "Diamond / Ascendant", "Effective sweeping rhythm; occasional delay when clearing deep corner blindspots"],
+      ["321 – 400 ms", "Developing", "72% – 83%", "Gold / Platinum", "Tendency to visually linger on cleared doors rather than snapping to the next angle"],
+      ["> 400 ms", "Novice", "< 72%", "Silver / Casual", "Erratic sweeping; slow recognition of target emergence behind doorway frames"]
+    ],
+    note: "These tactical engagement brackets are an editorial reference guide designed to evaluate speed and threat discrimination across multiple doorway vectors."
+  },
+  techniques: {
+    title: "Tactical Angle Clearance & Pie-Slicing Mechanics",
+    items: [
+      {
+        name: "Methodical Slicing vs. Wide Peeking",
+        desc: "Slicing the pie means revealing yourself to only one possible enemy position at a time by inching along a circular arc. Wide swinging exposes you to multiple angles simultaneously, making survival near impossible.",
+        tips: "Keep your crosshair glued to the door frame as your perspective changes."
+      },
+      {
+        name: "Crosshair Placement Discipline",
+        desc: "Crosshair placement is about pre-aiming at the exact height and depth where an enemy's head will emerge. If your crosshair is already at head level, your reaction requires only a click rather than a flick-plus-click.",
+        tips: "Keep your cursor at head level across all doorway openings."
+      },
+      {
+        name: "Pre-Aiming vs. Reaction Drag",
+        desc: "Never clear an angle with lazy eyes. Anticipate that an opponent is behind every door frame you check. Expecting a target shortens motor initiation latency by 40–70ms compared to passive observing.",
+        tips: "Maintain high cognitive readiness ('pre-aim mentality') on every check."
+      },
+      {
+        name: "Saccadic Sweep Rhythm",
+        desc: "When checking multiple doors in sequence, establish a consistent cadence. Jerky, uneven sweeps cause visual motion blur and decrease threat detection accuracy.",
+        tips: "Let your eyes settle for a fraction of a second on each opening to confirm clarity."
+      }
+    ]
+  },
+  steps: [
+    "Launch the trainer in full screen and prepare for the 5-doorway tactical layout.",
+    "Position your crosshair on the first designated doorway boundary.",
+    "Sweep rhythmically across the doors, systematically slicing angles from left to right or right to left.",
+    "The instant a hostile target flashes within a doorway, engage immediately with precise crosshair alignment.",
+    "Complete the drill waves to assess your angle clearance speed, sweep consistency, and hit rate."
+  ],
+  audience: "Tactical shooter players (Valorant, CS2, Rainbow Six Siege, Tarkov), military and law enforcement trainees, and esports athletes conditioning visual angle awareness.",
+  faqs: faqSchema.mainEntity.map(e => ({ q: e.name, a: e.acceptedAnswer.text })),
+  related: [
+    { href: "/drills/reaction-speed/barrier-sequence-pursuit", label: "Jiggle Peek Trainer" },
+    { href: "/drills/reaction-speed/saccadic-gallery", label: "Saccadic Gallery" },
+    { href: "/drills/reaction-speed/reaction-time-test", label: "Reaction Time Test" },
+    { href: "/drills/reaction-speed/fps-tracking-trainer", label: "FPS Tracking Trainer" }
+  ]
+};
+
 export default function MarketDoorsPursuitPage() {
   return (
     <>
@@ -178,6 +236,7 @@ export default function MarketDoorsPursuitPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
       <MarketDoorsPursuitWrapper />
+      <DrillGuide guide={marketDoorsGuide} />
     </>
   );
 }

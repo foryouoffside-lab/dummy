@@ -1,4 +1,12 @@
 import BarrierSequencePursuitWrapper from './BarrierSequencePursuitWrapper';
+import DrillGuide from '@/components/drill/DrillGuide';
+
+// ============================================================
+// SEO RESEARCH FINDINGS — barrier-sequence-pursuit
+// PRIMARY: "jiggle peek trainer" — 0 exact / 0 broad US, 0 exact GB (Bing API 2026-09-04)
+// SECONDARY / LSI:
+//   "cover peeking reflex drill" / "peeker's advantage" — 0 exact / 0 broad (Bing API 2026-09-04)
+// ============================================================
 
 export const metadata = {
   title: 'Jiggle Peek Trainer - Cover Peeking Reflex Drill',
@@ -137,6 +145,66 @@ const faqSchema = {
   ]
 };
 
+const barrierSequenceGuide = {
+  heading: "Jiggle Peek Trainer Guide: Beating Peeker's Advantage & Mastering Cover Reflexes",
+  intro: [
+    "In competitive first-person shooters like CS2 and Valorant, the duel between an angle holder and an angle peeker is determined by milliseconds, visual reaction speed, and network latency. The phenomenon known as 'peeker's advantage' gives an accelerating peeker a brief temporal lead because client-side position data must travel to the server and down to the angle holder.",
+    "To neutralize peeker's advantage, players use techniques like jiggle peeking (brief micro-strafes behind cover to bait shots or gather info) and dynamic crosshair offsetting. This Jiggle Peek Trainer isolates cover peeking reflexes, conditioning your ability to react to micro-targets flashing behind barrier sequences."
+  ],
+  benchmarks: {
+    title: "Cover Peeking & Angle Hold Reference Tiers",
+    headers: ["Reaction Window", "Hold Rank", "Detection Accuracy", "Tactical Equivalent", "Recommended Training Focus"],
+    rows: [
+      ["< 185 ms", "Radiant / Pro Hold", "98%+", "Elite AWPer / Sniper / Pro Anchor", "Micro-adjust for shoulder baits without discharging ammo prematurely"],
+      ["185 – 225 ms", "Immortal / Faceit 10", "92% – 97%", "High-level tactical anchor", "Maintain crosshair offset discipline against varied peek speeds"],
+      ["226 – 280 ms", "Ascendant / Diamond", "85% – 91%", "Solid competitive player", "Avoid holding too close to the barrier edge where peek speed is highest"],
+      ["281 – 350 ms", "Platinum / Gold", "70% – 84%", "Average FPS gamer", "Learn to re-peek rather than remaining static after missing the initial shot"],
+      ["> 350 ms", "Silver / Bronze", "< 70%", "Developing / Casual", "Prone to getting caught off-guard by wide swings and shoulder peeks"]
+    ],
+    note: "These reaction brackets are an editorial reference guide. Network ping, display refresh rate, and monitor input lag heavily modulate live online peeking duels."
+  },
+  techniques: {
+    title: "Cover Peeking & Counter-Peek Mechanics",
+    items: [
+      {
+        name: "Crosshair Offsetting vs. Edge Hugging",
+        desc: "Beginner angle holders place their crosshair directly on the corner edge of a barrier. Because human visual reaction takes ~200ms and peeking targets move at high speed, the enemy will travel past your crosshair before you can click. Offsetting your crosshair 1–2 target widths from the barrier edge allows the enemy to run directly into your shot.",
+        tips: "Widen your crosshair offset when holding against fast full-strafing opponents."
+      },
+      {
+        name: "Shoulder Bait Discrimination",
+        desc: "Savvy opponents execute shoulder peeks without exposing their head to bait your shot and force a reload. Training target discrimination helps you identify whether an emerging shape is a full swing or a micro-bait before firing.",
+        tips: "Wait for the central mass of the target before releasing your click."
+      },
+      {
+        name: "Jiggle Peeking Execution",
+        desc: "When executing a jiggle peek yourself, tap counter-movement keys (A and D) with minimal amplitude so only your shoulder peeks past the wall for 50–80ms before disappearing.",
+        tips: "Keep your crosshair centered on the pre-aim location even while rapidly jiggling."
+      },
+      {
+        name: "Offsetting Hardware & Network Lag",
+        desc: "Monitor refresh rates (144Hz vs 240Hz) and input latency compounds with online ping. Maximizing display framerates minimizes the visual penalty imposed by enemy peeker's advantage.",
+        tips: "Enable low-latency modes (NVIDIA Reflex / AMD Anti-Lag) in your driver settings."
+      }
+    ]
+  },
+  steps: [
+    "Select your barrier speed and difficulty preset, then enter full screen mode.",
+    "Offset your crosshair slightly off the barrier boundary at anticipated head level.",
+    "Focus your attention on the gap where the peeking target emerges.",
+    "The instant the target breaks cover past the barrier, click immediately to score the tag.",
+    "Review your reaction latency, hit percentage, and reaction consistency across rounds."
+  ],
+  audience: "Tactical FPS players (Valorant, CS2, Rainbow Six Siege), sniper/AWP anchors, and competitive gamers seeking to counter peeker's advantage.",
+  faqs: faqSchema.mainEntity.map(e => ({ q: e.name, a: e.acceptedAnswer.text })),
+  related: [
+    { href: "/drills/reaction-speed/market-doors-pursuit", label: "Corner Checking Trainer" },
+    { href: "/drills/reaction-speed/fps-tracking-trainer", label: "FPS Tracking Trainer" },
+    { href: "/drills/reaction-speed/reaction-time-test", label: "Reaction Time Test" },
+    { href: "/drills/reaction-speed/reaction-game", label: "Reaction Game" }
+  ]
+};
+
 export default function BarrierSequencePursuitPage() {
   return (
     <>
@@ -161,6 +229,7 @@ export default function BarrierSequencePursuitPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
       <BarrierSequencePursuitWrapper />
+      <DrillGuide guide={barrierSequenceGuide} />
     </>
   );
 }

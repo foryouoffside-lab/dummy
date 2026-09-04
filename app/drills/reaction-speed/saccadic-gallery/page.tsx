@@ -1,13 +1,12 @@
 import SaccadicGalleryWrapper from './SaccadicGalleryWrapper';
+import DrillGuide from '@/components/drill/DrillGuide';
 
 // ============================================================
 // SEO RESEARCH FINDINGS — saccadic-gallery
-// PRIMARY: "saccadic eye exercises" ~480/mo US, KD ~25% (Low-Medium)
-//          "eye tracking training" ~250/mo US, KD ~18% (Low)
+// PRIMARY: "saccadic eye exercises" — 0 exact / 0 broad US, 0 exact GB (Bing API 2026-09-04)
+//          "saccadic gallery"       — 0 exact / 0 broad US, 0 exact GB (Bing API 2026-09-04)
 // SECONDARY / LSI:
-//   "visual tracking exercises"       ~1,300/mo, KD ~30%
-//   "saccadic eye movement training"  ~250/mo,   KD ~22%
-//   "saccadic training online"        ~110/mo,   KD ~9%
+//   "saccadic eye movement training" / "eye tracking training"
 // ============================================================
 
 export const metadata = {
@@ -141,6 +140,66 @@ const faqSchema = {
   ]
 };
 
+const saccadicGalleryGuide = {
+  heading: "Saccadic Eye Exercises Guide: Training Rapid Ocular Repositioning & Target Acquisition",
+  intro: [
+    "A saccade is a rapid, conjugate movement of both eyes between phases of fixation. Ranging from 200 to 700 degrees per second, saccades are among the fastest biological movements produced by the human body. Saccadic eye exercises train the extraocular muscles and cortical gaze centers to acquire visual targets swiftly and accurately.",
+    "In daily life, competitive sports, and digital work, saccadic efficiency dictates how rapidly you can shift attention between dashboard displays, read text lines, spot an opponent on the screen edge, or react to peripheral motion. The Saccadic Gallery isolates these rapid eye jumps across wide zig-zag vectors."
+  ],
+  benchmarks: {
+    title: "Saccadic Fixation & Eye Exercise Reference Tiers",
+    headers: ["Fixation Latency", "Saccadic Tier", "Fixation Accuracy", "Visual Function Equivalent", "Key Clinical / Training Focus"],
+    rows: [
+      ["< 180 ms", "Elite / High-Performance", "98%+", "Professional esports / High-speed motorsport driver", "Maintain ocular stamina without saccadic drift or fatigue"],
+      ["180 – 230 ms", "Optimal / Athletic", "92% – 97%", "Competitive athlete / High visual reader", "Eliminate micro-overshoots (hypermetria) on wide angle targets"],
+      ["231 – 290 ms", "Normal / Functional", "85% – 91%", "Standard adult healthy ocular motor function", "Improve visual scanning rhythm and peripheral cue pickup"],
+      ["291 – 360 ms", "Sluggish / Fatigued", "72% – 84%", "Visual fatigue, prolonged screen time, or lack of sleep", "Take regular 20-20-20 visual breaks; reduce digital eye strain"],
+      ["> 360 ms", "Sub-Optimal", "< 72%", "Sedentary or unconditioned oculomotor performance", "Consult an eye care professional if persistent fixation difficulty occurs"]
+    ],
+    note: "These saccadic latency bands are an editorial reference guide for computer-based visual exercises. They do not substitute for clinical electro-oculography or optometric diagnosis."
+  },
+  techniques: {
+    title: "Oculomotor Conditioning & Saccade Protocols",
+    items: [
+      {
+        name: "Eliminating Saccadic Dysmetria",
+        desc: "Dysmetria occurs when the eyes either overshoot (hypermetria) or undershoot (hypometria) the intended target, requiring a corrective secondary saccade that wastes 80–120ms.",
+        tips: "Keep your head stable and move only your eyes to build true ocular muscle control."
+      },
+      {
+        name: "Head-Still Isolation Protocol",
+        desc: "Many individuals inadvertently rotate their neck and head to follow target jumps rather than moving their extraocular muscles. True saccadic training requires isolating the eye muscles from cervical spine movement.",
+        tips: "Rest your chin lightly in a resting hand or focus consciously on maintaining head stability."
+      },
+      {
+        name: "Wide-Angle Visual Scanning",
+        desc: "Targets in the Saccadic Gallery jump across large visual degrees. Practicing wide jumps strengthens the lateral and medial rectus muscles, enhancing horizontal and oblique field scanning.",
+        tips: "Ensure full screen coverage so targets leverage your full monitor dimensions."
+      },
+      {
+        name: "Ocular Fatigue Prevention",
+        desc: "The extraocular muscles tire quickly when subjected to rapid eccentric contractions. Sessions should be capped at 5–10 minutes to prevent muscle strain and headaches.",
+        tips: "Follow each session with gentle palming (covering eyes with warm palms) to relax ocular muscles."
+      }
+    ]
+  },
+  steps: [
+    "Sit upright with your monitor directly at eye level and your head centered.",
+    "Click Start Drill and focus on the initial center target marker.",
+    "As targets illuminate across the zig-zag gallery, jump your eyes immediately to the new coordinate.",
+    "Click or confirm the target the moment your fovea locks onto its center.",
+    "Complete the sequence to review your median saccadic reaction time, spatial accuracy, and drift."
+  ],
+  audience: "Athletes seeking faster visual field awareness, individuals doing eye strain recovery exercises, esports competitors, and readers looking to improve scan efficiency.",
+  faqs: faqSchema.mainEntity.map(e => ({ q: e.name, a: e.acceptedAnswer.text })),
+  related: [
+    { href: "/drills/reaction-speed/reaction-time-test", label: "Reaction Time Test" },
+    { href: "/drills/reaction-speed/visual-tracking-speed-test", label: "Visual Tracking Speed Test" },
+    { href: "/drills/reaction-speed/market-doors-pursuit", label: "Corner Checking Trainer" },
+    { href: "/drills/reaction-speed/barrier-sequence-pursuit", label: "Jiggle Peek Trainer" }
+  ]
+};
+
 export default function SaccadicGalleryPage() {
   return (
     <>
@@ -161,6 +220,7 @@ export default function SaccadicGalleryPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
       <SaccadicGalleryWrapper />
+      <DrillGuide guide={saccadicGalleryGuide} />
     </>
   );
 }

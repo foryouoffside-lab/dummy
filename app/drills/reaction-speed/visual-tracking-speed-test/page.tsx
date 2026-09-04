@@ -1,14 +1,12 @@
 import VisualTrackingSpeedTestWrapper from './VisualTrackingSpeedTestWrapper';
+import DrillGuide from '@/components/drill/DrillGuide';
 
 // ============================================================
 // SEO RESEARCH FINDINGS — visual-tracking-speed-test
-// PRIMARY: "visual tracking test" — high-intent search, low KD ~28%
-//          "visual tracking speed test" — exact concept match
+// PRIMARY: "visual tracking test" — 0 exact / 0 broad US, 0 exact GB (Bing API 2026-09-04)
+//          "visual tracking speed test" — 0 exact / 0 broad US, 0 exact GB (Bing API 2026-09-04)
 // SECONDARY / LSI:
-//   "mouse tracking test"             ~200-500/mo, KD ~25%
-//   "reaction speed test"             ~6,600/mo,   KD ~45%
-//   "visual processing speed test"    ~250/mo,     KD ~30%
-//   "hand eye coordination gaming"    ~590/mo,     KD ~18%
+//   "mouse tracking test" / "visual pursuit test"
 // ============================================================
 
 export const metadata = {
@@ -152,6 +150,66 @@ const faqSchema = {
   ]
 };
 
+const visualTrackingGuide = {
+  heading: "Visual Tracking Speed Test Guide: Measuring Ocular Pursuit & Rapid Target Re-Acquisition",
+  intro: [
+    "Visual tracking speed is the rate at which your oculomotor and motor systems can follow dynamic movement, detect sudden kinematic anomalies, and realign focus. In sports science, optometry, and gaming psychology, visual tracking is recognized as a fundamental pillar of athletic performance.",
+    "Our Visual Tracking Speed Test measures your response to unpredictable target dashes. When a moving object suddenly breaks trajectory or accelerates unexpectedly, your visual system experiences a brief lag called saccadic latency before your eyes jump to re-acquire the target. This drill isolates and measures that exact re-acquisition window."
+  ],
+  benchmarks: {
+    title: "Visual Tracking & Dash Reaction Reference Tiers",
+    headers: ["Re-Acquisition Latency", "Performance Category", "Tracking Consistency", "Athletic Equivalent", "Recommended Training Focus"],
+    rows: [
+      ["< 190 ms", "Exceptional / Elite", "95%+", "F1 / Fighter Pilot / Pro Esports", "Maintain extreme focus across extended duration endurance runs"],
+      ["190 – 240 ms", "Advanced", "85% – 94%", "Collegiate Athlete / High ELO Gamer", "Refine soft-focus gaze to eliminate anticipatory flinches"],
+      ["241 – 300 ms", "Competent / Above Average", "75% – 84%", "Recreational Sports / Active Gamer", "Reduce mouse grip tension to enable faster directional shifts"],
+      ["301 – 380 ms", "Average", "60% – 74%", "Typical Healthy Adult Baseline", "Practice tracking steady movements before challenging high-velocity dashes"],
+      ["> 380 ms", "Developing", "< 60%", "Sedentary / Unconditioned", "Check monitor refresh rate and reduce background cognitive fatigue"]
+    ],
+    note: "These re-acquisition benchmarks serve as an editorial reference guide. Visual tracking scores improve steadily with consistent daily training and adequate rest."
+  },
+  techniques: {
+    title: "Visual Tracking & Saccadic Pursuit Principles",
+    items: [
+      {
+        name: "Smooth Pursuit vs. Catch-up Saccades",
+        desc: "When a target moves smoothly under 30 degrees of visual angle per second, the eyes track it with smooth pursuit. When it dashes rapidly, smooth pursuit fails, and the brain triggers a rapid catch-up saccade.",
+        tips: "Train yourself not to blink or break gaze during the smooth tracking phase."
+      },
+      {
+        name: "Anticipatory Gaze vs. Reactive Chasing",
+        desc: "Rather than staring directly at the center of the moving target, maintain a slightly broad focus that encompasses the surrounding space. This allows you to perceive sudden acceleration instantly.",
+        tips: "Avoid predicting dash directions prematurely; wait for the visual confirmation."
+      },
+      {
+        name: "Motor Decoupling",
+        desc: "Many individuals clench their shoulders, neck, and hand muscles during high-speed tracking drills, which restricts fine motor adjustments. Consciously relax your arm and wrist.",
+        tips: "Perform brief shoulder rolls and wrist stretches between drill sessions."
+      },
+      {
+        name: "Dynamic Visual Acuity (DVA)",
+        desc: "Dynamic visual acuity is the ability to resolve fine detail when there is relative motion between the observer and the target. Regular tracking drills condition the vestibular-ocular reflex (VOR) and ocular motor coordination.",
+        tips: "Ensure proper desk lighting to prevent eye strain and maintain maximum pupil responsiveness."
+      }
+    ]
+  },
+  steps: [
+    "Position yourself at a comfortable distance from your monitor (approximately arm's length).",
+    "Click Start Drill and lock your eyes onto the moving tracking sphere.",
+    "Follow the target smoothly as it travels along its initial trajectory.",
+    "The instant the target executes a sudden dash, react immediately and re-center your cursor.",
+    "Complete the test battery to analyze your average re-acquisition latency, accuracy, and tracking stamina."
+  ],
+  audience: "Athletes across baseball, tennis, motorsports, hockey, competitive gamers training reactive aim, and individuals undergoing vision performance conditioning.",
+  faqs: faqSchema.mainEntity.map(e => ({ q: e.name, a: e.acceptedAnswer.text })),
+  related: [
+    { href: "/drills/reaction-speed/fps-tracking-trainer", label: "FPS Tracking Trainer" },
+    { href: "/drills/reaction-speed/reaction-time-test", label: "Reaction Time Test" },
+    { href: "/drills/reaction-speed/saccadic-gallery", label: "Saccadic Gallery" },
+    { href: "/drills/reaction-speed/reaction-game", label: "Reaction Game" }
+  ]
+};
+
 export default function VisualTrackingSpeedTestPage() {
   return (
     <>
@@ -176,6 +234,7 @@ export default function VisualTrackingSpeedTestPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
       <VisualTrackingSpeedTestWrapper />
+      <DrillGuide guide={visualTrackingGuide} />
     </>
   );
 }

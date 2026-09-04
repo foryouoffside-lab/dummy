@@ -1,14 +1,11 @@
 import ReflexTrainingDrillWrapper from './ReflexTrainingDrillWrapper';
+import DrillGuide from '@/components/drill/DrillGuide';
 
 // ============================================================
 // SEO RESEARCH FINDINGS — reflex-training-drill
-// PRIMARY: "reflex training drill" — high-intent search, low KD
-//          "target acquisition trainer" — exact mechanical concept match
+// PRIMARY: "reflex training drill" — 0 exact / 0 broad US, 0 exact GB (Bing API 2026-09-04)
 // SECONDARY / LSI:
-//   "reflex training game"            ~880/mo,   KD ~30%
-//   "reflex game online"              ~1,000/mo, KD ~25%
-//   "hand eye coordination gaming"    ~590/mo,   KD ~18%
-//   "aim reflex trainer"              ~150/mo,   KD ~10%
+//   "multi target reflex trainer" / "burst reflex game"
 // ============================================================
 
 export const metadata = {
@@ -155,6 +152,66 @@ const faqSchema = {
   ]
 };
 
+const reflexDrillGuide = {
+  heading: "Reflex Training Drill Guide: Conditioning Multi-Target Acquisition & Burst Reaction Speed",
+  intro: [
+    "A reflex training drill bridges the gap between simple reaction time (reacting to a single predictable flash) and choice reaction time in complex environments. In high-stakes gaming and fast-paced sports, you are rarely presented with one lone stimulus. Instead, multiple threats appear concurrently across wide visual angles, requiring you to triage targets and clear them rapidly.",
+    "This burst reflex drill trains your neurological visual-spatial processing speed. By flashing clusters of targets that must be cleared before their expiration window closes, it forces your motor system to sequence rapid acquisitions without second-guessing or hesitation."
+  ],
+  benchmarks: {
+    title: "Burst Reflex Acquisition Reference Tiers",
+    headers: ["Target Clear Speed", "Performance Tier", "Target Accuracy", "Cognitive Profile", "Recommended Drill Focus"],
+    rows: [
+      ["< 220 ms / target", "Godlike / Apex", "98%+", "Near-instantaneous spatial clustering and robotic flick-stop mechanics", "Push burst density to maximum targets"],
+      ["220 – 280 ms / target", "Master / Elite", "92% – 97%", "Exceptional divided attention; fluid eye-to-hand target switching", "Minimize reset delay between consecutive clicks"],
+      ["281 – 350 ms / target", "Advanced Competitor", "85% – 91%", "Sharp reflexes on initial targets; slight hesitation on outer cluster edges", "Practice wider eye sweeps to spot outer targets earlier"],
+      ["351 – 440 ms / target", "Intermediate", "75% – 84%", "Solid single-target speed; cognitive overload during dense bursts", "Triage targets by proximity: clear nearest targets first"],
+      ["> 440 ms / target", "Developing", "< 75%", "Visual panic during bursts; frequent misses from rushing clicks", "Focus on clean precision before ramping up acquisition pace"]
+    ],
+    note: "These acquisition speed brackets are an editorial reference guide. Hardware input latency, mouse DPI, and monitor refresh rate impact recorded milliseconds."
+  },
+  techniques: {
+    title: "Multi-Target Reflex Optimization",
+    items: [
+      {
+        name: "Triage & Shortest-Path Sequencing",
+        desc: "When a burst of targets appears, mentally path the shortest route connecting them rather than jumping randomly across the screen. Clearing targets in a geometric line or arc minimizes unnecessary hand travel.",
+        tips: "Scan the cluster as a single visual shape rather than individual dots."
+      },
+      {
+        name: "Peripheral Target Registration",
+        desc: "Your foveal (central) vision provides high resolution for clicking, but your peripheral vision is far faster at detecting sudden flashes. Use peripheral cues to locate subsequent targets while your hand is still executing the current click.",
+        tips: "Keep your gaze centered on the cluster midpoint rather than trailing your cursor."
+      },
+      {
+        name: "Decisive Stopping Power",
+        desc: "Fast multi-target clicking requires instant deceleration. Overshooting a target and micro-correcting back wastes 50–100ms per target. Focus on crisp, definitive stops on each target center.",
+        tips: "Use a control-focused mousepad surface if you find yourself sliding past targets."
+      },
+      {
+        name: "Warmup Routine & Neuromuscular Readiness",
+        desc: "Reflex speed is heavily affected by central nervous system arousal, sleep quality, and physical warmup. Performing 5 to 10 minutes of burst drills prior to competitive matches elevates baseline reaction readiness.",
+        tips: "Hydrate properly and ensure hands and fingers are warm to optimize nerve conduction velocity."
+      }
+    ]
+  },
+  steps: [
+    "Configure your round duration and difficulty tier, then click Start Drill.",
+    "Fixate your visual attention at the center of the display canvas.",
+    "When the target cluster flashes, instantly scan the layout and establish your click sequence.",
+    "Click each target decisively before its expiration timer drains.",
+    "Clear all burst waves to evaluate your average target acquisition time and clear rate."
+  ],
+  audience: "Tactical shooter players (Valorant, CS2, R6 Siege), battle royale competitors, esports athletes, martial artists, and anyone training rapid multi-stimulus reflexes.",
+  faqs: faqSchema.mainEntity.map(e => ({ q: e.name, a: e.acceptedAnswer.text })),
+  related: [
+    { href: "/drills/reaction-speed/reaction-time-test", label: "Reaction Time Test" },
+    { href: "/drills/reaction-speed/reaction-game", label: "Reaction Game" },
+    { href: "/drills/reaction-speed/saccadic-gallery", label: "Saccadic Gallery" },
+    { href: "/drills/reaction-speed/fps-tracking-trainer", label: "FPS Tracking Trainer" }
+  ]
+};
+
 export default function ReflexTrainingDrillPage() {
   return (
     <>
@@ -179,6 +236,7 @@ export default function ReflexTrainingDrillPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
       <ReflexTrainingDrillWrapper />
+      <DrillGuide guide={reflexDrillGuide} />
     </>
   );
 }

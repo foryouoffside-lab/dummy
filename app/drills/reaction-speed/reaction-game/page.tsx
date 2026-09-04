@@ -1,4 +1,5 @@
 import ReactionSimulatorWrapper from './ReactionSimulatorWrapper';
+import DrillGuide from '@/components/drill/DrillGuide';
 
 // ============================================================
 // SEO RESEARCH FINDINGS — reaction-game
@@ -238,6 +239,66 @@ const faqSchema = {
   ]
 };
 
+const reactionGameGuide = {
+  heading: "Online Reaction Game Guide: Training Vertical Tracking & Interception Reflexes",
+  intro: [
+    "Reaction games train your visual perception, response speed, and motor execution by forcing you to identify dynamic stimuli and act within a fraction of a second. In our vertical falling-target reaction game, targets drop at variable acceleration across multiple lanes, requiring you to balance rapid target selection with precise click accuracy.",
+    "Unlike simple single-button reaction timers, multi-lane reaction games engage choice reaction time and visual tracking. You must continuously monitor the upper visual field, project target landing trajectories, and prioritize imminent escapees to sustain high-speed combo streaks."
+  ],
+  benchmarks: {
+    title: "Reaction Game Performance & Scoring Reference Tiers",
+    headers: ["Score Range", "Difficulty Band", "Target Speed", "Skill Profile", "Recommended Focus"],
+    rows: [
+      ["15,000+ pts", "Grandmaster", "Extreme (>1400 px/s)", "Immediate foveal acquisition and micro-second click release", "Maintain composure during multi-sphere simultaneous drops"],
+      ["10,000–14,999 pts", "Elite", "Fast (1000–1400 px/s)", "High-level anticipation with minimal miss penalties", "Push interception point higher up the vertical lanes"],
+      ["6,000–9,999 pts", "Proficient", "Moderate (700–1000 px/s)", "Consistent baseline reflexes with occasional misses", "Focus on peripheral detection rather than tracking single targets"],
+      ["2,500–5,999 pts", "Intermediate", "Standard (450–700 px/s)", "Comfortable with single targets, challenged by multi-lane waves", "Minimize mouse travel by resting cursor near mid-lane"],
+      ["< 2,500 pts", "Novice", "Slow (<450 px/s)", "Reactive clicking with higher panic and delay", "Prioritize accuracy over speed to build rhythm"]
+    ],
+    note: "These scoring bands are an editorial reference guide calibrated for standard 60–144Hz displays. Enabling the optional time penalty increases difficulty significantly."
+  },
+  techniques: {
+    title: "Reaction & Interception Mechanics",
+    items: [
+      {
+        name: "High-Screen Interception",
+        desc: "Clicking falling targets near the top or upper-third of the screen maximizes time buffer and prevents last-second panic clicks near the danger baseline.",
+        tips: "Keep your eye gaze slightly above screen center to register spawns the millisecond they appear."
+      },
+      {
+        name: "Trajectory Projection & Pre-Aiming",
+        desc: "Rather than chasing a fast-falling target with your cursor, project where the target will be 150ms in the future and let it fall into your crosshair.",
+        tips: "Anticipatory clicking reduces muscular over-correction and fatigue."
+      },
+      {
+        name: "Peripheral Target Scanning",
+        desc: "Fixating intently on one lane leaves you blind to adjacent drops. Soften your visual focus to use peripheral motion detectors for new spawns.",
+        tips: "Human peripheral vision has higher temporal resolution for rapid movement than central vision."
+      },
+      {
+        name: "Input Latency Management",
+        desc: "Browser rendering at 60Hz incurs ~16.7ms frame intervals. Running on a 144Hz+ monitor with a high-polling mouse cuts input response latency.",
+        tips: "Turn off background heavy browser tabs and disable GPU throttling for crisp click delivery."
+      }
+    ]
+  },
+  steps: [
+    "Select your preferred settings (opt-in time penalties, sound cues) and click Start Drill.",
+    "Position your cursor in the upper-middle region of the playfield with a light, relaxed grip.",
+    "Monitor the lane entry zone using a soft visual gaze to spot spawns immediately.",
+    "Intercept targets cleanly as high up their lane as possible to keep pace with accelerating waves.",
+    "Survive the countdown, maintain your combo multiplier, and review your final accuracy and grade."
+  ],
+  audience: "Gamers training for vertical movement shooters (Apex Legends, Overwatch 2, Fortnite), athletes conditioning interception reflexes, and anyone wanting a fast, free reaction game to sharpen hand-eye coordination.",
+  faqs: faqSchema.mainEntity.map(e => ({ q: e.name, a: e.acceptedAnswer.text })),
+  related: [
+    { href: "/drills/reaction-speed/reaction-time-test", label: "Reaction Time Test" },
+    { href: "/drills/reaction-speed/reflex-training-drill", label: "Reflex Training Drill" },
+    { href: "/drills/reaction-speed/fps-tracking-trainer", label: "FPS Tracking Trainer" },
+    { href: "/drills/reaction-speed/saccadic-gallery", label: "Saccadic Eye Gallery" }
+  ]
+};
+
 export default function ReactionGamePage() {
   return (
     <>
@@ -262,6 +323,7 @@ export default function ReactionGamePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
       <ReactionSimulatorWrapper />
+      <DrillGuide guide={reactionGameGuide} />
     </>
   );
 }
