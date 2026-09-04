@@ -851,7 +851,7 @@ export default function ReactionTimeTestClient() {
                     <Eye className="w-4 h-4 text-cyan-400" /> What Is Visual Reaction Time & Mental Chronometry?
                   </h4>
                   <p className="text-sm leading-relaxed mb-3 text-gray-300">
-                    <strong>Reaction Time Test</strong> measures and conditions visual latency, internal clock calibration, and mental chronometry. In fast-paced FPS, racing, and sports games, judging timing intervals and visual cues with sub-millisecond precision is essential for winning duels.
+                    <strong>Reaction Time Test</strong> measures and conditions visual latency, internal clock calibration, and mental chronometry. In fast-paced FPS, racing, and sports games, the gap between two players is often a few tens of milliseconds, so shaving even a small amount off your visual response is what decides duels.
                   </p>
                   <p className="text-sm leading-relaxed text-gray-300">
                     This drill isolates time estimation and visual stimulus latency. Training your temporal processing reduces visual reaction delay, improves hand-eye synchronization, and helps you execute actions with peak consistency.

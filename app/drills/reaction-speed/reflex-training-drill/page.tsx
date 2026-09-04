@@ -1,4 +1,5 @@
 import ReflexTrainingDrillWrapper from './ReflexTrainingDrillWrapper';
+import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
 
 // ============================================================
@@ -19,12 +20,15 @@ export const metadata = {
     'multi target acquisition trainer', 'burst reflex game',
     'free aim trainer browser', 'gaming hand eye coordination test', 'low latency reaction tool'
   ],
-  // Intentionally omit hreflang until localized routes exist for this path:
-  // there is no /pt, /es, /ja, /de or /ko page for it -- emitting hreflang
-  // would advertise locale URLs that 404. Add it back only together with the
-  // locale pages themselves.
+  // hreflang is emitted again now that ja locale pages exist for this route.
+  // getAlternateLanguages() is route-aware -- it consults ROUTE_LOCALES and so
+  // lists only the locales that actually have a page.js, never the full six.
+  // Keep this in step with the locale pages: hreflang must be reciprocal, and
+  // the localized pages already point back here, so dropping it silently voids
+  // the annotation on both sides.
   alternates: {
     canonical: 'https://skilldrills.online/drills/reaction-speed/reflex-training-drill',
+    languages: getAlternateLanguages('/drills/reaction-speed/reflex-training-drill'),
   },
   robots: { index: true, follow: true },
   openGraph: {

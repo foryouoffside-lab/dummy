@@ -1,4 +1,5 @@
 import ReactionTimeTestWrapper from './ReactionTimeTestWrapper';
+import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
 
 // ============================================================
@@ -36,12 +37,15 @@ export const metadata = {
     description: 'Measure your visual reaction latency in milliseconds. Simple, free, browser-based reflex test with no downloads.',
   },
   robots: { index: true, follow: true },
-  // Intentionally omit hreflang until localized routes exist for this path:
-  // there is no /pt, /es, /ja, /de or /ko page for it -- emitting hreflang
-  // would advertise locale URLs that 404. Add it back only together with the
-  // locale pages themselves.
+  // hreflang is emitted again now that ko and ja locale pages exist for this route.
+  // getAlternateLanguages() is route-aware -- it consults ROUTE_LOCALES and so
+  // lists only the locales that actually have a page.js, never the full six.
+  // Keep this in step with the locale pages: hreflang must be reciprocal, and
+  // the localized pages already point back here, so dropping it silently voids
+  // the annotation on both sides.
   alternates: {
     canonical: 'https://skilldrills.online/drills/reaction-speed/reaction-time-test',
+    languages: getAlternateLanguages('/drills/reaction-speed/reaction-time-test'),
   },
 };
 
