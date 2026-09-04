@@ -21,7 +21,7 @@
 //     earn or realistically can earn, measured in Search Console.
 
 import { DRILLS } from '../lib/drillsRegistry';
-import { LOCALES, DEFAULT_LOCALE, LOCALIZED_ROUTES } from '../lib/i18n/locales';
+import { LOCALES, DEFAULT_LOCALE, LOCALIZED_ROUTES, hasLocalizedRoute } from '../lib/i18n/locales';
 
 const BASE_URL = 'https://skilldrills.online';
 
@@ -148,18 +148,22 @@ export default async function sitemap() {
     '/drills': 0.9,
     '/drills/fps': 0.9,
     '/drills/motor/movement-speed/rapid-tapping': 0.9,
+    '/drills/reaction-speed/reaction-time-test': 0.9,
+    '/drills/reaction-speed/reflex-training-drill': 0.85,
   };
   const localizedEntries = LOCALES
     .filter((loc) => loc !== DEFAULT_LOCALE)
     .flatMap((loc) =>
-      LOCALIZED_ROUTES.map((route) =>
-        entry(
-          route === '/' ? '/' + loc : '/' + loc + route,
-          UPDATED.localized,
-          'weekly',
-          LOCALIZED_PRIORITY[route] ?? 0.8
+      LOCALIZED_ROUTES
+        .filter((route) => hasLocalizedRoute(loc, route))
+        .map((route) =>
+          entry(
+            route === '/' ? '/' + loc : '/' + loc + route,
+            UPDATED.localized,
+            'weekly',
+            LOCALIZED_PRIORITY[route] ?? 0.8
+          )
         )
-      )
     );
 
   const drillEntries = DRILLS.map((drill) =>

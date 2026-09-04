@@ -219,7 +219,7 @@ export default function ReactionTimeTestClient() {
     drillAudio.init();
 
     const saved = getSavedData();
-    const startLevel = getStartLevel(saved.bestLevel);
+    const startLevel = getStartLevel();
 
     setUiScore(0);
     setUiRounds(0);

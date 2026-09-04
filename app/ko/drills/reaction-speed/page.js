@@ -2,16 +2,15 @@ import ReactionSpeedDrillsClient from '@/app/drills/reaction-speed/ReactionSpeed
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 
 export const metadata = {
-  title: '반응속도 테스트 - 밀리초 단위 온라인 반응속도 측정기',
-  description: '시각 반응 시간과 반사 신경을 1ms 단위로 정밀 측정하세요. 프로게이머 벤치마크 및 등급표 제공.',
-  keywords: ['반응속도 테스트', '반응속도 측정 사이트', '인간 반응속도 벤치마크', '반응속도 ms', '게이머 반응속도'],
+  title: '반응속도 훈련 및 테스트 - 반사신경 종합 트레이닝 허브 | SkillDrills',
+  description: '단순 반응 시간부터 다중 타깃 반사 신경, 동체 추적까지 8가지 온라인 반응속도 훈련 프로그램을 무료로 시작하세요.',
   alternates: {
     canonical: 'https://skilldrills.online/ko/drills/reaction-speed',
     languages: getAlternateLanguages('/ko/drills/reaction-speed'),
   },
   openGraph: {
-    title: '반응속도 테스트 - 밀리초 단위 온라인 반응속도 측정기',
-    description: '시각 반응 시간과 반사 신경을 1ms 단위로 정밀 측정하세요. 프로게이머 벤치마크 및 등급표 제공.',
+    title: '반응속도 훈련 및 테스트 - 반사신경 종합 트레이닝 허브 | SkillDrills',
+    description: '단순 반응 시간부터 다중 타깃 반사 신경, 동체 추적까지 8가지 온라인 반응속도 훈련 프로그램을 무료로 시작하세요.',
     url: 'https://skilldrills.online/ko/drills/reaction-speed',
     locale: 'ko_KR',
     type: 'website',

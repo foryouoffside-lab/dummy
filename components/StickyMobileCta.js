@@ -2,8 +2,10 @@
 
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
+import { useTranslation } from '@/lib/i18n/useTranslation';
 
 export default function StickyMobileCta({ href, label = 'Start Recommended Drill', categoryName }) {
+  const { t } = useTranslation();
   return (
     <div className="fixed bottom-0 left-0 right-0 p-3 bg-canvas/90 backdrop-blur-xl border-t border-hairline lg:hidden z-40 shadow-2xl">
       <div className="max-w-md mx-auto flex items-center justify-between gap-3">
@@ -12,7 +14,7 @@ export default function StickyMobileCta({ href, label = 'Start Recommended Drill
             {categoryName ? `${categoryName} Hub` : 'SkillDrills'}
           </span>
           <span className="text-xs font-semibold text-ink-1 truncate block">
-            Ready to train?
+            {t('hubs.reaction-speed.readyToTrain', 'Ready to train?')}
           </span>
         </div>
         <Link

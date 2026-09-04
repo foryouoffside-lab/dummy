@@ -21,6 +21,11 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { ChevronLeft, ChevronRight, Clock, Play, LayoutGrid, Rows3 } from 'lucide-react';
+import DrillPreview from '@/components/drill/DrillPreview';
+import { getDrillPreview } from '@/lib/drillPreviews';
+import { useTranslation } from '@/lib/i18n/useTranslation';
+import { hasLocalizedRoute } from '@/lib/i18n/locales';
+import { getLocalizedDrill } from '@/lib/i18n/drillNames';
 
 // Tailwind scans source for complete class strings, so each accent spells its
 // classes out in full. Do not build these by interpolation.
@@ -112,32 +117,71 @@ function difficultyChip(difficulty) {
  */
 function DrillCard({ drill, accent, icon: Icon, className = '' }) {
   const a = ACCENTS[accent] || ACCENTS.violet;
+  const hasPreview = Boolean(getDrillPreview(drill.href));
+  // drill.href is the canonical English route and stays that way: it is the
+  // lookup key for the preview registry and the React key. Only the link the
+  // visitor follows is localized.
+  //
+  // hasLocalizedRoute, not localizeHref, decides that. localizeHref degrades to
+  // the nearest localized ancestor, and since no drill page is translated yet
+  // every card on /ko/drills/reaction-speed would resolve to that same hub --
+  // a card that silently reloads the page it is on. Falling back to the English
+  // href keeps the drill reachable and playable. Once a drill gains a locale
+  // page and an entry in LOCALIZED_ROUTES, this starts pointing at it with no
+  // further change here.
+  const { locale, localizeHref, t } = useTranslation();
+  const href = hasLocalizedRoute(locale, drill.href) ? localizeHref(drill.href) : drill.href;
+  const localized = getLocalizedDrill(drill.href, locale, drill.name, drill.tagline);
+  const displayName = localized.name;
+  const displayTagline = localized.tagline;
+
   return (
     <Link
-      href={drill.href}
+      href={href}
       className={`group flex flex-col justify-between rounded-2xl border border-hairline bg-surface-1 p-5 shadow-lg transition-all duration-200 hover:-translate-y-1 focus:outline-none focus-visible:ring-2 ${a.hoverBorder} ${a.focus} ${className}`}
     >
       <div>
-        <div className="flex items-center justify-between gap-2 mb-3.5">
-          <span className={`inline-flex items-center justify-center w-9 h-9 rounded-xl border ${a.chip}`}>
-            {Icon ? <Icon className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-          </span>
-          <span className="flex items-center gap-1.5 shrink-0">
-            {drill.badge && (
-              <span className={`px-2 py-0.5 rounded-full border text-[9px] font-mono font-bold tracking-wider ${a.chip}`}>
-                {drill.badge}
+        {hasPreview ? (
+          <div className="relative mb-3.5">
+            <DrillPreview href={drill.href} accent={accent} icon={Icon} className="w-full" />
+            <div className="absolute top-2.5 left-2.5 z-10">
+              <span className={`inline-flex items-center justify-center w-8 h-8 rounded-lg border backdrop-blur-md bg-surface-1/80 ${a.chip} shadow-sm`}>
+                {Icon ? <Icon className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
               </span>
-            )}
-            <span className={`px-2 py-0.5 rounded-full border text-[9px] font-mono font-bold uppercase tracking-wider ${difficultyChip(drill.difficulty)}`}>
-              {drill.difficulty}
+            </div>
+            <div className="absolute top-2.5 right-2.5 z-10 flex items-center gap-1.5">
+              {drill.badge && (
+                <span className={`px-2 py-0.5 rounded-full border text-[9px] font-mono font-bold tracking-wider backdrop-blur-md bg-surface-1/80 ${a.chip}`}>
+                  {drill.badge}
+                </span>
+              )}
+              <span className={`px-2 py-0.5 rounded-full border text-[9px] font-mono font-bold uppercase tracking-wider backdrop-blur-md bg-surface-1/80 ${difficultyChip(drill.difficulty)}`}>
+                {drill.difficulty ? t(`ui.difficulty.${drill.difficulty.toLowerCase()}`, drill.difficulty) : drill.difficulty}
+              </span>
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-center justify-between gap-2 mb-3.5">
+            <span className={`inline-flex items-center justify-center w-9 h-9 rounded-xl border ${a.chip}`}>
+              {Icon ? <Icon className="w-4 h-4" /> : <Play className="w-4 h-4" />}
             </span>
-          </span>
-        </div>
+            <span className="flex items-center gap-1.5 shrink-0">
+              {drill.badge && (
+                <span className={`px-2 py-0.5 rounded-full border text-[9px] font-mono font-bold tracking-wider ${a.chip}`}>
+                  {drill.badge}
+                </span>
+              )}
+              <span className={`px-2 py-0.5 rounded-full border text-[9px] font-mono font-bold uppercase tracking-wider ${difficultyChip(drill.difficulty)}`}>
+                {drill.difficulty ? t(`ui.difficulty.${drill.difficulty.toLowerCase()}`, drill.difficulty) : drill.difficulty}
+              </span>
+            </span>
+          </div>
+        )}
 
         <h3 className={`text-[15px] font-bold text-ink-1 tracking-tight truncate transition-colors ${a.hoverText}`}>
-          {drill.name}
+          {displayName}
         </h3>
-        <p className="mt-1 text-xs text-ink-3 truncate">{drill.tagline}</p>
+        <p className="mt-1 text-xs text-ink-3 truncate">{displayTagline}</p>
       </div>
 
       <div className="mt-4 pt-3 border-t border-hairline flex items-center justify-between text-2xs font-mono text-ink-3">
@@ -146,7 +190,7 @@ function DrillCard({ drill, accent, icon: Icon, className = '' }) {
           <span className="truncate">{drill.duration}</span>
         </span>
         <span className={`inline-flex items-center gap-1 font-bold uppercase tracking-wider ${a.text}`}>
-          Play
+          {t('ui.play', 'Play')}
           <Play className="w-3 h-3 fill-current transition-transform group-hover:translate-x-0.5" />
         </span>
       </div>
@@ -162,6 +206,7 @@ export default function DrillCarousel({
   headingId,
   allLabel = 'View all',
 }) {
+  const { t } = useTranslation();
   const trackRef = useRef(null);
   const [showAll, setShowAll] = useState(false);
   const [index, setIndex] = useState(0);
@@ -235,7 +280,7 @@ export default function DrillCarousel({
             aria-pressed={showAll}
           >
             {showAll ? <Rows3 className="w-3.5 h-3.5" /> : <LayoutGrid className="w-3.5 h-3.5" />}
-            <span className="hidden sm:inline">{showAll ? 'One at a time' : allLabel}</span>
+            <span className="hidden sm:inline">{showAll ? t('ui.oneAtATime', 'One at a time') : allLabel}</span>
           </button>
 
           {!showAll && arrowsUseful && (
@@ -245,7 +290,7 @@ export default function DrillCarousel({
                 onClick={() => go(-1)}
                 disabled={atStart}
                 className={arrowClass(atStart)}
-                aria-label="Previous drill"
+                aria-label={t('ui.prevDrill', 'Previous drill')}
               >
                 <ChevronLeft className="w-5 h-5" />
               </button>
@@ -254,7 +299,7 @@ export default function DrillCarousel({
                 onClick={() => go(1)}
                 disabled={atEnd}
                 className={arrowClass(atEnd)}
-                aria-label="Next drill"
+                aria-label={t('ui.nextDrill', 'Next drill')}
               >
                 <ChevronRight className="w-5 h-5" />
               </button>

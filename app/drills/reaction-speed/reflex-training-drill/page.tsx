@@ -1,4 +1,5 @@
 import ReflexTrainingDrillWrapper from './ReflexTrainingDrillWrapper';
+import { getAlternateLanguages } from '@/lib/i18n/locales';
 
 // ============================================================
 // SEO RESEARCH FINDINGS — reflex-training-drill
@@ -24,6 +25,7 @@ export const metadata = {
   ],
   alternates: {
     canonical: 'https://skilldrills.online/drills/reaction-speed/reflex-training-drill',
+    languages: getAlternateLanguages('/drills/reaction-speed/reflex-training-drill'),
   },
   robots: { index: true, follow: true },
   openGraph: {

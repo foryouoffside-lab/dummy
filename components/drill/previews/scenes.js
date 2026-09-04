@@ -1,0 +1,3295 @@
+// components/drill/previews/scenes.js
+// Pure canvas draw functions for drill card previews.
+// Each scene is a deterministic, time-based loop (2.5–3.6s) representing
+// the drill's real mechanic in miniature.
+
+function drawSubtleGrid(ctx, w, h, dimColor) {
+  ctx.strokeStyle = dimColor || 'rgba(255, 255, 255, 0.04)';
+  ctx.lineWidth = 1;
+  const step = 26;
+  ctx.beginPath();
+  for (let x = step; x < w; x += step) {
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, h);
+  }
+  for (let y = step; y < h; y += step) {
+    ctx.moveTo(0, y);
+    ctx.lineTo(w, y);
+  }
+  ctx.stroke();
+}
+
+function drawCrosshair(ctx, x, y, size = 6, color = '#ffffff') {
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  // Horizontal with center gap
+  ctx.moveTo(x - size, y);
+  ctx.lineTo(x - 2, y);
+  ctx.moveTo(x + 2, y);
+  ctx.lineTo(x + size, y);
+  // Vertical with center gap
+  ctx.moveTo(x, y - size);
+  ctx.lineTo(x, y - 2);
+  ctx.moveTo(x, y + 2);
+  ctx.lineTo(x, y + size);
+  ctx.stroke();
+
+  // Micro center dot
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.arc(x, y, 0.9, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function drawHitRing(ctx, x, y, radius, color, alpha) {
+  if (alpha <= 0.01) return;
+  ctx.strokeStyle = color;
+  ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.arc(x, y, radius, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.globalAlpha = 1.0;
+}
+
+// Ease in-out cubic
+function easeInOutCubic(x) {
+  return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+}
+
+export const SCENES = {
+  // 1. REFLEX: Idle beat, sudden flash, reactive snap & tap (reaction-time-test)
+  reflex: {
+    id: 'reflex',
+    label: 'Reflex Trigger',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 1000) % 3000;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const cx = w * 0.5;
+      const cy = h * 0.5;
+      const flashStart = 1100;
+      const hitTime = 1420;
+      const isLit = cycle >= flashStart && cycle < hitTime + 700;
+
+      // Outer dashed orbital ring
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(cycle * 0.001);
+      ctx.strokeStyle = isLit ? accent : 'rgba(255, 255, 255, 0.12)';
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([6, 8]);
+      ctx.beginPath();
+      ctx.arc(0, 0, 24, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+
+      // Center orb
+      ctx.beginPath();
+      ctx.arc(cx, cy, isLit ? 11 : 7, 0, Math.PI * 2);
+      ctx.fillStyle = isLit ? accent : 'rgba(255, 255, 255, 0.25)';
+      ctx.fill();
+
+      // Hit ripple
+      if (cycle >= hitTime && cycle < hitTime + 650) {
+        const p = (cycle - hitTime) / 650;
+        drawHitRing(ctx, cx, cy, 11 + p * 30, accent, 1 - p);
+      }
+
+      // Crosshair: arrives around hitTime
+      let chX = cx;
+      let chY = cy;
+      if (cycle < flashStart) {
+        chX = cx + Math.sin(cycle * 0.002) * 16;
+        chY = cy + Math.cos(cycle * 0.002) * 10;
+      } else if (cycle < hitTime) {
+        const snapP = (cycle - flashStart) / (hitTime - flashStart);
+        const startX = cx + 16;
+        const startY = cy + 10;
+        chX = startX + (cx - startX) * easeInOutCubic(snapP);
+        chY = startY + (cy - startY) * easeInOutCubic(snapP);
+      }
+      drawCrosshair(ctx, chX, chY, 7, '#ffffff');
+    }
+  },
+
+  // 2. BURST: Multiple targets flash simultaneously, cleared in quick succession (reflex-training-drill)
+  burst: {
+    id: 'burst',
+    label: 'Burst Targets',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 1200) % 3200;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const targets = [
+        { x: w * 0.28, y: h * 0.36, hitAt: 800 },
+        { x: w * 0.74, y: h * 0.34, hitAt: 1600 },
+        { x: w * 0.50, y: h * 0.68, hitAt: 2400 },
+      ];
+
+      // Draw active targets
+      targets.forEach((tgt) => {
+        if (cycle < tgt.hitAt) {
+          // Shrinking countdown TTL ring
+          const ttlProgress = Math.max(0, (tgt.hitAt - cycle) / tgt.hitAt);
+          ctx.strokeStyle = accent;
+          ctx.lineWidth = 1.2;
+          ctx.beginPath();
+          ctx.arc(tgt.x, tgt.y, 8 + ttlProgress * 12, 0, Math.PI * 2);
+          ctx.stroke();
+
+          // Target core disc
+          ctx.fillStyle = accent;
+          ctx.beginPath();
+          ctx.arc(tgt.x, tgt.y, 7, 0, Math.PI * 2);
+          ctx.fill();
+        } else if (cycle < tgt.hitAt + 400) {
+          // Burst ripple
+          const p = (cycle - tgt.hitAt) / 400;
+          drawHitRing(ctx, tgt.x, tgt.y, 7 + p * 20, accent, 1 - p);
+        }
+      });
+
+      // Crosshair tracking between targets
+      let chX = w * 0.5;
+      let chY = h * 0.5;
+      if (cycle < targets[0].hitAt) {
+        const p = Math.min(1, cycle / targets[0].hitAt);
+        const ep = easeInOutCubic(p);
+        chX = (w * 0.5) + (targets[0].x - w * 0.5) * ep;
+        chY = (h * 0.5) + (targets[0].y - h * 0.5) * ep;
+      } else if (cycle < targets[1].hitAt) {
+        const p = (cycle - targets[0].hitAt) / (targets[1].hitAt - targets[0].hitAt);
+        const ep = easeInOutCubic(p);
+        chX = targets[0].x + (targets[1].x - targets[0].x) * ep;
+        chY = targets[0].y + (targets[1].y - targets[0].y) * ep;
+      } else if (cycle < targets[2].hitAt) {
+        const p = (cycle - targets[1].hitAt) / (targets[2].hitAt - targets[1].hitAt);
+        const ep = easeInOutCubic(p);
+        chX = targets[1].x + (targets[2].x - targets[1].x) * ep;
+        chY = targets[1].y + (targets[2].y - targets[1].y) * ep;
+      } else {
+        const p = (cycle - targets[2].hitAt) / (3200 - targets[2].hitAt);
+        const ep = easeInOutCubic(p);
+        chX = targets[2].x + (w * 0.5 - targets[2].x) * ep;
+        chY = targets[2].y + (h * 0.5 - targets[2].y) * ep;
+      }
+      drawCrosshair(ctx, chX, chY, 6, '#ffffff');
+    }
+  },
+
+  // 3. SACCADIC: Ballistic saccadic eye shifts jumping across a grid of nodes (saccadic-gallery)
+  saccadic: {
+    id: 'saccadic',
+    label: 'Saccadic Gallery',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 900) % 3000;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const cols = 4;
+      const rows = 3;
+      const marginX = w * 0.16;
+      const marginY = h * 0.22;
+      const stepX = (w - marginX * 2) / (cols - 1);
+      const stepY = (h - marginY * 2) / (rows - 1);
+
+      // Draw subtle gallery node slots
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.10)';
+      for (let c = 0; c < cols; c++) {
+        for (let r = 0; r < rows; r++) {
+          ctx.beginPath();
+          ctx.arc(marginX + c * stepX, marginY + r * stepY, 2.5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      // Three jump stages
+      const stages = [
+        { c: 1, r: 1, start: 0, hit: 650, end: 950 },
+        { c: 3, r: 2, start: 1000, hit: 1650, end: 1950 },
+        { c: 0, r: 0, start: 2000, hit: 2650, end: 2950 },
+      ];
+
+      let chX = w * 0.5;
+      let chY = h * 0.5;
+
+      stages.forEach((stg, idx) => {
+        const tx = marginX + stg.c * stepX;
+        const ty = marginY + stg.r * stepY;
+
+        if (cycle >= stg.start && cycle < stg.end) {
+          // Target glows at node
+          ctx.fillStyle = accent;
+          ctx.beginPath();
+          ctx.arc(tx, ty, 8, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Target outer pulse
+          ctx.strokeStyle = accent;
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.arc(tx, ty, 13, 0, Math.PI * 2);
+          ctx.stroke();
+
+          // Hit ripple
+          if (cycle >= stg.hit) {
+            const p = (cycle - stg.hit) / (stg.end - stg.hit);
+            drawHitRing(ctx, tx, ty, 8 + p * 20, accent, 1 - p);
+          }
+
+          // Crosshair snap to target
+          const prev = idx === 0
+            ? { x: marginX + stages[2].c * stepX, y: marginY + stages[2].r * stepY }
+            : { x: marginX + stages[idx - 1].c * stepX, y: marginY + stages[idx - 1].r * stepY };
+          const p = Math.min(1, (cycle - stg.start) / (stg.hit - stg.start));
+          const ep = easeInOutCubic(p);
+          chX = prev.x + (tx - prev.x) * ep;
+          chY = prev.y + (ty - prev.y) * ep;
+        }
+      });
+
+      drawCrosshair(ctx, chX, chY, 6, '#ffffff');
+    }
+  },
+
+  // 4. TRACK: Target executing erratic horizontal strafing while crosshair stays glued (fps-tracking-trainer)
+  track: {
+    id: 'track',
+    label: 'Tracking Trainer',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 1100) % 3600;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const p = cycle / 3600;
+      // Multi-harmonic horizontal strafing curve
+      const tgtX = w * 0.5 + Math.sin(p * Math.PI * 2) * (w * 0.32) + Math.sin(p * Math.PI * 6) * (w * 0.08);
+      const tgtY = h * 0.5 + Math.cos(p * Math.PI * 4) * (h * 0.12);
+
+      // Target tail trail
+      ctx.strokeStyle = dim || 'rgba(255, 255, 255, 0.15)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(tgtX - 18 * Math.cos(p * Math.PI * 2), tgtY);
+      ctx.lineTo(tgtX, tgtY);
+      ctx.stroke();
+
+      // Target orb
+      ctx.fillStyle = accent;
+      ctx.beginPath();
+      ctx.arc(tgtX, tgtY, 8, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Subtle target outer ring
+      ctx.strokeStyle = accent;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(tgtX, tgtY, 14, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Crosshair tracking with slight lag
+      const lagP = (cycle - 35) / 3600;
+      const chX = w * 0.5 + Math.sin(lagP * Math.PI * 2) * (w * 0.32) + Math.sin(lagP * Math.PI * 6) * (w * 0.08);
+      const chY = h * 0.5 + Math.cos(lagP * Math.PI * 4) * (h * 0.12);
+
+      drawCrosshair(ctx, chX, chY, 7, '#ffffff');
+    }
+  },
+
+  // 5. DASH: Target glides smoothly, sudden high-speed burst dash, crosshair snaps and catches (visual-tracking-speed-test)
+  dash: {
+    id: 'dash',
+    label: 'Tracking Dash',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 1300) % 3200;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      let tgtX = w * 0.25;
+      let tgtY = h * 0.5;
+      let chX = tgtX;
+      let chY = tgtY;
+      let isDashing = false;
+      const hitAt = 1850;
+
+      if (cycle < 1000) {
+        // Slow glide from left
+        const p = cycle / 1000;
+        tgtX = w * 0.22 + p * (w * 0.20);
+        tgtY = h * 0.48 + Math.sin(p * Math.PI) * 8;
+        chX = tgtX;
+        chY = tgtY;
+      } else if (cycle < 1450) {
+        // Sudden high-speed dash across screen
+        isDashing = true;
+        const p = (cycle - 1000) / 450;
+        const ep = p * p; // rapid acceleration
+        tgtX = w * 0.42 + ep * (w * 0.40);
+        tgtY = h * 0.48 + Math.sin(p * Math.PI * 2) * 16;
+        // Crosshair falls slightly behind during dash
+        chX = w * 0.42 + (ep * 0.7) * (w * 0.40);
+        chY = tgtY;
+      } else if (cycle < hitAt) {
+        // Crosshair catches up to target
+        tgtX = w * 0.82;
+        tgtY = h * 0.48;
+        const p = (cycle - 1450) / (hitAt - 1450);
+        const ep = easeInOutCubic(p);
+        const startChX = w * 0.42 + 0.7 * (w * 0.40);
+        chX = startChX + (tgtX - startChX) * ep;
+        chY = tgtY;
+      } else {
+        // Post-hit glide back to left
+        const p = (cycle - hitAt) / (3200 - hitAt);
+        const ep = easeInOutCubic(p);
+        tgtX = w * 0.82 - ep * (w * 0.60);
+        tgtY = h * 0.48 + Math.sin(p * Math.PI) * 10;
+        chX = tgtX;
+        chY = tgtY;
+      }
+
+      // Motion speed lines during dash
+      if (isDashing) {
+        ctx.strokeStyle = accent;
+        ctx.lineWidth = 1.5;
+        ctx.globalAlpha = 0.5;
+        ctx.beginPath();
+        ctx.moveTo(tgtX - 35, tgtY);
+        ctx.lineTo(tgtX - 8, tgtY);
+        ctx.stroke();
+        ctx.globalAlpha = 1.0;
+      }
+
+      // Target
+      ctx.fillStyle = accent;
+      ctx.beginPath();
+      ctx.arc(tgtX, tgtY, 8, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Hit ripple on catch
+      if (cycle >= hitAt && cycle < hitAt + 450) {
+        const p = (cycle - hitAt) / 450;
+        drawHitRing(ctx, tgtX, tgtY, 8 + p * 24, accent, 1 - p);
+      }
+
+      drawCrosshair(ctx, chX, chY, 7, '#ffffff');
+    }
+  },
+
+  // 6. LANES: Targets dropping along parallel vertical lanes, clicked before baseline (reaction-simulator)
+  lanes: {
+    id: 'lanes',
+    label: 'Parallel Lanes',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 950) % 3200;
+
+      // Draw 4 vertical lanes
+      const laneCount = 4;
+      const laneWidth = w / laneCount;
+      ctx.strokeStyle = dim || 'rgba(255, 255, 255, 0.05)';
+      ctx.lineWidth = 1;
+      for (let i = 1; i < laneCount; i++) {
+        ctx.beginPath();
+        ctx.setLineDash([4, 6]);
+        ctx.moveTo(i * laneWidth, 0);
+        ctx.lineTo(i * laneWidth, h);
+        ctx.stroke();
+      }
+      ctx.setLineDash([]);
+
+      // Baseline limit near bottom
+      const baselineY = h * 0.84;
+      ctx.strokeStyle = 'rgba(239, 68, 68, 0.35)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, baselineY);
+      ctx.lineTo(w, baselineY);
+      ctx.stroke();
+
+      // Drop 1: Lane 1 (x: laneWidth * 1.5)
+      const hit1 = 1350;
+      const drop1Y = (cycle / hit1) * baselineY;
+      const drop1X = laneWidth * 1.5;
+
+      // Drop 2: Lane 3 (x: laneWidth * 3.5)
+      const hit2 = 2750;
+      const drop2Start = 1400;
+      const drop2Y = ((cycle - drop2Start) / (hit2 - drop2Start)) * baselineY;
+      const drop2X = laneWidth * 3.5;
+
+      let chX = laneWidth * 1.5;
+      let chY = h * 0.5;
+
+      if (cycle < hit1) {
+        // Target 1 falling
+        ctx.fillStyle = accent;
+        ctx.beginPath();
+        ctx.arc(drop1X, drop1Y, 7.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Crosshair tracks down to intercept
+        chX = drop1X;
+        chY = Math.max(h * 0.3, drop1Y);
+      } else if (cycle < hit1 + 350) {
+        // Hit 1 ripple
+        const p = (cycle - hit1) / 350;
+        drawHitRing(ctx, drop1X, baselineY, 7.5 + p * 18, accent, 1 - p);
+      }
+
+      if (cycle >= drop2Start && cycle < hit2) {
+        // Target 2 falling
+        ctx.fillStyle = accent;
+        ctx.beginPath();
+        ctx.arc(drop2X, drop2Y, 7.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Crosshair sweeps to Lane 3 and intercepts
+        const sweepP = Math.min(1, (cycle - drop2Start) / 400);
+        chX = drop1X + (drop2X - drop1X) * easeInOutCubic(sweepP);
+        chY = Math.max(h * 0.3, drop2Y);
+      } else if (cycle >= hit2 && cycle < hit2 + 350) {
+        // Hit 2 ripple
+        const p = (cycle - hit2) / 350;
+        drawHitRing(ctx, drop2X, baselineY, 7.5 + p * 18, accent, 1 - p);
+      }
+
+      drawCrosshair(ctx, chX, chY, 6, '#ffffff');
+    }
+  },
+
+  // 7. DOORS: Saccadic sweeps across 5 centered doorways catching flashing targets (market-doors-pursuit)
+  doors: {
+    id: 'doors',
+    label: 'Market Doors',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 1050) % 3200;
+
+      const doorCount = 5;
+      const doorW = w * 0.14;
+      const doorH = h * 0.55;
+      const doorY = h * 0.26;
+      const totalW = doorCount * doorW + (doorCount - 1) * 8;
+      const startX = (w - totalW) * 0.5;
+
+      // Draw doorways
+      for (let i = 0; i < doorCount; i++) {
+        const dx = startX + i * (doorW + 8);
+        ctx.fillStyle = dim || 'rgba(255, 255, 255, 0.03)';
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.09)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.roundRect(dx, doorY, doorW, doorH, 4);
+        ctx.fill();
+        ctx.stroke();
+      }
+
+      // Door 1 target flash (Door index 1)
+      const door1X = startX + 1 * (doorW + 8) + doorW * 0.5;
+      const door1Y = doorY + doorH * 0.45;
+      const hit1 = 1200;
+
+      // Door 2 target flash (Door index 3)
+      const door2X = startX + 3 * (doorW + 8) + doorW * 0.5;
+      const door2Y = doorY + doorH * 0.45;
+      const hit2 = 2600;
+
+      let chX = w * 0.5;
+      let chY = doorY + doorH * 0.5;
+
+      if (cycle < hit1) {
+        // Target flashes inside door 1
+        ctx.fillStyle = accent;
+        ctx.beginPath();
+        ctx.arc(door1X, door1Y, 7, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Crosshair sweeps to door 1
+        const p = Math.min(1, cycle / hit1);
+        chX = (w * 0.5) + (door1X - w * 0.5) * easeInOutCubic(p);
+        chY = door1Y;
+      } else if (cycle < hit1 + 350) {
+        const p = (cycle - hit1) / 350;
+        drawHitRing(ctx, door1X, door1Y, 7 + p * 16, accent, 1 - p);
+      }
+
+      if (cycle >= 1400 && cycle < hit2) {
+        // Target flashes inside door 3
+        ctx.fillStyle = accent;
+        ctx.beginPath();
+        ctx.arc(door2X, door2Y, 7, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Crosshair sweeps across to door 3
+        const p = Math.min(1, (cycle - 1400) / (hit2 - 1400));
+        chX = door1X + (door2X - door1X) * easeInOutCubic(p);
+        chY = door2Y;
+      } else if (cycle >= hit2 && cycle < hit2 + 350) {
+        const p = (cycle - hit2) / 350;
+        drawHitRing(ctx, door2X, door2Y, 7 + p * 16, accent, 1 - p);
+      }
+
+      drawCrosshair(ctx, chX, chY, 6, '#ffffff');
+    }
+  },
+
+  // 8. PEEK: Jiggle peeking behind tactical corner barriers (barrier-sequence-pursuit)
+  peek: {
+    id: 'peek',
+    label: 'Barrier Peek',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 1150) % 3200;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      // Left and Right tactical cover pillars
+      const b1 = { x: w * 0.22, y: h * 0.20, w: w * 0.12, h: h * 0.60 };
+      const b2 = { x: w * 0.66, y: h * 0.20, w: w * 0.12, h: h * 0.60 };
+
+      // Phase 1: Target peeks from right edge of Left Barrier
+      const peek1At = 500;
+      const hit1 = 1200;
+      let tgt1X = b1.x + b1.w;
+      const tgt1Y = b1.y + b1.h * 0.45;
+
+      // Phase 2: Target peeks from left edge of Right Barrier
+      const peek2At = 1900;
+      const hit2 = 2600;
+      let tgt2X = b2.x;
+      const tgt2Y = b2.y + b2.h * 0.50;
+
+      let chX = w * 0.5;
+      let chY = h * 0.5;
+
+      // Draw peek targets (behind barriers)
+      if (cycle >= peek1At && cycle < hit1 + 300) {
+        if (cycle < hit1) {
+          const p = (cycle - peek1At) / (hit1 - peek1At);
+          tgt1X = b1.x + b1.w + Math.sin(p * Math.PI) * 14;
+          ctx.fillStyle = accent;
+          ctx.beginPath();
+          ctx.arc(tgt1X, tgt1Y, 7, 0, Math.PI * 2);
+          ctx.fill();
+
+          const snapP = Math.min(1, (cycle - peek1At) / 450);
+          chX = (w * 0.5) + (tgt1X - w * 0.5) * easeInOutCubic(snapP);
+          chY = tgt1Y;
+        } else {
+          const p = (cycle - hit1) / 300;
+          drawHitRing(ctx, tgt1X, tgt1Y, 7 + p * 16, accent, 1 - p);
+        }
+      }
+
+      if (cycle >= peek2At && cycle < hit2 + 300) {
+        if (cycle < hit2) {
+          const p = (cycle - peek2At) / (hit2 - peek2At);
+          tgt2X = b2.x - Math.sin(p * Math.PI) * 14;
+          ctx.fillStyle = accent;
+          ctx.beginPath();
+          ctx.arc(tgt2X, tgt2Y, 7, 0, Math.PI * 2);
+          ctx.fill();
+
+          const snapP = Math.min(1, (cycle - peek2At) / 450);
+          chX = tgt1X + (tgt2X - tgt1X) * easeInOutCubic(snapP);
+          chY = tgt2Y;
+        } else {
+          const p = (cycle - hit2) / 300;
+          drawHitRing(ctx, tgt2X, tgt2Y, 7 + p * 16, accent, 1 - p);
+        }
+      }
+
+      // Draw barrier pillars over peek targets to show cover
+      [b1, b2].forEach((b) => {
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.18)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.roundRect(b.x, b.y, b.w, b.h, 6);
+        ctx.fill();
+        ctx.stroke();
+
+        // Pillar accent grip stripes
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+        ctx.beginPath();
+        ctx.moveTo(b.x + 4, b.y + b.h * 0.35);
+        ctx.lineTo(b.x + b.w - 4, b.y + b.h * 0.35);
+        ctx.moveTo(b.x + 4, b.y + b.h * 0.65);
+        ctx.lineTo(b.x + b.w - 4, b.y + b.h * 0.65);
+        ctx.stroke();
+      });
+
+      drawCrosshair(ctx, chX, chY, 6, '#ffffff');
+    }
+  },
+
+  // 9. FLICK: Classic flick shot snap target to target with hit ring (flick-shot-training)
+  flick: {
+    id: 'flick',
+    label: 'Flick Shot',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 800) % 2800;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const cx = w * 0.5;
+      const cy = h * 0.5;
+      const hitAt = 1200;
+      const tx = w * 0.72;
+      const ty = h * 0.35;
+
+      // Target
+      if (cycle < hitAt) {
+        ctx.fillStyle = accent;
+        ctx.beginPath();
+        ctx.arc(tx, ty, 8, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = accent;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(tx, ty, 13, 0, Math.PI * 2);
+        ctx.stroke();
+      } else if (cycle < hitAt + 450) {
+        const p = (cycle - hitAt) / 450;
+        drawHitRing(ctx, tx, ty, 8 + p * 24, accent, 1 - p);
+      }
+
+      // Flick snap
+      let chX = cx;
+      let chY = cy;
+      if (cycle < hitAt) {
+        const p = Math.min(1, cycle / hitAt);
+        const ep = easeInOutCubic(p);
+        chX = cx + (tx - cx) * ep;
+        chY = cy + (ty - cy) * ep;
+      } else {
+        const p = (cycle - hitAt) / (2800 - hitAt);
+        const ep = easeInOutCubic(p);
+        chX = tx + (cx - tx) * ep;
+        chY = ty + (cy - ty) * ep;
+      }
+
+      drawCrosshair(ctx, chX, chY, 7, '#ffffff');
+    }
+  },
+
+  // 10. STROOP: Word in conflicting ink color, correct color swatch chosen (distraction-fighter)
+  stroop: {
+    id: 'stroop',
+    label: 'Stroop Interference',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 900) % 3000;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const cx = w * 0.5;
+      const cy = h * 0.38;
+
+      const isPhase1 = cycle < 1500;
+      const word = isPhase1 ? 'BLUE' : 'RED';
+      const inkColor = isPhase1 ? '#ef4444' : accent;
+      const hitAt = isPhase1 ? 950 : 2450;
+
+      // Word display box
+      ctx.fillStyle = dim || 'rgba(255, 255, 255, 0.04)';
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.roundRect(cx - 42, cy - 18, 84, 36, 6);
+      ctx.fill();
+      ctx.stroke();
+
+      // Conflicting word text
+      ctx.fillStyle = inkColor;
+      ctx.font = 'bold 15px monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(word, cx, cy);
+
+      // Color swatches below: Red, Accent, Blue
+      const swatches = [
+        { x: cx - 36, y: h * 0.74, color: '#ef4444' },
+        { x: cx,      y: h * 0.74, color: accent },
+        { x: cx + 36, y: h * 0.74, color: '#3b82f6' },
+      ];
+
+      swatches.forEach((sw) => {
+        ctx.fillStyle = sw.color;
+        ctx.beginPath();
+        ctx.arc(sw.x, sw.y, 8, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      });
+
+      const targetSw = isPhase1 ? swatches[0] : swatches[1];
+
+      // Hit ring
+      if (cycle >= hitAt && cycle < hitAt + 350) {
+        const p = (cycle - hitAt) / 350;
+        drawHitRing(ctx, targetSw.x, targetSw.y, 8 + p * 16, targetSw.color, 1 - p);
+      }
+
+      // Cursor movement
+      const phaseStart = isPhase1 ? 0 : 1500;
+      const moveP = Math.min(1, (cycle - phaseStart) / (hitAt - phaseStart));
+      const ep = easeInOutCubic(moveP);
+      const startX = isPhase1 ? swatches[1].x : swatches[0].x;
+      const startY = h * 0.60;
+      const chX = startX + (targetSw.x - startX) * ep;
+      const chY = startY + (targetSw.y - startY) * ep;
+
+      drawCrosshair(ctx, chX, chY, 6, '#ffffff');
+    }
+  },
+
+  // 11. SCAN: Sweeping sequential numbers across a grid (concentration-grid)
+  scan: {
+    id: 'scan',
+    label: 'Concentration Grid',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 850) % 3200;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const gridSize = 3;
+      const cellSize = Math.min(w, h) * 0.22;
+      const startX = (w - gridSize * cellSize) * 0.5;
+      const startY = (h - gridSize * cellSize) * 0.5;
+
+      const grid = [
+        [4, 1, 8],
+        [7, 3, 2],
+        [9, 6, 5],
+      ];
+
+      const seq = [
+        { num: 1, c: 1, r: 0, hitAt: 650 },
+        { num: 2, c: 2, r: 1, hitAt: 1400 },
+        { num: 3, c: 1, r: 1, hitAt: 2150 },
+        { num: 4, c: 0, r: 0, hitAt: 2900 },
+      ];
+
+      ctx.font = 'bold 12px monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      for (let r = 0; r < gridSize; r++) {
+        for (let c = 0; c < gridSize; c++) {
+          const x = startX + c * cellSize;
+          const y = startY + r * cellSize;
+          const num = grid[r][c];
+
+          const cleared = seq.some((s) => s.num === num && cycle >= s.hitAt);
+
+          ctx.fillStyle = cleared ? 'rgba(139, 92, 246, 0.20)' : 'rgba(255, 255, 255, 0.03)';
+          ctx.strokeStyle = cleared ? accent : 'rgba(255, 255, 255, 0.10)';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.roundRect(x + 2, y + 2, cellSize - 4, cellSize - 4, 4);
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.fillStyle = cleared ? accent : 'rgba(255, 255, 255, 0.70)';
+          ctx.fillText(String(num), x + cellSize * 0.5, y + cellSize * 0.5);
+        }
+      }
+
+      let currentStep = 0;
+      if (cycle < seq[0].hitAt) currentStep = 0;
+      else if (cycle < seq[1].hitAt) currentStep = 1;
+      else if (cycle < seq[2].hitAt) currentStep = 2;
+      else currentStep = 3;
+
+      const target = seq[currentStep];
+      const prev = currentStep === 0
+        ? { c: 0, r: 2 }
+        : seq[currentStep - 1];
+
+      const stepStart = currentStep === 0 ? 0 : seq[currentStep - 1].hitAt;
+      const p = Math.min(1, (cycle - stepStart) / (target.hitAt - stepStart));
+      const ep = easeInOutCubic(p);
+
+      const fromX = startX + (prev.c + 0.5) * cellSize;
+      const fromY = startY + (prev.r + 0.5) * cellSize;
+      const toX = startX + (target.c + 0.5) * cellSize;
+      const toY = startY + (target.r + 0.5) * cellSize;
+
+      const chX = fromX + (toX - fromX) * ep;
+      const chY = fromY + (toY - fromY) * ep;
+
+      if (cycle >= target.hitAt && cycle < target.hitAt + 300) {
+        const hp = (cycle - target.hitAt) / 300;
+        drawHitRing(ctx, toX, toY, 6 + hp * 18, accent, 1 - hp);
+      }
+
+      drawCrosshair(ctx, chX, chY, 6, '#ffffff');
+    }
+  },
+
+  // 12. STREAM: RSVP speed reading word stream with focal notch (rsvp-reader)
+  stream: {
+    id: 'stream',
+    label: 'RSVP Stream',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 750) % 2800;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const words = ['FOCUS', 'SPEED', 'PULSE', 'NEURAL', 'FLOW'];
+      const wordDuration = 2800 / words.length;
+      const wordIdx = Math.floor(cycle / wordDuration);
+      const currentWord = words[Math.min(wordIdx, words.length - 1)];
+
+      const cx = w * 0.5;
+      const cy = h * 0.48;
+
+      // Optical focal frame
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(cx - 50, cy - 20);
+      ctx.lineTo(cx + 50, cy - 20);
+      ctx.moveTo(cx - 50, cy + 20);
+      ctx.lineTo(cx + 50, cy + 20);
+      ctx.stroke();
+
+      // Center vertical Optimal Recognition Point notch
+      ctx.strokeStyle = accent;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - 24);
+      ctx.lineTo(cx, cy - 16);
+      ctx.moveTo(cx, cy + 16);
+      ctx.lineTo(cx, cy + 24);
+      ctx.stroke();
+
+      // Word text
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 16px monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(currentWord, cx, cy);
+
+      // RSVP reading progress bar
+      const barW = 100;
+      const barH = 3;
+      const barX = cx - barW * 0.5;
+      const barY = cy + 32;
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+      ctx.fillRect(barX, barY, barW, barH);
+      ctx.fillStyle = accent;
+      ctx.fillRect(barX, barY, barW * (cycle / 2800), barH);
+    }
+  },
+
+  // 13. CHOICE: Choice reaction discrimination between target rules (reaction-time)
+  choice: {
+    id: 'choice',
+    label: 'Choice Discrimination',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 950) % 3000;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const cx = w * 0.5;
+      const isPhase1 = cycle < 1500;
+      const ruleText = isPhase1 ? 'TAP RED' : 'TAP BLUE';
+      const ruleColor = isPhase1 ? '#ef4444' : '#3b82f6';
+      const hitAt = isPhase1 ? 850 : 2350;
+
+      // Top rule pill
+      ctx.fillStyle = isPhase1 ? 'rgba(239, 68, 68, 0.15)' : 'rgba(59, 130, 246, 0.15)';
+      ctx.strokeStyle = ruleColor;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.roundRect(cx - 40, h * 0.14, 80, 20, 10);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = ruleColor;
+      ctx.font = 'bold 9px monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(ruleText, cx, h * 0.14 + 10);
+
+      // Two target nodes: Left & Right
+      const n1 = { x: w * 0.32, y: h * 0.60, color: isPhase1 ? '#ef4444' : '#3b82f6' };
+      const n2 = { x: w * 0.68, y: h * 0.60, color: isPhase1 ? '#3b82f6' : '#ef4444' };
+
+      const target = isPhase1 ? n1 : n1;
+
+      [n1, n2].forEach((node) => {
+        ctx.fillStyle = node.color;
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, 9, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+        ctx.lineWidth = 1.2;
+        ctx.stroke();
+      });
+
+      // Target focus ring
+      ctx.strokeStyle = accent;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(target.x, target.y, 14, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Hit ring
+      if (cycle >= hitAt && cycle < hitAt + 350) {
+        const p = (cycle - hitAt) / 350;
+        drawHitRing(ctx, target.x, target.y, 9 + p * 20, target.color, 1 - p);
+      }
+
+      // Crosshair movement
+      const phaseStart = isPhase1 ? 0 : 1500;
+      const p = Math.min(1, (cycle - phaseStart) / (hitAt - phaseStart));
+      const ep = easeInOutCubic(p);
+      const startX = isPhase1 ? n2.x : n2.x;
+      const startY = h * 0.60;
+      const chX = startX + (target.x - startX) * ep;
+      const chY = startY + (target.y - startY) * ep;
+
+      drawCrosshair(ctx, chX, chY, 6, '#ffffff');
+    }
+  },
+
+  // 14. SYMBOL-MATCH: Matching symbol ciphers to digit buttons (symbol-matching)
+  'symbol-match': {
+    id: 'symbol-match',
+    label: 'Symbol Matching',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 900) % 3000;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const cx = w * 0.5;
+      const isPhase1 = cycle < 1500;
+      const hitAt = isPhase1 ? 850 : 2350;
+
+      // Top cipher key: [Δ:1] [Ω:2] [Φ:3]
+      const keyPairs = [
+        { sym: 'Δ', digit: '1', x: cx - 44 },
+        { sym: 'Ω', digit: '2', x: cx },
+        { sym: 'Φ', digit: '3', x: cx + 44 },
+      ];
+
+      keyPairs.forEach((pair) => {
+        ctx.fillStyle = dim || 'rgba(255, 255, 255, 0.04)';
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.10)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.roundRect(pair.x - 18, h * 0.12, 36, 18, 3);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = accent;
+        ctx.font = 'bold 9px monospace';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(`${pair.sym}:${pair.digit}`, pair.x, h * 0.12 + 9);
+      });
+
+      // Prompt symbol in center
+      const promptSym = isPhase1 ? 'Ω' : 'Δ';
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 18px monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(promptSym, cx, h * 0.44);
+
+      // Response buttons below: [1] [2] [3]
+      const btns = [
+        { digit: '1', x: cx - 38, y: h * 0.74 },
+        { digit: '2', x: cx,      y: h * 0.74 },
+        { digit: '3', x: cx + 38, y: h * 0.74 },
+      ];
+
+      const targetBtn = isPhase1 ? btns[1] : btns[0];
+
+      btns.forEach((btn) => {
+        const isTarget = btn === targetBtn && cycle >= hitAt;
+        ctx.fillStyle = isTarget ? 'rgba(139, 92, 246, 0.25)' : 'rgba(255, 255, 255, 0.05)';
+        ctx.strokeStyle = isTarget ? accent : 'rgba(255, 255, 255, 0.15)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.roundRect(btn.x - 14, btn.y - 12, 28, 24, 4);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = isTarget ? accent : 'rgba(255, 255, 255, 0.8)';
+        ctx.font = 'bold 11px monospace';
+        ctx.fillText(btn.digit, btn.x, btn.y);
+      });
+
+      // Hit ring
+      if (cycle >= hitAt && cycle < hitAt + 350) {
+        const p = (cycle - hitAt) / 350;
+        drawHitRing(ctx, targetBtn.x, targetBtn.y, 10 + p * 16, accent, 1 - p);
+      }
+
+      // Cursor movement
+      const phaseStart = isPhase1 ? 0 : 1500;
+      const p = Math.min(1, (cycle - phaseStart) / (hitAt - phaseStart));
+      const ep = easeInOutCubic(p);
+      const startX = isPhase1 ? btns[0].x : btns[1].x;
+      const chX = startX + (targetBtn.x - startX) * ep;
+      const chY = targetBtn.y;
+
+      drawCrosshair(ctx, chX, chY, 6, '#ffffff');
+    }
+  },
+
+  // 15. DIVIDED: Ball tracking on left, number discrimination on right (divided-attention)
+  divided: {
+    id: 'divided',
+    label: 'Divided Attention',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 1000) % 3200;
+
+      // Vertical split divider
+      const cx = w * 0.5;
+      ctx.strokeStyle = dim || 'rgba(255, 255, 255, 0.08)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4, 6]);
+      ctx.beginPath();
+      ctx.moveTo(cx, 0);
+      ctx.lineTo(cx, h);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Left Half: Continuous ball tracking task
+      const ballCycle = cycle * 0.003;
+      const ballX = cx * 0.5 + Math.sin(ballCycle) * (cx * 0.32);
+      const ballY = h * 0.5 + Math.cos(ballCycle * 1.5) * (h * 0.22);
+
+      ctx.fillStyle = accent;
+      ctx.beginPath();
+      ctx.arc(ballX, ballY, 7, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Tracking cursor glued to left ball
+      drawCrosshair(ctx, ballX, ballY, 5, '#ffffff');
+
+      // Right Half: Number matching task
+      const numCycle = cycle % 1600;
+      const isEven = numCycle > 800;
+      const numText = isEven ? '8' : '3';
+      const rightCx = cx + (w - cx) * 0.5;
+      const rightCy = h * 0.5;
+
+      ctx.fillStyle = isEven ? 'rgba(16, 185, 129, 0.12)' : 'rgba(255, 255, 255, 0.03)';
+      ctx.strokeStyle = isEven ? '#10b981' : 'rgba(255, 255, 255, 0.12)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.roundRect(rightCx - 24, rightCy - 20, 48, 40, 6);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = isEven ? '#10b981' : 'rgba(255, 255, 255, 0.7)';
+      ctx.font = 'bold 16px monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(numText, rightCx, rightCy);
+
+      // Hit ring when even number tapped
+      if (isEven && numCycle >= 1200 && numCycle < 1550) {
+        const p = (numCycle - 1200) / 350;
+        drawHitRing(ctx, rightCx, rightCy, 12 + p * 20, '#10b981', 1 - p);
+        drawCrosshair(ctx, rightCx, rightCy, 6, '#ffffff');
+      }
+    }
+  },
+
+  // 16. DUAL-FLOW: Two opposing target streams monitored concurrently (multi-tasking)
+  'dual-flow': {
+    id: 'dual-flow',
+    label: 'Dual Stream Multitasking',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 1050) % 3400;
+
+      const lane1Y = h * 0.32;
+      const lane2Y = h * 0.68;
+
+      ctx.strokeStyle = dim || 'rgba(255, 255, 255, 0.06)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, h * 0.5);
+      ctx.lineTo(w, h * 0.5);
+      ctx.stroke();
+
+      const gateX = w * 0.5;
+      [lane1Y, lane2Y].forEach((ly) => {
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+        ctx.lineWidth = 1.2;
+        ctx.strokeRect(gateX - 16, ly - 16, 32, 32);
+      });
+
+      // Top lane flows right to left
+      const p1 = (cycle % 1700) / 1700;
+      const tgt1X = w * 0.9 - p1 * (w * 0.8);
+      const hit1 = 850;
+
+      // Bottom lane flows left to right
+      const p2 = ((cycle + 850) % 1700) / 1700;
+      const tgt2X = w * 0.1 + p2 * (w * 0.8);
+      const hit2 = 2550;
+
+      // Top target (triangle)
+      ctx.fillStyle = accent;
+      ctx.beginPath();
+      ctx.moveTo(tgt1X, lane1Y - 7);
+      ctx.lineTo(tgt1X - 7, lane1Y + 6);
+      ctx.lineTo(tgt1X + 7, lane1Y + 6);
+      ctx.closePath();
+      ctx.fill();
+
+      // Bottom target (circle)
+      ctx.fillStyle = '#10b981';
+      ctx.beginPath();
+      ctx.arc(tgt2X, lane2Y, 6.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Crosshair switches between lanes
+      let chX = gateX;
+      let chY = lane1Y;
+      if (cycle < 1700) {
+        chY = lane1Y;
+        if (cycle >= hit1 && cycle < hit1 + 350) {
+          const p = (cycle - hit1) / 350;
+          drawHitRing(ctx, gateX, lane1Y, 8 + p * 18, accent, 1 - p);
+        }
+      } else {
+        chY = lane2Y;
+        if (cycle >= hit2 && cycle < hit2 + 350) {
+          const p = (cycle - hit2) / 350;
+          drawHitRing(ctx, gateX, lane2Y, 8 + p * 18, '#10b981', 1 - p);
+        }
+      }
+
+      drawCrosshair(ctx, chX, chY, 6, '#ffffff');
+    }
+  },
+
+  // 17. RULE-SWITCH: Vigilance stamina under alternating rule sets (concentration-stamina)
+  'rule-switch': {
+    id: 'rule-switch',
+    label: 'Rule-Switching Stamina',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 950) % 3200;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const cx = w * 0.5;
+      const isPhase1 = cycle < 1600;
+      const ruleText = isPhase1 ? 'RULE: VOWEL' : 'RULE: PRIME';
+      const stim = isPhase1 ? 'A' : '7';
+      const hitAt = isPhase1 ? 950 : 2550;
+
+      // Top rule pill
+      ctx.fillStyle = dim || 'rgba(139, 92, 246, 0.15)';
+      ctx.strokeStyle = accent;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.roundRect(cx - 48, h * 0.14, 96, 20, 10);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = accent;
+      ctx.font = 'bold 9px monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(ruleText, cx, h * 0.14 + 10);
+
+      // Center stimulus card
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.04)';
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.roundRect(cx - 28, h * 0.40, 56, 44, 6);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 22px monospace';
+      ctx.fillText(stim, cx, h * 0.40 + 22);
+
+      // Hit ring when matching stimulus tapped
+      if (cycle >= hitAt && cycle < hitAt + 400) {
+        const p = (cycle - hitAt) / 400;
+        drawHitRing(ctx, cx, h * 0.40 + 22, 14 + p * 24, accent, 1 - p);
+      }
+
+      // Crosshair
+      const phaseStart = isPhase1 ? 0 : 1600;
+      const p = Math.min(1, (cycle - phaseStart) / (hitAt - phaseStart));
+      const ep = easeInOutCubic(p);
+      const startX = cx - 24;
+      const startY = h * 0.70;
+      const chX = startX + (cx - startX) * ep;
+      const chY = startY + ((h * 0.40 + 22) - startY) * ep;
+
+      drawCrosshair(ctx, chX, chY, 6, '#ffffff');
+    }
+  },
+
+  // 18. SEQUENCE: 4-pad Simon color sequence played then repeated (color-sequence)
+  sequence: {
+    id: 'sequence',
+    label: 'Color Sequence',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 900) % 3200;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const cx = w * 0.5;
+      const cy = h * 0.5;
+      const radius = Math.min(w, h) * 0.28;
+      const padR = radius * 0.42;
+
+      const pads = [
+        { id: 0, x: cx, y: cy - radius * 0.65, color: '#ef4444' },
+        { id: 1, x: cx + radius * 0.65, y: cy, color: '#3b82f6' },
+        { id: 2, x: cx, y: cy + radius * 0.65, color: '#eab308' },
+        { id: 3, x: cx - radius * 0.65, y: cy, color: '#10b981' },
+      ];
+
+      const isPlayback = cycle < 1500;
+
+      let litPadId = -1;
+      if (isPlayback) {
+        if (cycle >= 100 && cycle < 500) litPadId = 0;
+        else if (cycle >= 550 && cycle < 950) litPadId = 1;
+        else if (cycle >= 1000 && cycle < 1400) litPadId = 3;
+      } else {
+        if (cycle >= 1850 && cycle < 2100) litPadId = 0;
+        else if (cycle >= 2350 && cycle < 2600) litPadId = 1;
+        else if (cycle >= 2850 && cycle < 3100) litPadId = 3;
+      }
+
+      pads.forEach((p) => {
+        const isLit = p.id === litPadId;
+        ctx.fillStyle = isLit ? p.color : 'rgba(255, 255, 255, 0.05)';
+        ctx.strokeStyle = isLit ? p.color : (dim || 'rgba(255, 255, 255, 0.15)');
+        ctx.lineWidth = isLit ? 2 : 1;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, padR, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        if (isLit) {
+          drawHitRing(ctx, p.x, p.y, padR + 6, p.color, 0.6);
+        }
+      });
+
+      if (!isPlayback) {
+        let targetPad = pads[0];
+        let prevPad = pads[2];
+        let stepStart = 1500;
+        let stepEnd = 1900;
+
+        if (cycle < 1900) {
+          targetPad = pads[0];
+          prevPad = { x: cx, y: cy };
+          stepStart = 1500;
+          stepEnd = 1900;
+        } else if (cycle < 2400) {
+          targetPad = pads[1];
+          prevPad = pads[0];
+          stepStart = 1900;
+          stepEnd = 2400;
+        } else {
+          targetPad = pads[3];
+          prevPad = pads[1];
+          stepStart = 2400;
+          stepEnd = 2900;
+        }
+
+        const moveP = Math.min(1, (cycle - stepStart) / (stepEnd - stepStart));
+        const ep = easeInOutCubic(moveP);
+        const chX = prevPad.x + (targetPad.x - prevPad.x) * ep;
+        const chY = prevPad.y + (targetPad.y - prevPad.y) * ep;
+        drawCrosshair(ctx, chX, chY, 6, accent || '#ffffff');
+      }
+    }
+  },
+
+  // 19. DIGIT-SPAN: Digits flashed then recalled on numeric input line (digit-span)
+  'digit-span': {
+    id: 'digit-span',
+    label: 'Digit Span',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 900) % 3200;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const cx = w * 0.5;
+      const digits = ['7', '3', '9'];
+
+      if (cycle < 1500) {
+        const dIdx = Math.min(2, Math.floor(cycle / 500));
+        const currentDigit = digits[dIdx];
+
+        ctx.fillStyle = dim || 'rgba(255, 255, 255, 0.04)';
+        ctx.strokeStyle = accent;
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.roundRect(cx - 25, h * 0.30, 50, 50, 8);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 24px monospace';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(currentDigit, cx, h * 0.30 + 25);
+
+        for (let i = 0; i < 3; i++) {
+          ctx.fillStyle = i <= dIdx ? accent : 'rgba(255, 255, 255, 0.15)';
+          ctx.beginPath();
+          ctx.arc(cx - 20 + i * 20, h * 0.74, 3, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      } else {
+        const recallProgress = cycle - 1500;
+        const count = recallProgress > 1200 ? 3 : recallProgress > 600 ? 2 : 1;
+
+        ctx.font = 'bold 18px monospace';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        for (let i = 0; i < 3; i++) {
+          const slotX = cx - 36 + i * 36;
+          const isEntered = i < count;
+
+          ctx.fillStyle = isEntered ? 'rgba(99, 102, 241, 0.18)' : 'rgba(255, 255, 255, 0.03)';
+          ctx.strokeStyle = isEntered ? accent : 'rgba(255, 255, 255, 0.12)';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.roundRect(slotX - 14, h * 0.40, 28, 32, 4);
+          ctx.fill();
+          ctx.stroke();
+
+          if (isEntered) {
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText(digits[i], slotX, h * 0.40 + 16);
+          } else {
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+            ctx.fillText('_', slotX, h * 0.40 + 16);
+          }
+        }
+
+        const currentSlotX = cx - 36 + Math.min(2, count - 1) * 36;
+        drawCrosshair(ctx, currentSlotX, h * 0.40 + 16, 6, '#ffffff');
+
+        if (count === 3 && recallProgress > 1400) {
+          drawHitRing(ctx, cx + 36, h * 0.40 + 16, 14, accent, 0.8);
+        }
+      }
+    }
+  },
+
+  // 20. GRID-RECALL: Cells light up, hide, then recalled by cursor (grid-memorization)
+  'grid-recall': {
+    id: 'grid-recall',
+    label: 'Grid Recall',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 850) % 3200;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const gridSize = 4;
+      const cellSize = Math.min(w, h) * 0.18;
+      const startX = (w - gridSize * cellSize) * 0.5;
+      const startY = (h - gridSize * cellSize) * 0.5;
+
+      const targets = [
+        { r: 0, c: 1, hitAt: 1900 },
+        { r: 1, c: 3, hitAt: 2300 },
+        { r: 2, c: 0, hitAt: 2700 },
+        { r: 3, c: 2, hitAt: 3050 },
+      ];
+
+      const isShowing = cycle < 1200;
+      const isBlank = cycle >= 1200 && cycle < 1600;
+
+      for (let r = 0; r < gridSize; r++) {
+        for (let c = 0; c < gridSize; c++) {
+          const x = startX + c * cellSize;
+          const y = startY + r * cellSize;
+          const isTarget = targets.some((tgt) => tgt.r === r && tgt.c === c);
+
+          let lit = false;
+          if (isShowing && isTarget) {
+            lit = true;
+          } else if (!isBlank && !isShowing && isTarget) {
+            const tgtObj = targets.find((tgt) => tgt.r === r && tgt.c === c);
+            if (tgtObj && cycle >= tgtObj.hitAt) {
+              lit = true;
+            }
+          }
+
+          ctx.fillStyle = lit ? accent : 'rgba(255, 255, 255, 0.03)';
+          ctx.strokeStyle = lit ? accent : 'rgba(255, 255, 255, 0.10)';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.roundRect(x + 2, y + 2, cellSize - 4, cellSize - 4, 4);
+          ctx.fill();
+          ctx.stroke();
+        }
+      }
+
+      if (!isShowing && !isBlank) {
+        let currIdx = 0;
+        if (cycle < targets[0].hitAt) currIdx = 0;
+        else if (cycle < targets[1].hitAt) currIdx = 1;
+        else if (cycle < targets[2].hitAt) currIdx = 2;
+        else currIdx = 3;
+
+        const currentTgt = targets[currIdx];
+        const prevTgt = currIdx === 0
+          ? { r: 1, c: 1 }
+          : targets[currIdx - 1];
+
+        const stepStart = currIdx === 0 ? 1600 : targets[currIdx - 1].hitAt;
+        const p = Math.min(1, (cycle - stepStart) / (currentTgt.hitAt - stepStart));
+        const ep = easeInOutCubic(p);
+
+        const fromX = startX + (prevTgt.c + 0.5) * cellSize;
+        const fromY = startY + (prevTgt.r + 0.5) * cellSize;
+        const toX = startX + (currentTgt.c + 0.5) * cellSize;
+        const toY = startY + (currentTgt.r + 0.5) * cellSize;
+
+        const chX = fromX + (toX - fromX) * ep;
+        const chY = fromY + (toY - fromY) * ep;
+
+        if (cycle >= currentTgt.hitAt && cycle < currentTgt.hitAt + 300) {
+          const hp = (cycle - currentTgt.hitAt) / 300;
+          drawHitRing(ctx, toX, toY, 6 + hp * 16, accent, 1 - hp);
+        }
+
+        drawCrosshair(ctx, chX, chY, 6, '#ffffff');
+      }
+    }
+  },
+
+  // 21. N-BACK: Continuous letter stream matching 2 steps back (n-back)
+  'n-back': {
+    id: 'n-back',
+    label: 'N-Back Working Memory',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 950) % 3000;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const cx = w * 0.5;
+      const letters = ['K', 'M', 'K'];
+      const hitAt = 2250;
+
+      let lIdx = 0;
+      if (cycle < 900) lIdx = 0;
+      else if (cycle < 1800) lIdx = 1;
+      else lIdx = 2;
+
+      const currentL = letters[lIdx];
+      const isMatch = lIdx === 2;
+
+      ctx.fillStyle = dim || 'rgba(255, 255, 255, 0.04)';
+      ctx.strokeStyle = isMatch && cycle >= hitAt ? accent : 'rgba(255, 255, 255, 0.15)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.roundRect(cx - 28, h * 0.22, 56, 56, 8);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 26px monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(currentL, cx, h * 0.22 + 28);
+
+      const btnY = h * 0.76;
+      const isPressed = isMatch && cycle >= hitAt;
+      ctx.fillStyle = isPressed ? 'rgba(99, 102, 241, 0.25)' : 'rgba(255, 255, 255, 0.05)';
+      ctx.strokeStyle = isPressed ? accent : 'rgba(255, 255, 255, 0.15)';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.roundRect(cx - 44, btnY - 14, 88, 28, 6);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = isPressed ? accent : 'rgba(255, 255, 255, 0.7)';
+      ctx.font = 'bold 9px monospace';
+      ctx.fillText('2-BACK MATCH', cx, btnY);
+
+      if (cycle >= 1800) {
+        const p = Math.min(1, (cycle - 1800) / (hitAt - 1800));
+        const ep = easeInOutCubic(p);
+        const startX = cx - 25;
+        const startY = h * 0.50;
+        const chX = startX + (cx - startX) * ep;
+        const chY = startY + (btnY - startY) * ep;
+
+        if (cycle >= hitAt && cycle < hitAt + 400) {
+          const hp = (cycle - hitAt) / 400;
+          drawHitRing(ctx, cx, btnY, 14 + hp * 22, accent, 1 - hp);
+        }
+
+        drawCrosshair(ctx, chX, chY, 6, '#ffffff');
+      }
+    }
+  },
+
+  // 22. OBJECT-LOCATION: Memorize item placement then locate target (object-location)
+  'object-location': {
+    id: 'object-location',
+    label: 'Object Location',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 900) % 3200;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const gridSize = 3;
+      const cellSize = Math.min(w, h) * 0.22;
+      const startX = (w - gridSize * cellSize) * 0.5;
+      const startY = (h - gridSize * cellSize) * 0.5;
+
+      const items = [
+        { r: 0, c: 1, sym: '★', label: 'Star', isTarget: true },
+        { r: 1, c: 2, sym: '◆', label: 'Gem', isTarget: false },
+        { r: 2, c: 0, sym: '▲', label: 'Delta', isTarget: false },
+      ];
+
+      const isShowing = cycle < 1300;
+      const isBlank = cycle >= 1300 && cycle < 1600;
+      const hitAt = 2400;
+
+      for (let r = 0; r < gridSize; r++) {
+        for (let c = 0; c < gridSize; c++) {
+          const x = startX + c * cellSize;
+          const y = startY + r * cellSize;
+          const item = items.find((it) => it.r === r && it.c === c);
+
+          const isRevealed = !isShowing && !isBlank && item && item.isTarget && cycle >= hitAt;
+          const showSym = (isShowing && item) || isRevealed;
+
+          ctx.fillStyle = isRevealed ? 'rgba(99, 102, 241, 0.20)' : 'rgba(255, 255, 255, 0.03)';
+          ctx.strokeStyle = isRevealed ? accent : (dim || 'rgba(255, 255, 255, 0.10)');
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.roundRect(x + 2, y + 2, cellSize - 4, cellSize - 4, 4);
+          ctx.fill();
+          ctx.stroke();
+
+          if (showSym && item) {
+            ctx.fillStyle = item.isTarget ? accent : '#ffffff';
+            ctx.font = 'bold 15px monospace';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(item.sym, x + cellSize * 0.5, y + cellSize * 0.5);
+          }
+        }
+      }
+
+      if (!isShowing && !isBlank) {
+        const targetX = startX + 1.5 * cellSize;
+        const targetY = startY + 0.5 * cellSize;
+
+        const p = Math.min(1, (cycle - 1600) / (hitAt - 1600));
+        const ep = easeInOutCubic(p);
+        const startXPos = w * 0.5;
+        const startYPos = h * 0.8;
+        const chX = startXPos + (targetX - startXPos) * ep;
+        const chY = startYPos + (targetY - startYPos) * ep;
+
+        if (cycle >= hitAt && cycle < hitAt + 350) {
+          const hp = (cycle - hitAt) / 350;
+          drawHitRing(ctx, targetX, targetY, 8 + hp * 18, accent, 1 - hp);
+        }
+
+        drawCrosshair(ctx, chX, chY, 6, '#ffffff');
+      }
+    }
+  },
+
+  // 23. WORD-RECALL: Study words, mask, then retrieve (word-recall)
+  'word-recall': {
+    id: 'word-recall',
+    label: 'Word Recall',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 900) % 3000;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const cx = w * 0.5;
+      const words = ['RIVER', 'STONE', 'CLOUD'];
+      const hitTimes = [1900, 2350, 2800];
+
+      const isStudy = cycle < 1300;
+      const isMasked = cycle >= 1300 && cycle < 1600;
+
+      ctx.font = 'bold 11px monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      for (let i = 0; i < 3; i++) {
+        const rowY = h * 0.30 + i * (h * 0.22);
+        const isRecalled = !isStudy && !isMasked && cycle >= hitTimes[i];
+
+        ctx.fillStyle = isRecalled ? 'rgba(99, 102, 241, 0.18)' : 'rgba(255, 255, 255, 0.04)';
+        ctx.strokeStyle = isRecalled ? accent : 'rgba(255, 255, 255, 0.10)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.roundRect(cx - 50, rowY - 12, 100, 24, 4);
+        ctx.fill();
+        ctx.stroke();
+
+        let displayTxt = '';
+        if (isStudy) {
+          displayTxt = words[i];
+          ctx.fillStyle = '#ffffff';
+        } else if (isRecalled) {
+          displayTxt = `✓ ${words[i]}`;
+          ctx.fillStyle = accent;
+        } else {
+          displayTxt = '•••••';
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
+        }
+
+        ctx.fillText(displayTxt, cx, rowY);
+
+        if (isRecalled && cycle >= hitTimes[i] && cycle < hitTimes[i] + 250) {
+          drawHitRing(ctx, cx + 40, rowY, 8, accent, 0.8);
+        }
+      }
+    }
+  },
+
+  // 24. PATH-TRACE: Watch path drawn between nodes, then retrace from memory (path-tracing)
+  'path-trace': {
+    id: 'path-trace',
+    label: 'Spatial Path Tracing',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 950) % 3200;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const nodes = [
+        { x: w * 0.22, y: h * 0.70 },
+        { x: w * 0.40, y: h * 0.30 },
+        { x: w * 0.68, y: h * 0.38 },
+        { x: w * 0.80, y: h * 0.72 },
+      ];
+
+      const isDrawing = cycle < 1300;
+      const isHidden = cycle >= 1300 && cycle < 1600;
+
+      nodes.forEach((n) => {
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, 6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+      });
+
+      if (isDrawing) {
+        const p = cycle / 1300;
+        const totalSegments = nodes.length - 1;
+        const currentSeg = Math.min(totalSegments - 1, Math.floor(p * totalSegments));
+        const segP = (p * totalSegments) - currentSeg;
+
+        ctx.strokeStyle = accent;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(nodes[0].x, nodes[0].y);
+        for (let i = 1; i <= currentSeg; i++) {
+          ctx.lineTo(nodes[i].x, nodes[i].y);
+        }
+        const lastNode = nodes[currentSeg];
+        const nextNode = nodes[currentSeg + 1];
+        ctx.lineTo(lastNode.x + (nextNode.x - lastNode.x) * segP, lastNode.y + (nextNode.y - lastNode.y) * segP);
+        ctx.stroke();
+      } else if (!isHidden) {
+        const p = (cycle - 1600) / 1600;
+        const totalSegments = nodes.length - 1;
+        const currentSeg = Math.min(totalSegments - 1, Math.floor(p * totalSegments));
+        const segP = (p * totalSegments) - currentSeg;
+
+        ctx.strokeStyle = accent;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(nodes[0].x, nodes[0].y);
+        for (let i = 1; i <= currentSeg; i++) {
+          ctx.lineTo(nodes[i].x, nodes[i].y);
+        }
+        const lastNode = nodes[currentSeg];
+        const nextNode = nodes[currentSeg + 1];
+        const curX = lastNode.x + (nextNode.x - lastNode.x) * segP;
+        const curY = lastNode.y + (nextNode.y - lastNode.y) * segP;
+        ctx.lineTo(curX, curY);
+        ctx.stroke();
+
+        drawCrosshair(ctx, curX, curY, 6, '#ffffff');
+      }
+    }
+  },
+
+  // ---------------- MOTOR PREVIEW SCENES (25–32) ----------------
+
+  // 25. TAP: Rapid CPS cadence test with speed meter & rhythmic tap ripples (rapid-tapping)
+  tap: {
+    id: 'tap',
+    label: 'Rapid Tapping Cadence',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 850) % 2800;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const cx = w * 0.45;
+      const cy = h * 0.54;
+      const tapTimestamps = [500, 750, 1000, 1250, 1500, 1750, 2000];
+
+      // Gauge arc on the right/top
+      const gx = w * 0.82;
+      const gy = h * 0.44;
+      const gr = 24;
+
+      // Draw gauge background arc
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(gx, gy, gr, Math.PI * 0.75, Math.PI * 2.25);
+      ctx.stroke();
+
+      // Determine current CPS gauge fill
+      let cpsRatio = 0;
+      if (cycle >= 450 && cycle < 2100) {
+        const p = (cycle - 450) / 1650;
+        cpsRatio = Math.min(1, p * 1.15);
+      } else if (cycle >= 2100) {
+        const p = (cycle - 2100) / 700;
+        cpsRatio = Math.max(0, 1 - p * 1.4);
+      }
+
+      // Gauge active accent arc
+      if (cpsRatio > 0.01) {
+        ctx.strokeStyle = accent;
+        ctx.lineWidth = 3.5;
+        ctx.beginPath();
+        const startAng = Math.PI * 0.75;
+        const endAng = startAng + cpsRatio * (Math.PI * 1.5);
+        ctx.arc(gx, gy, gr, startAng, endAng);
+        ctx.stroke();
+      }
+
+      // CPS numeric readout
+      const cpsVal = (cpsRatio * 12.8).toFixed(1);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 9px ui-monospace, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(`${cpsVal}`, gx, gy + 3);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+      ctx.font = '6px ui-monospace, monospace';
+      ctx.fillText('CPS', gx, gy + 12);
+
+      // Check if current frame is close to any tap timestamp
+      let activeTapP = 0;
+      for (const tapT of tapTimestamps) {
+        if (cycle >= tapT && cycle < tapT + 220) {
+          activeTapP = 1 - (cycle - tapT) / 220;
+          break;
+        }
+      }
+
+      // Button scale pulse
+      const btnScale = 1 - activeTapP * 0.08;
+      const btnR = 24 * btnScale;
+
+      // Pad halo
+      ctx.fillStyle = dim || 'rgba(16, 185, 129, 0.12)';
+      ctx.beginPath();
+      ctx.arc(cx, cy, btnR + 6, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Pad base
+      ctx.fillStyle = activeTapP > 0 ? accent : 'rgba(255, 255, 255, 0.08)';
+      ctx.strokeStyle = activeTapP > 0 ? '#ffffff' : accent;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(cx, cy, btnR, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Pad center target mark
+      ctx.fillStyle = activeTapP > 0 ? '#ffffff' : accent;
+      ctx.beginPath();
+      ctx.arc(cx, cy, 5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Expand ripple rings for recent taps
+      tapTimestamps.forEach((tapT) => {
+        if (cycle >= tapT && cycle < tapT + 380) {
+          const rp = (cycle - tapT) / 380;
+          drawHitRing(ctx, cx, cy, btnR + rp * 22, accent, 1 - rp);
+        }
+      });
+
+      // Finger / Cursor pointer tapping down
+      const cursorY = cy + (activeTapP > 0 ? 0 : -8);
+      drawCrosshair(ctx, cx, cursorY, 6, '#ffffff');
+    }
+  },
+
+  // 26. AIM-SHRINK: Dynamic shrinking targets with rapid precision acquisition (aim-trainer)
+  'aim-shrink': {
+    id: 'aim-shrink',
+    label: 'Aim Target Shrinking',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 920) % 2700;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const targets = [
+        { x: w * 0.28, y: h * 0.38, start: 100, hit: 850 },
+        { x: w * 0.72, y: h * 0.34, start: 900, hit: 1650 },
+        { x: w * 0.50, y: h * 0.68, start: 1700, hit: 2450 },
+      ];
+
+      let chX = w * 0.5;
+      let chY = h * 0.5;
+
+      targets.forEach((tgt) => {
+        if (cycle >= tgt.start && cycle < tgt.hit) {
+          const p = (cycle - tgt.start) / (tgt.hit - tgt.start);
+          const shrinkR = 24 * (1 - p * 0.65);
+
+          // Inner bullseye
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+          ctx.strokeStyle = accent;
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.arc(tgt.x, tgt.y, 7, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+
+          // Center micro dot
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.arc(tgt.x, tgt.y, 2.5, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Shrinking perimeter ring
+          ctx.strokeStyle = accent;
+          ctx.lineWidth = 1.8;
+          ctx.beginPath();
+          ctx.arc(tgt.x, tgt.y, Math.max(7.5, shrinkR), 0, Math.PI * 2);
+          ctx.stroke();
+        } else if (cycle >= tgt.hit && cycle < tgt.hit + 300) {
+          // Hit flash
+          const hp = (cycle - tgt.hit) / 300;
+          drawHitRing(ctx, tgt.x, tgt.y, 8 + hp * 24, accent, 1 - hp);
+        }
+      });
+
+      // Cursor movement tracking between targets
+      if (cycle < targets[0].hit) {
+        const p = Math.max(0, (cycle - targets[0].start) / (targets[0].hit - targets[0].start));
+        const ep = easeInOutCubic(p);
+        chX = (w * 0.5) + (targets[0].x - w * 0.5) * ep;
+        chY = (h * 0.5) + (targets[0].y - h * 0.5) * ep;
+      } else if (cycle < targets[1].hit) {
+        const p = Math.max(0, (cycle - targets[1].start) / (targets[1].hit - targets[1].start));
+        const ep = easeInOutCubic(p);
+        chX = targets[0].x + (targets[1].x - targets[0].x) * ep;
+        chY = targets[0].y + (targets[1].y - targets[0].y) * ep;
+      } else if (cycle < targets[2].hit) {
+        const p = Math.max(0, (cycle - targets[2].start) / (targets[2].hit - targets[2].start));
+        const ep = easeInOutCubic(p);
+        chX = targets[1].x + (targets[2].x - targets[1].x) * ep;
+        chY = targets[1].y + (targets[2].y - targets[1].y) * ep;
+      } else {
+        const p = (cycle - targets[2].hit) / (2700 - targets[2].hit);
+        const ep = easeInOutCubic(p);
+        chX = targets[2].x + (w * 0.5 - targets[2].x) * ep;
+        chY = targets[2].y + (h * 0.5 - targets[2].y) * ep;
+      }
+
+      drawCrosshair(ctx, chX, chY, 7, '#ffffff');
+    }
+  },
+
+  // 27. KEY-PRESS: Keyboard recognition with prompt cues & rhythmic depression (keyboard-recognition)
+  'key-press': {
+    id: 'key-press',
+    label: 'Keyboard Recognition',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 800) % 2700;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const keys = [
+        { label: 'A', x: w * 0.26, hit: 650 },
+        { label: 'S', x: w * 0.42, hit: 1350 },
+        { label: 'D', x: w * 0.58, hit: 2050 },
+        { label: 'F', x: w * 0.74, hit: -1 },
+      ];
+
+      // Active target key determination
+      let activeIdx = 0;
+      if (cycle < 1000) activeIdx = 0;
+      else if (cycle < 1700) activeIdx = 1;
+      else if (cycle < 2400) activeIdx = 2;
+      else activeIdx = 0;
+
+      // Top target prompt
+      const promptY = h * 0.28;
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.06)';
+      ctx.strokeStyle = accent;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.roundRect(w * 0.5 - 18, promptY - 14, 36, 20, 4);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = accent;
+      ctx.font = 'bold 11px ui-monospace, monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(keys[activeIdx].label, w * 0.5, promptY - 4);
+
+      // Keycaps layout
+      const keyY = h * 0.62;
+      const kw = 26;
+      const kh = 30;
+
+      keys.forEach((k, idx) => {
+        const isHit = k.hit > 0 && cycle >= k.hit && cycle < k.hit + 320;
+        const hitP = isHit ? 1 - (cycle - k.hit) / 320 : 0;
+        const isTarget = idx === activeIdx;
+
+        const offY = hitP * 4;
+
+        // Keycap shadow
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+        ctx.beginPath();
+        ctx.roundRect(k.x - kw / 2, keyY - kh / 2 + 4, kw, kh, 4);
+        ctx.fill();
+
+        // Keycap body
+        if (hitP > 0) {
+          ctx.fillStyle = accent;
+          ctx.strokeStyle = '#ffffff';
+        } else if (isTarget) {
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
+          ctx.strokeStyle = accent;
+        } else {
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+        }
+        ctx.lineWidth = isTarget ? 1.5 : 1;
+
+        ctx.beginPath();
+        ctx.roundRect(k.x - kw / 2, keyY - kh / 2 + offY, kw, kh, 4);
+        ctx.fill();
+        ctx.stroke();
+
+        // Keycap letter
+        ctx.fillStyle = hitP > 0 ? '#000000' : isTarget ? '#ffffff' : 'rgba(255, 255, 255, 0.6)';
+        ctx.font = 'bold 11px ui-monospace, monospace';
+        ctx.fillText(k.label, k.x, keyY + offY);
+
+        if (hitP > 0) {
+          drawHitRing(ctx, k.x, keyY + offY, kw * 0.7 + (1 - hitP) * 16, accent, hitP);
+        }
+      });
+    }
+  },
+
+  // 28. PRECISION-FLICK: Centering snaps into narrowing aperture rings (precision-flick-shot)
+  'precision-flick': {
+    id: 'precision-flick',
+    label: 'Precision Flick Centering',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 980) % 2800;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const center = { x: w * 0.5, y: h * 0.5 };
+      const targets = [
+        { x: w * 0.76, y: h * 0.32, flickStart: 250, hit: 650, returnEnd: 1150 },
+        { x: w * 0.24, y: h * 0.68, flickStart: 1350, hit: 1750, returnEnd: 2250 },
+      ];
+
+      // Draw home anchor ring
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(center.x, center.y, 6, 0, Math.PI * 2);
+      ctx.stroke();
+
+      let chX = center.x;
+      let chY = center.y;
+
+      targets.forEach((tgt) => {
+        // Draw aperture target if active
+        if (cycle >= tgt.flickStart - 150 && cycle < tgt.hit) {
+          const p = Math.max(0, (cycle - tgt.flickStart) / (tgt.hit - tgt.flickStart));
+          const apertureR = 20 * (1 - p * 0.6);
+
+          // Outer ring
+          ctx.strokeStyle = accent;
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.arc(tgt.x, tgt.y, apertureR, 0, Math.PI * 2);
+          ctx.stroke();
+
+          // Reticle tick marks
+          const tickLen = 4;
+          ctx.beginPath();
+          ctx.moveTo(tgt.x - apertureR - tickLen, tgt.y);
+          ctx.lineTo(tgt.x - apertureR, tgt.y);
+          ctx.moveTo(tgt.x + apertureR, tgt.y);
+          ctx.lineTo(tgt.x + apertureR + tickLen, tgt.y);
+          ctx.moveTo(tgt.x, tgt.y - apertureR - tickLen);
+          ctx.lineTo(tgt.x, tgt.y - apertureR);
+          ctx.moveTo(tgt.x, tgt.y + apertureR);
+          ctx.lineTo(tgt.x, tgt.y + apertureR + tickLen);
+          ctx.stroke();
+
+          // Center target pip
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.arc(tgt.x, tgt.y, 2.5, 0, Math.PI * 2);
+          ctx.fill();
+        } else if (cycle >= tgt.hit && cycle < tgt.hit + 350) {
+          const hp = (cycle - tgt.hit) / 350;
+          drawHitRing(ctx, tgt.x, tgt.y, 8 + hp * 22, accent, 1 - hp);
+        }
+      });
+
+      // Ballistic flick motion
+      if (cycle >= targets[0].flickStart && cycle < targets[0].hit) {
+        const p = (cycle - targets[0].flickStart) / (targets[0].hit - targets[0].flickStart);
+        const ep = easeInOutCubic(p);
+        chX = center.x + (targets[0].x - center.x) * ep;
+        chY = center.y + (targets[0].y - center.y) * ep;
+      } else if (cycle >= targets[0].hit && cycle < targets[0].returnEnd) {
+        const p = (cycle - targets[0].hit) / (targets[0].returnEnd - targets[0].hit);
+        const ep = easeInOutCubic(p);
+        chX = targets[0].x + (center.x - targets[0].x) * ep;
+        chY = targets[0].y + (center.y - targets[0].y) * ep;
+      } else if (cycle >= targets[1].flickStart && cycle < targets[1].hit) {
+        const p = (cycle - targets[1].flickStart) / (targets[1].hit - targets[1].flickStart);
+        const ep = easeInOutCubic(p);
+        chX = center.x + (targets[1].x - center.x) * ep;
+        chY = center.y + (targets[1].y - center.y) * ep;
+      } else if (cycle >= targets[1].hit && cycle < targets[1].returnEnd) {
+        const p = (cycle - targets[1].hit) / (targets[1].returnEnd - targets[1].hit);
+        const ep = easeInOutCubic(p);
+        chX = targets[1].x + (center.x - targets[1].x) * ep;
+        chY = targets[1].y + (center.y - targets[1].y) * ep;
+      }
+
+      drawCrosshair(ctx, chX, chY, 7, '#ffffff');
+    }
+  },
+
+  // 29. STEADY-CORRIDOR: Tremor suppression winding corridor navigation (steady-hand)
+  'steady-corridor': {
+    id: 'steady-corridor',
+    label: 'Steady Corridor Traversal',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 910) % 3000;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const pathPoints = [
+        { x: w * 0.12, y: h * 0.50 },
+        { x: w * 0.32, y: h * 0.28 },
+        { x: w * 0.52, y: h * 0.72 },
+        { x: w * 0.72, y: h * 0.32 },
+        { x: w * 0.88, y: h * 0.50 },
+      ];
+
+      // Corridor half-width
+      const hw = 14;
+
+      // Draw corridor walls
+      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.22)';
+
+      // Upper wall
+      ctx.beginPath();
+      ctx.moveTo(pathPoints[0].x, pathPoints[0].y - hw);
+      for (let i = 1; i < pathPoints.length; i++) {
+        const prev = pathPoints[i - 1];
+        const cur = pathPoints[i];
+        const midX = (prev.x + cur.x) / 2;
+        ctx.quadraticCurveTo(prev.x, prev.y - hw, midX, (prev.y + cur.y) / 2 - hw);
+      }
+      const last = pathPoints[pathPoints.length - 1];
+      ctx.lineTo(last.x, last.y - hw);
+      ctx.stroke();
+
+      // Lower wall
+      ctx.beginPath();
+      ctx.moveTo(pathPoints[0].x, pathPoints[0].y + hw);
+      for (let i = 1; i < pathPoints.length; i++) {
+        const prev = pathPoints[i - 1];
+        const cur = pathPoints[i];
+        const midX = (prev.x + cur.x) / 2;
+        ctx.quadraticCurveTo(prev.x, prev.y + hw, midX, (prev.y + cur.y) / 2 + hw);
+      }
+      ctx.lineTo(last.x, last.y + hw);
+      ctx.stroke();
+
+      // Guide center dotted line
+      ctx.strokeStyle = dim || 'rgba(16, 185, 129, 0.15)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([3, 3]);
+      ctx.beginPath();
+      ctx.moveTo(pathPoints[0].x, pathPoints[0].y);
+      for (let i = 1; i < pathPoints.length; i++) {
+        const prev = pathPoints[i - 1];
+        const cur = pathPoints[i];
+        const midX = (prev.x + cur.x) / 2;
+        ctx.quadraticCurveTo(prev.x, prev.y, midX, (prev.y + cur.y) / 2);
+      }
+      ctx.lineTo(last.x, last.y);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Progress along corridor: 200ms to 2700ms
+      let p = 0;
+      if (cycle >= 200 && cycle < 2700) {
+        p = (cycle - 200) / 2500;
+      } else if (cycle >= 2700) {
+        p = 1;
+      }
+
+      // Spline interpolation for current position
+      const segCount = pathPoints.length - 1;
+      const segIndex = Math.min(segCount - 1, Math.floor(p * segCount));
+      const segT = (p * segCount) - segIndex;
+      const p0 = pathPoints[segIndex];
+      const p1 = pathPoints[segIndex + 1];
+      const curX = p0.x + (p1.x - p0.x) * segT;
+      const curY = p0.y + (p1.y - p0.y) * easeInOutCubic(segT);
+
+      // Traversed path trail in accent
+      ctx.strokeStyle = accent;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(pathPoints[0].x, pathPoints[0].y);
+      for (let i = 1; i <= segIndex; i++) {
+        ctx.lineTo(pathPoints[i].x, pathPoints[i].y);
+      }
+      ctx.lineTo(curX, curY);
+      ctx.stroke();
+
+      // Steady hand probe orb
+      ctx.fillStyle = accent;
+      ctx.beginPath();
+      ctx.arc(curX, curY, 4.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Precision micro crosshair surrounding orb
+      drawCrosshair(ctx, curX, curY, 6, '#ffffff');
+    }
+  },
+
+  // 30. DRAG-DROP: Cursor grabs moving target and transports cleanly into receptacle (drag-and-drop)
+  'drag-drop': {
+    id: 'drag-drop',
+    label: 'Drag & Drop Intercept',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 940) % 2800;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const sourcePos = { x: w * 0.24, y: h * 0.52 };
+      const targetPos = { x: w * 0.76, y: h * 0.48 };
+
+      // Receptacle ring
+      ctx.strokeStyle = accent;
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.arc(targetPos.x, targetPos.y, 16, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Receptacle center notch
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+      ctx.beginPath();
+      ctx.arc(targetPos.x, targetPos.y, 5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Determine orb position and cursor state
+      let orbX = sourcePos.x;
+      let orbY = sourcePos.y;
+      let isGrabbed = false;
+
+      let chX = w * 0.15;
+      let chY = h * 0.35;
+
+      if (cycle < 400) {
+        // Cursor moves to source
+        const p = cycle / 400;
+        const ep = easeInOutCubic(p);
+        chX = (w * 0.15) + (sourcePos.x - w * 0.15) * ep;
+        chY = (h * 0.35) + (sourcePos.y - h * 0.35) * ep;
+        orbX = sourcePos.x;
+        orbY = sourcePos.y;
+      } else if (cycle < 1600) {
+        // Dragging phase
+        isGrabbed = true;
+        const p = (cycle - 400) / 1200;
+        const ep = easeInOutCubic(p);
+        const arcLift = Math.sin(p * Math.PI) * 22;
+        orbX = sourcePos.x + (targetPos.x - sourcePos.x) * ep;
+        orbY = sourcePos.y + (targetPos.y - sourcePos.y) * ep - arcLift;
+        chX = orbX;
+        chY = orbY;
+      } else {
+        // Delivered / socketed phase
+        orbX = targetPos.x;
+        orbY = targetPos.y;
+        chX = targetPos.x;
+        chY = targetPos.y;
+      }
+
+      // Draw drag flight arc hint
+      ctx.strokeStyle = dim || 'rgba(16, 185, 129, 0.12)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(sourcePos.x, sourcePos.y);
+      ctx.quadraticCurveTo(
+        (sourcePos.x + targetPos.x) / 2,
+        (sourcePos.y + targetPos.y) / 2 - 22,
+        targetPos.x,
+        targetPos.y
+      );
+      ctx.stroke();
+
+      // Source base ring
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(sourcePos.x, sourcePos.y, 10, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Draw Orb
+      ctx.fillStyle = isGrabbed ? accent : '#ffffff';
+      ctx.strokeStyle = accent;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(orbX, orbY, isGrabbed ? 9 : 8, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Success ripple on drop
+      if (cycle >= 1600 && cycle < 2100) {
+        const dp = (cycle - 1600) / 500;
+        drawHitRing(ctx, targetPos.x, targetPos.y, 16 + dp * 20, accent, 1 - dp);
+      }
+
+      // Cursor crosshair / grab grip
+      if (isGrabbed) {
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1.5;
+        const gr = 13;
+        ctx.strokeRect(chX - gr, chY - gr, gr * 2, gr * 2);
+      } else {
+        drawCrosshair(ctx, chX, chY, 6, '#ffffff');
+      }
+    }
+  },
+
+  // 31. WAVE-TRACE: Continuous sine filament velocity tracking (tracing)
+  'wave-trace': {
+    id: 'wave-trace',
+    label: 'Wave Filament Tracing',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 990) % 3000;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const startX = w * 0.14;
+      const endX = w * 0.86;
+      const waveLen = endX - startX;
+      const midY = h * 0.50;
+      const amp = h * 0.22;
+
+      // Full wave guideline in dim
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.14)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      const steps = 40;
+      for (let i = 0; i <= steps; i++) {
+        const wx = startX + (i / steps) * waveLen;
+        const norm = (i / steps) * Math.PI * 2.5;
+        const wy = midY + Math.sin(norm) * amp;
+        if (i === 0) ctx.moveTo(wx, wy);
+        else ctx.lineTo(wx, wy);
+      }
+      ctx.stroke();
+
+      // Tolerance bounds (upper & lower ghost waves)
+      ctx.strokeStyle = dim || 'rgba(16, 185, 129, 0.08)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([2, 3]);
+      ctx.beginPath();
+      for (let i = 0; i <= steps; i++) {
+        const wx = startX + (i / steps) * waveLen;
+        const norm = (i / steps) * Math.PI * 2.5;
+        const wy = midY + Math.sin(norm) * amp - 9;
+        if (i === 0) ctx.moveTo(wx, wy);
+        else ctx.lineTo(wx, wy);
+      }
+      ctx.stroke();
+      ctx.beginPath();
+      for (let i = 0; i <= steps; i++) {
+        const wx = startX + (i / steps) * waveLen;
+        const norm = (i / steps) * Math.PI * 2.5;
+        const wy = midY + Math.sin(norm) * amp + 9;
+        if (i === 0) ctx.moveTo(wx, wy);
+        else ctx.lineTo(wx, wy);
+      }
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Progress along wave: 200ms to 2600ms
+      let p = 0;
+      if (cycle >= 200 && cycle < 2600) {
+        p = (cycle - 200) / 2400;
+      } else if (cycle >= 2600) {
+        p = 1;
+      }
+
+      // Traced portion of wave in vibrant accent
+      if (p > 0.01) {
+        const tracedSteps = Math.floor(steps * p);
+        ctx.strokeStyle = accent;
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        for (let i = 0; i <= tracedSteps; i++) {
+          const wx = startX + (i / steps) * waveLen;
+          const norm = (i / steps) * Math.PI * 2.5;
+          const wy = midY + Math.sin(norm) * amp;
+          if (i === 0) ctx.moveTo(wx, wy);
+          else ctx.lineTo(wx, wy);
+        }
+        const curX = startX + p * waveLen;
+        const curNorm = p * Math.PI * 2.5;
+        const curY = midY + Math.sin(curNorm) * amp;
+        ctx.lineTo(curX, curY);
+        ctx.stroke();
+
+        // Stylus / tracking probe at current head
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(curX, curY, 3.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        drawCrosshair(ctx, curX, curY, 6, accent);
+      } else {
+        const curX = startX;
+        const curY = midY;
+        drawCrosshair(ctx, curX, curY, 6, '#ffffff');
+      }
+    }
+  },
+
+  // 32. SCALE-SEQUENCE: Size-ordered circular node sequence taps (finger-sequencing)
+  'scale-sequence': {
+    id: 'scale-sequence',
+    label: 'Finger Scale Sequencing',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 860) % 3200;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const nodes = [
+        { x: w * 0.22, y: h * 0.60, r: 21, num: '1', hit: 600 },
+        { x: w * 0.44, y: h * 0.36, r: 16, num: '2', hit: 1250 },
+        { x: w * 0.68, y: h * 0.64, r: 12, num: '3', hit: 1900 },
+        { x: w * 0.84, y: h * 0.38, r: 8, num: '4', hit: 2550 },
+      ];
+
+      // Draw connecting lines between already-tapped nodes
+      ctx.strokeStyle = accent;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      let hasLine = false;
+      for (let i = 0; i < nodes.length - 1; i++) {
+        if (cycle >= nodes[i].hit) {
+          if (!hasLine) {
+            ctx.moveTo(nodes[i].x, nodes[i].y);
+            hasLine = true;
+          }
+          if (cycle >= nodes[i + 1].hit) {
+            ctx.lineTo(nodes[i + 1].x, nodes[i + 1].y);
+          } else {
+            const p = (cycle - nodes[i].hit) / (nodes[i + 1].hit - nodes[i].hit);
+            const midX = nodes[i].x + (nodes[i + 1].x - nodes[i].x) * p;
+            const midY = nodes[i].y + (nodes[i + 1].y - nodes[i].y) * p;
+            ctx.lineTo(midX, midY);
+            break;
+          }
+        }
+      }
+      if (hasLine) ctx.stroke();
+
+      // Draw each node
+      nodes.forEach((n) => {
+        const isHit = cycle >= n.hit;
+        const isRecent = isHit && cycle < n.hit + 350;
+
+        // Node base fill
+        if (isHit) {
+          ctx.fillStyle = accent;
+          ctx.strokeStyle = '#ffffff';
+        } else {
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.06)';
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+        }
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Node rank number
+        ctx.fillStyle = isHit ? '#000000' : '#ffffff';
+        ctx.font = `bold ${Math.max(8, n.r * 0.85)}px ui-monospace, monospace`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(n.num, n.x, n.y);
+
+        // Tap ripple ring
+        if (isRecent) {
+          const hp = (cycle - n.hit) / 350;
+          drawHitRing(ctx, n.x, n.y, n.r + hp * 16, accent, 1 - hp);
+        }
+      });
+
+      // Cursor targeting nodes sequentially
+      let chX = w * 0.5;
+      let chY = h * 0.5;
+      if (cycle < nodes[0].hit) {
+        const p = cycle / nodes[0].hit;
+        const ep = easeInOutCubic(p);
+        chX = (w * 0.5) + (nodes[0].x - w * 0.5) * ep;
+        chY = (h * 0.5) + (nodes[0].y - h * 0.5) * ep;
+      } else if (cycle < nodes[1].hit) {
+        const p = (cycle - nodes[0].hit) / (nodes[1].hit - nodes[0].hit);
+        const ep = easeInOutCubic(p);
+        chX = nodes[0].x + (nodes[1].x - nodes[0].x) * ep;
+        chY = nodes[0].y + (nodes[1].y - nodes[0].y) * ep;
+      } else if (cycle < nodes[2].hit) {
+        const p = (cycle - nodes[1].hit) / (nodes[2].hit - nodes[1].hit);
+        const ep = easeInOutCubic(p);
+        chX = nodes[1].x + (nodes[2].x - nodes[1].x) * ep;
+        chY = nodes[1].y + (nodes[2].y - nodes[1].y) * ep;
+      } else if (cycle < nodes[3].hit) {
+        const p = (cycle - nodes[2].hit) / (nodes[3].hit - nodes[2].hit);
+        const ep = easeInOutCubic(p);
+        chX = nodes[2].x + (nodes[3].x - nodes[2].x) * ep;
+        chY = nodes[2].y + (nodes[3].y - nodes[2].y) * ep;
+      } else {
+        chX = nodes[3].x;
+        chY = nodes[3].y;
+      }
+
+      drawCrosshair(ctx, chX, chY, 6, '#ffffff');
+    }
+  },
+
+  // ---------------- FPS PREVIEW SCENES (33–46) ----------------
+
+  // 33. PERIPHERAL-SNAP: Screen-edge threat indicators & wide 180° sweeps (180-degree-awareness)
+  'peripheral-snap': {
+    id: 'peripheral-snap',
+    label: '180° Peripheral Awareness',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 950) % 3000;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const center = { x: w * 0.5, y: h * 0.5 };
+      const targets = [
+        { x: w * 0.10, y: h * 0.45, cueStart: 200, snapStart: 500, hit: 900, side: 'left' },
+        { x: w * 0.90, y: h * 0.55, cueStart: 1300, snapStart: 1600, hit: 2000, side: 'right' },
+      ];
+
+      // Draw subtle peripheral radar brackets on left and right screen borders
+      ctx.strokeStyle = dim || 'rgba(239, 68, 68, 0.12)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(8, h * 0.2);
+      ctx.lineTo(8, h * 0.8);
+      ctx.moveTo(w - 8, h * 0.2);
+      ctx.lineTo(w - 8, h * 0.8);
+      ctx.stroke();
+
+      let chX = center.x;
+      let chY = center.y;
+
+      targets.forEach((tgt) => {
+        // Flashing peripheral directional chevrons before snap
+        if (cycle >= tgt.cueStart && cycle < tgt.hit) {
+          const flash = Math.sin((cycle - tgt.cueStart) * 0.02) > 0;
+          ctx.strokeStyle = flash ? accent : 'rgba(255, 255, 255, 0.4)';
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          if (tgt.side === 'left') {
+            ctx.moveTo(tgt.x + 14, tgt.y - 7);
+            ctx.lineTo(tgt.x + 7, tgt.y);
+            ctx.lineTo(tgt.x + 14, tgt.y + 7);
+          } else {
+            ctx.moveTo(tgt.x - 14, tgt.y - 7);
+            ctx.lineTo(tgt.x - 7, tgt.y);
+            ctx.lineTo(tgt.x - 14, tgt.y + 7);
+          }
+          ctx.stroke();
+
+          // Target disc
+          ctx.fillStyle = accent;
+          ctx.beginPath();
+          ctx.arc(tgt.x, tgt.y, 7.5, 0, Math.PI * 2);
+          ctx.fill();
+        } else if (cycle >= tgt.hit && cycle < tgt.hit + 350) {
+          const p = (cycle - tgt.hit) / 350;
+          drawHitRing(ctx, tgt.x, tgt.y, 8 + p * 22, accent, 1 - p);
+        }
+      });
+
+      // Crosshair trajectory: Center -> Left -> Right -> Center
+      if (cycle < targets[0].snapStart) {
+        chX = center.x;
+        chY = center.y;
+      } else if (cycle < targets[0].hit) {
+        const p = (cycle - targets[0].snapStart) / (targets[0].hit - targets[0].snapStart);
+        const ep = easeInOutCubic(p);
+        chX = center.x + (targets[0].x - center.x) * ep;
+        chY = center.y + (targets[0].y - center.y) * ep;
+      } else if (cycle < targets[1].snapStart) {
+        chX = targets[0].x;
+        chY = targets[0].y;
+      } else if (cycle < targets[1].hit) {
+        // Extreme 180° flick across entire screen
+        const p = (cycle - targets[1].snapStart) / (targets[1].hit - targets[1].snapStart);
+        const ep = easeInOutCubic(p);
+        chX = targets[0].x + (targets[1].x - targets[0].x) * ep;
+        chY = targets[0].y + (targets[1].y - targets[0].y) * ep;
+      } else {
+        const p = (cycle - targets[1].hit) / (3000 - targets[1].hit);
+        const ep = easeInOutCubic(p);
+        chX = targets[1].x + (center.x - targets[1].x) * ep;
+        chY = targets[1].y + (center.y - targets[1].y) * ep;
+      }
+
+      drawCrosshair(ctx, chX, chY, 7, '#ffffff');
+    }
+  },
+
+  // 34. INSTANT-TRIGGER: Micro-reaction trigger shot with ms stopwatch readout (instant-response)
+  'instant-trigger': {
+    id: 'instant-trigger',
+    label: 'Instant Trigger Response',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 880) % 2600;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const cx = w * 0.5;
+      const cy = h * 0.5;
+      const stimStart = 900;
+      const shotAt = 1060;
+
+      // Crosshair gate / sensor box
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(cx - 24, cy - 18, 48, 36);
+
+      // Target stimulus: flashes or sweeps in
+      if (cycle >= stimStart && cycle < shotAt) {
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(cx, cy, 8, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = accent;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(cx, cy, 14, 0, Math.PI * 2);
+        ctx.stroke();
+      } else if (cycle >= shotAt && cycle < shotAt + 400) {
+        // Shot explosion & muzzle ripple
+        const p = (cycle - shotAt) / 400;
+        drawHitRing(ctx, cx, cy, 6 + p * 28, accent, 1 - p);
+      }
+
+      // Reaction timer badge
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+      ctx.strokeStyle = cycle >= shotAt ? accent : 'rgba(255, 255, 255, 0.15)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.roundRect(cx - 28, h * 0.76, 56, 18, 4);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = cycle >= shotAt ? accent : 'rgba(255, 255, 255, 0.5)';
+      ctx.font = 'bold 9px ui-monospace, monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      const readout = cycle < stimStart ? 'READY' : cycle < shotAt ? '...' : '158ms';
+      ctx.fillText(readout, cx, h * 0.76 + 9);
+
+      // Crosshair
+      drawCrosshair(ctx, cx, cy, 7, cycle >= shotAt && cycle < shotAt + 200 ? accent : '#ffffff');
+    }
+  },
+
+  // 35. FLOW-RHYTHM: Rhythmic tempo clicking in seamless flowing motion (flow-state)
+  'flow-rhythm': {
+    id: 'flow-rhythm',
+    label: 'Flow State Rhythm',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 920) % 2800;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const nodes = [
+        { x: w * 0.18, y: h * 0.55, hit: 500 },
+        { x: w * 0.38, y: h * 0.35, hit: 1050 },
+        { x: w * 0.62, y: h * 0.65, hit: 1600 },
+        { x: w * 0.82, y: h * 0.40, hit: 2150 },
+      ];
+
+      // Flow spline guide
+      ctx.strokeStyle = dim || 'rgba(239, 68, 68, 0.12)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(nodes[0].x, nodes[0].y);
+      for (let i = 1; i < nodes.length; i++) {
+        const prev = nodes[i - 1];
+        const cur = nodes[i];
+        ctx.quadraticCurveTo((prev.x + cur.x) / 2, (prev.y + cur.y) / 2 - 10, cur.x, cur.y);
+      }
+      ctx.stroke();
+
+      // Draw targets
+      nodes.forEach((n) => {
+        const isHit = cycle >= n.hit;
+        const isRecent = isHit && cycle < n.hit + 300;
+
+        ctx.fillStyle = isHit ? accent : 'rgba(255, 255, 255, 0.08)';
+        ctx.strokeStyle = isHit ? '#ffffff' : accent;
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, 7, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        if (isRecent) {
+          const p = (cycle - n.hit) / 300;
+          drawHitRing(ctx, n.x, n.y, 7 + p * 18, accent, 1 - p);
+        }
+      });
+
+      // Flowing crosshair following rhythm
+      let chX = nodes[0].x;
+      let chY = nodes[0].y;
+      if (cycle < nodes[0].hit) {
+        chX = nodes[0].x;
+        chY = nodes[0].y;
+      } else if (cycle < nodes[1].hit) {
+        const p = (cycle - nodes[0].hit) / (nodes[1].hit - nodes[0].hit);
+        const ep = easeInOutCubic(p);
+        chX = nodes[0].x + (nodes[1].x - nodes[0].x) * ep;
+        chY = nodes[0].y + (nodes[1].y - nodes[0].y) * ep;
+      } else if (cycle < nodes[2].hit) {
+        const p = (cycle - nodes[1].hit) / (nodes[2].hit - nodes[1].hit);
+        const ep = easeInOutCubic(p);
+        chX = nodes[1].x + (nodes[2].x - nodes[1].x) * ep;
+        chY = nodes[1].y + (nodes[2].y - nodes[1].y) * ep;
+      } else if (cycle < nodes[3].hit) {
+        const p = (cycle - nodes[2].hit) / (nodes[3].hit - nodes[2].hit);
+        const ep = easeInOutCubic(p);
+        chX = nodes[2].x + (nodes[3].x - nodes[2].x) * ep;
+        chY = nodes[2].y + (nodes[3].y - nodes[2].y) * ep;
+      } else {
+        const p = (cycle - nodes[3].hit) / (2800 - nodes[3].hit);
+        const ep = easeInOutCubic(p);
+        chX = nodes[3].x + (nodes[0].x - nodes[3].x) * ep;
+        chY = nodes[3].y + (nodes[0].y - nodes[3].y) * ep;
+      }
+
+      drawCrosshair(ctx, chX, chY, 6, '#ffffff');
+    }
+  },
+
+  // 36. MICRO-CORRECTION: Coarse flick landing slightly off followed by instant micro-adjustment (micro-correction-precision)
+  'micro-correction': {
+    id: 'micro-correction',
+    label: 'Micro-Correction Precision',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 940) % 2800;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const target = { x: w * 0.68, y: h * 0.40 };
+      const origin = { x: w * 0.28, y: h * 0.65 };
+      const undershoot = { x: target.x - 15, y: target.y + 12 };
+
+      const flickEnd = 600;
+      const microEnd = 950;
+      const hitAt = 1000;
+
+      // Draw headshot target with precision concentric rings
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+      ctx.strokeStyle = accent;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(target.x, target.y, 11, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Precision micro dot
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(target.x, target.y, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Crosshair trajectory
+      let chX = origin.x;
+      let chY = origin.y;
+
+      if (cycle < flickEnd) {
+        // Stage 1: Coarse flick to undershoot position
+        const p = cycle / flickEnd;
+        const ep = easeInOutCubic(p);
+        chX = origin.x + (undershoot.x - origin.x) * ep;
+        chY = origin.y + (undershoot.y - origin.y) * ep;
+      } else if (cycle < microEnd) {
+        // Stage 2: Sharp micro-adjustment from undershoot straight to bullseye
+        const p = (cycle - flickEnd) / (microEnd - flickEnd);
+        const ep = easeInOutCubic(p);
+        chX = undershoot.x + (target.x - undershoot.x) * ep;
+        chY = undershoot.y + (target.y - undershoot.y) * ep;
+      } else if (cycle < 2000) {
+        // Locked on target
+        chX = target.x;
+        chY = target.y;
+      } else {
+        // Return to origin
+        const p = (cycle - 2000) / 800;
+        const ep = easeInOutCubic(p);
+        chX = target.x + (origin.x - target.x) * ep;
+        chY = target.y + (origin.y - target.y) * ep;
+      }
+
+      // Hit confirmation spark
+      if (cycle >= hitAt && cycle < hitAt + 400) {
+        const p = (cycle - hitAt) / 400;
+        drawHitRing(ctx, target.x, target.y, 11 + p * 20, accent, 1 - p);
+      }
+
+      drawCrosshair(ctx, chX, chY, 7, '#ffffff');
+    }
+  },
+
+  // 37. ANGLE-HOLD: Tactical corner pre-aim holding and instant peek elimination (angle-hold-trainer)
+  'angle-hold': {
+    id: 'angle-hold',
+    label: 'Tactical Angle Hold',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 860) % 2800;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const wallX = w * 0.58;
+      const headY = h * 0.48;
+      const crosshairX = wallX - 16;
+      const crosshairY = headY;
+
+      // Draw tactical doorway / wall obstacle
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+      ctx.fillRect(wallX, 0, w - wallX, h);
+
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(wallX, 0);
+      ctx.lineTo(wallX, h);
+      ctx.stroke();
+
+      // Enemy peek animation
+      const peekStart = 900;
+      const hitAt = 1250;
+      let enemyX = wallX + 18;
+
+      if (cycle >= peekStart && cycle < hitAt) {
+        const p = (cycle - peekStart) / (hitAt - peekStart);
+        enemyX = (wallX + 18) - p * 34;
+      } else if (cycle >= hitAt) {
+        enemyX = crosshairX;
+      }
+
+      if (cycle >= peekStart && cycle < hitAt) {
+        // Enemy silhouette
+        ctx.fillStyle = accent;
+        ctx.beginPath();
+        ctx.arc(enemyX, headY, 8, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (cycle >= hitAt && cycle < hitAt + 450) {
+        // Hit explosion right on the angle hold
+        const p = (cycle - hitAt) / 450;
+        drawHitRing(ctx, crosshairX, headY, 8 + p * 24, accent, 1 - p);
+      }
+
+      // Pre-aim crosshair holding angle
+      drawCrosshair(ctx, crosshairX, crosshairY, 7, cycle >= hitAt && cycle < hitAt + 200 ? accent : '#ffffff');
+    }
+  },
+
+  // 38. JITTER-DUEL: High-frequency erratic strafe tracking with physics damping (anti-strafe-jitter-duel)
+  'jitter-duel': {
+    id: 'jitter-duel',
+    label: 'Anti-Strafe Jitter Duel',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 910) % 2800;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const midX = w * 0.5;
+      const midY = h * 0.5;
+
+      // Fast erratic jitter target position
+      const jitterFreq = 0.012;
+      const targetX = midX + Math.sin(cycle * jitterFreq) * (w * 0.22) + Math.cos(cycle * 0.027) * (w * 0.08);
+      const targetY = midY + Math.sin(cycle * 0.005) * 6;
+
+      // Target core disc
+      ctx.fillStyle = accent;
+      ctx.beginPath();
+      ctx.arc(targetX, targetY, 8, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Slightly lag-damped crosshair tracking
+      const lagCycle = Math.max(0, cycle - 45);
+      const chX = midX + Math.sin(lagCycle * jitterFreq) * (w * 0.21) + Math.cos(lagCycle * 0.027) * (w * 0.07);
+      const chY = midY + Math.sin(lagCycle * 0.005) * 6;
+
+      // Tracking laser connection beam
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([2, 2]);
+      ctx.beginPath();
+      ctx.moveTo(chX, chY);
+      ctx.lineTo(targetX, targetY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      drawCrosshair(ctx, chX, chY, 7, '#ffffff');
+    }
+  },
+
+  // 39. ZIGZAG-TRACK: Sharp 45° evasive diagonal corner tracking (anti-zigzag-movement-trainer)
+  'zigzag-track': {
+    id: 'zigzag-track',
+    label: 'Anti-Zigzag Movement',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 970) % 3000;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const corners = [
+        { x: w * 0.16, y: h * 0.68 },
+        { x: w * 0.38, y: h * 0.28 },
+        { x: w * 0.62, y: h * 0.72 },
+        { x: w * 0.84, y: h * 0.32 },
+      ];
+
+      // Draw faint zigzag guide path
+      ctx.strokeStyle = dim || 'rgba(239, 68, 68, 0.12)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(corners[0].x, corners[0].y);
+      for (let i = 1; i < corners.length; i++) {
+        ctx.lineTo(corners[i].x, corners[i].y);
+      }
+      ctx.stroke();
+
+      // Target traversal across 3 segments
+      const segCount = corners.length - 1;
+      const p = (cycle / 3000) % 1;
+      const segIdx = Math.min(segCount - 1, Math.floor(p * segCount));
+      const segT = (p * segCount) - segIdx;
+
+      const p0 = corners[segIdx];
+      const p1 = corners[segIdx + 1];
+      const tgtX = p0.x + (p1.x - p0.x) * segT;
+      const tgtY = p0.y + (p1.y - p0.y) * segT;
+
+      // Evasive target
+      ctx.fillStyle = accent;
+      ctx.beginPath();
+      ctx.arc(tgtX, tgtY, 7.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Crosshair closely tracking with slight momentum
+      drawCrosshair(ctx, tgtX, tgtY, 7, '#ffffff');
+    }
+  },
+
+  // 40. CONTRAST-SNAP: Sudden contrast illumination and rapid acquisition (target-acquisition)
+  'contrast-snap': {
+    id: 'contrast-snap',
+    label: 'Contrast Target Acquisition',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 890) % 2700;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const targets = [
+        { x: w * 0.28, y: h * 0.38, lightAt: 200, hitAt: 750 },
+        { x: w * 0.72, y: h * 0.58, lightAt: 950, hitAt: 1500 },
+        { x: w * 0.48, y: h * 0.32, lightAt: 1700, hitAt: 2250 },
+      ];
+
+      // Draw decoy / dim targets
+      targets.forEach((tgt) => {
+        const isIlluminated = cycle >= tgt.lightAt && cycle < tgt.hitAt;
+        const isHit = cycle >= tgt.hitAt && cycle < tgt.hitAt + 350;
+
+        if (isIlluminated) {
+          // Sudden high-contrast flash
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.arc(tgt.x, tgt.y, 8, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.strokeStyle = accent;
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(tgt.x, tgt.y, 14, 0, Math.PI * 2);
+          ctx.stroke();
+        } else if (isHit) {
+          const hp = (cycle - tgt.hitAt) / 350;
+          drawHitRing(ctx, tgt.x, tgt.y, 8 + hp * 22, accent, 1 - hp);
+        } else {
+          // Blended dim target
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.arc(tgt.x, tgt.y, 6, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+        }
+      });
+
+      // Crosshair snap to illuminated target
+      let chX = w * 0.5;
+      let chY = h * 0.5;
+      if (cycle < targets[0].hitAt) {
+        const p = Math.max(0, (cycle - targets[0].lightAt) / (targets[0].hitAt - targets[0].lightAt));
+        const ep = easeInOutCubic(p);
+        chX = (w * 0.5) + (targets[0].x - w * 0.5) * ep;
+        chY = (h * 0.5) + (targets[0].y - h * 0.5) * ep;
+      } else if (cycle < targets[1].hitAt) {
+        const p = Math.max(0, (cycle - targets[1].lightAt) / (targets[1].hitAt - targets[1].lightAt));
+        const ep = easeInOutCubic(p);
+        chX = targets[0].x + (targets[1].x - targets[0].x) * ep;
+        chY = targets[0].y + (targets[1].y - targets[0].y) * ep;
+      } else if (cycle < targets[2].hitAt) {
+        const p = Math.max(0, (cycle - targets[2].lightAt) / (targets[2].hitAt - targets[2].lightAt));
+        const ep = easeInOutCubic(p);
+        chX = targets[1].x + (targets[2].x - targets[1].x) * ep;
+        chY = targets[1].y + (targets[2].y - targets[1].y) * ep;
+      } else {
+        chX = targets[2].x;
+        chY = targets[2].y;
+      }
+
+      drawCrosshair(ctx, chX, chY, 7, '#ffffff');
+    }
+  },
+
+  // 41. TARGET-PRIORITY: Priority threat order triage (target-prioritization)
+  'target-priority': {
+    id: 'target-priority',
+    label: 'Target Prioritization',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 930) % 3000;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const targets = [
+        { x: w * 0.30, y: h * 0.60, priority: '1', hit: 850, isUrgent: true },
+        { x: w * 0.70, y: h * 0.35, priority: '2', hit: 1700, isUrgent: false },
+        { x: w * 0.50, y: h * 0.70, priority: '3', hit: 2550, isUrgent: false },
+      ];
+
+      targets.forEach((tgt) => {
+        if (cycle < tgt.hit) {
+          // Threat urgency ring
+          ctx.strokeStyle = tgt.isUrgent ? accent : 'rgba(255, 255, 255, 0.3)';
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.arc(tgt.x, tgt.y, 12, 0, Math.PI * 2);
+          ctx.stroke();
+
+          // Target core disc
+          ctx.fillStyle = tgt.isUrgent ? accent : 'rgba(255, 255, 255, 0.1)';
+          ctx.beginPath();
+          ctx.arc(tgt.x, tgt.y, 8, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Priority badge number
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 8px ui-monospace, monospace';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(tgt.priority, tgt.x, tgt.y);
+        } else if (cycle < tgt.hit + 350) {
+          const p = (cycle - tgt.hit) / 350;
+          drawHitRing(ctx, tgt.x, tgt.y, 8 + p * 20, accent, 1 - p);
+        }
+      });
+
+      // Crosshair sequential elimination in priority order (1 -> 2 -> 3)
+      let chX = w * 0.5;
+      let chY = h * 0.5;
+      if (cycle < targets[0].hit) {
+        const p = cycle / targets[0].hit;
+        const ep = easeInOutCubic(p);
+        chX = (w * 0.5) + (targets[0].x - w * 0.5) * ep;
+        chY = (h * 0.5) + (targets[0].y - h * 0.5) * ep;
+      } else if (cycle < targets[1].hit) {
+        const p = (cycle - targets[0].hit) / (targets[1].hit - targets[0].hit);
+        const ep = easeInOutCubic(p);
+        chX = targets[0].x + (targets[1].x - targets[0].x) * ep;
+        chY = targets[0].y + (targets[1].y - targets[0].y) * ep;
+      } else if (cycle < targets[2].hit) {
+        const p = (cycle - targets[1].hit) / (targets[2].hit - targets[1].hit);
+        const ep = easeInOutCubic(p);
+        chX = targets[1].x + (targets[2].x - targets[1].x) * ep;
+        chY = targets[1].y + (targets[2].y - targets[1].y) * ep;
+      }
+
+      drawCrosshair(ctx, chX, chY, 7, '#ffffff');
+    }
+  },
+
+  // 42. SWITCHING-SWARM: High-tempo target switching through 5-target swarm (target-switching-swarm)
+  'switching-swarm': {
+    id: 'switching-swarm',
+    label: 'Target Switching Swarm',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 850) % 2800;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const swarm = [
+        { x: w * 0.22, y: h * 0.38, hit: 450 },
+        { x: w * 0.42, y: h * 0.65, hit: 900 },
+        { x: w * 0.60, y: h * 0.32, hit: 1350 },
+        { x: w * 0.78, y: h * 0.62, hit: 1800 },
+        { x: w * 0.50, y: h * 0.48, hit: 2250 },
+      ];
+
+      swarm.forEach((node) => {
+        if (cycle < node.hit) {
+          ctx.fillStyle = accent;
+          ctx.beginPath();
+          ctx.arc(node.x, node.y, 6.5, 0, Math.PI * 2);
+          ctx.fill();
+        } else if (cycle < node.hit + 300) {
+          const p = (cycle - node.hit) / 300;
+          drawHitRing(ctx, node.x, node.y, 6.5 + p * 16, accent, 1 - p);
+        }
+      });
+
+      // Rapid snap chain
+      let chX = swarm[0].x;
+      let chY = swarm[0].y;
+      for (let i = 0; i < swarm.length; i++) {
+        const cur = swarm[i];
+        const prev = i > 0 ? swarm[i - 1] : { x: w * 0.5, y: h * 0.5 };
+        const prevHit = i > 0 ? swarm[i - 1].hit : 0;
+        if (cycle >= prevHit && cycle < cur.hit) {
+          const p = (cycle - prevHit) / (cur.hit - prevHit);
+          const ep = easeInOutCubic(p);
+          chX = prev.x + (cur.x - prev.x) * ep;
+          chY = prev.y + (cur.y - prev.y) * ep;
+          break;
+        } else if (i === swarm.length - 1 && cycle >= cur.hit) {
+          chX = cur.x;
+          chY = cur.y;
+        }
+      }
+
+      drawCrosshair(ctx, chX, chY, 6, '#ffffff');
+    }
+  },
+
+  // 43. RECOIL-SPRAY: Recoil pattern compensation counter-pull keeping tight impact group (recoil-control)
+  'recoil-spray': {
+    id: 'recoil-spray',
+    label: 'Recoil Pattern Compensation',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 960) % 2800;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const targetPos = { x: w * 0.5, y: h * 0.36 };
+
+      // Bullseye target
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(targetPos.x, targetPos.y, 16, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.fillStyle = accent;
+      ctx.beginPath();
+      ctx.arc(targetPos.x, targetPos.y, 5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Recoil spray phase: 400ms to 2200ms
+      const isFiring = cycle >= 400 && cycle < 2200;
+      let recoilP = 0;
+      if (isFiring) {
+        recoilP = (cycle - 400) / 1800;
+      }
+
+      // Gun reticle pulls downward to compensate upward muzzle climb
+      // S-curve recoil offset: pulls down and counter-sways horizontally
+      const reticleY = targetPos.y + (isFiring ? recoilP * 26 : 0);
+      const reticleX = targetPos.x + (isFiring ? Math.sin(recoilP * Math.PI * 3) * 10 : 0);
+
+      // Gun reticle position
+      drawCrosshair(ctx, reticleX, reticleY, 7, isFiring ? accent : '#ffffff');
+
+      // Clustered bullet impact impacts on target
+      if (isFiring) {
+        const shotCount = Math.floor(recoilP * 12);
+        ctx.fillStyle = '#ffffff';
+        for (let i = 0; i < shotCount; i++) {
+          const jitterX = targetPos.x + (Math.sin(i * 9) * 4);
+          const jitterY = targetPos.y + (Math.cos(i * 7) * 4);
+          ctx.beginPath();
+          ctx.arc(jitterX, jitterY, 1.8, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // Active muzzle spark ring at target center
+        drawHitRing(ctx, targetPos.x, targetPos.y, 5 + (cycle % 200) / 200 * 12, accent, 0.6);
+      }
+    }
+  },
+
+  // 44. VERTICAL-PARABOLA: Parabolic aerial jump arc tracking (vertical-air-track)
+  'vertical-parabola': {
+    id: 'vertical-parabola',
+    label: 'Vertical Parabolic Air Track',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 915) % 3000;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const startX = w * 0.18;
+      const endX = w * 0.82;
+      const groundY = h * 0.78;
+      const peakY = h * 0.22;
+
+      // Draw faint parabolic aerial flight curve
+      ctx.strokeStyle = dim || 'rgba(239, 68, 68, 0.12)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(startX, groundY);
+      ctx.quadraticCurveTo((startX + endX) / 2, peakY - 14, endX, groundY);
+      ctx.stroke();
+
+      // Current airborne target position
+      const p = (cycle / 3000);
+      const tgtX = startX + (endX - startX) * p;
+      // Parabolic altitude: 4 * h * p * (1 - p)
+      const altitude = 4 * (groundY - peakY) * p * (1 - p);
+      const tgtY = groundY - altitude;
+
+      // Airborne target
+      ctx.fillStyle = accent;
+      ctx.beginPath();
+      ctx.arc(tgtX, tgtY, 8, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Tracking lock crosshair
+      drawCrosshair(ctx, tgtX, tgtY, 7, '#ffffff');
+    }
+  },
+
+  // 45. STRAFE-ADAD: Horizontal ADAD erratic strafe tracking with direction indicator (strafe-tracking)
+  'strafe-adad': {
+    id: 'strafe-adad',
+    label: 'ADAD Strafe Tracking',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 925) % 3000;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const midX = w * 0.5;
+      const midY = h * 0.5;
+
+      // Compound strafe waveform: long strafe + short reversal
+      const s1 = Math.sin(cycle * 0.003) * (w * 0.28);
+      const s2 = Math.sin(cycle * 0.009) * (w * 0.08);
+      const tgtX = midX + s1 + s2;
+      const tgtY = midY;
+
+      // Directional velocity indicator line
+      const vel = Math.cos(cycle * 0.003) + Math.cos(cycle * 0.009);
+      const dirArrow = vel > 0 ? 1 : -1;
+
+      // Target
+      ctx.fillStyle = accent;
+      ctx.beginPath();
+      ctx.arc(tgtX, tgtY, 8, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Micro velocity arrow behind target
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(tgtX - dirArrow * 14, tgtY);
+      ctx.lineTo(tgtX - dirArrow * 8, tgtY);
+      ctx.stroke();
+
+      // Close tracking crosshair
+      drawCrosshair(ctx, tgtX, tgtY, 7, '#ffffff');
+    }
+  },
+
+  // 46. SMOOTH-PURSUIT: 360Hz continuous figure-8 orbital pursuit with smoothness index (pro-smooth-pursuit)
+  'smooth-pursuit': {
+    id: 'smooth-pursuit',
+    label: '360Hz Smooth Pursuit',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 945) % 3200;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const midX = w * 0.5;
+      const midY = h * 0.5;
+      const rx = w * 0.30;
+      const ry = h * 0.25;
+
+      // Draw faint figure-8 / infinity orbital track
+      ctx.strokeStyle = dim || 'rgba(239, 68, 68, 0.12)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      const steps = 60;
+      for (let i = 0; i <= steps; i++) {
+        const ang = (i / steps) * Math.PI * 2;
+        const ox = midX + Math.sin(ang) * rx;
+        const oy = midY + Math.sin(ang * 2) * (ry * 0.8);
+        if (i === 0) ctx.moveTo(ox, oy);
+        else ctx.lineTo(ox, oy);
+      }
+      ctx.stroke();
+
+      // Target position along figure-8
+      const ang = (cycle / 3200) * Math.PI * 2;
+      const tgtX = midX + Math.sin(ang) * rx;
+      const tgtY = midY + Math.sin(ang * 2) * (ry * 0.8);
+
+      // Target core
+      ctx.fillStyle = accent;
+      ctx.beginPath();
+      ctx.arc(tgtX, tgtY, 7.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Precision tracking beam & crosshair
+      drawCrosshair(ctx, tgtX, tgtY, 7, '#ffffff');
+
+      // Smoothness readout badge
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+      ctx.font = '7px ui-monospace, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('SMOOTHNESS: 99.4%', midX, h * 0.86);
+    }
+  },
+};
+
+export function getScene(id) {
+  return SCENES[id] || null;
+}

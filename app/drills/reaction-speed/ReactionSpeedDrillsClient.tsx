@@ -17,6 +17,8 @@ import DrillCarousel from '@/components/drill/DrillCarousel';
 import StickyMobileCta from '@/components/StickyMobileCta';
 import AdjacentHubs from '@/components/AdjacentHubs';
 import { useTranslation } from '@/lib/i18n/useTranslation';
+import { getLocalizedDrill } from '@/lib/i18n/drillNames';
+import { hasLocalizedRoute } from '@/lib/i18n/locales';
 
 const FOLDER_TO_STORAGE_KEY: Record<string, string> = {
   'market-doors-pursuit': 'skilldrills_market_doors_v2',
@@ -24,7 +26,7 @@ const FOLDER_TO_STORAGE_KEY: Record<string, string> = {
 };
 
 export default function ReactionSpeedDrillsClient() {
-  const { t } = useTranslation();
+  const { locale, localizeHref, t } = useTranslation();
   const [isClient, setIsClient] = useState(false);
   const [drillLevels, setDrillLevels] = useState<Record<string, number>>({});
 
@@ -97,21 +99,21 @@ export default function ReactionSpeedDrillsClient() {
         <nav aria-label="Breadcrumb" className="mb-8">
           <ol className="flex items-center gap-2 text-xs sm:text-sm text-ink-3 font-mono">
             <li>
-              <Link href="/" className="flex items-center gap-1.5 hover:text-amber-400 transition-colors">
+              <Link href={localizeHref('/')} className="flex items-center gap-1.5 hover:text-amber-400 transition-colors">
                 <Home className="w-4 h-4" />
-                <span>HQ</span>
+                <span>{t('ui.nav.hq', 'HQ')}</span>
               </Link>
             </li>
             <li><ChevronRight className="w-3.5 h-3.5 text-hairline-2" /></li>
             <li>
-              <Link href="/drills" className="hover:text-amber-400 transition-colors">
-                DRILLS
+              <Link href={hasLocalizedRoute(locale, '/drills') ? localizeHref('/drills') : '/drills'} className="hover:text-amber-400 transition-colors">
+                {t('ui.nav.drills', 'DRILLS')}
               </Link>
             </li>
             <li><ChevronRight className="w-3.5 h-3.5 text-hairline-2" /></li>
             <li>
               <span className="text-amber-400 font-semibold uppercase tracking-wider" aria-current="page">
-                REACTION SPEED
+                {t('header.reaction', 'REACTION SPEED')}
               </span>
             </li>
           </ol>
@@ -131,18 +133,22 @@ export default function ReactionSpeedDrillsClient() {
         <Reveal>
           <DrillCarousel
             headingId="reaction-drills"
-            heading="Reaction drills"
+            heading={t('hubs.reaction-speed.drillsHeading', 'Reaction drills')}
             accent="amber"
             icon={Zap}
-            allLabel="View all"
-            drills={orderedReactiveDrills.map((drill) => ({
-              href: drill.href,
-              name: drill.name,
-              tagline: getDrillTagline(drill.href, drill.description),
-              difficulty: drill.difficulty,
-              duration: drill.duration,
-              badge: drillLevels[drill.folderName] ? `Lv. ${drillLevels[drill.folderName]}` : null,
-            }))}
+            allLabel={t('ui.viewAll', 'View all')}
+            drills={orderedReactiveDrills.map((drill) => {
+              const fallbackTagline = getDrillTagline(drill.href, drill.description);
+              const localized = getLocalizedDrill(drill.href, locale, drill.name, fallbackTagline);
+              return {
+                href: drill.href,
+                name: localized.name,
+                tagline: localized.tagline,
+                difficulty: drill.difficulty,
+                duration: drill.duration,
+                badge: drillLevels[drill.folderName] ? `Lv. ${drillLevels[drill.folderName]}` : null,
+              };
+            })}
           />
         </Reveal>
 
@@ -151,15 +157,19 @@ export default function ReactionSpeedDrillsClient() {
         {/* Back Link */}
         <div className="mt-12 border-t border-hairline pt-6">
           <Link 
-            href="/drills"
+            href={hasLocalizedRoute(locale, '/drills') ? localizeHref('/drills') : '/drills'}
             className="inline-flex items-center gap-2 text-xs font-mono uppercase font-bold text-ink-3 hover:text-ink-1 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            Return to All Sectors
+            {t('ui.returnToAllSectors', 'Return to All Sectors')}
           </Link>
         </div>
 
-        <StickyMobileCta href="/drills/reaction-speed/reaction-time-test" label="Start Reaction Test" categoryName="Reaction Speed" />
+        <StickyMobileCta
+          href={hasLocalizedRoute(locale, '/drills/reaction-speed/reaction-time-test') ? localizeHref('/drills/reaction-speed/reaction-time-test') : '/drills/reaction-speed/reaction-time-test'}
+          label={t('hubs.reaction-speed.startReactionTest', 'Start Reaction Test')}
+          categoryName={t('header.reaction', 'Reaction Speed')}
+        />
         <SiteFooter />
       </div>
     </div>

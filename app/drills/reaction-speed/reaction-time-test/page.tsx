@@ -1,5 +1,6 @@
 import ReactionTimeTestWrapper from './ReactionTimeTestWrapper';
 import DrillGuide from '@/components/drill/DrillGuide';
+import { getAlternateLanguages } from '@/lib/i18n/locales';
 
 // ============================================================
 // SEO RESEARCH FINDINGS — reaction-time-test
@@ -40,6 +41,7 @@ export const metadata = {
   robots: { index: true, follow: true },
   alternates: {
     canonical: 'https://skilldrills.online/drills/reaction-speed/reaction-time-test',
+    languages: getAlternateLanguages('/drills/reaction-speed/reaction-time-test'),
   },
 };
 

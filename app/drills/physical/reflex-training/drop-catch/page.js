@@ -1,5 +1,4 @@
 import DropCatchClient from './DropCatchClient';
-import { getAlternateLanguages } from '@/lib/i18n/locales';
 
 // ============================================================
 // SEO RESEARCH FINDINGS — drop-catch
@@ -27,9 +26,12 @@ export const metadata = {
     'falling targets reflex game', 'improve clicking reflex speed gaming',
     'impulse control target recognition game', 'esports vertical reflex acquisition drill'
   ],
+  // No `languages` here on purpose. This route is not in LOCALIZED_ROUTES, so
+  // there is no /pt, /es, /ja, /de or /ko page.js for it -- emitting hreflang
+  // would advertise five URLs that all 404. Add it back only together with the
+  // locale pages themselves.
   alternates: {
     canonical: 'https://skilldrills.online/drills/physical/reflex-training/drop-catch',
-    languages: getAlternateLanguages('/drills/physical/reflex-training/drop-catch'),
   },
   robots: { index: true, follow: true },
   openGraph: {

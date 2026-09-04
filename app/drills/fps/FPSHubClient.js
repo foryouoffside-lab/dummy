@@ -25,6 +25,8 @@ import SiteFooter from '@/components/SiteFooter';
 import Reveal from '@/components/Reveal';
 import AdjacentHubs from '@/components/AdjacentHubs';
 import { useTranslation } from '@/lib/i18n/useTranslation';
+import DrillPreview from '@/components/drill/DrillPreview';
+import { getDrillPreview } from '@/lib/drillPreviews';
 
 // Mapping: drill folderName → actual localStorage STORAGE_KEY
 const FOLDER_TO_STORAGE_KEY = {
@@ -215,12 +217,12 @@ export default function FPSHubClient() {
                 levels[d.folderName] = parsed.bestLevel;
                 break;
               }
-            } catch (e) {}
+            } catch {}
           }
         }
       });
       setDrillLevels(levels);
-    } catch (e) {}
+    } catch {}
   }, [isClient]);
 
   // Base list of all FPS drills enriched with presentation metadata
@@ -465,6 +467,7 @@ export default function FPSHubClient() {
               const Icon = drill.icon;
               const userLevel = drillLevels[drill.folderName];
               const diffStyle = DIFFICULTY_STYLES[drill.difficulty] || DIFFICULTY_STYLES.Medium;
+              const hasPreview = Boolean(getDrillPreview(drill.href));
 
               return (
                 <Link
@@ -476,25 +479,48 @@ export default function FPSHubClient() {
                   <div className="absolute top-0 left-4 right-4 h-[2px] bg-gradient-to-r from-red-500 to-orange-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
                   <div>
-                    {/* Header: Icon, Tags & Difficulty Badge */}
-                    <div className="flex items-center justify-between gap-2 mb-3">
-                      <div className="w-9 h-9 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 flex items-center justify-center shrink-0 group-hover:bg-red-500/20 group-hover:text-red-300 transition-colors">
-                        <Icon className="w-4 h-4" />
-                      </div>
-
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        {userLevel && (
-                          <span className="px-2 py-0.5 rounded-md bg-red-500/15 border border-red-500/30 text-red-300 text-[9px] font-mono font-bold tracking-wider">
-                            Lv. {userLevel}
+                    {/* Header: Live Preview or Static Icon, Tags & Difficulty Badge */}
+                    {hasPreview ? (
+                      <div className="relative mb-3.5">
+                        <DrillPreview href={drill.href} accent="red" icon={Icon} className="w-full" />
+                        <div className="absolute top-2.5 left-2.5 z-10">
+                          <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg border backdrop-blur-md bg-surface-1/80 border-red-500/20 text-red-400 shadow-sm">
+                            <Icon className="w-3.5 h-3.5" />
                           </span>
-                        )}
-                        <span
-                          className={`px-2 py-0.5 rounded-md border text-[9px] font-mono font-bold uppercase tracking-wider ${diffStyle}`}
-                        >
-                          {drill.difficulty}
-                        </span>
+                        </div>
+                        <div className="absolute top-2.5 right-2.5 z-10 flex items-center gap-1.5">
+                          {userLevel && (
+                            <span className="px-2 py-0.5 rounded-md bg-red-500/15 border border-red-500/30 text-red-300 text-[9px] font-mono font-bold tracking-wider backdrop-blur-md">
+                              Lv. {userLevel}
+                            </span>
+                          )}
+                          <span
+                            className={`px-2 py-0.5 rounded-md border text-[9px] font-mono font-bold uppercase tracking-wider backdrop-blur-md bg-surface-1/80 ${diffStyle}`}
+                          >
+                            {drill.difficulty}
+                          </span>
+                        </div>
                       </div>
-                    </div>
+                    ) : (
+                      <div className="flex items-center justify-between gap-2 mb-3">
+                        <div className="w-9 h-9 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 flex items-center justify-center shrink-0 group-hover:bg-red-500/20 group-hover:text-red-300 transition-colors">
+                          <Icon className="w-4 h-4" />
+                        </div>
+
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          {userLevel && (
+                            <span className="px-2 py-0.5 rounded-md bg-red-500/15 border border-red-500/30 text-red-300 text-[9px] font-mono font-bold tracking-wider">
+                              Lv. {userLevel}
+                            </span>
+                          )}
+                          <span
+                            className={`px-2 py-0.5 rounded-md border text-[9px] font-mono font-bold uppercase tracking-wider ${diffStyle}`}
+                          >
+                            {drill.difficulty}
+                          </span>
+                        </div>
+                      </div>
+                    )}
 
                     {/* Discipline Eyebrow */}
                     <div className="text-[10px] font-mono uppercase tracking-wider text-red-400/80 mb-1">

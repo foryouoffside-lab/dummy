@@ -266,13 +266,16 @@ MARKET_LANG = {
     "br": "pt-BR", "pt": "pt-PT", "es": "es-ES", "mx": "es-MX", "ar": "es-AR",
     "jp": "ja-JP", "kr": "ko-KR", "de": "de-DE", "at": "de-AT", "ch": "de-CH",
     "fr": "fr-FR", "it": "it-IT", "nl": "nl-NL", "pl": "pl-PL", "ru": "ru-RU",
-    "tr": "tr-TR", "id": "id-ID", "th": "th-TH", "vn": "vi-VN", "tw": "zh-TW",
+    "tr": "tr-TR", "id": "id-ID", "th": "th-TH", "vn": "vi-VN", "vi": "vi-VN",
+    "se": "sv-SE", "tw": "zh-TW",
 }
 
 
 def market(country=None, language=None):
     """Resolve a (country, language) pair, defaulting language from the map."""
     c = (country or "us").lower()
+    if c == "vi":
+        c = "vn"
     return c, language or MARKET_LANG.get(c, "en-US")
 
 

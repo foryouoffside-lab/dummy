@@ -4,7 +4,10 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { DRILLS } from '@/lib/drillsRegistry';
 import { getRelatedDrills } from '@/lib/relatedDrills';
-import { DRILL_SEO } from '@/lib/drillSeo';
+import { DRILL_SEO, getDrillSeo } from '@/lib/drillSeo';
+import { useTranslation } from '@/lib/i18n/useTranslation';
+import { stripLocale, hasLocalizedRoute } from '@/lib/i18n/locales';
+import { getLocalizedDrill } from '@/lib/i18n/drillNames';
 
 // Keyword-bearing cross-links between drill pages.
 //
@@ -17,7 +20,7 @@ import { DRILL_SEO } from '@/lib/drillSeo';
 // identical on the server and the client — the links are in the initial HTML
 // and a crawler sees them without executing any JavaScript. That matters here:
 // the GSC URL Inspection API showed 64 of 81 drill URLs with no referring URL
-// at all, which is exactly why they never got crawled.
+// at all, which is why they sat in "Discovered - currently not indexed".
 //
 // The visible link text is the drill's target search phrase from lib/drillSeo.js
 // rather than its product name. Names like "Ghost-Link Tracking" and "Triangular
@@ -45,14 +48,18 @@ const RELATION_LABEL = {
 
 export default function RelatedDrills() {
   const pathname = usePathname();
-  const drill = DRILLS.find((d) => d.href === pathname);
+  const { locale, localizeHref } = useTranslation();
+  const cleanPath = stripLocale(pathname || '');
+  const drill = DRILLS.find((d) => d.href === cleanPath);
   if (!drill) return null;
 
   const related = getRelatedDrills(drill.href, 6);
   if (related.length === 0) return null;
 
   const hub = CATEGORY_HUB[drill.category];
-  const term = DRILL_SEO[drill.href]?.term;
+  const localizedSelfSeo = getDrillSeo(drill.href, locale);
+  const localizedSelf = getLocalizedDrill(drill.href, locale, drill.name);
+  const term = localizedSelfSeo?.term || localizedSelf.name;
 
   return (
     <section
@@ -73,33 +80,39 @@ export default function RelatedDrills() {
 
         <nav aria-label="Related drills">
           <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {related.map((r) => (
-              <li key={r.href}>
-                <Link
-                  href={r.href}
-                  className="group flex h-full flex-col gap-1.5 p-4 rounded-xl border border-gray-800 bg-white/[0.02] hover:bg-white/[0.05] hover:border-gray-700 transition-colors duration-200"
-                >
-                  <span className="text-sm font-bold text-white group-hover:text-blue-300 transition-colors">
-                    {r.anchor}
-                  </span>
-                  <span className="text-xs text-gray-400">{r.name}</span>
-                  <span className="mt-auto pt-2 text-[11px] uppercase tracking-wide text-gray-500">
-                    {RELATION_LABEL[r.relation]} · {r.categoryLabel} · {r.duration}
-                  </span>
-                </Link>
-              </li>
-            ))}
+            {related.map((r) => {
+              const href = hasLocalizedRoute(locale, r.href) ? localizeHref(r.href) : r.href;
+              const localizedSeo = getDrillSeo(r.href, locale);
+              const anchor = localizedSeo?.anchor || r.anchor;
+              const name = getLocalizedDrill(r.href, locale, r.name).name;
+              return (
+                <li key={r.href}>
+                  <Link
+                    href={href}
+                    className="group flex h-full flex-col gap-1.5 p-4 rounded-xl border border-gray-800 bg-white/[0.02] hover:bg-white/[0.05] hover:border-gray-700 transition-colors duration-200"
+                  >
+                    <span className="text-sm font-bold text-white group-hover:text-blue-300 transition-colors">
+                      {anchor}
+                    </span>
+                    <span className="text-xs text-gray-400">{name}</span>
+                    <span className="mt-auto pt-2 text-[11px] uppercase tracking-wide text-gray-500">
+                      {RELATION_LABEL[r.relation]} · {r.categoryLabel} · {r.duration}
+                    </span>
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         </nav>
 
         {hub && (
           <p className="mt-6 text-sm text-gray-400">
             Or browse every{' '}
-            <Link href={hub.href} className="text-blue-400 hover:text-blue-300 underline underline-offset-2">
+            <Link href={hasLocalizedRoute(locale, hub.href) ? localizeHref(hub.href) : hub.href} className="text-blue-400 hover:text-blue-300 underline underline-offset-2">
               {hub.label} drill
             </Link>
             {' '}·{' '}
-            <Link href="/drills" className="text-blue-400 hover:text-blue-300 underline underline-offset-2">
+            <Link href={hasLocalizedRoute(locale, '/drills') ? localizeHref('/drills') : '/drills'} className="text-blue-400 hover:text-blue-300 underline underline-offset-2">
               all {DRILLS.length} free online drills
             </Link>
           </p>
