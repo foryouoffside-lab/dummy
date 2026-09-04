@@ -82,18 +82,18 @@ export default function ObjectLocationPage() {
             "mainEntity": [
               {
                 "@type": "Question",
-                "name": "What is the Object Location Pro Drill?",
+                "name": "What is the Object Location Drill?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "A free spatial position memory exercise. Memorize emoji object locations on a grid for 1.5 seconds, then tap the position of the target object on a blank grid."
+                  "text": "A free spatial position memory exercise. Memorize illuminated object locations, then tap the target object's position on a blank grid."
                 }
               },
               {
                 "@type": "Question",
-                "name": "How does progressive grid expansion work?",
+                "name": "How does progressive difficulty work?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Starts at 3x3 grid with 2 objects. Clearing rounds adds more objects and expands the grid to 4x4, 5x5, 6x6, and 7x7."
+                  "text": "Starts on a 3x3 grid with 2 objects. Clearing rounds adds objects and expands the grid up to 7x7."
                 }
               },
               {
@@ -101,7 +101,7 @@ export default function ObjectLocationPage() {
                 "name": "Are there negative score or time penalties?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "No. Tapping an incorrect location never deducts score points or reduces remaining timer seconds — the round just replays at the same difficulty."
+                  "text": "No. Tapping a wrong location never deducts score points or reduces remaining timer seconds — the round just replays at the same difficulty."
                 }
               },
               {
@@ -109,7 +109,7 @@ export default function ObjectLocationPage() {
                 "name": "Does difficulty decrease on mistakes?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "No. The level remains unchanged when a mistake is made, allowing you to master your current level."
+                  "text": "No. Your level only ever goes up — a mistake never takes you back down, so you can safely master your current grid size."
                 }
               },
               {
