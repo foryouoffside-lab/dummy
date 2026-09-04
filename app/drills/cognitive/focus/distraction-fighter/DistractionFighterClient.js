@@ -105,7 +105,7 @@ const RELATED_DRILLS = [
   { id: "symbol-matching", name: "Symbol Matching", cat: "Processing Speed", desc: "Match rapid symbol pairs under strict time pressure.", href: "/drills/cognitive/processing-speed/symbol-matching" }
 ];
 
-export default function DistractionFighterClient() {
+export default function DistractionFighterClient({ faqs }) {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
   useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
@@ -724,7 +724,7 @@ export default function DistractionFighterClient() {
               onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-sans">
-                {FAQ_ITEMS.map((item, i) => (
+                {(faqs || FAQ_ITEMS).map((item, i) => (
                   <div key={i} className="bg-[#0d0d18] border border-white/5 rounded-xl p-5">
                     <h4 className="text-sm font-bold text-gray-200 mb-2">{item.q}</h4>
                     <p className="text-xs text-gray-400 leading-relaxed">{item.a}</p>

@@ -1,4 +1,5 @@
 import DistractionFighterClient from './DistractionFighterClient';
+import { getAlternateLanguages } from '@/lib/i18n/locales';
 
 // ============================================================
 // SEO RESEARCH FINDINGS — distraction-fighter
@@ -155,6 +156,7 @@ export const metadata = {
   ],
   alternates: {
     canonical: "https://skilldrills.online/drills/cognitive/focus/distraction-fighter",
+    languages: getAlternateLanguages('/drills/cognitive/focus/distraction-fighter'),
   },
   robots: { index: true, follow: true },
   openGraph: {
@@ -179,7 +181,9 @@ export default function DistractionFighterPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }} />
-      <DistractionFighterClient />
+      <DistractionFighterClient
+        faqs={faqSchema.mainEntity.map((e) => ({ q: e.name, a: e.acceptedAnswer.text }))}
+      />
     </>
   );
 }
