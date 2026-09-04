@@ -931,6 +931,10 @@ export default function ReflexTrainingDrillClient() {
                 <FAQItem q="Is this reflex training drill free?" a="Yes, all drills on SkillDrills are 100% free with no signups, downloads, or pop-up ads required." />
                 <FAQItem q="How does continuous difficulty scaling work?" a="Difficulty scales dynamically based on your score and combo streak, increasing concurrent targets and shortening time-to-live windows." />
                 <FAQItem q="Is there a time penalty for missing or target timeouts?" a="By default, missing or letting a target time out only resets your combo streak. An opt-in time penalty (-0.8s per error) is available in session settings for hard-mode training." />
+                <FAQItem q="Can you train divided attention and multi-target reflexes?" a="Yes. Repeated exposure to simultaneous stimuli strengthens parallel visual processing and reduces the tunnel-vision effect of fixating on one target." />
+                <FAQItem q="How does this drill differ from single-target reaction tests?" a="Single-target tests present one stimulus at a time. This drill spawns 2 to 5 targets simultaneously, so you must scan and clear a full burst under a shared time limit." />
+                <FAQItem q="Which target should I clear first in a burst?" a="Watch the depleting countdown ring around each target and prioritize whichever is closest to timing out, not just the nearest one to your cursor." />
+                <FAQItem q="What is a good score on this drill?" a="A score above 5,000 indicates strong divided-attention reflexes, while scores exceeding 10,000 represent elite multi-target acquisition speed." />
               </div>
             </DrillAccordion>
           </div>

@@ -121,26 +121,10 @@ const faqSchema = {
   "mainEntity": [
     {
       "@type": "Question",
-      "name": "What is Corner Checking Trainer (Market Doors Pursuit)?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "It is a visual reflex drill designed to train saccadic eye movements, corner checking, and angle clearing across multiple entry doorways."
-      }
-    },
-    {
-      "@type": "Question",
       "name": "What does 'slicing the pie' mean in FPS games?",
       "acceptedAnswer": {
         "@type": "Answer",
         "text": "Slicing the pie is a tactical technique where a player sweeps around a corner incrementally to clear narrow angles one by one."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "What are saccadic eye movements?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Saccades are rapid, jerky eye movements between points of fixation. Fast saccades allow gamers to scan multiple angles quickly."
       }
     },
     {
@@ -153,14 +137,6 @@ const faqSchema = {
     },
     {
       "@type": "Question",
-      "name": "Why is corner checking important in tactical shooters?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Failing to check a corner often leads to instant elimination by holding defenders. Dedicated practice builds automatic checking habits."
-      }
-    },
-    {
-      "@type": "Question",
       "name": "Does this drill train choice reaction time?",
       "acceptedAnswer": {
         "@type": "Answer",
@@ -169,74 +145,10 @@ const faqSchema = {
     },
     {
       "@type": "Question",
-      "name": "How does adaptive level difficulty work?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "As your score increases, target exposure times shorten, targets shrink in size, and doorway spawn delays speed up."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Is this corner checking trainer free?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes, all drills on SkillDrills are 100% free with no downloads, signups, or pop-up ads."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Does monitor refresh rate affect corner checking speed?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Higher refresh rate monitors (144Hz+) render doorway target appearances with lower display latency, improving visual re-acquisition."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "How often should I practice corner checking?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "A daily 5-10 minute session as part of your FPS pre-game warmup routine conditions consistent saccadic eye sweeps."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "What mechanical skills does Market Doors Pursuit train?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "It isolates saccadic eye speed, spatial awareness, choice reaction speed, and crosshair placement at entry angles."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Can traditional athletes benefit from saccadic vision training?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes. Sports vision research shows that saccadic eye training improves peripheral scanning and reaction speed in court/field sports."
-      }
-    },
-    {
-      "@type": "Question",
       "name": "Should I look at the doorways or my crosshair?",
       "acceptedAnswer": {
         "@type": "Answer",
         "text": "Focus your eyes directly on the open doorway spaces while allowing your motor reflex to snap the crosshair onto emerging targets."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "What games benefit most from corner checking training?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Tactical FPS titles such as CS2, Valorant, Rainbow Six Siege, and Tarkov benefit heavily from disciplined angle clearing."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Does this drill support mobile devices?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes! It features touch-optimized hitpads and automatic portrait orientation warnings."
       }
     }
   ]

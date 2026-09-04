@@ -120,22 +120,6 @@ const faqSchema = {
   "mainEntity": [
     {
       "@type": "Question",
-      "name": "What is a reflex training drill?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "It is an interactive vision utility where several targets flash on screen at once and you must tap every one before it times out, measuring divided-attention reflex speed."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "What is divided attention in gaming?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Divided attention is the ability to process and react to multiple simultaneous stimuli instead of tracking a single target — critical when several enemies or events appear at once."
-      }
-    },
-    {
-      "@type": "Question",
       "name": "Can you train divided attention and multi-target reflexes?",
       "acceptedAnswer": {
         "@type": "Answer",
@@ -152,82 +136,10 @@ const faqSchema = {
     },
     {
       "@type": "Question",
-      "name": "Does monitor refresh rate affect burst reflex scores?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes. Higher refresh rate monitors (144Hz, 240Hz, 360Hz) render each target's countdown ring more smoothly, helping you triage the burst with less input lag."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Is this reflex trainer free?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes, all drills on SkillDrills are 100% free with no signups, downloads, or pop-up ads required."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "What games benefit from multi-target burst training?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Fast arena shooters, battle royales (Apex Legends, Overwatch 2, Fortnite), and tactical shooters (Valorant, CS2) where multiple enemies can appear at once benefit heavily."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "How does level progression work?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Every 250 points earned levels up the drill, adding more simultaneous burst targets (up to 5), shrinking their radius, and tightening each target's timeout."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "What happens if I miss a click?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Clicking empty background space triggers a red alert flash and a miss is logged against your accuracy — there's no score penalty, so keep going."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Can traditional athletes use this drill?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes. Sports vision research shows multi-object tracking and divided-attention drills enhance spatial awareness for tennis, hockey, and martial arts."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Does this drill support touchscreens and mobile devices?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes! It features generous touch hitpads and automatic orientation warnings for mobile devices."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "How often should I practice divided attention reflexes?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "A daily 5-10 minute session warms up your eye-hand coordination and maintains optimal visual alertness across multiple stimuli."
-      }
-    },
-    {
-      "@type": "Question",
       "name": "Which target should I clear first in a burst?",
       "acceptedAnswer": {
         "@type": "Answer",
         "text": "Watch the depleting countdown ring around each target and prioritize whichever is closest to timing out, not just the nearest one to your cursor."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Does mouse DPI affect burst reflex performance?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Using a comfortable mouse DPI (400-1600 DPI) ensures smooth, quick cursor jumps between the multiple targets in a burst."
       }
     },
     {

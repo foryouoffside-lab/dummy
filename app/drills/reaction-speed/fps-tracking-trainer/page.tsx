@@ -113,14 +113,6 @@ const faqSchema = {
   "mainEntity": [
     {
       "@type": "Question",
-      "name": "What is FPS tracking training?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "FPS tracking training exercises your eyes and hands to keep your crosshair centered on targets moving along horizontal, vertical, or dynamic paths."
-      }
-    },
-    {
-      "@type": "Question",
       "name": "Should you look at the crosshair or the target when tracking?",
       "acceptedAnswer": {
         "@type": "Answer",
@@ -145,14 +137,6 @@ const faqSchema = {
     },
     {
       "@type": "Question",
-      "name": "What is the best sensitivity for tracking aim?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "For tracking shooters, a low-to-moderate sensitivity between 30 cm/360 and 45 cm/360 provides maximum mechanical stability."
-      }
-    },
-    {
-      "@type": "Question",
       "name": "How do you practice strafe tracking?",
       "acceptedAnswer": {
         "@type": "Answer",
@@ -161,74 +145,10 @@ const faqSchema = {
     },
     {
       "@type": "Question",
-      "name": "Is Aim Lab or Kovaak's better for tracking?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Both are great. Kovaak's has huge scenario libraries, while Aim Lab offers telemetry. SkillDrills provides instant free browser access."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "How long does it take to improve tracking aim?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Daily practice of 15 to 20 minutes yields noticeable improvements in tracking smoothness within 2 to 4 weeks."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Is this FPS tracking trainer free to practice?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes, all aim and reaction drills on SkillDrills are 100% free with no downloads, signups, or pop-up ads."
-      }
-    },
-    {
-      "@type": "Question",
       "name": "Does monitor refresh rate affect tracking aim?",
       "acceptedAnswer": {
         "@type": "Answer",
         "text": "Yes. High refresh rate monitors (144Hz, 240Hz, 360Hz) make target motion smoother and reduce display ghosting."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "How does this drill improve reflexes?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "By presenting unpredictable horizontal target switches, it teaches the brain to translate visual coordinate changes into precise motor movements."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Can this improve gaming performance?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes. Fast reaction times and high-precision target tracking are critical for winning duels in competitive tournaments."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Is this useful for FPS games?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Absolutely. Countering strafing players or tracking targets executing slide-cancels relies heavily on detecting speed transitions."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "How is reaction speed measured?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Reaction time is measured in milliseconds (ms) from the moment the target relocates to the moment you successfully click it."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Is this suitable for beginners?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes. The adaptive level system scales target sizes and duration limits dynamically so players of all skill levels can start training."
       }
     }
   ]

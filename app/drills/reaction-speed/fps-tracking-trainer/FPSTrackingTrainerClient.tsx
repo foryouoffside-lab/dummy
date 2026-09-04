@@ -966,6 +966,11 @@ export default function FPSTrackingTrainerClient() {
                 <FAQItem q="Is this FPS tracking drill free?" a="Yes, all drills on SkillDrills are 100% free with no signups, downloads, or pop-up ads required." />
                 <FAQItem q="How does continuous difficulty scaling work?" a="As your score and combo rise, target speed accelerates, size shrinks, and direction switches occur more rapidly without any upper ceiling." />
                 <FAQItem q="Is there a time penalty for missing or timeouts?" a="By default, missing or timeouts only reset your combo streak. An opt-in time penalty (-0.8s per error) is available in session settings." />
+                <FAQItem q="Should you look at the crosshair or the target when tracking?" a="Always look at the target character model rather than staring at your crosshair. Staring at the crosshair induces cognitive delay." />
+                <FAQItem q="Why is my tracking aim so shaky?" a="Shaky tracking aim is primarily caused by excessive muscle tension (gripping mouse too tightly) or high sensitivity amplifying micro-jitters." />
+                <FAQItem q="How do I make my aim tracking smoother?" a="Reduce mouse sensitivity to 30-45 cm per 360, keep hand/wrist relaxed, and practice smooth pursuit drills consistently." />
+                <FAQItem q="How do you practice strafe tracking?" a="Use reactive horizontal scenarios. Focus on reacting smoothly to direction changes rather than predicting turn timing." />
+                <FAQItem q="Does monitor refresh rate affect tracking aim?" a="Yes. High refresh rate monitors (144Hz, 240Hz, 360Hz) make target motion smoother and reduce display ghosting." />
               </div>
             </DrillAccordion>
           </div>

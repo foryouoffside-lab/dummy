@@ -992,6 +992,8 @@ export default function BarrierSequencePursuitClient() {
                 <FAQItem q="Is this cover peeking drill free?" a="Yes, all drills on SkillDrills are 100% free with no signups, downloads, or pop-up ads required." />
                 <FAQItem q="How does adaptive level difficulty work?" a="As your score and combo rise, target exposure times shorten and spawn intervals accelerate dynamically." />
                 <FAQItem q="Is there a time penalty for missing or timeouts?" a="By default, missing or timeouts only reset your combo streak. An opt-in time penalty (-0.8s per error) is available in session settings for hard-mode training." />
+                <FAQItem q="What is peeker's advantage in gaming?" a="Peeker's advantage is a networking phenomenon where a moving peeker sees a holding defender before the defender sees them. This drill trains quick reaction speed to counter it." />
+                <FAQItem q="How do you counter a jiggle peek?" a="Countering a jiggle peek requires high visual scanning. You must place your crosshair slightly off the corner and click the instant the target breaks cover." />
               </div>
             </DrillAccordion>
           </div>

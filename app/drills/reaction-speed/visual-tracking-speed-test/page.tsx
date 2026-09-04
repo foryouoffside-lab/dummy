@@ -119,14 +119,6 @@ const faqSchema = {
   "mainEntity": [
     {
       "@type": "Question",
-      "name": "What is a visual tracking speed test?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "It is an interactive vision utility where you track and tap moving targets to measure visual processing latency and tracking precision."
-      }
-    },
-    {
-      "@type": "Question",
       "name": "What is smooth pursuit in vision?",
       "acceptedAnswer": {
         "@type": "Answer",
@@ -135,90 +127,10 @@ const faqSchema = {
     },
     {
       "@type": "Question",
-      "name": "Can you train visual tracking speed?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes. Regular visual pursuit training sharpens brain-to-hand coordination, reduces tracking lag, and improves click timing."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "How does visual tracking help in FPS gaming?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "In games like CS2, Valorant, Apex Legends, and Overwatch 2, enemies strafe rapidly. Fast visual tracking lets you stay locked onto targets."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Does monitor refresh rate affect visual tracking?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes! High refresh rates (144Hz, 240Hz, 360Hz) render target motion with less motion blur and lower input delay."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Is this visual tracking test free?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes, all drills on SkillDrills are 100% free with no signups, downloads, or pop-up ads required."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "How does level progression work?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Every 250 points earned levels up the drill, accelerating target speed, shrinking target diameter, and shortening spawn TTL."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "What happens if I miss a click?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Clicking empty background space triggers a red alert flash and a miss is logged against your accuracy — there's no score penalty, so keep going."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Can traditional athletes use this test?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes. Athletes in baseball, tennis, motorsports, and hockey use visual tracking exercises to improve spatial pursuit reflexes."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Does this test support touchscreens and mobile devices?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes! It features generous touch hitpads and automatic orientation warnings for mobile devices."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "How often should I practice visual tracking?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "A daily 5-10 minute session warms up your eye-hand coordination and maintains optimal visual pursuit readiness."
-      }
-    },
-    {
-      "@type": "Question",
       "name": "Should I lead the target or click directly on it?",
       "acceptedAnswer": {
         "@type": "Answer",
         "text": "Focus your eyes directly on the center core of the target and execute a smooth click synced with its movement vector."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Does mouse DPI affect visual tracking?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Using a comfortable mouse DPI (400-1600 DPI) ensures smooth crosshair control without overshooting moving targets."
       }
     },
     {

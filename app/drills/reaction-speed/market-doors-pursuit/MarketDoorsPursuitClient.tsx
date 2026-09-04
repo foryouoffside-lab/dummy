@@ -1000,6 +1000,10 @@ export default function MarketDoorsPursuitClient() {
                 <FAQItem q="Is this doorway clearing drill free?" a="Yes, all drills on SkillDrills are 100% free with no signups, downloads, or pop-up ads required." />
                 <FAQItem q="How does dynamic level scaling work?" a="As your score and combo climb, target sizes shrink and spawn intervals shorten continuously with no artificial cap." />
                 <FAQItem q="Is there a time penalty for missing or timeouts?" a="By default, missing or timeouts only reset your combo streak. An opt-in time penalty (-0.8s per error) is available in session settings." />
+                <FAQItem q="What does 'slicing the pie' mean in FPS games?" a="Slicing the pie is a tactical technique where a player sweeps around a corner incrementally to clear narrow angles one by one." />
+                <FAQItem q="How does this drill improve site entry in Valorant and CS2?" a="Site entries require checking multiple doorways simultaneously. Training saccadic sweeps reduces hesitation when clearing entry points." />
+                <FAQItem q="Does this drill train choice reaction time?" a="Yes. Targets appear randomly in any doorway, forcing your visual cortex to process spatial location and execute immediate taps." />
+                <FAQItem q="Should I look at the doorways or my crosshair?" a="Focus your eyes directly on the open doorway spaces while allowing your motor reflex to snap the crosshair onto emerging targets." />
               </div>
             </DrillAccordion>
           </div>

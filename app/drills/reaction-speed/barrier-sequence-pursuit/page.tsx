@@ -115,7 +115,7 @@ const faqSchema = {
       "name": "What is Barrier Sequence Pursuit (Jiggle Peek Trainer)?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Barrier Sequence Pursuit is a reflex aim drill that isolates cover-peeking detection. Targets spawn behind cover barriers, testing visual re-acquisition speed and angle defense."
+        "text": "It is an online reflex training drill where targets emerge from behind tactical cover barriers, testing your angle holding and rapid trigger timing."
       }
     },
     {
@@ -132,46 +132,6 @@ const faqSchema = {
       "acceptedAnswer": {
         "@type": "Answer",
         "text": "Countering a jiggle peek requires high visual scanning. You must place your crosshair slightly off the corner and click the instant the target breaks cover."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Does this help FPS gaming?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes. In games like Valorant and CS2, players frequently peek from behind boxes. This drill translates directly to angle holding and reactive clicking."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "How does adaptive difficulty work?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "As your score climbs, targets shrink in size, peeks occur faster, exposure duration decreases, and barrier cycle timing becomes completely unpredictable."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "What mechanical skills does cover peeking pursuit improve?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "It targets peripheral detection, saccadic eye movement, target re-acquisition speed, and reflexive click accuracy under time pressure."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Is this jiggle peek trainer free?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes, this drill is completely free and runs directly in your web browser with 1:1 hardware raw input and mobile touch support."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "What games benefit from jiggle peek defense training?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Fast-paced tactical shooters like CS2, Valorant, Rainbow Six Siege, and Apex Legends benefit heavily from enhanced angle defense and cover tracking."
       }
     }
   ]

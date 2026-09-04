@@ -947,6 +947,10 @@ export default function VisualTrackingSpeedTestClient() {
                 <FAQItem q="Is this visual tracking drill free?" a="Yes, all drills on SkillDrills are 100% free with no signups, downloads, or pop-up ads required." />
                 <FAQItem q="How does dynamic level scaling work?" a="As your score and combo rise, target velocity increases, size shrinks, and time-to-live windows shorten continuously." />
                 <FAQItem q="Is there a time penalty for missing or timeouts?" a="By default, missing or timeouts only reset your combo streak. An opt-in time penalty (-0.8s per error) is available in session settings." />
+                <FAQItem q="What is smooth pursuit in vision?" a="Smooth pursuit is the visual eye movement mechanism that allows your eyes to closely follow a moving target across your visual field." />
+                <FAQItem q="Should I lead the target or click directly on it?" a="Focus your eyes directly on the center core of the target and execute a smooth click synced with its movement vector." />
+                <FAQItem q="What is a good score on this test?" a="A score above 5,000 indicates strong visual pursuit skills, while scores exceeding 10,000 represent elite tracking precision." />
+                <FAQItem q="How does this test measure reaction time?" a="It records the millisecond latency between target appearance and your successful click input." />
               </div>
             </DrillAccordion>
           </div>

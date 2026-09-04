@@ -108,98 +108,10 @@ const faqSchema = {
   "mainEntity": [
     {
       "@type": "Question",
-      "name": "What are saccadic eye exercises?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Saccadic eye exercises train fast voluntary eye movements between visual targets, improving reading speed, vision therapy, and sports tracking."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "What is a saccade in vision?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "A saccade is a quick, simultaneous movement of both eyes between phases of fixation. It is the fastest movement the human body can perform."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "How does saccadic training help in FPS gaming?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "In games like CS2, Valorant, and Overwatch, targets spawn in different areas of your screen. Fast saccadic eye movements let you acquire enemies instantly."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Can you train saccadic eye movements online?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes. Dedicated online vision utilities condition visual search speed, reducing saccadic latency and improving click synchronization."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Does monitor refresh rate affect saccadic training?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes. High refresh rates (144Hz+) provide smoother target transitions during rapid eye sweeps, reducing visual motion blur."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Is Saccadic Gallery free?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes, all drills on SkillDrills are 100% free with no signups, downloads, or pop-up ads required."
-      }
-    },
-    {
-      "@type": "Question",
       "name": "What is the difference between saccadic and smooth pursuit?",
       "acceptedAnswer": {
         "@type": "Answer",
         "text": "Saccadic movements are rapid jumps between targets, whereas smooth pursuit involves smoothly tracking a moving object across space."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "How does level progression work?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Every 250 points earned levels up the drill, shortening target TTL and shrinking target radius to challenge your foveal accuracy."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "What happens if I miss a click?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Clicking empty background space triggers a red alert flash and a miss is logged against your accuracy — there's no score penalty, so keep going."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Can traditional athletes use this drill?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes. Sports vision specialists use saccadic eye drills to improve peripheral awareness and reaction speed in tennis, baseball, and martial arts."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Does this drill support touchscreens and mobile devices?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes! It features generous touch hitpads and automatic orientation warnings for mobile devices."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "How often should I practice saccadic eye exercises?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "A daily 5-minute session keeps ocular muscles agile, reduces visual fatigue, and sharpens visual scanning reflexes."
       }
     },
     {

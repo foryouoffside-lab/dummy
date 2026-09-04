@@ -962,6 +962,10 @@ export default function SaccadicGalleryClient() {
                 <FAQItem q="Is this saccadic training drill free?" a="Yes, all drills on SkillDrills are 100% free with no downloads or registrations required." />
                 <FAQItem q="How does adaptive level progression work?" a="Difficulty scales continuously as your score and combo rise, shrinking node size and reducing target exposure windows." />
                 <FAQItem q="Is there a time penalty for missing or timeouts?" a="By default, missing or timeouts only reset your combo streak. A time penalty (-0.8s per error) is available as an opt-in toggle in session settings." />
+                <FAQItem q="What is the difference between saccadic and smooth pursuit?" a="Saccadic movements are rapid jumps between targets, whereas smooth pursuit involves smoothly tracking a moving object across space." />
+                <FAQItem q="Should I move my head or only my eyes?" a="Keep your head still and move only your eyes. Moving only your eyes conditions true saccadic agility and faster neural processing." />
+                <FAQItem q="What is saccadic latency?" a="Saccadic latency is the time delay (typically 150-200ms) between the appearance of a visual target and the initiation of an eye jump." />
+                <FAQItem q="What is a good score on Saccadic Gallery?" a="A score above 5,000 indicates strong ocular reflexes, while scores exceeding 10,000 represent elite saccadic eye speed." />
               </div>
             </DrillAccordion>
           </div>
