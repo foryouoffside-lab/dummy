@@ -166,6 +166,13 @@ const nextConfig = {
       { source: '/drills/fps/reactive-tracking', destination: '/drills/fps/strafe-tracking', permanent: true },
       { source: '/drills/cognitive/problem-solving/logic-puzzles', destination: '/drills/cognitive', permanent: true },
 
+      // Re-slugged drill: reaction-simulator -> reaction-game (retargeted to "reaction game")
+      {
+        source: '/drills/reaction-speed/reaction-simulator',
+        destination: '/drills/reaction-speed/reaction-game',
+        permanent: true,
+      },
+
       // Whole subtrees that no longer exist. These sit after the specific
       // rules above because Next matches redirects in array order.
       { source: '/drills/motor/timing-accuracy/:path*', destination: '/drills/motor', permanent: true },

@@ -78,7 +78,7 @@ const collectionPageSchema = {
   "author": { "@type": "Organization", "name": "SkillDrills", "url": "https://skilldrills.online" },
   "hasPart": [
     { "@type": "WebApplication", "name": "Reaction Time Test", "url": "https://skilldrills.online/drills/reaction-speed/reaction-time-test" },
-    { "@type": "WebApplication", "name": "Reaction Simulator", "url": "https://skilldrills.online/drills/reaction-speed/reaction-simulator" },
+    { "@type": "WebApplication", "name": "Reaction Game", "url": "https://skilldrills.online/drills/reaction-speed/reaction-game" },
     { "@type": "WebApplication", "name": "Reflex Training Drill", "url": "https://skilldrills.online/drills/reaction-speed/reflex-training-drill" },
     { "@type": "WebApplication", "name": "Saccadic Gallery (Eye Exercises)", "url": "https://skilldrills.online/drills/reaction-speed/saccadic-gallery" },
     { "@type": "WebApplication", "name": "Visual Tracking Speed Test", "url": "https://skilldrills.online/drills/reaction-speed/visual-tracking-speed-test" },

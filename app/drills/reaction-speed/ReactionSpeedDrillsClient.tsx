@@ -23,6 +23,7 @@ import { hasLocalizedRoute } from '@/lib/i18n/locales';
 const FOLDER_TO_STORAGE_KEY: Record<string, string> = {
   'market-doors-pursuit': 'skilldrills_market_doors_v3',
   'fps-tracking-trainer': 'skilldrills_fps_tracking_v3',
+  'reaction-game': 'skilldrills_reaction_simulator_v3',
 };
 
 export default function ReactionSpeedDrillsClient() {

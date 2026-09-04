@@ -638,31 +638,31 @@ export default function ReactionSimulatorClient() {
 
   // Share Score Card helper
   const sharePage = useCallback(async () => {
-    const url = 'https://skilldrills.online/drills/reaction-speed/reaction-simulator';
+    const url = 'https://skilldrills.online/drills/reaction-speed/reaction-game';
     try {
       const canvas = generateShareCard({
         score: uiScore,
         accuracy: analytics.accuracy,
         speed: analytics.avgReactionTime,
-        drillName: 'Reaction Simulator',
+        drillName: 'Reaction Game',
         rank: analytics.grade?.letter || 'A',
         rankName: analytics.grade?.label || 'ELITE REFLEX',
         playerName: getPlayerName(),
         level: analytics.finalLevel,
         date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-        url: 'skilldrills.online/drills/reaction-speed/reaction-simulator'
+        url: 'skilldrills.online/drills/reaction-speed/reaction-game'
       });
 
       await shareScoreCard(canvas, {
-        title: 'Reaction Simulator — My Score',
-        text: `I scored ${uiScore} (Grade: ${analytics.grade?.letter || 'A'}, Lv. ${analytics.finalLevel}) on Reaction Simulator at SkillDrills!`,
+        title: 'Reaction Game — My Score',
+        text: `I scored ${uiScore} (Grade: ${analytics.grade?.letter || 'A'}, Lv. ${analytics.finalLevel}) on Reaction Game at SkillDrills!`,
         url
       });
     } catch (err) {
       if (navigator.share) {
         navigator.share({
-          title: 'Reaction Simulator',
-          text: `I scored ${uiScore} on Reaction Simulator! Can you beat my score?`,
+          title: 'Reaction Game',
+          text: `I scored ${uiScore} on Reaction Game! Can you beat my score?`,
           url
         }).catch(() => {});
       }
@@ -701,9 +701,9 @@ export default function ReactionSimulatorClient() {
         {!isFullscreen && (
           <div className="text-center">
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-black uppercase tracking-tight text-white flex items-center justify-center gap-3 flex-wrap">
-              REACTION SIMULATOR
+              REACTION GAME
               <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
-                Reaction Simulator Game
+                Online Reaction Game
               </span>
             </h1>
           </div>
@@ -875,7 +875,7 @@ export default function ReactionSimulatorClient() {
 
             <DrillAccordion
               id="about"
-              title="About Reaction Simulator"
+              title="About Reaction Game"
               isOpen={openAccordion === 'about'}
               onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
             >
@@ -885,7 +885,7 @@ export default function ReactionSimulatorClient() {
                     <Eye className="w-4 h-4 text-red-400" /> What Is Reflex Interception & Vertical Tracking Training?
                   </h4>
                   <p className="text-sm leading-relaxed mb-3 text-gray-300">
-                    <strong>Reaction Simulator</strong> (Reflex Interception Drill) isolates and conditions vertical visual tracking, fast-twitch motor responses, and rapid spatial interception. In tactical and arcade shooters like Apex Legends, Overwatch 2, Fortnite, and Halo, targets frequently drop from high ledges, jump pads, or vertical ziplines.
+                    <strong>Reaction Game</strong> (Reflex Interception Drill) isolates and conditions vertical visual tracking, fast-twitch motor responses, and rapid spatial interception. In tactical and arcade shooters like Apex Legends, Overwatch 2, Fortnite, and Halo, targets frequently drop from high ledges, jump pads, or vertical ziplines.
                   </p>
                   <p className="text-sm leading-relaxed text-gray-300">
                     Intercepting accelerating downward targets requires precise foveal pursuit and timing. Training vertical tracking reduces motor reaction delay, improves hand-eye synchronization, and helps you acquire airborne or falling opponents consistently.

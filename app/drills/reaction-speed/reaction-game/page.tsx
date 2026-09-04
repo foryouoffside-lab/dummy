@@ -1,44 +1,41 @@
 import ReactionSimulatorWrapper from './ReactionSimulatorWrapper';
 
 // ============================================================
-// SEO RESEARCH FINDINGS — reaction-simulator
-// PRIMARY: "reaction simulator" ~1,300/mo US, KD ~28% (Easy-Medium)
-//          "reflex training game" ~880/mo US, KD ~30% (Easy-Medium)
+// SEO RESEARCH FINDINGS — reaction-game
+// PRIMARY: "reaction game" — 27 exact / 239 broad US, 5 exact GB (Bing API 2026-09-04)
+//          "reflex game"   — 25 exact US, 2 exact GB (Bing API 2026-09-04)
 // SECONDARY / LSI:
-//   "reflex game online"              ~1,000/mo, KD ~25%
-//   "hand eye coordination games"     ~2,900/mo, KD ~48%
-//   "reaction speed test"             ~6,600/mo, KD ~45%
-//   "reflex simulator"                ~390/mo,   KD ~15%
+//   "reaction games"        — 23 exact US, 5 exact GB (Bing API 2026-09-04)
+//   "reaction time games"   — 21 exact US, 3 exact GB (Bing API 2026-09-04)
 // ============================================================
 
 export const metadata = {
-  title: 'Reaction Simulator - Free Reflex Training Game Online',
-  description: 'Free online Reflex Training Game (Reaction Simulator). Intercept falling targets, train vertical tracking, and sharpen hand-eye coordination.',
+  title: 'Reaction Game - Free Online Reflex Training Game',
+  description: 'Free online reaction game. Intercept falling targets, train vertical tracking speed, and sharpen hand-eye coordination with zero downloads.',
   keywords: [
-    'reaction simulator', 'reflex training game', 'reflex game online',
-    'reflex simulator', 'hand eye coordination games', 'reaction speed test',
-    'fps reaction time test', 'reflex training app', 'speed reflex training',
+    'reaction game', 'reflex game', 'reaction games', 'reaction time games',
     'falling target reaction game', 'online reflex games free',
-    'how to test reflexes at home', 'do reflex training games work',
-    'vertical tracking aim trainer', 'mouse speed click trainer',
-    'free aim trainer browser', 'gaming eye coordination drill', 'low latency reflex test'
+    'hand eye coordination game', 'reaction speed test',
+    'fps reaction time test', 'vertical tracking aim trainer',
+    'mouse speed click trainer', 'free aim trainer browser',
+    'gaming eye coordination drill', 'low latency reflex test'
   ],
   alternates: {
-    canonical: 'https://skilldrills.online/drills/reaction-speed/reaction-simulator',
+    canonical: 'https://skilldrills.online/drills/reaction-speed/reaction-game',
   },
   robots: { index: true, follow: true },
   openGraph: {
-    title: 'Reaction Simulator - Free Reflex Training Game Online | SkillDrills',
-    description: 'Play this free online Reflex Training Game (Reaction Simulator). Intercept accelerating falling targets before they escape, train vertical visual tracking, and improve your hand-eye coordination.',
-    url: 'https://skilldrills.online/drills/reaction-speed/reaction-simulator',
+    title: 'Reaction Game - Free Online Reflex Training Game | SkillDrills',
+    description: 'Play this free online reaction game. Intercept accelerating falling targets before they escape, train vertical visual tracking, and improve your hand-eye coordination.',
+    url: 'https://skilldrills.online/drills/reaction-speed/reaction-game',
     siteName: 'SkillDrills',
     locale: 'en_US',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Reaction Simulator - Free Reflex Training Game',
-    description: 'Intercept falling targets and train vertical tracking. Free browser-based reflex simulator with no downloads.',
+    title: 'Reaction Game - Free Online Reflex Training Game',
+    description: 'Intercept falling targets and train vertical tracking. Free browser-based reaction game with no downloads.',
   },
 };
 
@@ -51,16 +48,16 @@ const breadcrumbSchema = {
     { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://skilldrills.online" },
     { "@type": "ListItem", "position": 2, "name": "Drills Hub", "item": "https://skilldrills.online/drills" },
     { "@type": "ListItem", "position": 3, "name": "Reaction Speed", "item": "https://skilldrills.online/drills/reaction-speed" },
-    { "@type": "ListItem", "position": 4, "name": "Reaction Simulator", "item": "https://skilldrills.online/drills/reaction-speed/reaction-simulator" }
+    { "@type": "ListItem", "position": 4, "name": "Reaction Game", "item": "https://skilldrills.online/drills/reaction-speed/reaction-game" }
   ]
 };
 
 const webAppSchema = {
   "@context": "https://schema.org",
   "@type": "WebApplication",
-  "name": "Reaction Simulator — Free Reflex Training Game Online | SkillDrills",
-  "url": "https://skilldrills.online/drills/reaction-speed/reaction-simulator",
-  "description": "Train reaction speed, vertical visual tracking, and hand-eye coordination. A free device-adaptive falling-target reflex simulator for mobile and desktop.",
+  "name": "Reaction Game — Free Online Reflex Training Game | SkillDrills",
+  "url": "https://skilldrills.online/drills/reaction-speed/reaction-game",
+  "description": "Train reaction speed, vertical visual tracking, and hand-eye coordination. A free device-adaptive falling-target reaction game for mobile and desktop.",
   "applicationCategory": "EducationalApplication",
   "operatingSystem": "All",
   "browserRequirements": "Requires a modern web browser with JavaScript support.",
@@ -74,7 +71,7 @@ const webAppSchema = {
 const educationalSchema = {
   "@context": "https://schema.org",
   "@type": "EducationalApplication",
-  "name": "Reaction Simulator Trainer",
+  "name": "Reaction Game Trainer",
   "description": "Isolates and trains vertical ocular tracking, hand-eye synchronization, rapid interception, and motor response time under high-speed falling waves.",
   "applicationCategory": "EducationalApplication",
   "operatingSystem": "All",
@@ -90,8 +87,8 @@ const howToSchema = {
     {
       "@type": "HowToStep",
       "position": 1,
-      "name": "Launch the Simulator",
-      "text": "Press Start Drill to initialize the Reaction Simulator in full screen."
+      "name": "Launch the Game",
+      "text": "Press Start Drill to initialize the Reaction Game in full screen."
     },
     {
       "@type": "HowToStep",
@@ -241,7 +238,7 @@ const faqSchema = {
   ]
 };
 
-export default function ReactionSimulatorPage() {
+export default function ReactionGamePage() {
   return (
     <>
       <script

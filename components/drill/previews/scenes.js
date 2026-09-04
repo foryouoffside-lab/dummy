@@ -375,7 +375,7 @@ export const SCENES = {
     }
   },
 
-  // 6. LANES: Targets dropping along parallel vertical lanes, clicked before baseline (reaction-simulator)
+  // 6. LANES: Targets dropping along parallel vertical lanes, clicked before baseline (reaction-game)
   lanes: {
     id: 'lanes',
     label: 'Parallel Lanes',
@@ -3286,6 +3286,914 @@ export const SCENES = {
       ctx.font = '7px ui-monospace, monospace';
       ctx.textAlign = 'center';
       ctx.fillText('SMOOTHNESS: 99.4%', midX, h * 0.86);
+    }
+  },
+
+  // ---------------- PHYSICAL PREVIEW SCENES (47–57) ----------------
+
+  // 47. STABILITY-HOLD: Wind-force equilibrium & safe zone centering (stability-challenge)
+  'stability-hold': {
+    id: 'stability-hold',
+    label: 'Wind-Force Equilibrium',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 910) % 3000;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const cx = w * 0.5;
+      const cy = h * 0.5;
+      const safeRadius = Math.min(w, h) * 0.28;
+
+      // Outer safe zone circular boundary
+      ctx.strokeStyle = dim || 'rgba(244, 63, 94, 0.15)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(cx, cy, safeRadius, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Dashed inner perimeter ring
+      ctx.save();
+      ctx.strokeStyle = accent;
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4, 5]);
+      ctx.beginPath();
+      ctx.arc(cx, cy, safeRadius * 0.75, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+
+      // Horizontal wind vector streamlines drifting left to right
+      const windSpeed = 0.08;
+      const windStep = h * 0.22;
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+      ctx.lineWidth = 1;
+      for (let i = 1; i <= 3; i++) {
+        const wy = i * windStep;
+        const offset = ((cycle * windSpeed * (0.8 + i * 0.2)) + i * 40) % (w + 40) - 20;
+        ctx.beginPath();
+        ctx.moveTo(offset - 25, wy);
+        ctx.lineTo(offset + 25, wy);
+        ctx.stroke();
+      }
+
+      // Wind gust disturbance force & counter-stabilization
+      const gust = Math.sin(cycle * 0.004) * (safeRadius * 0.35);
+      const counterDamping = -gust * 0.88;
+      const orbX = cx + gust + counterDamping;
+      const orbY = cy + Math.cos(cycle * 0.005) * 4;
+
+      // Stabilization pulse ring every 1.5s
+      const pulseCycle = cycle % 1500;
+      if (pulseCycle < 700) {
+        const pp = pulseCycle / 700;
+        drawHitRing(ctx, cx, cy, 10 + pp * (safeRadius - 10), accent, 1 - pp);
+      }
+
+      // Center crosshair and stabilization core
+      ctx.fillStyle = accent;
+      ctx.beginPath();
+      ctx.arc(orbX, orbY, 5.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      drawCrosshair(ctx, orbX, orbY, 6, '#ffffff');
+
+      // Status readout
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
+      ctx.font = '7px ui-monospace, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('EQUILIBRIUM: 99.4%', cx, h * 0.90);
+    }
+  },
+
+  // 48. PATTERN-TRACE: Memorize geometric path & recreate from memory (complex-pattern)
+  'pattern-trace': {
+    id: 'pattern-trace',
+    label: 'Memory Path Reconstruction',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 920) % 3200;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const nodes = [
+        { x: w * 0.20, y: h * 0.72 },
+        { x: w * 0.38, y: h * 0.26 },
+        { x: w * 0.62, y: h * 0.32 },
+        { x: w * 0.80, y: h * 0.68 },
+      ];
+
+      const isMemorize = cycle < 1000;
+      const isHidden = cycle >= 1000 && cycle < 1350;
+      const isDrawing = cycle >= 1350 && cycle < 2750;
+      const isDone = cycle >= 2750;
+
+      // Draw waypoints
+      nodes.forEach((n, idx) => {
+        ctx.fillStyle = idx === 0 ? 'rgba(6, 182, 212, 0.25)' : (idx === 3 ? 'rgba(244, 63, 94, 0.25)' : 'rgba(255, 255, 255, 0.08)');
+        ctx.strokeStyle = idx === 0 ? '#06b6d4' : (idx === 3 ? accent : 'rgba(255, 255, 255, 0.3)');
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, 5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+      });
+
+      if (isMemorize) {
+        // Flash guide path
+        ctx.strokeStyle = accent;
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(nodes[0].x, nodes[0].y);
+        for (let i = 1; i < nodes.length; i++) {
+          ctx.lineTo(nodes[i].x, nodes[i].y);
+        }
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+        ctx.font = '7px ui-monospace, monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('MEMORIZE VECTOR', w * 0.5, h * 0.90);
+      } else if (isHidden) {
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+        ctx.font = '7px ui-monospace, monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('RECONSTRUCT...', w * 0.5, h * 0.90);
+      } else if (isDrawing) {
+        const p = (cycle - 1350) / 1400;
+        const totalSegments = nodes.length - 1;
+        const currentSeg = Math.min(totalSegments - 1, Math.floor(p * totalSegments));
+        const segP = (p * totalSegments) - currentSeg;
+
+        ctx.strokeStyle = accent;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(nodes[0].x, nodes[0].y);
+        for (let i = 1; i <= currentSeg; i++) {
+          ctx.lineTo(nodes[i].x, nodes[i].y);
+        }
+        const lastNode = nodes[currentSeg];
+        const nextNode = nodes[currentSeg + 1];
+        const curX = lastNode.x + (nextNode.x - lastNode.x) * segP;
+        const curY = lastNode.y + (nextNode.y - lastNode.y) * segP;
+        ctx.lineTo(curX, curY);
+        ctx.stroke();
+
+        drawCrosshair(ctx, curX, curY, 6, '#ffffff');
+
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+        ctx.font = '7px ui-monospace, monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('TRACING MEMORY PATH', w * 0.5, h * 0.90);
+      } else if (isDone) {
+        // Complete path drawn
+        ctx.strokeStyle = '#10b981';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(nodes[0].x, nodes[0].y);
+        for (let i = 1; i < nodes.length; i++) {
+          ctx.lineTo(nodes[i].x, nodes[i].y);
+        }
+        ctx.stroke();
+
+        const endNode = nodes[nodes.length - 1];
+        const flashP = (cycle - 2750) / 450;
+        drawHitRing(ctx, endNode.x, endNode.y, 6 + flashP * 24, '#10b981', 1 - flashP);
+
+        ctx.fillStyle = '#10b981';
+        ctx.font = '7px ui-monospace, monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('ACCURACY: 98.7% (PERFECT)', w * 0.5, h * 0.90);
+      }
+    }
+  },
+
+  // 49. CROSS-BODY: Diagonal vector sweep across screen through corridor (cross-body-movement)
+  'cross-body': {
+    id: 'cross-body',
+    label: 'Bilateral Cross-Body Sweep',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 930) % 3000;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const nStart = { x: w * 0.18, y: h * 0.78 };
+      const nEnd = { x: w * 0.82, y: h * 0.22 };
+
+      // Diagonal corridor boundary
+      ctx.save();
+      ctx.strokeStyle = dim || 'rgba(244, 63, 94, 0.12)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([3, 4]);
+      const dx = -(nEnd.y - nStart.y) * 0.08;
+      const dy = (nEnd.x - nStart.x) * 0.08;
+      ctx.beginPath();
+      ctx.moveTo(nStart.x + dx, nStart.y + dy);
+      ctx.lineTo(nEnd.x + dx, nEnd.y + dy);
+      ctx.moveTo(nStart.x - dx, nStart.y - dy);
+      ctx.lineTo(nEnd.x - dx, nEnd.y - dy);
+      ctx.stroke();
+      ctx.restore();
+
+      // Start and end nodes
+      ctx.fillStyle = 'rgba(6, 182, 212, 0.3)';
+      ctx.strokeStyle = '#06b6d4';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(nStart.x, nStart.y, 6.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = 'rgba(244, 63, 94, 0.3)';
+      ctx.strokeStyle = accent;
+      ctx.beginPath();
+      ctx.arc(nEnd.x, nEnd.y, 6.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Motion phases
+      if (cycle < 400) {
+        drawCrosshair(ctx, nStart.x, nStart.y, 6, '#ffffff');
+      } else if (cycle < 2000) {
+        const p = easeInOutCubic((cycle - 400) / 1600);
+        const curX = nStart.x + (nEnd.x - nStart.x) * p;
+        const curY = nStart.y + (nEnd.y - nStart.y) * p;
+
+        // Glowing sweep laser
+        ctx.strokeStyle = accent;
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(nStart.x, nStart.y);
+        ctx.lineTo(curX, curY);
+        ctx.stroke();
+
+        drawCrosshair(ctx, curX, curY, 7, '#ffffff');
+      } else if (cycle < 2600) {
+        // Full connection beam
+        ctx.strokeStyle = accent;
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(nStart.x, nStart.y);
+        ctx.lineTo(nEnd.x, nEnd.y);
+        ctx.stroke();
+
+        const p = (cycle - 2000) / 600;
+        drawHitRing(ctx, nEnd.x, nEnd.y, 6 + p * 28, accent, 1 - p);
+        drawCrosshair(ctx, nEnd.x, nEnd.y, 6, '#ffffff');
+      }
+
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
+      ctx.font = '7px ui-monospace, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('CROSS-SWEEP: 100% IN CORRIDOR', w * 0.5, h * 0.90);
+    }
+  },
+
+  // 50. GRID-EVASION: 3x3 danger cell blast warning and safe hop (dynamic-grid-evasion)
+  'grid-evasion': {
+    id: 'grid-evasion',
+    label: '3x3 Hazard Grid Evasion',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 940) % 3000;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const gw = w * 0.54;
+      const gh = h * 0.64;
+      const gx = (w - gw) / 2;
+      const gy = (h - gh) / 2 - 2;
+      const cw = gw / 3;
+      const ch = gh / 3;
+
+      // Hazard cells in this wave: (0,1), (1,1), (2,1), (0,2)
+      const hazardCells = [
+        { r: 0, c: 1 },
+        { r: 1, c: 1 },
+        { r: 2, c: 1 },
+        { r: 0, c: 2 },
+      ];
+
+      const isWarning = cycle < 1300;
+      const isHop = cycle >= 1300 && cycle < 1650;
+      const isBlast = cycle >= 1650 && cycle < 2350;
+
+      // Draw 3x3 grid cells
+      for (let r = 0; r < 3; r++) {
+        for (let c = 0; c < 3; c++) {
+          const cx = gx + c * cw;
+          const cy = gy + r * ch;
+          const isHazard = hazardCells.some((hc) => hc.r === r && hc.c === c);
+
+          if (isHazard && isWarning) {
+            const pulse = 0.15 + 0.12 * Math.sin(cycle * 0.015);
+            ctx.fillStyle = `rgba(239, 68, 68, ${pulse})`;
+            ctx.fillRect(cx + 2, cy + 2, cw - 4, ch - 4);
+          } else if (isHazard && isBlast) {
+            const blastAlpha = 0.55 * (1 - (cycle - 1650) / 700);
+            ctx.fillStyle = `rgba(239, 68, 68, ${Math.max(0, blastAlpha)})`;
+            ctx.fillRect(cx + 2, cy + 2, cw - 4, ch - 4);
+          }
+
+          ctx.strokeStyle = isHazard && (isWarning || isBlast) ? 'rgba(239, 68, 68, 0.6)' : 'rgba(255, 255, 255, 0.15)';
+          ctx.lineWidth = 1;
+          ctx.strokeRect(cx, cy, cw, ch);
+        }
+      }
+
+      // Player orb position: starts at center (1,1), hops to safe corner (2,0)
+      const p1 = { x: gx + 1.5 * cw, y: gy + 1.5 * ch };
+      const p2 = { x: gx + 0.5 * cw, y: gy + 2.5 * ch };
+      let px = p1.x;
+      let py = p1.y;
+
+      if (isHop) {
+        const hp = easeInOutCubic((cycle - 1300) / 350);
+        px = p1.x + (p2.x - p1.x) * hp;
+        py = p1.y + (p2.y - p1.y) * hp;
+      } else if (isBlast || cycle >= 2350) {
+        px = p2.x;
+        py = p2.y;
+      }
+
+      // Player orb
+      ctx.fillStyle = isBlast ? '#10b981' : accent;
+      ctx.beginPath();
+      ctx.arc(px, py, 5.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Safe shield pulse on player when blast triggers
+      if (isBlast) {
+        const sp = (cycle - 1650) / 700;
+        drawHitRing(ctx, px, py, 6 + sp * 14, '#10b981', 1 - sp);
+      }
+
+      drawCrosshair(ctx, px, py, 5.5, '#ffffff');
+
+      ctx.fillStyle = isBlast ? '#10b981' : 'rgba(255, 255, 255, 0.55)';
+      ctx.font = '7px ui-monospace, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(isBlast ? 'EVADED BLAST (+100 PTS)' : 'WARNING: DETONATION IMMINENT', w * 0.5, h * 0.92);
+    }
+  },
+
+  // 51. AGILITY-LADDER: Descending rungs with rhythmic alternating footwork (agility-ladder)
+  'agility-ladder': {
+    id: 'agility-ladder',
+    label: 'Motor Agility Ladder',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 950) % 3000;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const lw = w * 0.38;
+      const lx = (w - lw) / 2;
+      const rungSpacing = h * 0.22;
+      const scrollOffset = (cycle * 0.05) % rungSpacing;
+
+      // Draw ladder vertical rails
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(lx, 0);
+      ctx.lineTo(lx, h);
+      ctx.moveTo(lx + lw, 0);
+      ctx.lineTo(lx + lw, h);
+      ctx.stroke();
+
+      // Draw scrolling rungs
+      ctx.strokeStyle = dim || 'rgba(244, 63, 94, 0.18)';
+      ctx.lineWidth = 1;
+      for (let y = -rungSpacing + scrollOffset; y < h + rungSpacing; y += rungSpacing) {
+        ctx.beginPath();
+        ctx.moveTo(lx, y);
+        ctx.lineTo(lx + lw, y);
+        ctx.stroke();
+      }
+
+      // 4 steps cadence (Left, Right, Left, Right)
+      const stepTimes = [450, 1100, 1750, 2400];
+      const isLeft = (stepIdx) => stepIdx % 2 === 0;
+
+      // Current footstep index
+      let curStep = 0;
+      for (let i = 0; i < stepTimes.length; i++) {
+        if (cycle >= stepTimes[i]) curStep = i;
+      }
+
+      const leftX = lx + lw * 0.28;
+      const rightX = lx + lw * 0.72;
+      const stepY = h * 0.50;
+
+      // Crosshair / stepping indicator
+      const nextStep = Math.min(stepTimes.length - 1, curStep + 1);
+      const prevT = stepTimes[curStep];
+      const nextT = stepTimes[nextStep];
+      const prog = nextT > prevT ? Math.min(1, Math.max(0, (cycle - prevT) / (nextT - prevT))) : 0;
+      const fromX = isLeft(curStep) ? leftX : rightX;
+      const toX = isLeft(nextStep) ? leftX : rightX;
+      const stepCurX = fromX + (toX - fromX) * easeInOutCubic(prog);
+
+      // Hit rings on each step tap
+      stepTimes.forEach((st, idx) => {
+        if (cycle >= st && cycle < st + 500) {
+          const hp = (cycle - st) / 500;
+          const sx = isLeft(idx) ? leftX : rightX;
+          drawHitRing(ctx, sx, stepY, 5 + hp * 18, accent, 1 - hp);
+        }
+      });
+
+      // Active stepping foot/dot
+      ctx.fillStyle = accent;
+      ctx.beginPath();
+      ctx.arc(stepCurX, stepY, 5, 0, Math.PI * 2);
+      ctx.fill();
+
+      drawCrosshair(ctx, stepCurX, stepY, 6, '#ffffff');
+
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
+      ctx.font = '7px ui-monospace, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('CADENCE: 180 BPM (L-R-L-R)', w * 0.5, h * 0.90);
+    }
+  },
+
+  // 52. JUMP-PARABOLA: Ground charge & mid-air parabolic steering intercept (jump-sequence)
+  'jump-parabola': {
+    id: 'jump-parabola',
+    label: 'Aerial Vector Intercept',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 960) % 3000;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const groundY = h * 0.80;
+      const startX = w * 0.22;
+      const targetX = w * 0.68;
+      const targetY = h * 0.30;
+
+      // Ground baseline
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(w * 0.1, groundY);
+      ctx.lineTo(w * 0.9, groundY);
+      ctx.stroke();
+
+      // Floating aerial target
+      const isIntercepted = cycle >= 1700 && cycle < 2300;
+      if (!isIntercepted) {
+        ctx.fillStyle = 'rgba(6, 182, 212, 0.3)';
+        ctx.strokeStyle = '#06b6d4';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(targetX, targetY, 7.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+      } else {
+        const ip = (cycle - 1700) / 600;
+        drawHitRing(ctx, targetX, targetY, 8 + ip * 26, '#06b6d4', 1 - ip);
+      }
+
+      // Parabolic jump trajectory
+      let px = startX;
+      let py = groundY;
+
+      if (cycle < 550) {
+        // Charging on ground
+        const chargeP = cycle / 550;
+        ctx.strokeStyle = accent;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(startX, groundY - 5, 14 * (1 - chargeP * 0.5), 0, Math.PI * 2);
+        ctx.stroke();
+        py = groundY - 4;
+      } else if (cycle < 1700) {
+        // Airborne jump arc
+        const p = (cycle - 550) / 1150;
+        px = startX + (targetX - startX) * p;
+        // Parabola: peaks at targetY
+        py = groundY - 4 * (groundY - targetY) * p * (1 - 0.5 * p);
+
+        // Faint flight trail
+        ctx.strokeStyle = dim || 'rgba(244, 63, 94, 0.2)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(startX, groundY);
+        for (let s = 0; s <= 10; s++) {
+          const sp = (s / 10) * p;
+          const sx = startX + (targetX - startX) * sp;
+          const sy = groundY - 4 * (groundY - targetY) * sp * (1 - 0.5 * sp);
+          ctx.lineTo(sx, sy);
+        }
+        ctx.stroke();
+      } else if (cycle < 2500) {
+        // Falling back to ground
+        const p = (cycle - 1700) / 800;
+        px = targetX + (w * 0.82 - targetX) * p;
+        py = targetY + (groundY - targetY) * (p * p);
+      } else {
+        px = w * 0.82;
+        py = groundY - 4;
+      }
+
+      // Player orb
+      ctx.fillStyle = accent;
+      ctx.beginPath();
+      ctx.arc(px, py, 5.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      drawCrosshair(ctx, px, py, 5.5, '#ffffff');
+
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
+      ctx.font = '7px ui-monospace, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(cycle < 550 ? 'CHARGING JUMP (100%)' : (cycle < 1700 ? 'MID-AIR STEERING' : 'TARGET INTERCEPT!'), w * 0.5, h * 0.92);
+    }
+  },
+
+  // 53. SPEED-RINGS: Shrinking rings vanishing under high burst flick tempo (speed-drill)
+  'speed-rings': {
+    id: 'speed-rings',
+    label: 'Vanishing Target Acceleration',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 970) % 2800;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const targets = [
+        { x: w * 0.26, y: h * 0.38, start: 0, hit: 650, end: 850 },
+        { x: w * 0.72, y: h * 0.40, start: 750, hit: 1450, end: 1650 },
+        { x: w * 0.48, y: h * 0.68, start: 1550, hit: 2250, end: 2450 },
+      ];
+
+      // Draw shrinking rings
+      targets.forEach((tgt) => {
+        if (cycle >= tgt.start && cycle < tgt.hit) {
+          const age = cycle - tgt.start;
+          const maxAge = tgt.hit - tgt.start;
+          const shrinkRadius = Math.max(6, 22 * (1 - age / (maxAge * 1.3)));
+
+          // Inner core
+          ctx.fillStyle = accent;
+          ctx.beginPath();
+          ctx.arc(tgt.x, tgt.y, 5, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Shrinking perimeter ring
+          ctx.strokeStyle = accent;
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.arc(tgt.x, tgt.y, shrinkRadius, 0, Math.PI * 2);
+          ctx.stroke();
+        } else if (cycle >= tgt.hit && cycle < tgt.end) {
+          // Hit flash burst
+          const hp = (cycle - tgt.hit) / (tgt.end - tgt.hit);
+          drawHitRing(ctx, tgt.x, tgt.y, 6 + hp * 22, accent, 1 - hp);
+        }
+      });
+
+      // Crosshair flicking between targets
+      let curX = targets[0].x;
+      let curY = targets[0].y;
+
+      if (cycle < 650) {
+        curX = targets[0].x;
+        curY = targets[0].y;
+      } else if (cycle < 1450) {
+        const p = easeInOutCubic(Math.min(1, (cycle - 650) / 450));
+        curX = targets[0].x + (targets[1].x - targets[0].x) * p;
+        curY = targets[0].y + (targets[1].y - targets[0].y) * p;
+      } else if (cycle < 2250) {
+        const p = easeInOutCubic(Math.min(1, (cycle - 1450) / 450));
+        curX = targets[1].x + (targets[2].x - targets[1].x) * p;
+        curY = targets[1].y + (targets[2].y - targets[1].y) * p;
+      } else {
+        curX = targets[2].x;
+        curY = targets[2].y;
+      }
+
+      drawCrosshair(ctx, curX, curY, 7, '#ffffff');
+
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
+      ctx.font = '7px ui-monospace, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('VANISHING TARGET BURST: 3.4/S', w * 0.5, h * 0.90);
+    }
+  },
+
+  // 54. DROP-CATCH: Catch falling green items & let red decoy traps pass (drop-catch)
+  'drop-catch': {
+    id: 'drop-catch',
+    label: 'Drop Catch & Decoy Avoidance',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 980) % 3000;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const catchY = h * 0.62;
+      const baselineY = h * 0.85;
+
+      // Bottom baseline catcher line
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(w * 0.1, baselineY);
+      ctx.lineTo(w * 0.9, baselineY);
+      ctx.stroke();
+
+      // Target 1: Green drop at x = w * 0.36
+      const g1X = w * 0.36;
+      if (cycle < 1200) {
+        const p = cycle / 1200;
+        const gy = p * catchY;
+        ctx.fillStyle = '#10b981';
+        ctx.beginPath();
+        ctx.arc(g1X, gy, 6, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (cycle < 1600) {
+        const hp = (cycle - 1200) / 400;
+        drawHitRing(ctx, g1X, catchY, 6 + hp * 22, '#10b981', 1 - hp);
+      }
+
+      // Target 2: Red decoy drop at x = w * 0.64 (falls completely without click)
+      const rX = w * 0.64;
+      if (cycle >= 300 && cycle < 2400) {
+        const p = (cycle - 300) / 2100;
+        const ry = p * baselineY;
+        // Red decoy with spike warning ticks
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath();
+        ctx.arc(rX, ry, 6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#ef4444';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(rX - 8, ry - 8, 16, 16);
+      }
+
+      // Target 3: Second green drop at x = w * 0.50
+      const g2X = w * 0.50;
+      if (cycle >= 1400 && cycle < 2500) {
+        const p = (cycle - 1400) / 1100;
+        const gy = p * catchY;
+        ctx.fillStyle = '#10b981';
+        ctx.beginPath();
+        ctx.arc(g2X, gy, 6, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (cycle >= 2500 && cycle < 2900) {
+        const hp = (cycle - 2500) / 400;
+        drawHitRing(ctx, g2X, catchY, 6 + hp * 22, '#10b981', 1 - hp);
+      }
+
+      // Crosshair tracking: moves to G1 at 1200ms, ignores Red decoy, moves to G2 at 2500ms
+      let chX = g1X;
+      let chY = catchY;
+
+      if (cycle < 1200) {
+        chX = g1X;
+      } else if (cycle < 2500) {
+        const p = easeInOutCubic(Math.min(1, (cycle - 1300) / 600));
+        chX = g1X + (g2X - g1X) * p;
+      } else {
+        chX = g2X;
+      }
+
+      drawCrosshair(ctx, chX, chY, 7, '#ffffff');
+
+      ctx.fillStyle = '#10b981';
+      ctx.font = '7px ui-monospace, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('CATCH GREEN · EVADE RED DECOYS', w * 0.5, h * 0.92);
+    }
+  },
+
+  // 55. PERIPHERAL-SWEEP: Central fixation crosshair sweeping inward radial perimeter threats (peripheral-threat-sweeper)
+  'peripheral-sweep': {
+    id: 'peripheral-sweep',
+    label: 'Perimeter Radial Scan',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 990) % 3000;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const cx = w * 0.5;
+      const cy = h * 0.5;
+
+      // Defense core perimeter ring
+      ctx.strokeStyle = dim || 'rgba(244, 63, 94, 0.15)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.arc(cx, cy, 18, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Outer radar sweep circle
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(cx, cy, Math.min(w, h) * 0.42, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Threat 1: Top-Right perimeter threat
+      const t1Start = { x: cx + w * 0.36, y: cy - h * 0.32 };
+      const t1Intercept = { x: cx + w * 0.20, y: cy - h * 0.18 };
+      if (cycle < 1000) {
+        const p = cycle / 1000;
+        const tx = t1Start.x + (t1Intercept.x - t1Start.x) * p;
+        const ty = t1Start.y + (t1Intercept.y - t1Start.y) * p;
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath();
+        ctx.arc(tx, ty, 5.5, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (cycle < 1400) {
+        const hp = (cycle - 1000) / 400;
+        drawHitRing(ctx, t1Intercept.x, t1Intercept.y, 6 + hp * 22, accent, 1 - hp);
+      }
+
+      // Threat 2: Bottom-Left perimeter threat
+      const t2Start = { x: cx - w * 0.36, y: cy + h * 0.30 };
+      const t2Intercept = { x: cx - w * 0.20, y: cy + h * 0.16 };
+      if (cycle >= 1000 && cycle < 2200) {
+        const p = (cycle - 1000) / 1200;
+        const tx = t2Start.x + (t2Intercept.x - t2Start.x) * p;
+        const ty = t2Start.y + (t2Intercept.y - t2Start.y) * p;
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath();
+        ctx.arc(tx, ty, 5.5, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (cycle >= 2200 && cycle < 2600) {
+        const hp = (cycle - 2200) / 400;
+        drawHitRing(ctx, t2Intercept.x, t2Intercept.y, 6 + hp * 22, accent, 1 - hp);
+      }
+
+      // Crosshair: sits in center, snaps out to T1 at 1000ms, back to center, snaps out to T2 at 2200ms
+      let chX = cx;
+      let chY = cy;
+
+      if (cycle < 750) {
+        chX = cx;
+        chY = cy;
+      } else if (cycle < 1000) {
+        const p = easeInOutCubic((cycle - 750) / 250);
+        chX = cx + (t1Intercept.x - cx) * p;
+        chY = cy + (t1Intercept.y - cy) * p;
+      } else if (cycle < 1400) {
+        chX = t1Intercept.x;
+        chY = t1Intercept.y;
+      } else if (cycle < 1700) {
+        const p = easeInOutCubic((cycle - 1400) / 300);
+        chX = t1Intercept.x + (cx - t1Intercept.x) * p;
+        chY = t1Intercept.y + (cy - t1Intercept.y) * p;
+      } else if (cycle < 2200) {
+        const p = easeInOutCubic((cycle - 1950) / 250);
+        chX = cx + (t2Intercept.x - cx) * p;
+        chY = cy + (t2Intercept.y - cy) * p;
+      } else if (cycle < 2600) {
+        chX = t2Intercept.x;
+        chY = t2Intercept.y;
+      } else {
+        const p = easeInOutCubic((cycle - 2600) / 300);
+        chX = t2Intercept.x + (cx - t2Intercept.x) * p;
+        chY = t2Intercept.y + (cy - t2Intercept.y) * p;
+      }
+
+      drawCrosshair(ctx, chX, chY, 7, '#ffffff');
+
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
+      ctx.font = '7px ui-monospace, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('PERIMETER RADIAL INTERCEPT', cx, h * 0.90);
+    }
+  },
+
+  // 56. QUICK-DODGE: Fluid cursor evasion weaving between dynamic homing obstacles (quick-dodge)
+  'quick-dodge': {
+    id: 'quick-dodge',
+    label: 'Reflex Chaos Evasion',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 1000) % 3200;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const midX = w * 0.5;
+      const midY = h * 0.5;
+
+      // Player orb weaves smoothly in figure/curve
+      const angle = (cycle / 3200) * Math.PI * 2;
+      const px = midX + Math.sin(angle) * (w * 0.22);
+      const py = midY + Math.cos(angle * 2) * (h * 0.22);
+
+      // 3 red homing threat obstacles converging
+      const threats = [
+        { startX: w * 0.15, startY: h * 0.15, speed: 0.9 },
+        { startX: w * 0.85, startY: h * 0.25, speed: 1.1 },
+        { startX: w * 0.80, startY: h * 0.80, speed: 1.0 },
+      ];
+
+      threats.forEach((th, idx) => {
+        const tp = ((cycle * 0.0008 * th.speed) + idx * 0.33) % 1.0;
+        const tx = th.startX + (px - th.startX) * tp * 0.85;
+        const ty = th.startY + (py - th.startY) * tp * 0.85;
+
+        // Threat chevron / spike
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath();
+        ctx.arc(tx, ty, 4.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Velocity trail
+        ctx.strokeStyle = 'rgba(239, 68, 68, 0.25)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(th.startX, th.startY);
+        ctx.lineTo(tx, ty);
+        ctx.stroke();
+      });
+
+      // Player orb
+      ctx.fillStyle = accent;
+      ctx.beginPath();
+      ctx.arc(px, py, 6, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Near miss shock halo
+      if (cycle >= 1400 && cycle < 1900) {
+        const p = (cycle - 1400) / 500;
+        drawHitRing(ctx, px, py, 7 + p * 16, accent, 1 - p);
+      }
+
+      drawCrosshair(ctx, px, py, 6.5, '#ffffff');
+
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
+      ctx.font = '7px ui-monospace, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('EVASION STREAK: 100% COLLISION FREE', midX, h * 0.90);
+    }
+  },
+
+  // 57. KINETIC-ARREST: Snap deceleration & complete cursor freeze over flying node (reaction-chain)
+  'kinetic-arrest': {
+    id: 'kinetic-arrest',
+    label: 'Reaction Chain Kinetic Arrest',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 1010) % 3000;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const midY = h * 0.50;
+      const arrestX = w * 0.52;
+
+      // Incoming node flies from left to right
+      let nodeX = w * 0.12;
+      const isFlying = cycle < 1100;
+      const isArrested = cycle >= 1100 && cycle < 2400;
+
+      if (isFlying) {
+        const p = easeInOutCubic(cycle / 1100);
+        nodeX = w * 0.12 + (arrestX - w * 0.12) * p;
+      } else {
+        nodeX = arrestX;
+      }
+
+      // Flying trail
+      if (isFlying) {
+        ctx.strokeStyle = 'rgba(244, 63, 94, 0.3)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(w * 0.12, midY);
+        ctx.lineTo(nodeX, midY);
+        ctx.stroke();
+      }
+
+      // Target node
+      ctx.fillStyle = isArrested ? '#10b981' : accent;
+      ctx.beginPath();
+      ctx.arc(nodeX, midY, 6, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Crosshair position
+      let chX = isFlying ? (cycle > 600 ? nodeX : arrestX) : arrestX;
+
+      if (isArrested) {
+        // Arrest lock brackets around the node: [  ]
+        const bracketP = Math.min(1, (cycle - 1100) / 200);
+        const gap = 12 - bracketP * 3;
+        ctx.strokeStyle = '#10b981';
+        ctx.lineWidth = 2;
+        // Left bracket [
+        ctx.beginPath();
+        ctx.moveTo(nodeX - gap + 3, midY - 8);
+        ctx.lineTo(nodeX - gap, midY - 8);
+        ctx.lineTo(nodeX - gap, midY + 8);
+        ctx.lineTo(nodeX - gap + 3, midY + 8);
+        // Right bracket ]
+        ctx.moveTo(nodeX + gap - 3, midY - 8);
+        ctx.lineTo(nodeX + gap, midY - 8);
+        ctx.lineTo(nodeX + gap, midY + 8);
+        ctx.lineTo(nodeX + gap - 3, midY + 8);
+        ctx.stroke();
+
+        // Lock damping pulse
+        if (cycle < 1700) {
+          const lp = (cycle - 1100) / 600;
+          drawHitRing(ctx, nodeX, midY, 8 + lp * 24, '#10b981', 1 - lp);
+        }
+      }
+
+      drawCrosshair(ctx, chX, midY, 7, isArrested ? '#10b981' : '#ffffff');
+
+      ctx.fillStyle = isArrested ? '#10b981' : 'rgba(255, 255, 255, 0.55)';
+      ctx.font = '7px ui-monospace, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(isArrested ? 'ARREST LOCKED (VELOCITY: 0.0 PX/S)' : 'DECELERATION BRAKE READY', w * 0.5, h * 0.90);
     }
   },
 };
