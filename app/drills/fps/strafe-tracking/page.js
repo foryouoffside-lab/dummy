@@ -159,58 +159,18 @@ export default function StrafeTrackingPage() {
       },
       {
         "@type": "Question",
-        "name": "Can tracking improve Overwatch 2 aim?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Target tracking is critical for heroes like Soldier: 76, Tracer, Zarya, and Sombra who rely on smooth pursuit and direction change recognition to maximize damage output."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "What is counter-strafe reading?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Counter-strafe reading is your neurological speed in registering when an enemy reverses their horizontal direction, allowing you to re-align your crosshair with minimal lag."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "What is aim smoothness?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Smoothness refers to moving your mouse at a constant, matching speed to the target without micro-corrections, jitters, or abrupt jerking movements."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "How do professional players train tracking?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Pros use specialized software aim trainers to practice isolating horizontal sweeps, vertical tracking, and reaction speed under variable speeds."
-        }
-      },
-      {
-        "@type": "Question",
         "name": "What sensitivity is best for tracking?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "A moderate-to-low sensitivity (e.g., 25cm to 45cm per 360 rotation) is generally best for tracking, as it provides enough physical space to make smooth micro-adjustments."
+          "text": "Medium-to-low sensitivity (30cm to 45cm per 360°) offers the best balance between smoothness and speed for reactive tracking."
         }
       },
       {
         "@type": "Question",
-        "name": "Can this drill improve mouse control?",
+        "name": "Is this strafe tracking drill free?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Yes. Keeping your crosshair on dodging targets forces your wrist and fingers to build subtle motor-control adjustments, optimizing mouse handling."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "How long does it take to improve tracking?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Most players notice improvements in crosshair smoothness and reaction time after 2 weeks of daily, focused 10-minute training sessions."
+          "text": "Yes, 100% free with unaccelerated raw input in your browser without downloads or signups."
         }
       }
     ]

@@ -159,58 +159,34 @@ export default function TargetSwitchingSwarmPage() {
       },
       {
         "@type": "Question",
-        "name": "What is efficient target pathing?",
+        "name": "How often should I train target switching?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Efficient pathing means eliminating a cluster of targets in an order that requires the least amount of overall mouse movement, reducing total time-to-kill."
+          "text": "We recommend 10 to 15 minutes of target switching drills during your pre-match warm-up routine to prime your flick transitions and multi-target indexing."
         }
       },
       {
         "@type": "Question",
-        "name": "Should my eyes move before my crosshair?",
+        "name": "What is the optimal mouse grip for target switching?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Yes. Your eyes should snap to the next target the millisecond you click on the current one. Your hand will naturally follow your eye movement."
+          "text": "Claw grip and fingertip grip offer the most agility for micro-adjustments during high-speed target switches, though consistency with your existing comfortable grip is most important."
         }
       },
       {
         "@type": "Question",
-        "name": "How does target switching help in Apex Legends?",
+        "name": "Is this drill free?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "In Apex Legends, target switching allows you to rapidly transfer fire between multiple squad members pushing your position or flying through the air."
+          "text": "Yes, this Target Switching Swarm Trainer is 100% free, open-source, and runs directly in your web browser with zero downloads required."
         }
       },
       {
         "@type": "Question",
-        "name": "Does target switching improve general flicking?",
+        "name": "What skills does this drill improve?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Yes. Target switching is essentially chaining multiple dynamic flicks together consecutively without returning to a center resting position."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "How often should I practice target switching?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Incorporate 10-15 minutes of pure target switching drills into your daily warm-up routine alongside flicking and tracking exercises."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Is this Target Switching Aim Trainer free?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Yes, this Target Switching Aim Trainer is 100% free, runs directly in your web browser using raw hardware pointer lock, and requires no downloads."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "What skills does this target switching drill improve?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "This drill improves multi-target transitions, target acquisition speed, flick deceleration, visual processing, pathing efficiency, and multi-kill mechanics."
+          "text": "It trains rapid multi-target transitions, visual indexing, flick deceleration, and high-tempo cognitive target switching."
         }
       }
     ]

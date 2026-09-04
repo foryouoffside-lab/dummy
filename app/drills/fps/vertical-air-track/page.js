@@ -159,42 +159,18 @@ export default function VerticalAirTrackPage() {
       },
       {
         "@type": "Question",
-        "name": "How do professional players track parabolic arcs?",
+        "name": "How often should I train vertical tracking?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Pros anticipate target acceleration at the start of a jump and slow down their tracking near the apex of the arc where vertical velocity drops to zero, securing high-damage tracking ticks."
+          "text": "We recommend 10 to 15 minutes of vertical tracking 3 to 4 times per week to develop smooth Y-axis control and reduce wrist fatigue during vertical engagements."
         }
       },
       {
         "@type": "Question",
-        "name": "What is Y-axis mouse sensitivity calibration?",
+        "name": "Is this drill free?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Y-axis sensitivity calibration ensures your vertical mouse movements feel natural and proportional to horizontal movements. Some players run a 1:1 ratio, while others adjust Y-sensitivity to compensate for wrist biomechanics."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Does vertical tracking help in Titanfall 2?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Yes, Titanfall 2 features extreme verticality, wall-running, and double jumping, which require excellent vertical tracking skills to counter."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "How often should I train vertical aim?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "We recommend training vertical aim for 10-15 minutes daily as part of your FPS warm-up routine to build consistent muscle memory on the Y-axis."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Is this vertical aim trainer free?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Yes, this Vertical Air Track Aim Trainer is 100% free, runs in any desktop browser using raw hardware pointer input, and contains no ads."
+          "text": "Yes, this Vertical Air-Track Trainer is 100% free, runs directly in your web browser, and requires no downloads or accounts."
         }
       },
       {
@@ -202,15 +178,7 @@ export default function VerticalAirTrackPage() {
         "name": "What skills does this drill improve?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "This drill trains vertical tracking, air tracking, parabolic arc prediction, Y-axis mouse control, visual processing speed, and tracking consistency."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Can vertical aim training improve overall tracking consistency?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Yes, isolating vertical aim training smooths out jittery vertical movements, making your overall mouse tracking more consistent across both axes."
+          "text": "It trains vertical smooth pursuit, parabolic trajectory prediction, Y-axis crosshair control, and mid-air target tracking under gravity."
         }
       }
     ]
