@@ -46,52 +46,27 @@ const faqSchema = {
     {
       "@type": "Question",
       "name": "What is a good reaction time in milliseconds?",
-      "acceptedAnswer": { "@type": "Answer", "text": "The average human visual reaction time is 200-250 milliseconds. Below 200ms is considered fast. Below 150ms is in the elite range typical of competitive esports players and trained athletes. Below 100ms would suggest anticipation rather than true reaction. Note that screen refresh rate (Hz) and browser timing add 10-20ms to measured times." }
+      "acceptedAnswer": { "@type": "Answer", "text": "The average human visual reaction time is 200-250 milliseconds. Below 200ms is considered fast. Below 150ms is in the elite range typical of competitive esports players and trained athletes." }
     },
     {
       "@type": "Question",
-      "name": "How can I improve my reaction time?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Proven methods to improve reaction time include: (1) Regular reaction time testing and training (consistent practice reduces neural processing overhead), (2) Aerobic exercise (improves cerebrovascular flow and neurotransmitter levels), (3) Optimal sleep (sleep deprivation adds 50-100ms to reaction time), (4) Reducing display latency (higher Hz monitor, lower input lag), and (5) Practicing dual n-back and visual attention tasks." }
+      "name": "How does rule switching work in this drill?",
+      "acceptedAnswer": { "@type": "Answer", "text": "The active rule banner at the top shows which color target to tap ('TAP RED' or 'TAP BLUE'). As you perform well and level up, the rule switches between RED and BLUE targets to test your cognitive switching speed." }
     },
     {
       "@type": "Question",
       "name": "What does this reaction time test measure?",
-      "acceptedAnswer": { "@type": "Answer", "text": "This test measures simple visual reaction time (SRT) — the elapsed time from the moment a visual stimulus appears to the moment you click your mouse or tap the screen. It uses high-resolution browser timing (performance.now()) to measure to the millisecond, accounting for frame rate limitations. Your average across multiple trials gives your best estimate of true reaction latency." }
+      "acceptedAnswer": { "@type": "Answer", "text": "This test measures choice visual reaction time (CRT) — the elapsed time from stimulus onset to motor response execution while discriminating between target rules." }
     },
     {
       "@type": "Question",
-      "name": "Why is my reaction time faster on some days than others?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Reaction time variability is normal and driven by several factors: sleep quality (the strongest predictor), caffeine intake, hydration, mental fatigue, alertness level, emotional state, and ambient temperature. Your 'true' reaction time is best estimated by averaging many trials across several days, not a single measurement session." }
+      "name": "What is the difference between simple and choice reaction time?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Simple reaction time (SRT) requires responding to a single expected stimulus and typically averages 200-250ms. Choice reaction time (CRT), like this drill, requires discriminating between multiple stimuli before responding, adding a decision-making stage that runs 50-100ms slower than SRT. This drill goes further by flipping which color is correct mid-session, layering cognitive flexibility on top of standard CRT." }
     },
     {
       "@type": "Question",
-      "name": "What is the reaction time of professional gamers and athletes?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Professional esports players (CS2, Valorant, Apex Legends) typically measure 150-200ms in clinical conditions. F1 racing drivers average 200ms. Elite sprinters' starting reaction time at the block must exceed 100ms (below 100ms is considered a false start). Baseball batters must react to a 95mph fastball in approximately 400ms — including the decision and swing." }
-    },
-    {
-      "@type": "Question",
-      "name": "Does caffeine improve reaction time?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Yes, moderately. Research shows that 200-400mg of caffeine (1-2 espresso shots) reduces reaction time by approximately 20-30ms in caffeine-naive individuals. The effect is strongest on fatigued individuals and in the morning. However, high doses can cause over-arousal and increased tremor, which can counteract precision benefits." }
-    },
-    {
-      "@type": "Question",
-      "name": "What factors affect human reaction time?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Key factors affecting reaction time: Age (fastest at 20-24 years, then gradually slows), Sleep (deprivation severely impairs reaction time), Fitness (aerobic fitness correlates with faster neural conduction), Stimulus type (auditory reactions are ~40ms faster than visual), Expectation (anticipated stimuli are 100-200ms faster), and Screen/Input lag (adds to measured time in online tests)." }
-    },
-    {
-      "@type": "Question",
-      "name": "Is 200ms a fast reaction time for gaming?",
-      "acceptedAnswer": { "@type": "Answer", "text": "200ms is average for the general population and perfectly functional for casual gaming. For competitive FPS esports (Valorant, CS2, Apex), the top players measure 150-180ms. While raw reaction time matters, game sense, crosshair placement, and prediction account for far more performance variance than the 30-50ms difference between average and elite reaction speed." }
-    },
-    {
-      "@type": "Question",
-      "name": "How accurate are online reaction time tests?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Online tests are reasonably accurate to within ±10-20ms for most users. Main sources of error: display refresh rate (60Hz monitors add up to ~16ms systematic delay), browser JavaScript timing precision (usually <1ms error), input device latency (wired mice ~1ms, wireless ~5ms, touchscreens ~30ms), and individual variation between trials. Average 10+ trials for reliable results." }
-    },
-    {
-      "@type": "Question",
-      "name": "Is this reaction time test free?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Yes. This reaction time test on SkillDrills is completely free. No registration, downloads, or subscriptions required. It works in any modern browser on desktop (mouse) or mobile (touch). Results are shown in milliseconds with your percentile ranking compared to other users." }
+      "name": "What is Hick's Law and how does it apply here?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Hick's Law states that reaction time increases logarithmically with the number of choices you must discriminate between before responding. Because this drill forces you to actively verify the current rule before reacting, it directly exercises the decision-time component Hick's Law describes, rather than pure reflex speed alone." }
     }
   ]
 };
