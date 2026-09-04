@@ -1,5 +1,4 @@
 import ReflexTrainingDrillWrapper from './ReflexTrainingDrillWrapper';
-import { getAlternateLanguages } from '@/lib/i18n/locales';
 
 // ============================================================
 // SEO RESEARCH FINDINGS — reflex-training-drill
@@ -23,9 +22,12 @@ export const metadata = {
     'multi target acquisition trainer', 'burst reflex game',
     'free aim trainer browser', 'gaming hand eye coordination test', 'low latency reaction tool'
   ],
+  // Intentionally omit hreflang until localized routes exist for this path:
+  // there is no /pt, /es, /ja, /de or /ko page for it -- emitting hreflang
+  // would advertise locale URLs that 404. Add it back only together with the
+  // locale pages themselves.
   alternates: {
     canonical: 'https://skilldrills.online/drills/reaction-speed/reflex-training-drill',
-    languages: getAlternateLanguages('/drills/reaction-speed/reflex-training-drill'),
   },
   robots: { index: true, follow: true },
   openGraph: {

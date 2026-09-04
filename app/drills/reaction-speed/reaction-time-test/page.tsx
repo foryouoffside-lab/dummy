@@ -1,6 +1,5 @@
 import ReactionTimeTestWrapper from './ReactionTimeTestWrapper';
 import DrillGuide from '@/components/drill/DrillGuide';
-import { getAlternateLanguages } from '@/lib/i18n/locales';
 
 // ============================================================
 // SEO RESEARCH FINDINGS — reaction-time-test
@@ -39,9 +38,12 @@ export const metadata = {
     description: 'Measure your visual reaction latency in milliseconds. Simple, free, browser-based reflex test with no downloads.',
   },
   robots: { index: true, follow: true },
+  // Intentionally omit hreflang until localized routes exist for this path:
+  // there is no /pt, /es, /ja, /de or /ko page for it -- emitting hreflang
+  // would advertise locale URLs that 404. Add it back only together with the
+  // locale pages themselves.
   alternates: {
     canonical: 'https://skilldrills.online/drills/reaction-speed/reaction-time-test',
-    languages: getAlternateLanguages('/drills/reaction-speed/reaction-time-test'),
   },
 };
 
