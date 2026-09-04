@@ -21,8 +21,8 @@ import { getLocalizedDrill } from '@/lib/i18n/drillNames';
 import { hasLocalizedRoute } from '@/lib/i18n/locales';
 
 const FOLDER_TO_STORAGE_KEY: Record<string, string> = {
-  'market-doors-pursuit': 'skilldrills_market_doors_v2',
-  'fps-tracking-trainer': 'skilldrills_fps_tracking_v2',
+  'market-doors-pursuit': 'skilldrills_market_doors_v3',
+  'fps-tracking-trainer': 'skilldrills_fps_tracking_v3',
 };
 
 export default function ReactionSpeedDrillsClient() {
@@ -47,7 +47,7 @@ export default function ReactionSpeedDrillsClient() {
       const levels: Record<string, number> = {};
       reactiveDrills.forEach(d => {
         const override = FOLDER_TO_STORAGE_KEY[d.folderName];
-        const keys = override ? [override] : [
+        const keys = override ? [override, override.replace(/_v3$/, '_v2'), override.replace(/_v3$/, '')] : [
           `skilldrills_${d.folderName.replace(/-/g, '_')}_v3`,
           `skilldrills_${d.folderName.replace(/-/g, '_')}_v2`,
           `skilldrills_${d.folderName.replace(/-/g, '_')}`,
