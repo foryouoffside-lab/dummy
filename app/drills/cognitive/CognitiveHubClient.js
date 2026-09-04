@@ -67,7 +67,7 @@ const orderedCogDrills = sortByInterest(
   )
 );
 
-export default function CognitiveHubClient() {
+export default function CognitiveHubClient({ faqs = [] }) {
   const { t } = useTranslation();
   const [isClient, setIsClient] = useState(false);
   const [drillLevels, setDrillLevels] = useState({});
@@ -280,6 +280,36 @@ export default function CognitiveHubClient() {
             </div>
           </div>
         </Reveal>
+
+        {/* The hub emits FAQPage JSON-LD, so these Q&As have to be on the page:
+            Google requires FAQ structured data to be visible to the visitor.
+            `faqs` is mapped straight from that same schema object in page.js,
+            so the two cannot drift apart. Rendered open rather than in an
+            accordion -- this is the hub's only body copy, and it is one of the
+            few URLs Google has actually indexed. */}
+        {faqs.length > 0 && (
+          <Reveal className="mt-12">
+            <section aria-labelledby="hub-faq-heading">
+              <h2
+                id="hub-faq-heading"
+                className="text-lg font-mono font-bold uppercase tracking-wider text-ink-1 mb-6"
+              >
+                {t('home.faqTitle', 'Frequently Asked Questions')}
+              </h2>
+              <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {faqs.map((f) => (
+                  <div
+                    key={f.q}
+                    className="p-5 rounded-2xl bg-surface-1 border border-hairline backdrop-blur-xl"
+                  >
+                    <dt className="font-semibold text-ink-1 text-sm font-sans">{f.q}</dt>
+                    <dd className="mt-2 text-xs text-ink-2 leading-relaxed font-sans">{f.a}</dd>
+                  </div>
+                ))}
+              </dl>
+            </section>
+          </Reveal>
+        )}
 
         {/* Explore Related Hubs */}
         <Reveal className="mt-12 mb-8 border-t border-hairline pt-12">

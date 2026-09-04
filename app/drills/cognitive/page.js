@@ -47,6 +47,69 @@ export const metadata = {
   },
 };
 
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is cognitive training?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Cognitive training consists of structured mental exercises designed to challenge and maintain core executive functions, including selective attention, working memory, processing speed, and cognitive flexibility."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can cognitive drills improve processing speed?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Targeted cognitive drills—such as rapid symbol matching and choice reaction tasks—can improve task-specific processing speed and psychomotor coordination. Repeated practice reinforces the neural pathways involved in identifying visual stimuli and executing motor decisions."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does attention training differ from focus training?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Attention training focuses on allocating cognitive resources, such as splitting focus across simultaneous stimuli (divided attention) or ignoring irrelevant distractors (selective attention). Focus training emphasizes sustained attention, training the ability to maintain vigilance on a single task over prolonged periods."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the Stroop effect and how does it measure inhibition?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The Stroop effect occurs when there is a conflict between the semantic meaning of a word (e.g. the word 'RED') and the ink color it is displayed in (e.g. green). Naming the display color requires active cognitive inhibition in the prefrontal cortex to suppress the automatic impulse to read the word."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is a Schulte table used for?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A Schulte table is a grid of randomly distributed numbers (typically 1 to 25) used to train visual search speed, peripheral awareness, and mental concentration. Users locate and tap numbers in ascending order while keeping their gaze centered on the grid."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How often should you practice cognitive drills?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Most cognitive training protocols recommend short, consistent sessions of 10 to 15 minutes per day, 3 to 5 days per week. Regular brief sessions provide consistent stimulation for neuroplastic adaptation while avoiding mental fatigue."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do cognitive skills transfer to gaming and daily performance?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Skills like rapid visual scanning, visual target discrimination, and inhibitory control transfer directly to high-demand environments, including competitive esports (tactical shooters and battle royales) and complex workplace tasks requiring fast switching and distractor suppression."
+      }
+    }
+  ]
+};
+
 export default function CognitiveDrillsPage() {
   return (
     <>
@@ -63,7 +126,10 @@ export default function CognitiveDrillsPage() {
           "url": `https://skilldrills.online${drill.href}`
         }))
       })}} />
-      <CognitiveHubClient />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      <CognitiveHubClient
+        faqs={faqSchema.mainEntity.map((e) => ({ q: e.name, a: e.acceptedAnswer.text }))}
+      />
     </>
   );
 }
