@@ -158,46 +158,6 @@ const faqSchema = {
         "@type": "Answer",
         "text": "Yes, because you must physically move your mouse to navigate the safe coordinates you visually identified, syncing your visual cortex with your motor cortex."
       }
-    },
-    {
-      "@type": "Question",
-      "name": "What is Adrenaline Mode?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Adrenaline Mode is a high-stakes 10-second burst triggered every 250 points. The environment darkens, a heartbeat plays, and all score and time rewards are massively multiplied. It tests your ability to stay calm under intense sensory pressure."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Does the game get harder over time?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes, it features a 10-Level adaptive progression. As you score points, the speed increases dramatically (up to 1600px/s) and spawn rates become overwhelming."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Are there penalties for getting hit?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes. Getting hit triggers a scaling time deduction. Your first hit costs -5s, but consecutive hits can scale the penalty up to a brutal -10s per hit, forcing you to maintain high evasion accuracy to stay alive."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "How does the survival clock work?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "You start with 60 seconds. Every dodge adds +0.6s. Perfect streak milestones grant massive time injections (up to +15s). The game ends when the clock hits zero."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Is this free?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes! The SkillDrills Reflex Game Online is entirely free, open-source, and runs purely in your web browser with zero downloads required."
-      }
     }
   ]
 };

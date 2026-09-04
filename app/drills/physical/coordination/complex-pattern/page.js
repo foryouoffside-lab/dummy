@@ -121,82 +121,42 @@ const faqSchema = {
   "mainEntity": [
     {
       "@type": "Question",
-      "name": "What is a pattern memory game?",
+      "name": "What is Complex Pattern Pro?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "A pattern memory game is a cognitive drill where a user is briefly shown a sequence or geometric path, which they must then accurately reproduce from memory, training their visual and spatial recall."
+        "text": "Complex Pattern Pro is a physical coordination & visual memory drill testing spatial geometry retention and mouse tracing accuracy. Players memorize multi-node patterns flashed briefly on canvas and reproduce them accurately."
       }
     },
     {
       "@type": "Question",
-      "name": "How does a pattern memory game improve working memory?",
+      "name": "How do pattern tracing controls work?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "It forces the brain to temporarily store visual-spatial information and rapidly translate it into fine motor commands, strengthening the neural pathways used for short-term recall."
+        "text": "During the drawing phase, click and drag from the cyan start node through all waypoints to the magenta end node. Releasing mouse click submits your drawn trajectory for similarity evaluation."
       }
     },
     {
       "@type": "Question",
-      "name": "Is this a visual memory test?",
+      "name": "Does this drill improve gaming performance?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes. Because the lines disappear entirely before you draw, you must rely 100% on your brain's ability to hold a visual snapshot of the geometry."
+        "text": "Yes. Retaining spatial geometry and executing fine cursor sweeps trains the visual cortex and motor precision needed for recoil control patterns, crosshair placement, and rapid gesture commands."
       }
     },
     {
       "@type": "Question",
-      "name": "Can this game improve spatial memory?",
+      "name": "How does difficulty scaling work?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes, spatial memory is specifically targeted by requiring you to remember the exact angles, proportions, and coordinates of the pattern's layout rather than just a simple sequence."
+        "text": "As you score points, your level rises up to Level 15. Node count increases from 3 up to 8, memorization time drops from 2.0s to 0.6s, and required similarity accuracy increases."
       }
     },
     {
       "@type": "Question",
-      "name": "Is this pattern memory game good for brain training?",
+      "name": "What is a good score in Complex Pattern Pro?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Absolutely. It combines visual processing, cognitive retention, and fine motor execution, making it an excellent holistic brain training exercise."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "How is pattern accuracy calculated?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "The physics engine resamples your drawn line into 100 mathematical waypoints, then compares the geometry, angles, and endpoint distances against the original shape using vector normalization."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "How does the adaptive difficulty work?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "As your score increases (Leveling up every 100 PTS), the game introduces more waypoints, complex shapes like zig-zags and spirals, shorter memorization flash times, and a higher baseline accuracy requirement."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "What is a good score in the Pattern Memory Test?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Scoring 300+ is Silver tier. 800+ indicates Gold visual memory. Hitting 1500+ points with 75% accuracy places you in the Platinum tier."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "How often should I practice spatial memory games?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "For optimal cognitive adaptation, practicing memory drills for 5 to 10 minutes a day is more effective than occasional hour-long sessions."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Is this memory drawing game free?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes! The SkillDrills Pattern Memory Game is entirely free, open-source, and runs purely in your web browser with zero downloads required."
+        "text": "Scoring 8,000+ points earns a Gold or Platinum grade, while reaching 17,000+ points with 85%+ average accuracy places you in the Master tier."
       }
     }
   ]

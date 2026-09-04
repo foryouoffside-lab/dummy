@@ -139,34 +139,34 @@ export default function CrossBodyMovementPage() {
             "mainEntity": [
               {
                 "@type": "Question",
-                "name": "What is hand eye coordination?",
+                "name": "What is Cross-Body Movement Pro?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Hand eye coordination is the neurological process of your brain simultaneously processing visual input from your eyes to guide and control the fine motor movements of your hands."
+                  "text": "Cross-Body Movement Pro is a physical coordination drill testing bilateral motor control and diagonal line tracing precision. It forces players to sweep their mouse across large diagonal screen distances within tight corridor bounds."
                 }
               },
               {
                 "@type": "Question",
-                "name": "Why are cross body exercises important?",
+                "name": "How do vector connection mechanics work?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Cross body exercises force the left and right hemispheres of your brain to communicate rapidly. This strengthens motor planning, spatial awareness, and overall physical agility."
+                  "text": "Touch the starting cyan node to activate the connection line, then trace directly along the vector to the target magenta node. Deviating past the corridor tolerance breaks connection."
                 }
               },
               {
                 "@type": "Question",
-                "name": "Can this hand eye coordination game improve mouse control?",
+                "name": "Does this drill improve gaming performance?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Absolutely. By demanding long, perfectly straight, sweeping movements without deviating off a narrow path, it punishes jittery clicks and rewards smooth, deliberate mouse precision."
+                  "text": "Yes. Sweeping wide diagonal angles trains the arm muscles for large flick movements, target switching across screens, and smooth mouse resetting in fast-paced shooters."
                 }
               },
               {
                 "@type": "Question",
-                "name": "Are there time penalties for missing?",
+                "name": "How does difficulty scaling work?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Yes, drifting off the designated vector path instantly triggers a 3-second penalty to your clock, but a successful connection grants a 3-second reward."
+                  "text": "As you score points, your level rises up to Level 15. Path corridor width shrinks from 10px down to 4px, node radius shrinks from 16px to 8px, and node placement variance increases."
                 }
               }
             ]

@@ -87,82 +87,42 @@ const faqSchema = {
   "mainEntity": [
     {
       "@type": "Question",
-      "name": "What is this reaction time training drill?",
+      "name": "What is Jump Sequence Pro?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "A free reaction time training and trajectory control game. Click-hold to charge, release to launch, steer mid-air with mouse. Land on green targets for points. Combo streaks every 5 hits in this 60-second reaction training challenge."
+        "text": "Jump Sequence Pro is a physical fitness & motor control drill that trains trajectory calculation, charge timing, and mid-air steering. Players charge jump velocity and steer their airborne character to intercept dynamic moving targets."
       }
     },
     {
       "@type": "Question",
-      "name": "How do charge-and-launch mechanics work in this reaction training game?",
+      "name": "How do jump controls work?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Hold mouse on the ball to charge (cyan progress bar). Longer hold = higher jump. Release to launch. Move mouse mid-air to steer left or right and land on the target. Reaction time and precision both matter."
+        "text": "Hover your crosshair over your player circle at the bottom floor, hold mouse click to charge jump power, and release to launch into the air. While airborne, move your mouse left or right to steer."
       }
     },
     {
       "@type": "Question",
-      "name": "What skills does this reaction time training improve?",
+      "name": "Does this drill improve gaming performance?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Reaction time, trajectory control, mouse precision, hand-eye coordination, timing accuracy, and quick decision-making for projectile aim — all critical skills in FPS games like Valorant, CS2, and Apex Legends."
+        "text": "Yes. Steering in mid-air and timing jump releases trains the neuromuscular coordination required for movement shooter mechanics, rocket jumping, and dynamic aerial tracking in games like Apex Legends and Overwatch."
       }
     },
     {
       "@type": "Question",
-      "name": "Why does my score go down?",
+      "name": "How does difficulty scaling work?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Unlike standard aim trainers, this drill actively punishes bad accuracy. Missing a jump or hitting bounds triggers a penalty, draining your points and your master clock. You must rely on precision trajectories over spastic launching."
+        "text": "As you score points, your level rises up to Level 15. Target movement speed accelerates up to 900+ px/s, target radius shrinks from 35px down to 12px, and target trajectory turns erratically."
       }
     },
     {
       "@type": "Question",
-      "name": "Why is the target shrinking and moving?",
+      "name": "What is a good score in Jump Sequence Pro?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "This is the engine's adaptive difficulty at work. As you successfully hit the target and build your streak, the target shrinks from a forgiving 35px down to a tiny 12px, and its random bouncing velocity increases."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "How does mid-air steering affect trajectory control?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Once launched, moving your mouse left or right applies a gentle thrust, letting you adjust your trajectory in mid-air to align with moving targets."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Does this game help with projectile aim in FPS?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes, it trains you to estimate gravity curves, velocity, and timing, which are directly applicable to throwables like grenades, mollies, and character abilities."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "What is a good score in the Jump Sequence drill?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "A score of 150+ points is Gold tier. Hitting 400+ points requires extreme trajectory precision and metronomic timing, placing you in the Master tier."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Do I need to sign up for this reaction time training?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "No registration required. This free reaction time training game works instantly in your browser — no downloads needed."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Is this physics skill game free?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes, the Jump Sequence drill on SkillDrills is 100% free, ad-free, and runs entirely in your web browser."
+        "text": "Scoring 8,000+ points earns a Gold or Platinum grade, while reaching 17,000+ points with high trajectory accuracy places you in the Master tier."
       }
     }
   ]
