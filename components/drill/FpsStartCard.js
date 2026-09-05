@@ -218,13 +218,6 @@ function getAccent(name) {
  * @param {keyof ACCENTS} accent - card-wide theme (badge, subtitle, button)
  * @param {string} title
  * @param {string} subtitle
- * @param {{icon, accent, title, text}[]} rules - what the drill asks of the player.
- *   Every drill has always passed these; the component used to drop them on the
- *   floor, which is why the card rendered as an icon, a title and a button
- *   floating in an otherwise empty canvas. 198 lines of already-written copy
- *   across 66 drills were never shown to anyone.
- * @param {{icon, label, value, color}[]} stats - personal bests, shown in the card
- *   so the page does not need a row of zeroes above the drill before first play.
  * @param {boolean} isTouchOnlyDevice
  * @param {string} touchBlockedLabel - what the drill actually needs, shown in place
  *   of the start button on a touch-only device. Most of these drills aim with a
@@ -236,12 +229,10 @@ export default function FpsStartCard({
   accent = 'emerald',
   title,
   subtitle,
-  rules = [],
-  stats = [],
   isTouchOnlyDevice = false,
   touchBlockedLabel = 'Mouse Required for Pointer Lock',
   onStart,
-  maxWidthClassName = 'max-w-[420px]',
+  maxWidthClassName = 'max-w-[360px]',
 }) {
   const a = getAccent(accent);
 
@@ -275,47 +266,6 @@ export default function FpsStartCard({
               <p className={`text-[10px] ${a.subtitleText} uppercase tracking-[0.15em] font-semibold mt-1`}>{subtitle}</p>
             )}
           </div>
-
-          {rules.length > 0 && (
-            <ul className="flex flex-col gap-2 text-left mt-1">
-              {rules.map((r, i) => {
-                const ra = getAccent(r.accent);
-                const RIcon = r.icon;
-                return (
-                  <li key={i} className="flex items-start gap-2.5 rounded-xl border border-white/5 bg-white/[0.02] px-3 py-2">
-                    <span className={`mt-[1px] flex-shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-lg border ${ra.chipBg} ${ra.chipBorder} ${ra.chipText}`}>
-                      {RIcon ? <RIcon className="w-3.5 h-3.5" /> : null}
-                    </span>
-                    <span className="min-w-0">
-                      <span className="block text-[11.5px] font-bold text-white leading-tight">{r.title}</span>
-                      {r.text && (
-                        <span className="block text-[10.5px] text-slate-400 leading-snug mt-0.5">{r.text}</span>
-                      )}
-                    </span>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-
-          {stats.length > 0 && (
-            <div className="grid gap-2 mt-0.5" style={{ gridTemplateColumns: `repeat(${Math.min(stats.length, 3)}, minmax(0, 1fr))` }}>
-              {stats.map((st, i) => {
-                const SIcon = st.icon;
-                return (
-                  <div key={i} className="rounded-xl border border-white/5 bg-white/[0.02] px-2 py-2 text-center">
-                    <span className="flex items-center justify-center gap-1 text-[9px] uppercase tracking-[0.12em] font-semibold text-slate-500">
-                      {SIcon ? <SIcon className="w-3 h-3" /> : null}
-                      {st.label}
-                    </span>
-                    <span className={`block text-[15px] font-black mt-0.5 tabular-nums ${st.color || 'text-white'}`}>
-                      {st.value}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          )}
 
           {isTouchOnlyDevice ? (
             <div className="w-full py-2.5 rounded-[13px] bg-red-950/60 border border-red-500/30 font-bold text-[11px] text-red-400 flex items-center justify-center gap-2 mt-0.5">
