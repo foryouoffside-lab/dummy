@@ -3,6 +3,7 @@
 **Target agent:** Antigravity
 **Type:** Design + information architecture. Run **before** the browser keyword research, so new content lands in a layout that can hold it.
 **Scope:** Drill page presentation sitewide. Not the drill mechanics, not the game logic.
+**Staged:** WS-0 designs **two pages only** and stops for operator approval. The 74-page rollout is blocked until that design is signed off.
 
 ---
 
@@ -84,9 +85,37 @@ Do not touch game loops, canvas rendering, scoring, timing, storage keys, or `li
 
 ## 5. Workstreams
 
-### WS-1 — Invert the H1 (74 pages)
+### WS-0 — Design ONE page first, and stop for approval
 
-The primary fix. The search term becomes the headline; the internal name becomes the supporting line.
+**This is a gate, not a suggestion. Do not touch the other 73 pages until the operator has approved a single finished reference page.**
+
+74 pages rebuilt against an unapproved design is 74 pages to redo. One page, reviewed, then a rollout that is mostly mechanical, is the cheaper path by a wide margin.
+
+**Build two pages, in this order:**
+
+**1. The reference page — `app/drills/reaction-speed/reaction-time-test`**
+
+Chosen because it exercises the most layout surface of any page on the site: it has a `DrillGuide`, a benchmark table, a full FAQ mapped single-source from its schema, the site's highest measured demand (8,223 exact/mo US), and both `ko` and `ja` localized versions — so it also proves the design survives translation, where headline lengths change substantially.
+
+Apply the full §3 design system to it: heading hierarchy, above-the-fold spacing, the answer sentence, guide integration, the post-drill moment, mobile behaviour.
+
+**2. The inversion-validation page — one where the codename and the search term genuinely differ**
+
+`reaction-time-test` is a weak test of WS-1, because its name and its target term are the same string. Pick a page where they diverge — `saccadic-gallery` → "saccadic eye exercises", or `market-doors-pursuit` → "corner checking trainer" — and apply the same system. This is what proves the H1 inversion reads well rather than merely compiling.
+
+**Then stop.** Deliver:
+- Screenshots of both pages at 390×844, 768×1024 and 1440×900
+- A screenshot of one localized version (`/ja/drills/reaction-speed/reaction-time-test`)
+- Before/after above-the-fold pixel measurements
+- Before/after word counts
+- The FAQ-drift check output, proving zero
+- A short note on anything in §3 that did not work in practice and what you did instead
+
+**Wait for approval before WS-1.** If the operator asks for changes, revise these two pages and present again. Only once the pattern is signed off does it get applied at scale.
+
+### WS-1 — Roll the approved pattern out (74 pages)
+
+**Blocked on WS-0 approval.** Once the design is signed off this is largely mechanical, and the primary change is the H1. The search term becomes the headline; the internal name becomes the supporting line.
 
 **Current:**
 ```jsx
@@ -182,7 +211,12 @@ This is where internal-link value and engagement signals are won. Improve it wit
 
 ## 7. Deliverables
 
-1. Code changes per §5.
+**Stage 1 (WS-0) — stop here and wait:**
+1. The two designed pages only.
+2. `UI_DESIGN_PROPOSAL.md` with the screenshots, measurements and notes listed in WS-0.
+
+**Stage 2 (after approval):**
+1. Code changes per the rest of §5.
 2. `UI_SEO_INTEGRATION_REPORT.md`:
    - The 74-page H1 table: page → old headline → new headline → source of term
    - **Pages where the `drillSeo` term read poorly as a headline, and the wording used instead**
@@ -205,6 +239,7 @@ This is where internal-link value and engagement signals are won. Improve it wit
 - The site's dark/gradient visual direction replaced with a minimalist restyle
 - Content deleted to make the layout tidier — this is a placement task, not a trim
 - More than one `<h1>` on a page, or skipped heading levels
+- **Editing pages beyond the two in WS-0 before the design is approved**
 - `npm run build` during development
 - Pushing or deploying
 
