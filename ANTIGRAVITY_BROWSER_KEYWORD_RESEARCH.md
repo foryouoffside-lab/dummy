@@ -204,6 +204,96 @@ If research supports one, propose it — but only where it can be written honest
 
 ---
 
+## 7b. GEO — What the Research Actually Measured
+
+AEO (§7) is about being *retrievable*. GEO is about being *quoted once retrieved*. Unlike most SEO advice, this part has a controlled study behind it, and you should follow the evidence rather than blog consensus.
+
+**Source:** Aggarwal et al., *GEO: Generative Engine Optimization*, KDD 2024 (Princeton / IIT Delhi). 9 content tactics tested across a 10,000-query benchmark spanning 8 domains, run against a Bing-Chat-like system and validated on Perplexity. Metrics introduced: **Position Adjusted Word Count** (how much of your text survives into the answer, weighted by position) and **Subjective Impression**.
+
+### 7b.1 What worked, and what did not
+
+| Tactic | Measured effect |
+|---|---|
+| **Statistics Addition** — concrete figures with units | **≈ +41%** |
+| **Cite Sources** — reference credible external work | strong (30–41% band) |
+| **Quotation Addition** — quote a named authority | **≈ +28%** |
+| **Fluency Optimization** — clean, readable prose | in the 30–41% band |
+| **Authoritative Voice** — confident, declarative phrasing | in the 30–41% band |
+| Easy-to-Understand simplification | no benefit |
+| Content Padding | no benefit |
+| **Keyword Stuffing** | **weakest — can actively reduce visibility** |
+
+Five of nine tactics moved the needle 30–41%. **Keyword stuffing was not merely useless; it measured worse than doing nothing.** That is a measured result, not an opinion, and it settles the question for this project permanently.
+
+### 7b.2 The trap this creates on THIS site — read carefully
+
+"Statistics Addition, +41%" is the single most dangerous line in this brief, because the obvious way to exploit it is to invent numbers. **You must not.** This site collects no aggregate data — scores never leave `localStorage`, the testimonials array is empty by design (§4.3). "Our 12,000 users average 214 ms" would be fabrication, and fabrication in a health/performance-adjacent claim is the worst failure available here.
+
+**The honest and equally effective route is external evidence.** Reaction time, working memory, saccadic movement and the Stroop effect are genuinely researched fields with real published figures. So:
+
+- ✅ Cite real, verifiable, published findings, named and linked
+- ✅ Quote a named researcher or a real study
+- ✅ State real hardware facts with units — display refresh intervals, `performance.now()` resolution and its Spectre-era coarsening
+- ✅ Describe your own methodology precisely — what is measured, what is not controlled
+- ❌ Invent a study, a citation, a sample size, or a percentile table
+- ❌ Present editorial score bands as measured norms
+- ❌ Attribute any statistic to this site's own users
+
+**Verify every citation you add actually exists and says what you claim.** A fabricated citation is worse than no citation: it is the exact failure mode AI systems are increasingly cross-checking for, and it destroys the trust signal you are trying to build.
+
+### 7b.3 Per-engine behaviour
+
+The engines do not agree with each other, so optimise for the mechanism rather than a single platform:
+
+| Engine | What it favours | Implication |
+|---|---|---|
+| **Google AI Overviews** | Pages already ranking in the organic top 10 | Classic SEO is the gate. No ranking, no citation. |
+| **ChatGPT (search)** | Authoritative long-form | Depth and named expertise. Retrieves largely **through Bing** — where this site already ranks page 1. |
+| **Perplexity** | Fresh, well-cited articles | Citations and recency matter most here. |
+
+Citations concentrate on a small set of outlets and cross-engine agreement is low, so **measure each engine separately** rather than assuming one result generalises.
+
+### 7b.4 Multilingual GEO — the part most relevant to this project
+
+Directly contradicts the intuition that a strong English site lifts its translations:
+
+- **English authority does not transfer** into Japanese, Korean or other market languages. Each language page earns its own authority.
+- **Translation-only sites reportedly under-perform their potential by 40–60%** in non-English markets; content translated for keywords without cultural adaptation shows materially lower engagement. This is the measured case for the "native copy, never machine translation" rule in §8.
+- **hreflang must be reciprocal.** Where page A points to B and B does not point back, engines may treat the annotation as misconfigured and **ignore hreflang on both pages**. This exact defect existed on this site and was fixed; do not reintroduce it.
+- **Critical nuance:** hreflang influences which URL is *served to a user*. It does **not** control which URL an AI engine *retrieves for synthesis*. Whichever page gives the clearest answer to the semantic query gets pulled in, regardless of language annotations. **So a Korean page must independently be the best answer to the Korean question — it inherits nothing from the English one.**
+- Mainstream tools do **not** run native-language prompt sets in Japanese or Korean. If you want to know what an assistant says in Korean, **you must ask it in Korean yourself** (§7.3).
+
+Entity consistency matters across languages: if the site describes the same drill differently in English, Korean and Japanese, engines can produce conflicting or incomplete answers. Keep the definition of each drill semantically identical across locales even as the wording is localised.
+
+### 7b.5 Tools — what to use, and what this project already owns
+
+**Already available, use these first:**
+
+| Tool | Use |
+|---|---|
+| `scripts/bing/bing.py` | Volume, related terms, and this site's own Bing impressions/clicks/queries |
+| Google Search Console | What already ranks, and which URLs are uncrawled |
+| **Chrome** | SERP inspection, autocomplete, People Also Ask, AI Overview capture, competitor pages |
+| **The assistants themselves** | Free and authoritative: ask ChatGPT, Perplexity, Copilot and Gemini your target questions, in the target language, and record who they cite |
+| Google Trends | Relative demand and rising terms only — never a volume source |
+| Rich Results Test / Schema validator | Confirm structured data parses |
+
+**Commercial AI-visibility trackers** (Otterly, Peec AI, Profound, Scrunch, SE Ranking's AI toolkit, Semrush) monitor citations and share-of-voice across engines. Tiers run roughly $29 / $139 / $499 per month.
+
+**Recommendation for this site: do not buy one yet.** At ~80 clicks/month the manual §7.3 check across four assistants costs nothing and answers the same question. Report what a tracker *would* add and let the operator decide. **Never sign up for a paid service, create an account, or spend money on the operator's behalf.**
+
+### 7b.6 How to measure GEO here
+
+Rankings are the wrong metric. Track instead:
+
+- **Citation rate** — of N target questions asked across engines, how many answers cite this site
+- **Share of voice** — this site's mentions vs named competitors for the same questions
+- **Which competitor gets cited instead**, and what their page has that this one lacks
+
+Run the same fixed question set before and after your changes, in English **and** in the target language, and report both. A before/after on ten questions is real evidence; a claim that the page is "now AI-optimised" is not.
+
+---
+
 ## 8. Phase 4 — Content Production
 
 Research is worthless until it becomes a page. Write for the promoted term(s) only.
@@ -392,6 +482,10 @@ Two screenshot traps:
 - A route in `LOCALIZED_ROUTES` without a real `page.js`
 - Outreach, posting, or account creation on the operator's behalf
 - Batching multiple drills in one run
+- **Any fabricated statistic, citation, quotation or study** — including one invented to chase the +41% Statistics lift (§7b.2)
+- **A citation that does not exist or does not say what you claim**
+- **Signing up for, or spending money on, any paid tool** (§7b.5)
+- **Claiming a page is "AI-optimised" without a before/after citation-rate measurement** (§7b.6)
 - **`{isOpen && children}`, or any conditional render of indexable content** (§8b.4)
 - **Deleting unique content to tidy a layout** (§8b.5)
 - **Reporting a mobile overflow bug measured only in a clamped headless window** (§8b.6)
