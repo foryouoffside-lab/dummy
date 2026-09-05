@@ -606,21 +606,40 @@ export default function ReactionTimeTestClient() {
     }
   }, [uiScore, bestScore, analytics, isNewBest]);
 
+  // The live stat row is meaningless on arrival -- every value is 0 until a run
+  // starts. Gate it on having left the start card rather than on a score, so the
+  // row is already in place for the first tick of the first round.
+  const hasPlayed = gameState !== 'start';
+
   return (
     <div className="min-h-screen bg-[#050508] text-white flex flex-col font-sans select-none">
       {/* ── MAIN CONTENT AREA ── */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
-        {/* Title */}
+        {/* Title + the one sentence that orients a visitor.
+            Someone arriving from "reaction time test" landed on a black box and
+            had to guess what it measured. This answers that above the fold, in a
+            single self-contained sentence -- which is also the unit an assistant
+            quotes when asked what a good reaction time is. Keep it one sentence:
+            a paragraph here pushes the drill itself below the fold. */}
         {!isFullscreen && (
           <div className="text-center">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              REACTION TIME TEST
+              Reaction Time Test
             </h1>
+            <p className="mt-2 text-sm text-slate-400 max-w-2xl mx-auto leading-relaxed">
+              Measure your visual reaction speed in milliseconds. A typical adult
+              reacts in <span className="whitespace-nowrap">200&ndash;250&nbsp;ms</span>;
+              under <span className="whitespace-nowrap">180&nbsp;ms</span> is elite.
+            </p>
           </div>
         )}
 
-        {/* Live Stat Cards */}
-        {!isFullscreen && (
+        {/* Live Stat Cards.
+            Hidden until there is something to show. Before the first run every
+            value here is a zero, so the row filled the most valuable strip on the
+            page with SCORE 0 / AVG ERROR 0 / BEST 0 and pushed the drill down for
+            no information. Personal bests live in the start card instead. */}
+        {!isFullscreen && hasPlayed && (
           <div className="grid grid-cols-4 gap-2.5 max-w-2xl mx-auto w-full">
             <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
