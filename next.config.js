@@ -50,7 +50,15 @@ const nextConfig = {
       // an injected form from posting somewhere else.
       "base-uri 'self'",
       "form-action 'self'",
-      'upgrade-insecure-requests',
+      // Production is HTTPS, so this is free there. It is omitted only when
+      // ALLOW_INSECURE_LOCAL=1, which exists for testing a production build from
+      // a phone on the LAN: the page is reachable over plain http://<lan-ip>:3000,
+      // and this directive would rewrite every CSS and JS request to https on a
+      // port with no TLS listener -- the page then renders as unstyled HTML with
+      // the sr-only blocks visible. localhost is exempt as a trustworthy origin,
+      // so the problem only appears over the network address. Never set this in
+      // production; Vercel does not, so the directive always ships there.
+      ...(process.env.ALLOW_INSECURE_LOCAL === '1' ? [] : ['upgrade-insecure-requests']),
     ].join('; ');
 
     return [

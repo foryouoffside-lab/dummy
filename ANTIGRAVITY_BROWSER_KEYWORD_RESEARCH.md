@@ -1,7 +1,7 @@
 # Execution Brief — Browser-Driven Global Keyword Research, AEO & Content Production
 
 **Target agent:** Antigravity, **with Chrome / browser access**
-**Type:** Research → content. The research decides what gets written; the content is what ranks.
+**Type:** Research → content → layout. The research decides what to write; §8b decides how the page looks.
 **Scope:** One drill at a time. The operator names the drill. Do not batch the site.
 
 ---
@@ -257,6 +257,96 @@ Related drills       internal links with keyword-first anchor text
 
 ---
 
+## 8b. Page Design — How the Page Should Actually Look
+
+Content that ranks still has to be readable. This is the house style for a drill page, derived from a reference implementation already built on `reaction-speed/reaction-time-test`. **Open that page and copy its structure rather than inventing a new one.**
+
+### 8b.1 Layout order
+
+```
+Breadcrumb                      thin, muted, one line
+H1                              LEFT-aligned, sentence case, directly above the drill box
+One-sentence answer             text-[13px], muted — the extractable fact (§7.4)
+Stat row                        4 tiles, FULL WIDTH, edges flush with the drill box below
+[ DRILL BOX ]                   the thing the visitor came for
+Instructions  (collapsible)
+About         (collapsible)
+Guide intro   (always visible)  the definition — never behind a click
+Benchmarks    (collapsible)
+Technique     (collapsible)
+How to train  (collapsible)
+FAQ           (collapsible)
+Related drills                  keyword-first anchor text
+```
+
+**Rules that produced this:**
+- The H1 is **left-aligned, not centred**. A centred stack reads as a splash screen; left-aligned reads as a document and puts the drill name at the natural first-fixation point.
+- **Sentence case, not ALL CAPS.** `font-black uppercase` is fine on "REACTION TIME TEST" and unreadable on "micro-correction aim trainer".
+- The stat row spans the **full container width** so its edges align with the drill box. A narrower centred row floats free of the thing it describes.
+- **Depth goes below the drill.** Never put a paragraph between the visitor and the tool.
+- The guide's **intro stays visible**; everything else collapses. The definition is what a reader needs first and what an assistant quotes.
+
+### 8b.2 Visual weight — the most common mistake here
+
+Panels must read as **hairlines on the page background**, not cards on a sheet. The old style used `border border-gray-800 bg-black` on a `#050508` page — the panel was *darker* than the background, which is exactly what made it look pasted on.
+
+Use, consistently, on every panel:
+
+```
+container      border border-white/[0.07] bg-white/[0.012] rounded-xl
+hover          hover:border-white/[0.11]
+divider        border-white/[0.06]
+header         px-5 py-4, text-[15px] font-bold
+body           px-5 pb-5 pt-4, text-[13px] leading-relaxed text-slate-300
+label/eyebrow  text-[9.5px] uppercase tracking-[0.12em] text-slate-500
+```
+
+The type scale runs roughly `9.5 → 11 → 12 → 13 → 15 → 2xl/3xl`. Do not introduce sizes outside that ladder.
+
+**No emoji in headings.** The guide previously used `📊 ⚡ 🎯 👥 ❓` while the rest of the site uses Lucide icons. Pick one system — Lucide — and drop the emoji.
+
+### 8b.3 Colour
+
+The site is deliberately dark with gradient and glow accents. **That direction stays** — a minimalist restyle has already been proposed and rejected. Fix hierarchy, spacing and wording, not the art direction.
+
+Within that: one accent carries the action (this page's cyan start button). Everything else stays grey until it earns colour. A stat row in blue, purple, gold and white is four colours meaning nothing.
+
+### 8b.4 Invariants a redesign must not break
+
+Each was expensive to fix and a naive cleanup silently undoes it.
+
+1. **Never `{isOpen && children}`.** `components/drill/DrillAccordion.js` renders children unconditionally and hides them with the `hidden` attribute. Conditional rendering is what kept 82 of 91 URLs uncrawled and left the FAQPage JSON-LD describing answers that appeared nowhere. Any new collapsible, tab or "read more" must render into the DOM and hide with CSS or `hidden`.
+2. **FAQ schema and visible FAQ stay in parity**, hub pages included. The site is at zero drift sitewide; keep it there. Where a page maps its visible FAQ from the schema object, keep that mapping instead of hand-copying questions.
+3. **No fabricated social proof.** Scores never leave `localStorage`; the testimonials array is empty by design. No "trusted by N players", star ratings, or activity indicators to fill space.
+4. **No hidden text for SEO.** The accordion's `hidden` on a user-toggleable region is the only sanctioned concealment, and it already exists.
+5. **Do not touch** game loops, canvas rendering, scoring, timing, storage-key string literals, or `lib/drillPreviews.js` lookup keys.
+6. **One `<h1>` per page**, headings sequential, no skipped levels.
+
+### 8b.5 Do not cut content to tidy the layout
+
+If layout and content appear to conflict, the layout is wrong. Do not solve it by deleting or hiding words. Reorder instead: confirm arrival, let them play, then go deep. A redesign that looks cleaner but drops the page's word count or breaks accordion indexing is a net loss.
+
+The one legitimate deletion is genuine duplication — this page carried two separate FAQ blocks, a hand-written five-question one and the fifteen-question schema-derived one. Removing the duplicate is correct; trimming unique content is not.
+
+### 8b.6 Previewing your work — read before trying to run the site
+
+`next.config.js` sets `output: 'standalone'`. **`npx next start` does not work with it** — it serves the HTML but returns 400 for every CSS and JS file, so the page renders as unstyled HTML with the screen-reader-only blocks visible. This has already been misdiagnosed twice and cost real time.
+
+Run it this way:
+
+```bash
+npx next build          # never `npm run build` — postbuild pings live IndexNow
+cp -r .next/static  .next/standalone/.next/static
+cp -r public        .next/standalone/public
+HOSTNAME=0.0.0.0 PORT=3210 node .next/standalone/server.js
+```
+
+Two screenshot traps:
+- **Chrome on Windows clamps a headless window to ~500px wide.** Requesting 390px lays out at ~500 and crops the image, which looks exactly like horizontal overflow but is not. Confirm any suspected mobile bug on a real device or in DevTools device mode before reporting it.
+- The drill client root is `min-h-screen`, so a very tall capture window inflates it and pushes everything below the drill off-frame. Capture at a realistic viewport height.
+
+---
+
 ## 9. Verification
 
 - [ ] `npx next build` exits 0 — **capture the exit code directly, not through a pipe** (a pipe returns `tail`'s status and has already masked a failure here)
@@ -302,6 +392,9 @@ Related drills       internal links with keyword-first anchor text
 - A route in `LOCALIZED_ROUTES` without a real `page.js`
 - Outreach, posting, or account creation on the operator's behalf
 - Batching multiple drills in one run
+- **`{isOpen && children}`, or any conditional render of indexable content** (§8b.4)
+- **Deleting unique content to tidy a layout** (§8b.5)
+- **Reporting a mobile overflow bug measured only in a clamped headless window** (§8b.6)
 - `npm run build` during development
 - Pushing or deploying
 
