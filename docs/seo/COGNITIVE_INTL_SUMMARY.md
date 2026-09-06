@@ -22,7 +22,7 @@ Prior to query execution across foreign markets, the US calibration control quer
 ## 2. International Keyword Research & Volume Ledger
 
 Research script: `scripts/keywords/cognitive_research.py`  
-Output dataset: [`scripts/keywords/out/cognitive-intl-2026-09-05.md`](file:///C:/Users/sangmesh/Desktop/global-drill-system-nextjs%20-%20Copy/scripts/keywords/out/cognitive-intl-2026-09-05.md) & `.csv` (committed in `14d9154`).
+Output dataset: [`scripts/keywords/out/cognitive-intl-2026-09-05.md`](../../scripts/keywords/out/cognitive-intl-2026-09-05.md) & `.csv` (committed in `14d9154`).
 
 ### Core Demand Findings by Language / Market
 
@@ -88,21 +88,21 @@ Following the §5.6 criteria ($\ge 150$ exact for existing Tier A locales, $\ge 
 - Recorded, parsed, and logged 281 query pairs across 11 markets into `scripts/keywords/out/cognitive-intl-2026-09-04.md` and `.csv`.
 
 ### Workstream 2: Cognitive Hub Depth & FAQ Integration (Committed `df69e91`)
-- **Hub Page:** [`app/drills/cognitive/page.js`](file:///C:/Users/sangmesh/Desktop/global-drill-system-nextjs%20-%20Copy/app/drills/cognitive/page.js)
+- **Hub Page:** [`app/drills/cognitive/page.js`](../../app/drills/cognitive/page.js)
   - Added structured `FAQPage` schema containing 7 questions focused on cognitive training validity, transferability, executive function domains, and browser mechanics.
-  - Rendered open semantic `<dl>` grid in [`app/drills/cognitive/CognitiveHubClient.js`](file:///C:/Users/sangmesh/Desktop/global-drill-system-nextjs%20-%20Copy/app/drills/cognitive/CognitiveHubClient.js).
+  - Rendered open semantic `<dl>` grid in [`app/drills/cognitive/CognitiveHubClient.js`](../../app/drills/cognitive/CognitiveHubClient.js).
 - **Word Count Impact:**
   - Baseline word count: **353 words**
   - Post-build rendered word count: **649 words** (+83.8% depth increase, eliminating thin content flag without filler or artificial cloaking).
 
 ### Workstream 3: Japanese Localization & Reciprocal Hreflang (Committed `117293f`)
-- Created [`app/ja/drills/cognitive/focus/distraction-fighter/page.js`](file:///C:/Users/sangmesh/Desktop/global-drill-system-nextjs%20-%20Copy/app/ja/drills/cognitive/focus/distraction-fighter/page.js):
+- Created [`app/ja/drills/cognitive/focus/distraction-fighter/page.js`](../../app/ja/drills/cognitive/focus/distraction-fighter/page.js):
   - Native Japanese metadata leading with primary query `ストループテスト`.
   - Native WebApplication, BreadcrumbList, HowTo, and 6-question FAQPage schema.
   - Linked to shared `DistractionFighterClient` with translated FAQ prop to ensure 100% schema-to-body text parity.
-- Updated English drill page [`app/drills/cognitive/focus/distraction-fighter/page.js`](file:///C:/Users/sangmesh/Desktop/global-drill-system-nextjs%20-%20Copy/app/drills/cognitive/focus/distraction-fighter/page.js) to emit `getAlternateLanguages('/drills/cognitive/focus/distraction-fighter')`.
-- Registered route in [`lib/i18n/locales.js`](file:///C:/Users/sangmesh/Desktop/global-drill-system-nextjs%20-%20Copy/lib/i18n/locales.js) under `LOCALIZED_ROUTES` and `ROUTE_LOCALES: { ... ['ja'] }`.
-- Registered localized display metadata in [`lib/i18n/drillNames.js`](file:///C:/Users/sangmesh/Desktop/global-drill-system-nextjs%20-%20Copy/lib/i18n/drillNames.js) and search term anchors in [`lib/drillSeo.js`](file:///C:/Users/sangmesh/Desktop/global-drill-system-nextjs%20-%20Copy/lib/drillSeo.js).
+- Updated English drill page [`app/drills/cognitive/focus/distraction-fighter/page.js`](../../app/drills/cognitive/focus/distraction-fighter/page.js) to emit `getAlternateLanguages('/drills/cognitive/focus/distraction-fighter')`.
+- Registered route in [`lib/i18n/locales.js`](../../lib/i18n/locales.js) under `LOCALIZED_ROUTES` and `ROUTE_LOCALES: { ... ['ja'] }`.
+- Registered localized display metadata in [`lib/i18n/drillNames.js`](../../lib/i18n/drillNames.js) and search term anchors in [`lib/drillSeo.js`](../../lib/drillSeo.js).
 
 ---
 

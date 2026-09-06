@@ -4,7 +4,7 @@
 **Auditor / Engineer:** Antigravity (Senior Technical SEO)  
 **Target Domain:** `skilldrills.online`  
 **Category:** `app/drills/reaction-speed` (8 drills + 1 hub)  
-**Reference Brief:** [`ANTIGRAVITY_REACTION_SPEED_EN_CLEANUP.md`](file:///C:/Users/sangmesh/Desktop/global-drill-system-nextjs%20-%20Copy/ANTIGRAVITY_REACTION_SPEED_EN_CLEANUP.md)  
+**Reference Brief:** [`ANTIGRAVITY_REACTION_SPEED_EN_CLEANUP.md`](ANTIGRAVITY_REACTION_SPEED_EN_CLEANUP.md)  
 **Git Branch:** `seo/bing-baseline`  
 
 ---
@@ -31,7 +31,7 @@ Search demand was measured using the official Bing Webmaster Tools API via `scri
 
 The control query `reaction time test` served as calibration. The measured exact US volume of **8,223** confirmed the toolchain was operating accurately against historical baselines.
 
-Full dataset committed to [`scripts/keywords/out/reaction-speed-en-2026-09-04.md`](file:///C:/Users/sangmesh/Desktop/global-drill-system-nextjs%20-%20Copy/scripts/keywords/out/reaction-speed-en-2026-09-04.md) and [`reaction-speed-en-2026-09-04.csv`](file:///C:/Users/sangmesh/Desktop/global-drill-system-nextjs%20-%20Copy/scripts/keywords/out/reaction-speed-en-2026-09-04.csv).
+Full dataset committed to [`scripts/keywords/out/reaction-speed-en-2026-09-04.md`](../../scripts/keywords/out/reaction-speed-en-2026-09-04.md) and [`reaction-speed-en-2026-09-04.csv`](../../scripts/keywords/out/reaction-speed-en-2026-09-04.csv).
 
 ### Key Measured Volumes
 
@@ -71,16 +71,16 @@ Full dataset committed to [`scripts/keywords/out/reaction-speed-en-2026-09-04.md
 | `saccadic-gallery` | **LEFT ALONE** | **Slug:** `saccadic-gallery`<br>**Term:** `saccadic eye exercises`<br>**Anchor:** `saccadic eye exercises` | Accurately describes ballistic eye repositioning training. |
 
 ### Complete Re-slug Synchronization Checklist for `reaction-game`:
-1. **Directory moved:** `app/drills/reaction-speed/reaction-simulator` $\rightarrow$ [`app/drills/reaction-speed/reaction-game`](file:///C:/Users/sangmesh/Desktop/global-drill-system-nextjs%20-%20Copy/app/drills/reaction-speed/reaction-game).
-2. **Registry:** [`lib/drillsRegistry.js`](file:///C:/Users/sangmesh/Desktop/global-drill-system-nextjs%20-%20Copy/lib/drillsRegistry.js) updated `href: '/drills/reaction-speed/reaction-game'` and `folderName: 'reaction-game'`.
-3. **Catalog:** [`lib/drillCatalog.js`](file:///C:/Users/sangmesh/Desktop/global-drill-system-nextjs%20-%20Copy/lib/drillCatalog.js) keyed under `reaction-game`.
-4. **Previews:** [`lib/drillPreviews.js`](file:///C:/Users/sangmesh/Desktop/global-drill-system-nextjs%20-%20Copy/lib/drillPreviews.js) registered under `'/drills/reaction-speed/reaction-game'`.
-5. **SEO Term Map:** [`lib/drillSeo.js`](file:///C:/Users/sangmesh/Desktop/global-drill-system-nextjs%20-%20Copy/lib/drillSeo.js) mapped `'/drills/reaction-speed/reaction-game': { term: 'reaction game', anchor: 'reaction game' }`.
-6. **Hub Schema:** [`app/drills/reaction-speed/page.tsx`](file:///C:/Users/sangmesh/Desktop/global-drill-system-nextjs%20-%20Copy/app/drills/reaction-speed/page.tsx) updated `ItemList` schema URL to `/reaction-game`.
-7. **Hub Storage Key Alias:** [`app/drills/reaction-speed/ReactionSpeedDrillsClient.tsx`](file:///C:/Users/sangmesh/Desktop/global-drill-system-nextjs%20-%20Copy/app/drills/reaction-speed/ReactionSpeedDrillsClient.tsx) added `'reaction-game': 'skilldrills_reaction_simulator_v3'`.
+1. **Directory moved:** `app/drills/reaction-speed/reaction-simulator` $\rightarrow$ [`app/drills/reaction-speed/reaction-game`](../../app/drills/reaction-speed/reaction-game).
+2. **Registry:** [`lib/drillsRegistry.js`](../../lib/drillsRegistry.js) updated `href: '/drills/reaction-speed/reaction-game'` and `folderName: 'reaction-game'`.
+3. **Catalog:** [`lib/drillCatalog.js`](../../lib/drillCatalog.js) keyed under `reaction-game`.
+4. **Previews:** [`lib/drillPreviews.js`](../../lib/drillPreviews.js) registered under `'/drills/reaction-speed/reaction-game'`.
+5. **SEO Term Map:** [`lib/drillSeo.js`](../../lib/drillSeo.js) mapped `'/drills/reaction-speed/reaction-game': { term: 'reaction game', anchor: 'reaction game' }`.
+6. **Hub Schema:** [`app/drills/reaction-speed/page.tsx`](../../app/drills/reaction-speed/page.tsx) updated `ItemList` schema URL to `/reaction-game`.
+7. **Hub Storage Key Alias:** [`app/drills/reaction-speed/ReactionSpeedDrillsClient.tsx`](../../app/drills/reaction-speed/ReactionSpeedDrillsClient.tsx) added `'reaction-game': 'skilldrills_reaction_simulator_v3'`.
 8. **Client Storage Literals:** Unchanged (`skilldrills_reaction_simulator_v3`) to preserve historical user scores.
 9. **Cross-Links:** Updated `RELATED_DRILLS` across 7 drill client files.
-10. **Redirect:** Added permanent 301 redirect in [`next.config.js`](file:///C:/Users/sangmesh/Desktop/global-drill-system-nextjs%20-%20Copy/next.config.js):
+10. **Redirect:** Added permanent 301 redirect in [`next.config.js`](../../next.config.js):
     ```javascript
     {
       source: '/drills/reaction-speed/reaction-simulator',
@@ -98,7 +98,7 @@ Full dataset committed to [`scripts/keywords/out/reaction-speed-en-2026-09-04.md
 ## 4. Content Depth & Truthfulness Audit (WS-4)
 
 ### 4.1 Truthfulness Gate: Claims Deleted from `reaction-time-test`
-The reference page [`reaction-time-test/page.tsx`](file:///C:/Users/sangmesh/Desktop/global-drill-system-nextjs%20-%20Copy/app/drills/reaction-speed/reaction-time-test/page.tsx) was audited for unsupportable marketing claims:
+The reference page [`reaction-time-test/page.tsx`](../../app/drills/reaction-speed/reaction-time-test/page.tsx) was audited for unsupportable marketing claims:
 
 1. **Deleted:** *"sub-millisecond precision"*  
    - *Why:* Browser timer APIs (`performance.now()`) are deliberately coarsened by browsers (typically to 1ms or with added jitter) to protect against microarchitectural side-channel attacks (Spectre). Claiming sub-millisecond precision in an unprivileged web application is factually false.
@@ -127,14 +127,14 @@ Word counts measured on server-rendered HTML files in `.next/server/app/drills/r
 
 | Drill Slug | Words Before | Words After | Net Increase | Target Term Verified in Server HTML? |
 |---|---:|---:|---:|:---:|
-| [`reaction-time-test`](file:///C:/Users/sangmesh/Desktop/global-drill-system-nextjs%20-%20Copy/app/drills/reaction-speed/reaction-time-test/page.tsx) | 1,510 | **1,511** | +1 | **TRUE** (`reaction time test`) |
-| [`reaction-game`](file:///C:/Users/sangmesh/Desktop/global-drill-system-nextjs%20-%20Copy/app/drills/reaction-speed/reaction-game/page.tsx) | 967 | **1,878** | **+911** | **TRUE** (`reaction game`) |
-| [`fps-tracking-trainer`](file:///C:/Users/sangmesh/Desktop/global-drill-system-nextjs%20-%20Copy/app/drills/reaction-speed/fps-tracking-trainer/page.tsx) | 845 | **1,557** | **+712** | **TRUE** (`fps tracking trainer`) |
-| [`reflex-training-drill`](file:///C:/Users/sangmesh/Desktop/global-drill-system-nextjs%20-%20Copy/app/drills/reaction-speed/reflex-training-drill/page.tsx) | 813 | **1,531** | **+718** | **TRUE** (`reflex training drill`) |
-| [`visual-tracking-speed-test`](file:///C:/Users/sangmesh/Desktop/global-drill-system-nextjs%20-%20Copy/app/drills/reaction-speed/visual-tracking-speed-test/page.tsx) | 810 | **1,480** | **+670** | **TRUE** (`visual tracking test`) |
-| [`saccadic-gallery`](file:///C:/Users/sangmesh/Desktop/global-drill-system-nextjs%20-%20Copy/app/drills/reaction-speed/saccadic-gallery/page.tsx) | 802 | **1,495** | **+693** | **TRUE** (`saccadic eye exercises`) |
-| [`market-doors-pursuit`](file:///C:/Users/sangmesh/Desktop/global-drill-system-nextjs%20-%20Copy/app/drills/reaction-speed/market-doors-pursuit/page.tsx) | 798 | **1,481** | **+683** | **TRUE** (`corner checking trainer`) |
-| [`barrier-sequence-pursuit`](file:///C:/Users/sangmesh/Desktop/global-drill-system-nextjs%20-%20Copy/app/drills/reaction-speed/barrier-sequence-pursuit/page.tsx) | 778 | **1,486** | **+708** | **TRUE** (`jiggle peek trainer`) |
+| [`reaction-time-test`](../../app/drills/reaction-speed/reaction-time-test/page.tsx) | 1,510 | **1,511** | +1 | **TRUE** (`reaction time test`) |
+| [`reaction-game`](../../app/drills/reaction-speed/reaction-game/page.tsx) | 967 | **1,878** | **+911** | **TRUE** (`reaction game`) |
+| [`fps-tracking-trainer`](../../app/drills/reaction-speed/fps-tracking-trainer/page.tsx) | 845 | **1,557** | **+712** | **TRUE** (`fps tracking trainer`) |
+| [`reflex-training-drill`](../../app/drills/reaction-speed/reflex-training-drill/page.tsx) | 813 | **1,531** | **+718** | **TRUE** (`reflex training drill`) |
+| [`visual-tracking-speed-test`](../../app/drills/reaction-speed/visual-tracking-speed-test/page.tsx) | 810 | **1,480** | **+670** | **TRUE** (`visual tracking test`) |
+| [`saccadic-gallery`](../../app/drills/reaction-speed/saccadic-gallery/page.tsx) | 802 | **1,495** | **+693** | **TRUE** (`saccadic eye exercises`) |
+| [`market-doors-pursuit`](../../app/drills/reaction-speed/market-doors-pursuit/page.tsx) | 798 | **1,481** | **+683** | **TRUE** (`corner checking trainer`) |
+| [`barrier-sequence-pursuit`](../../app/drills/reaction-speed/barrier-sequence-pursuit/page.tsx) | 778 | **1,486** | **+708** | **TRUE** (`jiggle peek trainer`) |
 | **Category Average** | **915** | **1,602** | **+687** | **100% In Server HTML** |
 
 ---
@@ -175,7 +175,7 @@ app/drills/reaction-speed/barrier-sequence-pursuit/BarrierSequencePursuitClient.
   `Total HTML files referencing 'reaction-simulator': 0`
 
 ### 7.5 Live Drill Preview Verification
-Audit verified that all 8 drills have valid, active scene mappings in [`lib/drillPreviews.js`](file:///C:/Users/sangmesh/Desktop/global-drill-system-nextjs%20-%20Copy/lib/drillPreviews.js):
+Audit verified that all 8 drills have valid, active scene mappings in [`lib/drillPreviews.js`](../../lib/drillPreviews.js):
 - `/drills/reaction-speed/reaction-time-test`: `stopwatch`
 - `/drills/reaction-speed/reaction-game`: `lanes`
 - `/drills/reaction-speed/fps-tracking-trainer`: `crosshair-orbit`

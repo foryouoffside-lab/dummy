@@ -5,6 +5,15 @@
 **Scope:** One drill at a time. The operator names the drill. Do not batch the site.
 **Self-contained:** §11b carries every source behind the SEO/AEO/GEO guidance, with URLs and an explicit list of what could not be verified. You should not need to re-derive the research — but you should verify it.
 
+> ### ⚠️ READ §10c FIRST
+> **§10c is a post-mortem of the reaction-speed category, which was worked under this exact
+> brief and then audited.** It lists fourteen specific things that went wrong and the rule
+> that prevents each. The largest was that all eight drill summaries reported PASS on
+> verification gates that had **never been run** — when finally executed, the build failed
+> and there were 15 type errors, every one inside the folder being worked on.
+> **Do not begin until you have read it.** Most of what follows in §5–§9 was already being
+> followed; §10c is what was not.
+
 ---
 
 ## 1. Why This Brief Exists
@@ -149,9 +158,14 @@ Two paths, and only one is influenceable:
 ### 7.2 Infrastructure already built — do not rebuild
 
 - `app/robots.js` allows `OAI-SearchBot`, `ChatGPT-User`, `GPTBot`, `PerplexityBot`, `Perplexity-User`, `ClaudeBot`, `Claude-User`, `Claude-SearchBot`, `Google-Extended`, `Applebot-Extended` and more, with the search-index vs training-corpus distinction already reasoned out.
-- `app/llms.txt/route.js` serves an llmstxt.org-format index generated from `DRILLS` and `DRILL_SEO`, so it cannot drift.
+- `app/llms.txt/route.js` serves an llmstxt.org-format index generated from `DRILLS` and `DRILL_SEO`, so it cannot drift. It now also states the measurement limits and the no-aggregate-data fact directly, so an engine can summarise the site without fetching a drill page.
+- **`lib/drillSources.js`** — shared reference library, 20 works, 19 with DOIs. Call `pickSources('woods2015', …)`. Add new works here, never inline (§10c.4).
+- **`components/drill/DrillGuide.js`** renders a collapsible **References** panel from a `sources:` array on the guide object.
+- **`/about`** (`app/about/page.js`) — the E-E-A-T entity page §7.5 asked for, wired into the footer, `app/sitemap.js`, `llms.txt`, and the `Organization` schema via `subjectOf` + `contactPoint`. Its methodology section is the canonical wording for how these drills measure and what they cannot resolve.
 
-**What is missing is content extractability and entity strength.**
+**Built as of the reaction-speed pass — extend these, do not reinvent them.**
+
+**What is still missing is content extractability on the categories not yet worked, and entity strength.**
 
 ### 7.3 Baseline test — what do assistants say today
 
@@ -440,14 +454,27 @@ Two screenshot traps:
 
 ## 9. Verification
 
-- [ ] `npx next build` exits 0 — **capture the exit code directly, not through a pipe** (a pipe returns `tail`'s status and has already masked a failure here)
-- [ ] `npx tsc --noEmit` — no new errors above baseline
+**Every box below requires you to have RUN the check and to PASTE its output — including
+the exit-code line — into the summary. A dev-server 200, a screenshot, or "the page
+renders" is not a substitute for any of them. The last category reported PASS on all of
+these for eight drills without running the first two; see §10c.1.**
+
+- [ ] `npx next build` exits 0 — **capture the exit code directly, not through a pipe** (a pipe returns `tail`'s status and has already masked a failure here). On this Windows machine the parallel build races and fails with a different symptom each run; verify with **`NEXT_BUILD_WORKERS=1 npx next build`** and say which form you ran (§10c.1)
+- [ ] `npx tsc --noEmit` — **record the count before you start; the baseline is 0.** Finishing above your own starting count means you introduced errors (§10c.1)
 - [ ] All FAQ schema questions present in **rendered** HTML (`.next/server/`), **hub pages included**
 - [ ] hreflang reciprocal both directions; zero alternates pointing at a 404
 - [ ] Any re-slug: old 301s to new, new returns 200, no self-redirect, zero internal links to the old slug
+- [ ] Any **rename**: all 9 surfaces in §10c.7 updated, old name greps to 0 outside schema `alternateName`
 - [ ] Drill preview still renders (a stale `drillPreviews.js` key **fails silently**)
 - [ ] Target term present in **server-rendered** HTML
-- [ ] The §8.1 answer sentence is present, standalone, and in the first two sentences
+- [ ] The §8.1 answer sentence is present, standalone, and in the first two sentences — **on every page in the category, not just the exemplar** (§10c.3)
+- [ ] Every cited work has a resolvable DOI/URL or is deliberately link-less, and **every listed source is named in that page's copy** (§10c.4)
+- [ ] Every citation checked for population, effect size, direction, and the paper's own limitations (§10c.5)
+- [ ] Known-false phrases grep to 0 repo-wide — `sub-millisecond` and any sub-5 ms precision claim (§10c.2)
+- [ ] Every `{ href, label }` in a guide's `related:` equals `DRILL_SEO[href].anchor` (§10c.8)
+- [ ] Title ≤ 60 and description ≤ 155, **character counts tabulated**, not eyeballed (§10c.13)
+- [ ] Zero new `as any` / `@ts-ignore` suppressions added (§10c.12)
+- [ ] Your own changes re-verified as surviving, in case another process is writing concurrently (§10c.14)
 - [ ] Every claim defensible; zero fabricated stats or social proof
 - [ ] Nothing pushed, nothing deployed
 
@@ -466,6 +493,373 @@ Two screenshot traps:
    - **E-E-A-T gaps found** (§7.5) and what was implemented vs left for the operator
    - Pasted verification output, including failures
    - Honest next step
+
+---
+
+## 10c. Post-Mortem — What the Reaction-Speed Run Actually Got Wrong
+
+**Read this before you start. It is not background; it is the list of mistakes the last
+category made against this exact brief, and the rules that stop each one recurring.**
+
+The reaction-speed category (8 drills + hub) was worked under this brief and then audited
+line by line. The verdict: **the SEO mechanics were done well and the AEO/GEO layer was
+not.** FAQ-schema parity was perfect, the accordion invariant held, hreflang was reciprocal,
+target terms were in the server HTML, and there was no fabricated social proof anywhere.
+Those are real wins and the same standard is expected again.
+
+Everything below is what went wrong anyway. Fourteen findings, each with the rule that
+prevents it.
+
+---
+
+### 10c.1 Verification was claimed, not performed — the single worst failure
+
+Every one of the eight `<DRILL>_RESEARCH_SUMMARY.md` files carried a verification table
+with **PASS** on every row. The evidence given for the build gate was:
+
+> `Live Dev Server HTTP 200 Rendering | PASS | Verified via Invoke-WebRequest -Uri "http://localhost:3000/..."`
+
+A dev-server 200 is **not** §9's gate and cannot substitute for it. When the real gate was
+finally run:
+
+- `npx next build` → **exit 1**
+- `npx tsc --noEmit` → **15 errors, every one of them inside the folder being worked on**,
+  masked by `typescript.ignoreBuildErrors: true` in `next.config.js`
+
+Neither had ever been run. Both were reported as passing for eight consecutive drills.
+
+> **RULE.** You may not write PASS for a gate you did not execute. Paste the **actual
+> terminal output including the exit-code line** into the summary. A dev server, a
+> screenshot, a curl, or "the page renders" is not the build gate. If a gate fails and you
+> cannot fix it, the summary says **FAIL** with the output — a failing gate honestly
+> reported is a complete result; a fabricated PASS is an automatic rejection (§11).
+
+**Windows build note, learned the hard way — use this exact command.**
+
+```bash
+NODE_OPTIONS="--max-old-space-size=3072" NEXT_BUILD_WORKERS=1 npx next build
+```
+
+On this machine the default `npx next build` fails intermittently with a *different*
+symptom every run: `PageNotFoundError` for routes that exist on disk, `MODULE_NOT_FOUND
+./5611.js` from a jest-worker, `ENOENT ...chunks/5873.js`, `ENOENT ...page.js.nft.json`
+during "Collecting build traces", or a bare **exit 127** with the log truncated at
+"Collecting page data". None of these are code faults.
+
+Two separate causes, and you need both flags:
+
+1. **Parallel-worker filesystem races** → `NEXT_BUILD_WORKERS=1`.
+2. **Memory pressure.** The exit-127 and several ENOENT variants are the build worker
+   being killed while ~242 pages are collected. The machine has 15 GB with roughly 4 GB
+   free once an editor and other agents are running. Capping the heap at 3 GB
+   (`--max-old-space-size=3072`) turned a run of six consecutive failures into a clean
+   exit 0. **Do not conclude the build is broken until you have tried the memory cap** —
+   this was misdiagnosed as a pure race for six attempts before the cap was tried.
+
+Still never `npm run build` (§4.9). Report which form you ran and paste the exit line.
+
+**The tsc baseline is zero.** Do not interpret "no new errors above baseline" as licence to
+leave errors. Before you start, run `npx tsc --noEmit` and record the count. If your
+category ends with more than it started with, you introduced them.
+
+---
+
+### 10c.2 A factual fix was applied to one file instead of the class
+
+§7.5 names the "sub-millisecond precision" claim explicitly and says **do not reintroduce
+it**. A prior commit removed it from `reaction-time-test`. The audit found it still live in
+**eight** other places — five more in reaction-speed, four in FPS — including two written
+*after* that commit.
+
+> **RULE.** A factual claim is a class, not a line. When you correct one, immediately
+> `grep -rn "<the exact phrase>" app components lib` and fix **every** hit, including files
+> outside your assigned drill and category. Paste the grep returning 0 into your summary.
+> The one-drill-per-run rule (§4.11) governs *research and page construction*; it has never
+> licensed leaving a known-false claim standing elsewhere in the repo.
+
+Phrases already known to be wrong on this project, to grep on every run:
+`sub-millisecond`, `submillisecond`, and any construction claiming timing precision finer
+than about 5 ms from a browser.
+
+**The honest replacement, verbatim, for reuse:** browser timers are deliberately coarsened
+as a Spectre mitigation (typically ~1 ms); the display quantizes the stimulus to its refresh
+interval (~16.7 ms at 60 Hz, ~6.9 ms at 144 Hz, ~4.1 ms at 240 Hz — Woods et al., 2015);
+mouse polling adds ~8 ms at 125 Hz versus ~1 ms at 1000 Hz. **Therefore differences under
+about 5 ms are measurement noise.** State that, and tell the reader to compare their own
+runs on the same hardware rather than against someone else's setup.
+
+---
+
+### 10c.3 The AEO answer sentence was written on the reference page only
+
+§7.4 and §8b.1 require a self-contained, number-carrying answer in the first two sentences.
+It existed on **1 page of 8**. Four pages opened with marketing build-up:
+
+> "Visual Tracking Speed Test is an interactive ocular psychomotor drill **engineered to**
+> measure smooth pursuit accuracy and target re-acquisition latency…"
+
+That is the precise anti-pattern §7.4 describes. An assistant asked "what is visual tracking
+speed?" has nothing quotable in it.
+
+> **RULE.** Every page in the category gets the answer sentence, not just the exemplar. It
+> must (a) define the entity in plain words, (b) carry at least one real figure with units,
+> (c) name its source, and (d) parse standing alone with no pronoun pointing at the drill.
+> Before finishing, print the first `<p>` after the `<h1>` of every page in the category
+> side by side and check all four properties on each.
+
+Worked examples produced for reaction-speed, for calibration:
+
+- *"A saccade is a rapid jump of both eyes between fixation points, reaching 200–700°/s and
+  lasting 20–40 ms — among the fastest movements the human body produces (Rayner, 1998)."*
+- *"Tracking aim is holding your crosshair on a target that keeps moving. Human smooth
+  pursuit follows a target accurately up to roughly 30°/s; past that the eye falls behind
+  and needs catch-up saccades (Krauzlis, 2004)."*
+
+---
+
+### 10c.4 Citations were named but never linked
+
+Twenty real published works were cited by name across the category. **Zero had a URL or
+DOI.** "Cite Sources" is one of the five tactics the KDD study measured in the 30–41% band
+(§7b.1), and a citation a reader cannot follow captures almost none of that. It is also the
+only GEO tactic this site can use honestly, since it has no data of its own (§7b.2).
+
+> **RULE.** Every cited work needs a resolvable identifier — **prefer a DOI**, which does
+> not rot. A work with no stable identifier keeps its in-text citation and simply omits the
+> link; you may **never** invent, guess, or approximate a URL to fill the gap.
+
+**Infrastructure now exists — use it, do not rebuild it:**
+
+- `lib/drillSources.js` — the shared reference library. 20 entries, 19 with DOIs.
+  `pickSources('woods2015', 'hick1952', …)` returns them in order.
+- `components/drill/DrillGuide.js` — renders a collapsible **References** panel from a
+  `sources:` array on the guide object, with a closing note stating that SkillDrills
+  collects no aggregate data.
+
+Add new entries to `drillSources.js` following the rules in its header comment. If your
+category needs works not yet in it, add them there rather than inlining citations.
+
+> **RULE (source ↔ copy correspondence).** Every source you list must be **named in that
+> page's own body copy**. A reference list padded with works the page never cites is
+> decoration, and it reads as manufactured authority. Verify programmatically; the
+> reaction-speed pass ended at 0 unnamed after dropping one source that could not be
+> justified.
+
+---
+
+### 10c.5 A real citation was made to say more than it says
+
+`market-doors-pursuit` claimed:
+
+> "Eye-tracking research shows that **elite FPS players** acquire emerging targets using a
+> ballistic '0-fixation-1-saccade' sequence… (Yang et al., 2025)"
+
+The paper is real and was verified (*Computers in Human Behavior* 165:108573,
+`10.1016/j.chb.2025.108573`). But it studied **28 experienced players against 35
+non-players**, reported the pattern in **over 40% of trials** rather than as a universal
+signature, and states in its **own limitations** that the sample **excluded elite and
+professional esports athletes**. The page inverted that, twice — in the FAQ schema and in a
+technique panel.
+
+§11 already rejects "a citation that does not say what you claim". Confirming the paper
+exists is not enough.
+
+> **RULE.** For every citation, verify four things and be able to state them: **the
+> population studied**, **the effect size or prevalence**, **the direction of the finding**,
+> and **what the paper's own limitations section rules out**. Then write the claim at or
+> below that strength. Prefer naming the population in the sentence — "in a study of 28
+> experienced FPS players" is both more honest and more quotable than "elite players".
+
+---
+
+### 10c.6 The promotion gate was cited selectively
+
+The `reaction-time-test` summary rated competition **VERY HIGH (0.95)**, named
+`humanbenchmark.com` as the entrenched incumbent — and then recorded:
+
+> "Promotion Gate Result: **QUALIFIED UNDER §6.5 RULE 1 & RULE 2**"
+
+§6.5 has **six** rules that must *all* hold. Rule 3 says skip a term an entrenched incumbent
+owns **regardless of volume**, and the summary had just finished demonstrating that Rule 3
+failed. Quoting only the rules that passed is how a §11 automatic-rejection item ("term
+owned by an entrenched incumbent") got through.
+
+> **RULE.** State a verdict for **every** §6.5 rule, 1 through 6, including the ones that
+> fail, and give the overall gate result as the **conjunction**. If a page already exists on
+> a term that fails the gate, say so plainly — "this term fails Rule 3; the page predates
+> this brief and is retained, not promoted" is an honest and acceptable outcome. Silently
+> omitting the failing rule is not.
+
+---
+
+### 10c.7 The same drill was given three different names
+
+Three drills carried a different name on every surface:
+
+| Route | Registry `name` (hub cards, search, `llms.txt`) | drillSeo `anchor` | H1 / `<title>` | Hub `hasPart` |
+|---|---|---|---|---|
+| `barrier-sequence-pursuit` | Barrier Sequence Pursuit | Jiggle Peek Trainer | Jiggle Peek Trainer | "Cover Peeking Reflex Drill (Barrier sequence)" |
+| `market-doors-pursuit` | Market Doors Pursuit | Corner Checking Trainer | Corner Checking Trainer | "Corner Checking Trainer (Market doors)" |
+| `saccadic-gallery` | Saccadic Gallery | Saccadic Eye Exercises | Saccadic Eye Exercises | "Saccadic Gallery (Eye Exercises)" |
+
+§7b.4 warns that inconsistent entity descriptions make engines produce conflicting or
+incomplete answers. The retarget updated the page and left every other surface on the
+internal codename — so the hub card, the site search and `llms.txt` all advertised a phrase
+with no search demand.
+
+> **RULE.** Renaming a drill is a **repo-wide sweep**, not a page edit. Enumerate and update
+> every surface, then grep the old name to 0:
+>
+> 1. `lib/drillsRegistry.js` → `name`
+> 2. `lib/drillSeo.js` → `term` and `anchor`
+> 3. `<title>`, `openGraph.title`, `twitter.title`
+> 4. The `<h1>` in the client
+> 5. Every JSON-LD `name` (WebApplication, HowTo, the hub's `CollectionPage.hasPart`)
+> 6. `opengraph-image.js` — both `alt` and the rendered text
+> 7. Share-sheet strings: `drillName`, share `title`, share `text` (usually 4–6 per client)
+> 8. Visible accordion copy — the "About <drill>" panel especially
+> 9. Hand-written cross-link cards **inside other drills' clients**
+>
+> Keep the old codename **only** as schema `alternateName`, which is what it is for. Do
+> **not** touch `STORAGE_KEY` literals or `lib/drillPreviews.js` lookup keys (§8b.4.5) —
+> those are keyed to the slug, not the name.
+
+---
+
+### 10c.8 Hand-written link arrays drifted from the canonical anchor
+
+`saccadic-gallery` received five inbound links from other drills' guides under **three**
+different anchor texts — "Saccadic Gallery", "Saccadic Eye Gallery", "Saccadic Gallery" —
+none of which was its canonical `drillSeo` anchor. `RelatedDrills` reads `DRILL_SEO` and was
+correct; the hand-written `related:` arrays in each guide bypassed it and rotted.
+
+Anchor text is one of the very few keyword levers this site has (§8.4). Spending five links
+on three phrases wastes all of them.
+
+> **RULE.** Never hand-type an anchor. Every `{ href, label }` in a guide's `related:` array
+> must equal `DRILL_SEO[href].anchor` exactly. Verify by script across the whole
+> `app/drills/**` tree — not just your category — and report the drift count. The
+> reaction-speed pass found 7 drifted anchors across 6 files, two of them pointing at
+> drills in other categories.
+
+---
+
+### 10c.9 Half the summaries were written against an older brief
+
+Four of the eight summaries — `reflex-training-drill`, `saccadic-gallery`,
+`visual-tracking-speed-test`, `fps-tracking-trainer` — contain **no §7.3 AI-visibility
+baseline and no §7.5 E-E-A-T audit**. They predate those sections and were never revisited,
+so the category shipped half-covered while reading as complete.
+
+> **RULE.** Every drill in a category is finished against the **current** revision of this
+> brief. If earlier drills in the category were done under an older revision, either re-run
+> the missing phases or state explicitly, in the category summary, which drills are missing
+> which sections. A summary that silently omits a required section reads as if the section
+> passed.
+
+---
+
+### 10c.10 The AEO work was never measured
+
+§7b.6 asks for a fixed question set run across engines **before and after**. It was never
+run, for any drill, in any language — yet the pages were described as AEO/GEO optimised.
+§11 already lists this as an automatic rejection.
+
+> **RULE.** Either run the before/after, or state plainly that AI visibility is **unmeasured**
+> and list it as the next step. Both are acceptable. Claiming the outcome without the
+> measurement is not. Note that this requires asking the assistants **in the target
+> language yourself** (§7b.4) — no tracker does Korean or Japanese prompt sets.
+
+---
+
+### 10c.11 Site-level E-E-A-T was deferred through eight consecutive drills
+
+§7.5 asks for "a real About page stating who builds this and why, and a contact route",
+because an anonymous domain is cited less. Across eight drill passes it was noted and never
+built. The footer carried only Privacy / Terms / Delete data.
+
+> **RULE.** A §7.5 item that is **site-level rather than drill-level** gets built on the
+> first category that encounters it, not deferred to the next one. Deferring it eight times
+> is how it never happened.
+
+`/about` now exists and is wired into the footer, `app/sitemap.js`, `llms.txt`, and the
+`Organization` schema (`subjectOf` + `contactPoint`). **Do not rebuild it.** Its strongest
+section is the measurement methodology and its limits — reuse that framing rather than
+inventing new wording. `sameAs` remains deliberately absent: this project controls no social
+profiles and inventing one is a §11 rejection.
+
+---
+
+### 10c.12 Type suppression was hiding two real, shipped bugs
+
+The 15 TypeScript errors were not cosmetic. Each was a genuine defect that had been silenced
+rather than read:
+
+- **`FpsStartCard` never accepted `rules` or `stats`.** All **66 drills** using the card
+  pass both. React dropped them silently, so every start card rendered as an icon, a title
+  and a button over an empty canvas — roughly 198 lines of already-written explanatory copy
+  shown to nobody. Drills papered over the resulting type error with
+  `as React.ComponentType<any>`.
+- **`generateShareCard` never accepted `rank` / `rankName`.** 51 drills pass a `rating`
+  object; **15 pass flat `rank`/`rankName`**, which the function did not declare. Those 15
+  fell through to the `'C', 'Keep Going'` default — **a player who scored an S rank shared
+  an image saying C.** `speed`, `level`, `date` and `url` were likewise passed and dropped.
+
+> **RULE.** `as any`, `as React.ComponentType<any>`, and `@ts-ignore` are **smells, not
+> fixes**. When you meet one, read what the error is actually saying before silencing it. A
+> prop a component does not declare is a prop React throws away — which means copy that
+> nobody sees and features that silently do nothing. Never add a new suppression to make a
+> page compile; fix the contract.
+
+---
+
+### 10c.13 Title and description limits were exceeded
+
+§8.4 sets title ≤ 60 and description ≤ 155. Shipped: one title at **64** (and the only page
+in the category carrying a `| SkillDrills` suffix in `title`, which the root layout's `'%s'`
+template does not add anywhere else), and descriptions at **176** and **156**.
+
+> **RULE.** Measure them, do not eyeball them. Print the character count of every `title`
+> and `description` in the category as a table in your summary. Note that with the layout
+> template set to `'%s'`, whatever you put in `title` is exactly what ships — no suffix is
+> appended.
+
+---
+
+### 10c.14 Operational hazard: you may not be the only process writing
+
+During the audit, another agent was editing this repository concurrently. One build failed
+on a file caught **mid-write** (a syntax error that did not exist a minute later), and files
+outside the assigned category changed underneath the work.
+
+> **RULE.** If a build fails on a file you did not touch, re-read that file before
+> diagnosing it — it may simply have been half-written at the moment the compiler opened it.
+> Check `find app components lib -newermt "-10 minutes" -type f` to see what is moving.
+> **Do not edit a file another process is actively writing**; note it for the operator
+> instead. And after finishing, re-verify that your own changes survived, especially in
+> shared files (`app/layout.js`, `lib/drillSeo.js`, `lib/drillsRegistry.js`).
+
+---
+
+### 10c.15 The standard to match
+
+For reference, the reaction-speed category ended at:
+
+| Gate | Result |
+|---|---|
+| `npx tsc --noEmit` | 0 errors (from 15) |
+| `NEXT_BUILD_WORKERS=1 npx next build` | exit 0, 242 pages |
+| FAQ schema ↔ rendered HTML | 0 drift, 99 questions across 9 URLs |
+| `sub-millisecond` in category HTML | 0 |
+| Answer sentence with sourced figures | 8 of 8 pages |
+| DOI links in rendered HTML | 38 unique |
+| Sources listed but unnamed in copy | 0 |
+| Anchor drift vs `DRILL_SEO` | 0 |
+| Old codenames in rendered site | 0 (schema `alternateName` only) |
+| Fabricated statistics or social proof | 0 |
+
+Match it, and report the same table with your own measured numbers.
+
 
 ---
 
@@ -492,6 +886,17 @@ Two screenshot traps:
 - **Reporting a mobile overflow bug measured only in a clamped headless window** (§8b.6)
 - `npm run build` during development
 - Pushing or deploying
+- **Writing PASS for a verification gate you did not execute** (§10c.1) — the single failure that let every other item on this list through last time
+- **Substituting a dev-server 200, a curl, or a screenshot for `npx next build`** (§10c.1)
+- **Leaving a known-false claim standing elsewhere in the repo after fixing one instance of it** (§10c.2)
+- **A citation with no resolvable DOI/URL where one exists, or an invented one where it does not** (§10c.4)
+- **Listing a source the page's copy never names** (§10c.4)
+- **Overstating a real study's population, prevalence, or certainty beyond what it reports** (§10c.5)
+- **Citing only the §6.5 rules that passed** — all six get a stated verdict (§10c.6)
+- **Renaming a drill on the page but not across all 9 surfaces** (§10c.7)
+- **Hand-typing an anchor that does not equal `DRILL_SEO[href].anchor`** (§10c.8)
+- **Adding an `as any`, `as ComponentType<any>`, or `@ts-ignore` to make something compile** (§10c.12)
+- **Editing a file another process is actively writing** (§10c.14)
 
 ---
 

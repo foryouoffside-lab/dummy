@@ -71,7 +71,7 @@ Affects 8 hub files:
 - `app/drills/visual-tracking/VisualTrackingDrillsClient.tsx`
 
 ### Bug 2 — the JS that would fix it is blocked
-[app/robots.js](app/robots.js) disallows `/_next/` for Googlebot and every other crawler. Google cannot load the JS bundle, so it can never render past the skeleton.
+[app/robots.js](../app/robots.js) disallows `/_next/` for Googlebot and every other crawler. Google cannot load the JS bundle, so it can never render past the skeleton.
 
 ### Proof (live fetch as Googlebot, 2026-08-21)
 | URL | Visible words in HTML | H1 |
@@ -83,7 +83,7 @@ Affects 8 hub files:
 `/drills/fps` has 622 impressions and sits at position 32.5 — because Google literally sees 74 words and no heading.
 
 ### Bug 3 — every AI search crawler is blocked
-[app/robots.js](app/robots.js) has `disallow: '/'` for: `OAI-SearchBot`, `ChatGPT-User`, `PerplexityBot`, `ClaudeBot`, `Claude-Web`, `anthropic-ai`, `Google-Extended`, `GPTBot`, `CCBot`, `YouBot`, `cohere-ai`, `Meta-ExternalAgent`, `GoogleOther`.
+[app/robots.js](../app/robots.js) has `disallow: '/'` for: `OAI-SearchBot`, `ChatGPT-User`, `PerplexityBot`, `ClaudeBot`, `Claude-Web`, `anthropic-ai`, `Google-Extended`, `GPTBot`, `CCBot`, `YouBot`, `cohere-ai`, `Meta-ExternalAgent`, `GoogleOther`.
 
 This directly defeats the stated goal of "AI should suggest my website." Critically:
 - `OAI-SearchBot` = ChatGPT Search index (not training)

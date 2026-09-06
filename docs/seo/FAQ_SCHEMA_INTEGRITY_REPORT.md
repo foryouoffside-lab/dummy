@@ -3,7 +3,7 @@
 **Date:** 2026-09-05  
 **Auditor / Engineer:** Antigravity (Technical SEO)  
 **Target Domain:** `skilldrills.online`  
-**Reference Brief:** [`ANTIGRAVITY_FAQ_SCHEMA_INTEGRITY.md`](file:///C:/Users/sangmesh/Desktop/global-drill-system-nextjs%20-%20Copy/ANTIGRAVITY_FAQ_SCHEMA_INTEGRITY.md)  
+**Reference Brief:** [`ANTIGRAVITY_FAQ_SCHEMA_INTEGRITY.md`](ANTIGRAVITY_FAQ_SCHEMA_INTEGRITY.md)  
 **Git Branch:** `seo/bing-baseline`  
 
 ---
@@ -31,21 +31,21 @@ All figures measured against server-rendered HTML in `.next/server/app/drills/`.
 
 | Category | Drill | Old Schema Qs | Visible Before | Missing Before | Final Schema Qs | Final Visible Qs | Missing After | Drift Status |
 |---|---|---:|---:|---:|---:|---:|---:|:---:|
-| `reaction-speed` | [`fps-tracking-trainer`](file:///C:/Users/sangmesh/Desktop/global-drill-system-nextjs%20-%20Copy/app/drills/reaction-speed/fps-tracking-trainer/page.tsx) | 15 | 0 | **15** | 5 | 5 | 0 | **CLEAN** |
-| `reaction-speed` | [`market-doors-pursuit`](file:///C:/Users/sangmesh/Desktop/global-drill-system-nextjs%20-%20Copy/app/drills/reaction-speed/market-doors-pursuit/page.tsx) | 15 | 0 | **15** | 4 | 4 | 0 | **CLEAN** |
-| `reaction-speed` | [`reflex-training-drill`](file:///C:/Users/sangmesh/Desktop/global-drill-system-nextjs%20-%20Copy/app/drills/reaction-speed/reflex-training-drill/page.tsx) | 15 | 0 | **15** | 4 | 4 | 0 | **CLEAN** |
-| `reaction-speed` | [`saccadic-gallery`](file:///C:/Users/sangmesh/Desktop/global-drill-system-nextjs%20-%20Copy/app/drills/reaction-speed/saccadic-gallery/page.tsx) | 15 | 0 | **15** | 4 | 4 | 0 | **CLEAN** |
-| `reaction-speed` | [`visual-tracking-speed-test`](file:///C:/Users/sangmesh/Desktop/global-drill-system-nextjs%20-%20Copy/app/drills/reaction-speed/visual-tracking-speed-test/page.tsx) | 15 | 0 | **15** | 4 | 4 | 0 | **CLEAN** |
-| `reaction-speed` | [`barrier-sequence-pursuit`](file:///C:/Users/sangmesh/Desktop/global-drill-system-nextjs%20-%20Copy/app/drills/reaction-speed/barrier-sequence-pursuit/page.tsx) | 8 | 1 | **7** | 3 | 3 | 0 | **CLEAN** |
-| `physical` | [`complex-pattern`](file:///C:/Users/sangmesh/Desktop/global-drill-system-nextjs%20-%20Copy/app/drills/physical/coordination/complex-pattern/page.js) | 10 | 0 | **10** | 5 | 5 | 0 | **CLEAN** |
-| `physical` | [`jump-sequence`](file:///C:/Users/sangmesh/Desktop/global-drill-system-nextjs%20-%20Copy/app/drills/physical/fitness/jump-sequence/page.js) | 10 | 0 | **10** | 5 | 5 | 0 | **CLEAN** |
-| `physical` | [`cross-body-movement`](file:///C:/Users/sangmesh/Desktop/global-drill-system-nextjs%20-%20Copy/app/drills/physical/coordination/cross-body-movement/page.js) | 4 | 0 | **4** | 4 | 4 | 0 | **CLEAN** |
-| `physical` | [`quick-dodge`](file:///C:/Users/sangmesh/Desktop/global-drill-system-nextjs%20-%20Copy/app/drills/physical/reflex-training/quick-dodge/page.js) | 10 | 6 | **4** | 5 | 5 | 0 | **CLEAN** |
-| `cognitive` | [`reaction-time`](file:///C:/Users/sangmesh/Desktop/global-drill-system-nextjs%20-%20Copy/app/drills/cognitive/processing-speed/reaction-time/page.js) | 10 | 3 | **7** | 5 | 5 | 0 | **CLEAN** |
-| `fps` | [`target-switching-swarm`](file:///C:/Users/sangmesh/Desktop/global-drill-system-nextjs%20-%20Copy/app/drills/fps/target-switching-swarm/page.js) | 15 | 8 | **7** | 12 | 12 | 0 | **CLEAN** |
-| `fps` | [`strafe-tracking`](file:///C:/Users/sangmesh/Desktop/global-drill-system-nextjs%20-%20Copy/app/drills/fps/strafe-tracking/page.js) | 15 | 9 | **6** | 10 | 10 | 0 | **CLEAN** |
-| `fps` | [`vertical-air-track`](file:///C:/Users/sangmesh/Desktop/global-drill-system-nextjs%20-%20Copy/app/drills/fps/vertical-air-track/page.js) | 15 | 9 | **6** | 11 | 11 | 0 | **CLEAN** |
-| `memory` | [`object-location`](file:///C:/Users/sangmesh/Desktop/global-drill-system-nextjs%20-%20Copy/app/drills/memory/spatial-memory/object-location/page.js) | 6 | 4 | **2** | 6 | 6 | 0 | **CLEAN** |
+| `reaction-speed` | [`fps-tracking-trainer`](../../app/drills/reaction-speed/fps-tracking-trainer/page.tsx) | 15 | 0 | **15** | 5 | 5 | 0 | **CLEAN** |
+| `reaction-speed` | [`market-doors-pursuit`](../../app/drills/reaction-speed/market-doors-pursuit/page.tsx) | 15 | 0 | **15** | 4 | 4 | 0 | **CLEAN** |
+| `reaction-speed` | [`reflex-training-drill`](../../app/drills/reaction-speed/reflex-training-drill/page.tsx) | 15 | 0 | **15** | 4 | 4 | 0 | **CLEAN** |
+| `reaction-speed` | [`saccadic-gallery`](../../app/drills/reaction-speed/saccadic-gallery/page.tsx) | 15 | 0 | **15** | 4 | 4 | 0 | **CLEAN** |
+| `reaction-speed` | [`visual-tracking-speed-test`](../../app/drills/reaction-speed/visual-tracking-speed-test/page.tsx) | 15 | 0 | **15** | 4 | 4 | 0 | **CLEAN** |
+| `reaction-speed` | [`barrier-sequence-pursuit`](../../app/drills/reaction-speed/barrier-sequence-pursuit/page.tsx) | 8 | 1 | **7** | 3 | 3 | 0 | **CLEAN** |
+| `physical` | [`complex-pattern`](../../app/drills/physical/coordination/complex-pattern/page.js) | 10 | 0 | **10** | 5 | 5 | 0 | **CLEAN** |
+| `physical` | [`jump-sequence`](../../app/drills/physical/fitness/jump-sequence/page.js) | 10 | 0 | **10** | 5 | 5 | 0 | **CLEAN** |
+| `physical` | [`cross-body-movement`](../../app/drills/physical/coordination/cross-body-movement/page.js) | 4 | 0 | **4** | 4 | 4 | 0 | **CLEAN** |
+| `physical` | [`quick-dodge`](../../app/drills/physical/reflex-training/quick-dodge/page.js) | 10 | 6 | **4** | 5 | 5 | 0 | **CLEAN** |
+| `cognitive` | [`reaction-time`](../../app/drills/cognitive/processing-speed/reaction-time/page.js) | 10 | 3 | **7** | 5 | 5 | 0 | **CLEAN** |
+| `fps` | [`target-switching-swarm`](../../app/drills/fps/target-switching-swarm/page.js) | 15 | 8 | **7** | 12 | 12 | 0 | **CLEAN** |
+| `fps` | [`strafe-tracking`](../../app/drills/fps/strafe-tracking/page.js) | 15 | 9 | **6** | 10 | 10 | 0 | **CLEAN** |
+| `fps` | [`vertical-air-track`](../../app/drills/fps/vertical-air-track/page.js) | 15 | 9 | **6** | 11 | 11 | 0 | **CLEAN** |
+| `memory` | [`object-location`](../../app/drills/memory/spatial-memory/object-location/page.js) | 6 | 4 | **2** | 6 | 6 | 0 | **CLEAN** |
 | **Totals** | **15 Pages** | **178** | **40** | **138** | **84** | **84** | **0** | **100% RECONCILED** |
 
 ---

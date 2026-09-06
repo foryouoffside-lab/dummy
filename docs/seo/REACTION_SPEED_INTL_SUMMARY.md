@@ -2,8 +2,8 @@
 
 **Date:** 2026-09-04  
 **Scope:** `app/drills/reaction-speed` (8 drills + 1 category hub)  
-**Dataset:** [`scripts/keywords/out/reaction-speed-intl-2026-09-04.csv`](file:///C:/Users/sangmesh/Desktop/global-drill-system-nextjs%20-%20Copy/scripts/keywords/out/reaction-speed-intl-2026-09-04.csv)  
-**Full Research Report:** [`scripts/keywords/out/reaction-speed-intl-2026-09-04.md`](file:///C:/Users/sangmesh/Desktop/global-drill-system-nextjs%20-%20Copy/scripts/keywords/out/reaction-speed-intl-2026-09-04.md)  
+**Dataset:** [`scripts/keywords/out/reaction-speed-intl-2026-09-04.csv`](../../scripts/keywords/out/reaction-speed-intl-2026-09-04.csv)  
+**Full Research Report:** [`scripts/keywords/out/reaction-speed-intl-2026-09-04.md`](../../scripts/keywords/out/reaction-speed-intl-2026-09-04.md)  
 **Guidelines Followed:** `ANTIGRAVITY_REACTION_SPEED_INTL_SEO.md`, lazy senior engineering rules (`AGENTS.md`)
 
 ---
@@ -60,18 +60,18 @@ SkillDrills evaluated international search demand across **17 national search ma
 
 ### 3.1. What Was Built (3 Research-Justified Drill Pages)
 
-1. **[`app/ko/drills/reaction-speed/reaction-time-test/page.js`](file:///C:/Users/sangmesh/Desktop/global-drill-system-nextjs%20-%20Copy/app/ko/drills/reaction-speed/reaction-time-test/page.js)**
+1. **[`app/ko/drills/reaction-speed/reaction-time-test/page.js`](../../app/ko/drills/reaction-speed/reaction-time-test/page.js)**
    - **Primary Keyword:** `반응속도 테스트` (10,032/mo exact).
    - **Secondary/LSI:** `반속테스트` (316/mo exact), `시각 반응속도`, `게이머 벤치마크`.
    - **Components:** Server-rendered Korean `DrillGuide`, 4-tier benchmark grading table (Elite 150-190ms down to Developing >300ms), 4-item FAQ schema, HowTo schema, WebApplication schema, BreadcrumbList schema.
    - **Self-canonical:** `https://skilldrills.online/ko/drills/reaction-speed/reaction-time-test`.
 
-2. **[`app/ja/drills/reaction-speed/reaction-time-test/page.js`](file:///C:/Users/sangmesh/Desktop/global-drill-system-nextjs%20-%20Copy/app/ja/drills/reaction-speed/reaction-time-test/page.js)**
+2. **[`app/ja/drills/reaction-speed/reaction-time-test/page.js`](../../app/ja/drills/reaction-speed/reaction-time-test/page.js)**
    - **Primary Keyword:** `反応速度テスト` (1,768/mo exact).
    - **Components:** Server-rendered Japanese `DrillGuide`, 4-tier benchmark grading table, 4-item FAQ schema, HowTo schema, WebApplication schema, BreadcrumbList schema.
    - **Self-canonical:** `https://skilldrills.online/ja/drills/reaction-speed/reaction-time-test`.
 
-3. **[`app/ja/drills/reaction-speed/reflex-training-drill/page.js`](file:///C:/Users/sangmesh/Desktop/global-drill-system-nextjs%20-%20Copy/app/ja/drills/reaction-speed/reflex-training-drill/page.js)**
+3. **[`app/ja/drills/reaction-speed/reflex-training-drill/page.js`](../../app/ja/drills/reaction-speed/reflex-training-drill/page.js)**
    - **Primary Keyword:** `反射神経ゲーム` (606/mo exact).
    - **Components:** Server-rendered Japanese `DrillGuide`, score tier benchmarks (Elite 10,000+ down to Beginner <3,000), 3-item FAQ schema, HowTo schema, WebApplication schema, BreadcrumbList schema.
    - **Self-canonical:** `https://skilldrills.online/ja/drills/reaction-speed/reflex-training-drill`.

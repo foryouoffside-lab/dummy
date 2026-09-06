@@ -4,7 +4,7 @@ const BASE_URL = 'https://skilldrills.online';
 // crawlable — including /_next/, which holds the JS and CSS Google needs to
 // render the page. Blocking /_next/ is what kept the hub pages stuck around
 // position 30: the crawler could not load the bundle, so it only ever saw the
-// loading skeleton. See SEO_PROGRESS.md.
+// loading skeleton. See docs/SEO_PROGRESS.md.
 const PRIVATE_PATHS = ['/api/', '/.vercel/'];
 
 // Search crawlers. Full access, no crawl delay for the ones that respect it —
