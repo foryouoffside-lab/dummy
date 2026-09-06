@@ -4,11 +4,8 @@ import { isIdleFrameSkippable } from '@/lib/performance';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 import {
-  Activity, AlertCircle, ArrowRight, ChevronRight, Crosshair,
-  Eye, GraduationCap, Play, RefreshCw, Target,
-  Timer, TrendingUp, Trophy, Volume2, VolumeX,
-  Zap, ZapOff, Users, Share2, Sliders, Flame,
-  LogOut, Award, ShieldAlert, BarChart3, Info, Lightbulb, Move, GitBranch
+  Activity, GitBranch, LogOut, Move, RefreshCw,
+  Share2, TrendingUp, Users, Volume2, VolumeX, Zap, ZapOff
 } from 'lucide-react';
 
 import generateShareCard, { shareScoreCard } from '../../../../../components/ShareScoreCard';
@@ -726,15 +723,6 @@ export default function CrossBodyMovementClient() {
               accent="cyan"
               title="Hand Eye Coordination Game"
               subtitle="Bilateral Motor Control & Midline Crossing Sweeps • 15 Levels"
-              rules={[
-                { icon: Target, accent: 'cyan', title: 'Activate Node A', text: 'Touch the starting cyan node with your crosshair to initiate vector line' },
-                { icon: Zap, accent: 'emerald', title: 'Sweep to Node B', text: 'Sweep directly across the canvas corridor to reach magenta target node' },
-              ]}
-              stats={[
-                { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
-                { icon: Flame, label: 'Best Combo', value: `${bestCombo}x`, color: 'text-rose-400', accent: 'rose' },
-                { icon: TrendingUp, label: 'Best Level', value: `Lv. ${bestLevel}`, color: 'text-blue-400', accent: 'blue' },
-              ]}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
             />

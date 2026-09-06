@@ -639,14 +639,6 @@ export default function DistanceJudgmentClient() {
               accent="cyan"
               title="Distance Judgment Pro"
               subtitle="3D Stereoscopic Intercept • Depth Estimation"
-              rules={[
-                { icon: Target, accent: 'cyan', title: 'Tap on Depth Ring Match', text: 'Tap when the 3D moving sphere aligns exactly with target depth ring' },
-                { icon: Zap, accent: 'blue', title: 'Dynamic Speed Acceleration', text: 'Calibrate stereoscopic spatial judgment against accelerating sphere speeds' },
-              ]}
-              stats={[
-                { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
-                { icon: TrendingUp, label: 'Best Level', value: `Lv. ${bestLevel}`, color: 'text-blue-400', accent: 'blue' },
-              ]}
               isTouchOnlyDevice={false}
               onStart={enterDrill}
             />

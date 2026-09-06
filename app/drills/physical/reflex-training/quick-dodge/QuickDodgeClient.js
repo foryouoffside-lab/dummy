@@ -714,15 +714,6 @@ export default function QuickDodgeClient() {
               accent="red"
               title="Quick Dodge"
               subtitle="Kinetic Evasion Reflex Drill • 15 Levels"
-              rules={[
-                { icon: Target, accent: 'red', title: 'Evade Homing Obstacles', text: 'Navigate crosshair to dodge red threats spawning from edge boundaries' },
-                { icon: Zap, accent: 'rose', title: 'Streak Reset', text: 'Getting hit resets your combo streak without score or time penalties' },
-              ]}
-              stats={[
-                { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
-                { icon: Flame, label: 'Best Combo', value: `${bestCombo}x`, color: 'text-rose-400', accent: 'rose' },
-                { icon: TrendingUp, label: 'Best Level', value: `Lv. ${bestLevel}`, color: 'text-blue-400', accent: 'blue' },
-              ]}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
             />

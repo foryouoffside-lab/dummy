@@ -7,8 +7,8 @@ import Link from 'next/link';
 import {
   Activity, AlertCircle, ArrowRight, ChevronRight, Crosshair,
   Eye, GraduationCap, RefreshCw, Target,
-  Timer, TrendingUp, Trophy, Volume2, VolumeX,
-  Flame, Share2, LogOut,
+  Timer, Volume2, VolumeX,
+  Share2, LogOut,
   Award, Shield, Users, Zap, ZapOff
 } from 'lucide-react';
 
@@ -687,15 +687,6 @@ export default function ProSmoothPursuitClient() {
               accent="green"
               title="Pro Smooth Pursuit"
               subtitle="Lissajous Curve Smooth Pursuit • Endless Level Progression"
-              rules={[
-                { icon: Target, accent: "green", title: "Objective", text: "Track Lissajous Curve (+0.4s/s)" },
-                { icon: AlertCircle, accent: "red", title: "Failure Rule", text: penaltyEnabled ? "Off-Target 1s → Resets Combo, -0.6s" : "Off-Target 1s → Resets Combo" },
-              ]}
-              stats={[
-                { icon: Trophy, label: "Best Score", value: bestScore, color: "text-white", accent: "slate" },
-                { icon: Flame, label: "Best Combo", value: `${bestCombo}x`, color: "text-green-400", accent: "green" },
-                { icon: TrendingUp, label: "Best Level", value: `Lv. ${bestLevel}`, color: "text-blue-400", accent: "blue" },
-              ]}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
             />

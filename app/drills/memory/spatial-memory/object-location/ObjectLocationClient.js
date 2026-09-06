@@ -6,7 +6,7 @@ import {
   Brain, Play, RefreshCw,
   TrendingUp, Volume2, VolumeX,
   Zap, ZapOff, Users, Share2, ArrowLeft,
-  MapPin, Target, Trophy
+  MapPin
 } from 'lucide-react';
 
 import generateShareCard, { shareScoreCard } from '../../../../../components/ShareScoreCard';
@@ -632,14 +632,6 @@ export default function ObjectLocationClient() {
               accent="emerald"
               title="Object Location Pro"
               subtitle="Spatial Object Memory • Location Recall"
-              rules={[
-                { icon: Target, accent: 'emerald', title: 'Memorize Object Positions', text: 'Study where each emoji object is placed on the grid' },
-                { icon: Zap, accent: 'blue', title: 'Locate Target Object', text: 'Tap the correct grid cell when prompted for a target object' },
-              ]}
-              stats={[
-                { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
-                { icon: TrendingUp, label: 'Best Level', value: `Lv. ${bestLevel}`, color: 'text-purple-400', accent: 'purple' },
-              ]}
               isTouchOnlyDevice={false}
               onStart={enterDrill}
             />
@@ -732,7 +724,7 @@ export default function ObjectLocationClient() {
             onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <DrillRuleItem num="1" text="Find Target Location" highlight="+150 PTS" result="Level Up (+1 Obj)" />
+              <DrillRuleItem num="1" text="Memorize Positions & Find Target" highlight="+150 PTS" result="Level Up (+1 Obj)" />
               <DrillRuleItem num="2" text="Level Progression" highlight="Grid 3x3 → 7x7" result="Difficulty naturally scales" />
               <DrillRuleItem num="3" text="Miss / Timeout" highlight="Zero Penalties" result="No score or time loss" />
               <DrillRuleItem num="4" text="Difficulty Never Drops" highlight="Stays at Current Level" result="A miss just replays the round" />

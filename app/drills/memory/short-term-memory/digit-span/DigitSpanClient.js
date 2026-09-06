@@ -6,7 +6,7 @@ import {
   Brain, Play, RefreshCw,
   TrendingUp, Volume2, VolumeX,
   Zap, ZapOff, Users, Share2, ArrowLeft,
-  Hash, Delete, Check, Target, Trophy
+  Hash, Delete, Check
 } from 'lucide-react';
 
 import generateShareCard, { shareScoreCard } from '../../../../../components/ShareScoreCard';
@@ -630,14 +630,6 @@ export default function DigitSpanClient() {
               accent="purple"
               title="Digit Span Pro"
               subtitle="Numerical Short-Term Memory • Digit Sequence Recall"
-              rules={[
-                { icon: Target, accent: 'purple', title: 'Memorize Digit Sequence', text: 'Watch the flashing numbers displayed on screen' },
-                { icon: Zap, accent: 'blue', title: 'Recall with On-Screen Numpad', text: 'Enter the exact sequence of digits using the numpad' },
-              ]}
-              stats={[
-                { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
-                { icon: TrendingUp, label: 'Best Span', value: `${bestLevel} Digits`, color: 'text-blue-400', accent: 'blue' },
-              ]}
               isTouchOnlyDevice={false}
               onStart={enterDrill}
             />
@@ -730,7 +722,7 @@ export default function DigitSpanClient() {
             onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <DrillRuleItem num="1" text="Perfect Recall" highlight="+100 PTS" result="Adds 1 Digit to Span" />
+              <DrillRuleItem num="1" text="Digit Sequence Recall" highlight="+100 PTS" result="Enter flashing digit sequence with on-screen numpad" />
               <DrillRuleItem num="2" text="Level Bonus" highlight="Up to +120% PTS" result="Higher span = more points per hit" />
               <DrillRuleItem num="3" text="Miss / Timeout" highlight="-1 Digit" result="No score or time loss" />
               <DrillRuleItem num="4" text="Adaptive Span Test" highlight="Rises & Falls" result="Converges on your true digit span" />

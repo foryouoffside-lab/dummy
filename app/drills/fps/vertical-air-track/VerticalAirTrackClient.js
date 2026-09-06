@@ -7,8 +7,8 @@ import Link from 'next/link';
 import {
   Activity, AlertCircle, ArrowRight, ChevronRight, Crosshair,
   Eye, GraduationCap, RefreshCw, Target,
-  Timer, TrendingUp, Trophy, Volume2, VolumeX,
-  Flame, Share2, LogOut,
+  Timer, TrendingUp, Volume2, VolumeX,
+  Share2, LogOut,
   Award, Shield, Users, Zap, ZapOff
 } from 'lucide-react';
 
@@ -75,7 +75,7 @@ const getLevelConfig = (level, combo = 0) => {
 const RULES_ITEMS = [
   { num: "1", text: "Airborne Target", highlight: "Destroy Target (+100 PTS / +0.4s)", result: "Track Parabolic Trajectory" },
   { num: "2", text: "Height Bonus", highlight: "Up to +75 PTS", result: "Higher Destructions Award More Points" },
-  { num: "3", text: "Failure Rule", highlight: "Target Drop (-0.6s)", result: "Resets Combo Streak" },
+  { num: "3", text: "Failure Rule", highlight: "Failure Penalty", result: "Dropping target resets combo streak (-0.6s with Time Penalty enabled)" },
   { num: "4", text: "Level Progression", highlight: "+1 Level / 1400 PTS", result: "Continuous Dynamic Gravity & Speed" }
 ];
 
@@ -900,16 +900,6 @@ export default function VerticalAirTrackClient() {
               accent="redOrange"
               title="Vertical Air-Track"
               subtitle="Hardware Raw Input • Endless Level Progression"
-              rules={[
-                { icon: Target, accent: "red", title: "Objective", text: "Hold Laser On Airborne Targets" },
-                { icon: Zap, accent: "orange", title: "Height Bonus", text: "Up to +75 PTS at Jump Peak" },
-                { icon: AlertCircle, accent: "red", title: "Failure Rule", text: penaltyEnabled ? "Target Drop → Resets Combo, -0.6s" : "Target Drop → Resets Combo" },
-              ]}
-              stats={[
-                { icon: Trophy, label: "Best Score", value: bestScore, color: "text-white", accent: "slate" },
-                { icon: Flame, label: "Best Combo", value: `${bestCombo}x`, color: "text-red-400", accent: "red" },
-                { icon: TrendingUp, label: "Best Level", value: `Lv. ${bestLevel}`, color: "text-blue-400", accent: "blue" },
-              ]}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
             />

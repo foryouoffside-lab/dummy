@@ -754,22 +754,6 @@ export default function DropCatchClient() {
               accent="emerald"
               title="Drop Catch"
               subtitle="Visual Discrimination & Impulse Control • Continuous Scaling"
-              rules={[
-                { icon: Zap, accent: 'emerald', title: 'Catch Green Target (+100 PTS)', text: '+100 PTS × Combo × Level multiplier (+0.6s per catch)' },
-                {
-                  icon: ShieldAlert,
-                  accent: 'red',
-                  title: penaltyEnabled ? 'Decoy Traps & Time Penalty' : 'Decoy Traps & Combo Reset',
-                  text: penaltyEnabled
-                    ? 'Ignore red decoys. Missed targets or decoys subtract 0.8s and reset combo'
-                    : 'Ignore red decoys marked X. Missed targets or decoys reset combo streak'
-                },
-              ]}
-              stats={[
-                { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
-                { icon: Flame, label: 'Best Combo', value: `${bestCombo}x`, color: 'text-emerald-400', accent: 'emerald' },
-                { icon: TrendingUp, label: 'Best Level', value: `Lv. ${bestLevel}`, color: 'text-blue-400', accent: 'blue' },
-              ]}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
             />

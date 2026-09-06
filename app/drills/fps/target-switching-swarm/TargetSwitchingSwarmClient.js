@@ -7,8 +7,8 @@ import Link from 'next/link';
 import {
   Activity, AlertCircle, ArrowRight, ChevronRight, Crosshair,
   Eye, GraduationCap, RefreshCw, Target,
-  Timer, TrendingUp, Trophy, Volume2, VolumeX,
-  Flame, Share2, LogOut,
+  Timer, TrendingUp, Volume2, VolumeX,
+  Share2, LogOut,
   Award, Shield, Users, Zap, ZapOff
 } from 'lucide-react';
 
@@ -74,7 +74,7 @@ const getLevelConfig = (level, combo = 0) => {
 const RULES_ITEMS = [
   { num: "1", text: "Target Destruction", highlight: "Cyan Targets (+100 PTS / +0.35s)", result: "Rapidly switch between targets" },
   { num: "2", text: "Dynamic Swarm", highlight: "Instant Respawns", result: "Maintains active targets continuously" },
-  { num: "3", text: "Failure Rule", highlight: "Miss / Timeout (-0.5s)", result: "Resets combo multiplier" },
+  { num: "3", text: "Failure Rule", highlight: "Failure Penalty", result: "Miss or timeout resets combo multiplier (-0.5s with Time Penalty enabled)" },
   { num: "4", text: "Level Progression", highlight: "+1 Level / 2100 PTS", result: "Continuous Dynamic Speed & Size" }
 ];
 
@@ -802,15 +802,6 @@ export default function TargetSwitchingSwarmClient() {
               accent="cyan"
               title="Target Switching Swarm"
               subtitle="Hardware Raw Input • Endless Level Progression"
-              rules={[
-                { icon: Target, accent: "cyan", title: "Objective (+100 PTS)", text: "Rapidly Switch & Eliminate Active Swarms" },
-                { icon: AlertCircle, accent: "red", title: "Failure Rule", text: penaltyEnabled ? "Missed Click / Timeout → Resets Combo, -0.5s" : "Missed Click / Timeout → Resets Combo" },
-              ]}
-              stats={[
-                { icon: Trophy, label: "Best Score", value: bestScore, color: "text-white", accent: "slate" },
-                { icon: Flame, label: "Best Combo", value: `${bestCombo}x`, color: "text-cyan-400", accent: "cyan" },
-                { icon: TrendingUp, label: "Best Level", value: `Lv. ${bestLevel}`, color: "text-blue-400", accent: "blue" },
-              ]}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
             />

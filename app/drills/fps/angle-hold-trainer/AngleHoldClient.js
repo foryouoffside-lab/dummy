@@ -5,11 +5,10 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 
 import {
-  Activity, AlertCircle, ArrowRight, ChevronRight, Eye,
-  Flame, RefreshCw, Target, Timer, TrendingUp,
-  Trophy, Volume2, VolumeX, Zap, ZapOff, Share2,
-  Users, LogOut, Award,
-  Crosshair, Brain
+  Activity, AlertCircle, Eye,
+  Target, TrendingUp,
+  Volume2, VolumeX, Zap, ZapOff,
+  Users, Crosshair
 } from 'lucide-react';
 
 import generateShareCard, { shareScoreCard } from '../../../../components/ShareScoreCard';
@@ -835,15 +834,6 @@ export default function AngleHoldClient() {
               accent="orange"
               title="Angle Hold Pro"
               subtitle="Crosshair Placement & Peek Reaction • Endless Level Progression"
-              rules={[
-                { icon: Target, accent: "orange", title: "Objective (+100 PTS)", text: "Punish Cover Peeks (Confirm Real Swings)" },
-                { icon: AlertCircle, accent: "red", title: "Failure Rule", text: penaltyEnabled ? "Pre-fire / Miss / Escape → Resets Combo, -0.8s" : "Pre-fire / Miss / Escape → Resets Combo" },
-              ]}
-              stats={[
-                { icon: Trophy, label: "Best Score", value: bestScore, color: "text-white", accent: "slate" },
-                { icon: Flame, label: "Best Combo", value: `${bestCombo}x`, color: "text-orange-400", accent: "orange" },
-                { icon: TrendingUp, label: "Best Level", value: `Lv. ${bestLevel}`, color: "text-blue-400", accent: "blue" },
-              ]}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
             />

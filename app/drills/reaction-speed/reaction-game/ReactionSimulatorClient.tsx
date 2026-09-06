@@ -787,21 +787,6 @@ export default function ReactionSimulatorClient() {
               accent="red"
               title="Reaction Game"
               subtitle="Reflex Interception • Vertical Tracking"
-              rules={[
-                { icon: Target, accent: 'red', title: 'Intercept Falling Targets', text: '+100 PTS × Combo × Level multiplier (+0.6s per hit)' },
-                {
-                  icon: Zap,
-                  accent: 'orange',
-                  title: penaltyEnabled ? 'Time Penalty (-0.8s)' : 'Streak & Combo System',
-                  text: penaltyEnabled
-                    ? 'Missing or letting targets escape subtracts 0.8s and resets combo'
-                    : 'Escaping targets reset combo multiplier. No time deducted (enable in session settings)'
-                },
-              ]}
-              stats={[
-                { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
-                { icon: TrendingUp, label: 'Best Level', value: `Lv. ${bestLevel}`, color: 'text-blue-400', accent: 'blue' },
-              ]}
               isTouchOnlyDevice={false}
               onStart={enterDrill}
             />

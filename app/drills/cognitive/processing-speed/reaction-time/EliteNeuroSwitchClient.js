@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
-import { Target, Volume2, VolumeX, Play, RefreshCw, Share2, LogOut, ArrowLeft, Users, TrendingUp, Zap, ZapOff, Trophy } from 'lucide-react';
+import { Target, Volume2, VolumeX, Users, TrendingUp, Zap, ZapOff } from 'lucide-react';
 
 import { isIdleFrameSkippable } from '@/lib/performance';
 import generateShareCard, { shareScoreCard } from '../../../../../components/ShareScoreCard';
@@ -60,7 +60,7 @@ const getLevelConfig = (level, combo = 0) => {
 };
 
 const RULES_ITEMS = [
-  { title: "Dynamic Target Rule", text: "Pay close attention to the active top rule banner (e.g. 'TAP RED' or 'TAP BLUE'). Tap ONLY the target matching the active rule (+100 PTS × Combo, +0.6s)." },
+  { title: "Dynamic Target Rule", text: "Pay close attention to the active top rule banner (e.g. 'TAP RED' or 'TAP BLUE'). Tap ONLY the target matching the active rule (+100 PTS × Combo × Level multiplier, +0.6s)." },
   { title: "Performance Rule Switching", text: "As your performance improves and level increases, the rule dynamically switches between RED and BLUE targets." },
   { title: "Rapid Target Shift", text: "Target nodes shift positions continuously to train visual discrimination and choice reaction speed." },
   { title: "Streak & Penalty Rules", text: "Tapping the wrong target node or letting the active target time out resets your combo streak. A 0.8s time deduction applies when enabled in settings." }
@@ -638,21 +638,6 @@ export default function EliteNeuroSwitchClient() {
               accent="red"
               title="Reaction Time"
               subtitle="Choice Discrimination • Reflex Latency"
-              rules={[
-                { icon: Target, accent: 'emerald', title: 'Tap Active Target Rule', text: '+100 PTS × Combo × Level multiplier (+0.6s per hit)' },
-                {
-                  icon: Zap,
-                  accent: 'red',
-                  title: penaltyEnabled ? 'Time Penalty (-0.8s)' : 'Dynamic Neuro-Switching',
-                  text: penaltyEnabled
-                    ? 'Wrong target taps or timeouts subtract 0.8s and reset combo'
-                    : 'Discriminate target rules under escalating speed. Misses reset combo'
-                },
-              ]}
-              stats={[
-                { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
-                { icon: TrendingUp, label: 'Best Level', value: `Lv. ${bestLevel}`, color: 'text-blue-400', accent: 'blue' },
-              ]}
               isTouchOnlyDevice={false}
               onStart={enterDrill}
             />

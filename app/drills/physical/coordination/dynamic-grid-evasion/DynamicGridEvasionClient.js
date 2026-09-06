@@ -4,11 +4,8 @@ import { isIdleFrameSkippable } from '@/lib/performance';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 import {
-  Activity, AlertCircle, ArrowRight, ChevronRight, Crosshair,
-  Eye, GraduationCap, Play, RefreshCw, Target,
-  Timer, TrendingUp, Trophy, Volume2, VolumeX,
-  Zap, ZapOff, Users, Share2, Sliders, Flame,
-  LogOut, Award, ShieldAlert, BarChart3, Info, Lightbulb, LayoutGrid
+  Eye, LayoutGrid, LogOut, RefreshCw, Share2,
+  TrendingUp, Users, Volume2, VolumeX, Zap, ZapOff
 } from 'lucide-react';
 
 import generateShareCard, { shareScoreCard } from '../../../../../components/ShareScoreCard';
@@ -742,15 +739,6 @@ export default function DynamicGridEvasionClient() {
               accent="emerald"
               title="Dynamic Grid Evasion"
               subtitle="Spatial Hazard Avoidance & Rapid Flicking • 15 Levels"
-              rules={[
-                { icon: Target, accent: 'emerald', title: 'Evade Danger Cells Before Blast', text: 'Move crosshair away from warning grid cells before detonation' },
-                { icon: Zap, accent: 'red', title: 'Explosion Hit Penalty', text: 'Getting caught in a cell blast resets your combo streak' },
-              ]}
-              stats={[
-                { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
-                { icon: Flame, label: 'Best Combo', value: `${bestCombo}x`, color: 'text-emerald-400', accent: 'emerald' },
-                { icon: TrendingUp, label: 'Best Level', value: `Lv. ${bestLevel}`, color: 'text-blue-400', accent: 'blue' },
-              ]}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
             />

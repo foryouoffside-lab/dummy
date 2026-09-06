@@ -4,8 +4,8 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 import { 
   Volume2, VolumeX,
-  Play, RefreshCw, Crosshair,
-  Share2, LogOut, RotateCw, Eye, Users, TrendingUp, Zap, ZapOff, Brain, Move, AlertTriangle, Trophy, Target
+  RefreshCw, Crosshair,
+  Share2, LogOut, Users, TrendingUp, Zap, ZapOff, Brain, AlertTriangle
 } from 'lucide-react';
 
 import generateShareCard, { shareScoreCard } from '../../../../../components/ShareScoreCard';
@@ -610,14 +610,6 @@ export default function AutoPursuitClient() {
                 accent="emerald"
                 title="Pursuit Tracker Pro"
                 subtitle="Smooth Pursuit Eye Movement • Aim Latency"
-                rules={[
-                  { icon: Target, accent: 'emerald', title: 'Track Moving Orb', text: 'Maintain continuous cursor alignment over moving target orb (+5 PTS/s)' },
-                  { icon: Zap, accent: 'amber', title: 'Accelerating Speed', text: 'Orb velocity escalates continuously as tracking streak increases' },
-                ]}
-                stats={[
-                  { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
-                  { icon: TrendingUp, label: 'Best Streak', value: `${bestStreak}s`, color: 'text-emerald-400', accent: 'blue' },
-                ]}
                 isTouchOnlyDevice={false}
                 onStart={enterDrill}
               />
@@ -728,9 +720,10 @@ export default function AutoPursuitClient() {
               onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <DrillRuleItem num="1" text="Sustained Tracking (1s)" highlight="+5 PTS" result="Maintain Cursor Contact" />
-                <DrillRuleItem num="2" text="Progressive Difficulty" highlight="Faster & Smaller" result="Orb speed rises, hitbox shrinks" />
-                <DrillRuleItem num="3" text="Lost Tracking (>2s)" highlight="Zero Penalties" result="Streak resets, no score or time loss" />
+                <DrillRuleItem num="1" text="Track Moving Orb" highlight="Continuous Cursor Alignment" result="+5 PTS/s sustained contact" />
+                <DrillRuleItem num="2" text="Accelerating Speed" highlight="Orb Velocity Escalation" result="Speeds up as streak increases" />
+                <DrillRuleItem num="3" text="Progressive Difficulty" highlight="Faster & Smaller" result="Orb speed rises, hitbox shrinks" />
+                <DrillRuleItem num="4" text="Lost Tracking (>2s)" highlight="Zero Penalties" result="Streak resets, no score or time loss" />
               </div>
             </DrillAccordion>
 

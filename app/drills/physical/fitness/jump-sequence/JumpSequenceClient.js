@@ -5,11 +5,8 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 
 import {
-  Activity, AlertCircle, ArrowRight, ChevronRight, Crosshair,
-  Eye, GraduationCap, Play, RefreshCw, Target,
-  Timer, TrendingUp, Trophy, Volume2, VolumeX,
-  Zap, ZapOff, Users, Share2, Sliders, Flame,
-  LogOut, Award, ShieldAlert, BarChart3, Info, Lightbulb, Move
+  Activity, Eye, LogOut, Move, RefreshCw,
+  Share2, Target, Volume2, VolumeX, Zap, ZapOff
 } from 'lucide-react';
 
 import generateShareCard, { shareScoreCard } from '../../../../../components/ShareScoreCard';
@@ -809,15 +806,6 @@ export default function JumpSequenceClient() {
               accent="cyan"
               title="Jump Sequence"
               subtitle="Vertical Trajectory & Mid-Air Steering • 15 Levels"
-              rules={[
-                { icon: Target, accent: 'cyan', title: 'Charge & Launch', text: 'Hold click over player dot to charge velocity and release to jump' },
-                { icon: Zap, accent: 'emerald', title: 'Mid-Air Steering', text: 'Steer cursor left & right while airborne to intercept moving targets' },
-              ]}
-              stats={[
-                { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
-                { icon: Flame, label: 'Best Combo', value: `${bestCombo}x`, color: 'text-rose-400', accent: 'rose' },
-                { icon: TrendingUp, label: 'Best Level', value: `Lv. ${bestLevel}`, color: 'text-blue-400', accent: 'blue' },
-              ]}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
             />

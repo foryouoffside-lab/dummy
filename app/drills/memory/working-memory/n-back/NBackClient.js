@@ -3,8 +3,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 import {
-  Brain, Play, RefreshCw, TrendingUp, Volume2, VolumeX,
-  Zap, ZapOff, Users, Share2, ArrowLeft, Target, Trophy
+  Brain, RefreshCw, TrendingUp, Volume2, VolumeX,
+  Zap, ZapOff, Users, Share2, ArrowLeft
 } from 'lucide-react';
 
 import generateShareCard, { shareScoreCard } from '../../../../../components/ShareScoreCard';
@@ -551,14 +551,6 @@ export default function NBackClient() {
               accent="cyan"
               title="Dual N-Back Training Pro"
               subtitle="Working Memory • Sequence Updating"
-              rules={[
-                { icon: Target, accent: 'cyan', title: 'Compare to N Steps Ago', text: 'Determine if current item matches the item N steps back in sequence' },
-                { icon: Zap, accent: 'blue', title: 'Match / No Match Decision', text: 'Respond quickly with Match or No Match for each stimulus' },
-              ]}
-              stats={[
-                { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
-                { icon: TrendingUp, label: 'Best Level', value: `${bestLevel}-Back`, color: 'text-purple-400', accent: 'purple' },
-              ]}
               isTouchOnlyDevice={false}
               onStart={enterDrill}
             />
@@ -651,7 +643,7 @@ export default function NBackClient() {
             onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <DrillRuleItem num="1" text="Correct Match / No Match" highlight="+150 PTS" result="Per correct judgment" />
+              <DrillRuleItem num="1" text="Correct Match / No Match (N Steps Ago)" highlight="+150 PTS" result="Per correct judgment" />
               <DrillRuleItem num="2" text="Level Progression" highlight="3-Back → 4-Back+" result="Every 1200 points earned" />
               <DrillRuleItem num="3" text="Display Speeds Up" highlight="2000ms → 1200ms Floor" result="Faster letters at higher levels" />
               <DrillRuleItem num="4" text="Timeout (No Response)" highlight="Zero Penalties" result="No score, time, or life lost" />

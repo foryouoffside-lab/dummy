@@ -4,11 +4,9 @@ import { isIdleFrameSkippable } from '@/lib/performance';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 import { 
-  Activity, AlertCircle, ArrowRight, Brain, ChevronRight, 
-  Crosshair, Eye, GraduationCap, Info, Lightbulb, 
-  Play, RefreshCw, Target, Timer, TrendingUp, Trophy, 
-  Volume2, VolumeX, Flame, Share2, Sliders, LogOut, Award,
-  Shield, Users, Zap, ZapOff, Move, PenTool, Video, Star
+  AlertCircle, Move, PenTool, RefreshCw, 
+  Share2, TrendingUp, Volume2, VolumeX, 
+  Users, Zap, ZapOff, LogOut
 } from 'lucide-react';
 
 import generateShareCard, { shareScoreCard } from '../../../../../components/ShareScoreCard';
@@ -137,10 +135,10 @@ const getLevelConfig = (level) => {
 // ACCORDION DATA
 // ============================================================
 const RULES_ITEMS = [
-  { title: "Target Drop", text: "Score +100 PTS × Combo for dropping ball cleanly inside moving target container." },
+  { title: "Target Drop", text: "Grab the blue ball and drop it cleanly inside the hollow moving blue bucket. Score +100 PTS × Combo per hit." },
   { title: "Continuous Combo", text: "Chain successful releases to build combo multiplier up to 3.0x max." },
   { title: "Level Progression", text: "Score increases level every 250 PTS. Containers shrink & speed accelerates." },
-  { title: "Miss / Timeout", text: "Releasing outside container or letting target expire resets active combo multiplier." }
+  { title: "Miss / Timeout", text: "Dropping off-target, releasing outside the container, or letting the target expire resets your combo streak." }
 ];
 
 const ABOUT_TEXT = `Drag & Drop Precision Training is a mechanical motor drill designed to refine raw cursor control, spatial dragging accuracy, and deceleration release timing.
@@ -832,15 +830,6 @@ export default function DragAndDropClient() {
               accent="blue"
               title="Drag & Drop Mouse Trainer"
               subtitle="Spatial Drag & Drop Target Alignment • 15 Levels"
-              rules={[
-                { icon: Target, accent: 'blue', title: 'Drag Blue Ball into Moving Bucket (+100 PTS)', text: 'Grab the blue ball and drop it cleanly inside the hollow moving blue bucket' },
-                { icon: Zap, accent: 'red', title: 'Miss / Timeout Penalty', text: 'Dropping off-target or timing out resets your combo streak' },
-              ]}
-              stats={[
-                { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
-                { icon: Flame, label: 'Best Combo', value: `${bestCombo}x`, color: 'text-blue-400', accent: 'blue' },
-                { icon: TrendingUp, label: 'Best Level', value: `Lv. ${bestLevel}`, color: 'text-cyan-400', accent: 'cyan' },
-              ]}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
             />

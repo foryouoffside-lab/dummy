@@ -7,9 +7,9 @@ import Link from 'next/link';
 import {
   Activity, AlertCircle, ArrowRight, ChevronRight, Crosshair,
   Eye, GraduationCap, RefreshCw, Target,
-  Timer, TrendingUp, Trophy, Volume2, VolumeX,
-  Flame, Share2, LogOut,
-  Award, Shield, Users, Zap, ZapOff
+  Timer, TrendingUp, Volume2, VolumeX,
+  Share2, LogOut,
+  Award, Users, Zap, ZapOff
 } from 'lucide-react';
 
 import generateShareCard, { shareScoreCard } from '../../../../components/ShareScoreCard';
@@ -76,7 +76,7 @@ const getLevelConfig = (level, combo = 0) => {
 const RULES_ITEMS = [
   { num: "1", text: "High Threat Target", highlight: "Red (+100 PTS / +0.4s)", result: "Must be eliminated first" },
   { num: "2", text: "Medium Threat Target", highlight: "Yellow (+50 PTS / +0.4s)", result: "Escalates to Red after timer" },
-  { num: "3", text: "Friendly Unit", highlight: "Green (DO NOT SHOOT)", result: "Causes penalty on hit" },
+  { num: "3", text: "Friendly Unit", highlight: "Green (DO NOT SHOOT)", result: "Friendly hit, wrong target, or miss resets combo (-0.6s with Time Penalty enabled)" },
   { num: "4", text: "Level Progression", highlight: "+1 Level / 1400 PTS", result: "Continuous Dynamic Density & Speed" }
 ];
 
@@ -864,17 +864,6 @@ export default function TargetPrioritizationClient() {
               accent="indigo"
               title="Target Prioritization"
               subtitle="Threat Assessment & Cognitive Filtering • Endless Level Progression"
-              rules={[
-                { icon: Target, accent: "red", title: "Red Threat (+100 PTS)", text: "High Priority (Shoot First)" },
-                { icon: AlertCircle, accent: "amber", title: "Yellow Threat (+50 PTS)", text: "Medium Priority (Escalates)" },
-                { icon: Shield, accent: "green", title: "Green Unit", text: "Friendly — DO NOT SHOOT" },
-                { icon: AlertCircle, accent: "red", title: "Failure Rule", text: penaltyEnabled ? "Friendly / Wrong / Miss → Resets Combo, -0.6s" : "Friendly / Wrong / Miss → Resets Combo" },
-              ]}
-              stats={[
-                { icon: Trophy, label: "Best Score", value: bestScore, color: "text-white", accent: "slate" },
-                { icon: Flame, label: "Best Combo", value: `${bestCombo}x`, color: "text-blue-400", accent: "indigo" },
-                { icon: TrendingUp, label: "Best Level", value: `Lv. ${bestLevel}`, color: "text-blue-400", accent: "blue" },
-              ]}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
             />

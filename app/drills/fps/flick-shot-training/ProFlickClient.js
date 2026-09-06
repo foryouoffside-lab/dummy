@@ -5,10 +5,10 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 
 import {
-  Activity, AlertCircle, ArrowRight, ChevronRight,
-  Eye, Flame, RefreshCw, Target,
-  Timer, TrendingUp, Trophy, Volume2, VolumeX, Zap, ZapOff,
-  Share2, Users, LogOut, Award, Crosshair
+  Activity, AlertCircle,
+  Eye, Target,
+  TrendingUp, Volume2, VolumeX, Zap, ZapOff,
+  Users, Crosshair
 } from 'lucide-react';
 
 import generateShareCard, { shareScoreCard } from '../../../../components/ShareScoreCard';
@@ -109,10 +109,10 @@ const getLevelConfig = (level, combo = 0) => {
 // ACCORDION DATA
 // ============================================================
 const RULES_ITEMS = [
-  { num: "1", text: "Target Hit", highlight: "+100 PTS", result: "× Combo × Level Multiplier" },
+  { num: "1", text: "Target Hit", highlight: "+100 PTS (+0.6s)", result: "× Combo × Level Multiplier" },
   { num: "2", text: "Combo System", highlight: "Up to 3.0x Multiplier", result: "Smaller, faster targets on a hot streak" },
-  { num: "3", text: "Level Progression", highlight: "+1 Level / 250 PTS", result: "Radius & TTL shrink across 15 levels" },
-  { num: "4", text: "Miss / Timeout / Idle", highlight: "Zero Penalties", result: "Combo resets, no time or score lost" }
+  { num: "3", text: "Level Progression", highlight: "+1 Level / 1800 PTS", result: "Continuous Adaptive Target Scaling" },
+  { num: "4", text: "Miss / Timeout / Idle", highlight: "Failure Penalty", result: "Combo resets to 0 (-0.8s with Time Penalty enabled)" }
 ];
 
 const ABOUT_INTRO = [
@@ -887,15 +887,6 @@ export default function ProFlickClient() {
               accent="emerald"
               title="Pro Flick Trainer"
               subtitle="Macro Flicking & Target Acquisition • Endless Levels"
-              rules={[
-                { icon: Target, accent: 'emerald', title: 'Objective', text: 'Snap & Click Targets' },
-                { icon: AlertCircle, accent: 'red', title: 'Failure Rule', text: penaltyEnabled ? 'Miss / Timeout → Combo Reset, -0.8s' : 'Miss / Timeout → Combo Reset' },
-              ]}
-              stats={[
-                { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
-                { icon: Flame, label: 'Best Combo', value: `${bestCombo}x`, color: 'text-emerald-400', accent: 'emerald' },
-                { icon: TrendingUp, label: 'Best Level', value: `Lv. ${bestLevel}`, color: 'text-blue-400', accent: 'blue' },
-              ]}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
             />

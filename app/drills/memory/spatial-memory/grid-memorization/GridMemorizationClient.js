@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 import {
   Brain, Play, RefreshCw, TrendingUp, Volume2, VolumeX,
-  Zap, ZapOff, Users, Share2, ArrowLeft, Grid3X3, Target, Trophy
+  Zap, ZapOff, Users, Share2, ArrowLeft, Grid3X3
 } from 'lucide-react';
 
 import generateShareCard, { shareScoreCard } from '../../../../../components/ShareScoreCard';
@@ -579,14 +579,6 @@ export default function GridMemorizationClient() {
               accent="purple"
               title="Grid Memorization Pro"
               subtitle="Spatial Short-Term Memory • Pattern Recall"
-              rules={[
-                { icon: Target, accent: 'purple', title: 'Memorize Spatial Pattern', text: 'Study the lit cell positions on the expanding grid matrix' },
-                { icon: Zap, accent: 'blue', title: 'Recreate Lit Positions', text: 'Tap the matching grid tiles to reconstruct the exact spatial pattern' },
-              ]}
-              stats={[
-                { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
-                { icon: TrendingUp, label: 'Best Cells', value: `${bestLevel} Cells`, color: 'text-blue-400', accent: 'blue' },
-              ]}
               isTouchOnlyDevice={false}
               onStart={enterDrill}
             />
@@ -679,7 +671,7 @@ export default function GridMemorizationClient() {
             onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <DrillRuleItem num="1" text="Perfect Recall" highlight="+150 PTS" result="Adds 1 Lit Cell" />
+              <DrillRuleItem num="1" text="Pattern Recall" highlight="+150 PTS" result="Memorize lit cell positions & tap tiles to recreate" />
               <DrillRuleItem num="2" text="Level Progression" highlight="Grid 4x4 → 5x5" result="Difficulty naturally scales" />
               <DrillRuleItem num="3" text="Miss / Timeout" highlight="Zero Penalties" result="No score or time loss" />
               <DrillRuleItem num="4" text="Difficulty Never Drops" highlight="Stays at Current Level" result="A miss just replays the round" />

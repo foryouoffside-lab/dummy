@@ -4,11 +4,8 @@ import { isIdleFrameSkippable } from '@/lib/performance';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 import { 
-  Activity, AlertCircle, ArrowRight, Brain, ChevronRight, 
-  Crosshair, Eye, GraduationCap, Info, Lightbulb, 
-  Play, Target, Timer, TrendingUp, Trophy, 
-  Volume2, VolumeX, Flame, Award,
-  Shield, Users, Zap, ZapOff
+  AlertCircle, Crosshair, Target, TrendingUp, 
+  Volume2, VolumeX, Users, Zap, ZapOff
 } from 'lucide-react';
 
 import generateShareCard, { shareScoreCard } from '../../../../../components/ShareScoreCard';
@@ -793,15 +790,6 @@ export default function PrecisionFlickShotClient() {
               accent="cyan"
               title="Precision Flick Shot"
               subtitle="Target Decay & Bulls-Eye Micro-Flicks • Endless Level Progression"
-              rules={[
-                { icon: Target, accent: "emerald", title: "Bulls-eye Hit (+200 PTS)", text: "Micro-flick to target centers for double bonus points (+0.6s)" },
-                { icon: Zap, accent: "red", title: "Miss / Timeout Penalty", text: penaltyEnabled ? "Missing or target decay expiration resets combo & deducts 0.8s" : "Missing or target decay expiration resets combo streak" },
-              ]}
-              stats={[
-                { icon: Trophy, label: "Best Score", value: bestScore, color: "text-white", accent: "slate" },
-                { icon: Flame, label: "Best Combo", value: `${bestCombo}x`, color: "text-emerald-400", accent: "emerald" },
-                { icon: TrendingUp, label: "Best Level", value: `Lv. ${bestLevel}`, color: "text-blue-400", accent: "blue" },
-              ]}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
             />

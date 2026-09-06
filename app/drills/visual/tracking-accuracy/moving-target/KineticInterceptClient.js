@@ -658,21 +658,6 @@ export default function KineticInterceptClient() {
               accent="orange"
               title="Moving Target Pro"
               subtitle="Kinetic Visual Tracking • Intercept Accuracy"
-              rules={[
-                { icon: Target, accent: 'orange', title: 'Intercept Target', text: '+150 PTS × Combo × Level multiplier (+0.6s per hit)' },
-                {
-                  icon: Zap,
-                  accent: 'amber',
-                  title: penaltyEnabled ? 'Time Penalty (-0.8s)' : 'Escalating Target Pace',
-                  text: penaltyEnabled
-                    ? 'Misclicks or relocation timeouts subtract 0.8s and reset combo'
-                    : 'Target relocation speed accelerates. Misclicks reset combo (no time deducted)'
-                },
-              ]}
-              stats={[
-                { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
-                { icon: TrendingUp, label: 'Best Level', value: `Lv. ${bestLevel}`, color: 'text-blue-400', accent: 'blue' },
-              ]}
               isTouchOnlyDevice={false}
               onStart={enterDrill}
             />

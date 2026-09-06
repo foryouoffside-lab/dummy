@@ -5,11 +5,9 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 
 import {
-  Activity, AlertCircle, ArrowRight, ChevronRight, Crosshair,
-  Eye, GraduationCap, RefreshCw, Target,
-  Timer, TrendingUp, Trophy, Volume2, VolumeX,
-  Flame, Share2, LogOut,
-  Award, Shield, Users, Zap, ZapOff
+  Activity, AlertCircle, Shield,
+  TrendingUp, Volume2, VolumeX,
+  Users, Zap, ZapOff
 } from 'lucide-react';
 
 import generateShareCard, { shareScoreCard } from '../../../../components/ShareScoreCard';
@@ -746,15 +744,6 @@ export default function AntiStrafeJitterClient() {
               accent="cyan"
               title="Anti-Strafe Jitter Duel"
               subtitle="Reactive Movement Reading • Endless Level Progression"
-              rules={[
-                { icon: Target, accent: "cyan", title: "Objective (+10 PTS / 0.25s)", text: "Continuous Anti-Strafe Tracking" },
-                { icon: AlertCircle, accent: "red", title: "Failure Rule", text: penaltyEnabled ? "1.0s Off Target → Combo Reset, -0.6s" : "1.0s Off Target → Combo Reset" },
-              ]}
-              stats={[
-                { icon: Trophy, label: "Best Score", value: bestScore, color: "text-white", accent: "slate" },
-                { icon: Flame, label: "Best Combo", value: `${bestCombo}x`, color: "text-cyan-400", accent: "cyan" },
-                { icon: TrendingUp, label: "Best Level", value: `Lv. ${bestLevel}`, color: "text-blue-400", accent: "blue" },
-              ]}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
             />

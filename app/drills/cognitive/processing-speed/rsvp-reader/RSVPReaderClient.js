@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import {
   Volume2, VolumeX,
-  Play, RefreshCw, Share2, ArrowLeft, BookOpen, Users, TrendingUp, Zap, ZapOff, Target, Trophy
+  RefreshCw, Share2, ArrowLeft, BookOpen, Users, TrendingUp, Zap, ZapOff
 } from 'lucide-react';
 
 import generateShareCard, { shareScoreCard } from '../../../../../components/ShareScoreCard';
@@ -565,14 +565,6 @@ export default function RSVPReaderClient() {
               accent="amber"
               title="RSVP Speed Reader"
               subtitle="Lexical Decoding • ORP Focus"
-              rules={[
-                { icon: Target, accent: 'amber', title: 'Tap When Target Word Flashes', text: 'Detect designated target words in the rapid focal stream' },
-                { icon: Zap, accent: 'blue', title: 'ORP Focal Stream', text: 'Words flash sequentially at a single focal point without eye movement' },
-              ]}
-              stats={[
-                { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
-                { icon: TrendingUp, label: 'Best Level', value: `Lv. ${bestLevel}`, color: 'text-blue-400', accent: 'blue' },
-              ]}
               isTouchOnlyDevice={false}
               onStart={enterDrill}
             />

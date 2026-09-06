@@ -723,14 +723,6 @@ export default function ChromaSyncClient() {
               accent="emerald"
               title="Go/No-Go Pro"
               subtitle="Response Inhibition • Impulse Control"
-              rules={[
-                { icon: Target, accent: 'emerald', title: 'Green GO Stimulus', text: '+150 PTS × Combo × Level multiplier (+0.6s per tap)' },
-                { icon: Zap, accent: 'red', title: 'Red STOP Stimulus', text: '+100 PTS on successful restraint (+0.6s). Wrong tap costs 1 life' },
-              ]}
-              stats={[
-                { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
-                { icon: TrendingUp, label: 'Best Level', value: `Lv. ${bestLevel}`, color: 'text-blue-400', accent: 'blue' },
-              ]}
               isTouchOnlyDevice={false}
               onStart={enterDrill}
             />

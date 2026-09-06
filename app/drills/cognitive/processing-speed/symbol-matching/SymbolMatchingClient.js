@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
-import { Target, Volume2, VolumeX, Play, RefreshCw, Share2, ArrowLeft, Users, TrendingUp, Repeat, Zap, ZapOff, Trophy } from 'lucide-react';
+import { Target, Volume2, VolumeX, Users, TrendingUp, Repeat, Zap, ZapOff } from 'lucide-react';
 
 import { isIdleFrameSkippable } from '@/lib/performance';
 import generateShareCard, { shareScoreCard } from '../../../../../components/ShareScoreCard';
@@ -63,7 +63,7 @@ const getLevelConfig = (level, combo = 0) => {
 
 const RULES_ITEMS = [
   { title: "Symbol Digit Modality", text: "A key mapping bar at the top assigns 6 unique Greek symbols to digits 1 through 6." },
-  { title: "Target Symbol Prompt", text: "A target symbol appears in the center. Tap the matching digit (+100 PTS × Combo, +0.6s)." },
+  { title: "Target Symbol Prompt", text: "A target symbol appears in the center. Tap the matching digit (+100 PTS × Combo × Level multiplier, +0.6s)." },
   { title: "Wrong Answers", text: "Tapping the wrong digit resets your combo (and deducts time if penalties are on). Nothing ends the run early — you play until the clock reaches zero." },
   { title: "Streak & Penalty Rules", text: "Building streaks multiplies your score. Timeouts and wrong taps deduct 0.8s when enabled in settings." }
 ];
@@ -605,21 +605,6 @@ export default function SymbolMatchingClient() {
               accent="cyan"
               title="Symbol Matching"
               subtitle="SDMT Paradigm • Visual Search"
-              rules={[
-                { icon: Target, accent: 'cyan', title: 'Match Target Symbol to Digit', text: '+100 PTS × Combo × Level multiplier (+0.6s per hit)' },
-                {
-                  icon: Zap,
-                  accent: 'blue',
-                  title: penaltyEnabled ? 'Wrong Answers & Time Penalty' : 'Wrong Answers',
-                  text: penaltyEnabled
-                    ? 'Wrong clicks reset your combo and subtract 0.8s. The run lasts the full clock'
-                    : 'Wrong clicks reset your combo. The run always lasts the full clock'
-                },
-              ]}
-              stats={[
-                { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
-                { icon: TrendingUp, label: 'Best Level', value: `Lv. ${bestLevel}`, color: 'text-blue-400', accent: 'blue' },
-              ]}
               isTouchOnlyDevice={false}
               onStart={enterDrill}
             />

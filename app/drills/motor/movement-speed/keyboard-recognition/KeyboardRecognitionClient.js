@@ -3,10 +3,8 @@ import { isIdleFrameSkippable } from '@/lib/performance';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
-  AlertCircle, ArrowRight, ChevronRight, Cpu,
-  GraduationCap, Lightbulb, Play, RefreshCw, Target,
-  Timer, Trophy, Volume2, VolumeX, Zap, ZapOff, Share2,
-  Keyboard, Settings, LogOut, Award, Flame, TrendingUp
+  Cpu, Keyboard, LogOut, RefreshCw, Share2,
+  Target, TrendingUp, Volume2, VolumeX, Zap, ZapOff
 } from 'lucide-react';
 
 import generateShareCard, { shareScoreCard } from '@/components/ShareScoreCard';
@@ -839,15 +837,6 @@ export default function KeyboardRecognitionClient() {
               accent="emerald"
               title="Keyboard Speed Test"
               subtitle="Keybind Muscle Memory & Response Inhibition • 60s Timer"
-              rules={[
-                { icon: Target, accent: 'emerald', title: 'Match Prompt Before Timeout', text: 'Press the matching key on your physical keyboard before target timer expires' },
-                { icon: Zap, accent: 'red', title: 'Incorrect Key Penalty', text: 'Pressing the wrong key or timing out resets your streak' },
-              ]}
-              stats={[
-                { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
-                { icon: Keyboard, label: 'Keys Active', value: enabledKeys.length, color: 'text-emerald-400', accent: 'emerald' },
-                { icon: Timer, label: 'Duration', value: '60s', color: 'text-blue-400', accent: 'blue' },
-              ]}
               isTouchOnlyDevice={isTouchOnlyDevice}
               touchBlockedLabel="Keyboard Required"
               onStart={enterDrill}

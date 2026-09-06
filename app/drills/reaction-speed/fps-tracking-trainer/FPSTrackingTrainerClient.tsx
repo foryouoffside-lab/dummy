@@ -840,21 +840,6 @@ export default function FPSTrackingTrainerClient() {
               accent="red"
               title="FPS Tracking Trainer"
               subtitle="Dynamic Strafe • Moving Target Pursuit"
-              rules={[
-                { icon: Target, accent: 'red', title: 'Hit Moving Strafers', text: '+100 PTS × Combo × Level multiplier (+0.6s per hit)' },
-                {
-                  icon: Zap,
-                  accent: 'orange',
-                  title: penaltyEnabled ? 'Time Penalty (-0.8s)' : 'Streak & Combo System',
-                  text: penaltyEnabled
-                    ? 'Missing or strafer timeout subtracts 0.8s and resets combo'
-                    : 'Target timeouts reset combo multiplier. No time deducted (enable in session settings)'
-                },
-              ]}
-              stats={[
-                { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
-                { icon: TrendingUp, label: 'Best Level', value: `Lv. ${bestLevel}`, color: 'text-blue-400', accent: 'blue' },
-              ]}
               isTouchOnlyDevice={false}
               onStart={enterDrill}
             />

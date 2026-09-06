@@ -752,22 +752,6 @@ export default function PeripheralThreatSweeperClient() {
               accent="emerald"
               title="Peripheral Threat Sweeper"
               subtitle="Peripheral Vision & Shield Defense • Continuous Scaling"
-              rules={[
-                { icon: Target, accent: 'emerald', title: 'Intercept Edge Threats (+100 PTS)', text: '+100 PTS × Combo × Level multiplier (+0.6s per sweep)' },
-                {
-                  icon: Zap,
-                  accent: 'red',
-                  title: penaltyEnabled ? 'Core Breach Penalty (-0.8s)' : 'Core Breach Combo Reset',
-                  text: penaltyEnabled
-                    ? 'Allowing threats to breach the central core subtracts 0.8s and resets combo'
-                    : 'Allowing threats to breach the central core resets your combo multiplier'
-                },
-              ]}
-              stats={[
-                { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
-                { icon: Flame, label: 'Best Combo', value: `${bestCombo}x`, color: 'text-emerald-400', accent: 'emerald' },
-                { icon: TrendingUp, label: 'Best Level', value: `Lv. ${bestLevel}`, color: 'text-blue-400', accent: 'blue' },
-              ]}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
             />

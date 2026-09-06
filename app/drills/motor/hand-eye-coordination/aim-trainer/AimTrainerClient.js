@@ -5,11 +5,8 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 
 import { 
-  Activity, AlertCircle, ArrowRight, Brain, ChevronRight, 
-  Crosshair, Eye, GraduationCap, Info, Lightbulb, 
-  Play, Target, Timer, TrendingUp, Trophy, 
-  Volume2, VolumeX, Flame, Award,
-  Shield, Users, Zap, ZapOff, MousePointer2, Star
+  AlertCircle, Crosshair, Target, TrendingUp,
+  Volume2, VolumeX, Users, Zap, ZapOff
 } from 'lucide-react';
 
 import generateShareCard, { shareScoreCard } from '../../../../../components/ShareScoreCard';
@@ -87,10 +84,10 @@ const spawnTarget = (w, h, config) => {
 // ACCORDION DATA
 // ============================================================
 const RULES_ITEMS = [
-  { title: "Target Hit", text: "Score +100 PTS × Combo (+0.6s) per hit on active moving target." },
+  { title: "Target Hit", text: "Acquire and click active moving targets before they disappear. Score +100 PTS × Combo (+0.6s) per hit." },
   { title: "Continuous Combo", text: "Chain successful target hits to build combo multiplier up to 3.0x max." },
   { title: "Level Progression", text: "Level up every 1750 PTS. Targets shrink, accelerate, and expire faster." },
-  { title: "Miss / Timeout", text: "Missing shots or letting targets expire resets combo streak and deducts time when enabled." }
+  { title: "Miss / Timeout", text: "Missing shots or letting targets expire resets combo streak and deducts 0.8s when penalty is enabled." }
 ];
 
 
@@ -738,15 +735,6 @@ export default function AimTrainerClient() {
               accent="emerald"
               title="Aim Trainer Elite"
               subtitle="Dynamic Moving Targets & Precision Click Timing • Endless Level Progression"
-              rules={[
-                { icon: Target, accent: "emerald", title: "Hit Targets (+100 PTS)", text: "Acquire and click moving targets rapidly before they disappear (+0.6s)" },
-                { icon: Zap, accent: "red", title: "Miss / Timeout Penalty", text: penaltyEnabled ? "Missing or timing out resets combo streak & deducts 0.8s" : "Missing or timing out resets combo streak" },
-              ]}
-              stats={[
-                { icon: Trophy, label: "Best Score", value: bestScore, color: "text-white", accent: "slate" },
-                { icon: Flame, label: "Best Combo", value: `${bestCombo}x`, color: "text-emerald-400", accent: "emerald" },
-                { icon: TrendingUp, label: "Best Level", value: `Lv. ${bestLevel}`, color: "text-blue-400", accent: "blue" },
-              ]}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
             />

@@ -4,9 +4,8 @@ import { isIdleFrameSkippable } from '@/lib/performance';
 import { useState, useEffect, useRef, useCallback } from 'react';
 
 import {
-  AlertCircle, ArrowRight, BarChart3, Flame, RefreshCw, Target,
-  Timer, TrendingUp, Trophy, Zap, ZapOff, Share2, Users, Route, LogOut,
-  Volume2, VolumeX
+  AlertCircle, ArrowRight, LogOut, RefreshCw, Route, Share2,
+  TrendingUp, Users, Volume2, VolumeX, Zap, ZapOff
 } from 'lucide-react';
 
 import generateShareCard, { shareScoreCard } from '@/components/ShareScoreCard';
@@ -580,15 +579,6 @@ export default function SteadyHandClient() {
               accent="cyan"
               title="Steady Hand Circuit"
               subtitle="Motor Precision & Line Tracking • 45s Timer"
-              rules={[
-                { icon: Target, accent: 'cyan', title: 'Objective', text: 'Trace Glowing Cyan Line to Reach Goal Zone' },
-                { icon: Zap, accent: 'blue', title: 'Reaching Goal', text: 'Resets Timer to 45s & Advances Difficulty' },
-              ]}
-              stats={[
-                { icon: Trophy, label: 'Best Laps', value: `${bestScore || 0}`, color: 'text-white', accent: 'slate' },
-                { icon: Flame, label: 'Current Laps', value: `${analytics.laps || 0}`, color: 'text-cyan-400', accent: 'cyan' },
-                { icon: Timer, label: 'Duration', value: '45s', color: 'text-blue-400', accent: 'blue' },
-              ]}
               isTouchOnlyDevice={false}
               onStart={startGame}
             />

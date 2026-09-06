@@ -7,8 +7,8 @@ import Link from 'next/link';
 import {
   Activity, AlertCircle, ArrowRight, ChevronRight, Crosshair,
   Eye, GraduationCap, RefreshCw, Target,
-  Timer, TrendingUp, Trophy, Volume2, VolumeX,
-  Flame, Share2, LogOut,
+  Timer, TrendingUp, Volume2, VolumeX,
+  Share2, LogOut,
   Award, Shield, Users, Zap, ZapOff
 } from 'lucide-react';
 
@@ -748,15 +748,6 @@ export default function StrafeTrackingClient() {
               accent="green"
               title="Strafe Tracking"
               subtitle="Hardware Raw Input • Endless Level Progression"
-              rules={[
-                { icon: Target, accent: "green", title: "Objective", text: "Continuous Crosshair Lock (+0.4s/s)" },
-                { icon: AlertCircle, accent: "red", title: "Failure Rule", text: penaltyEnabled ? "Off-Target 1s → Resets Combo, -0.6s" : "Off-Target 1s → Resets Combo" },
-              ]}
-              stats={[
-                { icon: Trophy, label: "Best Score", value: bestScore, color: "text-white", accent: "slate" },
-                { icon: Flame, label: "Best Combo", value: `${bestCombo}x`, color: "text-green-400", accent: "green" },
-                { icon: TrendingUp, label: "Best Level", value: `Lv. ${bestLevel}`, color: "text-blue-400", accent: "blue" },
-              ]}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
             />
@@ -799,7 +790,7 @@ export default function StrafeTrackingClient() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-sans">
                 <RuleItem num="1" text="Target Tracking" highlight="Pure Reactive (+0.4s/s)" result="Keep crosshair locked on target" />
                 <RuleItem num="2" text="Time Adjusting" highlight={`${DRILL_DURATION}s Starting Duration`} result="Uncapped session timer" />
-                <RuleItem num="3" text="Off-Target Penalty" highlight="Combo Reset / -0.6s" result="1s off-target resets streak" />
+                <RuleItem num="3" text="Off-Target Penalty" highlight="Failure Penalty" result="1s off-target resets combo streak (-0.6s with Time Penalty enabled)" />
                 <RuleItem num="4" text="Level Progression" highlight="+1 Level / 1400 PTS" result="Continuous Speed & Direction Frequency" />
               </div>
             </DrillAccordion>

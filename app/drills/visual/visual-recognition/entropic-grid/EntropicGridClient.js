@@ -4,8 +4,8 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 import {
   Volume2, VolumeX,
-  Play, RefreshCw, Target,
-  Share2, LogOut, RotateCw, Eye, Users, TrendingUp, Zap, ZapOff, Brain, Crosshair, Trophy
+  RefreshCw,
+  Share2, LogOut, Users, TrendingUp, Zap, ZapOff, Brain, Crosshair
 } from 'lucide-react';
 
 import generateShareCard, { shareScoreCard } from '../../../../../components/ShareScoreCard';
@@ -569,14 +569,6 @@ export default function EntropicGridClient() {
               accent="blue"
               title="Entropic Grid"
               subtitle="Visual Noise Suppression • Target Recognition"
-              rules={[
-                { icon: Target, accent: 'blue', title: 'Find Target Code', text: 'Scan noisy letter grid to locate target code pair (+150 PTS)' },
-                { icon: Zap, accent: 'cyan', title: 'Dynamic Noise Reshuffle', text: 'Distractor grid elements reshuffle every 700ms under timed pressure' },
-              ]}
-              stats={[
-                { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
-                { icon: TrendingUp, label: 'Best Level', value: `Lv. ${bestLevel}`, color: 'text-blue-400', accent: 'blue' },
-              ]}
               isTouchOnlyDevice={false}
               onStart={enterDrill}
             />
@@ -670,9 +662,9 @@ export default function EntropicGridClient() {
               onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <DrillRuleItem num="1" text="Find Target Code Cell" highlight="+150 PTS" result="Target Match" />
-                <DrillRuleItem num="2" text="Progressive Difficulty" highlight="Up to 6 Live Targets" result="Guaranteed placements grow with level" />
-                <DrillRuleItem num="3" text="Entropy Noise Engine" highlight="700ms Regeneration" result="Dynamic visual noise" />
+                <DrillRuleItem num="1" text="Find Target Code" highlight="Scan Noisy Letter Grid" result="+150 PTS per target code pair" />
+                <DrillRuleItem num="2" text="Dynamic Noise Reshuffle" highlight="700ms Regeneration" result="Distractors reshuffle continuously" />
+                <DrillRuleItem num="3" text="Progressive Difficulty" highlight="Up to 6 Live Targets" result="Guaranteed placements grow with level" />
                 <DrillRuleItem num="4" text="Miss / Timeout" highlight="Zero Penalties" result="No score or time loss" />
               </div>
             </DrillAccordion>

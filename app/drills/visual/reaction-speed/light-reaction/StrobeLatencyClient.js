@@ -693,21 +693,6 @@ export default function StrobeLatencyClient() {
               accent="amber"
               title="Light Reaction Pro"
               subtitle="Visual Strobe Latency • Reflex Speed"
-              rules={[
-                { icon: Target, accent: 'amber', title: 'Strobe Flash Stimulus', text: '+150 PTS × Combo × Level multiplier (+0.6s per hit)' },
-                {
-                  icon: Zap,
-                  accent: 'orange',
-                  title: penaltyEnabled ? 'Time Penalty (-0.8s)' : 'Streak & Combo System',
-                  text: penaltyEnabled
-                    ? 'Premature clicks, spam, or flash timeouts subtract 0.8s and reset combo'
-                    : 'Misses or early taps reset combo multiplier. No time deducted (enable in session settings)'
-                },
-              ]}
-              stats={[
-                { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
-                { icon: TrendingUp, label: 'Best Level', value: `Lv. ${bestLevel}`, color: 'text-blue-400', accent: 'blue' },
-              ]}
               isTouchOnlyDevice={false}
               onStart={enterDrill}
             />

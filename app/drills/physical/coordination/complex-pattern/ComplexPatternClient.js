@@ -4,11 +4,8 @@ import { isIdleFrameSkippable } from '@/lib/performance';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 import {
-  Activity, AlertCircle, ArrowRight, ChevronRight, Crosshair,
-  Eye, GraduationCap, Play, RefreshCw, Target,
-  Timer, TrendingUp, Trophy, Volume2, VolumeX,
-  Zap, ZapOff, Users, Share2, Sliders, Flame,
-  LogOut, Award, ShieldAlert, BarChart3, Info, Lightbulb, Move, GitBranch
+  Activity, GitBranch, LogOut, RefreshCw, Share2,
+  TrendingUp, Users, Volume2, VolumeX, Zap, ZapOff
 } from 'lucide-react';
 
 import generateShareCard, { shareScoreCard } from '../../../../../components/ShareScoreCard';
@@ -907,15 +904,6 @@ export default function ComplexPatternClient() {
               accent="purple"
               title="Pattern Memory Game"
               subtitle="Spatial Working Memory & Vector Tracing • 15 Levels"
-              rules={[
-                { icon: Target, accent: 'purple', title: 'Memorize Vector Path', text: 'Study multi-node geometric pattern shown briefly on canvas' },
-                { icon: Zap, accent: 'emerald', title: 'Trace & Recreate', text: 'Click and drag from cyan start node to magenta end node' },
-              ]}
-              stats={[
-                { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
-                { icon: Flame, label: 'Best Combo', value: `${bestCombo}x`, color: 'text-rose-400', accent: 'rose' },
-                { icon: TrendingUp, label: 'Best Level', value: `Lv. ${bestLevel}`, color: 'text-blue-400', accent: 'blue' },
-              ]}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
             />

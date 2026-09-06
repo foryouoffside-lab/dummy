@@ -4,8 +4,8 @@ import { isIdleFrameSkippable } from '@/lib/performance';
 import { useState, useEffect, useRef, useCallback } from 'react';
 
 import {
-  Activity, AlertCircle, ArrowRight, BarChart3, Flame, RefreshCw, Target,
-  Timer, TrendingUp, Trophy, Zap, ZapOff, Users, Share2, LogOut, Volume2, VolumeX
+  Activity, AlertCircle, BarChart3, LogOut, RefreshCw, Share2,
+  TrendingUp, Users, Volume2, VolumeX, Zap, ZapOff
 } from 'lucide-react';
 
 import generateShareCard, { shareScoreCard } from '@/components/ShareScoreCard';
@@ -633,15 +633,6 @@ export default function FineMotorClient() {
               accent="red"
               title="Mouse Tracing Game"
               subtitle="Raw Input Continuous Tracking • 45s Timer"
-              rules={[
-                { icon: Target, accent: 'redOrange', title: 'Objective', text: 'Keep Crosshair Perfectly Aligned with Wave' },
-                { icon: Zap, accent: 'purple', title: 'Continuous Flow', text: 'Wave Never Stops, Re-acquire to Maintain Flow' },
-              ]}
-              stats={[
-                { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
-                { icon: Flame, label: 'Peak Flow', value: `${analytics.peakFlow}%`, color: 'text-rose-400', accent: 'redOrange' },
-                { icon: Timer, label: 'Duration', value: '45s', color: 'text-blue-400', accent: 'blue' },
-              ]}
               isTouchOnlyDevice={false}
               onStart={startGame}
             />

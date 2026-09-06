@@ -4,11 +4,8 @@ import { isIdleFrameSkippable } from '@/lib/performance';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 import {
-  Activity, AlertCircle, ArrowRight, ChevronRight, Crosshair,
-  Eye, GraduationCap, Play, RefreshCw, Target,
-  Timer, TrendingUp, Trophy, Volume2, VolumeX,
-  Zap, ZapOff, Users, Share2, Sliders, Flame,
-  LogOut, Award, ShieldAlert, BarChart3, Info, Lightbulb, Wind
+  Activity, LogOut, RefreshCw, Share2, TrendingUp,
+  Users, Volume2, VolumeX, Wind, Zap, ZapOff
 } from 'lucide-react';
 
 import generateShareCard, { shareScoreCard } from '../../../../../components/ShareScoreCard';
@@ -689,15 +686,6 @@ export default function StabilityChallengeClient() {
               accent="emerald"
               title="Stability Challenge"
               subtitle="Wind Resistance Motor Control • 15 Levels"
-              rules={[
-                { icon: Target, accent: 'emerald', title: 'Resist Wind & Stay Centered', text: 'Counteract dynamic wind forces to keep crosshair aligned' },
-                { icon: Zap, accent: 'red', title: 'Blowout Penalty', text: 'Drifting off-center resets your combo streak' },
-              ]}
-              stats={[
-                { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
-                { icon: Flame, label: 'Best Combo', value: `${bestCombo}x`, color: 'text-emerald-400', accent: 'emerald' },
-                { icon: TrendingUp, label: 'Best Level', value: `Lv. ${bestLevel}`, color: 'text-blue-400', accent: 'blue' },
-              ]}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
             />

@@ -4,11 +4,8 @@ import { isIdleFrameSkippable } from '@/lib/performance';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 import {
-  Activity, AlertCircle, ArrowRight, ChevronRight, Crosshair,
-  Eye, Flame, GraduationCap, Play, RefreshCw, Target,
-  Timer, TrendingUp, Trophy, Volume2, VolumeX,
-  Zap, ZapOff, Users, Sparkles, Share2, Sliders,
-  LogOut, Award, Move
+  Activity, AlertCircle, LogOut, RefreshCw, Share2,
+  TrendingUp, Users, Volume2, VolumeX, Zap, ZapOff
 } from 'lucide-react';
 
 import generateShareCard, { shareScoreCard } from '@/components/ShareScoreCard';
@@ -809,15 +806,6 @@ export default function RapidTappingClient() {
               accent="fuchsia"
               title="CPS Test"
               subtitle="CPS Click Speed Trainer • Hardware Raw Input"
-              rules={[
-                { icon: Target, accent: 'fuchsia', title: 'Objective', text: 'Tap Target Ball to Prevent Shrink' },
-                { icon: Zap, accent: 'purple', title: 'Scoring Rate', text: '+1 Point per 10 Clicks' },
-              ]}
-              stats={[
-                { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
-                { icon: Flame, label: 'Best CPS', value: `${bestCps}`, color: 'text-fuchsia-400', accent: 'fuchsia' },
-                { icon: Timer, label: 'Duration', value: '45s', color: 'text-blue-400', accent: 'blue' },
-              ]}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
             />

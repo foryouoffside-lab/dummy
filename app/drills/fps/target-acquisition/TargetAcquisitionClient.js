@@ -5,8 +5,8 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 
 import {
-  AlertCircle, ArrowRight, ChevronRight, Eye, Flame,
-  RefreshCw, Target, Timer, TrendingUp, Trophy,
+  AlertCircle, ArrowRight, ChevronRight, Eye,
+  RefreshCw, Target, Timer,
   Volume2, VolumeX, Zap, ZapOff, Share2, Users, LogOut, Award
 } from 'lucide-react';
 
@@ -802,15 +802,6 @@ export default function TargetAcquisitionClient() {
               accent="amber"
               title="Target Acquisition Pro"
               subtitle="Visual Discrimination Speed • Endless Level Progression"
-              rules={[
-                { icon: Target, accent: "amber", title: "Objective (+100 PTS)", text: "Click Brightest Target First" },
-                { icon: AlertCircle, accent: "red", title: "Failure Rule", text: penaltyEnabled ? "Wrong Click / Miss → Resets Combo, -0.6s" : "Wrong Click / Miss → Resets Combo" },
-              ]}
-              stats={[
-                { icon: Trophy, label: "Best Score", value: bestScore, color: "text-white", accent: "slate" },
-                { icon: Flame, label: "Best Combo", value: `${bestCombo}x`, color: "text-amber-400", accent: "amber" },
-                { icon: TrendingUp, label: "Best Level", value: `Lv. ${bestLevel}`, color: "text-blue-400", accent: "blue" },
-              ]}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
             />

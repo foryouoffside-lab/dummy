@@ -6,7 +6,7 @@ import {
   BookOpen, Brain, Play, RefreshCw,
   TrendingUp, Volume2, VolumeX,
   Zap, ZapOff, Users, Share2, ArrowLeft,
-  SkipForward, Target, Trophy
+  SkipForward
 } from 'lucide-react';
 
 import generateShareCard, { shareScoreCard } from '../../../../../components/ShareScoreCard';
@@ -640,14 +640,6 @@ export default function WordRecallClient() {
               accent="pink"
               title="Word Recall Pro"
               subtitle="Verbal Short-Term Memory • Word Recall"
-              rules={[
-                { icon: Target, accent: 'purple', title: 'Memorize Word List', text: 'Study the list of words presented during the flash phase' },
-                { icon: Zap, accent: 'blue', title: 'Free Verbal Recall', text: 'Type or submit as many words as you can remember' },
-              ]}
-              stats={[
-                { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
-                { icon: TrendingUp, label: 'Best Words', value: `${bestWords} Words`, color: 'text-blue-400', accent: 'blue' },
-              ]}
               isTouchOnlyDevice={false}
               onStart={enterDrill}
             />
@@ -740,7 +732,7 @@ export default function WordRecallClient() {
             onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <DrillRuleItem num="1" text="Perfect Recall" highlight="+150 PTS" result="Adds 1 Word to List" />
+              <DrillRuleItem num="1" text="Word List Recall" highlight="+150 PTS" result="Memorize words and type them during recall phase" />
               <DrillRuleItem num="2" text="Level Bonus" highlight="Up to +135% PTS" result="Longer lists = more points per hit" />
               <DrillRuleItem num="3" text="Miss / Timeout" highlight="-1 Word" result="No score or time loss" />
               <DrillRuleItem num="4" text="Adaptive Span Test" highlight="Rises & Falls" result="Converges on your true word span" />

@@ -5,8 +5,8 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 
 import {
-  AlertCircle, Eye, Flame, Target, TrendingUp,
-  Trophy, Volume2, VolumeX, Zap, ZapOff, Users
+  AlertCircle, Eye, Target, TrendingUp,
+  Volume2, VolumeX, Zap, ZapOff, Users
 } from 'lucide-react';
 
 import generateShareCard, { shareScoreCard } from '../../../../components/ShareScoreCard';
@@ -856,15 +856,6 @@ export default function InstantResponseClient() {
               accent="emerald"
               title="Instant Response Pro"
               subtitle="Visual Reaction Latency & Reflex • Endless Level Progression"
-              rules={[
-                { icon: Target, accent: "emerald", title: "Objective (+100 PTS)", text: "Click flash stimulus as fast as possible" },
-                { icon: AlertCircle, accent: "red", title: "Failure Rule", text: penaltyEnabled ? "Pre-fire / Miss / Timeout → Combo Reset, -0.8s" : "Pre-fire / Miss / Timeout → Combo Reset" },
-              ]}
-              stats={[
-                { icon: Trophy, label: "Best Score", value: bestScore, color: "text-white", accent: "slate" },
-                { icon: Flame, label: "Best Combo", value: `${bestCombo}x`, color: "text-emerald-400", accent: "emerald" },
-                { icon: TrendingUp, label: "Best Level", value: `Lv. ${bestLevel}`, color: "text-blue-400", accent: "blue" },
-              ]}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
             />

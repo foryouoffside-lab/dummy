@@ -866,21 +866,6 @@ export default function BarrierSequencePursuitClient() {
               accent="red"
               title="Jiggle Peek Trainer"
               subtitle="Cover Peeking • Angle Holding Reflexes"
-              rules={[
-                { icon: Target, accent: 'red', title: 'Cover Peeking Targets', text: '+100 PTS × Combo × Level multiplier (+0.6s per hit)' },
-                {
-                  icon: Zap,
-                  accent: 'orange',
-                  title: penaltyEnabled ? 'Time Penalty (-0.8s)' : 'Streak & Combo System',
-                  text: penaltyEnabled
-                    ? 'Missing or target timeout subtracts 0.8s and resets combo'
-                    : 'Target timeouts reset combo multiplier. No time deducted (enable in session settings)'
-                },
-              ]}
-              stats={[
-                { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
-                { icon: TrendingUp, label: 'Best Level', value: `Lv. ${bestLevel}`, color: 'text-blue-400', accent: 'blue' },
-              ]}
               isTouchOnlyDevice={false}
               onStart={enterDrill}
             />

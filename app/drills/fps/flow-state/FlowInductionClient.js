@@ -7,8 +7,8 @@ import Link from 'next/link';
 import {
   Activity, AlertCircle, ArrowRight, ChevronRight, Crosshair,
   Eye, GraduationCap, RefreshCw, Target,
-  Timer, TrendingUp, Trophy, Volume2, VolumeX,
-  Flame, Share2, LogOut,
+  Timer, TrendingUp, Volume2, VolumeX,
+  Share2, LogOut,
   Award, Shield, Users, Zap, ZapOff, Waves,
   Wind, Focus
 } from 'lucide-react';
@@ -769,15 +769,6 @@ export default function FlowStateClient() {
               accent="cyan"
               title="Flow State Trainer"
               subtitle="Hardware Raw Input • Endless Level Progression"
-              rules={[
-                { icon: Target, accent: "cyan", title: "Objective (+10 PTS / 0.25s)", text: "Continuous Bezier Tracking" },
-                { icon: AlertCircle, accent: "red", title: "Failure Rule", text: penaltyEnabled ? "1.0s Off Target → Combo Reset, -0.6s" : "1.0s Off Target → Combo Reset" },
-              ]}
-              stats={[
-                { icon: Trophy, label: "Best Score", value: bestScore, color: "text-white", accent: "slate" },
-                { icon: Flame, label: "Best Combo", value: `${bestCombo}x`, color: "text-cyan-400", accent: "cyan" },
-                { icon: TrendingUp, label: "Best Level", value: `Lv. ${bestLevel}`, color: "text-blue-400", accent: "blue" },
-              ]}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
             />

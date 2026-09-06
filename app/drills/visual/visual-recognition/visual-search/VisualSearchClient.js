@@ -1,14 +1,9 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import Link from 'next/link';
-
 import {
-  Activity, AlertCircle, ArrowRight, Award, Brain, ChevronRight,
-  Eye, GraduationCap, Play, RefreshCw, RotateCw, Target,
-  Timer, TrendingUp, Trophy, Volume2, VolumeX,
-  Zap, ZapOff, Users, Sparkles, Share2, LogOut, CheckCircle, XCircle,
-  Crosshair, Search
+  Brain, RefreshCw, TrendingUp, Volume2, VolumeX,
+  Zap, ZapOff, Users, Share2, LogOut, Crosshair, Search
 } from 'lucide-react';
 
 import generateShareCard, { shareScoreCard } from '../../../../../components/ShareScoreCard';
@@ -543,14 +538,6 @@ export default function VisualSearchClient() {
               accent="cyan"
               title="Visual Search"
               subtitle="Conjunctive Scanning • Target Isolation"
-              rules={[
-                { icon: Target, accent: 'cyan', title: "Find Dynamic Target Symbol", text: "Locate target symbol ('C', 'E', 'P', etc.) hidden among rotated distractor symbols (+150 PTS)" },
-                { icon: Zap, accent: 'blue', title: "Randomized Symbol Field", text: "Scan past rotated distractor symbols under timed pressure with dynamic target shifts" },
-              ]}
-              stats={[
-                { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
-                { icon: TrendingUp, label: 'Best Level', value: `Lv. ${bestLevel}`, color: 'text-blue-400', accent: 'blue' },
-              ]}
               isTouchOnlyDevice={false}
               onStart={enterDrill}
             />
@@ -646,9 +633,9 @@ export default function VisualSearchClient() {
               onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <DrillRuleItem num="1" text="Find Dynamic Target Symbol" highlight="+150 PTS" result="Target Match" />
-                <DrillRuleItem num="2" text="Constant Grid Layout" highlight="12×8 Grid" result="Target symbol & location shift" />
-                <DrillRuleItem num="3" text="Conjunctive Feature Search" highlight="Rotated Distractors" result="Visual discrimination" />
+                <DrillRuleItem num="1" text="Find Dynamic Target Symbol" highlight="Rotated Distractors" result="+150 PTS per target symbol found" />
+                <DrillRuleItem num="2" text="Randomized Symbol Field" highlight="12×8 Conjunctive Grid" result="Target symbol & location shift under time pressure" />
+                <DrillRuleItem num="3" text="Conjunctive Feature Search" highlight="Rotated Distractor Shapes" result="Active serial scanning" />
                 <DrillRuleItem num="4" text="Miss / Timeout" highlight="Zero Penalties" result="No score or time loss" />
               </div>
             </DrillAccordion>

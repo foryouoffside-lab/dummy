@@ -3,11 +3,10 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 import {
-  Activity, AlertCircle, Brain,
-  Eye, GraduationCap, Play, RefreshCw, Target,
+  Brain, RefreshCw,
   TrendingUp, Volume2, VolumeX,
-  Zap, ZapOff, Users, Share2, ArrowLeft, CheckCircle, XCircle,
-  Route, MapPin, Trophy
+  Zap, ZapOff, Users, Share2, ArrowLeft,
+  Route
 } from 'lucide-react';
 
 import generateShareCard, { shareScoreCard } from '../../../../../components/ShareScoreCard';
@@ -664,14 +663,6 @@ export default function PathTracingClient() {
               accent="amber"
               title="Path Tracing Pro"
               subtitle="Spatial Path Memory • Progressive Step Tracing"
-              rules={[
-                { icon: Target, accent: 'amber', title: 'Memorize Path Sequence', text: 'Watch the animated path sequence move across the grid' },
-                { icon: Zap, accent: 'blue', title: 'Retrace Step by Step', text: 'Tap the grid tiles in the exact sequential order shown' },
-              ]}
-              stats={[
-                { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
-                { icon: TrendingUp, label: 'Best Level', value: `Lv. ${bestLevel}`, color: 'text-purple-400', accent: 'purple' },
-              ]}
               isTouchOnlyDevice={false}
               onStart={enterDrill}
             />
@@ -764,7 +755,7 @@ export default function PathTracingClient() {
             onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <DrillRuleItem num="1" text="Retrace Exact Path Sequence" highlight="+150 PTS" result="Level Up (+1 Step)" />
+              <DrillRuleItem num="1" text="Memorize & Retrace Path Sequence" highlight="+150 PTS" result="Level Up (+1 Step)" />
               <DrillRuleItem num="2" text="Level Progression" highlight="Grid 3x3 → 7x7" result="Difficulty naturally scales" />
               <DrillRuleItem num="3" text="Miss / Timeout" highlight="Zero Penalties" result="No score or time loss" />
               <DrillRuleItem num="4" text="Difficulty Never Drops" highlight="Stays at Current Level" result="A miss just replays the round" />

@@ -5,11 +5,9 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 
 import {
-  Activity, AlertCircle, ArrowRight, ChevronRight, Crosshair,
-  Eye, GraduationCap, RefreshCw, Target,
-  Timer, TrendingUp, Trophy, Volume2, VolumeX,
-  Flame, Share2, LogOut,
-  Award, Shield, Users, Zap, ZapOff, RotateCcw
+  Activity, AlertCircle, Crosshair,
+  Target, TrendingUp, Volume2, VolumeX,
+  Users, Zap, ZapOff
 } from 'lucide-react';
 
 import generateShareCard, { shareScoreCard } from '../../../../components/ShareScoreCard';
@@ -804,15 +802,6 @@ export default function AntiZigzagClient() {
               accent="redOrange"
               title="Anti-Zigzag Movement"
               subtitle="Reactive Direction Snap • Endless Level Progression"
-              rules={[
-                { icon: Target, accent: "redOrange", title: "Objective (+10 / 0.25s)", text: "Track Erratic Strafe Reversals" },
-                { icon: AlertCircle, accent: "red", title: "Failure Rule", text: penaltyEnabled ? "Target Escape → Resets Combo, -0.6s" : "Target Escape → Resets Combo" },
-              ]}
-              stats={[
-                { icon: Trophy, label: "Best Score", value: bestScore, color: "text-white", accent: "slate" },
-                { icon: Flame, label: "Best Combo", value: `${bestCombo}x`, color: "text-red-400", accent: "redOrange" },
-                { icon: TrendingUp, label: "Best Level", value: `Lv. ${bestLevel}`, color: "text-blue-400", accent: "blue" },
-              ]}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
             />

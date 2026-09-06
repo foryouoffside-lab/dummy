@@ -3,11 +3,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 import {
-  Activity, AlertCircle, ArrowRight, Award, Brain, ChevronRight,
-  Eye, GraduationCap, Play, RefreshCw, RotateCw, Target,
-  Timer, TrendingUp, Trophy, Volume2, VolumeX,
-  Zap, ZapOff, Users, Sparkles, Share2, LogOut, CheckCircle, XCircle,
-  Grid3X3, Search, AlertTriangle
+  Brain, RefreshCw, TrendingUp, Volume2, VolumeX,
+  Zap, ZapOff, Users, Share2, LogOut, AlertTriangle
 } from 'lucide-react';
 
 import generateShareCard, { shareScoreCard } from '../../../../../components/ShareScoreCard';
@@ -687,14 +684,6 @@ export default function RhythmAnomalyClient() {
                 accent="purple"
                 title="Rhythm Anomaly"
                 subtitle="Visual Temporal Perception • Flicker Discrimination"
-                rules={[
-                  { icon: Target, accent: 'purple', title: 'Find Anomaly Cell', text: 'Identify the grid cell pulsing at an off-beat rhythm anomaly (+10 PTS)' },
-                  { icon: Zap, accent: 'indigo', title: 'Visual Temporal Perception', text: 'Grid pulse speeds up and flicker phase differences tighten as level rises' },
-                ]}
-                stats={[
-                  { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
-                  { icon: TrendingUp, label: 'Best Streak', value: `${bestStreak}x`, color: 'text-purple-400', accent: 'blue' },
-                ]}
                 isTouchOnlyDevice={false}
                 onStart={enterDrill}
               />
@@ -807,10 +796,10 @@ export default function RhythmAnomalyClient() {
               onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <DrillRuleItem num="1" text="Find Faster Pulsing Cell" highlight="+10 PTS" result="Anomaly Match" />
-                <DrillRuleItem num="2" text="Entropy Scramble" highlight="Random Cells Flicker" result="Background distractor noise" />
-                <DrillRuleItem num="3" text="Miss / Timeout" highlight="Zero Penalties" result="No score or time loss" />
-                <DrillRuleItem num="4" text="Accelerating Grid Tempo" highlight="Faster Pulses" result="Whole grid pulses faster as level rises" />
+                <DrillRuleItem num="1" text="Find Anomaly Cell" highlight="Off-Beat Rhythm Anomaly" result="+10 PTS per anomaly identified" />
+                <DrillRuleItem num="2" text="Visual Temporal Perception" highlight="Tightening Phase Diffs" result="Pulse speeds up as level rises" />
+                <DrillRuleItem num="3" text="Entropy Scramble" highlight="Random Cells Flicker" result="Background distractor noise" />
+                <DrillRuleItem num="4" text="Miss / Timeout" highlight="Zero Penalties" result="No score or time loss" />
               </div>
             </DrillAccordion>
 

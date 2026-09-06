@@ -2,10 +2,10 @@
 
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { 
-  Eye, Zap, ZapOff, Volume2, VolumeX,
-  Target, RefreshCw, GraduationCap,
-  TrendingUp, Share2, Brain, AlertTriangle, Play,
-  Users, Layers, LogOut, RotateCw, Trophy
+  Zap, ZapOff, Volume2, VolumeX,
+  RefreshCw, GraduationCap,
+  TrendingUp, Share2, Brain, AlertTriangle,
+  LogOut
 } from 'lucide-react';
 import useDrillFlash from '../../../../../lib/useDrillFlash';
 import useUnexpectedExitGuard from '../../../../../lib/useUnexpectedExitGuard';
@@ -819,14 +819,6 @@ diagnostics = "Low target identification accuracy. Anchor your gaze centrally an
                 accent="purple"
                 title="Multiple Targets"
                 subtitle="Multi-Object Tracking • Visual Working Memory"
-                rules={[
-                  { icon: Target, accent: 'purple', title: 'Track & Identify Targets', text: 'Memorize highlighted targets and track them through dynamic movement' },
-                  { icon: Zap, accent: 'pink', title: 'Multi-Object Tracking', text: 'Select all highlighted targets after movement stops (+20 PTS per target)' },
-                ]}
-                stats={[
-                  { icon: Trophy, label: 'Best Score', value: bestScore || 0, color: 'text-white', accent: 'slate' },
-                  { icon: TrendingUp, label: 'Best Level', value: `Lv. ${bestLevel || 1}`, color: 'text-blue-400', accent: 'blue' },
-                ]}
                 isTouchOnlyDevice={false}
                 onStart={enterDrill}
               />
@@ -939,10 +931,10 @@ diagnostics = "Low target identification accuracy. Anchor your gaze centrally an
               onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <DrillRuleItem num="1" text="Accurate Identification" highlight="Correct Target Selection" result="+20 PTS per target" />
-                <DrillRuleItem num="2" text="Dynamic Adjustments" highlight="Ball Count & Speed" result="Personalized Difficulty" />
+                <DrillRuleItem num="1" text="Track & Identify Targets" highlight="Memorize Highlighted Targets" result="Track through dynamic movement" />
+                <DrillRuleItem num="2" text="Multi-Object Tracking" highlight="Select Highlighted Targets" result="+20 PTS per target" />
                 <DrillRuleItem num="3" text="False Identification" highlight="Clicking wrong ball" result="0 PTS penalty" />
-                <DrillRuleItem num="4" text="True 2D Collisions" highlight="Physics Deflections" result="Extreme Unpredictability" />
+                <DrillRuleItem num="4" text="True 2D Collisions" highlight="Physics Deflections" result="Dynamic Speed & Angles" />
               </div>
             </DrillAccordion>
 

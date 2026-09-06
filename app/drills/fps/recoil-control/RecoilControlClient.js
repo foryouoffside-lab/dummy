@@ -6,8 +6,8 @@ import Link from 'next/link';
 
 import {
   Activity, AlertCircle, ArrowRight, ChevronRight, Eye,
-  Flame, Play, RefreshCw, Target, Timer, TrendingUp,
-  Trophy, Volume2, VolumeX, Zap, ZapOff, Share2,
+  Play, RefreshCw, Target, Timer, TrendingUp,
+  Volume2, VolumeX, Zap, ZapOff, Share2,
   Users, Sparkles, Sliders, LogOut, Award,
   Crosshair
 } from 'lucide-react';
@@ -85,7 +85,7 @@ const RULES_ITEMS = [
   { num: "1", text: "Headshot Hit", highlight: "+100 PTS / +0.25s", result: "Top Priority Target Zone" },
   { num: "2", text: "Chest / Limb Hit", highlight: "+40 / +20 PTS", result: "Maintains Combo Streak" },
   { num: "3", text: "Level Progression", highlight: "+1 Level / 1400 PTS", result: "Speed & Recoil Scale" },
-  { num: "4", text: "Magazine Discipline", highlight: "Mag Reset + Reload", result: "30-Bullet Controlled Spray" }
+  { num: "4", text: "Magazine Discipline", highlight: "Failure Penalty", result: "<40% mag accuracy resets combo (-0.6s with Time Penalty enabled)" }
 ];
 
 const ABOUT_INTRO = [
@@ -915,16 +915,6 @@ export default function RecoilControlClient() {
               accent="redOrange"
               title="Recoil Control Pro"
               subtitle="Weapon Spray Patterns & Motor Compensation • Endless Level Progression"
-              rules={[
-                { icon: Target, accent: "red", title: "Objective", text: "Counteract 30-Bullet Kick Pattern" },
-                { icon: Zap, accent: "orange", title: "Headshot (+100 PTS / +0.25s)", text: "Top Priority Target Zone" },
-                { icon: AlertCircle, accent: "red", title: "Discipline Rule", text: penaltyEnabled ? "<40% Mag Accuracy → -0.6s Penalty" : "<40% Mag Accuracy → Combo Reset" },
-              ]}
-              stats={[
-                { icon: Trophy, label: "Best Score", value: bestScore, color: "text-white", accent: "slate" },
-                { icon: Flame, label: "Best Combo", value: `${bestCombo}x`, color: "text-red-400", accent: "red" },
-                { icon: TrendingUp, label: "Best Level", value: `Lv. ${bestLevel}`, color: "text-blue-400", accent: "blue" },
-              ]}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
             />

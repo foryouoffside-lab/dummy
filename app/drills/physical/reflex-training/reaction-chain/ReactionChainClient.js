@@ -822,15 +822,6 @@ export default function ReactionChainClient() {
               accent="emerald"
               title="Reaction Chain"
               subtitle="Impulse Arrest & Motor Inhibition • 15 Levels"
-              rules={[
-                { icon: Zap, accent: 'emerald', title: 'Stop on Nodes (+50 PTS)', text: 'Intercept moving nodes and bring cursor to a complete halt (ARREST READY)' },
-                { icon: ShieldAlert, accent: 'blue', title: 'Maintain Combo Streak', text: 'Chain successful arrests to scale your score multiplier up to 3.0x' },
-              ]}
-              stats={[
-                { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
-                { icon: Flame, label: 'Best Combo', value: `${bestCombo.toFixed(1)}x`, color: 'text-emerald-400', accent: 'emerald' },
-                { icon: TrendingUp, label: 'Best Level', value: `Lv. ${bestLevel}`, color: 'text-blue-400', accent: 'blue' },
-              ]}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
             />

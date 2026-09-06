@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 import {
   Brain, Play, RefreshCw, TrendingUp, Volume2, VolumeX,
-  Zap, ZapOff, Users, Share2, ArrowLeft, Target, Trophy
+  Zap, ZapOff, Users, Share2, ArrowLeft
 } from 'lucide-react';
 
 import generateShareCard, { shareScoreCard } from '../../../../../components/ShareScoreCard';
@@ -621,14 +621,6 @@ export default function ColorSequenceClient() {
               accent="purple"
               title="Color Sequence Pro"
               subtitle="Visual Short-Term Memory • Sequence Recall"
-              rules={[
-                { icon: Target, accent: 'purple', title: 'Memorize Color Pattern', text: 'Watch the flashing color sequence carefully' },
-                { icon: Zap, accent: 'blue', title: 'Repeat in Exact Order', text: 'Tap the color buttons to recreate the sequence in exact order' },
-              ]}
-              stats={[
-                { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
-                { icon: TrendingUp, label: 'Best Level', value: `Lv. ${bestLevel}`, color: 'text-blue-400', accent: 'blue' },
-              ]}
               isTouchOnlyDevice={false}
               onStart={enterDrill}
             />
@@ -721,7 +713,7 @@ export default function ColorSequenceClient() {
             onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <DrillRuleItem num="1" text="Perfect Sequence" highlight="+100 PTS" result="Level Up (+1 Color)" />
+              <DrillRuleItem num="1" text="Sequence Recall" highlight="+100 PTS" result="Recreate flashing color sequence in exact order" />
               <DrillRuleItem num="2" text="Level Bonus" highlight="+10% PTS per Level" result="Longer sequences = more points" />
               <DrillRuleItem num="3" text="Miss / Timeout" highlight="-1 Level" result="No score or time loss" />
               <DrillRuleItem num="4" text="Adaptive Difficulty" highlight="Rises & Falls" result="Sequence length tracks your skill" />

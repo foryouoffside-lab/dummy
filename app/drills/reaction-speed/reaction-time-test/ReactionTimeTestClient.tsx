@@ -728,15 +728,6 @@ export default function ReactionTimeTestClient() {
               accent="cyan"
               title="Reaction Time Test"
               subtitle="Visual Latency • Mental Chronometry"
-              rules={[
-                { icon: Clock, accent: 'cyan', title: 'Memorize Target Interval', text: 'Note the exact target time displayed before estimation starts' },
-                { icon: Target, accent: 'orange', title: 'Click at Exact Time', text: 'Click as close to 0ms error as possible when time elapses' },
-                { icon: Zap, accent: 'emerald', title: 'Time-Free Practice', text: 'Play unlimited rounds at your pace. Click End Drill whenever ready!' }
-              ]}
-              stats={[
-                { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
-                { icon: TrendingUp, label: 'Best Level', value: `Lv. ${bestLevel}`, color: 'text-cyan-400', accent: 'blue' },
-              ]}
               isTouchOnlyDevice={false}
               onStart={enterDrill}
             />
