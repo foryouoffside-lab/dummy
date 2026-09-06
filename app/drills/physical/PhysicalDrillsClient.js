@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import {
+  ArrowLeft,
   Zap,
   Dumbbell,
   Activity,
@@ -26,7 +27,12 @@ import { isIdleFrameSkippable } from '@/lib/performance';
 import SiteFooter from '@/components/SiteFooter';
 import Reveal from '@/components/Reveal';
 import AdjacentHubs from '@/components/AdjacentHubs';
+import DrillPreview from '@/components/drill/DrillPreview';
+import { getDrillPreview } from '@/lib/drillPreviews';
+import StickyMobileCta from '@/components/StickyMobileCta';
 import { useTranslation } from '@/lib/i18n/useTranslation';
+import { getLocalizedDrill } from '@/lib/i18n/drillNames';
+import { hasLocalizedRoute } from '@/lib/i18n/locales';
 
 const FOLDER_TO_STORAGE_KEY = {
   'dynamic-grid-evasion': 'skilldrills_physical_grid_evasion_v3',
@@ -141,7 +147,7 @@ const FOCUS_PRESETS = [
 ];
 
 export default function PhysicalDrillsClient() {
-  const { t, localizeHref } = useTranslation();
+  const { locale, localizeHref, t } = useTranslation();
   const [isClient, setIsClient] = useState(false);
   const [drillLevels, setDrillLevels] = useState({});
   const [selectedDiscipline, setSelectedDiscipline] = useState('all');
@@ -177,12 +183,12 @@ export default function PhysicalDrillsClient() {
                 levels[d.folderName] = parsed.bestLevel;
                 break;
               }
-            } catch (e) {}
+            } catch {}
           }
         }
       });
       setDrillLevels(levels);
-    } catch (e) {}
+    } catch {}
   }, [isClient]);
 
   // Subtle speed streams background canvas
@@ -359,19 +365,22 @@ export default function PhysicalDrillsClient() {
                 className="flex items-center gap-1.5 hover:text-rose-400 transition-colors"
               >
                 <Home className="w-3.5 h-3.5" />
-                <span>HQ</span>
+                <span>{t('ui.nav.hq', 'HQ')}</span>
               </Link>
             </li>
             <li><ChevronRight className="w-3 h-3 text-hairline-2" /></li>
             <li>
-              <Link href={localizeHref('/drills')} className="hover:text-rose-400 transition-colors">
-                {t('header.allHubs', 'Drills')}
+              <Link
+                href={hasLocalizedRoute(locale, '/drills') ? localizeHref('/drills') : '/drills'}
+                className="hover:text-rose-400 transition-colors"
+              >
+                {t('ui.nav.drills', 'DRILLS')}
               </Link>
             </li>
             <li><ChevronRight className="w-3 h-3 text-hairline-2" /></li>
             <li>
               <span className="text-rose-400 font-bold" aria-current="page">
-                {t('header.physical', 'Physical Sector')}
+                {t('header.physical', 'PHYSICAL')}
               </span>
             </li>
           </ol>
@@ -385,7 +394,7 @@ export default function PhysicalDrillsClient() {
           <p className="mt-2 text-sm sm:text-base text-ink-2 max-w-2xl leading-relaxed">
             {t(
               'hubs.physical.desc',
-              'Train gross and fine sensorimotor coordination, high-velocity reflex evasion, dynamic balance equilibrium, and spatial agility ladders.'
+              'Reflex and coordination drills measure how fast you can react to something appearing, and how accurately you can steer, stop and sequence a movement once you have. Simple visual reaction costs about 200–250 ms before any of that starts (Woods et al., 2015), and vision needs roughly 100–150 ms more to correct a movement already under way (Woodworth, 1899) — which is why the faster drills reward prediction over reaction. These run in a browser through a mouse or touchscreen, so they train the timing and the decision rather than physical fitness. Free, no sign-up, and every score stays in your browser.'
             )}
           </p>
         </div>
@@ -490,36 +499,64 @@ export default function PhysicalDrillsClient() {
               const Icon = drill.icon;
               const userLevel = drillLevels[drill.folderName];
               const diffStyle = DIFFICULTY_STYLES[drill.difficulty] || DIFFICULTY_STYLES.Medium;
+              const hasPreview = Boolean(getDrillPreview(drill.href));
+              const href = hasLocalizedRoute(locale, drill.href) ? localizeHref(drill.href) : drill.href;
+              const localized = getLocalizedDrill(drill.href, locale, drill.name, drill.tagline);
+              const displayName = localized.name;
+              const displayTagline = localized.tagline;
 
               return (
                 <Link
                   key={drill.href}
-                  href={drill.href}
+                  href={href}
                   className="group relative flex flex-col justify-between rounded-2xl bg-surface-1/90 border border-hairline p-5 shadow-lg transition-all duration-200 hover:-translate-y-1 hover:border-rose-500/40 hover:shadow-xl hover:shadow-rose-500/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500"
                 >
                   {/* Subtle top indicator hover line */}
                   <div className="absolute top-0 left-4 right-4 h-[2px] bg-gradient-to-r from-rose-500 to-orange-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
                   <div>
-                    {/* Header: Icon, Tags & Difficulty Badge */}
-                    <div className="flex items-center justify-between gap-2 mb-3">
-                      <div className="w-9 h-9 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center shrink-0 group-hover:bg-rose-500/20 group-hover:text-rose-300 transition-colors">
-                        <Icon className="w-4 h-4" />
-                      </div>
-
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        {userLevel && (
-                          <span className="px-2 py-0.5 rounded-md bg-rose-500/15 border border-rose-500/30 text-rose-300 text-[9px] font-mono font-bold tracking-wider">
-                            Lv. {userLevel}
+                    {/* Header: Live Preview or Static Icon, Tags & Difficulty Badge */}
+                    {hasPreview ? (
+                      <div className="relative mb-3.5">
+                        <DrillPreview href={drill.href} accent="rose" icon={Icon} className="w-full" />
+                        <div className="absolute top-2.5 left-2.5 z-10">
+                          <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg border backdrop-blur-md bg-surface-1/80 border-rose-500/20 text-rose-400 shadow-sm">
+                            <Icon className="w-3.5 h-3.5" />
                           </span>
-                        )}
-                        <span
-                          className={`px-2 py-0.5 rounded-md border text-[9px] font-mono font-bold uppercase tracking-wider ${diffStyle}`}
-                        >
-                          {drill.difficulty}
-                        </span>
+                        </div>
+                        <div className="absolute top-2.5 right-2.5 z-10 flex items-center gap-1.5">
+                          {userLevel && (
+                            <span className="px-2 py-0.5 rounded-md bg-rose-500/15 border border-rose-500/30 text-rose-300 text-[9px] font-mono font-bold tracking-wider backdrop-blur-md">
+                              Lv. {userLevel}
+                            </span>
+                          )}
+                          <span
+                            className={`px-2 py-0.5 rounded-md border text-[9px] font-mono font-bold uppercase tracking-wider backdrop-blur-md bg-surface-1/80 ${diffStyle}`}
+                          >
+                            {drill.difficulty ? t(`ui.difficulty.${drill.difficulty.toLowerCase()}`, drill.difficulty) : drill.difficulty}
+                          </span>
+                        </div>
                       </div>
-                    </div>
+                    ) : (
+                      <div className="flex items-center justify-between gap-2 mb-3">
+                        <div className="w-9 h-9 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center shrink-0 group-hover:bg-rose-500/20 group-hover:text-rose-300 transition-colors">
+                          <Icon className="w-4 h-4" />
+                        </div>
+
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          {userLevel && (
+                            <span className="px-2 py-0.5 rounded-md bg-rose-500/15 border border-rose-500/30 text-rose-300 text-[9px] font-mono font-bold tracking-wider">
+                              Lv. {userLevel}
+                            </span>
+                          )}
+                          <span
+                            className={`px-2 py-0.5 rounded-md border text-[9px] font-mono font-bold uppercase tracking-wider ${diffStyle}`}
+                          >
+                            {drill.difficulty ? t(`ui.difficulty.${drill.difficulty.toLowerCase()}`, drill.difficulty) : drill.difficulty}
+                          </span>
+                        </div>
+                      </div>
+                    )}
 
                     {/* Discipline Eyebrow */}
                     <div className="text-[10px] font-mono uppercase tracking-wider text-rose-400/80 mb-1">
@@ -528,12 +565,12 @@ export default function PhysicalDrillsClient() {
 
                     {/* Drill Name */}
                     <h3 className="text-base font-bold text-ink-1 group-hover:text-rose-400 transition-colors tracking-tight line-clamp-1">
-                      {drill.name}
+                      {displayName}
                     </h3>
 
                     {/* Tagline / Subtitle */}
                     <p className="mt-1.5 text-xs text-ink-3 leading-relaxed line-clamp-2">
-                      {drill.tagline}
+                      {displayTagline}
                     </p>
 
                     {/* Skill Focus Chips */}
@@ -560,7 +597,7 @@ export default function PhysicalDrillsClient() {
                     </span>
 
                     <span className="inline-flex items-center gap-1 font-bold text-rose-400 group-hover:text-rose-300 transition-colors uppercase tracking-wider">
-                      <span>Launch Drill</span>
+                      <span>{t('ui.launchDrill', 'Launch Drill')}</span>
                       <Play className="w-3 h-3 fill-current transition-transform group-hover:translate-x-0.5" />
                     </span>
                   </div>
@@ -636,6 +673,23 @@ export default function PhysicalDrillsClient() {
 
         {/* Clean Adjacent Hubs Navigation */}
         <AdjacentHubs currentCat="physical" />
+
+        {/* Back Link */}
+        <div className="mt-12 border-t border-hairline pt-6">
+          <Link 
+            href={hasLocalizedRoute(locale, '/drills') ? localizeHref('/drills') : '/drills'}
+            className="inline-flex items-center gap-2 text-xs font-mono uppercase font-bold text-ink-3 hover:text-ink-1 transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            {t('ui.returnToAllSectors', 'Return to All Sectors')}
+          </Link>
+        </div>
+
+        <StickyMobileCta
+          href={hasLocalizedRoute(locale, '/drills/physical/reflex-training/quick-dodge') ? localizeHref('/drills/physical/reflex-training/quick-dodge') : '/drills/physical/reflex-training/quick-dodge'}
+          label={t('hubs.physical.startCta', 'Start Agility Drill')}
+          categoryName={t('header.physical', 'Physical')}
+        />
       </div>
 
       <SiteFooter />

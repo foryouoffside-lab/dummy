@@ -131,6 +131,11 @@ export default async function sitemap() {
           HUB_PRIORITY[path]
         )
       ),
+    // About carries the entity description and the measurement methodology, so
+    // it ranks above the legal pages: it is the page that answers "who is making
+    // this claim", which is what both Google's quality guidance and the answer
+    // engines weight when deciding whether to cite a tool site at all.
+    entry('/about', UPDATED.legal, 'monthly', 0.5),
     // Low priority but genuinely indexable, and a site with no reachable legal
     // pages reads as low-trust to both search engines and users.
     entry('/privacy', UPDATED.legal, 'yearly', 0.3),

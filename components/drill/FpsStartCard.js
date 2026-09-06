@@ -229,10 +229,20 @@ export default function FpsStartCard({
   accent = 'emerald',
   title,
   subtitle,
+  // Every drill using this card has always passed `rules` and `stats`, but the
+  // signature never accepted them, so React dropped both silently and the card
+  // rendered as an icon, a title and a button over an empty canvas. The ACCENTS
+  // map still carries the chipBg/chipBorder/chipText tokens the rows were meant
+  // to use, which is what gave it away. Declaring them here both restores the
+  // copy and removes the prop-type error the .tsx drills were reporting.
+  //   rules: [{ icon, accent, title, text }]
+  //   stats: [{ icon, label, value, color, accent }]
+  rules = null,
+  stats = null,
   isTouchOnlyDevice = false,
   touchBlockedLabel = 'Mouse Required for Pointer Lock',
   onStart,
-  maxWidthClassName = 'max-w-[360px]',
+  maxWidthClassName = 'max-w-[420px]',
 }) {
   const a = getAccent(accent);
 
@@ -266,6 +276,58 @@ export default function FpsStartCard({
               <p className={`text-[10px] ${a.subtitleText} uppercase tracking-[0.15em] font-semibold mt-1`}>{subtitle}</p>
             )}
           </div>
+
+          {/* Rules. Hairline rows on the card background per the house style --
+              never darker panels pasted onto it. */}
+          {rules?.length ? (
+            <ul className="flex flex-col gap-1.5 text-left mt-1">
+              {rules.map((rule, i) => {
+                const ra = getAccent(rule.accent || accent);
+                const RIcon = rule.icon;
+                return (
+                  <li
+                    key={i}
+                    className="flex items-start gap-2.5 rounded-[11px] border border-white/[0.07] bg-white/[0.012] px-3 py-2"
+                  >
+                    {RIcon && (
+                      <span className={`shrink-0 mt-[1px] w-6 h-6 rounded-lg ${ra.chipBg} border ${ra.chipBorder} flex items-center justify-center`}>
+                        <RIcon className={`w-3.5 h-3.5 ${ra.chipText}`} />
+                      </span>
+                    )}
+                    <span className="min-w-0">
+                      <span className="block text-[11.5px] font-bold text-white leading-snug">{rule.title}</span>
+                      {rule.text && (
+                        <span className="block text-[11px] text-slate-400 leading-relaxed mt-0.5">{rule.text}</span>
+                      )}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          ) : null}
+
+          {/* Personal bests, read from localStorage by the drill. Never anyone
+              else's numbers -- this site collects no aggregate data. */}
+          {stats?.length ? (
+            <div className={`grid gap-1.5 mt-0.5 ${stats.length >= 3 ? 'grid-cols-3' : 'grid-cols-2'}`}>
+              {stats.map((stat, i) => {
+                const SIcon = stat.icon;
+                return (
+                  <div
+                    key={i}
+                    className="rounded-[11px] border border-white/[0.07] bg-white/[0.012] px-2 py-2 text-center"
+                  >
+                    <span className="flex items-center justify-center gap-1 text-[9px] uppercase tracking-[0.12em] font-semibold text-slate-500">
+                      {SIcon && <SIcon className="w-3 h-3" />} {stat.label}
+                    </span>
+                    <span className={`block text-[15px] font-black font-mono tabular-nums mt-0.5 ${stat.color || 'text-white'}`}>
+                      {stat.value}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          ) : null}
 
           {isTouchOnlyDevice ? (
             <div className="w-full py-2.5 rounded-[13px] bg-red-950/60 border border-red-500/30 font-bold text-[11px] text-red-400 flex items-center justify-center gap-2 mt-0.5">

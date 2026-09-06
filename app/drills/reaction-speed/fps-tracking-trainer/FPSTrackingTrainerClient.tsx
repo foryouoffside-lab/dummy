@@ -37,7 +37,7 @@ const STORAGE_KEY = 'skilldrills_fps_tracking_v3';
 const RELATED_DRILLS = [
   { id: "barrier-sequence-pursuit", name: "Jiggle Peek Trainer", cat: "Reaction Speed", desc: "Train angle holding and cover peeking reaction reflexes.", href: "/drills/reaction-speed/barrier-sequence-pursuit" },
   { id: "reaction-time-test", name: "Reaction Time Test", cat: "Reaction Speed", desc: "Measure pure visual reaction speed in milliseconds.", href: "/drills/reaction-speed/reaction-time-test" },
-  { id: "market-doors-pursuit", name: "Market Doors Pursuit", cat: "Reaction Speed", desc: "Reaction pursuit drill tracking door breakouts.", href: "/drills/reaction-speed/market-doors-pursuit" },
+  { id: "market-doors-pursuit", name: "Corner Checking Trainer", cat: "Reaction Speed", desc: "Reaction pursuit drill tracking door breakouts.", href: "/drills/reaction-speed/market-doors-pursuit" },
   { id: "reaction-game", name: "Reaction Game", cat: "Reaction Speed", desc: "Simulate rapid combat reaction scenarios.", href: "/drills/reaction-speed/reaction-game" },
   { id: "reflex-training-drill", name: "Reflex Training Drill", cat: "Reaction Speed", desc: "High-speed reflex triggers & visual target hitting.", href: "/drills/reaction-speed/reflex-training-drill" },
   { id: "saccadic-gallery", name: "Saccadic Gallery", cat: "Reaction Speed", desc: "Rapid saccadic eye movement & target acquisition gallery.", href: "/drills/reaction-speed/saccadic-gallery" }
@@ -734,36 +734,36 @@ export default function FPSTrackingTrainerClient() {
 
         {/* Drill Header */}
         {!isFullscreen && (
-          <div className="text-center">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-black uppercase tracking-tight text-white flex items-center justify-center gap-3 flex-wrap">
-              FPS TRACKING TRAINER
-              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
-                Dynamic Strafe Tracking & Moving Target Reaction Drill
-              </span>
+          <div className="flex flex-col gap-1">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+              FPS Tracking Trainer
             </h1>
+            <p className="text-[13px] text-slate-400 leading-relaxed">
+              Tracking aim is holding your crosshair on a target that keeps moving. Human smooth pursuit follows a target accurately up to roughly 30&deg;/s; past that the eye falls behind and needs catch-up saccades (Krauzlis, 2004).
+            </p>
           </div>
         )}
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 gap-2.5 max-w-2xl mx-auto w-full">
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+          <div className="grid grid-cols-4 gap-2 w-full">
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
-              <div className="text-lg sm:text-xl font-black text-red-400 tabular-nums">{uiScore}</div>
+              <div className="text-base sm:text-lg font-black text-red-400 tabular-nums">{uiScore}</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
-              <div className={`text-lg sm:text-xl font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>
+              <div className={`text-base sm:text-lg font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>
                 {uiTimeLeft}s
               </div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Level</div>
-              <div className="text-lg sm:text-xl font-black text-indigo-400 tabular-nums">L{uiLevel}</div>
+              <div className="text-base sm:text-lg font-black text-indigo-400 tabular-nums">L{uiLevel}</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
-              <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
+              <div className="text-base sm:text-lg font-black text-amber-400 tabular-nums">{bestScore}</div>
             </div>
           </div>
         )}
@@ -916,9 +916,9 @@ export default function FPSTrackingTrainerClient() {
             >
               <div className="space-y-8 font-sans">
                 <section>
-                  <h4 className="text-base font-bold text-white mb-2 flex items-center gap-2">
+                  <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
                     <Eye className="w-4 h-4 text-red-400" /> What Is Dynamic Strafe Tracking & Moving Target Reaction?
-                  </h4>
+                  </h3>
                   <p className="text-sm leading-relaxed mb-3 text-gray-300">
                     <strong>FPS Tracking Trainer</strong> isolates visual smooth pursuit and predictive click timing against erratic, horizontally strafing targets. In high-speed gunfights across Apex Legends, Overwatch 2, and COD Warzone, enemies constantly A/D strafe to throw off crosshair tracking.
                   </p>
@@ -931,46 +931,25 @@ export default function FPSTrackingTrainerClient() {
                   <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-red-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Who Should Use This?</h5>
+                      <h4 className="text-xs font-bold text-white">Who Should Use This?</h4>
                     </div>
                     <p className="text-xs text-gray-300 leading-relaxed">FPS and battle royale players looking to improve moving target tracking, strafe prediction, and reactive click accuracy.</p>
                   </div>
                   <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Anti-Strafe Prediction</h5>
+                      <h4 className="text-xs font-bold text-white">Anti-Strafe Prediction</h4>
                     </div>
                     <p className="text-xs text-gray-300 leading-relaxed">Conditions your visual system to track target velocity and counter unpredictable direction reversals without overshooting.</p>
                   </div>
                   <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Zap className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Kinetic Intercept Timing</h5>
+                      <h4 className="text-xs font-bold text-white">Kinetic Intercept Timing</h4>
                     </div>
                     <p className="text-xs text-gray-300 leading-relaxed">Reinforces the exact micro-second trigger timing required to click high-velocity moving hitboxes cleanly.</p>
                   </div>
                 </div>
-              </div>
-            </DrillAccordion>
-
-            <DrillAccordion
-              id="faq"
-              title="Frequently Asked Questions"
-              isOpen={openAccordion === 'faq'}
-              onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-sans">
-                <FAQItem q="What is FPS Tracking Trainer (Dynamic Strafe Reaction)?" a="It is an online reflex training drill where targets execute erratic horizontal strafes with random direction changes, testing your tracking and click timing." />
-                <FAQItem q="How does this improve tracking in Apex Legends and Overwatch 2?" a="It builds the neurological reflex to track moving targets and time your clicks precisely during aggressive A/D strafe duels." />
-                <FAQItem q="What is smooth pursuit in aim training?" a="Smooth pursuit is the ocular ability to match eye velocity to target speed, keeping the target centered in your foveal vision without lagging." />
-                <FAQItem q="Is this FPS tracking drill free?" a="Yes, all drills on SkillDrills are 100% free with no signups, downloads, or pop-up ads required." />
-                <FAQItem q="How does continuous difficulty scaling work?" a="As your score and combo rise, target speed accelerates, size shrinks, and direction switches occur more rapidly without any upper ceiling." />
-                <FAQItem q="Is there a time penalty for missing or timeouts?" a="By default, missing or timeouts only reset your combo streak. An opt-in time penalty (-0.8s per error) is available in session settings." />
-                <FAQItem q="Should you look at the crosshair or the target when tracking?" a="Always look at the target character model rather than staring at your crosshair. Staring at the crosshair induces cognitive delay." />
-                <FAQItem q="Why is my tracking aim so shaky?" a="Shaky tracking aim is primarily caused by excessive muscle tension (gripping mouse too tightly) or high sensitivity amplifying micro-jitters." />
-                <FAQItem q="How do I make my aim tracking smoother?" a="Reduce mouse sensitivity to 30-45 cm per 360, keep hand/wrist relaxed, and practice smooth pursuit drills consistently." />
-                <FAQItem q="How do you practice strafe tracking?" a="Use reactive horizontal scenarios. Focus on reacting smoothly to direction changes rather than predicting turn timing." />
-                <FAQItem q="Does monitor refresh rate affect tracking aim?" a="Yes. High refresh rate monitors (144Hz, 240Hz, 360Hz) make target motion smoother and reduce display ghosting." />
               </div>
             </DrillAccordion>
           </div>
@@ -1024,15 +1003,6 @@ function RuleItem({ num, text, highlight = '', result }: { num: string; text: st
           {result}
         </div>
       </div>
-    </div>
-  );
-}
-
-function FAQItem({ q, a }: { q: string; a: string }) {
-  return (
-    <div className="bg-[#05060b] border border-gray-800 rounded-xl p-5 hover:border-gray-700 transition-colors font-sans">
-      <h4 className="text-sm font-bold text-gray-200 mb-2">{q}</h4>
-      <p className="text-xs text-gray-400 leading-relaxed">{a}</p>
     </div>
   );
 }

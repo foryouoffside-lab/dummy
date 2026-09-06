@@ -2,7 +2,6 @@
 import { isIdleFrameSkippable } from '@/lib/performance';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import Link from 'next/link';
 
 import {
   Activity, AlertCircle, ArrowRight, ChevronRight, Crosshair,
@@ -634,35 +633,35 @@ export default function DynamicGridEvasionClient() {
     <div className="min-h-screen bg-[#050508] text-white flex flex-col font-sans select-none">
       {/* ── MAIN CONTENT AREA ── */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
-        {/* Title */}
+        {/* Title & AIO Header */}
         {!isFullscreen && (
-          <div className="text-center">
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white uppercase">
-              Dynamic Grid Evasion
-              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
-                Dynamic Grid Evasion Drill
-              </span>
+          <div className="text-left">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+              Dynamic grid evasion
             </h1>
+            <p className="text-sm text-slate-400 mt-1.5 leading-relaxed max-w-3xl">
+              Attention can be moved to a location without moving the eyes there, and a cue that points to the right place speeds up responses while a misleading one slows them down (Posner, 1980). That is what a grid evasion task exercises: you watch the whole 3x3 field rather than fixating one cell. Warnings here contract to 0.45 seconds and hazards can cover 7 of the 9 cells, so late in a session there is no time to look at each cell in turn.
+            </p>
           </div>
         )}
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 gap-2.5 max-w-2xl mx-auto w-full">
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
+          <div className="grid grid-cols-4 gap-2 w-full">
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Score</div>
               <div className="text-lg sm:text-xl font-black text-white tabular-nums">{uiScore}</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Time Left</div>
               <div className={`text-lg sm:text-xl font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>{uiTimeLeft}s</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Best Score</div>
               <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Combo</div>
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Best Combo</div>
               <div className="text-lg sm:text-xl font-black text-teal-400 tabular-nums">{bestCombo}x</div>
             </div>
           </div>
@@ -862,85 +861,45 @@ export default function DynamicGridEvasionClient() {
               isOpen={openAccordion === 'about'}
               onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
             >
-              <div className="space-y-8">
-                <section>
-                  <h4 className="text-base font-bold text-white mb-2 flex items-center gap-2">
-                    <LayoutGrid className="w-4 h-4 text-teal-400" /> What Is Dynamic Grid Evasion Training?
-                  </h4>
-                  {ABOUT_TEXT.split('\n\n').map((para, i) => (
-                    <p key={i} className="text-sm leading-relaxed text-gray-300 mb-3 last:mb-0">{para}</p>
-                  ))}
-                </section>
+              <div className="space-y-6">
+                <div className="space-y-3">
+                  <h3 className="text-base font-bold text-white flex items-center gap-2">
+                    <LayoutGrid className="w-4 h-4 text-emerald-400" /> Spatial Reflex Training &amp; Hazard Avoidance
+                  </h3>
+                  <p className="text-sm leading-relaxed text-gray-300">
+                    <strong>Dynamic Grid Evasion</strong> is a high-intensity spatial reflex and peripheral scanning exercise. The play canvas is structured as a 3x3 tactical grid where amber warning pulses identify impending explosion zones. Players must scan all 9 sectors simultaneously and flick their crosshair into an uncompromised safe cell before the detonation triggers.
+                  </p>
+                  <p className="text-sm leading-relaxed text-gray-300">
+                    Grounded in Anne Treisman&apos;s (1980) feature integration theory, Michael Posner&apos;s (1980) spatial orienting paradigm, and Robert Woodworth&apos;s (1899) voluntary movement framework, this drill exercises rapid exogenous visual attention and ballistic flick evasion. As difficulty escalates across 15 levels, warning windows contract from 1.4s down to 0.45s and threat counts rise from 3 up to 7 danger cells, leaving only 2 safe sectors under severe cognitive chronometry pressure.
+                  </p>
+                </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                  <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Who Should Use This?</h5>
+                      <h4 className="text-xs font-bold text-white">Target Audience</h4>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">FPS and battle royale players training AOE and grenade evasion, esports competitors building rapid spatial scanning, and anyone sharpening peripheral hazard detection.</p>
+                    <p className="text-xs text-gray-300 leading-relaxed">FPS players evading tactical AOE utility (molotovs, grenades, ults), action gamers mastering spatial awareness, and athletes training wide-angle peripheral scanning.</p>
                   </div>
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                  <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Skills Improved</h5>
+                      <h4 className="text-xs font-bold text-white">Skills Conditioned</h4>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Spatial awareness, visual spatial training, grid navigation, rapid peripheral scanning, and hazard evasion reflexes.</p>
+                    <p className="text-xs text-gray-300 leading-relaxed">Visual parallel search, covert attentional orienting, sub-second choice reaction latency, and ballistic flick deceleration.</p>
                   </div>
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                  <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-purple-600 flex items-center justify-center"><Eye className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Peripheral Scanning</h5>
+                      <h4 className="text-xs font-bold text-white">Peripheral Scanning</h4>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Tracking multiple pulsing danger cells at once trains the peripheral vision scan needed to spot area-of-effect threats without tunnel-visioning on a single point.</p>
+                    <p className="text-xs text-gray-300 leading-relaxed">Decentralized fixation across the 3x3 matrix prevents tunnel vision and reinforces rapid parallel feature extraction.</p>
                   </div>
                 </div>
               </div>
             </DrillAccordion>
-
-            <DrillAccordion
-              id="faq"
-              title="Frequently Asked Questions"
-              isOpen={openAccordion === 'faq'}
-              onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {FAQ_ITEMS.map((item, i) => (
-                  <div key={i} className="bg-[#05060b] border border-gray-800 rounded-xl p-5">
-                    <h4 className="text-sm font-bold text-gray-200 mb-2">{item.q}</h4>
-                    <p className="text-xs text-gray-400 leading-relaxed">{item.a}</p>
-                  </div>
-                ))}
-              </div>
-            </DrillAccordion>
           </div>
-        )}
-
-        {/* ── RELATED PHYSICAL DRILLS ── */}
-        {!isFullscreen && (
-          <section className="mt-4">
-            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3 font-sans">
-              Related Physical &amp; Reflex Drills
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {RELATED_DRILLS.map((drill) => (
-                <Link
-                  key={drill.id}
-                  href={drill.href}
-                  className="group bg-[#0c0c16] border border-white/5 hover:border-emerald-500/40 rounded-xl p-3.5 transition-all duration-200 hover:-translate-y-0.5 flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider mb-1">{drill.cat}</div>
-                    <div className="text-xs font-bold text-white group-hover:text-emerald-300 transition-colors">{drill.name}</div>
-                    <div className="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">{drill.desc}</div>
-                  </div>
-                  <div className="text-[10px] font-bold text-slate-500 group-hover:text-emerald-400 mt-3 flex items-center gap-1 transition-colors">
-                    Train Drill <span>→</span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
         )}
 
         {/* ── FOOTER ── */}

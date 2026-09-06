@@ -1,6 +1,6 @@
 import { ImageResponse } from 'next/og';
 
-export const alt = 'Multi-Tasking — free browser dual-stream visual tracking cognitive focus drill';
+export const alt = 'Multitasking Test — free browser dual-stream visual tracking cognitive focus drill';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -74,7 +74,7 @@ export default async function Image() {
               letterSpacing: -2,
             }}
           >
-            Multi-Tasking
+            Multitasking Test
           </div>
           <div
             style={{

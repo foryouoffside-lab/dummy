@@ -5,7 +5,7 @@ import { getAlternateLanguages } from '@/lib/i18n/locales';
 const visualDrillCount = DRILLS.filter((d) => d.category === 'visual').length;
 
 export const metadata = {
-  title: `Free Visual Training - Tracking & Perception | SkillDrills`,
+  title: `Free Visual Training Online - Vision & Tracking Drills`,
   description: `Free visual training online. ${visualDrillCount} drills for reaction speed, tracking accuracy, depth perception and visual recognition. No sign-up needed.`,
   keywords: [
     'visual training online', 'free visual training', 'visual training drills',

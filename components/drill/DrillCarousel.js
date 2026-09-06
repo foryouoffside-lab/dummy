@@ -13,7 +13,7 @@
  * WHY EVERY CARD STAYS IN THE DOM
  * Rendering only the visible card would strip every other drill link out of the
  * server HTML. That is the exact failure that left 82 of 91 URLs uncrawled
- * before (see SEO_PROGRESS.md — `{isOpen && children}` accordions). So the
+ * before (see docs/SEO_PROGRESS.md — `{isOpen && children}` accordions). So the
  * track holds all cards and the browser scrolls between them; the arrows drive
  * `scrollTo`, never a render. Crawlers see every link, and swipe still works.
  */
@@ -36,7 +36,7 @@ const ACCENTS = {
     hoverBorder: 'hover:border-violet-500/40',
     hoverText: 'group-hover:text-violet-400',
     focus: 'focus-visible:ring-violet-500/60',
-    bar: 'bg-violet-500',
+    dot: 'bg-violet-500 shadow-[0_0_10px_rgba(139,92,246,0.75)]',
   },
   red: {
     text: 'text-red-400',
@@ -44,7 +44,7 @@ const ACCENTS = {
     hoverBorder: 'hover:border-red-500/40',
     hoverText: 'group-hover:text-red-400',
     focus: 'focus-visible:ring-red-500/60',
-    bar: 'bg-red-500',
+    dot: 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.75)]',
   },
   indigo: {
     text: 'text-indigo-400',
@@ -52,7 +52,7 @@ const ACCENTS = {
     hoverBorder: 'hover:border-indigo-500/40',
     hoverText: 'group-hover:text-indigo-400',
     focus: 'focus-visible:ring-indigo-500/60',
-    bar: 'bg-indigo-500',
+    dot: 'bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.75)]',
   },
   emerald: {
     text: 'text-emerald-400',
@@ -60,7 +60,7 @@ const ACCENTS = {
     hoverBorder: 'hover:border-emerald-500/40',
     hoverText: 'group-hover:text-emerald-400',
     focus: 'focus-visible:ring-emerald-500/60',
-    bar: 'bg-emerald-500',
+    dot: 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.75)]',
   },
   rose: {
     text: 'text-rose-400',
@@ -68,7 +68,7 @@ const ACCENTS = {
     hoverBorder: 'hover:border-rose-500/40',
     hoverText: 'group-hover:text-rose-400',
     focus: 'focus-visible:ring-rose-500/60',
-    bar: 'bg-rose-500',
+    dot: 'bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.75)]',
   },
   fuchsia: {
     text: 'text-fuchsia-400',
@@ -76,7 +76,7 @@ const ACCENTS = {
     hoverBorder: 'hover:border-fuchsia-500/40',
     hoverText: 'group-hover:text-fuchsia-400',
     focus: 'focus-visible:ring-fuchsia-500/60',
-    bar: 'bg-fuchsia-500',
+    dot: 'bg-fuchsia-500 shadow-[0_0_10px_rgba(217,70,239,0.75)]',
   },
   cyan: {
     text: 'text-cyan-400',
@@ -84,7 +84,7 @@ const ACCENTS = {
     hoverBorder: 'hover:border-cyan-500/40',
     hoverText: 'group-hover:text-cyan-400',
     focus: 'focus-visible:ring-cyan-500/60',
-    bar: 'bg-cyan-500',
+    dot: 'bg-cyan-500 shadow-[0_0_10px_rgba(6,182,212,0.75)]',
   },
   amber: {
     text: 'text-amber-400',
@@ -92,7 +92,7 @@ const ACCENTS = {
     hoverBorder: 'hover:border-amber-500/40',
     hoverText: 'group-hover:text-amber-400',
     focus: 'focus-visible:ring-amber-500/60',
-    bar: 'bg-amber-500',
+    dot: 'bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.75)]',
   },
 };
 
@@ -245,15 +245,20 @@ export default function DrillCarousel({
     };
   }, [showAll, syncFromScroll]);
 
-  const go = (direction) => {
+  const scrollToIndex = (target) => {
     const m = measure();
     if (!m) return;
-    const next = Math.min(Math.max(index + direction, 0), Math.max(total - perView, 0));
+    const next = Math.min(Math.max(target, 0), Math.max(total - perView, 0));
     m.track.scrollTo({ left: next * m.step, behavior: 'smooth' });
     setIndex(next);
   };
 
+  const go = (direction) => scrollToIndex(index + direction);
+
   const lastIndex = Math.max(total - perView, 0);
+  // One stop per scroll position, so three-up desktop shows fewer dots
+  // than one-up mobile rather than dots that cannot be reached.
+  const stops = lastIndex + 1;
   const atStart = index <= 0;
   const atEnd = index >= lastIndex;
   const arrowsUseful = total > perView;
@@ -332,16 +337,31 @@ export default function DrillCarousel({
           </div>
 
           {arrowsUseful && (
-            <div className="flex items-center gap-3 mt-3">
-              <div className="h-1 flex-1 rounded-full bg-surface-2 overflow-hidden">
-                <div
-                  className={`h-full rounded-full transition-all duration-300 ${a.bar}`}
-                  style={{ width: `${Math.min(100, ((index + perView) / total) * 100)}%` }}
-                />
-              </div>
-              <span className="text-2xs font-mono text-ink-3 tabular-nums shrink-0">
-                {Math.min(index + perView, total)} / {total}
-              </span>
+            /*
+             * Step dots, not a fill bar. A percentage bar answers "how far
+             * through the list am I" -- a question nobody asks of eight drills.
+             * One dot per stop answers the useful one ("how many are left, and
+             * can I jump there"), and each dot is a real button, so the deck is
+             * navigable by tap on a phone where the arrows are a small target.
+             */
+            <div className="flex flex-wrap items-center justify-center gap-2 mt-4">
+              {Array.from({ length: stops }).map((_, i) => {
+                const isActive = i === Math.min(index, stops - 1);
+                return (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => scrollToIndex(i)}
+                    aria-label={t('ui.goToDrill', 'Go to drill {n}').replace('{n}', String(i + 1))}
+                    aria-current={isActive ? 'true' : undefined}
+                    className={`h-1.5 rounded-full transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent ${a.focus} ${
+                      isActive
+                        ? `w-9 ${a.dot}`
+                        : 'w-5 bg-ink-3/25 hover:bg-ink-3/50'
+                    }`}
+                  />
+                );
+              })}
             </div>
           )}
         </>

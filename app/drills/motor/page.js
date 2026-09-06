@@ -69,8 +69,8 @@ export default function MotorDrillsPage() {
               { "@type": "WebApplication", "name": "Drag and Drop Game - Mouse Precision Training", "url": "https://skilldrills.online/drills/motor/hand-eye-coordination/drag-and-drop" },
               { "@type": "WebApplication", "name": "Precision Flick Shot Trainer", "url": "https://skilldrills.online/drills/motor/hand-eye-coordination/precision-flick-shot" },
               { "@type": "WebApplication", "name": "Finger Speed Test - Finger Sequencing Drill", "url": "https://skilldrills.online/drills/motor/movement-speed/finger-sequencing" },
-              { "@type": "WebApplication", "name": "Keyboard Recognition & Keybind Speed Trainer", "url": "https://skilldrills.online/drills/motor/movement-speed/keyboard-recognition" },
-              { "@type": "WebApplication", "name": "Click Speed Test - Rapid Tapping CPS Test", "url": "https://skilldrills.online/drills/motor/movement-speed/rapid-tapping" },
+              { "@type": "WebApplication", "name": "Keyboard Speed Test & Keybind Trainer", "url": "https://skilldrills.online/drills/motor/movement-speed/keyboard-recognition" },
+              { "@type": "WebApplication", "name": "CPS Test - Click Speed Test", "url": "https://skilldrills.online/drills/motor/movement-speed/rapid-tapping" },
               { "@type": "WebApplication", "name": "Steady Hand Game - Mouse Path Tracing", "url": "https://skilldrills.online/drills/motor/precision-control/steady-hand" },
               { "@type": "WebApplication", "name": "Mouse Tracing Game - Wave Tracking Drill", "url": "https://skilldrills.online/drills/motor/precision-control/tracing" }
             ]

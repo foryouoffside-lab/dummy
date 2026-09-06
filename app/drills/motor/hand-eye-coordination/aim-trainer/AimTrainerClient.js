@@ -93,38 +93,7 @@ const RULES_ITEMS = [
   { title: "Miss / Timeout", text: "Missing shots or letting targets expire resets combo streak and deducts time when enabled." }
 ];
 
-const ABOUT_TEXT = `Aim Trainer Elite is a dynamic target acquisition drill designed to refine raw mouse precision, eye-hand motor coordination, and click timing speed. Unlike static target shooting, targets continuously move and shrink across the canvas area.
 
-By balancing speed with careful crosshair placement, players build muscle memory and suppress panic clicks during intense competitive gunfights in games like Valorant, CS2, and Apex Legends.
-
-As your score rises, targets shrink and movement speed accelerates dynamically, continuously pushing your mechanical skill ceiling.`;
-
-const FAQ_ITEMS = [
-  { q: "What is Aim Trainer Elite?", a: "Aim Trainer Elite is a dynamic target acquisition drill designed to test and refine your mouse accuracy, target acquisition speed, and click timing." },
-  { q: "How does this aim trainer improve mouse precision?", a: "By spawning targets that dynamically shrink, move, and expire, the drill conditions fine motor control and rapid eye-to-hand target acquisition." },
-  { q: "Does this help Valorant and CS2 aim?", a: "Yes, micro-flicking and clicking small targets directly translates to first-shot headshot precision in tactical shooters like Valorant and CS2." },
-  { q: "How does score-based difficulty scaling work?", a: "As your score increases, the game engine automatically advances your level without cap, reducing target sizes and increasing movement speed." },
-  { q: "What happens when a target times out?", a: "When a target expires before you click it, your combo streak resets and a red error flash triggers. If the optional Time Penalty is enabled, 0.8s is deducted." },
-  { q: "How is tracking accuracy calculated?", a: "Accuracy is calculated as the ratio of successful target hits divided by total clicks, displayed as a percentage on the result dashboard." },
-  { q: "Can I play this aim trainer on mobile devices?", a: "This drill requires pointer-lock mouse input for crosshair control, so it is not playable on touch-only phones or tablets. Use a desktop or laptop with a mouse for the full experience." },
-  { q: "Does this trainer support universal mouse sensitivity?", a: "Yes — the Mouse Sensitivity slider in Session Settings on the drills hub calibrates raw input cm/360 for this and every other mouse-aimed drill." },
-  { q: "What is the best way to practice with Aim Trainer Elite?", a: "Focus on accuracy first before building speed. Rushed clicks reset your combo, while clean centered clicks build combo multipliers." },
-  { q: "How often should I warm up with this aim trainer?", a: "A 10-15 minute session before playing competitive matches helps prime your motor cortex and eye-hand coordination." },
-  { q: "Is this aim trainer completely free?", a: "Yes, Aim Trainer Elite is 100% free, requires no downloads or account registration, and runs natively in any modern web browser." },
-  { q: "What is combo scaling in this drill?", a: "Sustaining consecutive hits without missing or letting targets expire builds combo multipliers up to 3.0x bonus points per hit." },
-  { q: "Does this help with reaction speed?", a: "Yes, fast-expiring targets at higher difficulty levels train your brain to register target locations and execute click commands faster." },
-  { q: "What causes missed clicks?", a: "Missed clicks occur when you fire before your crosshair is fully centered over the target hitbox, or when you over-flick past the target edge." },
-  { q: "How does the session timer work?", a: "Each session starts with 45 seconds on the clock. Clean target hits add +0.6s to extend your run. When the optional Time Penalty setting is enabled, misses and timeouts deduct 0.8s." }
-];
-
-const RELATED_DRILLS = [
-  { id: "precision-flick-shot", name: "Precision Flick Shot", cat: "Motor Coordination", desc: "Train precise clicking on moving target arrays.", href: "/drills/motor/hand-eye-coordination/precision-flick-shot" },
-  { id: "flick-shot-training", name: "Pro Flick Trainer", cat: "FPS Flicking", desc: "Snap to targets in time-attack mode with precision flicking.", href: "/drills/fps/flick-shot-training" },
-  { id: "target-switching-swarm", name: "Target Switching", cat: "FPS Multi-Kill", desc: "Flick and track target arrays rapidly.", href: "/drills/fps/target-switching-swarm" },
-  { id: "180-degree-awareness", name: "180° Awareness Pro", cat: "FPS Awareness", desc: "Flick to flanking perimeter spawns.", href: "/drills/fps/180-degree-awareness" },
-  { id: "steady-hand", name: "Steady Hand Trainer", cat: "Motor Control", desc: "Improve fine motor mouse control and stability.", href: "/drills/motor/precision-control/steady-hand" },
-  { id: "rapid-tapping", name: "Rapid Tapping", cat: "Motor Speed", desc: "Boost physical clicking speed and stamina.", href: "/drills/motor/movement-speed/rapid-tapping" }
-];
 
 // ============================================================
 // MAIN COMPONENT
@@ -641,18 +610,21 @@ export default function AimTrainerClient() {
     <div className="min-h-screen bg-[#050508] text-white flex flex-col font-sans select-none">
       {/* ── MAIN CONTENT AREA ── */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
-        {/* Title */}
+        {/* Title & AIO Snippet */}
         {!isFullscreen && (
-          <div className="text-center">
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white uppercase">
+          <div className="text-left">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
               Aim Trainer Elite
             </h1>
+            <p className="text-sm text-slate-400 mt-1.5 max-w-3xl leading-relaxed">
+              An aim trainer measures how quickly and how accurately you can move a mouse cursor onto a target and click it. Fitts&apos;s Law describes the trade-off it exposes: movement time grows with the logarithm of the distance to a target divided by that target&apos;s width, so a target half the size costs about the same extra time as one twice as far away (Fitts, 1954; MacKenzie, 1992).
+            </p>
           </div>
         )}
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 gap-2.5 max-w-2xl mx-auto w-full">
+          <div className="grid grid-cols-4 gap-2 w-full">
             <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
               <div className="text-lg sm:text-xl font-black text-white tabular-nums">{uiScore}</div>
@@ -830,54 +802,45 @@ export default function AimTrainerClient() {
               isOpen={openAccordion === 'about'}
               onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
             >
-              <div className="space-y-4">
-                <p className="text-xs text-gray-300 leading-relaxed">{ABOUT_TEXT}</p>
-              </div>
-            </DrillAccordion>
+              <div className="space-y-6">
+                <section>
+                  <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
+                    <Target className="w-4 h-4 text-emerald-400" /> What Is Aim Trainer Elite?
+                  </h3>
+                  <p className="text-sm leading-relaxed mb-3 text-slate-300">
+                    <strong>Aim Trainer Elite</strong> is a dynamic target acquisition drill engineered to isolate and refine your visual-motor latency, micro-flick precision, and click timing under accelerating difficulty. Grounded in Fitts&apos;s Law and two-component motor control theory, targets dynamically shrink, accelerate, and expire across the canvas.
+                  </p>
+                  <p className="text-sm leading-relaxed text-slate-400">
+                    By balancing rapid ballistic cursor propulsion with terminal deceleration control, players train muscle memory and eliminate panic-clicking under intense competitive conditions.
+                  </p>
+                </section>
 
-            <DrillAccordion
-              id="faq"
-              title="Frequently Asked Questions"
-              isOpen={openAccordion === 'faq'}
-              onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
-            >
-              <div className="space-y-4">
-                {FAQ_ITEMS.map((item, idx) => (
-                  <div key={idx} className="border-b border-gray-800/80 pb-3 last:border-0 last:pb-0">
-                    <h5 className="text-xs font-bold text-white mb-1">{item.q}</h5>
-                    <p className="text-xs text-gray-400 leading-relaxed">{item.a}</p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                    <div className="flex items-center gap-2.5 mb-2">
+                      <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
+                      <h4 className="text-xs font-bold text-white">Who Should Use This?</h4>
+                    </div>
+                    <p className="text-xs text-gray-300 leading-relaxed">Competitive tactical shooter players (Valorant, CS2, Apex Legends) and visual-motor athletes refining mouse precision.</p>
                   </div>
-                ))}
+                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                    <div className="flex items-center gap-2.5 mb-2">
+                      <div className="w-7 h-7 rounded-lg bg-cyan-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
+                      <h4 className="text-xs font-bold text-white">Skills Improved</h4>
+                    </div>
+                    <p className="text-xs text-gray-300 leading-relaxed">Target acquisition speed, micro-flick accuracy, ballistic impulse control, and click timing synchronization.</p>
+                  </div>
+                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                    <div className="flex items-center gap-2.5 mb-2">
+                      <div className="w-7 h-7 rounded-lg bg-purple-600 flex items-center justify-center"><Zap className="w-3.5 h-3.5 text-white" /></div>
+                      <h4 className="text-xs font-bold text-white">Fitts&apos;s Law Tuning</h4>
+                    </div>
+                    <p className="text-xs text-gray-300 leading-relaxed">Progressively trains high Index of Difficulty (ID) movements where target size contracts and distance scales.</p>
+                  </div>
+                </div>
               </div>
             </DrillAccordion>
           </div>
-        )}
-
-        {/* ── RELATED FPS DRILLS ── */}
-        {!isFullscreen && (
-          <section className="mt-4">
-            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">
-              Related Motor &amp; FPS Drills
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {RELATED_DRILLS.map((drill) => (
-                <Link
-                  key={drill.id}
-                  href={drill.href}
-                  className="group bg-[#0c0c16] border border-white/5 hover:border-emerald-500/40 rounded-xl p-3.5 transition-all duration-200 hover:-translate-y-0.5 flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider mb-1">{drill.cat}</div>
-                    <div className="text-xs font-bold text-white group-hover:text-emerald-300 transition-colors">{drill.name}</div>
-                    <div className="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">{drill.desc}</div>
-                  </div>
-                  <div className="text-[10px] font-bold text-slate-500 group-hover:text-emerald-400 mt-3 flex items-center gap-1 transition-colors">
-                    Train Drill <span>→</span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
         )}
       </main>
 

@@ -1,4 +1,6 @@
 import RSVPReaderClient from './RSVPReaderClient';
+import DrillGuide from '@/components/drill/DrillGuide';
+import { pickSources } from '@/lib/drillSources';
 
 export const metadata = {
   title: 'Reading Speed Test - Free RSVP Speed Reading Trainer',
@@ -43,6 +45,26 @@ export const metadata = {
   alternates: {
     canonical: 'https://skilldrills.online/drills/cognitive/processing-speed/rsvp-reader',
   },
+};
+
+
+const rsvpreaderGuide = {
+  heading: "Reading Speed Guide & What RSVP Can and Cannot Do",
+  intro: [
+    "Rapid serial visual presentation shows one word at a time in a fixed position, so your eyes never move. That removes saccades and regressions from reading, which is where most speed-reading claims start.",
+    "Ordinary adult reading runs at roughly 200-300 words per minute (Rayner, 1998). A comprehensive review of the evidence found that the eye movements RSVP eliminates are not what limits reading speed: the bottleneck is the time needed to identify each word and integrate it with the sentence, so pushing the rate up trades comprehension away rather than adding free speed, and RSVP is especially costly when you need to look back at earlier text (Rayner et al., 2016). Use this drill to find where your own comprehension starts to fall off, not as evidence that faster is better.",
+    "Timing methodology: every event is timestamped with the browser's performance.now() high-resolution clock, entirely on your device. Browser timers are deliberately coarsened as a Spectre mitigation (typically to about 1 ms), and your display quantizes each change to its refresh interval -- about 16.7 ms per frame at 60 Hz, 6.9 ms at 144 Hz and 4.1 ms at 240 Hz (Woods et al., 2015). Treat differences smaller than about 5 ms as measurement noise, and compare your own runs on the same hardware rather than against someone else's setup.",
+    "Data transparency: SkillDrills collects no aggregate data. Your scores and settings live only in your browser's localStorage and are never uploaded, so this site publishes no user averages, percentiles or player counts. Every figure quoted here comes from the published work listed in the References panel below.",
+    "This drill is a free browser game for practice and interest. It is not a medical device, a diagnostic instrument, or a screening or treatment tool for any condition, and no score here says anything about your health. If you have concerns about your attention, memory or thinking, speak to a qualified clinician.",
+  ],
+  // Works named in this page's copy, with DOIs so a reader or an answer
+  // engine can check the figures rather than take them on trust.
+  sources: pickSources('rayner1998', 'rayner2016', 'woods2015'),
+  related: [
+    { href: "/drills/cognitive/processing-speed/symbol-matching", label: "Symbol Digit Modalities Test" },
+    { href: "/drills/cognitive/focus/concentration-grid", label: "Schulte Table Trainer" },
+    { href: "/drills/cognitive/attention/concentration-stamina", label: "Focus Test" },
+  ],
 };
 
 export default function RSVPReaderPage() {
@@ -222,6 +244,7 @@ export default function RSVPReaderPage() {
       />
 
       <RSVPReaderClient />
+      <DrillGuide guide={rsvpreaderGuide} />
     </>
   );
 }

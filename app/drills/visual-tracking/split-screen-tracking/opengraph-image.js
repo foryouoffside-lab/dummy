@@ -8,7 +8,7 @@ import { ImageResponse } from 'next/og';
 // Satori (the renderer behind ImageResponse) supports FLEXBOX ONLY — no CSS grid,
 // and every element with more than one child needs an explicit `display: flex`.
 
-export const alt = 'Split-Screen Tracking — free browser Visual Tracking drill on SkillDrills';
+export const alt = 'Split-Screen Tracking — Divided Attention Eye Test | SkillDrills';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -94,7 +94,7 @@ export default async function Image() {
               maxWidth: 980,
             }}
           >
-            {"Condition divided attention by tracking two targets moving along vertical and horizontal planes."}
+            {"Condition divided attention by tracking dual targets moving along vertical and horizontal axes."}
           </div>
         </div>
 

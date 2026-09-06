@@ -8,7 +8,20 @@
 // sport or game it transfers to; generic "train your eyes" filler re-creates
 // the duplication problem this file exists to solve.
 
+import { DRILL_SEO } from '@/lib/drillSeo';
+
 const VT = '/drills/visual-tracking';
+
+// Cross-link labels are resolved from DRILL_SEO rather than typed here.
+// Every label in this file used to be the drill's internal codename while the
+// canonical anchor said something else entirely -- 45 links spent on phrases
+// with no search demand (§10c.8). Reading the anchor at module load means the
+// two cannot disagree again: change DRILL_SEO and every link here follows.
+const rel = (...slugs) =>
+  slugs.map((slug) => {
+    const href = `${VT}/${slug}`;
+    return { href, label: DRILL_SEO[href]?.anchor ?? slug };
+  });
 
 export const GUIDES = {
   'constant-slow-pursuit': {
@@ -29,11 +42,7 @@ export const GUIDES = {
       { q: 'What is a Lissajous curve?', a: 'A path traced by combining two perpendicular oscillations. It produces a continuous looping shape with no corners, which keeps the drill purely about smooth pursuit rather than direction changes.' },
       { q: 'Should my eyes water during this?', a: 'Mild watering usually means you are blinking less than normal while concentrating. Blink deliberately between rounds, and stop if you get genuine eye strain.' },
     ],
-    related: [
-      { label: 'Sine Wave Pursuit', href: `${VT}/sine-wave-pursuit` },
-      { label: 'Infinity Pursuit', href: `${VT}/infinity-pursuit` },
-      { label: 'Predictive Pursuit', href: `${VT}/predictive-pursuit` },
-    ],
+    related: rel('sine-wave-pursuit', 'infinity-pursuit', 'predictive-pursuit'),
   },
 
   'directional-chaos-pursuit': {
@@ -54,11 +63,7 @@ export const GUIDES = {
       { q: 'Is random motion actually trainable?', a: 'The randomness itself is not, but your recovery latency after losing the target is. That latency is the skill this drill improves.' },
       { q: 'How does this differ from the evasion drill?', a: 'Dynamic Evasion uses sharp deliberate turns at intervals. This drill applies continuous small random nudges, so the target is never briefly stable.' },
     ],
-    related: [
-      { label: 'Dynamic Evasion Pursuit', href: `${VT}/dynamic-evasion-pursuit` },
-      { label: 'Spatial Shift Pursuit', href: `${VT}/spatial-shift-pursuit` },
-      { label: 'Momentum Teleport Pursuit', href: `${VT}/momentum-teleport-pursuit` },
-    ],
+    related: rel('dynamic-evasion-pursuit', 'spatial-shift-pursuit', 'momentum-teleport-pursuit'),
   },
 
   'dynamic-evasion-pursuit': {
@@ -79,11 +84,7 @@ export const GUIDES = {
       { q: 'Should I use a lower mouse sensitivity for this?', a: 'This drill is gaze-based rather than aim-based, so sensitivity does not apply. Transfer to aim happens through faster visual re-acquisition.' },
       { q: 'How often should I run it?', a: 'Five to ten minutes as a warm-up before playing is more useful than long isolated sessions, because reactive tracking responds to frequency more than volume.' },
     ],
-    related: [
-      { label: 'Directional Chaos Pursuit', href: `${VT}/directional-chaos-pursuit` },
-      { label: 'Zig-Zag Path Pursuit', href: `${VT}/zig-zag-path-pursuit` },
-      { label: 'Spatial Shift Pursuit', href: `${VT}/spatial-shift-pursuit` },
-    ],
+    related: rel('directional-chaos-pursuit', 'zig-zag-path-pursuit', 'spatial-shift-pursuit'),
   },
 
   'ghosting-suppress-pursuit': {
@@ -104,11 +105,7 @@ export const GUIDES = {
       { q: 'Will this help on a 60Hz monitor?', a: 'Yes, and arguably more. Lower refresh rates produce longer visible trails, so the suppression skill matters more.' },
       { q: 'Why does the target smear more as I get tired?', a: 'Fatigue reduces fixation stability, so your gaze drifts across the trail rather than holding the edge. It is a reliable signal to end the session.' },
     ],
-    related: [
-      { label: 'Strobe Prediction Pursuit', href: `${VT}/strobe-prediction-pursuit` },
-      { label: 'Constant Slow Pursuit', href: `${VT}/constant-slow-pursuit` },
-      { label: 'Peripheral Ping Pursuit', href: `${VT}/peripheral-ping-pursuit` },
-    ],
+    related: rel('strobe-prediction-pursuit', 'constant-slow-pursuit', 'peripheral-ping-pursuit'),
   },
 
   'infinity-pursuit': {
@@ -129,11 +126,7 @@ export const GUIDES = {
       { q: 'Is a figure-8 better than a circle?', a: 'For this purpose yes, because a circle never crosses the midline or reverses curvature, so it trains a narrower slice of pursuit.' },
       { q: 'Should I do it in both directions?', a: 'Yes. Most people track noticeably better one way, and training only the strong direction widens the gap.' },
     ],
-    related: [
-      { label: 'Constant Slow Pursuit', href: `${VT}/constant-slow-pursuit` },
-      { label: 'Sine Wave Pursuit', href: `${VT}/sine-wave-pursuit` },
-      { label: 'Triangular Pursuit', href: `${VT}/triangular-pursuit` },
-    ],
+    related: rel('constant-slow-pursuit', 'sine-wave-pursuit', 'triangular-pursuit'),
   },
 
   'momentum-teleport-pursuit': {
@@ -154,11 +147,7 @@ export const GUIDES = {
       { q: 'Is this just a reaction-time test?', a: 'No. Reaction time is fixed within a session. What improves is where you choose to look first, which is a prediction skill.' },
       { q: 'Why does scanning outward feel faster but score worse?', a: 'Outward scanning covers area without using information you already have. Following the known heading searches a much smaller region.' },
     ],
-    related: [
-      { label: 'Predictive Pursuit', href: `${VT}/predictive-pursuit` },
-      { label: 'Strobe Prediction Pursuit', href: `${VT}/strobe-prediction-pursuit` },
-      { label: 'Spatial Shift Pursuit', href: `${VT}/spatial-shift-pursuit` },
-    ],
+    related: rel('predictive-pursuit', 'strobe-prediction-pursuit', 'spatial-shift-pursuit'),
   },
 
   'peripheral-ping-pursuit': {
@@ -179,11 +168,7 @@ export const GUIDES = {
       { q: 'Why do my eyes keep jumping to the targets?', a: 'That is a reflexive orienting response and it is normal. Suppressing it deliberately is the trained skill, and it takes repetition.' },
       { q: 'Should I sit closer to the screen?', a: 'Yes. Sitting closer pushes the targets further into your periphery in angular terms, which makes the drill harder and more useful.' },
     ],
-    related: [
-      { label: 'Split-Screen Tracking', href: `${VT}/split-screen-tracking` },
-      { label: 'Ghosting Suppress Pursuit', href: `${VT}/ghosting-suppress-pursuit` },
-      { label: 'Strobe Prediction Pursuit', href: `${VT}/strobe-prediction-pursuit` },
-    ],
+    related: rel('split-screen-tracking', 'ghosting-suppress-pursuit', 'strobe-prediction-pursuit'),
   },
 
   'predictive-pursuit': {
@@ -204,11 +189,7 @@ export const GUIDES = {
       { q: 'How far ahead should I look?', a: 'Far enough that the target arrives at your gaze rather than passing it, which depends on speed. Calibrating that distance is the drill.' },
       { q: 'Does this hurt me against unpredictable targets?', a: 'It can if you predict indiscriminately. Pair this with a chaos or evasion drill so you learn to switch strategies based on how readable the motion is.' },
     ],
-    related: [
-      { label: 'Momentum Teleport Pursuit', href: `${VT}/momentum-teleport-pursuit` },
-      { label: 'Directional Chaos Pursuit', href: `${VT}/directional-chaos-pursuit` },
-      { label: 'Constant Slow Pursuit', href: `${VT}/constant-slow-pursuit` },
-    ],
+    related: rel('momentum-teleport-pursuit', 'directional-chaos-pursuit', 'constant-slow-pursuit'),
   },
 
   'sine-wave-pursuit': {
@@ -229,11 +210,7 @@ export const GUIDES = {
       { q: 'Is this a good drill to start with?', a: 'Yes. Predictable rhythmic motion gives a clean baseline before you add chaos, occlusion or teleporting.' },
       { q: 'Should I increase speed or amplitude first?', a: 'Frequency first. Faster reversals stress pursuit more directly than simply making the path wider.' },
     ],
-    related: [
-      { label: 'Constant Slow Pursuit', href: `${VT}/constant-slow-pursuit` },
-      { label: 'Infinity Pursuit', href: `${VT}/infinity-pursuit` },
-      { label: 'Vertical Zig-Zag Pursuit', href: `${VT}/staircase-step` },
-    ],
+    related: rel('constant-slow-pursuit', 'infinity-pursuit', 'staircase-step'),
   },
 
   'spatial-shift-pursuit': {
@@ -254,11 +231,7 @@ export const GUIDES = {
       { q: 'Should I stop predicting to avoid being caught out?', a: 'No. Refusing to predict makes you late on every readable phase. The goal is fast abandonment of a prediction, not avoidance of prediction.' },
       { q: 'Why do speed shifts catch me more than direction shifts?', a: 'A direction change is visually obvious. A speed change preserves the heading, so it registers only as a growing positional error.' },
     ],
-    related: [
-      { label: 'Directional Chaos Pursuit', href: `${VT}/directional-chaos-pursuit` },
-      { label: 'Dynamic Evasion Pursuit', href: `${VT}/dynamic-evasion-pursuit` },
-      { label: 'Predictive Pursuit', href: `${VT}/predictive-pursuit` },
-    ],
+    related: rel('directional-chaos-pursuit', 'dynamic-evasion-pursuit', 'predictive-pursuit'),
   },
 
   'split-screen-tracking': {
@@ -279,11 +252,7 @@ export const GUIDES = {
       { q: 'Which strategy scores higher?', a: 'For most people, holding a central fixation and using peripheral tracking. Alternation costs a saccade and a re-acquisition every switch.' },
       { q: 'Why do I always lose the same target?', a: 'Side bias in visual attention is common. Knowing which side you drop tells you which side to consciously check in real situations.' },
     ],
-    related: [
-      { label: 'Peripheral Ping Pursuit', href: `${VT}/peripheral-ping-pursuit` },
-      { label: 'Directional Chaos Pursuit', href: `${VT}/directional-chaos-pursuit` },
-      { label: 'Dynamic Evasion Pursuit', href: `${VT}/dynamic-evasion-pursuit` },
-    ],
+    related: rel('peripheral-ping-pursuit', 'directional-chaos-pursuit', 'dynamic-evasion-pursuit'),
   },
 
   'staircase-step': {
@@ -304,11 +273,7 @@ export const GUIDES = {
       { q: 'Is upward really harder than downward?', a: 'For most people yes. Upward gaze works against a slightly less favourable mechanical arrangement and is used less often.' },
       { q: 'Can I tilt my head to make it easier?', a: 'You can, but it defeats the purpose. Tilting turns vertical motion into horizontal motion relative to your eyes.' },
     ],
-    related: [
-      { label: 'Zig-Zag Path Pursuit', href: `${VT}/zig-zag-path-pursuit` },
-      { label: 'Sine Wave Pursuit', href: `${VT}/sine-wave-pursuit` },
-      { label: 'Triangular Pursuit', href: `${VT}/triangular-pursuit` },
-    ],
+    related: rel('zig-zag-path-pursuit', 'sine-wave-pursuit', 'triangular-pursuit'),
   },
 
   'strobe-prediction-pursuit': {
@@ -329,11 +294,7 @@ export const GUIDES = {
       { q: 'Should I freeze my gaze during the blackout?', a: 'No. Freezing means the target reappears somewhere you are not looking. Keep moving along the predicted trajectory.' },
       { q: 'How long should the occlusion be?', a: 'Start short enough that you can predict successfully most of the time, then lengthen it. Gaps you cannot bridge just train guessing.' },
     ],
-    related: [
-      { label: 'Momentum Teleport Pursuit', href: `${VT}/momentum-teleport-pursuit` },
-      { label: 'Predictive Pursuit', href: `${VT}/predictive-pursuit` },
-      { label: 'Ghosting Suppress Pursuit', href: `${VT}/ghosting-suppress-pursuit` },
-    ],
+    related: rel('momentum-teleport-pursuit', 'predictive-pursuit', 'ghosting-suppress-pursuit'),
   },
 
   'triangular-pursuit': {
@@ -354,11 +315,7 @@ export const GUIDES = {
       { q: 'Why do I overshoot every corner?', a: 'You are carrying velocity from the previous edge. Reducing how far you lead the target along each edge cuts the overshoot directly.' },
       { q: 'How does this compare to the zig-zag drill?', a: 'A triangle returns to a closed repeating loop with three fixed corners. The zig-zag drill uses an open path with varied segment lengths, so it is less predictable.' },
     ],
-    related: [
-      { label: 'Zig-Zag Path Pursuit', href: `${VT}/zig-zag-path-pursuit` },
-      { label: 'Infinity Pursuit', href: `${VT}/infinity-pursuit` },
-      { label: 'Dynamic Evasion Pursuit', href: `${VT}/dynamic-evasion-pursuit` },
-    ],
+    related: rel('zig-zag-path-pursuit', 'infinity-pursuit', 'dynamic-evasion-pursuit'),
   },
 
   'zig-zag-path-pursuit': {
@@ -379,11 +336,7 @@ export const GUIDES = {
       { q: 'Why do short segments feel so much harder?', a: 'They give you less time to re-establish smooth tracking after a corner, so you meet the next one before you have fully settled.' },
       { q: 'Should I follow the drawn line or the target?', a: 'The target. Following the line means you are reading a route rather than tracking an object, which does not transfer.' },
     ],
-    related: [
-      { label: 'Triangular Pursuit', href: `${VT}/triangular-pursuit` },
-      { label: 'Vertical Zig-Zag Pursuit', href: `${VT}/staircase-step` },
-      { label: 'Dynamic Evasion Pursuit', href: `${VT}/dynamic-evasion-pursuit` },
-    ],
+    related: rel('triangular-pursuit', 'staircase-step', 'dynamic-evasion-pursuit'),
   },
 };
 

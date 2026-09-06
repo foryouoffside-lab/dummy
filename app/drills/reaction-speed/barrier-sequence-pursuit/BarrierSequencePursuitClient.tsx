@@ -705,7 +705,7 @@ export default function BarrierSequencePursuitClient() {
         score: uiScore,
         accuracy: analytics.accuracy,
         speed: analytics.avgReactionTime,
-        drillName: 'Barrier Sequence Pursuit',
+        drillName: 'Jiggle Peek Trainer',
         rank: analytics.grade?.letter || 'A',
         rankName: analytics.grade?.label || 'ELITE REFLEX',
         playerName: getPlayerName(),
@@ -715,15 +715,15 @@ export default function BarrierSequencePursuitClient() {
       });
 
       await shareScoreCard(canvas, {
-        title: 'Barrier Sequence Pursuit — My Score',
-        text: `I scored ${uiScore} (Grade: ${analytics.grade?.letter || 'A'}, Lv. ${analytics.finalLevel}) on Barrier Sequence Pursuit at SkillDrills!`,
+        title: 'Jiggle Peek Trainer — My Score',
+        text: `I scored ${uiScore} (Grade: ${analytics.grade?.letter || 'A'}, Lv. ${analytics.finalLevel}) on Jiggle Peek Trainer at SkillDrills!`,
         url
       });
     } catch (err) {
       if (navigator.share) {
         navigator.share({
-          title: 'Barrier Sequence Pursuit',
-          text: `I scored ${uiScore} on Barrier Sequence Pursuit! Can you beat my score?`,
+          title: 'Jiggle Peek Trainer',
+          text: `I scored ${uiScore} on Jiggle Peek Trainer! Can you beat my score?`,
           url
         }).catch(() => {});
       }
@@ -760,35 +760,35 @@ export default function BarrierSequencePursuitClient() {
 
         {/* Drill Header */}
         {!isFullscreen && (
-          <div className="text-center">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-black uppercase tracking-tight text-white flex items-center justify-center gap-3 flex-wrap">
-              BARRIER SEQUENCE PURSUIT
-              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
-                Jiggle Peek Trainer & Cover Peeking Reaction Drill
-              </span>
+          <div className="text-left">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+              Jiggle Peek Trainer
             </h1>
+            <p className="text-[13px] text-slate-400 mt-1 max-w-2xl leading-relaxed">
+              Holding an angle means seeing an opponent break cover, deciding, and clicking &mdash; about 200&ndash;250&nbsp;ms of human reaction time (Kosinski, 2008) &mdash; while network delay lets the peeker see you first. This drill trains crosshair pre-placement so less of that budget is spent moving the mouse.
+            </p>
           </div>
         )}
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 gap-2.5 max-w-2xl mx-auto w-full">
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
-              <div className="text-lg sm:text-xl font-black text-red-400 tabular-nums">{uiScore}</div>
+          <div className="grid grid-cols-4 gap-2 w-full -mb-2">
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider font-mono">Score</div>
+              <div className="text-lg sm:text-xl font-black text-white tabular-nums">{uiScore}</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider font-mono">Time</div>
               <div className={`text-lg sm:text-xl font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>
                 {uiTimeLeft}s
               </div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Level</div>
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider font-mono">Level</div>
               <div className="text-lg sm:text-xl font-black text-indigo-400 tabular-nums">L{uiLevel}</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider font-mono">Best Score</div>
               <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
             </div>
           </div>
@@ -864,7 +864,7 @@ export default function BarrierSequencePursuitClient() {
             <FpsStartCard
               icon={Target}
               accent="red"
-              title="Barrier Sequence Pursuit"
+              title="Jiggle Peek Trainer"
               subtitle="Cover Peeking • Angle Holding Reflexes"
               rules={[
                 { icon: Target, accent: 'red', title: 'Cover Peeking Targets', text: '+100 PTS × Combo × Level multiplier (+0.6s per hit)' },
@@ -936,17 +936,17 @@ export default function BarrierSequencePursuitClient() {
 
             <DrillAccordion
               id="about"
-              title="About Barrier Sequence Pursuit"
+              title="About Jiggle Peek Trainer"
               isOpen={openAccordion === 'about'}
               onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
             >
               <div className="space-y-8 font-sans">
                 <section>
-                  <h4 className="text-base font-bold text-white mb-2 flex items-center gap-2">
+                  <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
                     <Eye className="w-4 h-4 text-red-400" /> What Is Angle Holding & Cover Peeking Reaction Training?
-                  </h4>
+                  </h3>
                   <p className="text-sm leading-relaxed mb-3 text-gray-300">
-                    <strong>Barrier Sequence Pursuit</strong> (Jiggle Peek Trainer) trains defensive angle holding, crosshair pre-placement, and instant trigger reactions against opponents peeking from behind cover. In tactical shooters like CS2, Valorant, and Rainbow Six Siege, players constantly hold tight angles on pillars and doorframes.
+                    <strong>Jiggle Peek Trainer</strong> trains defensive angle holding, crosshair pre-placement, and instant trigger reactions against opponents peeking from behind cover. In tactical shooters like CS2, Valorant, and Rainbow Six Siege, players constantly hold tight angles on pillars and doorframes.
                   </p>
                   <p className="text-sm leading-relaxed text-gray-300">
                     Conditioning your reaction timing against rapid, random peek triggers trains your motor cortex to fire immediately upon detecting edge-of-cover pixel shifts.
@@ -957,43 +957,25 @@ export default function BarrierSequencePursuitClient() {
                   <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-red-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Who Should Use This?</h5>
+                      <h4 className="text-xs font-bold text-white">Who Should Use This?</h4>
                     </div>
                     <p className="text-xs text-gray-300 leading-relaxed">Valorant, CS2, and tactical FPS players mastering angle holding, pre-aim placement, and instant peek punishment.</p>
                   </div>
                   <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Cover Peek Interception</h5>
+                      <h4 className="text-xs font-bold text-white">Cover Peek Interception</h4>
                     </div>
                     <p className="text-xs text-gray-300 leading-relaxed">Trains your eyes to monitor multiple cover edges and react the moment a target emerges from occlusion.</p>
                   </div>
                   <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Zap className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Pre-Aim Trigger Speed</h5>
+                      <h4 className="text-xs font-bold text-white">Pre-Aim Trigger Speed</h4>
                     </div>
                     <p className="text-xs text-gray-300 leading-relaxed">Eliminates visual hesitation and optimizes motor execution speed when holding defensive angles.</p>
                   </div>
                 </div>
-              </div>
-            </DrillAccordion>
-
-            <DrillAccordion
-              id="faq"
-              title="Frequently Asked Questions"
-              isOpen={openAccordion === 'faq'}
-              onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-sans">
-                <FAQItem q="What is Barrier Sequence Pursuit (Jiggle Peek Trainer)?" a="It is an online reflex training drill where targets emerge from behind tactical cover barriers, testing your angle holding and rapid trigger timing." />
-                <FAQItem q="How does this help in tactical shooters like Valorant and CS2?" a="It builds the exact neurological trigger response required to punish enemy jiggle peeks and wide swings around cover." />
-                <FAQItem q="What is angle holding in FPS gaming?" a="Angle holding is placing your crosshair slightly off a corner where an enemy will appear, clicking immediately as they enter your line of sight." />
-                <FAQItem q="Is this cover peeking drill free?" a="Yes, all drills on SkillDrills are 100% free with no signups, downloads, or pop-up ads required." />
-                <FAQItem q="How does adaptive level difficulty work?" a="As your score and combo rise, target exposure times shorten and spawn intervals accelerate dynamically." />
-                <FAQItem q="Is there a time penalty for missing or timeouts?" a="By default, missing or timeouts only reset your combo streak. An opt-in time penalty (-0.8s per error) is available in session settings for hard-mode training." />
-                <FAQItem q="What is peeker's advantage in gaming?" a="Peeker's advantage is a networking phenomenon where a moving peeker sees a holding defender before the defender sees them. This drill trains quick reaction speed to counter it." />
-                <FAQItem q="How do you counter a jiggle peek?" a="Countering a jiggle peek requires high visual scanning. You must place your crosshair slightly off the corner and click the instant the target breaks cover." />
               </div>
             </DrillAccordion>
           </div>
@@ -1047,15 +1029,6 @@ function RuleItem({ num, text, highlight = '', result }: { num: string; text: st
           {result}
         </div>
       </div>
-    </div>
-  );
-}
-
-function FAQItem({ q, a }: { q: string; a: string }) {
-  return (
-    <div className="bg-[#05060b] border border-gray-800 rounded-xl p-5 hover:border-gray-700 transition-colors font-sans">
-      <h4 className="text-sm font-bold text-gray-200 mb-2">{q}</h4>
-      <p className="text-xs text-gray-400 leading-relaxed">{a}</p>
     </div>
   );
 }

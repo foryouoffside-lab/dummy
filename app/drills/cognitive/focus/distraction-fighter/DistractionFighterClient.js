@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
-import { Volume2, VolumeX, Play, RefreshCw, Share2, ArrowLeft, ShieldCheck, Users, TrendingUp, Brain, Trophy, Target, Zap, ZapOff } from 'lucide-react';
+import { Volume2, VolumeX, ShieldCheck, Users, TrendingUp, Brain, Zap, ZapOff } from 'lucide-react';
 
 import { isIdleFrameSkippable } from '@/lib/performance';
 import generateShareCard, { shareScoreCard } from '../../../../../components/ShareScoreCard';
@@ -72,7 +72,7 @@ const getLevelConfig = (level, combo = 0) => {
 
 const RULES_ITEMS = [
   { title: "Stroop Effect Challenge", text: "A color word flashes on screen (e.g. 'BLUE'), printed in a conflicting ink color (e.g. RED ink)." },
-  { title: "Target Selection Rule", text: "Tap the button matching the INK COLOR (e.g., tap Red), ignoring the semantic word meaning (+100 PTS × Combo, +0.6s)." },
+  { title: "Target Selection Rule", text: "Tap the button matching the INK COLOR (e.g., tap Red), ignoring the semantic word meaning (+100 PTS × Combo × Level multiplier, +0.6s)." },
   { title: "Wrong Selections", text: "A wrong selection resets your combo (and deducts time if penalties are on). Nothing ends the run early — you play until the clock reaches zero." },
   { title: "Streak & Penalty Rules", text: "Building streaks multiplies your score. Timeouts and wrong taps deduct 0.8s when enabled in settings." }
 ];
@@ -92,16 +92,16 @@ const FAQ_ITEMS = [
   { q: "Can distraction-resistance training help with open-office productivity?", a: "Yes. Workers in open offices face continuous visual and auditory distractors. Training inhibitory control makes it cognitively cheaper to suppress peripheral visual movement (colleagues walking), auditory interruptions, and environmental noise, allowing deeper sustained focus during critical work intervals." },
   { q: "What is the orienting reflex and how does it cause distraction?", a: "The orienting reflex is an automatic neurological response to novel stimuli — your brain involuntarily redirects attention to unexpected sounds, movement, or visual changes. Mediated by the superior colliculus and thalamus, it evolved to ensure threat detection. Inhibitory control training helps the prefrontal cortex override this reflex when distraction is unhelpful." },
   { q: "How does this distraction fighter game work?", a: "A color word flashes on screen printed in a conflicting ink color (e.g. the word 'BLUE' printed in red ink). You must tap the button matching the ink color, not the word's meaning, suppressing the automatic urge to read the word aloud. Each correct ink-color tap builds your score, while a wrong tap or a timed-out trial counts as an impulse control failure." },
-  { q: "Does inhibitory control training help children with ADHD?", a: "Inhibitory control deficits are a hallmark of ADHD. Computerized inhibitory control training shows promise as a supplemental intervention, with studies showing improvements in stop-signal reaction times, Stroop interference, and classroom behavior with regular practice. Always combine cognitive training with clinical treatment and professional guidance." },
+  { q: "Can this Stroop drill diagnose or treat ADHD?", a: "No. This is a free browser game, not a medical device, a diagnostic instrument, or a treatment for any condition. Stroop tasks are used in research and in clinical settings, but this is not a clinical version, and your score here says nothing about whether you or anyone else has ADHD. If you have concerns about attention or focus, speak to a qualified clinician." },
   { q: "Is this distraction-fighter game free to play?", a: "Yes. The Distraction Fighter drill on SkillDrills is completely free. No sign-up, no downloads, no subscriptions. It runs entirely in your browser on both desktop and mobile devices." }
 ];
 
 const RELATED_DRILLS = [
-  { id: "concentration-stamina", name: "Concentration Stamina", cat: "Attention", desc: "Sustain continuous visual focus through prolonged high-density sequences.", href: "/drills/cognitive/attention/concentration-stamina" },
-  { id: "concentration-grid", name: "Concentration Grid", cat: "Focus", desc: "Scan and tap sequential numbers on expanding grid matrices.", href: "/drills/cognitive/focus/concentration-grid" },
+  { id: "concentration-stamina", name: "Focus Test", cat: "Attention", desc: "Sustain continuous visual focus through prolonged high-density sequences.", href: "/drills/cognitive/attention/concentration-stamina" },
+  { id: "concentration-grid", name: "Schulte Table Trainer", cat: "Focus", desc: "Scan and tap sequential numbers on expanding grid matrices.", href: "/drills/cognitive/focus/concentration-grid" },
   { id: "reaction-time", name: "Reaction Time", cat: "Processing Speed", desc: "Train choice reaction speed and visual reflex latency.", href: "/drills/cognitive/processing-speed/reaction-time" },
-  { id: "divided-attention", name: "Divided Attention", cat: "Attention", desc: "Track and react to multiple independent target streams simultaneously.", href: "/drills/cognitive/attention/divided-attention" },
-  { id: "multi-tasking", name: "Multi-Tasking", cat: "Attention", desc: "Track dual independent target streams under speed pressure.", href: "/drills/cognitive/attention/multi-tasking" },
+  { id: "divided-attention", name: "Divided Attention Test", cat: "Attention", desc: "Track and react to multiple independent target streams simultaneously.", href: "/drills/cognitive/attention/divided-attention" },
+  { id: "multi-tasking", name: "Multitasking Test", cat: "Attention", desc: "Track dual independent target streams under speed pressure.", href: "/drills/cognitive/attention/multi-tasking" },
   { id: "symbol-matching", name: "Symbol Matching", cat: "Processing Speed", desc: "Match rapid symbol pairs under strict time pressure.", href: "/drills/cognitive/processing-speed/symbol-matching" }
 ];
 
@@ -478,11 +478,11 @@ export default function DistractionFighterClient({ faqs }) {
         {!isFullscreen && (
         <div className="text-center">
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-            DISTRACTION FIGHTER
-            <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
-              Stroop Test Online
-            </span>
+            Stroop Test
           </h1>
+          <p className="text-[13px] text-slate-400 leading-relaxed mt-1">
+            The Stroop effect is the delay you get naming the ink colour of a word that spells a different colour. Stroop first measured it in 1935, and it is one of the most reliable findings in psychology &mdash; the interference shows up in essentially every healthy adult (Stroop, 1935; MacLeod, 1991).
+          </p>
         </div>
         )}
 
@@ -611,21 +611,6 @@ export default function DistractionFighterClient({ faqs }) {
               accent="red"
               title="Distraction Fighter"
               subtitle="Stroop Interference • Executive Focus"
-              rules={[
-                { icon: Target, accent: 'emerald', title: 'Tap Matching INK COLOR', text: '+100 PTS × Combo × Level multiplier (+0.6s per hit)' },
-                {
-                  icon: Zap,
-                  accent: 'red',
-                  title: penaltyEnabled ? 'Wrong Selections & Time Penalty' : 'Wrong Selections',
-                  text: penaltyEnabled
-                    ? 'Wrong selections reset your combo and subtract 0.8s. The run lasts the full clock'
-                    : 'Wrong selections reset your combo. The run always lasts the full clock'
-                },
-              ]}
-              stats={[
-                { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
-                { icon: TrendingUp, label: 'Best Level', value: `Lv. ${bestLevel}`, color: 'text-blue-400', accent: 'blue' },
-              ]}
               isTouchOnlyDevice={false}
               onStart={enterDrill}
             />

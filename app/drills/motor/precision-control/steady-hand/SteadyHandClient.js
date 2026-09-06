@@ -2,7 +2,6 @@
 import { isIdleFrameSkippable } from '@/lib/performance';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import Link from 'next/link';
 
 import {
   AlertCircle, ArrowRight, BarChart3, Flame, RefreshCw, Target,
@@ -453,35 +452,35 @@ export default function SteadyHandClient() {
     <div className="min-h-screen bg-[#050508] text-white flex flex-col font-sans select-none">
       {/* ── MAIN CONTENT AREA ── */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
-        {/* Title */}
+        {/* Title & AIO Header */}
         {!isFullscreen && (
-          <div className="text-center">
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white uppercase">
-              Steady Hand Circuit
-              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
-                Steady Hand Game
-              </span>
+          <div className="text-left">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+              Steady Hand Game
             </h1>
+            <p className="text-sm text-slate-400 mt-1.5 leading-relaxed max-w-3xl">
+              A steady hand game asks you to move a cursor along a narrow path without touching its edges, which measures fine motor steadiness rather than speed. The Steering Law sets the difficulty: the time to travel a corridor scales with its length divided by its width, so a corridor half as wide takes about twice as long to cross without a contact (Accot &amp; Zhai, 1997). Staying on the centreline is a closed-loop task &mdash; vision continuously corrects the hand while the movement is still under way (Woodworth, 1899).
+            </p>
           </div>
         )}
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 gap-2.5 max-w-2xl mx-auto w-full">
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Laps Cleared</div>
+          <div className="grid grid-cols-4 gap-2 w-full">
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Laps Cleared</div>
               <div className="text-lg sm:text-xl font-black text-cyan-400 tabular-nums">{analytics.laps || (gameState === 'playing' ? engine.current.laps : 0)}</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Time Left</div>
               <div className={`text-lg sm:text-xl font-black tabular-nums ${timeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>{timeLeft}s</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Current Streak</div>
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Current Streak</div>
               <div className="text-lg sm:text-xl font-black text-emerald-400 tabular-nums">{gameState === 'playing' ? engine.current.streak : 0}</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Laps</div>
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Best Laps</div>
               <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
             </div>
           </div>
@@ -690,73 +689,49 @@ export default function SteadyHandClient() {
 
             <DrillAccordion
               id="about"
-              title="About Steady Hand Circuit"
+              title="About Steady Hand Game"
               isOpen={openAccordion === 'about'}
               onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
             >
-              <div className="space-y-8">
-                <section>
-                  <h4 className="text-base font-bold text-white mb-2 flex items-center gap-2">
-                    <Zap className="w-4 h-4 text-cyan-400" /> Continuous Path Precision & Fine Motor Control
-                  </h4>
-                  <p className="text-sm leading-relaxed mb-3">
-                    This steady hand trainer develops hand-eye coordination, fine motor control, and continuous path precision. By challenging you to physically guide your cursor perfectly along a highly volatile, jagged line without deviating, it isolates the micro-muscles in your wrist and forearm required for surgical mouse movements.
+              <div className="space-y-6">
+                <div className="space-y-3">
+                  <h3 className="text-base font-bold text-white flex items-center gap-2">
+                    <Route className="w-4 h-4 text-cyan-400" /> Continuous Path Precision &amp; Hand Tremor Suppression
+                  </h3>
+                  <p className="text-sm leading-relaxed text-gray-300">
+                    The <strong>Steady Hand Game</strong> develops hand-eye coordination, fine motor control, and continuous path-tracing stability. By challenging you to guide your cursor precisely along a winding, jagged trajectory corridor without crossing boundary tolerances, it isolates the micro-stabilizing muscles in your wrist and forearm required for surgical mouse control.
                   </p>
-                </section>
+                  <p className="text-sm leading-relaxed text-gray-300">
+                    Grounded in Johnny Accot &amp; Shumin Zhai&apos;s (1997) Steering Law, movement time through constrained tunnels depends on the integral of path length divided by corridor width. As your lap count increases, path complexity multiplies and tolerance margins tighten from 50px down to 12px, forcing your motor cortex to recruit closed-loop visual feedback corrections (Woodworth 1899) and suppress physiological tremor.
+                  </p>
+                </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                  <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Target Audience</h5>
+                      <h4 className="text-xs font-bold text-white">Target Audience</h4>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Esports athletes, graphic designers, digital artists, and individuals seeking to improve hand stability and reduce hand tremors.</p>
+                    <p className="text-xs text-gray-300 leading-relaxed">Esports athletes, digital artists, graphic designers, surgeons, and individuals seeking to improve hand stability and reduce cursor jitter.</p>
                   </div>
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                  <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Mechanical Benefits</h5>
+                      <h4 className="text-xs font-bold text-white">Mechanical Benefits</h4>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Fine motor control, continuous hand stability, path-tracking strict precision, and mouse sensitivity mastery.</p>
+                    <p className="text-xs text-gray-300 leading-relaxed">Fine motor coordination, continuous hand steadiness, smooth velocity regulation, and antagonist muscle stabilization.</p>
                   </div>
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                  <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-purple-600 flex items-center justify-center"><BarChart3 className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Telemetry Tracked</h5>
+                      <div className="w-7 h-7 rounded-lg bg-cyan-600 flex items-center justify-center"><Zap className="w-3.5 h-3.5 text-white" /></div>
+                      <h4 className="text-xs font-bold text-white">Dynamic Tightening</h4>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Total laps cleared, max survival streak, and total off-path line deviation errors.</p>
+                    <p className="text-xs text-gray-300 leading-relaxed">Corridor width contracts dynamically while vertex angles become sharper, demanding rigorous micro-steering discipline.</p>
                   </div>
                 </div>
               </div>
             </DrillAccordion>
-
-            <DrillAccordion
-              id="faq"
-              title="Frequently Asked Questions"
-              isOpen={openAccordion === 'faq'}
-              onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FAQItem q="Why does my cursor teleport back?" a="If your crosshair deviates from the exact glowing cyan line, it is an instant failure. The engine continuously runs a mathematical check between your mouse coordinates and the line, penalizing you and resetting your crosshair to the starting safe zone." />
-                <FAQItem q="How should I grip the mouse?" a="Hold the mouse with a relaxed grip. Tensing your muscles will cause micro-jitters, pushing your crosshair off the tracking line. Smooth, flowing motions are key." />
-              </div>
-            </DrillAccordion>
           </div>
-        )}
-
-        {/* ── RELATED DRILLS ── */}
-        {!isFullscreen && (
-          <section className="mt-4">
-            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3 font-sans">
-              Related Motor &amp; Precision Drills
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <RelatedCard href="/drills/motor/hand-eye-coordination/aim-trainer" title="Aim Trainer" desc="Hone spatial coordinate click speed." />
-              <RelatedCard href="/drills/fps/flick-shot-training" title="Pro Flick Trainer" desc="Snap to targets in time-attack mode." />
-              <RelatedCard href="/drills/fps/180-degree-awareness" title="180° Awareness" desc="Alternate snapping opposite horizons." />
-              <RelatedCard href="/drills/fps/recoil-control" title="Recoil Control" desc="Calibrate pulling pattern compensation." />
-            </div>
-          </section>
         )}
 
         {/* ── FOOTER ── */}
@@ -785,7 +760,7 @@ function RuleItem({ num, text, highlight = '', result }) {
   );
 }
 
-function RelatedCard({ href, title, desc }) {
+function RelatedDrillCard({ title, desc, href }) {
   return (
     <Link href={href} className="group p-5 bg-black rounded-2xl border border-gray-800 hover:border-cyan-500/50 hover:bg-white/[0.02] transition-all flex flex-col justify-between">
       <div>

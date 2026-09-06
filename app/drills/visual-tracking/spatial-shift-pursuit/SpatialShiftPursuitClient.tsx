@@ -18,12 +18,12 @@ import useImmersiveMode from '@/lib/useImmersiveMode';
 const STORAGE_KEY = 'skilldrills_visual_tracking_spatial_shift_pursuit_v2';
 
 const RELATED_DRILLS = [
-  { id: "constant-slow-pursuit", name: "Constant Slow Pursuit", cat: "Visual Tracking", desc: "Condition smooth pursuit tracking along continuous Lissajous curves.", href: "/drills/visual-tracking/constant-slow-pursuit" },
-  { id: "directional-chaos-pursuit", name: "Directional Chaos Pursuit", cat: "Visual Tracking", desc: "Complex multi-directional visual tracking with sudden direction shifts.", href: "/drills/visual-tracking/directional-chaos-pursuit" },
-  { id: "dynamic-evasion-pursuit", name: "Dynamic Evasion Pursuit", cat: "Visual Tracking", desc: "Re-acquire targets executing rapid evasive directional changes.", href: "/drills/visual-tracking/dynamic-evasion-pursuit" },
-  { id: "180-degree-awareness", name: "180° Awareness Pro", cat: "FPS Awareness", desc: "Master 180-degree snap turn awareness for CS2 & Valorant.", href: "/drills/fps/180-degree-awareness" },
-  { id: "strafe-tracking", name: "Strafe Tracking", cat: "FPS Tracking", desc: "Smooth pursuit tracking against erratic horizontal targets.", href: "/drills/fps/strafe-tracking" },
-  { id: "recoil-control", name: "Recoil Control", cat: "FPS Recoil", desc: "Calibrate pulling pattern compensation for weapons.", href: "/drills/fps/recoil-control" }
+  { id: "constant-slow-pursuit", name: "Smooth Pursuit Eye Exercise", cat: "Visual Tracking", desc: "Condition smooth pursuit tracking along continuous Lissajous curves.", href: "/drills/visual-tracking/constant-slow-pursuit" },
+  { id: "directional-chaos-pursuit", name: "Erratic Motion Eye Drill", cat: "Visual Tracking", desc: "Complex multi-directional visual tracking with sudden direction shifts.", href: "/drills/visual-tracking/directional-chaos-pursuit" },
+  { id: "dynamic-evasion-pursuit", name: "Reactive Eye Tracking Drill", cat: "Visual Tracking", desc: "Re-acquire targets executing rapid evasive directional changes.", href: "/drills/visual-tracking/dynamic-evasion-pursuit" },
+  { id: "ghosting-suppress-pursuit", name: "Eye Fixation Stability Training", cat: "Visual Tracking", desc: "Condition visual stability and suppress perceptual ghosting artifacts.", href: "/drills/visual-tracking/ghosting-suppress-pursuit" },
+  { id: "infinity-pursuit", name: "Figure-8 Eye Tracking Exercise", cat: "Visual Tracking", desc: "Track targets along figure-8 infinity loops at custom speeds.", href: "/drills/visual-tracking/infinity-pursuit" },
+  { id: "momentum-teleport-pursuit", name: "Anticipatory Eye Tracking Drill", cat: "Visual Tracking", desc: "Predict target direction after coordinates instantly teleport.", href: "/drills/visual-tracking/momentum-teleport-pursuit" }
 ];
 
 const getSavedData = () => {
@@ -416,21 +416,24 @@ export default function SpatialShiftPursuitClient() {
     <div className="min-h-screen bg-[#050508] text-white flex flex-col font-sans select-none">
       {/* ── MAIN CONTENT AREA ── */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
-        {/* Title */}
+        {/* Title & AEO Answer Block */}
         {!isFullscreen && (
-          <div className="text-center">
+          <div className="flex flex-col gap-1">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              SPATIAL SHIFT PURSUIT
-              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
+              Spatial Shift Pursuit
+              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-0.5 normal-case tracking-normal">
                 Adaptive Eye Tracking Drill
               </span>
             </h1>
+            <p className="text-[13px] text-slate-400 leading-relaxed">
+              Adaptive eye tracking drills train the ocular motor system to rapidly re-acquire targets following sudden spatial velocity shifts (Robinson, 1965; Rashbass, 1961). Interleaving ballistic catch-up saccades with immediate velocity gain re-synchronization conditions cerebellar plasticity and minimizes tracking recovery latencies (Krauzlis, 2004; Kahlon & Lisberger, 1996). Pursuit only tracks accurately to roughly 30&deg;/s (Krauzlis, 2004), so each sudden displacement is re-acquired by a saccade before smooth tracking restarts.
+            </p>
           </div>
         )}
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 gap-2.5 max-w-2xl mx-auto w-full">
+          <div className="grid grid-cols-4 gap-2 w-full -mb-2">
             <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Status</div>
               <div className="text-lg sm:text-xl font-black text-red-400 tabular-nums">
@@ -615,61 +618,11 @@ export default function SpatialShiftPursuitClient() {
               isOpen={openAccordion === 'rules'}
               onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
             >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-sans">
-                <RuleItem num="1" text="Spatial Velocity Shifts" highlight="Pure Visual" result="Adapt to vector changes" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <RuleItem num="1" text="Adaptive Tracking" highlight="Pure Visual" result="Adapt to velocity shifts" />
                 <RuleItem num="2" text="Time Adjusting" highlight={`${selectedDuration}s Duration`} result="Customizable session timer" />
                 <RuleItem num="3" text="Hide Line" highlight={mathInvisible ? "Enabled (Invisible)" : "Disabled (Visible)"} result="Toggle path guide lines" />
                 <RuleItem num="4" text="Random Speed" highlight={randomSpeed ? "Enabled Acceleration" : "Disabled Velocity"} result="Erratic acceleration control" />
-              </div>
-            </DrillAccordion>
-
-            <DrillAccordion
-              id="about"
-              title="About Spatial Shift Pursuit"
-              isOpen={openAccordion === 'about'}
-              onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
-            >
-              <div className="space-y-6 font-sans">
-                <section>
-                  <h4 className="text-base font-bold text-white mb-2">
-                    What Is Spatial Shift Pursuit Training?
-                  </h4>
-                  <p className="text-sm leading-relaxed mb-3 text-gray-300">
-                    <strong>Spatial Shift Pursuit Training</strong> conditions visual tracking agility by forcing your eyes to adapt to sudden randomized shifts in target velocity and spatial vectors.
-                  </p>
-                  <p className="text-sm leading-relaxed text-gray-300">
-                    By utilizing features like <strong>Hide Line</strong> and <strong>Random Speed Acceleration</strong>, your visual cortex learns to track unpredictable spatial direction shifts independently.
-                  </p>
-                </section>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
-                    <h5 className="text-xs font-bold text-white mb-1.5">Target Audience</h5>
-                    <p className="text-xs text-gray-300 leading-relaxed">Gamers, athletes, and vision training practitioners looking to build dynamic spatial tracking agility.</p>
-                  </div>
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
-                    <h5 className="text-xs font-bold text-white mb-1.5">Spatial Adaptability</h5>
-                    <p className="text-xs text-gray-300 leading-relaxed">Condition eye muscles to re-acquire target trajectories immediately post-vector shift.</p>
-                  </div>
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
-                    <h5 className="text-xs font-bold text-white mb-1.5">Invisible Line Mode</h5>
-                    <p className="text-xs text-gray-300 leading-relaxed">Hides path lines so tracking relies 100% on real-time visual input.</p>
-                  </div>
-                </div>
-              </div>
-            </DrillAccordion>
-
-            <DrillAccordion
-              id="faq"
-              title="Frequently Asked Questions"
-              isOpen={openAccordion === 'faq'}
-              onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-sans">
-                <FAQItem q="What is the Spatial Shift Pursuit drill?" a="The Spatial Shift Pursuit drill conditions visual tracking agility by forcing your eyes to adapt to sudden randomized shifts in target velocity and spatial vectors." />
-                <FAQItem q="Why use the 'Hide Line' setting?" a="Hiding velocity path vectors forces your visual system to track instantaneous direction shifts without visual motion cues." />
-                <FAQItem q="What does the Random Speed feature do?" a="Random Speed introduces unpredictable shift frequencies and magnitude spikes, strengthening ocular motor control." />
-                <FAQItem q="How long should I practice visual tracking daily?" a="We recommend 5 to 10 minutes of daily visual tracking training before gaming or athletic practice to warm up ocular muscles and reduce eye fatigue." />
               </div>
             </DrillAccordion>
           </div>

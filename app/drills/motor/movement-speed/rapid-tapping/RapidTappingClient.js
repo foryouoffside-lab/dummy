@@ -2,7 +2,6 @@
 import { isIdleFrameSkippable } from '@/lib/performance';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import Link from 'next/link';
 
 import {
   Activity, AlertCircle, ArrowRight, ChevronRight, Crosshair,
@@ -59,68 +58,6 @@ const getCoachAdvice = (cps, totalClicks, score) => {
   return "Elite CPS performance! Your rapid tapping speed and muscle endurance easily rival top-tier competitive Minecraft and FPS players.";
 };
 
-const FAQ_ITEMS = [
-  {
-    q: "What is a rapid tapping test?",
-    a: "A rapid tapping test is a specialized motor speed assessment that measures how fast you can repeatedly click or tap your finger on a target within a set time limit, evaluating your CPS (Clicks Per Second) and finger endurance."
-  },
-  {
-    q: "What is a good CPS score?",
-    a: "An average CPS score for casual users is between 5 and 7 clicks per second. Competitive gamers using single-finger tapping reach 8 to 10 CPS, while elite players using jitter or butterfly clicking reach 12 to 16+ CPS."
-  },
-  {
-    q: "How does rapid tapping improve finger speed and dexterity?",
-    a: "Repeated fast tapping strengthens forearm extensor tendons, conditions high-frequency motor unit firing, and improves overall finger speed and fine motor coordination."
-  },
-  {
-    q: "What is jitter clicking and how is it used?",
-    a: "Jitter clicking is a technique where you rapidly tense your arm and wrist muscles to transmit micro-vibrations into your index finger, creating high-speed clicks far beyond normal deliberate tapping."
-  },
-  {
-    q: "What is butterfly clicking?",
-    a: "Butterfly clicking involves alternating rapidly between your index finger and middle finger on a single mouse button to double your click input frequency."
-  },
-  {
-    q: "Does click speed matter in Minecraft PvP?",
-    a: "Yes, high CPS is crucial in Minecraft PvP. Faster click rates allow you to register more hits per second, deal greater knockback, and trap opponents in continuous hit combos."
-  },
-  {
-    q: "Does CPS matter in tactical shooters like Valorant and CS2?",
-    a: "While precision aim is most critical in tactical shooters, high rapid tapping capability ensures crisp semi-automatic weapon bursts (e.g., USP-S or Pistol rounds) without disrupting your crosshair control."
-  },
-  {
-    q: "How does difficulty scaling work in the 45-second test?",
-    a: "As your score increases, the target ball's shrink rate accelerates, forcing higher CPS rates and continuous rapid tapping to keep the ball alive before time expires."
-  },
-  {
-    q: "How can I build finger clicking endurance?",
-    a: "Consistent daily practice on 45-second rapid tapping sessions conditions forearm stamina, delays lactic acid buildup, and trains your muscles to sustain high CPS bursts without tensing up."
-  },
-  {
-    q: "Can I practice rapid tapping on mobile or touch screens?",
-    a: "Yes, our Rapid Tapping Test fully supports touch inputs on mobile phones and tablets, allowing you to train multi-finger tapping speed on touch displays."
-  },
-  {
-    q: "How often should I practice click speed drills?",
-    a: "Performing 3 to 5 minutes of rapid tapping practice before gaming sessions warms up finger tendons and sharpens neuromuscular activation."
-  },
-  {
-    q: "What is the scoring system in the Rapid Tapping Test?",
-    a: "You gain 1 point for every successful click landed on the target ball. Each hit also grows the ball slightly, while it continuously shrinks between clicks — keep your CPS high enough to prevent it from shrinking to zero radius."
-  },
-  {
-    q: "How does the AI Diagnostics Advice feature evaluate performance?",
-    a: "The diagnostic engine measures your average CPS, total clicks, survival duration, and target shrink resistance to deliver personalized technical training tips."
-  },
-  {
-    q: "Is this rapid tapping test completely free?",
-    a: "Yes, SkillDrills Rapid Tapping Test is 100% free with no sign-ups, downloads, or paywalls required."
-  },
-  {
-    q: "How can I share my verified CPS score card?",
-    a: "After completing a 45-second run, click the 'Share Score Card' button in the results modal to generate and copy a verified image card of your results."
-  }
-];
 
 export default function RapidTappingClient() {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
@@ -725,14 +662,14 @@ export default function RapidTappingClient() {
         accuracy: `${analytics.cps} CPS`,
         rating: { letter: gradeLetter, label: analytics.grade?.label || 'Keep Going', emoji: '⚡' },
         newBest: isNewBest,
-        drillName: 'Rapid Tapping Test',
+        drillName: 'CPS Test',
         playerName: player,
       });
       await shareScoreCard(url, canvas);
     } catch (e) {
-      const text = `🎯 I scored ${uiScore} PTS (${analytics.cps} CPS) on Rapid Tapping Test! Practice at skilldrills.online!`;
+      const text = `🎯 I scored ${uiScore} PTS (${analytics.cps} CPS) on the CPS Test! Practice at skilldrills.online!`;
       if (typeof navigator !== 'undefined' && navigator.share) {
-        navigator.share({ title: 'Rapid Tapping Test Score', text, url }).catch(() => {});
+        navigator.share({ title: 'CPS Test Score', text, url }).catch(() => {});
       } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
         navigator.clipboard.writeText(text);
         alert('Score card copied to clipboard!');
@@ -744,35 +681,35 @@ export default function RapidTappingClient() {
     <div className="min-h-screen bg-[#050508] text-white flex flex-col font-sans select-none">
       {/* ── MAIN CONTENT AREA ── */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
-        {/* Title */}
+        {/* Title & AIO Header */}
         {!isFullscreen && (
-          <div className="text-center">
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white uppercase">
-              Rapid Tapping Test
-              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
-                CPS Test &amp; Click Speed Test
-              </span>
+          <div className="text-left">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+              CPS Test
             </h1>
+            <p className="text-sm text-slate-400 mt-1.5 leading-relaxed max-w-3xl">
+              A CPS test counts how many times you can click a mouse button in one second. Sustained one-finger clicking runs to roughly 5&ndash;7 clicks per second, because the standard finger tapping test puts a healthy adult&apos;s dominant index finger near 50&ndash;55 taps per 10 seconds (Halstead, 1947) &mdash; the much higher numbers quoted online come from jitter and butterfly techniques, which do not use one finger press per click.
+            </p>
           </div>
         )}
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 gap-2.5 max-w-2xl mx-auto w-full">
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
+          <div className="grid grid-cols-4 gap-2 w-full">
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Score</div>
               <div className="text-lg sm:text-xl font-black text-white tabular-nums">{uiScore}</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Time Left</div>
               <div className={`text-lg sm:text-xl font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>{uiTimeLeft}s</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">CPS Rate</div>
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">CPS Rate</div>
               <div className="text-lg sm:text-xl font-black text-fuchsia-400 tabular-nums">{liveCps}</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Best Score</div>
               <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
             </div>
           </div>
@@ -870,7 +807,7 @@ export default function RapidTappingClient() {
             <FpsStartCard
               icon={Activity}
               accent="fuchsia"
-              title="Rapid Tapping Test"
+              title="CPS Test"
               subtitle="CPS Click Speed Trainer • Hardware Raw Input"
               rules={[
                 { icon: Target, accent: 'fuchsia', title: 'Objective', text: 'Tap Target Ball to Prevent Shrink' },
@@ -985,77 +922,49 @@ export default function RapidTappingClient() {
 
             <DrillAccordion
               id="about"
-              title="About Rapid Tapping Test"
+              title="About the CPS Test"
               isOpen={openAccordion === 'about'}
               onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
             >
-              <div className="space-y-8">
-                <section>
-                  <h4 className="text-base font-bold text-white mb-2 flex items-center gap-2">
-                    <Zap className="w-4 h-4 text-fuchsia-400" /> Mastering Clicks Per Second (CPS) &amp; Finger Endurance
-                  </h4>
-                  <p className="text-sm leading-relaxed mb-3">
-                    The <strong>Rapid Tapping Test</strong> measures your raw Clicks Per Second (CPS), finger tapping velocity, and forearm tendon endurance. In competitive gaming like <strong>Minecraft PvP, League of Legends, and tactical shooters</strong>, landing high-frequency click bursts allows you to register rapid weapon fire and land continuous hit combos.
+              <div className="space-y-6">
+                <div className="space-y-3">
+                  <h3 className="text-base font-bold text-white flex items-center gap-2">
+                    <Activity className="w-4 h-4 text-fuchsia-400" /> Neuromuscular Tapping Frequency &amp; Clicking Endurance
+                  </h3>
+                  <p className="text-sm leading-relaxed text-gray-300">
+                    The <strong>CPS Test (rapid tapping test)</strong> isolates and evaluates the maximum firing rate of your neuromuscular pathway, measuring how many discrete ballistic inputs your motor cortex can generate per second. In competitive gaming environments like <strong>Minecraft PvP, MOBA combat, and semi-automatic pistol rounds in CS2/Valorant</strong>, click frequency directly determines damage throughput and engagement outcomes.
                   </p>
-                  <p className="text-sm leading-relaxed">
-                    By tapping continuously against an accelerating shrink rate over 45 seconds, the drill conditions neuromuscular firing rates, delays lactic acid fatigue, and sharpens click execution under pressure.
+                  <p className="text-sm leading-relaxed text-gray-300">
+                    While casual tapping relies on voluntary finger flexor contractions averaging 5–7 CPS, advanced techniques like <strong>jitter clicking</strong> (transmitting micro-vibrations via isometric forearm co-contraction) and <strong>butterfly clicking</strong> (alternating dual-finger actuation) push mechanical switch actuation up to 12–20+ CPS. Grounded in Ward Halstead&apos;s (1947) finger tapping norms and Todor &amp; Kyprie&apos;s (1980) motor oscillation research, our continuous shrink-rate engine tests both your burst velocity and muscular endurance over a sustained 45-second session.
                   </p>
-                </section>
+                </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                  <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-fuchsia-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Target Audience</h5>
+                      <h4 className="text-xs font-bold text-white">Target Audience</h4>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Minecraft PvP competitors, MOBA/RTS players, and gamers seeking to improve raw CPS, jitter clicking techniques, and finger stamina.</p>
+                    <p className="text-xs text-gray-300 leading-relaxed">Competitive Minecraft PvP players, tactical FPS gamers, and rhythm game enthusiasts training finger tapping frequency and endurance.</p>
                   </div>
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                  <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-purple-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Mechanical Benefits</h5>
+                      <h4 className="text-xs font-bold text-white">Physiological Benefits</h4>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Strengthens forearm extensor tendons, conditions high-frequency motor unit firing, and improves click precision during high-speed bursts.</p>
+                    <p className="text-xs text-gray-300 leading-relaxed">Strengthens finger extensor and flexor tendons, elevates motor unit recruitment velocity, and delays neuromuscular fatigue.</p>
                   </div>
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                  <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-pink-600 flex items-center justify-center"><Zap className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Difficulty Scaling</h5>
+                      <h4 className="text-xs font-bold text-white">Dynamic Decay Engine</h4>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Target decay rate accelerates up to +600px/sec as score increases, demanding faster CPS and unrelenting tap frequency.</p>
+                    <p className="text-xs text-gray-300 leading-relaxed">Target decay accelerates up to +600px/sec as score increases, demanding faster CPS and unrelenting tap frequency.</p>
                   </div>
                 </div>
               </div>
             </DrillAccordion>
-
-            <DrillAccordion
-              id="faq"
-              title="Frequently Asked Questions"
-              isOpen={openAccordion === 'faq'}
-              onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {FAQ_ITEMS.map((item, idx) => (
-                  <FAQItem key={idx} q={item.q} a={item.a} />
-                ))}
-              </div>
-            </DrillAccordion>
           </div>
-        )}
-
-        {/* ── RELATED DRILLS ── */}
-        {!isFullscreen && (
-          <section className="mt-4">
-            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3 font-sans">
-              Related Motor &amp; Speed Drills
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              <RelatedCard href="/drills/motor/movement-speed/finger-sequencing" title="Sequence Aim Trainer" desc="Train multi-target ordered clicking and finger dexterity under time pressure." />
-              <RelatedCard href="/drills/motor/hand-eye-coordination/drag-and-drop" title="Drag & Drop Precision" desc="Master mouse spatial drag control and release timing." />
-              <RelatedCard href="/drills/motor/movement-speed/keyboard-recognition" title="Keyboard Recognition" desc="Train rapid key target recognition and motor execution." />
-              <RelatedCard href="/drills/fps/180-degree-awareness" title="180° Awareness Pro" desc="Master wide horizontal flicks and peripheral target detection." />
-            </div>
-          </section>
         )}
 
         {/* ── FOOTER ── */}
@@ -1096,27 +1005,4 @@ function RuleItem({ num, text, highlight = '', result }) {
     </div>
   );
 }
-
-function RelatedCard({ href, title, desc }) {
-  return (
-    <Link href={href} className="group p-5 bg-black rounded-2xl border border-gray-800 hover:border-fuchsia-500/50 hover:bg-white/[0.02] transition-all flex flex-col justify-between">
-      <div>
-        <h4 className="font-bold text-white group-hover:text-fuchsia-400 transition-colors mb-1 text-base">{title}</h4>
-        <p className="text-xs text-gray-400 leading-relaxed line-clamp-2">{desc}</p>
-      </div>
-      <div className="flex items-center gap-1 mt-4 text-xs text-fuchsia-400 font-bold font-mono">
-        <span>TRY DRILL</span>
-        <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-      </div>
-    </Link>
-  );
-}
-
-function FAQItem({ q, a }) {
-  return (
-    <div className="bg-[#05060b] border border-gray-800 rounded-xl p-5 hover:border-gray-700 transition-colors">
-      <h4 className="text-sm font-bold text-gray-200 mb-2">{q}</h4>
-      <p className="text-xs text-gray-400 leading-relaxed">{a}</p>
-    </div>
-  );
-}
+

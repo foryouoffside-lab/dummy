@@ -699,36 +699,36 @@ export default function ReflexTrainingDrillClient() {
 
         {/* Drill Header */}
         {!isFullscreen && (
-          <div className="text-center">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-black uppercase tracking-tight text-white flex items-center justify-center gap-3 flex-wrap">
-              REFLEX TRAINING DRILL
-              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
-                Multi-Target Burst Reflex Game
-              </span>
+          <div className="flex flex-col gap-1">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+              Reflex Training Drill
             </h1>
+            <p className="text-[13px] text-slate-400 leading-relaxed">
+              Reacting to a single expected target takes a typical adult 200&ndash;250&nbsp;ms. Adding more targets to choose between makes it slower still, and reaction time rises with the number of alternatives you have to sort through (Hick, 1952).
+            </p>
           </div>
         )}
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 gap-2.5 max-w-2xl mx-auto w-full">
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+          <div className="grid grid-cols-4 gap-2 w-full">
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
-              <div className="text-lg sm:text-xl font-black text-red-400 tabular-nums">{uiScore}</div>
+              <div className="text-base sm:text-lg font-black text-red-400 tabular-nums">{uiScore}</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
-              <div className={`text-lg sm:text-xl font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>
+              <div className={`text-base sm:text-lg font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>
                 {uiTimeLeft}s
               </div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Level</div>
-              <div className="text-lg sm:text-xl font-black text-indigo-400 tabular-nums">L{uiLevel}</div>
+              <div className="text-base sm:text-lg font-black text-indigo-400 tabular-nums">L{uiLevel}</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
-              <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
+              <div className="text-base sm:text-lg font-black text-amber-400 tabular-nums">{bestScore}</div>
             </div>
           </div>
         )}
@@ -881,9 +881,9 @@ export default function ReflexTrainingDrillClient() {
             >
               <div className="space-y-8 font-sans">
                 <section>
-                  <h4 className="text-base font-bold text-white mb-2 flex items-center gap-2">
+                  <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
                     <Eye className="w-4 h-4 text-red-400" /> What Is Multi-Target Burst Reflex Training?
-                  </h4>
+                  </h3>
                   <p className="text-sm leading-relaxed mb-3 text-gray-300">
                     <strong>Reflex Training Drill</strong> isolates simultaneous multi-target acquisition and divided attention speed. In high-pressure FPS games like Valorant, CS2, Overwatch 2, and Apex Legends, you often encounter multiple targets appearing at the same moment across your field of view.
                   </p>
@@ -896,45 +896,25 @@ export default function ReflexTrainingDrillClient() {
                   <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-red-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Who Should Use This?</h5>
+                      <h4 className="text-xs font-bold text-white">Who Should Use This?</h4>
                     </div>
                     <p className="text-xs text-gray-300 leading-relaxed">Gamers and esports competitors looking to sharpen multi-target scanning speed, divided attention, and fast sequential clicks.</p>
                   </div>
                   <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Divided Attention Control</h5>
+                      <h4 className="text-xs font-bold text-white">Divided Attention Control</h4>
                     </div>
                     <p className="text-xs text-gray-300 leading-relaxed">Trains your visual field to register multiple targets simultaneously without losing awareness of expiring nodes.</p>
                   </div>
                   <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Zap className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Burst Interception Speed</h5>
+                      <h4 className="text-xs font-bold text-white">Burst Interception Speed</h4>
                     </div>
                     <p className="text-xs text-gray-300 leading-relaxed">Conditions fast motor execution and click cadence to maximize points before time runs out.</p>
                   </div>
                 </div>
-              </div>
-            </DrillAccordion>
-
-            <DrillAccordion
-              id="faq"
-              title="Frequently Asked Questions"
-              isOpen={openAccordion === 'faq'}
-              onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-sans">
-                <FAQItem q="What is Reflex Training Drill (Burst Acquisition)?" a="It is an interactive multi-target reflex trainer where simultaneous targets flash across your viewport with individual time-to-live countdowns." />
-                <FAQItem q="How does this improve gaming performance?" a="By training your brain to scan and prioritize multiple visual threats simultaneously, you react faster in 1vX clutch rounds." />
-                <FAQItem q="What is divided attention in aim training?" a="Divided attention is the neurological capability to monitor several stimuli across your visual field concurrently while executing motor actions." />
-                <FAQItem q="Is this reflex training drill free?" a="Yes, all drills on SkillDrills are 100% free with no signups, downloads, or pop-up ads required." />
-                <FAQItem q="How does continuous difficulty scaling work?" a="Difficulty scales dynamically based on your score and combo streak, increasing concurrent targets and shortening time-to-live windows." />
-                <FAQItem q="Is there a time penalty for missing or target timeouts?" a="By default, missing or letting a target time out only resets your combo streak. An opt-in time penalty (-0.8s per error) is available in session settings for hard-mode training." />
-                <FAQItem q="Can you train divided attention and multi-target reflexes?" a="Yes. Repeated exposure to simultaneous stimuli strengthens parallel visual processing and reduces the tunnel-vision effect of fixating on one target." />
-                <FAQItem q="How does this drill differ from single-target reaction tests?" a="Single-target tests present one stimulus at a time. This drill spawns 2 to 5 targets simultaneously, so you must scan and clear a full burst under a shared time limit." />
-                <FAQItem q="Which target should I clear first in a burst?" a="Watch the depleting countdown ring around each target and prioritize whichever is closest to timing out, not just the nearest one to your cursor." />
-                <FAQItem q="What is a good score on this drill?" a="A score above 5,000 indicates strong divided-attention reflexes, while scores exceeding 10,000 represent elite multi-target acquisition speed." />
               </div>
             </DrillAccordion>
           </div>
@@ -988,15 +968,6 @@ function RuleItem({ num, text, highlight = '', result }: { num: string; text: st
           {result}
         </div>
       </div>
-    </div>
-  );
-}
-
-function FAQItem({ q, a }: { q: string; a: string }) {
-  return (
-    <div className="bg-[#05060b] border border-gray-800 rounded-xl p-5 hover:border-gray-700 transition-colors font-sans">
-      <h4 className="text-sm font-bold text-gray-200 mb-2">{q}</h4>
-      <p className="text-xs text-gray-400 leading-relaxed">{a}</p>
     </div>
   );
 }

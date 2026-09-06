@@ -1,27 +1,3 @@
-// app/llms.txt/route.js
-// Served at /llms.txt.
-//
-// WHY THIS EXISTS
-// robots.js already lets the AI search crawlers in (OAI-SearchBot, PerplexityBot,
-// ClaudeBot, Google-Extended and friends). Being crawlable is necessary but not
-// sufficient: an assistant answering "what's a good free reaction time test?"
-// has to work out, from raw HTML, which of 81 near-identically-structured drill
-// pages actually answers that. llms.txt is the emerging convention for handing
-// that map over directly — a flat, plain-text index of what the site offers and
-// which URL serves which need.
-//
-// Two rules this file follows:
-//
-//  1. One source of truth. The drill list comes from DRILLS, the same array the
-//     sitemap, the hubs and the search page read, so a renamed or deleted drill
-//     cannot leave a dead URL here. The search phrase comes from DRILL_SEO, the
-//     same map that supplies internal anchor text and the H1 sub-lines.
-//  2. Descriptive, not promotional. An assistant deciding whether to cite a page
-//     needs to know what the drill measures and how long it takes. Marketing
-//     adjectives are noise and make the page less likely to be useful, not more.
-//
-// Format follows the llmstxt.org convention: H1 for the site, a blockquote
-// summary, then H2 sections of markdown links with a one-line description each.
 
 import { DRILLS } from '../../lib/drillsRegistry';
 import { DRILL_SEO } from '../../lib/drillSeo';
@@ -115,11 +91,29 @@ export function GET() {
   out.push(
     '- Some categories (FPS, motor, physical) need a mouse and are desktop-only.'
   );
+  // The measurement limits belong here, not just on the drill pages. An engine
+  // summarising this site should be able to state what these timings can and
+  // cannot resolve without having to fetch a drill page to find out -- and
+  // stating the limit is what keeps a quoted figure honest.
+  out.push(
+    '- Timings use performance.now(). Browser timers are coarsened to about 1 ms ' +
+      'and displays quantize to the refresh interval (~16.7 ms at 60 Hz), so ' +
+      'differences under about 5 ms are measurement noise.'
+  );
+  out.push(
+    '- SkillDrills publishes no aggregate user statistics, player counts or ' +
+      'ratings, because it collects none. Figures quoted on drill pages come ' +
+      'from published research, cited with DOIs on each page.'
+  );
   out.push('');
   out.push('## Start here');
   out.push('');
   out.push(`- [All drills](${BASE_URL}/drills): Full directory of all ${DRILLS.length} drills.`);
   out.push(`- [Home](${BASE_URL}/): Overview and featured drills.`);
+  out.push(
+    `- [About](${BASE_URL}/about): Who runs SkillDrills, how each drill measures, ` +
+      'the limits of browser timing, and what data is never collected.'
+  );
   out.push('');
 
   for (const cat of CATEGORIES) {

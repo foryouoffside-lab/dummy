@@ -2,7 +2,6 @@
 import { isIdleFrameSkippable } from '@/lib/performance';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import Link from 'next/link';
 
 import {
   Activity, AlertCircle, ArrowRight, Brain, ChevronRight, Crosshair,
@@ -57,27 +56,6 @@ const RULES_ITEMS = [
   { title: "Combo Multiplier (up to 3.0x)", text: "Chain arrests without errors to multiply score gains up to 3.0x max." },
   { title: "Slice-Through & Miss Errors", text: "Moving while over a node or missing it resets your combo streak without score deduction." },
   { title: "Brutal Speed Scaling", text: "As your score increases, node speeds accelerate up to 1800 px/s with smaller radiuses." }
-];
-
-const FAQ_ITEMS = [
-  { q: "What is the Reaction Chain drill?", a: "An elite reflex training game focusing on mouse precision and impulse arrest. Instead of clicking targets, you must steer your cursor over them and stop completely to 'arrest' them." },
-  { q: "How do impulse arrest mechanics work?", a: "When your crosshair is over a target, your mouse velocity must be under 1.5 pixels/frame ('ARREST READY' turns green). Stopping successfully scores 50 points base per hit." },
-  { q: "What skills does this reflex drill improve?", a: "It trains kinetic brake control, hand-eye coordination, motor inhibition (stopping on a dime), and prevents over-flicking or spastic aiming in high-speed gaming." },
-  { q: "How long does each round last?", a: "Each round lasts 45 seconds focused duration." },
-  { q: "Why do targets change colors?", a: "As you level up, node velocities accelerate from 600px/s up to 1800px/s. Node colors shift from Green -> Orange -> Red to visually warn you of higher speeds." },
-  { q: "How does the combo multiplier work?", a: "Chaining successful arrests increases your combo multiplier up to 3.0x. Maintaining high combos is the key to scaling score quickly." },
-  { q: "Does this game help with Valorant or CS2 aim?", a: "Yes, it directly trains snap deceleration. In tactical shooters, you must stop moving your mouse and character to achieve perfect first-shot accuracy. This drill builds that muscle memory." },
-  { q: "Do I need to sign up for this mouse precision test?", a: "No registration required. This free mouse precision and reflex game works instantly in your browser — no downloads needed." },
-  { q: "Is this reflex game free to play?", a: "Yes, the Reaction Chain drill on SkillDrills is 100% free, ad-free, and runs entirely in your web browser." }
-];
-
-const RELATED_DRILLS = [
-  { id: "180-degree-awareness", name: "180° Awareness Pro", cat: "FPS Awareness", desc: "Train rapid target identification and 180° turnaround flicks.", href: "/drills/fps/180-degree-awareness" },
-  { id: "quick-dodge", name: "Quick Dodge", cat: "Physical Reflex", desc: "Evasion and spatial coordinate reaction drill.", href: "/drills/physical/reflex-training/quick-dodge" },
-  { id: "aim-trainer", name: "Aim Trainer", cat: "Motor Coordination", desc: "Hone spatial coordinate click speed and precision.", href: "/drills/motor/hand-eye-coordination/aim-trainer" },
-  { id: "flick-shot-training", name: "Pro Flick Trainer", cat: "FPS Flicking", desc: "Snap to targets in time-attack mode with precision flicking.", href: "/drills/fps/flick-shot-training" },
-  { id: "steady-hand", name: "Steady Hand", cat: "Motor Precision", desc: "Test steady pathing and micro-movement control.", href: "/drills/motor/precision-control/steady-hand" },
-  { id: "reaction-time-test", name: "Reaction Time Test", cat: "Reaction Speed", desc: "Test raw visual reaction speed in milliseconds.", href: "/drills/reaction-speed/reaction-time-test" }
 ];
 
 // ============================================================
@@ -713,32 +691,37 @@ export default function ReactionChainClient() {
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
         {/* Title */}
         {!isFullscreen && (
-          <div className="text-center">
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white uppercase">
-              REACTION CHAIN
-              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
-                Reaction Chain Impulse Drill
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-2">
+              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
+                Reaction chain
+              </h1>
+              <span className="text-[11px] font-semibold text-emerald-400/90 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full" data-seo-kw="1">
+                Impulse Control Reflex Game
               </span>
-            </h1>
+            </div>
+            <p className="text-xs sm:text-sm text-slate-400 leading-relaxed max-w-3xl">
+              Stopping a fast movement exactly on a target is harder than starting one. Going and stopping behave like a race between two independent processes, and whichever finishes first determines whether the action is completed or cancelled (Logan &amp; Cowan, 1984). A rapid aimed movement also arrives in two parts — a ballistic impulse covering most of the distance, then a slower visually guided correction (Woodworth, 1899) — so overshooting costs far more time than setting off slightly slower.
+            </p>
           </div>
         )}
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 gap-2.5 max-w-2xl mx-auto w-full">
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+          <div className="grid grid-cols-4 gap-2 w-full">
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
               <div className="text-lg sm:text-xl font-black text-white tabular-nums">{uiScore}</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
               <div className={`text-lg sm:text-xl font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>{uiTimeLeft}s</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Accuracy</div>
-              <div className="text-lg sm:text-xl font-black text-blue-400 tabular-nums">{accuracy}%</div>
+              <div className="text-lg sm:text-xl font-black text-emerald-400 tabular-nums">{accuracy}%</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
               <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
             </div>
@@ -838,7 +821,7 @@ export default function ReactionChainClient() {
               icon={Crosshair}
               accent="emerald"
               title="Reaction Chain"
-              subtitle="Desktop Exclusive • Impulse Arrest"
+              subtitle="Impulse Arrest & Motor Inhibition • 15 Levels"
               rules={[
                 { icon: Zap, accent: 'emerald', title: 'Stop on Nodes (+50 PTS)', text: 'Intercept moving nodes and bring cursor to a complete halt (ARREST READY)' },
                 { icon: ShieldAlert, accent: 'blue', title: 'Maintain Combo Streak', text: 'Chain successful arrests to scale your score multiplier up to 3.0x' },
@@ -946,7 +929,10 @@ export default function ReactionChainClient() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {RULES_ITEMS.map((item, i) => (
                   <div key={i} className="bg-black p-4 rounded-xl border border-white/10">
-                    <p className="text-sm font-bold text-white mb-1">{item.title}</p>
+                    <h3 className="text-sm font-bold text-white mb-1 flex items-center gap-2">
+                      <Target className="w-4 h-4 text-emerald-400" />
+                      {item.title}
+                    </h3>
                     <p className="text-xs text-gray-300 leading-relaxed">{item.text}</p>
                   </div>
                 ))}
@@ -955,92 +941,50 @@ export default function ReactionChainClient() {
 
             <DrillAccordion
               id="about"
-              title="About Reaction Chain"
+              title="About Reaction Chain (Impulse Arrest Reflex Drill)"
               isOpen={openAccordion === 'about'}
               onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
             >
-              <div className="space-y-8">
+              <div className="space-y-6">
                 <section>
-                  <h4 className="text-base font-bold text-white mb-2 flex items-center gap-2">
-                    <Brain className="w-4 h-4 text-emerald-400" /> What Is Reaction Chain Training?
-                  </h4>
-                  <p className="text-sm leading-relaxed mb-3 text-gray-300">
-                    <strong>Reaction Chain</strong> isolates and exercises your precision stopping ability and impulse control (motor inhibition). Instead of simply clicking moving targets, you must move to intercept them and force your hand to stop completely.
+                  <h3 className="text-sm font-bold text-white mb-2 flex items-center gap-2">
+                    <Brain className="w-4 h-4 text-emerald-400" />
+                    Kinetic Braking & Response Inhibition Neurophysiology
+                  </h3>
+                  <p className="text-xs sm:text-sm leading-relaxed mb-3 text-gray-300">
+                    Reaction Chain isolates and trains your motor deceleration capacity and response inhibition. Instead of simply clicking moving targets, you must steer your crosshair to intercept incoming nodes and force your antagonist forearm muscles to arrest cursor momentum completely within the node perimeter.
                   </p>
-                  <p className="text-sm leading-relaxed text-gray-300">
-                    By consistently performing kinetic arrest drills, players train their central nervous system to rapidly decelerate crosshair velocity. This eliminates over-flicking and builds clean first-shot accuracy in tactical shooters like CS2 and Valorant.
+                  <p className="text-xs sm:text-sm leading-relaxed text-gray-300">
+                    By consistently conditioning kinetic arrests, players rewire the subthalamic nucleus and motor cortex to execute rapid motor braking (Logan et al. 1984). This eradicates lazy over-flicking and builds razor-sharp first-shot stabilization in tactical shooters like Counter-Strike 2 and Valorant.
                   </p>
                 </section>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
-                    <div className="flex items-center gap-2.5 mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Who Should Use This?</h5>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="p-3.5 rounded-xl border border-white/5 bg-white/[0.02]">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <div className="w-6 h-6 rounded-lg bg-blue-600/30 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-blue-400" /></div>
+                      <h4 className="text-xs font-bold text-white">Target Athletes</h4>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">FPS gamers wanting to eliminate "lazy aiming" and over-flicking, and players seeking advanced motor inhibition training.</p>
+                    <p className="text-[11px] text-gray-300 leading-relaxed">FPS players seeking to eliminate over-flicking, and athletes requiring rapid neuromuscular motor arrest.</p>
                   </div>
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
-                    <div className="flex items-center gap-2.5 mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Skills Improved</h5>
+                  <div className="p-3.5 rounded-xl border border-white/5 bg-white/[0.02]">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <div className="w-6 h-6 rounded-lg bg-emerald-600/30 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-emerald-400" /></div>
+                      <h4 className="text-xs font-bold text-white">Conditioned Skills</h4>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Precision stopping, kinetic friction control, impulse inhibition, and high-speed target interception.</p>
+                    <p className="text-[11px] text-gray-300 leading-relaxed">Precision deceleration, kinetic friction control, stop-signal inhibition, and spatial interception.</p>
                   </div>
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
-                    <div className="flex items-center gap-2.5 mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-purple-600 flex items-center justify-center"><Zap className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Kinetic Control</h5>
+                  <div className="p-3.5 rounded-xl border border-white/5 bg-white/[0.02]">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <div className="w-6 h-6 rounded-lg bg-purple-600/30 flex items-center justify-center"><Zap className="w-3.5 h-3.5 text-purple-400" /></div>
+                      <h4 className="text-xs font-bold text-white">Kinetic Braking</h4>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Intercept high-velocity incoming targets and bring your hand to a complete stop to score points and build combos.</p>
+                    <p className="text-[11px] text-gray-300 leading-relaxed">Intercept nodes up to 1,800 px/s and halt within 1.5 px/frame to build multipliers up to 3.0x.</p>
                   </div>
                 </div>
               </div>
             </DrillAccordion>
-
-            <DrillAccordion
-              id="faq"
-              title="Frequently Asked Questions"
-              isOpen={openAccordion === 'faq'}
-              onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {FAQ_ITEMS.map((item, i) => (
-                  <div key={i} className="bg-[#05060b] border border-gray-800 rounded-xl p-5">
-                    <h4 className="text-sm font-bold text-gray-200 mb-2">{item.q}</h4>
-                    <p className="text-xs text-gray-400 leading-relaxed">{item.a}</p>
-                  </div>
-                ))}
-              </div>
-            </DrillAccordion>
           </div>
-        )}
-
-        {/* ── RELATED DRILLS ── */}
-        {!isFullscreen && (
-          <section className="mt-4">
-            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3 font-sans">
-              Related Drills
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {RELATED_DRILLS.map((drill) => (
-                <Link
-                  key={drill.id}
-                  href={drill.href}
-                  className="group bg-[#0c0c16] border border-white/5 hover:border-emerald-500/40 rounded-xl p-3.5 transition-all duration-200 hover:-translate-y-0.5 flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider mb-1">{drill.cat}</div>
-                    <div className="text-xs font-bold text-white group-hover:text-emerald-300 transition-colors">{drill.name}</div>
-                    <div className="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">{drill.desc}</div>
-                  </div>
-                  <div className="text-[10px] font-bold text-slate-500 group-hover:text-emerald-400 mt-3 flex items-center gap-1 transition-colors">
-                    Train Drill <span>→</span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
         )}
 
         {/* ── FOOTER ── */}

@@ -2,7 +2,6 @@
 import { isIdleFrameSkippable } from '@/lib/performance';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import Link from 'next/link';
 
 import {
   Activity, AlertCircle, ArrowRight, BarChart3, Flame, RefreshCw, Target,
@@ -498,35 +497,35 @@ export default function FineMotorClient() {
     <div className="min-h-screen bg-[#050508] text-white flex flex-col font-sans select-none">
       {/* ── MAIN CONTENT AREA ── */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
-        {/* Title */}
+        {/* Title & AIO Header */}
         {!isFullscreen && (
-          <div className="text-center">
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white uppercase">
-              Wave Tracing Trainer
-              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
-                Mouse Tracing Game
-              </span>
+          <div className="text-left">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+              Mouse Tracing Game
             </h1>
+            <p className="text-sm text-slate-400 mt-1.5 leading-relaxed max-w-3xl">
+              A mouse tracing game asks you to keep the cursor on a path that keeps moving, which measures continuous tracking rather than one-off accuracy. The eye follows a smoothly moving target accurately up to roughly 30&deg;/s; past that it falls behind and has to catch up with saccades (Krauzlis, 2004; Rashbass, 1961), and the hand can only stay on a line the eye is still tracking. The path itself is a Steering Law corridor: time to stay inside it scales with its length divided by its width (Accot &amp; Zhai, 1997).
+            </p>
           </div>
         )}
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 gap-2.5 max-w-2xl mx-auto w-full">
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Flow Score</div>
+          <div className="grid grid-cols-4 gap-2 w-full">
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Flow Score</div>
               <div className="text-lg sm:text-xl font-black text-white tabular-nums">{score}</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Time Left</div>
               <div className={`text-lg sm:text-xl font-black tabular-nums ${timeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>{timeLeft}s</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Flow Integrity</div>
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Flow Integrity</div>
               <div className="text-lg sm:text-xl font-black text-rose-400 tabular-nums">{flowState}%</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Best Score</div>
               <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
             </div>
           </div>
@@ -632,7 +631,7 @@ export default function FineMotorClient() {
             <FpsStartCard
               icon={Activity}
               accent="red"
-              title="Wave Tracing Trainer"
+              title="Mouse Tracing Game"
               subtitle="Raw Input Continuous Tracking • 45s Timer"
               rules={[
                 { icon: Target, accent: 'redOrange', title: 'Objective', text: 'Keep Crosshair Perfectly Aligned with Wave' },
@@ -738,73 +737,49 @@ export default function FineMotorClient() {
 
             <DrillAccordion
               id="about"
-              title="About Wave Tracing Trainer"
+              title="About Mouse Tracing Game"
               isOpen={openAccordion === 'about'}
               onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
             >
-              <div className="space-y-8">
-                <section>
-                  <h4 className="text-base font-bold text-white mb-2 flex items-center gap-2">
-                    <Zap className="w-4 h-4 text-rose-400" /> Continuous Wave Tracking & Flow Endurance
-                  </h4>
-                  <p className="text-sm leading-relaxed mb-3">
-                    This fine motor drill develops hand-eye coordination and path precision by challenging you to physically guide your cursor along a dynamic, scrolling wave. The wave moves continuously regardless of your position, challenging you to quickly re-acquire the target if you slip off, forcing you to develop seamless positional awareness and flow state endurance.
+              <div className="space-y-6">
+                <div className="space-y-3">
+                  <h3 className="text-base font-bold text-white flex items-center gap-2">
+                    <Zap className="w-4 h-4 text-rose-400" /> Continuous Wave Tracking &amp; Flow Endurance
+                  </h3>
+                  <p className="text-sm leading-relaxed text-gray-300">
+                    The <strong>Mouse Tracing Game</strong> develops dynamic hand-eye coordination, fine motor path precision, and smooth pursuit visual tracking. By challenging you to guide your cursor along a continuously scrolling sinusoidal wave filament with a 22px tolerance band, it isolates the micro-stabilizing muscles in your wrist and forearm required for fluid tracking in tactical shooters and digital illustration.
                   </p>
-                </section>
+                  <p className="text-sm leading-relaxed text-gray-300">
+                    Grounded in Johnny Accot &amp; Shumin Zhai&apos;s (1997) Steering Law, dynamic trajectory navigation requires continuous velocity modulation. As scroll speed accelerates from 2.2 to 4.5+ px/frame over 45 seconds, the drill engages Robert Woodworth&apos;s (1899) closed-loop current control mechanism, demanding continuous visual-motor error correction and smooth pursuit eye movements (Krauzlis 2004, Rashbass 1961) to sustain peak flow integrity.
+                  </p>
+                </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                  <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Target Audience</h5>
+                      <h4 className="text-xs font-bold text-white">Target Audience</h4>
                     </div>
                     <p className="text-xs text-gray-300 leading-relaxed">Esports athletes, graphic designers, digital artists, and individuals seeking to improve hand stability and reduce hand tremors.</p>
                   </div>
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                  <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Mechanical Benefits</h5>
+                      <h4 className="text-xs font-bold text-white">Mechanical Benefits</h4>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Fine motor control, continuous hand stability, flow state endurance, and mouse sensitivity mastery.</p>
+                    <p className="text-xs text-gray-300 leading-relaxed">Fine motor control, continuous hand stability, flow state endurance, and smooth pursuit tracking mastery.</p>
                   </div>
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                  <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-purple-600 flex items-center justify-center"><BarChart3 className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Telemetry Tracked</h5>
+                      <h4 className="text-xs font-bold text-white">Telemetry Tracked</h4>
                     </div>
                     <p className="text-xs text-gray-300 leading-relaxed">Flow Score, peak flow state percentage, and maximum survival tracking streak frames.</p>
                   </div>
                 </div>
               </div>
             </DrillAccordion>
-
-            <DrillAccordion
-              id="faq"
-              title="Frequently Asked Questions"
-              isOpen={openAccordion === 'faq'}
-              onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FAQItem q="Why does the wave keep moving?" a="The continuous motion mimics tracking smooth dynamic targets in tactical games. Re-acquiring target alignment under motion trains rapid adaptive crosshair recentering." />
-                <FAQItem q="How is Flow Integrity calculated?" a="Flow Integrity is a 0-100 meter that rises while your crosshair stays aligned on the wave and drains when you drift off, tracked across your 45-second session." />
-              </div>
-            </DrillAccordion>
           </div>
-        )}
-
-        {/* ── RELATED DRILLS ── */}
-        {!isFullscreen && (
-          <section className="mt-4">
-            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3 font-sans">
-              Related Motor &amp; Precision Drills
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <RelatedCard href="/drills/motor/precision-control/steady-hand" title="Steady Hand Circuit" desc="Guide cursor along a jagged line without deviation." />
-              <RelatedCard href="/drills/motor/hand-eye-coordination/aim-trainer" title="Aim Trainer" desc="Hone spatial coordinate click speed." />
-              <RelatedCard href="/drills/fps/flick-shot-training" title="Pro Flick Trainer" desc="Snap to targets in time-attack mode." />
-              <RelatedCard href="/drills/fps/recoil-control" title="Recoil Control" desc="Calibrate pulling pattern compensation." />
-            </div>
-          </section>
         )}
 
         {/* ── FOOTER ── */}
@@ -833,26 +808,3 @@ function RuleItem({ num, text, highlight = '', result }) {
   );
 }
 
-function RelatedCard({ href, title, desc }) {
-  return (
-    <Link href={href} className="group p-5 bg-black rounded-2xl border border-gray-800 hover:border-rose-500/50 hover:bg-white/[0.02] transition-all flex flex-col justify-between">
-      <div>
-        <h4 className="font-bold text-white group-hover:text-rose-400 transition-colors mb-1 text-base">{title}</h4>
-        <p className="text-xs text-gray-400 leading-relaxed line-clamp-2">{desc}</p>
-      </div>
-      <div className="flex items-center gap-1 mt-4 text-xs text-rose-400 font-bold font-mono">
-        <span>TRY DRILL</span>
-        <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-      </div>
-    </Link>
-  );
-}
-
-function FAQItem({ q, a }) {
-  return (
-    <div className="bg-[#05060b] border border-gray-800 rounded-xl p-5 hover:border-gray-700 transition-colors">
-      <h4 className="text-sm font-bold text-gray-200 mb-2">{q}</h4>
-      <p className="text-xs text-gray-400 leading-relaxed">{a}</p>
-    </div>
-  );
-}

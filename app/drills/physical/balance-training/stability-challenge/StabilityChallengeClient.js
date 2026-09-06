@@ -2,7 +2,6 @@
 import { isIdleFrameSkippable } from '@/lib/performance';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import Link from 'next/link';
 
 import {
   Activity, AlertCircle, ArrowRight, ChevronRight, Crosshair,
@@ -581,35 +580,35 @@ export default function StabilityChallengeClient() {
     <div className="min-h-screen bg-[#050508] text-white flex flex-col font-sans select-none">
       {/* ── MAIN CONTENT AREA ── */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
-        {/* Title */}
+        {/* Title & AIO Header */}
         {!isFullscreen && (
-          <div className="text-center">
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white uppercase">
-              Stability Challenge
-              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
-                Stability &amp; Balance Trainer
-              </span>
+          <div className="text-left">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+              Stability challenge
             </h1>
+            <p className="text-sm text-slate-400 mt-1.5 leading-relaxed max-w-3xl">
+              Holding something steady against a force that keeps pushing it off centre is a continuous correction task, never a finished one. Standing balance works the same way: quiet standing is not motionless but a constant loop of small corrections around a drifting centre of pressure (Winter, 1995), organised into a few stereotyped strategies rather than improvised each time (Nashner &amp; McCollum, 1985). Vision needs roughly 100&ndash;150 ms to influence a movement already under way (Woodworth, 1899), so the faster the disturbance, the more you have to anticipate instead of react. This drill runs that loop through a mouse cursor &mdash; it trains the correction habit, and does not measure physical balance.
+            </p>
           </div>
         )}
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 gap-2.5 max-w-2xl mx-auto w-full">
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
+          <div className="grid grid-cols-4 gap-2 w-full">
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Score</div>
               <div className="text-lg sm:text-xl font-black text-white tabular-nums">{uiScore}</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Time Left</div>
               <div className={`text-lg sm:text-xl font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>{uiTimeLeft}s</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Best Score</div>
               <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Combo</div>
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Best Combo</div>
               <div className="text-lg sm:text-xl font-black text-emerald-400 tabular-nums">{bestCombo}x</div>
             </div>
           </div>
@@ -809,85 +808,45 @@ export default function StabilityChallengeClient() {
               isOpen={openAccordion === 'about'}
               onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
             >
-              <div className="space-y-8">
-                <section>
-                  <h4 className="text-base font-bold text-white mb-2 flex items-center gap-2">
-                    <Wind className="w-4 h-4 text-emerald-400" /> What Is Stability Challenge Training?
-                  </h4>
-                  {ABOUT_TEXT.split('\n\n').map((para, i) => (
-                    <p key={i} className="text-sm leading-relaxed text-gray-300 mb-3 last:mb-0">{para}</p>
-                  ))}
-                </section>
+              <div className="space-y-6">
+                <div className="space-y-3">
+                  <h3 className="text-base font-bold text-white flex items-center gap-2">
+                    <Wind className="w-4 h-4 text-emerald-400" /> Dynamic Force Counteraction &amp; Postural Equilibrium
+                  </h3>
+                  <p className="text-sm leading-relaxed text-gray-300">
+                    The <strong>Stability Challenge</strong> is a fine motor resistance tracking and postural equilibrium exercise. Dynamic wind force vectors continuously push your crosshair away from the center, requiring precise counter-directional mouse input to maintain central safe ring alignment.
+                  </p>
+                  <p className="text-sm leading-relaxed text-gray-300">
+                    Grounded in Nashner &amp; McCollum&apos;s (1985) postural synergy models and David A. Winter&apos;s (1995) perturbation balance principles, the drill forces your motor cortex to recruit closed-loop visual feedback corrections (Woodworth 1899). As your score rises, safe ring radii contract from 45px down to 20px while force magnitudes accelerate up to 850 strength units, testing high-frequency micro-adjustments and isometric stability under pressure.
+                  </p>
+                </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                  <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Who Should Use This?</h5>
+                      <h4 className="text-xs font-bold text-white">Target Audience</h4>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">FPS and tactical shooter players training recoil control, esports competitors building micro-stabilization under pressure, and anyone strengthening fine motor resistance to involuntary drift.</p>
+                    <p className="text-xs text-gray-300 leading-relaxed">FPS and tactical shooter players training recoil control, esports competitors building micro-stabilization under pressure, and athletes strengthening fine motor resistance to involuntary drift.</p>
                   </div>
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                  <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Skills Improved</h5>
+                      <h4 className="text-xs font-bold text-white">Mechanical Benefits</h4>
                     </div>
                     <p className="text-xs text-gray-300 leading-relaxed">Force vector counteraction, postural equilibrium, resistance tracking, central crosshair stabilization, and micro-adjustment precision.</p>
                   </div>
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                  <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-purple-600 flex items-center justify-center"><Activity className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Recoil Control</h5>
+                      <h4 className="text-xs font-bold text-white">Recoil Counteraction</h4>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Continuously countering unpredictable wind push mirrors the smooth counter-pressure needed to hold a crosshair steady through weapon recoil climb.</p>
+                    <p className="text-xs text-gray-300 leading-relaxed">Continuously countering unpredictable wind push mirrors the smooth counter-pressure needed to hold a crosshair steady through weapon recoil climb and flinch displacement.</p>
                   </div>
                 </div>
               </div>
             </DrillAccordion>
-
-            <DrillAccordion
-              id="faq"
-              title="Frequently Asked Questions"
-              isOpen={openAccordion === 'faq'}
-              onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {FAQ_ITEMS.map((item, i) => (
-                  <div key={i} className="bg-[#05060b] border border-gray-800 rounded-xl p-5">
-                    <h4 className="text-sm font-bold text-gray-200 mb-2">{item.q}</h4>
-                    <p className="text-xs text-gray-400 leading-relaxed">{item.a}</p>
-                  </div>
-                ))}
-              </div>
-            </DrillAccordion>
           </div>
-        )}
-
-        {/* ── RELATED PHYSICAL DRILLS ── */}
-        {!isFullscreen && (
-          <section className="mt-4">
-            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3 font-sans">
-              Related Physical &amp; Reflex Drills
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {RELATED_DRILLS.map((drill) => (
-                <Link
-                  key={drill.id}
-                  href={drill.href}
-                  className="group bg-[#0c0c16] border border-white/5 hover:border-emerald-500/40 rounded-xl p-3.5 transition-all duration-200 hover:-translate-y-0.5 flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider mb-1">{drill.cat}</div>
-                    <div className="text-xs font-bold text-white group-hover:text-emerald-300 transition-colors">{drill.name}</div>
-                    <div className="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">{drill.desc}</div>
-                  </div>
-                  <div className="text-[10px] font-bold text-slate-500 group-hover:text-emerald-400 mt-3 flex items-center gap-1 transition-colors">
-                    Train Drill <span>→</span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
         )}
 
         {/* ── FOOTER ── */}

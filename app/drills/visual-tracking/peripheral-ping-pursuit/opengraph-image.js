@@ -8,7 +8,7 @@ import { ImageResponse } from 'next/og';
 // Satori (the renderer behind ImageResponse) supports FLEXBOX ONLY — no CSS grid,
 // and every element with more than one child needs an explicit `display: flex`.
 
-export const alt = 'Peripheral Ping Pursuit — free browser Visual Tracking drill on SkillDrills';
+export const alt = 'Peripheral Ping — Peripheral Vision Training Drill | SkillDrills';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -94,7 +94,7 @@ export default async function Image() {
               maxWidth: 980,
             }}
           >
-            {"Fixate on center crosshairs while detecting transient targets spawning in your peripheral view."}
+            {"Condition peripheral awareness while maintaining steady central gaze fixation."}
           </div>
         </div>
 

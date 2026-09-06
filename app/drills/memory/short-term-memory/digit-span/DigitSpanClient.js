@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import Link from 'next/link';
 
 import {
   Brain, Play, RefreshCw,
@@ -22,7 +21,6 @@ import DrillCountdown from '../../../../../components/drill/DrillCountdown';
 import DrillAccordion from '../../../../../components/drill/DrillAccordion';
 import DrillFlashOverlay from '../../../../../components/drill/DrillFlashOverlay';
 import DrillRuleItem from '../../../../../components/drill/DrillRuleItem';
-import DrillFAQItem from '../../../../../components/drill/DrillFAQItem';
 import FpsStartCard from '../../../../../components/drill/FpsStartCard';
 import useImmersiveMode from '@/lib/useImmersiveMode';
 
@@ -464,38 +462,36 @@ export default function DigitSpanClient() {
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
         {/* Title */}
         {!isFullscreen && (
-        <div className="text-center">
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-            DIGIT SPAN
-            <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
-              Digit Span Memory Test
-            </span>
-          </h1>
-        </div>
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">Digit Span Memory Test</h1>
+          <p className="text-[13px] text-slate-400 leading-relaxed mt-1">
+            Digit span is the longest string of numbers you can repeat back in order. Miller (1956) famously put the limit near seven items, but later work that blocks rehearsal and chunking puts genuine capacity closer to four (Cowan, 2001) &mdash; the gap is strategy, which is what this drill trains.
+          </p>
+          </div>
         )}
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-        <div className="grid grid-cols-4 gap-2.5 max-w-2xl mx-auto w-full">
-          <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-            <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
-            <div className="text-lg sm:text-xl font-black text-purple-400 tabular-nums">{uiScore}</div>
-          </div>
-          <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-            <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
-            <div className={`text-lg sm:text-xl font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>
-              {uiTimeLeft}s
+          <div className="grid grid-cols-4 gap-2 w-full">
+            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
+              <div className="text-lg sm:text-xl font-black text-purple-400 tabular-nums">{uiScore}</div>
+            </div>
+            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
+              <div className={`text-lg sm:text-xl font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>
+                {uiTimeLeft}s
+              </div>
+            </div>
+            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Span</div>
+              <div className="text-lg sm:text-xl font-black text-indigo-400 tabular-nums">{digitCount} Digits</div>
+            </div>
+            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
+              <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
             </div>
           </div>
-          <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-            <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Span</div>
-            <div className="text-lg sm:text-xl font-black text-indigo-400 tabular-nums">{digitCount} Digits</div>
-          </div>
-          <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-            <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
-            <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
-          </div>
-        </div>
         )}
 
         {/* Game Stage Container */}
@@ -750,9 +746,9 @@ export default function DigitSpanClient() {
           >
             <div className="space-y-8">
               <section>
-                <h4 className="text-base font-bold text-white mb-2 flex items-center gap-2">
+                <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
                   <Brain className="w-4 h-4 text-purple-400" /> What Is Digit Span Training?
-                </h4>
+                </h3>
                 <p className="text-sm leading-relaxed mb-3">
                   <strong>Digit Span Training</strong> is a gold-standard cognitive exercise used in WAIS IQ and clinical memory evaluations to measure working memory capacity. The <strong>Digit Span drill</strong> presents random numerical sequences, testing your capacity to memorize and type back exact strings.
                 </p>
@@ -765,21 +761,21 @@ export default function DigitSpanClient() {
                 <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                   <div className="flex items-center gap-2.5 mb-2">
                     <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
-                    <h5 className="text-xs font-bold text-white">Who Should Use This?</h5>
+                    <h4 className="text-xs font-bold text-white">Who Should Use This?</h4>
                   </div>
                   <p className="text-xs text-gray-300 leading-relaxed">Students expanding numerical retention, professionals needing strong number memory, and anyone wanting to benchmark working memory capacity.</p>
                 </div>
                 <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                   <div className="flex items-center gap-2.5 mb-2">
                     <div className="w-7 h-7 rounded-lg bg-purple-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
-                    <h5 className="text-xs font-bold text-white">Skills Improved</h5>
+                    <h4 className="text-xs font-bold text-white">Skills Improved</h4>
                   </div>
                   <p className="text-xs text-gray-300 leading-relaxed">Numerical short-term memory, working memory span, phone number encoding, and focus under pressure.</p>
                 </div>
                 <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                   <div className="flex items-center gap-2.5 mb-2">
                     <div className="w-7 h-7 rounded-lg bg-orange-600 flex items-center justify-center"><Zap className="w-3.5 h-3.5 text-white" /></div>
-                    <h5 className="text-xs font-bold text-white">Digit Chunking</h5>
+                    <h4 className="text-xs font-bold text-white">Digit Chunking</h4>
                   </div>
                   <p className="text-xs text-gray-300 leading-relaxed">Group digits into pairs or triplets (e.g. 472-913) to bypass standard memory limits and reach higher digit spans.</p>
                 </div>
@@ -787,66 +783,12 @@ export default function DigitSpanClient() {
 
             </div>
           </DrillAccordion>
-
-          {/* ACCORDION 3: FREQUENTLY ASKED QUESTIONS */}
-          <DrillAccordion
-            id="faq"
-            title="Frequently Asked Questions"
-            isOpen={openAccordion === 'faq'}
-            onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
-          >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <DrillFAQItem q="What is the Digit Span Drill?" a="A free working memory exercise based on the digit span test. Memorize random digit sequences, then type the exact order." />
-              <DrillFAQItem q="How does progressive difficulty work?" a="Sequence length = level. Level 3 has 3 digits, Level 4 has 4, and so on as you score perfect rounds." />
-              <DrillFAQItem q="Are there negative score or time penalties?" a="No. Incorrect entries or timeouts never deduct score points or reduce remaining timer seconds." />
-              <DrillFAQItem q="Does my digit span go down after a mistake?" a="Yes — unlike other drills on this site, Digit Span is an adaptive staircase test: a miss drops your span by 1 digit while a perfect round adds 1. This up-and-down design is the standard method real memory assessments use to converge on your true capacity, so it's intentional here, not a penalty." />
-              <DrillFAQItem q="Why is digit span important?" a="It measures working memory capacity used in cognitive performance. Average adult span is 7±2 digits." />
-              <DrillFAQItem q="Do I need to sign up?" a="No registration required. This drill runs directly in your browser with instant response." />
-              <DrillFAQItem q="How long does each drill session last?" a="Each round is timed for exactly 45 seconds of continuous focus." />
-              <DrillFAQItem q="What is the WAIS Digit Span subtest?" a="Digit Span is a core subtest of the Wechsler Adult Intelligence Scale (WAIS), used clinically to assess working memory and attention. This drill mirrors the forward-recall format of that assessment in a free, gamified form." />
-              <DrillFAQItem q="Why is 7±2 considered the average digit span?" a="Psychologist George Miller's influential 1956 paper described short-term memory capacity as limited to about seven items, plus or minus two — a benchmark digit span tests have used as a reference point ever since, though modern estimates trend closer to 4±1 without chunking." />
-              <DrillFAQItem q="How can I increase my digit span?" a="Chunking digits into pairs or triplets, rehearsing sequences aloud (sub-vocalization), and regular practice are the most effective evidence-based methods for extending your working digit span." />
-            </div>
-          </DrillAccordion>
           </div>
-        )}
-
-        {/* RELATED DRILLS GRID */}
-        {!isFullscreen && (
-          <section className="mt-4">
-            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">
-              Related Memory Drills
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              <RelatedCard href="/drills/memory/spatial-memory/path-tracing" title="Path Tracing" desc="Retrace animated path sequences on expanding grids." cat="Spatial Memory" />
-              <RelatedCard href="/drills/memory/spatial-memory/object-location" title="Object Location" desc="Memorize and locate emoji objects on grids." cat="Spatial Memory" />
-              <RelatedCard href="/drills/memory/spatial-memory/grid-memorization" title="Grid Memorization" desc="Memorize progressive spatial grid patterns." cat="Spatial Memory" />
-              <RelatedCard href="/drills/memory/working-memory/n-back" title="Dual N-Back" desc="The gold standard working memory trainer." cat="Working Memory" />
-              <RelatedCard href="/drills/memory/short-term-memory/word-recall" title="Word Recall" desc="Free recall random word lists under time pressure." cat="Short-Term Memory" />
-              <RelatedCard href="/drills/memory/short-term-memory/color-sequence" title="Color Sequence" desc="Watch and recall color sequences." cat="Short-Term Memory" />
-            </div>
-          </section>
         )}
       </main>
 
       {/* ── FOOTER ── */}
       {!isFullscreen && <DrillFooter />}
     </div>
-  );
-}
-
-// === Subcomponents ===
-function RelatedCard({ href, title, desc, cat }) {
-  return (
-    <Link href={href} className="group bg-[#0c0c16] border border-white/5 hover:border-purple-500/40 rounded-xl p-3.5 transition-all duration-200 hover:-translate-y-0.5 flex flex-col justify-between">
-      <div>
-        {cat && <div className="text-[10px] font-bold text-purple-400 uppercase tracking-wider mb-1">{cat}</div>}
-        <div className="text-xs font-bold text-white group-hover:text-purple-300 transition-colors">{title}</div>
-        <div className="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">{desc}</div>
-      </div>
-      <div className="text-[10px] font-bold text-slate-500 group-hover:text-purple-400 mt-3 flex items-center gap-1 transition-colors">
-        Train Drill <span>→</span>
-      </div>
-    </Link>
   );
 }

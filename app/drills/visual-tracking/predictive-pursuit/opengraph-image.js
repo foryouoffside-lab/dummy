@@ -8,7 +8,7 @@ import { ImageResponse } from 'next/og';
 // Satori (the renderer behind ImageResponse) supports FLEXBOX ONLY — no CSS grid,
 // and every element with more than one child needs an explicit `display: flex`.
 
-export const alt = 'Predictive Pursuit — free browser Visual Tracking drill on SkillDrills';
+export const alt = 'Predictive Pursuit — Predictive Eye Tracking Drill | SkillDrills';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -94,7 +94,7 @@ export default async function Image() {
               maxWidth: 980,
             }}
           >
-            {"Interpolate path trajectory of a moving cyan shadow and execute ballistic gaze shifts to capture solidified targets."}
+            {"Anticipate moving targets and extrapolate smooth trajectory paths."}
           </div>
         </div>
 

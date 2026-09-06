@@ -15,6 +15,7 @@ const LEGAL_LINKS = [
 const SITE_LINKS = [
   { href: '/drills', label: 'All drills' },
   { href: '/search', label: 'Search' },
+  { href: '/about', label: 'About' },
 ];
 
 export default function SiteFooter() {

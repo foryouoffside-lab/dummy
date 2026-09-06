@@ -1,10 +1,9 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import Link from 'next/link';
 import {
   Brain, Volume2, VolumeX, Eye, Zap, ZapOff,
-  Share2, ArrowLeft, RefreshCw, Layers, Users, TrendingUp, Repeat, Flame, Trophy, Target
+  Share2, ArrowLeft, RefreshCw, Layers, Users, TrendingUp, Repeat
 } from 'lucide-react';
 
 import { drillAudio } from '../../../../../lib/drillAudio';
@@ -63,31 +62,9 @@ const RULES_ITEMS = [
   { title: "Inhibitory Control", text: "Ignore non-matching stimuli. False alarms and missed targets count against your accuracy, but never end the session early." }
 ];
 
-const ABOUT_TEXT = `Concentration Stamina is an advanced Continuous Performance Test (CPT) designed to evaluate sustained visual attention, working memory updating, and task-set switching under speed pressure. Originating from clinical neuropsychology and cognitive ergonomics, continuous stamina tests challenge the brain's executive control network to maintain high vigilance over extended sequences.
+const ABOUT_TEXT = `Focus Test (Concentration Stamina) is an advanced Continuous Performance Test (CPT) designed to evaluate sustained visual attention, working memory updating, and task-set switching under speed pressure. Originating from cognitive psychology and ergonomics, continuous stamina tests challenge the brain's executive control network to maintain high vigilance over extended sequences.
 
-By requiring instantaneous categorization of incoming visual stimuli while periodically switching target rules, the drill trains cognitive flexibility, impulse suppression, and focus stability under fatigue.`;
-
-const FAQ_ITEMS = [
-  { q: "What is concentration stamina and why does it matter?", a: "Concentration stamina, or cognitive endurance, is your brain's capacity to sustain single-task engagement and accurate performance over extended periods without succumbing to fatigue or distraction. It is critical for high-demand professions, sports performance, and academic settings where lapses cost significant consequences." },
-  { q: "What is the vigilance decrement?", a: "The vigilance decrement is the progressive deterioration in signal detection performance during sustained monitoring tasks. Over time, your brain habituates to repetitive stimuli and your ability to detect rare targets drops. Mackworth's Clock Test (1948) was the first systematic study of this phenomenon. This drill tracks your personal decrement curve." },
-  { q: "How can I test my concentration level online?", a: "This free online concentration test measures your target discrimination accuracy and response consistency over an extended session. It tracks when and how sharply your accuracy drops relative to your peak early-session performance, giving you a real-time vigilance curve as your cognitive endurance metric." },
-  { q: "Why does focus deteriorate during long study sessions?", a: "Mental fatigue depletes glucose and neurotransmitter resources in the prefrontal cortex, the brain region responsible for executive control and target engagement. Once these resources are taxed, your attentional gate weakens, letting irrelevant stimuli through and reducing your discrimination accuracy — this is exactly what this drill quantifies." },
-  { q: "How do athletes train mental stamina?", a: "Elite athletes use concentration grids, target discrimination drills, and sustained attention tasks to strengthen their mental endurance. The goal is to push the threshold at which vigilance decrement begins, allowing athletes to maintain focus and decision accuracy during the final minutes of high-pressure competition." },
-  { q: "What does target discrimination measure in cognitive tests?", a: "Target discrimination measures your ability to correctly identify and respond to specific target stimuli while ignoring non-target distractors in a rapid stream of stimuli. It requires both perceptual speed (detecting the target) and response inhibition (ignoring the distractors), both of which degrade under prolonged cognitive load." },
-  { q: "How long can the average person concentrate without a break?", a: "Research suggests the average adult can maintain intense focused concentration for 20-45 minutes before cognitive performance begins to noticeably decline. Elite performers (surgeons, air traffic controllers, pilots) achieve 90+ minutes through specific training protocols and planned micro-rest cycles." },
-  { q: "What is a good score on a concentration stamina test?", a: "A strong performance means maintaining above 90% accuracy throughout the full session with minimal decrement. If your accuracy falls below 80% in the final third of the drill compared to your opening accuracy, your concentration stamina has significant room for improvement through regular practice." },
-  { q: "Is this focus endurance test suitable for students and gamers?", a: "Absolutely. Students preparing for long exams, competitive gamers who need sustained accuracy in extended match sessions, and anyone whose work demands prolonged focus will find this drill directly applicable. Regular practice directly translates to better late-session performance." },
-  { q: "Is this concentration stamina test free?", a: "Yes. This drill is completely free on SkillDrills with no sign-up, no downloads, and no paywalls. It runs entirely in your web browser and works on both desktop and mobile devices." }
-];
-
-const RELATED_DRILLS = [
-  { id: "concentration-grid", name: "Concentration Grid", cat: "Focus", desc: "Scan and tap sequential numbers on expanding grid matrices.", href: "/drills/cognitive/focus/concentration-grid" },
-  { id: "rsvp-reader", name: "RSVP Speed Reader", cat: "Processing Speed", desc: "Process rapid serial visual presentation text streams.", href: "/drills/cognitive/processing-speed/rsvp-reader" },
-  { id: "divided-attention", name: "Divided Attention", cat: "Attention", desc: "Track dual independent target streams and number matches simultaneously.", href: "/drills/cognitive/attention/divided-attention" },
-  { id: "multi-tasking", name: "Multi-Tasking", cat: "Attention", desc: "Track dual independent target streams under speed pressure.", href: "/drills/cognitive/attention/multi-tasking" },
-  { id: "distraction-fighter", name: "Distraction Fighter", cat: "Focus", desc: "Filter out high-interference Stroop visual distractors.", href: "/drills/cognitive/focus/distraction-fighter" },
-  { id: "reaction-time", name: "Reaction Time", cat: "Processing Speed", desc: "Train choice reaction speed and visual reflex latency.", href: "/drills/cognitive/processing-speed/reaction-time" }
-];
+By requiring instantaneous categorization of incoming visual stimuli while periodically switching target rules, the drill trains cognitive flexibility, impulse suppression, and focus stability under cognitive fatigue.`;
 
 // ============================================================
 // MAIN COMPONENT
@@ -388,14 +365,14 @@ export default function ConcentrationStaminaClient() {
         accuracy: endSummary.accuracy,
         rating: { letter: gradeInfo.grade, label: gradeInfo.label, emoji: '🧠' },
         newBest: endSummary.isNewBest,
-        drillName: 'Concentration Stamina',
+        drillName: 'Focus Test',
         playerName: getPlayerName(),
       });
       await shareScoreCard(url, canvas);
     } catch (e) {
-      const text = `🧠 I scored ${endSummary.score} PTS (Level ${endSummary.peakLevel}) on Concentration Stamina! Accuracy: ${endSummary.accuracy}%. Practice free cognitive focus drills at skilldrills.online!`;
+      const text = `🧠 I scored ${endSummary.score} PTS (Level ${endSummary.peakLevel}) on the Focus Test (Concentration Stamina)! Accuracy: ${endSummary.accuracy}%. Practice free cognitive focus drills at skilldrills.online!`;
       if (typeof navigator !== 'undefined' && navigator.share) {
-        navigator.share({ title: 'Concentration Stamina Score', text, url }).catch(() => {});
+        navigator.share({ title: 'Focus Test Score', text, url }).catch(() => {});
       }
     }
   }, [endSummary, gradeInfo, bestScore]);
@@ -404,40 +381,33 @@ export default function ConcentrationStaminaClient() {
     <div className="min-h-screen bg-[#050508] text-white flex flex-col font-sans select-none">
       {/* ── MAIN CONTENT AREA ── */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
-        {/* Title */}
+        {/* Title — left-aligned sentence-case H1 and 2-sentence definition snippet */}
         {!isFullscreen && (
-        <div className="text-center">
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-            CONCENTRATION STAMINA
-            <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
-              Focus Test
-            </span>
-          </h1>
-        </div>
+          <div className="flex flex-col">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+              Focus Test & Concentration Stamina Drill
+            </h1>
+            <p className="text-[13px] text-slate-400 leading-relaxed mt-1">
+              Sustained attention decays measurably the longer you watch for a rare signal: Mackworth (1948) found detection accuracy dropping within the first 30 minutes of a monitoring task, and the decline is steeper when the events come faster or the memory load is higher (Parasuraman, 1979). This drill compresses that vigilance decrement into a short session.
+            </p>
+          </div>
         )}
 
-        {/* Live Stat Cards */}
+        {/* Live Stat Cards — full width flush with the drill container */}
         {!isFullscreen && (
-        <div className="grid grid-cols-4 gap-2.5 max-w-2xl mx-auto w-full">
-          <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-            <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
-            <div className="text-lg sm:text-xl font-black text-indigo-400 tabular-nums">{score}</div>
+          <div className="grid grid-cols-4 gap-2 w-full -mb-2">
+            {[
+              { label: 'Score', value: score, tone: 'text-indigo-400' },
+              { label: 'Time', value: `${Math.ceil(timeRemaining)}s`, tone: timeRemaining <= 10 ? 'text-red-400 animate-pulse' : 'text-white' },
+              { label: 'Level', value: `L${level}`, tone: 'text-indigo-400' },
+              { label: 'Best Score', value: bestScore, tone: 'text-amber-400' },
+            ].map((s) => (
+              <div key={s.label} className="rounded-lg border border-white/[0.06] bg-white/[0.015] px-2 py-2 text-center">
+                <div className="text-[9.5px] uppercase font-semibold text-slate-500 tracking-[0.12em]">{s.label}</div>
+                <div className={`text-lg sm:text-xl font-black tabular-nums font-mono mt-0.5 ${s.tone}`}>{s.value}</div>
+              </div>
+            ))}
           </div>
-          <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-            <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
-            <div className={`text-lg sm:text-xl font-black tabular-nums ${timeRemaining <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>
-              {Math.ceil(timeRemaining)}s
-            </div>
-          </div>
-          <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-            <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Level</div>
-            <div className="text-lg sm:text-xl font-black text-indigo-400 tabular-nums">L{level}</div>
-          </div>
-          <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-            <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
-            <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
-          </div>
-        </div>
         )}
 
         {/* Game Stage Container */}
@@ -482,16 +452,8 @@ export default function ConcentrationStaminaClient() {
             <FpsStartCard
               icon={Brain}
               accent="indigo"
-              title="Concentration Stamina"
-              subtitle="Category Rule Switching CPT"
-              rules={[
-                { icon: Zap, accent: 'emerald', title: 'Dynamic Rule Shifts (10s)', text: 'Category rule shifts between VOWELS and PRIMES every 10 seconds' },
-                { icon: Target, accent: 'red', title: 'Impulse Control Penalty', text: 'Tapping invalid targets or missing valid ones costs accuracy, not the run' },
-              ]}
-              stats={[
-                { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
-                { icon: TrendingUp, label: 'Best Level', value: `Lv. ${bestLevel}`, color: 'text-blue-400', accent: 'blue' },
-              ]}
+              title="Focus Test"
+              subtitle="Concentration Stamina • Continuous Performance Test"
               isTouchOnlyDevice={false}
               onStart={enterDrill}
             />
@@ -643,7 +605,7 @@ export default function ConcentrationStaminaClient() {
 
         <DrillAccordion
           id="about"
-          title="About Concentration Stamina"
+          title="About Focus Test & Concentration Stamina"
           isOpen={openAccordion === 'about'}
           onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
         >
@@ -660,71 +622,28 @@ export default function ConcentrationStaminaClient() {
               <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                 <div className="flex items-center gap-2.5 mb-2">
                   <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
-                  <h5 className="text-xs font-bold text-white">Who Should Use This?</h5>
+                  <h4 className="text-xs font-bold text-white">Who Should Use This?</h4>
                 </div>
                 <p className="text-xs text-gray-300 leading-relaxed">Students preparing for long exams, competitive gamers who need consistent accuracy deep into matches, and professionals in high-vigilance roles who must sustain focus for extended periods.</p>
               </div>
               <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                 <div className="flex items-center gap-2.5 mb-2">
                   <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
-                  <h5 className="text-xs font-bold text-white">Skills Improved</h5>
+                  <h4 className="text-xs font-bold text-white">Skills Improved</h4>
                 </div>
                 <p className="text-xs text-gray-300 leading-relaxed">Sustained attention, target discrimination, vigilance under fatigue, and resistance to the vigilance decrement over long sessions.</p>
               </div>
               <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                 <div className="flex items-center gap-2.5 mb-2">
                   <div className="w-7 h-7 rounded-lg bg-purple-600 flex items-center justify-center"><Repeat className="w-3.5 h-3.5 text-white" /></div>
-                  <h5 className="text-xs font-bold text-white">Cognitive Flexibility</h5>
+                  <h4 className="text-xs font-bold text-white">Cognitive Flexibility</h4>
                 </div>
                 <p className="text-xs text-gray-300 leading-relaxed">Every 10-second rule switch between VOWELS and PRIMES forces you to re-categorize stimuli on the fly, training rapid task-set switching.</p>
               </div>
             </div>
           </div>
         </DrillAccordion>
-
-        <DrillAccordion
-          id="faq"
-          title="Frequently Asked Questions"
-          isOpen={openAccordion === 'faq'}
-          onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
-        >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {FAQ_ITEMS.map((item, i) => (
-              <div key={i} className="bg-[#05060b] border border-gray-800 rounded-xl p-5">
-                <h4 className="text-sm font-bold text-gray-200 mb-2">{item.q}</h4>
-                <p className="text-xs text-gray-400 leading-relaxed">{item.a}</p>
-              </div>
-            ))}
           </div>
-        </DrillAccordion>
-        </div>
-        )}
-
-        {/* RELATED COGNITIVE DRILLS (6 CARDS) */}
-        {!isFullscreen && (
-        <section className="mt-4">
-          <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">
-            Related Cognitive Drills
-          </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            {RELATED_DRILLS.map((drill) => (
-              <Link
-                key={drill.id}
-                href={drill.href}
-                className="group bg-[#0c0c16] border border-white/5 hover:border-indigo-500/40 rounded-xl p-3.5 transition-all duration-200 hover:-translate-y-0.5 flex flex-col justify-between"
-              >
-                <div>
-                  <div className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider mb-1">{drill.cat}</div>
-                  <div className="text-xs font-bold text-white group-hover:text-indigo-300 transition-colors">{drill.name}</div>
-                  <div className="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">{drill.desc}</div>
-                </div>
-                <div className="text-[10px] font-bold text-slate-500 group-hover:text-indigo-400 mt-3 flex items-center gap-1 transition-colors">
-                  Train Drill <span>→</span>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </section>
         )}
       </main>
 

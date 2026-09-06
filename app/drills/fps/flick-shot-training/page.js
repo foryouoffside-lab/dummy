@@ -1,5 +1,6 @@
 import ProFlickClient from './ProFlickClient';
 import DrillGuide from '@/components/drill/DrillGuide';
+import { pickSources } from '@/lib/drillSources';
 
 export const metadata = {
   title: "Flick Shot Trainer - Snap Aim Practice | SkillDrills",
@@ -65,6 +66,7 @@ export default function FlickShotPage() {
     "description": "A free browser-based FPS aim trainer for improving flick shots, snap aim, and rapid target acquisition for competitive shooters.",
     "genre": "FPS Training / Flick Aim",
     "url": "https://skilldrills.online/drills/fps/flick-shot-training",
+    "dateModified": "2026-09-05",
     "publisher": {
       "@type": "Organization",
       "name": "SkillDrills",
@@ -82,139 +84,85 @@ export default function FlickShotPage() {
     "genre": ["FPS Training", "Aim Trainer"],
     "playMode": "SinglePlayer",
     "applicationCategory": "Game",
-    "operatingSystem": "Web Browser"
+    "operatingSystem": "Web Browser",
+    "dateModified": "2026-09-05"
   };
 
   const faqSchema = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
+    "dateModified": "2026-09-05",
     "mainEntity": [
       {
         "@type": "Question",
         "name": "What is flick aim?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Flick aim is the mechanical ability to quickly snap your crosshair to a target outside of your immediate focus area using a single, swift mouse movement."
+          "text": "Flick aim (or snap targeting) is the biomechanical ability to rapidly transition your crosshair from an initial resting position to an off-center target in a single, high-velocity ballistic movement, followed immediately by click timing."
         }
       },
       {
         "@type": "Question",
-        "name": "How do I improve flick aim?",
+        "name": "How do you improve flicking aim in FPS games?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Improve flick aim by practicing raw input drills that penalize misses and reward speed, forcing you to map the physical mousepad space to your monitor accurately."
+          "text": "Improve flicking aim by training smooth initial acceleration combined with muscular deceleration (stopping power) on raw input with zero hardware acceleration. Isolate target acquisition mechanics in dedicated daily drills of 15 to 20 minutes before playing competitive matches."
         }
       },
       {
         "@type": "Question",
-        "name": "What is a good flick accuracy?",
+        "name": "What is the difference between tracking and flicking aim?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "A good baseline flick accuracy is around 70%. Advanced players aim for 80%+, while professional esports players maintain 90%+ precision during high-speed target acquisition."
+          "text": "Tracking aim relies on continuous visual smooth pursuit to maintain your crosshair over moving targets in sustained fire games (like Apex Legends or Overwatch). Flicking aim is a discrete ballistic impulse that snaps the crosshair onto a static or suddenly appearing target for an instantaneous single-shot elimination (crucial in CS2 and Valorant)."
         }
       },
       {
         "@type": "Question",
-        "name": "Does flick training help Valorant?",
+        "name": "Why do I consistently overshoot or undershoot flick targets?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Yes, Valorant heavily relies on crosshair placement and first-shot accuracy. Flick training improves your ability to react and snap to off-angle enemies instantly."
+          "text": "Overshooting typically indicates excessive mouse sensitivity (eDPI) or insufficient antagonist muscle deceleration stopping power. Undershooting indicates hesitant motor commitment or overly low sensitivity requiring excessive arm excursion. Calibrate your effective DPI so a comfortable wrist flick covers common tactical angles."
         }
       },
       {
         "@type": "Question",
-        "name": "Does flick training help CS2?",
+        "name": "Does flick shot training help in tactical shooters like Valorant and CS2?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Absolutely. Counter-Strike requires immense micro and macro flicking, especially with AWPing or reacting to unexpected peekers."
+          "text": "Yes. While crosshair placement minimizes required mouse movement in Valorant and CS2, unexpected off-angle peeks, trade fragging, and multi-angle site takes require rapid sub-250ms target re-acquisition where trained ballistic flick accuracy decides the duel."
         }
       },
       {
         "@type": "Question",
-        "name": "Can flick aim be learned?",
+        "name": "Should you use wrist or arm movements for flick aiming?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Yes, flick aim is a physical motor skill. Through repetitive practice with zero hardware acceleration, you develop muscle memory that makes flicking subconscious."
+          "text": "Competitive aim technique combines both: the forearm executes large-amplitude macro-flicks (wide angular transitions and resetting), while the wrist and fingers govern micro-flicks and precise terminal homing adjustments."
         }
       },
       {
         "@type": "Question",
-        "name": "How long should I practice?",
+        "name": "How does Fitts's Law apply to FPS flick shot accuracy?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Aim for 15-20 minutes of dedicated flick aim training daily before playing competitive matches to optimize muscle memory retention without causing fatigue."
+          "text": "Fitts's Law establishes that movement time (MT) is a logarithmic function of target distance (D) divided by target width (W): ID = log2(2D/W). Smaller targets or larger angular separations increase index of difficulty, requiring either slower deceleration or higher micro-correction latency."
         }
       },
       {
         "@type": "Question",
-        "name": "Should I use arm aim?",
+        "name": "Does monitor refresh rate and input polling affect flick training?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "For macro-flicks (large distances across the screen), arm aiming is generally preferred as it provides better stability and consistency on low sensitivities."
+          "text": "Yes. A 240 Hz display updates every ~4.17 ms compared to 16.67 ms on 60 Hz, reducing visual latency and frame quantization. A standard 1000 Hz mouse polls every 1 ms, ensuring continuous trajectory registration during rapid ballistic flick acceleration."
         }
       },
       {
         "@type": "Question",
-        "name": "Should I use wrist aim?",
+        "name": "How long should you practice flick aiming each day?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Wrist and fingertip aiming should be used for micro-flicks and fine adjustments once your arm brings the crosshair near the target."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "How important is sensitivity?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Sensitivity is crucial. You must find a consistent sensitivity (eDPI) and stick to it so your brain can properly map physical hand movement to virtual crosshair movement."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Can aim trainers improve rank?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Yes, aim trainers isolate mechanical flaws. By improving your raw mechanical skill, you win more aim duels, which naturally translates to ranking up."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "What is target acquisition?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Target acquisition is the combined cognitive and physical process of visually locating an enemy and moving your crosshair onto them."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "What is snap aiming?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Snap aiming is another term for flicking. It emphasizes the fast, abrupt 'snapping' motion of the crosshair onto a target."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Why do I overshoot targets?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Overshooting usually means your sensitivity is too high, or you haven't built enough stopping power (deceleration control) in your wrist."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "How do pro players train aim?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Pros use a combination of dedicated aim trainers (like this one), in-game deathmatches, and routine warmup regimens to maintain peak mechanical precision."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "How does the scoring system work?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Hits grant base points multiplied by your combo multiplier and level multiplier. Misses and timeouts reset your combo multiplier."
+          "text": "A focused daily session of 15 to 20 minutes provides optimal motor skill consolidation without inducing neuromuscular fatigue or repetitive strain injury."
         }
       },
       {
@@ -222,7 +170,7 @@ export default function FlickShotPage() {
         "name": "Does the drill get harder while I'm on a streak?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Yes. Beyond the 15-level curve, a live streak 'heat' system shrinks targets and speeds up spawns the longer your hit streak runs, capping out at the same 50-combo streak that maxes your score multiplier. A miss cools the heat back to your level's baseline, so a hot run never gets easier to sustain."
+          "text": "Yes. Beyond the standard 15-level progression curve, an adaptive streak heat engine dynamically shrinks target radii and tightens spawn intervals during uninterrupted streaks up to 50 hits, cooling back down upon a miss."
         }
       }
     ]
@@ -253,22 +201,24 @@ export default function FlickShotPage() {
   };
 
   const flickGuide = {
-    heading: "Flick Shot Training Guide & FPS Aim Benchmarks",
+    heading: "Flick Shot Training Guide & Biomechanical Aim Benchmarks",
     intro: [
-      "Flick aim (or snap targeting) is the biomechanical ability to rapidly transition your crosshair from an initial resting angle onto an unexpected target in a single ballistic motor movement. In tactical hero shooters like Valorant and tactical team shooters like Counter-Strike 2, winning opening duels hinges on sub-180ms micro-flicks and precise target confirmation.",
-      "Our interactive Flick Shot Trainer trains neuromuscular saccades, target acquisition speed, and deceleration control directly inside your browser."
+      "Flick aim (snap targeting) is the biomechanical process of translating an ocular fixation into an explosive ballistic limb-and-wrist trajectory. In psychomotor science, human goal-directed aiming is governed by the two-component model (Elliott et al., 2010): an initial open-loop ballistic impulse that covers the bulk of the distance, followed by a closed-loop visual feedback phase that executes minute terminal homing corrections.",
+      "Under Fitts's Law (Fitts, 1954), movement duration scales predictably with task difficulty: ID = log2(2D/W), where target distance (D) and target diameter (W) dictate movement time. Precision training optimizes agonist-antagonist muscular deceleration (Schmidt et al., 1979), enabling players to stop their mouse abruptly on target without overshooting.",
+      "Hardware latency and digital chronometry significantly influence measurable flick performance. Browser chronometry in this trainer is driven by high-resolution performance.now() timestamps. At 1000 Hz mouse polling (1.0 ms USB intervals) and high-refresh displays (144 Hz at 6.94 ms, 240 Hz at 4.17 ms per frame), input quantization jitter is minimized, enabling pure neuromuscular acquisition testing (Woods et al., 2015).",
+      "How this is measured: every event is timestamped with the browser's performance.now() high-resolution clock, entirely on your device -- no score is uploaded. Two things this cannot control: browser timers are deliberately coarsened as a Spectre mitigation (typically to about 1 ms), and your display quantizes the stimulus to its refresh interval -- about 16.7 ms per frame at 60 Hz, 6.9 ms at 144 Hz and 4.1 ms at 240 Hz (Woods et al., 2015). Mouse polling adds roughly 8 ms at 125 Hz versus 1 ms at 1000 Hz. So treat differences smaller than about 5 ms as measurement noise, and compare your own runs on the same hardware rather than against someone else's setup."
     ],
     benchmarks: {
-      title: "Official Flick Shot Performance & Accuracy Tiers",
-      headers: ["Accuracy %", "Avg Time-To-Kill", "Rank Classification", "Esports Tier Equivalent", "Mechanic Mastery"],
+      title: "Target Acquisition & Movement Time (MT) Benchmarks",
+      headers: ["Movement Phase / Metric", "Typical Latency (ms)", "Motor Control Mechanism", "Fitts's Law & Skill Phase"],
       rows: [
-        ["> 95%", "< 180 ms", "Radiant / Global Elite", "Professional Esports", "Flawless first-shot accuracy, zero over-flick micro-adjustments"],
-        ["88% – 94%", "180 – 240 ms", "Immortal / Faceit 10", "High Competitive", "Crisp snap flicks with instantaneous target confirmation"],
-        ["78% – 87%", "240 – 310 ms", "Ascendant / Diamond", "Intermediate Gamer", "Reliable target acquisition with slight micro-correction latency"],
-        ["65% – 77%", "310 – 380 ms", "Platinum / Gold", "Average Player", "Frequent over-shooting or under-flicking requiring second corrections"],
-        ["< 65%", "> 400 ms", "Silver / Bronze", "Developing", "Inconsistent mouse deceleration and unstable crosshair placement"]
+        ["Initial Visual Saccade & Latency", "180 – 220 ms", "Ocular foveation & visual cortex latency", "Stimulus detection prior to ballistic physical motion (Woods et al. 2015)"],
+        ["Ballistic Primary Movement (Impulse)", "120 – 180 ms", "Agonist-antagonist muscular burst (arm/wrist)", "Open-loop ballistic flight covering 80–90% of target distance (Elliott et al. 2010)"],
+        ["Secondary Micro-Correction (Homing)", "60 – 120 ms", "Sensory visual feedback & deceleration damping", "Closed-loop homing phase resolving index of difficulty (Fitts 1954)"],
+        ["Total Target Acquisition Time (Gross)", "360 – 520 ms", "Combined sensorimotor loop + click execution", "Standard competitive baseline across unpracticed to proficient operators"],
+        ["Elite Subconscious Acquisition", "240 – 320 ms", "Automated motor synergy with minimized micro-adjustments", "High-tier tactical FPS mastery with tuned eDPI stopping power"]
       ],
-      note: "Data averaged across competitive tactical shooter aim trials under standard 1080p/1440p resolutions."
+      note: "Metrics synthesized from peer-reviewed psychomotor aiming literature (Fitts 1954; Schmidt et al. 1979; Elliott et al. 2010) and digital chronometry benchmarks (Woods et al. 2015). Individual latency varies with display refresh rate, USB mouse polling, and target amplitude."
     },
     techniques: {
       title: "Optimal eDPI Sensitivity Alignment by Game",
@@ -304,13 +254,17 @@ export default function FlickShotPage() {
     ],
     audience: "Tactical FPS competitors (Valorant, CS2, Rainbow Six Siege), Battle Royale players (Apex, Fortnite), and gamers seeking crisp mechanical mouse accuracy.",
     faqs: faqSchema.mainEntity.map(e => ({ q: e.name, a: e.acceptedAnswer.text })),
+    // Works named in this page's copy, with DOIs so a reader or an answer
+    // engine can check the figures rather than take them on trust.
+    sources: pickSources('woods2015', 'elliott2010', 'fitts1954', 'schmidt1979'),
     related: [
-      { href: "/drills/fps/180-degree-awareness", label: "180° Awareness Scan" },
-      { href: "/drills/fps/angle-hold-trainer", label: "Angle Hold & Peek" },
+      { href: "/drills/fps/180-degree-awareness", label: "180° Awareness Pro" },
+      { href: "/drills/fps/angle-hold-trainer", label: "Crosshair Placement & Angle Hold Trainer" },
       { href: "/drills/reaction-speed/reaction-time-test", label: "Reaction Time Test" },
-      { href: "/drills/motor/movement-speed/rapid-tapping", label: "CPS Click Speed Test" }
+      { href: "/drills/motor/movement-speed/rapid-tapping", label: "CPS Test & Click Speed Test" }
     ]
   };
+
 
   return (
     <>

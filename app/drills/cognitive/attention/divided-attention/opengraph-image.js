@@ -1,6 +1,6 @@
 import { ImageResponse } from 'next/og';
 
-export const alt = 'Divided Attention — free browser dual-task visual tracking & number stream cognitive drill';
+export const alt = 'Divided Attention Test — free browser dual-task visual tracking & number stream cognitive drill';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -67,14 +67,14 @@ export default async function Image() {
           <div
             style={{
               display: 'flex',
-              fontSize: 92,
+              fontSize: 88,
               fontWeight: 900,
               color: '#ffffff',
               lineHeight: 1.05,
               letterSpacing: -2,
             }}
           >
-            Divided Attention
+            Divided Attention Test
           </div>
           <div
             style={{

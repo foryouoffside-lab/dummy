@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import Link from 'next/link';
 
 import {
   Activity, AlertCircle, Brain,
@@ -23,7 +22,6 @@ import DrillCountdown from '../../../../../components/drill/DrillCountdown';
 import DrillAccordion from '../../../../../components/drill/DrillAccordion';
 import DrillFlashOverlay from '../../../../../components/drill/DrillFlashOverlay';
 import DrillRuleItem from '../../../../../components/drill/DrillRuleItem';
-import DrillFAQItem from '../../../../../components/drill/DrillFAQItem';
 import FpsStartCard from '../../../../../components/drill/FpsStartCard';
 import useImmersiveMode from '@/lib/useImmersiveMode';
 
@@ -487,19 +485,19 @@ export default function PathTracingClient() {
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
         {/* Title */}
         {!isFullscreen && (
-        <div className="text-center">
+        <div className="text-left">
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-            PATH TRACING
-            <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
-              Path Tracing Sequence Memory
-            </span>
+            Path Tracing Memory Test
           </h1>
+          <p className="text-[13px] text-slate-400 leading-relaxed mt-1">
+            Spatial span is the longest sequence of positions you can retrace in order. The Corsi block-tapping task, the standard measure, puts most adults around five to seven steps (Milner, 1971; Corsi, 1972), and it draws on a different store from verbal digit span (Logie, 1995).
+          </p>
         </div>
         )}
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-        <div className="grid grid-cols-4 gap-2.5 max-w-2xl mx-auto w-full">
+        <div className="grid grid-cols-4 gap-2 w-full">
           <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
             <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
             <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{uiScore}</div>
@@ -773,18 +771,18 @@ export default function PathTracingClient() {
             </div>
           </DrillAccordion>
 
-          {/* ACCORDION 2: ABOUT PATH TRACING PRO */}
+          {/* ACCORDION 2: ABOUT PATH TRACING */}
           <DrillAccordion
             id="about"
-            title="About Path Tracing Pro"
+            title="About Path Tracing Memory Test"
             isOpen={openAccordion === 'about'}
             onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
           >
             <div className="space-y-8">
               <section>
-                <h4 className="text-base font-bold text-white mb-2 flex items-center gap-2">
+                <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
                   <Brain className="w-4 h-4 text-amber-400" /> What Is Path Tracing Training?
-                </h4>
+                </h3>
                 <p className="text-sm leading-relaxed mb-3">
                   <strong>Path Tracing Training</strong> is an advanced spatial sequence memory drill designed to measure route tracing capacity. The <strong>Path Tracing drill</strong> demonstrates animated step paths on 3x3 to 7x7 matrices, testing your ability to lock in and retrace directional routes in exact order.
                 </p>
@@ -797,21 +795,21 @@ export default function PathTracingClient() {
                 <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                   <div className="flex items-center gap-2.5 mb-2">
                     <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
-                    <h5 className="text-xs font-bold text-white">Who Should Use This?</h5>
+                    <h4 className="text-xs font-bold text-white">Who Should Use This?</h4>
                   </div>
                   <p className="text-xs text-gray-300 leading-relaxed">Strategy & MOBA gamers improving map route tracing, STEM students strengthening spatial navigation, and professionals enhancing sequential memory.</p>
                 </div>
                 <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                   <div className="flex items-center gap-2.5 mb-2">
                     <div className="w-7 h-7 rounded-lg bg-amber-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
-                    <h5 className="text-xs font-bold text-white">Skills Improved</h5>
+                    <h4 className="text-xs font-bold text-white">Skills Improved</h4>
                   </div>
                   <p className="text-xs text-gray-300 leading-relaxed">Spatial path memory, route tracing, sequential visual memory, and directional spatial navigation.</p>
                 </div>
                 <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                   <div className="flex items-center gap-2.5 mb-2">
                     <div className="w-7 h-7 rounded-lg bg-purple-600 flex items-center justify-center"><Zap className="w-3.5 h-3.5 text-white" /></div>
-                    <h5 className="text-xs font-bold text-white">Path Chunking</h5>
+                    <h4 className="text-xs font-bold text-white">Path Chunking</h4>
                   </div>
                   <p className="text-xs text-gray-300 leading-relaxed">Group individual dot steps into directional vectors (e.g. Up-Right-Down) to memorize longer path lengths effortlessly.</p>
                 </div>
@@ -819,45 +817,7 @@ export default function PathTracingClient() {
 
             </div>
           </DrillAccordion>
-
-          {/* ACCORDION 3: FREQUENTLY ASKED QUESTIONS */}
-          <DrillAccordion
-            id="faq"
-            title="Frequently Asked Questions"
-            isOpen={openAccordion === 'faq'}
-            onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
-          >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <DrillFAQItem q="What is the Path Tracing Drill?" a="A free spatial sequence memory exercise. Watch animated dot paths at 500ms intervals, then retrace the exact path sequence on the grid." />
-              <DrillFAQItem q="How does progressive difficulty work?" a="Starts on a 3x3 grid with 3 steps. Clearing rounds adds steps and expands the grid up to 7x7." />
-              <DrillFAQItem q="Are there negative score or time penalties?" a="No. Tapping a wrong step never deducts score points or reduces remaining timer seconds — the round just replays at the same difficulty." />
-              <DrillFAQItem q="Does difficulty decrease on mistakes?" a="No. Your level only ever goes up — a mistake never takes you back down, so you can safely master your current path length." />
-              <DrillFAQItem q="How long does each drill session last?" a="Each round is timed for exactly 45 seconds of continuous focus." />
-              <DrillFAQItem q="Do I need to sign up?" a="No registration required. This drill runs directly in your browser with instant response." />
-              <DrillFAQItem q="What cognitive skill does path tracing train?" a="Path Tracing trains spatial sequence memory — encoding an ordered series of spatial positions and reproducing them exactly. Unlike static pattern recall, both the location and the order have to be retained together." />
-              <DrillFAQItem q="How is this different from Grid Memorization?" a="Grid Memorization asks you to recall a static set of illuminated cells with no inherent order. Path Tracing adds a sequential dimension — you must retrace the exact step-by-step route, so both 'where' and 'when' matter." />
-              <DrillFAQItem q="What is a good path length to aim for?" a="Reaching a 6-7 step path on a 5x5 grid is a solid intermediate result. Elite spatial-memory performers retrace 10+ step paths on 7x7 grids by relying on directional chunking rather than memorizing each dot individually." />
-              <DrillFAQItem q="Why does spatial sequence memory matter in real life?" a="It underlies everyday skills like recalling driving directions, dance or sports choreography, and navigating unfamiliar buildings — anywhere you need to reproduce an ordered series of spatial moves from memory." />
-            </div>
-          </DrillAccordion>
           </div>
-        )}
-
-        {/* RELATED DRILLS GRID */}
-        {!isFullscreen && (
-          <section className="mt-4">
-            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">
-              Related Memory Drills
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              <RelatedCard href="/drills/memory/spatial-memory/object-location" title="Object Location" desc="Memorize and locate emoji objects on grids." cat="Spatial Memory" />
-              <RelatedCard href="/drills/memory/spatial-memory/grid-memorization" title="Grid Memorization" desc="Memorize progressive spatial grid patterns." cat="Spatial Memory" />
-              <RelatedCard href="/drills/memory/working-memory/n-back" title="Dual N-Back" desc="The gold standard working memory trainer." cat="Working Memory" />
-              <RelatedCard href="/drills/memory/short-term-memory/word-recall" title="Word Recall" desc="Free recall random word lists under time pressure." cat="Short-Term Memory" />
-              <RelatedCard href="/drills/memory/short-term-memory/color-sequence" title="Color Sequence" desc="Watch and recall color sequences." cat="Short-Term Memory" />
-              <RelatedCard href="/drills/memory/short-term-memory/digit-span" title="Digit Span" desc="Train numerical short-term memory capacity." cat="Short-Term Memory" />
-            </div>
-          </section>
         )}
 
       </main>
@@ -865,21 +825,5 @@ export default function PathTracingClient() {
       {/* ── FOOTER ── */}
       {!isFullscreen && <DrillFooter />}
     </div>
-  );
-}
-
-// === Subcomponents ===
-function RelatedCard({ href, title, desc, cat }) {
-  return (
-    <Link href={href} className="group bg-[#0c0c16] border border-white/5 hover:border-amber-500/40 rounded-xl p-3.5 transition-all duration-200 hover:-translate-y-0.5 flex flex-col justify-between">
-      <div>
-        {cat && <div className="text-[10px] font-bold text-amber-400 uppercase tracking-wider mb-1">{cat}</div>}
-        <div className="text-xs font-bold text-white group-hover:text-amber-300 transition-colors">{title}</div>
-        <div className="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">{desc}</div>
-      </div>
-      <div className="text-[10px] font-bold text-slate-500 group-hover:text-amber-400 mt-3 flex items-center gap-1 transition-colors">
-        Train Drill <span>→</span>
-      </div>
-    </Link>
   );
 }

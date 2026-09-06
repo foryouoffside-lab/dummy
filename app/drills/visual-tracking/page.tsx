@@ -6,7 +6,7 @@ const trackingDrills = DRILLS.filter((d) => d.category === 'visual-tracking');
 const trackingDrillCount = trackingDrills.length;
 
 export const metadata = {
-  title: `Free Eye Tracking Training - Smooth Pursuit | SkillDrills`,
+  title: `Free Eye Tracking Training - Smooth Pursuit Drills`,
   description: `Free eye tracking training online. ${trackingDrillCount} smooth pursuit eye movement drills. Train your gaze for sports, gaming, and vision therapy. No sign-up required.`,
   keywords: [
     'eye tracking training online', 'free eye tracking training', 'eye tracking exercises',

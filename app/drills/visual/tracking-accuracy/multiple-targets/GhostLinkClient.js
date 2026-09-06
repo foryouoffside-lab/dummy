@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useEffect, useState, useRef, useCallback } from 'react';
-import Link from 'next/link';
 import { 
   Eye, Zap, ZapOff, Volume2, VolumeX,
   Target, RefreshCw, GraduationCap,
@@ -15,7 +14,6 @@ import DrillCountdown from '../../../../../components/drill/DrillCountdown';
 import DrillAccordion from '../../../../../components/drill/DrillAccordion';
 import DrillFlashOverlay from '../../../../../components/drill/DrillFlashOverlay';
 import DrillRuleItem from '../../../../../components/drill/DrillRuleItem';
-import DrillFAQItem from '../../../../../components/drill/DrillFAQItem';
 import { drillAudio } from '../../../../../lib/drillAudio';
 import { drillFlash } from '../../../../../lib/drillFlash';
 import { drawTacticalTarget } from '../../../../../lib/canvasFx';
@@ -45,15 +43,6 @@ const saveData = (data) => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   } catch (e) {}
 };
-
-const RELATED_DRILLS = [
-  { id: "moving-target", name: "Moving Target Pro", cat: "Visual Tracking", desc: "Kinetic visual tracking and smooth pursuit interception.", href: "/drills/visual/tracking-accuracy/moving-target" },
-  { id: "pursuit-tracker", name: "Pursuit Tracker", cat: "Visual Tracking", desc: "Smooth pursuit tracking accuracy and velocity alignment.", href: "/drills/visual/tracking-accuracy/pursuit-tracker" },
-  { id: "light-reaction", name: "Light Reaction", cat: "Reaction Speed", desc: "Test raw visual motor reaction speed.", href: "/drills/visual/reaction-speed/light-reaction" },
-  { id: "go-no-go", name: "Go / No-Go", cat: "Reaction Speed", desc: "Response inhibition & selective reaction speed.", href: "/drills/visual/reaction-speed/go/no-go" },
-  { id: "distance-judgment", name: "Distance Judgment Pro", cat: "Depth Perception", desc: "3D stereoscopic depth estimation & intercept timing.", href: "/drills/visual/depth-perception/distance-judgment" },
-  { id: "entropic-grid", name: "Entropic Grid", cat: "Visual Recognition", desc: "Visual search speed & pattern recognition grid.", href: "/drills/visual/visual-recognition/entropic-grid" }
-];
 
 // ==========================================
 // ERROR BOUNDARY
@@ -647,36 +636,36 @@ diagnostics = "Low target identification accuracy. Anchor your gaze centrally an
     <div className="min-h-screen bg-[#050508] text-white flex flex-col font-sans select-none">
       {/* ── MAIN CONTENT AREA ── */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
-        {/* Title */}
+        {/* Title & AIO Snippet */}
         {!isFullscreen && (
-          <div className="text-center">
+          <div className="text-left">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              MULTIPLE TARGETS
-              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
-                Multiple Object Tracking Test
-              </span>
+              Multiple Object Tracking Test
             </h1>
+            <p className="text-sm text-slate-400 mt-1 leading-relaxed">
+              A multiple object tracking (MOT) test asks you to follow several moving targets among identical moving distractors, then identify them at the end. Most people can track about four or five independent targets at once, and accuracy falls away sharply beyond that (Pylyshyn &amp; Storm, 1988). The limit is attentional rather than optical &mdash; the eyes cannot fixate five things at once, so the tracking is done by attention split across locations (Cavanagh &amp; Alvarez, 2005).
+            </p>
           </div>
         )}
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 gap-2.5 max-w-2xl mx-auto w-full">
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+          <div className="grid grid-cols-4 gap-2 w-full">
+            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-3 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
               <div className="text-lg sm:text-xl font-black text-purple-400 tabular-nums">{customScore}</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-3 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
               <div className={`text-lg sm:text-xl font-black tabular-nums ${localTimeRemaining <= 10 && phase === 'TRACKING' ? 'text-red-400 animate-pulse' : 'text-white'}`}>
                 {phase === 'TRACKING' ? `${localTimeRemaining}s` : '-'}
               </div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-3 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Phase</div>
               <div className="text-lg sm:text-xl font-black text-cyan-400 tabular-nums">{phase === 'IDENTIFY' ? 'WAIT' : phase}</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-3 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
               <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore || 0}</div>
             </div>
@@ -965,9 +954,9 @@ diagnostics = "Low target identification accuracy. Anchor your gaze centrally an
             >
               <div className="space-y-8">
                 <section>
-                  <h4 className="text-base font-bold text-white mb-2 flex items-center gap-2">
+                  <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
                     <Brain className="w-4 h-4 text-purple-400" /> What Is Multi-Object Tracking?
-                  </h4>
+                  </h3>
                   <p className="text-sm leading-relaxed mb-3 text-slate-300">
                     <strong>Multiple Object Tracking (MOT)</strong> forces the brain to isolate, store, and continuously update spatial coordinates of multiple identical moving objects in real time, even through chaotic bouncing collisions.
                   </p>
@@ -980,21 +969,21 @@ diagnostics = "Low target identification accuracy. Anchor your gaze centrally an
                   <div className="p-4 rounded-xl border border-white/5 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-purple-600 flex items-center justify-center"><GraduationCap className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Who Should Use This?</h5>
+                      <h4 className="text-xs font-bold text-white">Who Should Use This?</h4>
                     </div>
                     <p className="text-xs text-slate-400 leading-relaxed">MOBA & FPS players, tactical operators, and trainees seeking superior visual working memory capacity.</p>
                   </div>
                   <div className="p-4 rounded-xl border border-white/5 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Skills Improved</h5>
+                      <h4 className="text-xs font-bold text-white">Skills Improved</h4>
                     </div>
                     <p className="text-xs text-slate-400 leading-relaxed">Divided visual attention, working memory capacity, spatial tracking resolution, and motion prediction.</p>
                   </div>
                   <div className="p-4 rounded-xl border border-white/5 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-pink-600 flex items-center justify-center"><Zap className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Pro Tip</h5>
+                      <h4 className="text-xs font-bold text-white">Pro Tip</h4>
                     </div>
                     <p className="text-xs text-slate-400 leading-relaxed">Anchor your visual gaze near the centroid of all target balls rather than chasing individual balls with your eyes.</p>
                   </div>
@@ -1002,51 +991,7 @@ diagnostics = "Low target identification accuracy. Anchor your gaze centrally an
 
               </div>
             </DrillAccordion>
-
-            <DrillAccordion
-              id="faq"
-              title="Frequently Asked Questions"
-              isOpen={openAccordion === 'faq'}
-              onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <DrillFAQItem q="What is the Multiple Object Tracking test?" a="A visual cognitive test based on the Multiple Object Tracking (MOT) paradigm where you track specific targets among moving distractors." />
-                <DrillFAQItem q="How does the tracking phase work?" a="First, the target objects are highlighted in green. Then they fade to match the distractors and all objects bounce around the screen. Finally, you select the original targets." />
-                <DrillFAQItem q="What cognitive skills are measured?" a="Sustained attention, divided attention, visual working memory, spatial location tracking, and distractor suppression." />
-                <DrillFAQItem q="Are there negative score penalties?" a="No. Selecting a wrong ball costs zero points — you only earn +20 PTS per correctly identified target, and the engine enforces a strict minimum score floor of 0." />
-                <DrillFAQItem q="How do collisions work?" a="The engine runs a custom 2D elastic collision loop where balls perfectly exchange momentum vectors upon impact." />
-                <DrillFAQItem q="How long does each session last?" a="Session tracking duration is configurable from 15 to 60 seconds." />
-                <DrillFAQItem q="Do I need to sign up?" a="No registration is required. The Multiple Object Tracking test is completely free and works instantly in your browser." />
-              </div>
-            </DrillAccordion>
           </div>
-        )}
-
-        {/* RELATED DRILLS GRID */}
-        {!isFullscreen && (
-          <section className="mt-4">
-            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">
-              Related Visual Drills
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {RELATED_DRILLS.map((drill) => (
-                <Link
-                  key={drill.id}
-                  href={drill.href}
-                  className="group bg-[#0c0c16] border border-white/5 hover:border-purple-500/40 rounded-xl p-3.5 transition-all duration-200 hover:-translate-y-0.5 flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="text-[10px] font-bold text-purple-400 uppercase tracking-wider mb-1">{drill.cat}</div>
-                    <div className="text-xs font-bold text-white group-hover:text-purple-300 transition-colors">{drill.name}</div>
-                    <div className="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">{drill.desc}</div>
-                  </div>
-                  <div className="text-[10px] font-bold text-slate-500 group-hover:text-purple-400 mt-3 flex items-center gap-1 transition-colors">
-                    Train Drill <span>→</span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
         )}
 
         {/* SITE FOOTER */}

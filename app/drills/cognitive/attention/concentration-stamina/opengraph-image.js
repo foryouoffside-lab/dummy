@@ -1,6 +1,6 @@
 import { ImageResponse } from 'next/og';
 
-export const alt = 'Concentration Stamina — free browser prolonged visual focus & target tracking drill';
+export const alt = 'Focus Test — free online concentration stamina and attention endurance drill';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -74,7 +74,7 @@ export default async function Image() {
               letterSpacing: -2,
             }}
           >
-            Concentration Stamina
+            Focus Test
           </div>
           <div
             style={{
@@ -86,8 +86,7 @@ export default async function Image() {
               maxWidth: 940,
             }}
           >
-            Sustain continuous visual focus and rapid target acquisition through high-density
-            target sequences.
+            Sustain continuous visual focus and rapid rule-switching under cognitive load.
           </div>
         </div>
 

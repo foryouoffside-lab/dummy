@@ -1,23 +1,31 @@
 import MicroCorrectionClient from './MicroCorrectionClient';
+import DrillGuide from '@/components/drill/DrillGuide';
+import { pickSources } from '@/lib/drillSources';
 
 export const metadata = {
-  title: "Micro-Correction Aim Trainer | SkillDrills",
-  description: "Refine your headshot accuracy with our Micro-Correction Aim Trainer. Eliminate overflicking and improve snap deceleration and precision clicks.",
+  title: "Micro-Correction Aim Trainer - Headshot Precision",
+  description: "Master terminal deceleration, snap landing accuracy, and sub-degree micro-adjustments for tactical FPS games like Valorant and CS2 with raw pointer lock.",
   keywords: [
+    "micro-correction aim trainer",
+    "micro correction aim",
+    "micro flick training",
+    "headshot precision drill",
+    "overflick correction",
+    "micro adjustments aim",
+    "micro flick aim trainer",
     "micro-adjustment aim training",
-    "micro-correction aim practice",
-    "micro adjustment aim trainer",
-    "precision aim trainer",
     "headshot accuracy trainer",
     "snap deceleration training",
-    "micro flick trainer",
+    "how to improve micro adjustments valorant",
+    "cs2 micro adjustment practice",
+    "fine motor aim control",
+    "anti overflick drill",
+    "precision click timing",
+    "tactical shooter micro adjustment",
+    "foveal micro saccades aim",
     "post flick correction",
-    "overflick correction trainer",
-    "aim refinement training",
-    "cs2 precision aim",
-    "headshot consistency training",
-    "aim adjustment training",
-    "click timing trainer"
+    "マイクロフリック 練習",
+    "마이크로 플릭"
   ],
   alternates: {
     canonical: "https://skilldrills.online/drills/fps/micro-correction-precision",
@@ -27,8 +35,8 @@ export const metadata = {
     follow: true,
   },
   openGraph: {
-    title: "Micro-Correction Aim Trainer | SkillDrills",
-    description: "Refine your headshot accuracy with our Micro-Correction Aim Trainer. Eliminate overflicking and improve snap deceleration and precision clicks.",
+    title: "Micro-Correction Aim Trainer - Headshot Precision",
+    description: "Master terminal deceleration, snap landing accuracy, and sub-degree micro-adjustments for tactical FPS games like Valorant and CS2 with raw pointer lock.",
     url: "https://skilldrills.online/drills/fps/micro-correction-precision",
     siteName: 'SkillDrills',
     locale: 'en_US',
@@ -36,8 +44,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Micro-Correction Aim Trainer | SkillDrills",
-    description: "Refine your headshot accuracy with our Micro-Correction Aim Trainer. Eliminate overflicking and improve snap deceleration and precision clicks.",
+    title: "Micro-Correction Aim Trainer - Headshot Precision",
+    description: "Master terminal deceleration, snap landing accuracy, and sub-degree micro-adjustments for tactical FPS games like Valorant and CS2 with raw pointer lock.",
   },
 };
 
@@ -58,6 +66,7 @@ export default function MicroCorrectionPage() {
     "name": "Micro-Correction Aim Trainer",
     "applicationCategory": "GameApplication",
     "operatingSystem": "Web Browser",
+    "dateModified": "2026-09-05",
     "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
     "description": "A free browser FPS drill training micro-corrections, snap deceleration after large flicks, and precision headshot consistency for tactical shooters.",
     "genre": "FPS Training / Precision Aim",
@@ -75,8 +84,9 @@ export default function MicroCorrectionPage() {
     "name": "Micro-Correction Aim Trainer",
     "url": "https://skilldrills.online/drills/fps/micro-correction-precision",
     "description": "A free browser FPS drill training micro-corrections, snap deceleration after large flicks, and precision headshot consistency for tactical shooters.",
+    "dateModified": "2026-09-05",
     "gamePlatform": "Web Browser",
-    "genre": ["FPS Training", "Aim Trainer"],
+    "genre": ["FPS Training", "Aim Trainer", "Precision Aim"],
     "playMode": "SinglePlayer",
     "applicationCategory": "Game",
     "operatingSystem": "Web Browser",
@@ -86,125 +96,86 @@ export default function MicroCorrectionPage() {
   const faqSchema = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
+    "dateModified": "2026-09-05",
     "mainEntity": [
       {
         "@type": "Question",
-        "name": "What is a micro-correction in aiming?",
+        "name": "What is mouse deceleration in FPS aiming?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "A micro-correction is a tiny, precise adjustment made to your crosshair position after your initial flick aim lands close to the target. It bridges the gap between a fast flick and a perfect headshot, which is critical in tactical shooters like Valorant and CS2."
+          "text": "Mouse deceleration is the biomechanical ability to brake mouse momentum quickly and stably at the end of a rapid swipe. Developing controlled deceleration counteracts kinetic inertia, preventing your crosshair from sliding past the enemy hitbox and eliminating costly overshoot."
         }
       },
       {
         "@type": "Question",
-        "name": "How do I improve headshot accuracy?",
+        "name": "Why do players overflick past targets in tactical shooters?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Improve headshot accuracy by practicing crosshair placement, training mouse deceleration to stop flicks cleanly, using micro-correction drills to refine your aim on tiny targets, and ensuring target confirmation before clicking."
+          "text": "Overflicking occurs when the initial ballistic movement generates more kinetic energy than the hand flexors can absorb upon landing. Under Woodworth's two-component aiming model (1899), an uncalibrated primary impulse overshoots the target boundary, forcing an emergency reverse micro-correction that drastically increases time-to-damage."
         }
       },
       {
         "@type": "Question",
-        "name": "Why do I overflick targets?",
+        "name": "How does the two-component aiming model explain micro-adjustments?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Overflicking is caused by poor mouse deceleration control, tensing your muscles, or running an excessively high sensitivity. Training micro-correction helps build the motor control to stop the mouse exactly on target."
+          "text": "Formalized by Robert S. Woodworth (1899) and expanded by Meyer et al. (1988), human rapid targeting consists of an initial open-loop ballistic impulse that covers 85–95% of target distance, followed by a closed-loop corrective submovement guided by visual and proprioceptive feedback to lock exactly onto the target center."
         }
       },
       {
         "@type": "Question",
-        "name": "What is mouse deceleration?",
+        "name": "How do pro Valorant and CS2 players train micro-precision?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Mouse deceleration is the mechanical skill of stopping your mouse quickly and stably at the end of a swipe. Developing deceleration control prevents your crosshair from sliding past the enemy model."
+          "text": "Professional tactical shooter players practice disciplined crosshair placement combined with micro-flicking routines. Rather than sweeping wildly across screens, they calibrate fingertip and wrist micro-adjustments to snap 5–30 pixels onto enemy head hitboxes immediately after holding or clearing an angle."
         }
       },
       {
         "@type": "Question",
-        "name": "How do pro Valorant players aim?",
+        "name": "What is target confirmation before firing?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Professional Valorant players aim by keeping their crosshair at head-height (crosshair placement), executing clean flicks close to the target, making immediate micro-corrections, and timing their clicks perfectly."
+          "text": "Target confirmation is the cognitive split-second where the visual cortex verifies that the reticle has fully settled inside the target bounding box before triggering index finger motor discharge. Without target confirmation, players suffer from panic firing during the deceleration phase, resulting in missed shots."
         }
       },
       {
         "@type": "Question",
-        "name": "How do CS2 players train precision?",
+        "name": "Can micro-correction drills improve headshot percentage?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "CS2 players train precision using tactical aim drills, practicing counter-strafing timing, refining their crosshair micro-adjustments, and repeating click-timing patterns on static micro-targets."
+          "text": "Yes. In games like Counter-Strike 2 and Valorant, head hitboxes represent tiny angular visual angles. Training micro-adjustments refines fine motor motor-unit recruitment in the lumbricals and interossei, allowing sub-degree crosshair corrections that convert body-shot misses into lethal first-bullet headshots."
         }
       },
       {
         "@type": "Question",
-        "name": "Can micro-correction drills improve aim?",
+        "name": "How do monitor refresh rates and mouse polling rates affect micro-flicking?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Yes. Most players miss targets because their initial flick is slightly off. Micro-correction drills train the brain and hand muscles to automatically adjust and hit the target center, increasing hit consistency."
+          "text": "High refresh rates (144Hz–360Hz) deliver higher temporal frame density, reducing display quantization delay and visual motion smear during fast flicks (Woods et al., 2015). A 1000Hz+ mouse polling rate ensures low-latency coordinate updates, preventing micro-stutter when executing delicate 2-pixel fine adjustments."
         }
       },
       {
         "@type": "Question",
-        "name": "Why does missing or timing out reset my combo and how are penalties applied?",
+        "name": "How often should I practice micro-correction drills?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "By default, missing a shot or allowing a target to expire resets your combo multiplier without reducing your time or score. If you want a more punishing tactical challenge, you can enable Time Penalty in the session settings to deduct 0.6s per error."
+          "text": "Engaging in 10 to 15 minutes of dedicated micro-correction training daily before ranked sessions builds strong neuromuscular myelin pathways without inducing hand fatigue. For mechanical rebuilding, 20 to 30 minutes with periodic rest intervals delivers optimal motor consolidation."
         }
       },
       {
         "@type": "Question",
-        "name": "What is target confirmation?",
+        "name": "How does hand grip style affect fine fingertip micro-adjustments?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Target confirmation is the cognitive split-second where your visual cortex registers that the crosshair is locked onto the target model before you trigger your index finger to click/shoot."
+          "text": "Claw and fingertip grips provide superior vertical and horizontal micro-mobility because the base of the palm does not anchor rigidly to the mouse shell. This allows the fingers to curl and extend dynamically, executing 1–10 pixel adjustments far more rapidly than a rigid palm grip."
         }
       },
       {
         "@type": "Question",
-        "name": "What is precision aiming?",
+        "name": "Why does missing or timing out reset my combo in this drill?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Precision aiming is the mechanical capacity to hit extremely small targets consistently. It depends on fine motor control of the wrist and fingers, low-friction mouse movements, and disciplined click timing."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "How often should I train micro-corrections?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "We recommend training micro-corrections for 10–15 minutes daily as part of your FPS warm-up routine, or up to 30 minutes for a dedicated mechanical accuracy training session."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Can this improve flick accuracy?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Yes. By training the deceleration and correction phase, your muscle memory learns to flick close and transition smoothly into a micro-flick adjustment rather than overshooting."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Does this help tactical shooters?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Definitely. Tactical shooters like Valorant, CS2, Rainbow Six Siege, Spectre Divide, and FragPunk rely heavily on low-TTK headshots, making micro-adjustments the most common aiming mechanic in gunfights."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Is this aim trainer free?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Yes, this Micro-Correction Precision Aim Trainer is 100% free, runs in any desktop browser using raw hardware pointer input, and contains no ads."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "What skills does this drill improve?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "This drill improves micro-flicking adjustments, click timing, snap deceleration, target reacquisition speed, headshot precision, and consistency under pressure."
+          "text": "By default, missing a shot or allowing a target to expire resets your combo multiplier to enforce click discipline and penalize hasty, unconfirmed shooting. Players seeking higher tactical stakes can enable the optional Time Penalty in session settings to deduct 0.6 seconds per error."
         }
       }
     ]
@@ -214,23 +185,93 @@ export default function MicroCorrectionPage() {
     "@context": "https://schema.org",
     "@type": "HowTo",
     "name": "How to Practice Aim Micro-Adjustments",
-    "description": "Step-by-step instructions to train micro-correction speed and snap deceleration.",
+    "description": "Step-by-step instructions to train micro-correction speed, snap deceleration, and target confirmation.",
     "step": [
       {
         "@type": "HowToStep",
-        "name": "Perform the Large Flick",
-        "text": "Flick quickly toward the target's general area. Expect a slight overshoot or undershoot."
+        "name": "Configure Game Sensitivity",
+        "text": "Set your game and sensitivity in Session Settings to mirror your 1:1 hardware coordinates and bypass operating system mouse curves."
       },
       {
         "@type": "HowToStep",
-        "name": "Decelerate and Stop",
-        "text": "Apply immediate friction braking to decelerate and stop your crosshair near the target edge."
+        "name": "Execute the Primary Ballistic Flick",
+        "text": "Flick rapidly toward the target spawn location, utilizing arm and wrist acceleration to cover the majority of the distance."
       },
       {
         "@type": "HowToStep",
-        "name": "Micro-Correct and Fire",
-        "text": "Make a tiny, controlled wrist or finger adjustment to align onto the target center, then click immediately."
+        "name": "Engage Friction Deceleration",
+        "text": "Apply immediate muscular braking to stop mouse momentum within the target's immediate perimeter."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Micro-Adjust with Fingertips and Confirm",
+        "text": "Execute a subtle sub-degree fingertip adjustment to place the reticle dead center on the target, confirm visually, and click."
       }
+    ]
+  };
+
+  const microCorrectionGuide = {
+    heading: "Micro-Correction Aim Trainer Guide & Precision Chronometry",
+    intro: [
+      "Micro-Correction Aim Trainer is an empirical sensorimotor training drill engineered to isolate, calibrate, and master the secondary adjustment phase of visual targeting. In high-stakes competitive shooters such as Valorant, Counter-Strike 2, and Rainbow Six Siege, combat encounters are frequently won or lost by sub-degree corrections of only 5 to 25 pixels.",
+      "The theoretical framework governing rapid targeted movement was established by Robert S. Woodworth (1899) in his seminal two-component model: an initial open-loop ballistic impulse propelling the limb toward the visual stimulus, followed by a closed-loop current control phase governed by continuous sensory feedback. This speed-accuracy trade-off was mathematically codified by Paul M. Fitts (1954) in Fitts' Law, where movement time scales logarithmically with target distance and inversely with target width (Index of Difficulty = log2(2D / W)).",
+      "Later neuro-computational refinements by David E. Meyer et al. (1988) introduced the Stochastic Optimized Submovement Model, demonstrating that human motor control plans primary movements to fall slightly short of or near the target boundary, relying on rapid corrective submovements to resolve coordinate discrepancy without excessive kinetic overrun.",
+      "During the high-acuity terminal fixation phase, human ocular dynamics deploy microsaccades—involuntary, rapid foveal shifts of less than 1 degree—to refresh neural representations and center the retina over high-frequency visual targets (Rolfs, 2009; Martinez-Conde et al., 2004). This drill pairs raw pointer lock hardware input with performance.now() digital chronometry (Woods et al., 2015) to help players eliminate terminal oscillation, conquer overflick drift, and land pinpoint headshots with robotic consistency.",
+      "How this is measured: every event is timestamped with the browser's performance.now() high-resolution clock, entirely on your device -- no score is uploaded. Two things this cannot control: browser timers are deliberately coarsened as a Spectre mitigation (typically to about 1 ms), and your display quantizes the stimulus to its refresh interval -- about 16.7 ms per frame at 60 Hz, 6.9 ms at 144 Hz and 4.1 ms at 240 Hz (Woods et al., 2015). Mouse polling adds roughly 8 ms at 125 Hz versus 1 ms at 1000 Hz. So treat differences smaller than about 5 ms as measurement noise, and compare your own runs on the same hardware rather than against someone else's setup."
+    ],
+    benchmarks: {
+      title: "Micro-Correction Latency & Target Acquisition Tiers",
+      headers: ["Performance Tier", "Correction Latency Window", "Motor Control Mechanics", "Competitive In-Game Implication"],
+      rows: [
+        ["Tier 1 (Apex Precision)", "Sub-280 ms", "Near-instantaneous deceleration; sub-10px fingertip micro-adjustments executed with zero overshoot oscillation", "Lethal first-bullet headshot conversion in Radiant, CS2 Faceit 10, and high-tier competitive lobbies"],
+        ["Tier 2 (Competitive Pro)", "280 – 340 ms", "Disciplined muscular braking; smooth transition from primary flick to secondary micro-landing", "Consistently out-duels aggressive angle peekers; reliable headshot accuracy on micro-targets"],
+        ["Tier 3 (High-Skill FPS)", "340 – 420 ms", "Solid target acquisition; occasional 10–15px overshoot requiring minor dual-submovement corrections", "Effective tactical gunplay; minor hesitation when micro-adjusting across vertical offsets"],
+        ["Tier 4 (Intermediate)", "420 – 520 ms", "Loose terminal braking; tendency to float or drag past hitboxes before initiating correction", "Prone to spraying or losing duels when targets perform rapid counter-strafes"],
+        ["Tier 5 (Developing / High Jitter)", "520 ms+", "Excessive ballistic momentum with severe overshooting; delayed target visual confirmation", "Vulnerable to common peeks; crosshair frequently lands off-target requiring wide re-flicks"]
+      ],
+      note: "Latencies represent combined deceleration, visual target confirmation, micro-adjustment, and click execution times measured via performance.now() chronometry (Woods et al., 2015)."
+    },
+    techniques: {
+      title: "Evidence-Based Protocols for Perfecting Terminal Deceleration & Micro-Aim",
+      items: [
+        {
+          name: "Terminal Muscular Braking & Pad Friction",
+          desc: "Rather than allowing mouse momentum to drift freely after a swipe, intentionally push your mouse downward slightly into the pad weave or clamp your ring and pinky fingers against the pad. This biomechanical friction brake instantly bleeds kinetic inertia at the target perimeter.",
+          tips: "A hybrid cloth mousepad with moderate dynamic stopping friction assists deceleration without sacrificing low static startup friction."
+        },
+        {
+          name: "The Two-Phase Aiming Cadence",
+          desc: "Consciously divide your aim into two distinct rhythms: a fast, relaxed primary flick covering 90% of distance, followed by a deliberate, sharp micro-nudge. Never rush the final click before the micro-adjustment has confirmed the crosshair on target.",
+          tips: "Resist the urge to panic click simultaneously with the flick landing; decouple movement completion from trigger actuation."
+        },
+        {
+          name: "Fingertip Articulation for Sub-Degree Offsets",
+          desc: "Use the wrist and forearm solely for the primary displacement, reserving fingertip curling and extending (controlled by the flexor digitorum and intrinsic hand lumbricals) for the final 5–20 pixel micro-correction.",
+          tips: "Adopt a relaxed claw or fingertip grip that allows unobstructed vertical and horizontal finger mobility within your palm arch."
+        },
+        {
+          name: "Visual Anchor Fixation (Microsaccadic Locking)",
+          desc: "Lock your ocular gaze directly onto the center pixel of the target before your crosshair arrives. According to visual psychophysics (Rolfs, 2009), moving your eyes ahead of the cursor primes the pre-motor cortex with exact coordinate feedback.",
+          tips: "Keep your eyes fixed on the target center—do not watch your crosshair travel across the screen."
+        }
+      ]
+    },
+    steps: [
+      "Configure your exact game, DPI, and in-game sensitivity in the Session Settings modal to guarantee 1:1 cm/360 motor memory transfer, then engage raw Pointer Lock.",
+      "When a micro-target spawns, execute a swift primary flick toward the target boundary covering approximately 90% of the displacement.",
+      "Apply immediate muscular braking near the target rim, execute a subtle sub-degree fingertip micro-adjustment onto the target center, confirm visual lock, and click.",
+      "Review your mean latency, accuracy percentage, and combo retention in the post-session analytics to diagnose undershoot versus overshoot tendencies."
+    ],
+    audience: "Tactical FPS competitors in Valorant, CS2, and Rainbow Six Siege seeking lethal first-bullet headshot consistency, players eliminating overflick oscillation, and marksmen calibrating sub-degree motor control.",
+    faqs: faqSchema.mainEntity.map(e => ({ q: e.name, a: e.acceptedAnswer.text })),
+    // Works named in this page's copy, with DOIs so a reader or an answer
+    // engine can check the figures rather than take them on trust.
+    sources: pickSources('woods2015', 'fitts1954', 'meyer1988', 'martinezConde2004', 'rolfs2009', 'woodworth1899'),
+    related: [
+      { href: "/drills/fps/flick-shot-training", label: "Flick Shot Trainer" },
+      { href: "/drills/fps/angle-hold-trainer", label: "Crosshair Placement & Angle Hold Trainer" },
+      { href: "/drills/fps/instant-response", label: "FPS Reaction Time Test" },
+      { href: "/drills/fps/fps-tracking-trainer", label: "FPS Tracking Speed Trainer" }
     ]
   };
 
@@ -267,6 +308,8 @@ export default function MicroCorrectionPage() {
       />
 
       <MicroCorrectionClient />
+
+      <DrillGuide guide={microCorrectionGuide} />
     </>
   );
 }

@@ -3877,7 +3877,7 @@ export const SCENES = {
   'drop-catch': {
     id: 'drop-catch',
     label: 'Drop Catch & Decoy Avoidance',
-    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+    draw(ctx, { t, w, h, dim, seed = 0 }) {
       const cycle = (t + seed * 980) % 3000;
       drawSubtleGrid(ctx, w, h, dim);
 
@@ -4195,6 +4195,1633 @@ export const SCENES = {
       ctx.textAlign = 'center';
       ctx.fillText(isArrested ? 'ARREST LOCKED (VELOCITY: 0.0 PX/S)' : 'DECELERATION BRAKE READY', w * 0.5, h * 0.90);
     }
+  },
+
+  // ---------------- VISUAL TRACKING PREVIEW SCENES (58–72) ----------------
+
+  // 58. LISSAJOUS-SLOW: Low-velocity continuous Lissajous curve pursuit with micro-catchup saccade (constant-slow-pursuit)
+  'lissajous-slow': {
+    id: 'lissajous-slow',
+    label: 'Low Velocity Lissajous Pursuit',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 950) % 3600;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const midX = w * 0.5;
+      const midY = h * 0.48;
+      const rx = w * 0.36;
+      const ry = h * 0.30;
+
+      // Draw faint Lissajous track
+      ctx.strokeStyle = dim || 'rgba(6, 182, 212, 0.12)';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      const steps = 72;
+      for (let i = 0; i <= steps; i++) {
+        const ang = (i / steps) * Math.PI * 2;
+        const ox = midX + Math.cos(ang * 3) * rx;
+        const oy = midY + Math.sin(ang * 4) * ry;
+        if (i === 0) ctx.moveTo(ox, oy);
+        else ctx.lineTo(ox, oy);
+      }
+      ctx.stroke();
+
+      // Target position
+      const ang = (cycle / 3600) * Math.PI * 2;
+      const tgtX = midX + Math.cos(ang * 3) * rx;
+      const tgtY = midY + Math.sin(ang * 4) * ry;
+
+      // Draw target orb with outer ring
+      ctx.fillStyle = accent;
+      ctx.beginPath();
+      ctx.arc(tgtX, tgtY, 6, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.strokeStyle = accent;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(tgtX, tgtY, 10, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Subtle micro-catchup saccade lag simulation every 1200ms
+      const sub = cycle % 1200;
+      let chX = tgtX;
+      let chY = tgtY;
+      if (sub < 160) {
+        const lagP = sub / 160;
+        chX = tgtX - Math.sin(ang * 3) * 5 * (1 - lagP);
+        chY = tgtY - Math.cos(ang * 4) * 4 * (1 - lagP);
+      }
+
+      drawCrosshair(ctx, chX, chY, 7, '#ffffff');
+
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
+      ctx.font = '7px ui-monospace, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('PURSUIT GAIN: 0.98 (SMOOTH)', midX, h * 0.90);
+    },
+  },
+
+  // 59. DIRECTIONAL-CHAOS: Erratic unpredictable motion with continuous random velocity nudges (directional-chaos-pursuit)
+  'directional-chaos': {
+    id: 'directional-chaos',
+    label: 'Erratic Motion Pursuit',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 920) % 3000;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const midX = w * 0.5;
+      const midY = h * 0.48;
+
+      // Multi-harmonic chaotic trajectory
+      const sec = cycle * 0.001;
+      const tgtX = midX + (Math.sin(sec * 2.1) * 0.32 + Math.sin(sec * 4.7) * 0.10 + Math.cos(sec * 1.3) * 0.05) * w;
+      const tgtY = midY + (Math.cos(sec * 2.7) * 0.28 + Math.cos(sec * 5.3) * 0.08 + Math.sin(sec * 1.9) * 0.05) * h;
+
+      // Trailing erratic motion breadcrumbs
+      ctx.fillStyle = dim || 'rgba(6, 182, 212, 0.2)';
+      for (let i = 1; i <= 3; i++) {
+        const pastSec = Math.max(0, sec - i * 0.08);
+        const px = midX + (Math.sin(pastSec * 2.1) * 0.32 + Math.sin(pastSec * 4.7) * 0.10 + Math.cos(pastSec * 1.3) * 0.05) * w;
+        const py = midY + (Math.cos(pastSec * 2.7) * 0.28 + Math.cos(pastSec * 5.3) * 0.08 + Math.sin(pastSec * 1.9) * 0.05) * h;
+        ctx.beginPath();
+        ctx.arc(px, py, 4 - i * 0.8, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Chaotic target
+      ctx.fillStyle = accent;
+      ctx.beginPath();
+      ctx.arc(tgtX, tgtY, 6.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Velocity jitter vector indicator
+      const vx = Math.cos(sec * 4.7) * 12;
+      const vy = -Math.sin(sec * 5.3) * 12;
+      ctx.strokeStyle = accent;
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(tgtX, tgtY);
+      ctx.lineTo(tgtX + vx, tgtY + vy);
+      ctx.stroke();
+
+      // Crosshair with recovery latency
+      const latSec = Math.max(0, sec - 0.09);
+      const chX = midX + (Math.sin(latSec * 2.1) * 0.32 + Math.sin(latSec * 4.7) * 0.10 + Math.cos(latSec * 1.3) * 0.05) * w;
+      const chY = midY + (Math.cos(latSec * 2.7) * 0.28 + Math.cos(latSec * 5.3) * 0.08 + Math.sin(latSec * 1.9) * 0.05) * h;
+
+      drawCrosshair(ctx, chX, chY, 7, '#ffffff');
+
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
+      ctx.font = '7px ui-monospace, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('RECOVERY LATENCY: 138MS', midX, h * 0.90);
+    },
+  },
+
+  // 60. DYNAMIC-EVASION: Sudden 90° evasive heading cut with momentum overshoot recovery (dynamic-evasion-pursuit)
+  'dynamic-evasion': {
+    id: 'dynamic-evasion',
+    label: 'Sudden Evasive Cut',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 890) % 3200;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const startX = w * 0.18;
+      const startY = h * 0.34;
+      const turnX = w * 0.68;
+      const turnY = h * 0.34;
+      const endX = w * 0.68;
+      const endY = h * 0.74;
+
+      // Draw faint guide paths
+      ctx.strokeStyle = dim || 'rgba(6, 182, 212, 0.12)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(startX, startY);
+      ctx.lineTo(turnX, turnY);
+      ctx.lineTo(endX, endY);
+      ctx.stroke();
+
+      // Evasion corner node marker
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.18)';
+      ctx.beginPath();
+      ctx.arc(turnX, turnY, 3, 0, Math.PI * 2);
+      ctx.fill();
+
+      let tgtX, tgtY, chX, chY;
+
+      if (cycle < 1300) {
+        // Phase 1: Steady linear glide to turn point
+        const p = cycle / 1300;
+        tgtX = startX + (turnX - startX) * p;
+        tgtY = startY;
+        chX = tgtX;
+        chY = tgtY;
+      } else if (cycle < 1700) {
+        // Phase 2: Sudden 90° cut downward + Crosshair overshoot
+        const p = (cycle - 1300) / 400;
+        tgtX = turnX;
+        tgtY = turnY + (endY - turnY) * p;
+
+        // Crosshair overshoots along previous heading then recovers downward
+        const overP = Math.sin(p * Math.PI);
+        chX = turnX + overP * 14;
+        chY = turnY + (endY - turnY) * Math.pow(p, 2);
+
+        // Turn ripple burst
+        if (cycle < 1550) {
+          const rp = (cycle - 1300) / 250;
+          drawHitRing(ctx, turnX, turnY, 6 + rp * 18, accent, 1 - rp);
+        }
+      } else if (cycle < 2500) {
+        // Phase 3: Steady vertical pursuit downward
+        const p = (cycle - 1700) / 800;
+        tgtX = turnX;
+        tgtY = turnY + (endY - turnY) * (0.5 + p * 0.5);
+        chX = tgtX;
+        chY = tgtY;
+      } else {
+        // Phase 4: Smooth reset glide
+        const p = (cycle - 2500) / 700;
+        const ep = easeInOutCubic(p);
+        tgtX = endX + (startX - endX) * ep;
+        tgtY = endY + (startY - endY) * ep;
+        chX = tgtX;
+        chY = tgtY;
+      }
+
+      // Target
+      ctx.fillStyle = accent;
+      ctx.beginPath();
+      ctx.arc(tgtX, tgtY, 6.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      drawCrosshair(ctx, chX, chY, 7, '#ffffff');
+
+      // Cut angle badge
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
+      ctx.font = '7px ui-monospace, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(cycle >= 1300 && cycle < 2000 ? '90° CUT DETECTED: SNAP' : 'EVASIVE TURN: READY', w * 0.5, h * 0.90);
+    },
+  },
+
+  // 61. GHOSTING-SUPPRESS: Target with trailing decaying ghost copies; fixation locked on leading edge (ghosting-suppress-pursuit)
+  'ghosting-suppress': {
+    id: 'ghosting-suppress',
+    label: 'Ghosting Suppression',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 940) % 2800;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const midX = w * 0.5;
+      const midY = h * 0.48;
+
+      // High-speed horizontal sweep
+      const p = 0.5 - 0.5 * Math.cos((cycle / 2800) * Math.PI * 2);
+      const tgtX = w * 0.18 + p * (w * 0.64);
+      const tgtY = midY + Math.sin(p * Math.PI) * (h * 0.18);
+
+      // Trailing ghost duplicates (simulating display persistence & afterimages)
+      const isMovingRight = Math.sin((cycle / 2800) * Math.PI * 2) > 0;
+      const ghostDirection = isMovingRight ? -1 : 1;
+
+      for (let g = 3; g >= 1; g--) {
+        const gx = tgtX + ghostDirection * g * 14;
+        const gy = tgtY;
+        const ghostAlpha = 0.38 - g * 0.10;
+
+        ctx.fillStyle = accent;
+        ctx.globalAlpha = ghostAlpha;
+        ctx.beginPath();
+        ctx.arc(gx, gy, 6 - g * 0.8, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Ghost smear blur lines
+        ctx.strokeStyle = accent;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(gx - 4, gy);
+        ctx.lineTo(gx + 4, gy);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1.0;
+
+      // True leading edge target
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(tgtX, tgtY, 6.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Reticle locked exclusively onto the true leading target
+      drawCrosshair(ctx, tgtX, tgtY, 8, accent);
+
+      // Suppression lock brackets around the true target
+      ctx.strokeStyle = accent;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(tgtX - 10, tgtY - 5);
+      ctx.lineTo(tgtX - 10, tgtY + 5);
+      ctx.moveTo(tgtX + 10, tgtY - 5);
+      ctx.lineTo(tgtX + 10, tgtY + 5);
+      ctx.stroke();
+
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
+      ctx.font = '7px ui-monospace, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('AFTERIMAGE FILTER: SUPPRESSED', midX, h * 0.90);
+    },
+  },
+
+  // 62. INFINITY-LOOP: Figure-8 lemniscate tracking with crossing midline and curvature reversals (infinity-pursuit)
+  'infinity-loop': {
+    id: 'infinity-loop',
+    label: 'Midline Lemniscate Pursuit',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 910) % 3200;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const midX = w * 0.5;
+      const midY = h * 0.48;
+      const rx = w * 0.32;
+      const ry = h * 0.28;
+
+      // Vertical dashed midline axis (the core transfer zone)
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([3, 4]);
+      ctx.beginPath();
+      ctx.moveTo(midX, h * 0.12);
+      ctx.lineTo(midX, h * 0.84);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Draw continuous figure-8 lemniscate track
+      ctx.strokeStyle = dim || 'rgba(6, 182, 212, 0.12)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      const steps = 64;
+      for (let i = 0; i <= steps; i++) {
+        const ang = (i / steps) * Math.PI * 2;
+        const ox = midX + Math.sin(ang) * rx;
+        const oy = midY + Math.sin(ang * 2) * (ry * 0.85);
+        if (i === 0) ctx.moveTo(ox, oy);
+        else ctx.lineTo(ox, oy);
+      }
+      ctx.stroke();
+
+      // Current target position along figure-8
+      const ang = (cycle / 3200) * Math.PI * 2;
+      const tgtX = midX + Math.sin(ang) * rx;
+      const tgtY = midY + Math.sin(ang * 2) * (ry * 0.85);
+
+      // Midline crossing pulse
+      const distToMid = Math.abs(tgtX - midX);
+      const isCrossing = distToMid < 6;
+      if (isCrossing) {
+        drawHitRing(ctx, midX, midY, 14, accent, 0.6);
+      }
+
+      // Target core
+      ctx.fillStyle = accent;
+      ctx.beginPath();
+      ctx.arc(tgtX, tgtY, 6.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      drawCrosshair(ctx, tgtX, tgtY, 7, '#ffffff');
+
+      ctx.fillStyle = isCrossing ? accent : 'rgba(255, 255, 255, 0.55)';
+      ctx.font = '7px ui-monospace, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(isCrossing ? 'MIDLINE HANDOFF: ACTIVE' : 'FIGURE-8 PURSUIT: LOCKED', midX, h * 0.90);
+    },
+  },
+
+  // 63. MOMENTUM-TELEPORT: Target preserves velocity vector across sudden quantum teleport (momentum-teleport-pursuit)
+  'momentum-teleport': {
+    id: 'momentum-teleport',
+    label: 'Momentum Teleport Pursuit',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 960) % 3000;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const midX = w * 0.5;
+
+      // Phase 1: 0–1200ms -> vector 1: from (0.16*w, 0.72*h) to (0.46*w, 0.42*h)
+      // Phase 2: 1200–2600ms -> teleport to (0.34*w, 0.66*h) -> continue along IDENTICAL heading to (0.84*w, 0.26*h)
+      const v1Start = { x: w * 0.16, y: h * 0.72 };
+      const v1End = { x: w * 0.46, y: h * 0.42 };
+      const v2Start = { x: w * 0.34, y: h * 0.68 };
+      const v2End = { x: w * 0.84, y: h * 0.28 };
+
+      // Draw faint trajectory vectors
+      ctx.strokeStyle = dim || 'rgba(6, 182, 212, 0.12)';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(v1Start.x, v1Start.y);
+      ctx.lineTo(v1End.x, v1End.y);
+      ctx.moveTo(v2Start.x, v2Start.y);
+      ctx.lineTo(v2End.x, v2End.y);
+      ctx.stroke();
+
+      let tgtX, tgtY, chX, chY;
+      const isTeleporting = cycle >= 1200 && cycle < 1450;
+
+      if (cycle < 1200) {
+        const p = cycle / 1200;
+        tgtX = v1Start.x + (v1End.x - v1Start.x) * p;
+        tgtY = v1Start.y + (v1End.y - v1Start.y) * p;
+        chX = tgtX;
+        chY = tgtY;
+      } else if (cycle < 2600) {
+        const p = (cycle - 1200) / 1400;
+        tgtX = v2Start.x + (v2End.x - v2Start.x) * p;
+        tgtY = v2Start.y + (v2End.y - v2Start.y) * p;
+
+        // Crosshair snaps from v1End to new position over 200ms
+        if (cycle < 1400) {
+          const sp = (cycle - 1200) / 200;
+          const ep = easeInOutCubic(sp);
+          chX = v1End.x + (tgtX - v1End.x) * ep;
+          chY = v1End.y + (tgtY - v1End.y) * ep;
+        } else {
+          chX = tgtX;
+          chY = tgtY;
+        }
+      } else {
+        // Reset loop
+        const p = (cycle - 2600) / 400;
+        tgtX = v2End.x + (v1Start.x - v2End.x) * p;
+        tgtY = v2End.y + (v1Start.y - v2End.y) * p;
+        chX = tgtX;
+        chY = tgtY;
+      }
+
+      // Teleport visual effects
+      if (cycle >= 1200 && cycle < 1550) {
+        const tp = (cycle - 1200) / 350;
+        // Vanish ring at v1End
+        drawHitRing(ctx, v1End.x, v1End.y, 6 + tp * 20, '#ef4444', 1 - tp);
+        // Entry arrival ring at v2Start
+        drawHitRing(ctx, v2Start.x, v2Start.y, 6 + tp * 24, accent, 1 - tp);
+      }
+
+      // Target
+      ctx.fillStyle = accent;
+      ctx.beginPath();
+      ctx.arc(tgtX, tgtY, 6.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Heading vector arrow
+      ctx.strokeStyle = accent;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(tgtX, tgtY);
+      ctx.lineTo(tgtX + 10, tgtY - 9);
+      ctx.stroke();
+
+      drawCrosshair(ctx, chX, chY, 7, '#ffffff');
+
+      ctx.fillStyle = isTeleporting ? accent : 'rgba(255, 255, 255, 0.55)';
+      ctx.font = '7px ui-monospace, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(cycle >= 1200 && cycle < 1700 ? 'POSITION TELEPORT: VECTOR LOCKED' : 'MOMENTUM PRESERVED: 320 PX/S', midX, h * 0.90);
+    },
+  },
+
+  // 64. PERIPHERAL-PING: Steady central fixation while peripheral stimuli ping at screen perimeter (peripheral-ping-pursuit)
+  'peripheral-ping': {
+    id: 'peripheral-ping',
+    label: 'Peripheral Ping Suppression',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 970) % 3000;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const midX = w * 0.5;
+      const midY = h * 0.48;
+
+      // 3 Peripheral nodes at the corners
+      const nodes = [
+        { x: w * 0.16, y: h * 0.24, start: 400, end: 1200 },
+        { x: w * 0.84, y: h * 0.72, start: 1300, end: 2100 },
+        { x: w * 0.82, y: h * 0.26, start: 2200, end: 2950 },
+      ];
+
+      // Draw faint peripheral radar circles
+      nodes.forEach((n) => {
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, 4, 0, Math.PI * 2);
+        ctx.stroke();
+      });
+
+      // Active peripheral ping
+      nodes.forEach((n) => {
+        if (cycle >= n.start && cycle < n.end) {
+          // Blooming peripheral stimulus
+          ctx.fillStyle = accent;
+          ctx.beginPath();
+          ctx.arc(n.x, n.y, 7, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Expanding radar ripple
+          const p = (cycle - n.start) / (n.end - n.start);
+          drawHitRing(ctx, n.x, n.y, 7 + p * 22, accent, 1 - p);
+
+          // Subtle peripheral detection beam connecting center to active ping
+          ctx.strokeStyle = dim || 'rgba(6, 182, 212, 0.15)';
+          ctx.lineWidth = 1;
+          ctx.setLineDash([2, 4]);
+          ctx.beginPath();
+          ctx.moveTo(midX, midY);
+          ctx.lineTo(n.x, n.y);
+          ctx.stroke();
+          ctx.setLineDash([]);
+        }
+      });
+
+      // FIXED CENTRAL RETICLE: Stays locked at screen center (suppresses saccadic reflex)
+      ctx.strokeStyle = accent;
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.arc(midX, midY, 14, 0, Math.PI * 2);
+      ctx.stroke();
+
+      drawCrosshair(ctx, midX, midY, 8, '#ffffff');
+
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
+      ctx.font = '7px ui-monospace, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('CENTRAL FIXATION: 100% (STABLE)', midX, h * 0.90);
+    },
+  },
+
+  // 65. PREDICTIVE-LEAD: Trajectory interpolation where crosshair anticipates and leads ahead of the target (predictive-pursuit)
+  'predictive-lead': {
+    id: 'predictive-lead',
+    label: 'Trajectory Interpolation Lead',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 930) % 3000;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const midX = w * 0.5;
+      const midY = h * 0.48;
+
+      // Smooth sweeping wave arc
+      const p = (cycle / 3000);
+      const tgtX = w * 0.15 + p * (w * 0.70);
+      const tgtY = midY + Math.sin(p * Math.PI * 2) * (h * 0.24);
+
+      // Lookahead lead crosshair (positioned +120ms ahead of target)
+      const leadP = Math.min(1, p + 0.12);
+      const leadX = w * 0.15 + leadP * (w * 0.70);
+      const leadY = midY + Math.sin(leadP * Math.PI * 2) * (h * 0.24);
+
+      // Dashed lookahead trajectory projection line
+      ctx.strokeStyle = accent;
+      ctx.lineWidth = 1.2;
+      ctx.setLineDash([3, 3]);
+      ctx.beginPath();
+      ctx.moveTo(tgtX, tgtY);
+      ctx.lineTo(leadX, leadY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Target orb
+      ctx.fillStyle = accent;
+      ctx.beginPath();
+      ctx.arc(tgtX, tgtY, 6.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Lead reticle waiting ahead
+      drawCrosshair(ctx, leadX, leadY, 7, '#ffffff');
+
+      // Lead bracket
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(leadX, leadY, 11, -Math.PI * 0.4, Math.PI * 0.4);
+      ctx.stroke();
+
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
+      ctx.font = '7px ui-monospace, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('TRAJECTORY LEAD: +180MS ANTICIPATED', midX, h * 0.90);
+    },
+  },
+
+  // 66. SINE-WAVE: Rhythmic horizontal sinusoidal wave pursuit with reversal deceleration (sine-wave-pursuit)
+  'sine-wave': {
+    id: 'sine-wave',
+    label: 'Rhythmic Sine Wave Pursuit',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 905) % 3000;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const midX = w * 0.5;
+      const midY = h * 0.48;
+      const amp = h * 0.26;
+      const startX = w * 0.16;
+      const spanX = w * 0.68;
+
+      // Draw continuous sine wave path
+      ctx.strokeStyle = dim || 'rgba(6, 182, 212, 0.12)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      const steps = 60;
+      for (let i = 0; i <= steps; i++) {
+        const ox = startX + (i / steps) * spanX;
+        const oy = midY + Math.sin(((ox - startX) / spanX) * Math.PI * 2) * amp;
+        if (i === 0) ctx.moveTo(ox, oy);
+        else ctx.lineTo(ox, oy);
+      }
+      ctx.stroke();
+
+      // Oscillating target
+      const p = 0.5 - 0.5 * Math.cos((cycle / 3000) * Math.PI * 2);
+      const tgtX = startX + p * spanX;
+      const tgtY = midY + Math.sin(p * Math.PI * 2) * amp;
+
+      // Target
+      ctx.fillStyle = accent;
+      ctx.beginPath();
+      ctx.arc(tgtX, tgtY, 6.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Crosshair tracking smoothly
+      drawCrosshair(ctx, tgtX, tgtY, 7, '#ffffff');
+
+      // Peak & trough reversal indicators
+      const isReversing = p < 0.05 || p > 0.95;
+      if (isReversing) {
+        drawHitRing(ctx, tgtX, tgtY, 12, accent, 0.5);
+      }
+
+      ctx.fillStyle = isReversing ? accent : 'rgba(255, 255, 255, 0.55)';
+      ctx.font = '7px ui-monospace, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(isReversing ? 'REVERSAL DECEL: 0.0 PX/S' : 'RHYTHMIC PURSUIT: SYNCED', midX, h * 0.90);
+    },
+  },
+
+  // 67. SPATIAL-SHIFT: Target suddenly shifts trajectory and speed, testing fast expectation abandonment (spatial-shift-pursuit)
+  'spatial-shift': {
+    id: 'spatial-shift',
+    label: 'Spatial Shift Deflection',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 880) % 3000;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const midX = w * 0.5;
+      const p0 = { x: w * 0.16, y: h * 0.38 };
+      const pShift = { x: w * 0.50, y: h * 0.38 };
+      const pStale = { x: w * 0.84, y: h * 0.38 }; // Stale prediction continues horizontally
+      const pActual = { x: w * 0.82, y: h * 0.74 }; // Actual trajectory shifts down-right
+
+      // Draw faint initial path + deflected path
+      ctx.strokeStyle = dim || 'rgba(6, 182, 212, 0.12)';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(p0.x, p0.y);
+      ctx.lineTo(pShift.x, pShift.y);
+      ctx.lineTo(pActual.x, pActual.y);
+      ctx.stroke();
+
+      // Stale ghost trajectory projection (the invalid expectation)
+      ctx.strokeStyle = 'rgba(239, 68, 68, 0.25)';
+      ctx.setLineDash([3, 4]);
+      ctx.beginPath();
+      ctx.moveTo(pShift.x, pShift.y);
+      ctx.lineTo(pStale.x, pStale.y);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      let tgtX, tgtY, chX, chY;
+      const isShifted = cycle >= 1200;
+
+      if (cycle < 1200) {
+        const p = cycle / 1200;
+        tgtX = p0.x + (pShift.x - p0.x) * p;
+        tgtY = p0.y;
+        chX = tgtX;
+        chY = tgtY;
+      } else if (cycle < 2500) {
+        const p = (cycle - 1200) / 1300;
+        tgtX = pShift.x + (pActual.x - pShift.x) * p;
+        tgtY = pShift.y + (pActual.y - pShift.y) * p;
+
+        // Crosshair briefly lags toward stale vector then snaps onto deflected path
+        if (cycle < 1450) {
+          const sp = (cycle - 1200) / 250;
+          const staleX = pShift.x + (pStale.x - pShift.x) * sp;
+          chX = staleX + (tgtX - staleX) * easeInOutCubic(sp);
+          chY = pShift.y + (tgtY - pShift.y) * easeInOutCubic(sp);
+        } else {
+          chX = tgtX;
+          chY = tgtY;
+        }
+      } else {
+        const p = (cycle - 2500) / 500;
+        tgtX = pActual.x + (p0.x - pActual.x) * p;
+        tgtY = pActual.y + (p0.y - pActual.y) * p;
+        chX = tgtX;
+        chY = tgtY;
+      }
+
+      // Shift impulse ring at turn node
+      if (cycle >= 1200 && cycle < 1550) {
+        const sp = (cycle - 1200) / 350;
+        drawHitRing(ctx, pShift.x, pShift.y, 6 + sp * 22, accent, 1 - sp);
+      }
+
+      // Target
+      ctx.fillStyle = accent;
+      ctx.beginPath();
+      ctx.arc(tgtX, tgtY, 6.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      drawCrosshair(ctx, chX, chY, 7, '#ffffff');
+
+      ctx.fillStyle = isShifted ? accent : 'rgba(255, 255, 255, 0.55)';
+      ctx.font = '7px ui-monospace, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(cycle >= 1200 && cycle < 1800 ? 'STALE EXPECTATION ABANDONED' : 'SPATIAL DEFLECTION: ADAPTED', midX, h * 0.90);
+    },
+  },
+
+  // 68. SPLIT-SCREEN: Divided visual attention across split screen with bilateral peripheral monitoring (split-screen-tracking)
+  'split-screen': {
+    id: 'split-screen',
+    label: 'Divided Attention Split Tracking',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 915) % 3200;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const midX = w * 0.5;
+      const midY = h * 0.48;
+
+      // Vertical dividing line down center (separating Sector A and Sector B)
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([3, 4]);
+      ctx.beginPath();
+      ctx.moveTo(midX, h * 0.10);
+      ctx.lineTo(midX, h * 0.84);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Sector labels
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+      ctx.font = '6px ui-monospace, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('SECTOR L', w * 0.25, h * 0.16);
+      ctx.fillText('SECTOR R', w * 0.75, h * 0.16);
+
+      // Target L: Oscillates vertically in Sector L
+      const lY = midY + Math.sin((cycle / 3200) * Math.PI * 4) * (h * 0.26);
+      const lX = w * 0.25;
+
+      // Target R: Oscillates diagonally in Sector R
+      const rP = (cycle / 3200) * Math.PI * 2;
+      const rX = w * 0.75 + Math.cos(rP * 2) * (w * 0.12);
+      const rY = midY + Math.sin(rP * 3) * (h * 0.24);
+
+      // Target L & Target R orbs
+      ctx.fillStyle = accent;
+      ctx.beginPath();
+      ctx.arc(lX, lY, 5.5, 0, Math.PI * 2);
+      ctx.arc(rX, rY, 5.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Center fixation reticle (monitoring both simultaneously)
+      drawCrosshair(ctx, midX, midY, 8, '#ffffff');
+
+      // Bilateral radar monitoring beams from center to both targets
+      ctx.strokeStyle = dim || 'rgba(6, 182, 212, 0.18)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(midX, midY);
+      ctx.lineTo(lX, lY);
+      ctx.moveTo(midX, midY);
+      ctx.lineTo(rX, rY);
+      ctx.stroke();
+
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
+      ctx.font = '7px ui-monospace, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('BILATERAL PURSUIT: 2 TARGETS', midX, h * 0.90);
+    },
+  },
+
+  // 69. STAIRCASE-STEP: Vertical eye tracking across multi-segment staircase elevation steps (staircase-step)
+  'staircase-step': {
+    id: 'staircase-step',
+    label: 'Vertical Staircase Elevation',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 925) % 3200;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const midX = w * 0.5;
+
+      // 4 Staircase step points (tread -> riser)
+      const steps = [
+        { x: w * 0.16, y: h * 0.76 },
+        { x: w * 0.36, y: h * 0.76 },
+        { x: w * 0.36, y: h * 0.54 },
+        { x: w * 0.56, y: h * 0.54 },
+        { x: w * 0.56, y: h * 0.32 },
+        { x: w * 0.76, y: h * 0.32 },
+        { x: w * 0.76, y: h * 0.18 },
+      ];
+
+      // Draw staircase outline
+      ctx.strokeStyle = dim || 'rgba(6, 182, 212, 0.15)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(steps[0].x, steps[0].y);
+      for (let i = 1; i < steps.length; i++) {
+        ctx.lineTo(steps[i].x, steps[i].y);
+      }
+      ctx.stroke();
+
+      // Step nodes
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+      steps.forEach((s) => {
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // Traversal across segments
+      const segCount = steps.length - 1;
+      const p = (cycle / 3200) % 1;
+      const segIdx = Math.min(segCount - 1, Math.floor(p * segCount));
+      const segT = (p * segCount) - segIdx;
+
+      const p0 = steps[segIdx];
+      const p1 = steps[segIdx + 1];
+      const tgtX = p0.x + (p1.x - p0.x) * segT;
+      const tgtY = p0.y + (p1.y - p0.y) * segT;
+
+      // Target
+      ctx.fillStyle = accent;
+      ctx.beginPath();
+      ctx.arc(tgtX, tgtY, 6.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Crosshair tracking with vertical emphasis
+      drawCrosshair(ctx, tgtX, tgtY, 7, '#ffffff');
+
+      // Elevation meter tick
+      const isVerticalRiser = Math.abs(p0.x - p1.x) < 2;
+      ctx.fillStyle = isVerticalRiser ? accent : 'rgba(255, 255, 255, 0.55)';
+      ctx.font = '7px ui-monospace, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(isVerticalRiser ? 'VERTICAL RISER: ELEVATION GAIN' : 'HORIZONTAL TREAD: TRACKING', midX, h * 0.90);
+    },
+  },
+
+  // 70. STROBE-OCCLUSION: Intermittent visual blackout / occlusion gap with predictive trajectory bridging (strobe-prediction-pursuit)
+  'strobe-occlusion': {
+    id: 'strobe-occlusion',
+    label: 'Cyclic Strobe Occlusion',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 935) % 3000;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const midX = w * 0.5;
+      const midY = h * 0.48;
+
+      // Occlusion corridor in center (w * 0.38 to w * 0.62)
+      const occLeft = w * 0.38;
+      const occRight = w * 0.62;
+      const occTop = h * 0.16;
+      const occHeight = h * 0.64;
+
+      // Draw shaded occlusion corridor
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+      ctx.fillRect(occLeft, occTop, occRight - occLeft, occHeight);
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(occLeft, occTop, occRight - occLeft, occHeight);
+
+      // Hazard hatch lines inside occlusion box
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      for (let x = occLeft + 8; x < occRight; x += 12) {
+        ctx.moveTo(x, occTop);
+        ctx.lineTo(x - 8, occTop + occHeight);
+      }
+      ctx.stroke();
+
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+      ctx.font = '6px ui-monospace, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('OCCLUSION ZONE', midX, occTop + 10);
+
+      // Trajectory horizontal sweep
+      const p = (cycle / 3000);
+      const tgtX = w * 0.16 + p * (w * 0.68);
+      const tgtY = midY;
+
+      const isOccluded = tgtX >= occLeft && tgtX <= occRight;
+
+      // Predictive trajectory bridge (dashed across occlusion)
+      ctx.strokeStyle = accent;
+      ctx.lineWidth = 1.2;
+      ctx.setLineDash([3, 4]);
+      ctx.beginPath();
+      ctx.moveTo(w * 0.16, midY);
+      ctx.lineTo(w * 0.84, midY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Target: Hidden while inside occlusion zone!
+      if (!isOccluded) {
+        ctx.fillStyle = accent;
+        ctx.beginPath();
+        ctx.arc(tgtX, tgtY, 6.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Crosshair continues forward without visual feedback based purely on model prediction
+      drawCrosshair(ctx, tgtX, tgtY, 7, isOccluded ? '#ffffff' : accent);
+
+      ctx.fillStyle = isOccluded ? accent : 'rgba(255, 255, 255, 0.55)';
+      ctx.font = '7px ui-monospace, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(isOccluded ? 'VISUAL BLACKOUT: PREDICTION ACTIVE' : 'RE-ACQUIRED POST-OCCLUSION', midX, h * 0.90);
+    },
+  },
+
+  // 71. TRIANGULAR-TRACK: Closed triangular pursuit with sharp vertex corners and momentum recovery (triangular-pursuit)
+  'triangular-track': {
+    id: 'triangular-track',
+    label: 'Sharp Triangular Apex Pursuit',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 945) % 3000;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const midX = w * 0.5;
+
+      const v0 = { x: midX, y: h * 0.22 }; // Top apex
+      const v1 = { x: w * 0.82, y: h * 0.74 }; // Bottom right
+      const v2 = { x: w * 0.18, y: h * 0.74 }; // Bottom left
+
+      // Draw faint triangle outline
+      ctx.strokeStyle = dim || 'rgba(6, 182, 212, 0.15)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(v0.x, v0.y);
+      ctx.lineTo(v1.x, v1.y);
+      ctx.lineTo(v2.x, v2.y);
+      ctx.closePath();
+      ctx.stroke();
+
+      // Vertex anchor dots
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
+      [v0, v1, v2].forEach((v) => {
+        ctx.beginPath();
+        ctx.arc(v.x, v.y, 3, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      let tgtX, tgtY, chX, chY;
+      let isCorner = false;
+
+      if (cycle < 1000) {
+        // Edge 1: v0 -> v1
+        const p = cycle / 1000;
+        tgtX = v0.x + (v1.x - v0.x) * p;
+        tgtY = v0.y + (v1.y - v0.y) * p;
+        chX = tgtX;
+        chY = tgtY;
+      } else if (cycle < 2000) {
+        // Edge 2: v1 -> v2
+        const p = (cycle - 1000) / 1000;
+        tgtX = v1.x + (v2.x - v1.x) * p;
+        tgtY = v1.y + (v2.y - v1.y) * p;
+
+        // Momentary corner overshoot at v1
+        if (cycle < 1140) {
+          isCorner = true;
+          const cp = (cycle - 1000) / 140;
+          const ep = easeInOutCubic(cp);
+          chX = v1.x + 8 * (1 - ep) + (tgtX - v1.x) * ep;
+          chY = v1.y + 6 * (1 - ep) + (tgtY - v1.y) * ep;
+        } else {
+          chX = tgtX;
+          chY = tgtY;
+        }
+      } else {
+        // Edge 3: v2 -> v0
+        const p = (cycle - 2000) / 1000;
+        tgtX = v2.x + (v0.x - v2.x) * p;
+        tgtY = v2.y + (v0.y - v2.y) * p;
+
+        // Momentary corner overshoot at v2
+        if (cycle < 2140) {
+          isCorner = true;
+          const cp = (cycle - 2000) / 140;
+          const ep = easeInOutCubic(cp);
+          chX = v2.x - 8 * (1 - ep) + (tgtX - v2.x) * ep;
+          chY = v2.y + 4 * (1 - ep) + (tgtY - v2.y) * ep;
+        } else {
+          chX = tgtX;
+          chY = tgtY;
+        }
+      }
+
+      // Target
+      ctx.fillStyle = accent;
+      ctx.beginPath();
+      ctx.arc(tgtX, tgtY, 6.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      drawCrosshair(ctx, chX, chY, 7, '#ffffff');
+
+      ctx.fillStyle = isCorner ? accent : 'rgba(255, 255, 255, 0.55)';
+      ctx.font = '7px ui-monospace, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(isCorner ? 'VERTEX CORNER: OVERSHOOT RECOVERED' : 'TRIANGULAR PURSUIT: LOCKED', midX, h * 0.90);
+    },
+  },
+
+  // 72. ZIGZAG-PATH: Open irregular zig-zag with varied segment lengths and abrupt turns (zig-zag-path-pursuit)
+  'zigzag-path': {
+    id: 'zigzag-path',
+    label: 'Irregular Zig-Zag Path',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 955) % 3200;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const midX = w * 0.5;
+
+      const pts = [
+        { x: w * 0.16, y: h * 0.30 },
+        { x: w * 0.38, y: h * 0.74 },
+        { x: w * 0.52, y: h * 0.36 },
+        { x: w * 0.70, y: h * 0.68 },
+        { x: w * 0.84, y: h * 0.26 },
+      ];
+
+      // Draw faint irregular zig-zag track
+      ctx.strokeStyle = dim || 'rgba(6, 182, 212, 0.15)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(pts[0].x, pts[0].y);
+      for (let i = 1; i < pts.length; i++) {
+        ctx.lineTo(pts[i].x, pts[i].y);
+      }
+      ctx.stroke();
+
+      // Corner anchor nodes
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+      pts.forEach((p) => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // Target traversal across the 4 segments
+      const segCount = pts.length - 1;
+      const p = (cycle / 3200) % 1;
+      const segIdx = Math.min(segCount - 1, Math.floor(p * segCount));
+      const segT = (p * segCount) - segIdx;
+
+      const p0 = pts[segIdx];
+      const p1 = pts[segIdx + 1];
+      const tgtX = p0.x + (p1.x - p0.x) * segT;
+      const tgtY = p0.y + (p1.y - p0.y) * segT;
+
+      // Target
+      ctx.fillStyle = accent;
+      ctx.beginPath();
+      ctx.arc(tgtX, tgtY, 6.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Crosshair tracking smoothly through sharp corners
+      drawCrosshair(ctx, tgtX, tgtY, 7, '#ffffff');
+
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
+      ctx.font = '7px ui-monospace, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('IRREGULAR CORNERS: ADAPTIVE', midX, h * 0.90);
+    },
+  },
+
+  // ---------------- VISUAL HUB PREVIEW SCENES (73–81) ----------------
+
+  // 73. DEPTH-INTERCEPT: 3D perspective wireframe tunnel with moving depth sphere intercepted at target depth (distance-judgment)
+  'depth-intercept': {
+    id: 'depth-intercept',
+    label: '3D Depth Intercept',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 960) % 3000;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const midX = w * 0.5;
+      const midY = h * 0.48;
+
+      // 3D perspective tunnel wireframe rectangles
+      ctx.strokeStyle = dim || 'rgba(217, 70, 239, 0.15)';
+      ctx.lineWidth = 1;
+      const depths = [0.25, 0.5, 0.75, 1.0];
+      depths.forEach((scale) => {
+        const rw = w * 0.78 * scale;
+        const rh = h * 0.68 * scale;
+        ctx.strokeRect(midX - rw * 0.5, midY - rh * 0.5, rw, rh);
+      });
+
+      // Perspective corner vanishing lines
+      ctx.beginPath();
+      ctx.moveTo(w * 0.11, h * 0.14);
+      ctx.lineTo(midX, midY);
+      ctx.moveTo(w * 0.89, h * 0.14);
+      ctx.lineTo(midX, midY);
+      ctx.moveTo(w * 0.11, h * 0.82);
+      ctx.lineTo(midX, midY);
+      ctx.moveTo(w * 0.89, h * 0.82);
+      ctx.lineTo(midX, midY);
+      ctx.stroke();
+
+      // Target depth calibration ring (fixed at depth 0.52)
+      const targetR = 22;
+      ctx.strokeStyle = accent;
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.arc(midX, midY, targetR, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Sphere traveling in depth toward viewer: starts small, scales to large
+      const p = (cycle / 3000);
+      const sphereR = 6 + p * 34;
+
+      // Intercept hit window around p = 0.50 (when sphere radius matches targetR)
+      const isIntercept = cycle >= 1400 && cycle < 1850;
+      if (cycle >= 1400 && cycle < 1850) {
+        const hp = (cycle - 1400) / 450;
+        drawHitRing(ctx, midX, midY, targetR + hp * 22, '#10b981', 1 - hp);
+      }
+
+      // 3D Sphere orb
+      ctx.fillStyle = isIntercept ? '#10b981' : accent;
+      ctx.beginPath();
+      ctx.arc(midX, midY, Math.min(sphereR, 28), 0, Math.PI * 2);
+      ctx.fill();
+
+      // Concentric sphere contour
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(midX, midY, Math.min(sphereR, 28) * 0.6, 0, Math.PI * 2);
+      ctx.stroke();
+
+      drawCrosshair(ctx, midX, midY, 8, isIntercept ? '#10b981' : '#ffffff');
+
+      ctx.fillStyle = isIntercept ? '#10b981' : 'rgba(255, 255, 255, 0.55)';
+      ctx.font = '7px ui-monospace, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(isIntercept ? 'DEPTH INTERCEPT: 0.0% ERROR' : 'CALIBRATING DEPTH PLANE', midX, h * 0.90);
+    },
+  },
+
+  // 74. GO-NOGO: Impulse control stimulus switching between Green GO (tap) and Red NO-GO (hold) (go/no-go)
+  'go-nogo': {
+    id: 'go-nogo',
+    label: 'Selective Response Chroma Sync',
+    draw(ctx, { t, w, h, dim, seed = 0 }) {
+      const cycle = (t + seed * 940) % 3200;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const midX = w * 0.5;
+      const midY = h * 0.48;
+
+      // Phase 1: 0–1600ms -> GO trial (Green)
+      // Phase 2: 1600–3200ms -> NO-GO trial (Red)
+      const isGoPhase = cycle < 1600;
+      const subCycle = isGoPhase ? cycle : cycle - 1600;
+
+      const isStimulusLit = subCycle >= 400 && subCycle < 1400;
+      const isGo = isGoPhase && isStimulusLit;
+      const isNoGo = !isGoPhase && isStimulusLit;
+
+      // Center stimulus orb
+      let orbColor = 'rgba(255, 255, 255, 0.15)';
+      if (isGo) orbColor = '#10b981';
+      else if (isNoGo) orbColor = '#ef4444';
+
+      ctx.fillStyle = orbColor;
+      ctx.beginPath();
+      ctx.arc(midX, midY, isStimulusLit ? 10 : 7, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Outer stimulus status ring
+      ctx.strokeStyle = isStimulusLit ? (isGo ? '#10b981' : '#ef4444') : (dim || 'rgba(217, 70, 239, 0.15)');
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(midX, midY, 18, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // GO Tap hit burst at subCycle = 650ms
+      if (isGoPhase && subCycle >= 650 && subCycle < 1150) {
+        const hp = (subCycle - 650) / 500;
+        drawHitRing(ctx, midX, midY, 10 + hp * 24, '#10b981', 1 - hp);
+      }
+
+      // Crosshair behavior:
+      // In GO phase: crosshair snaps in and taps at center.
+      // In NO-GO phase: crosshair holds back at safe standoff distance.
+      let chX = midX;
+      let chY = midY;
+      if (isNoGo) {
+        chX = midX - 16;
+        chY = midY;
+      } else if (!isStimulusLit) {
+        chX = midX - 10 + Math.sin(cycle * 0.003) * 6;
+      }
+
+      drawCrosshair(ctx, chX, chY, 7, isGo ? '#10b981' : (isNoGo ? '#ef4444' : '#ffffff'));
+
+      ctx.fillStyle = isGo ? '#10b981' : (isNoGo ? '#ef4444' : 'rgba(255, 255, 255, 0.55)');
+      ctx.font = '7px ui-monospace, monospace';
+      ctx.textAlign = 'center';
+      let statusText = 'STIMULUS PRIMED';
+      if (isGo) statusText = 'GO STIMULUS: CLICK CONFIRMED';
+      else if (isNoGo) statusText = 'NO-GO: IMPULSE INHIBITED';
+      ctx.fillText(statusText, midX, h * 0.90);
+    },
+  },
+
+  // 75. STROBE-LATENCY: Center orb flashes white within tight 100-200ms window with rapid latency tap (light-reaction)
+  'strobe-latency': {
+    id: 'strobe-latency',
+    label: 'Strobe Flash Latency',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 910) % 2800;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const midX = w * 0.5;
+      const midY = h * 0.48;
+
+      const flashStart = 900;
+      const hitTime = 1040;
+      const flashEnd = 1600;
+
+      const isFlashing = cycle >= flashStart && cycle < flashEnd;
+      const isHit = cycle >= hitTime && cycle < flashEnd;
+
+      // Outer strobe warning gauge ring
+      ctx.strokeStyle = isFlashing ? '#ffffff' : (dim || 'rgba(217, 70, 239, 0.15)');
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.arc(midX, midY, 20, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Center orb
+      ctx.fillStyle = isFlashing ? '#ffffff' : 'rgba(255, 255, 255, 0.2)';
+      ctx.beginPath();
+      ctx.arc(midX, midY, isFlashing ? 11 : 6.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Strobe expanding shockwave ripple
+      if (cycle >= hitTime && cycle < hitTime + 550) {
+        const p = (cycle - hitTime) / 550;
+        drawHitRing(ctx, midX, midY, 11 + p * 30, '#ffffff', 1 - p);
+      }
+
+      // Crosshair reactive snap
+      let chX = midX;
+      let chY = midY;
+      if (cycle < flashStart) {
+        chX = midX + Math.sin(cycle * 0.002) * 8;
+        chY = midY + Math.cos(cycle * 0.002) * 6;
+      }
+
+      drawCrosshair(ctx, chX, chY, 7, isHit ? '#ffffff' : accent);
+
+      ctx.fillStyle = isHit ? '#ffffff' : 'rgba(255, 255, 255, 0.55)';
+      ctx.font = '7px ui-monospace, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(isHit ? 'STROBE LATENCY: 140MS (ELITE)' : 'ARMED: AWAITING PHOTIC TRIGGER', midX, h * 0.90);
+    },
+  },
+
+  // 76. KINETIC-INTERCEPT: High-velocity moving target with circular relocation timer arc intercepted before timeout (moving-target)
+  'kinetic-intercept': {
+    id: 'kinetic-intercept',
+    label: 'Kinetic Velocity Intercept',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 950) % 3000;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const midX = w * 0.5;
+
+      const isRound1 = cycle < 1500;
+      const sub = isRound1 ? cycle : cycle - 1500;
+
+      const p0 = isRound1 ? { x: w * 0.16, y: h * 0.72 } : { x: w * 0.80, y: h * 0.70 };
+      const p1 = isRound1 ? { x: w * 0.76, y: h * 0.32 } : { x: w * 0.22, y: h * 0.28 };
+
+      const moveP = Math.min(1, sub / 1400);
+      const tgtX = p0.x + (p1.x - p0.x) * moveP;
+      const tgtY = p0.y + (p1.y - p0.y) * moveP;
+
+      // Relocation circular countdown arc wrapping around target
+      const timerP = Math.min(1, sub / 1000);
+      ctx.strokeStyle = timerP > 0.75 ? '#ef4444' : accent;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(tgtX, tgtY, 12, -Math.PI * 0.5, -Math.PI * 0.5 + timerP * Math.PI * 2);
+      ctx.stroke();
+
+      // Intercept hit burst at sub = 950ms
+      const isIntercepted = sub >= 950 && sub < 1400;
+      if (sub >= 950 && sub < 1350) {
+        const hp = (sub - 950) / 400;
+        drawHitRing(ctx, tgtX, tgtY, 12 + hp * 22, '#10b981', 1 - hp);
+      }
+
+      // Target sphere
+      ctx.fillStyle = isIntercepted ? '#10b981' : accent;
+      ctx.beginPath();
+      ctx.arc(tgtX, tgtY, 6.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Crosshair tracking and snapping
+      let chX = tgtX;
+      let chY = tgtY;
+      if (sub < 700) {
+        const ep = easeInOutCubic(sub / 700);
+        chX = p0.x + (tgtX - p0.x) * ep;
+        chY = p0.y + (tgtY - p0.y) * ep;
+      }
+
+      drawCrosshair(ctx, chX, chY, 7, isIntercepted ? '#10b981' : '#ffffff');
+
+      ctx.fillStyle = isIntercepted ? '#10b981' : 'rgba(255, 255, 255, 0.55)';
+      ctx.font = '7px ui-monospace, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(isIntercepted ? 'INTERCEPT CONFIRMED (+150 PTS)' : 'KINETIC VELOCITY: 18.5 PX/S', midX, h * 0.90);
+    },
+  },
+
+  // 77. MULTI-OBJECT-TRACK: Multiple Object Tracking (MOT) with memorize phase, tracking bounce, and identification (multiple-targets)
+  'multi-object-track': {
+    id: 'multi-object-track',
+    label: 'Multiple Object Tracking',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 920) % 3600;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const midX = w * 0.5;
+
+      const isMemorize = cycle < 1000;
+      const isIdentify = cycle >= 2700;
+
+      const sec = cycle * 0.001;
+
+      // Parametric bouncing positions
+      const b0 = { x: midX + Math.sin(sec * 2.2) * (w * 0.32), y: h * 0.48 + Math.cos(sec * 2.8) * (h * 0.28) };
+      const b1 = { x: midX + Math.cos(sec * 1.9) * (w * 0.34), y: h * 0.48 + Math.sin(sec * 2.5) * (h * 0.24) };
+      const b2 = { x: midX + Math.sin(sec * 2.6 + 1.2) * (w * 0.30), y: h * 0.48 + Math.cos(sec * 2.1 + 0.5) * (h * 0.26) };
+      const b3 = { x: midX + Math.cos(sec * 2.3 + 2.0) * (w * 0.35), y: h * 0.48 + Math.sin(sec * 1.7 + 1.8) * (h * 0.25) };
+
+      const balls = [b0, b1, b2, b3];
+
+      balls.forEach((b, idx) => {
+        const isTarget = idx < 2;
+        let color = 'rgba(255, 255, 255, 0.35)';
+
+        if (isMemorize && isTarget) {
+          color = accent;
+        } else if (isIdentify && isTarget) {
+          color = '#10b981';
+        }
+
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, 6, 0, Math.PI * 2);
+        ctx.fill();
+
+        if ((isMemorize || isIdentify) && isTarget) {
+          ctx.strokeStyle = isIdentify ? '#10b981' : accent;
+          ctx.lineWidth = 1.2;
+          ctx.beginPath();
+          ctx.arc(b.x, b.y, 10, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+      });
+
+      let chX = b0.x;
+      let chY = b0.y;
+      drawCrosshair(ctx, chX, chY, 7, isIdentify ? '#10b981' : '#ffffff');
+
+      ctx.fillStyle = isIdentify ? '#10b981' : (isMemorize ? accent : 'rgba(255, 255, 255, 0.55)');
+      ctx.font = '7px ui-monospace, monospace';
+      ctx.textAlign = 'center';
+      let phaseLabel = 'TRACKING 2 TARGETS';
+      if (isMemorize) phaseLabel = 'MEMORIZE 2 TARGETS';
+      else if (isIdentify) phaseLabel = 'IDENTIFIED: 2/2 CORRECT';
+      ctx.fillText(phaseLabel, midX, h * 0.90);
+    },
+  },
+
+  // 78. AUTO-PURSUIT: Smooth pursuit with continuous cursor alignment and circular lock-on progress gauge (pursuit-tracker)
+  'auto-pursuit': {
+    id: 'auto-pursuit',
+    label: 'Continuous Auto Pursuit',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 935) % 3200;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const midX = w * 0.5;
+      const midY = h * 0.48;
+
+      // Smooth orbital curve
+      const p = (cycle / 3200) * Math.PI * 2;
+      const tgtX = midX + Math.sin(p) * (w * 0.32);
+      const tgtY = midY + Math.sin(p * 2) * (h * 0.25);
+
+      // Target orb
+      ctx.fillStyle = accent;
+      ctx.beginPath();
+      ctx.arc(tgtX, tgtY, 6.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Circular Lock-On progress gauge wrapping around target
+      const lockP = Math.min(1, cycle / 2600);
+      ctx.strokeStyle = '#10b981';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(tgtX, tgtY, 14, -Math.PI * 0.5, -Math.PI * 0.5 + lockP * Math.PI * 2);
+      ctx.stroke();
+
+      // Full lock pulse
+      if (cycle >= 2600) {
+        const lp = (cycle - 2600) / 600;
+        drawHitRing(ctx, tgtX, tgtY, 14 + lp * 18, '#10b981', 1 - lp);
+      }
+
+      // Crosshair locked squarely on target
+      drawCrosshair(ctx, tgtX, tgtY, 7, '#ffffff');
+
+      ctx.fillStyle = '#10b981';
+      ctx.font = '7px ui-monospace, monospace';
+      ctx.textAlign = 'center';
+      const pct = Math.round(lockP * 100);
+      ctx.fillText(`LOCK-ON ALIGNMENT: ${pct}% (+5 PTS/S)`, midX, h * 0.90);
+    },
+  },
+
+  // 79. ENTROPIC-GRID: 10x10 matrix of digital character glyph cells with noise corruption and target isolation (entropic-grid)
+  'entropic-grid': {
+    id: 'entropic-grid',
+    label: 'Entropic Matrix Isolation',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 975) % 3000;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const cols = 7;
+      const rows = 4;
+      const marginX = w * 0.16;
+      const marginY = h * 0.20;
+      const stepX = (w - marginX * 2) / (cols - 1);
+      const stepY = (h - marginY * 2) / (rows - 1);
+
+      const targetCol = 4;
+      const targetRow = 1;
+      const targetX = marginX + targetCol * stepX;
+      const targetY = marginY + targetRow * stepY;
+
+      ctx.font = '7px ui-monospace, monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      const corruptFlicker = Math.floor(cycle / 600) % 2 === 0;
+
+      for (let c = 0; c < cols; c++) {
+        for (let r = 0; r < rows; r++) {
+          const x = marginX + c * stepX;
+          const y = marginY + r * stepY;
+          const isTarget = c === targetCol && r === targetRow;
+
+          if (isTarget) {
+            ctx.fillStyle = accent;
+            ctx.fillText('A4', x, y);
+
+            ctx.strokeStyle = accent;
+            ctx.lineWidth = 1;
+            ctx.strokeRect(x - 9, y - 7, 18, 14);
+          } else {
+            const isCorrupt = corruptFlicker && ((c * 3 + r * 7) % 5 === 0);
+            ctx.fillStyle = isCorrupt ? 'rgba(217, 70, 239, 0.4)' : 'rgba(255, 255, 255, 0.18)';
+            ctx.fillText(isCorrupt ? '##' : '..', x, y);
+          }
+        }
+      }
+
+      // Scanner reticle sweeps to target and locks at cycle = 1200ms
+      const isLocked = cycle >= 1200;
+      let chX = targetX;
+      let chY = targetY;
+      if (cycle < 1200) {
+        const sp = cycle / 1200;
+        const ep = easeInOutCubic(sp);
+        chX = marginX + (targetX - marginX) * ep;
+        chY = marginY + (targetY - marginY) * ep;
+      } else if (cycle < 1650) {
+        const hp = (cycle - 1200) / 450;
+        drawHitRing(ctx, targetX, targetY, 12 + hp * 20, accent, 1 - hp);
+      }
+
+      drawCrosshair(ctx, chX, chY, 8, isLocked ? accent : '#ffffff');
+
+      ctx.fillStyle = isLocked ? accent : 'rgba(255, 255, 255, 0.55)';
+      ctx.font = '7px ui-monospace, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(isLocked ? 'TARGET CODE [A4]: ISOLATED' : 'SCANNING ENTROPIC NOISE MATRIX', w * 0.5, h * 0.90);
+    },
+  },
+
+  // 80. RHYTHM-ANOMALY: Grid of pulsating nodes with one anomaly cell pulsing out of frequency (rhythm-anomaly)
+  'rhythm-anomaly': {
+    id: 'rhythm-anomaly',
+    label: 'Temporal Frequency Anomaly',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 945) % 3200;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const cols = 5;
+      const rows = 3;
+      const marginX = w * 0.20;
+      const marginY = h * 0.24;
+      const stepX = (w - marginX * 2) / (cols - 1);
+      const stepY = (h - marginY * 2) / (rows - 1);
+
+      const anomalyCol = 3;
+      const anomalyRow = 1;
+      const anomalyX = marginX + anomalyCol * stepX;
+      const anomalyY = marginY + anomalyRow * stepY;
+
+      // Steady pulse period = 2000ms
+      const steadyIntensity = Math.pow(Math.sin((cycle / 2000) * Math.PI), 4);
+      // Anomaly pulse period = 1200ms
+      const anomalyIntensity = Math.pow(Math.sin((cycle / 1200) * Math.PI), 4);
+
+      for (let c = 0; c < cols; c++) {
+        for (let r = 0; r < rows; r++) {
+          const x = marginX + c * stepX;
+          const y = marginY + r * stepY;
+          const isAnomaly = c === anomalyCol && r === anomalyRow;
+
+          const intensity = isAnomaly ? anomalyIntensity : steadyIntensity;
+          const radius = 4 + intensity * 4;
+
+          ctx.fillStyle = isAnomaly ? accent : 'rgba(255, 255, 255, 0.25)';
+          ctx.beginPath();
+          ctx.arc(x, y, radius, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      // Scanner locates and brackets the anomaly node at cycle = 1400ms
+      const isDetected = cycle >= 1400;
+      let chX = anomalyX;
+      let chY = anomalyY;
+      if (cycle < 1400) {
+        const sp = cycle / 1400;
+        const ep = easeInOutCubic(sp);
+        chX = marginX + (anomalyX - marginX) * ep;
+        chY = marginY + (anomalyY - marginY) * ep;
+      } else {
+        ctx.strokeStyle = accent;
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(anomalyX, anomalyY, 14, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      drawCrosshair(ctx, chX, chY, 7, isDetected ? accent : '#ffffff');
+
+      ctx.fillStyle = isDetected ? accent : 'rgba(255, 255, 255, 0.55)';
+      ctx.font = '7px ui-monospace, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(isDetected ? 'ANOMALY DETECTED: 1.2S vs 2.0S' : 'SCANNING RHYTHMIC FREQUENCIES', w * 0.5, h * 0.90);
+    },
+  },
+
+  // 81. VISUAL-SEARCH: Dense distractor field search isolating target symbol among noise (visual-search)
+  'visual-search': {
+    id: 'visual-search',
+    label: 'Conjunctive Visual Search',
+    draw(ctx, { t, w, h, accent, dim, seed = 0 }) {
+      const cycle = (t + seed * 915) % 3000;
+      drawSubtleGrid(ctx, w, h, dim);
+
+      const cols = 7;
+      const rows = 4;
+      const marginX = w * 0.18;
+      const marginY = h * 0.22;
+      const stepX = (w - marginX * 2) / (cols - 1);
+      const stepY = (h - marginY * 2) / (rows - 1);
+
+      const targetCol = 4;
+      const targetRow = 1;
+      const targetX = marginX + targetCol * stepX;
+      const targetY = marginY + targetRow * stepY;
+
+      ctx.font = '8px ui-monospace, monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      for (let c = 0; c < cols; c++) {
+        for (let r = 0; r < rows; r++) {
+          const x = marginX + c * stepX;
+          const y = marginY + r * stepY;
+          const isTarget = c === targetCol && r === targetRow;
+
+          if (isTarget) {
+            ctx.fillStyle = accent;
+            ctx.fillText('C', x, y);
+          } else {
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.22)';
+            ctx.fillText('O', x, y);
+          }
+        }
+      }
+
+      const isFound = cycle >= 1100;
+      let chX = targetX;
+      let chY = targetY;
+      if (cycle < 1100) {
+        const sp = cycle / 1100;
+        const ep = easeInOutCubic(sp);
+        chX = marginX + (targetX - marginX) * ep;
+        chY = marginY + (targetY - marginY) * ep;
+      } else {
+        ctx.strokeStyle = accent;
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(targetX - 8, targetY - 8, 16, 16);
+
+        if (cycle < 1600) {
+          const hp = (cycle - 1100) / 500;
+          drawHitRing(ctx, targetX, targetY, 10 + hp * 18, accent, 1 - hp);
+        }
+      }
+
+      drawCrosshair(ctx, chX, chY, 7, isFound ? accent : '#ffffff');
+
+      ctx.fillStyle = isFound ? accent : 'rgba(255, 255, 255, 0.55)';
+      ctx.font = '7px ui-monospace, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(isFound ? 'FEATURE ISOLATED [C]: 184MS' : 'SEARCHING CONJUNCTIVE FIELD', w * 0.5, h * 0.90);
+    },
   },
 };
 

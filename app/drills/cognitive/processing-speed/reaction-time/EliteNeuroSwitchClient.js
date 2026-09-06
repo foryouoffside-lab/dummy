@@ -77,7 +77,7 @@ const FAQ_ITEMS = [
   { q: "How does rule switching work in this drill?", a: "The active rule banner at the top shows which color target to tap ('TAP RED' or 'TAP BLUE'). As you perform well and level up, the rule switches between RED and BLUE targets to test your cognitive switching speed." },
   { q: "What does this reaction time test measure?", a: "This test measures choice visual reaction time (CRT) — the elapsed time from stimulus onset to motor response execution while discriminating between target rules." },
   { q: "What is the difference between simple and choice reaction time?", a: "Simple reaction time (SRT) requires responding to a single expected stimulus and typically averages 200-250ms. Choice reaction time (CRT), like this drill, requires discriminating between multiple stimuli before responding, adding a decision-making stage that runs 50-100ms slower than SRT. This drill goes further by flipping which color is correct mid-session, layering cognitive flexibility on top of standard CRT." },
-  { q: "What is Hick's Law and how does it apply here?", a: "Hick's Law states that reaction time increases logarithmically with the number of choices you must discriminate between before responding. Because this drill forces you to actively verify the current rule before reacting, it directly exercises the decision-time component Hick's Law describes, rather than pure reflex speed alone." },
+  { q: "What is Hick\'s Law and how does it apply here?", a: "Hick\'s Law states that reaction time increases logarithmically with the number of choices you must discriminate between before responding. Because this drill forces you to actively verify the current rule before reacting, it directly exercises the decision-time component Hick\'s Law describes, rather than pure reflex speed alone." },
   { q: "How can I improve my choice reaction time?", a: "Evidence-based approaches include: (1) deliberate practice on choice-based (not just simple) reaction drills, since the two skills don't fully transfer, (2) consistent sleep, since fatigue disproportionately slows the decision stage, (3) regular aerobic exercise, which improves neural conduction velocity, and (4) fast-paced action gaming, shown in research to sharpen visual-motor choice reaction speed." },
   { q: "Why does reaction time matter for gaming and esports?", a: "In competitive gaming, choice reaction time determines how quickly you can distinguish a real threat from a decoy and execute the correct response — exactly the skill this drill isolates. Elite esports athletes consistently test in the 150-180ms range for choice reaction tasks, well below the general population average." },
   { q: "How does scoring and grading work in this drill?", a: "Each correct tap on the active rule's target earns points. Tapping the wrong-colored target resets your combo multiplier. When enabled, an opt-in time penalty of 0.8s is deducted. Your final score is graded against an elite benchmark, awarding letter grades from D up to S+." },
@@ -88,10 +88,10 @@ const FAQ_ITEMS = [
 const RELATED_DRILLS = [
   { id: "symbol-matching", name: "Symbol Matching", cat: "Processing Speed", desc: "Match rapid symbol pairs under strict time pressure.", href: "/drills/cognitive/processing-speed/symbol-matching" },
   { id: "rsvp-reader", name: "RSVP Speed Reader", cat: "Processing Speed", desc: "Process rapid serial visual presentation text streams.", href: "/drills/cognitive/processing-speed/rsvp-reader" },
-  { id: "concentration-grid", name: "Concentration Grid", cat: "Focus", desc: "Scan and tap sequential numbers on expanding grid matrices.", href: "/drills/cognitive/focus/concentration-grid" },
+  { id: "concentration-grid", name: "Schulte Table Trainer", cat: "Focus", desc: "Scan and tap sequential numbers on expanding grid matrices.", href: "/drills/cognitive/focus/concentration-grid" },
   { id: "distraction-fighter", name: "Distraction Fighter", cat: "Focus", desc: "Filter out high-interference Stroop visual distractors.", href: "/drills/cognitive/focus/distraction-fighter" },
-  { id: "multi-tasking", name: "Multi-Tasking", cat: "Attention", desc: "Track dual independent target streams under speed pressure.", href: "/drills/cognitive/attention/multi-tasking" },
-  { id: "concentration-stamina", name: "Concentration Stamina", cat: "Attention", desc: "Sustain continuous visual focus through prolonged high-density sequences.", href: "/drills/cognitive/attention/concentration-stamina" }
+  { id: "multi-tasking", name: "Multitasking Test", cat: "Attention", desc: "Track dual independent target streams under speed pressure.", href: "/drills/cognitive/attention/multi-tasking" },
+  { id: "concentration-stamina", name: "Focus Test", cat: "Attention", desc: "Sustain continuous visual focus through prolonged high-density sequences.", href: "/drills/cognitive/attention/concentration-stamina" }
 ];
 
 export default function EliteNeuroSwitchClient() {
@@ -489,11 +489,11 @@ export default function EliteNeuroSwitchClient() {
         {!isFullscreen && (
         <div className="text-center">
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-            REACTION TIME
-            <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
-              Neuro Speed &amp; Reflex Test
-            </span>
+            Neuro Speed &amp; Reflex Test
           </h1>
+          <p className="text-[13px] text-slate-400 leading-relaxed mt-1">
+            Choice reaction time is how long it takes to pick the right response from several options. It rises roughly logarithmically with the number of alternatives &mdash; Hick&rsquo;s law &mdash; so four choices cost more than two, but not twice as much (Hick, 1952; Hyman, 1953).
+          </p>
         </div>
         )}
 

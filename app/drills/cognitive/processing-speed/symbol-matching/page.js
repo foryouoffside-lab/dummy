@@ -1,4 +1,6 @@
 import SymbolMatchingClient from './SymbolMatchingClient';
+import DrillGuide from '@/components/drill/DrillGuide';
+import { pickSources } from '@/lib/drillSources';
 
 // ============================================================
 // SEO RESEARCH FINDINGS — symbol-matching
@@ -35,8 +37,7 @@ const webAppSchema = {
   "description": "Free online symbol matching game. Practice the Digit Symbol Substitution Test (DSST) to train cognitive processing speed, visual scanning, and mental flexibility. No sign-up required.",
   "genre": "Cognitive Testing / Processing Speed / Symbol Matching",
   "url": "https://skilldrills.online/drills/cognitive/processing-speed/symbol-matching",
-  "publisher": { "@type": "Organization", "name": "SkillDrills", "url": "https://skilldrills.online" },
-  "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.8", "reviewCount": "1432" }
+  "publisher": { "@type": "Organization", "name": "SkillDrills", "url": "https://skilldrills.online" }
 };
 
 const faqSchema = {
@@ -60,8 +61,8 @@ const faqSchema = {
     },
     {
       "@type": "Question",
-      "name": "Is this symbol matching test used for dementia screening?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Yes. The DSST and SDMT are among the most sensitive cognitive screening tools for neurological conditions including multiple sclerosis, Parkinson's disease, traumatic brain injury, and early Alzheimer's disease. Processing speed measured by symbol substitution tests declines measurably years before other cognitive deficits appear, making it a valuable early marker." }
+      "name": "Is this symbol matching drill a medical or screening test?",
+      "acceptedAnswer": { "@type": "Answer", "text": "No. This is a free browser game built on the same symbol-substitution format as the DSST and SDMT, but it is not those instruments and is not a screening or diagnostic test for any condition. The clinical versions use different materials, timing and scoring, and are administered and interpreted by trained professionals. Nothing you score here tells you anything about your health. If you are concerned about your memory or thinking, speak to a doctor." }
     },
     {
       "@type": "Question",
@@ -75,8 +76,8 @@ const faqSchema = {
     },
     {
       "@type": "Question",
-      "name": "How does the DSST predict future cognitive decline?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Longitudinal studies show that DSST performance in midlife (ages 40-60) is a strong predictor of cognitive status in older age. Individuals with faster symbol substitution scores at 45-55 years show significantly lower rates of dementia and cognitive impairment at 75-85 years. This makes DSST-style training a potentially high-value preventive cognitive health activity." }
+      "name": "Will practising this drill make me faster at everyday tasks?",
+      "acceptedAnswer": { "@type": "Answer", "text": "You will get faster at this drill with practice. Whether that carries over to unrelated everyday tasks is far less certain -- gains on a trained cognitive task often fail to generalise to untrained ones. Treat your score as a measure of how well you do this particular task, not as a general index of how your brain works." }
     },
     {
       "@type": "Question",
@@ -86,7 +87,7 @@ const faqSchema = {
     {
       "@type": "Question",
       "name": "What is the average DSST score for adults?",
-      "acceptedAnswer": { "@type": "Answer", "text": "In the WAIS-IV standardization, the average DSST score for adults aged 20-34 is approximately 70-75 correct symbols in 120 seconds. Scores decline with age: 50-64 year-olds average 55-60, and 65-79 year-olds average 45-52. Top performers in cognitive training studies can achieve 85-100+ with extensive practice." }
+      "acceptedAnswer": { "@type": "Answer", "text": "In the WAIS-IV standardization, adults aged 20-34 average roughly 70-75 correct symbols in 120 seconds, with the average falling in older age bands. Those figures come from the supervised pencil-and-paper clinical test. This drill uses different symbols, timing and scoring, so your score here is not comparable to them and should not be read as a clinical result." }
     },
     {
       "@type": "Question",
@@ -154,6 +155,26 @@ export const metadata = {
   },
 };
 
+
+const symbolmatchingGuide = {
+  heading: "Symbol Substitution Guide & Processing Speed",
+  intro: [
+    "A symbol-substitution task gives you a key pairing symbols with digits and asks how many you can match correctly against the clock. Almost nothing about it depends on knowledge or vocabulary, which is why it is used as a measure of processing speed -- how quickly simple, well-defined operations can be carried out -- rather than of what you know.",
+    "The format originates with the Digit Symbol Substitution Test in the Wechsler scales and with the Symbol Digit Modalities Test (Smith, 1973), which reverses the direction of the match. Processing speed measured this way slows gradually across adulthood (Der &amp; Deary, 2006). This drill uses the format as a game -- different symbols, different timing, different scoring -- so treat it as practice and interest rather than as a version of the clinical test.",
+    "Timing methodology: every event is timestamped with the browser's performance.now() high-resolution clock, entirely on your device. Browser timers are deliberately coarsened as a Spectre mitigation (typically to about 1 ms), and your display quantizes each change to its refresh interval -- about 16.7 ms per frame at 60 Hz, 6.9 ms at 144 Hz and 4.1 ms at 240 Hz (Woods et al., 2015). Treat differences smaller than about 5 ms as measurement noise, and compare your own runs on the same hardware rather than against someone else's setup.",
+    "Data transparency: SkillDrills collects no aggregate data. Your scores and settings live only in your browser's localStorage and are never uploaded, so this site publishes no user averages, percentiles or player counts. Every figure quoted here comes from the published work listed in the References panel below.",
+    "This drill is a free browser game for practice and interest. It is not a medical device, a diagnostic instrument, or a screening or treatment tool for any condition, and no score here says anything about your health. If you have concerns about your attention, memory or thinking, speak to a qualified clinician.",
+  ],
+  // Works named in this page's copy, with DOIs so a reader or an answer
+  // engine can check the figures rather than take them on trust.
+  sources: pickSources('smith1973', 'der2006', 'woods2015'),
+  related: [
+    { href: "/drills/cognitive/processing-speed/rsvp-reader", label: "Reading Speed Test" },
+    { href: "/drills/cognitive/processing-speed/reaction-time", label: "Neuro Speed &amp; Reflex Test" },
+    { href: "/drills/cognitive/focus/concentration-grid", label: "Schulte Table Trainer" },
+  ],
+};
+
 export default function SymbolMatchingPage() {
   return (
     <>
@@ -162,6 +183,7 @@ export default function SymbolMatchingPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }} />
       <SymbolMatchingClient />
+      <DrillGuide guide={symbolmatchingGuide} />
     </>
   );
 }

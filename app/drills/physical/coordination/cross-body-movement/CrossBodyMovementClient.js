@@ -2,7 +2,6 @@
 import { isIdleFrameSkippable } from '@/lib/performance';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import Link from 'next/link';
 
 import {
   Activity, AlertCircle, ArrowRight, ChevronRight, Crosshair,
@@ -618,35 +617,35 @@ export default function CrossBodyMovementClient() {
     <div className="min-h-screen bg-[#050508] text-white flex flex-col font-sans select-none">
       {/* ── MAIN CONTENT AREA ── */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
-        {/* Title */}
+        {/* Title & AIO Header */}
         {!isFullscreen && (
-          <div className="text-center">
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white uppercase">
-              Cross-Body Movement Pro
-              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
-                Hand Eye Coordination Game
-              </span>
+          <div className="text-left">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+              Hand eye coordination game
             </h1>
+            <p className="text-sm text-slate-400 mt-1.5 leading-relaxed max-w-3xl">
+              Crossing the midline means reaching to the side of space opposite the hand doing the reaching. It is measurably harder: reaches to contralateral targets are slower and less accurate than reaches to targets on the same side as the hand (Carey, Hargreaves &amp; Goodale, 1996). Each sweep here is also a Fitts&apos;s Law movement &mdash; time grows with the log of distance divided by target width (Fitts, 1954) &mdash; and the corridor narrows to 4 px, so the cost of the crossing rises as the session runs.
+            </p>
           </div>
         )}
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 gap-2.5 max-w-2xl mx-auto w-full">
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
+          <div className="grid grid-cols-4 gap-2 w-full">
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Score</div>
               <div className="text-lg sm:text-xl font-black text-white tabular-nums">{uiScore}</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Time Left</div>
               <div className={`text-lg sm:text-xl font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>{uiTimeLeft}s</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Best Score</div>
               <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Combo</div>
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Best Combo</div>
               <div className="text-lg sm:text-xl font-black text-rose-400 tabular-nums">{bestCombo}x</div>
             </div>
           </div>
@@ -725,8 +724,8 @@ export default function CrossBodyMovementClient() {
             <FpsStartCard
               icon={Move}
               accent="cyan"
-              title="Cross-Body Movement Pro"
-              subtitle="Bilateral Motor Control & Diagonal Vector Sweeping • 15 Levels"
+              title="Hand Eye Coordination Game"
+              subtitle="Bilateral Motor Control & Midline Crossing Sweeps • 15 Levels"
               rules={[
                 { icon: Target, accent: 'cyan', title: 'Activate Node A', text: 'Touch the starting cyan node with your crosshair to initiate vector line' },
                 { icon: Zap, accent: 'emerald', title: 'Sweep to Node B', text: 'Sweep directly across the canvas corridor to reach magenta target node' },
@@ -842,60 +841,49 @@ export default function CrossBodyMovementClient() {
 
             <DrillAccordion
               id="about"
-              title="About Cross-Body Movement Pro"
+              title="About Hand Eye Coordination Game"
               isOpen={openAccordion === 'about'}
               onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
             >
-              <div className="space-y-4">
-                {ABOUT_TEXT.split('\n\n').map((para, i) => (
-                  <p key={i} className="text-sm leading-relaxed text-gray-300">{para}</p>
-                ))}
-              </div>
-            </DrillAccordion>
+              <div className="space-y-6">
+                <div className="space-y-3">
+                  <h3 className="text-base font-bold text-white flex items-center gap-2">
+                    <GitBranch className="w-4 h-4 text-cyan-400" /> Bilateral Motor Integration &amp; Contralateral Reaching
+                  </h3>
+                  <p className="text-sm leading-relaxed text-gray-300">
+                    The <strong>Hand Eye Coordination Game</strong> (Cross-Body Movement) trains bilateral motor control, cross-body diagonal mouse sweeps, and high-velocity vector line tracking. Players touch edge nodes to activate connection vectors and sweep across the body midline to reach opposite-side target nodes.
+                  </p>
+                  <p className="text-sm leading-relaxed text-gray-300">
+                    Grounded in A. Jean Ayres&apos;s (1972) sensory integration theory, Paul Fitts&apos;s (1954) law of movement amplitude, and Robert Woodworth&apos;s (1899) voluntary movement framework, this drill stimulates interhemispheric transfer via the corpus callosum. As difficulty scales to Level 15+, corridor tolerances constrict from 10px down to 4px and target nodes shrink, requiring rapid ballistic arm translation coupled with micrometric terminal finger deceleration.
+                  </p>
+                </div>
 
-            <DrillAccordion
-              id="faq"
-              title="Frequently Asked Questions"
-              isOpen={openAccordion === 'faq'}
-              onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {FAQ_ITEMS.map((item, i) => (
-                  <div key={i} className="bg-[#05060b] border border-gray-800 rounded-xl p-5">
-                    <h4 className="text-sm font-bold text-gray-200 mb-2">{item.q}</h4>
-                    <p className="text-xs text-gray-400 leading-relaxed">{item.a}</p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
+                    <div className="flex items-center gap-2.5 mb-2">
+                      <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
+                      <h4 className="text-xs font-bold text-white">Target Audience</h4>
+                    </div>
+                    <p className="text-xs text-gray-300 leading-relaxed">Competitive gamers training large 180° flick resets, athletic coordination trainees building bilateral integration, and desk workers restoring upper-limb motor mobility.</p>
                   </div>
-                ))}
+                  <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
+                    <div className="flex items-center gap-2.5 mb-2">
+                      <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
+                      <h4 className="text-xs font-bold text-white">Neurological Benefits</h4>
+                    </div>
+                    <p className="text-xs text-gray-300 leading-relaxed">Interhemispheric neural activation, cross-midline spatial integration, agonist-antagonist deceleration control, and precision diagonal trajectory tracking.</p>
+                  </div>
+                  <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
+                    <div className="flex items-center gap-2.5 mb-2">
+                      <div className="w-7 h-7 rounded-lg bg-cyan-600 flex items-center justify-center"><Activity className="w-3.5 h-3.5 text-white" /></div>
+                      <h4 className="text-xs font-bold text-white">Dynamic Difficulty</h4>
+                    </div>
+                    <p className="text-xs text-gray-300 leading-relaxed">Corridor tolerance tightens from 10px down to 4px, target nodes shrink from 16px to 8px, and diagonal vectors span extreme screen corners.</p>
+                  </div>
+                </div>
               </div>
             </DrillAccordion>
           </div>
-        )}
-
-        {/* ── RELATED PHYSICAL & REFLEX DRILLS ── */}
-        {!isFullscreen && (
-          <section className="mt-4">
-            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3 font-sans">
-              Related Physical &amp; Reflex Drills
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {RELATED_DRILLS.map((drill) => (
-                <Link
-                  key={drill.id}
-                  href={drill.href}
-                  className="group bg-[#0c0c16] border border-white/5 hover:border-cyan-500/40 rounded-xl p-3.5 transition-all duration-200 hover:-translate-y-0.5 flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider mb-1">{drill.cat}</div>
-                    <div className="text-xs font-bold text-white group-hover:text-cyan-300 transition-colors">{drill.name}</div>
-                    <div className="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">{drill.desc}</div>
-                  </div>
-                  <div className="text-[10px] font-bold text-slate-500 group-hover:text-cyan-400 mt-3 flex items-center gap-1 transition-colors">
-                    Train Drill <span>→</span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
         )}
 
         {/* ── FOOTER ── */}

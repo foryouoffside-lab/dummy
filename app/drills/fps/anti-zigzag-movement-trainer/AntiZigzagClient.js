@@ -96,23 +96,6 @@ const ABOUT_SECTIONS = [
   }
 ];
 
-const FAQ_ITEMS = [
-  { q: "Why do players zigzag in CODM?", a: "It throws off aim assist, desyncs the physical hitbox from the visual character model, and forces you to waste ammunition trying to track wide, unpredictable sweeps." },
-  { q: "Should I zigzag back during gunfights?", a: "Yes and no. While strafing is vital, excessive zigzagging without proper crosshair alignment will ruin your own aim. Good players balance evasion with precision." },
-  { q: "Is this drill for touch screen or mouse?", a: "Both. The engine dynamically scales the target sizes and hitboxes depending on whether you are swiping on a mobile device or aiming with a desktop mouse." },
-  { q: "How do I get a higher accuracy score?", a: "Stop predicting. Reactive tracking means letting your eyes process the direction change first, then snapping to the target. Predicting leads to over-flicking." },
-  { q: "What is the V-crossover point?", a: "It's the center of a zigzag strafe path. Instead of chasing the target to each extreme, aim at where the target crosses through the middle of its movement arc." },
-  { q: "How does the level progression work?", a: "Every 1400 points increases your continuous level. Higher levels make targets smaller, faster, and perform more frequent direction reversals with tighter lifespan windows." },
-  { q: "What sensitivity should I use?", a: "For tracking, moderate to low sensitivity (25–45 cm/360) works best. Set the Mouse Sensitivity slider in Session Settings on the drills hub to match your in-game settings — it applies to every mouse-aimed drill." },
-  { q: "Do I need to click to damage the target?", a: "No. This drill uses pure dwell-tracking — hold your crosshair inside the target's hitbox and its health drains automatically for as long as you stay locked on. Break contact and the drain pauses until you reacquire it." },
-  { q: "What stats does this drill track?", a: "Each run logs your tracking accuracy (frames on-target versus total frames), targets destroyed, targets that escaped, your best combo streak, and the peak level reached — all shown on the results screen after time runs out." },
-  { q: "Can this improve my Apex Legends tracking?", a: "Yes significantly. Apex fights require 0.5–2s of continuous tracking to confirm kills. Training reactive tracking against direction changes directly improves your damage output." },
-  { q: "How are errors penalised in Anti-Zigzag Movement?", a: "When a target escapes or tracking contact is broken for 1.0s, your combo resets to zero. When the optional Time Penalty setting is enabled, target escapes and 1.0s tracking losses deduct 0.6s from your clock." },
-  { q: "How does the combo multiplier work?", a: "Every full second of unbroken crosshair lock adds +1 to your combo, which raises your score multiplier at fixed thresholds (3, 5, 7, 10, 15, 20, 30, and 50). Losing lock for a full second resets the combo back to zero." },
-  { q: "Does this help with recoil control?", a: "Indirectly. The reactive micro-adjustments trained here apply to recoil tracking as well. For dedicated recoil training, try the Recoil Control drill." },
-  { q: "Is this aim trainer free?", a: "Yes, this tracking trainer is 100% free, requires no sign-ups or downloads, and runs natively in modern browsers with hardware-level mouse input." },
-  { q: "How often should I train anti-zigzag tracking?", a: "5–6 sessions per week of 10–15 minutes each. Daily warm-ups before ranked play are ideal for building and maintaining reactive tracking muscle memory." }
-];
 
 const RELATED_DRILLS = [
   { id: "pro-smooth-pursuit", name: "Pro Smooth Pursuit", cat: "FPS Tracking", desc: "Lissajous curve tracking and smooth arm glide.", href: "/drills/fps/pro-smooth-pursuit" },
@@ -695,32 +678,32 @@ export default function AntiZigzagClient() {
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
         {/* Title */}
         {!isFullscreen && (
-          <div className="text-center">
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white uppercase">
-              Anti-Zigzag Movement
-              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
-                Anti-Zigzag Aim Trainer
-              </span>
+          <div className="text-left">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white mb-2">
+              Anti-Zigzag Aim Trainer
             </h1>
+            <p className="text-xs sm:text-sm text-slate-400 max-w-3xl leading-relaxed">
+              Zigzag movement beats aim by forcing a fresh correction at every direction change. Smooth pursuit holds accurately to roughly 30&deg;/s (Krauzlis, 2004); beyond that each reversal costs a catch-up saccade of about 100&ndash;130&nbsp;ms before your crosshair can follow (Rashbass, 1961).
+            </p>
           </div>
         )}
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 gap-2.5 max-w-2xl mx-auto w-full">
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+          <div className="grid grid-cols-4 gap-2 w-full">
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
               <div className="text-lg sm:text-xl font-black text-white tabular-nums">{score}</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
               <div className={`text-lg sm:text-xl font-black tabular-nums ${timeLeft <= 10 ? "text-red-400 animate-pulse" : "text-white"}`}>{timeLeft}s</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Accuracy</div>
               <div className="text-lg sm:text-xl font-black text-red-400 tabular-nums">{accuracy}%</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
               <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
             </div>
@@ -884,9 +867,9 @@ export default function AntiZigzagClient() {
             >
               <div className="space-y-8">
                 <section>
-                  <h4 className="text-base font-bold text-white mb-2 flex items-center gap-2">
+                  <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
                     <Crosshair className="w-4 h-4 text-red-400" /> Why Train Anti-Zigzag Aim?
-                  </h4>
+                  </h3>
                   {ABOUT_INTRO.map((para, i) => (
                     <p key={i} className={`text-sm leading-relaxed text-gray-300 ${i < ABOUT_INTRO.length - 1 ? "mb-3" : ""}`}>{para}</p>
                   ))}
@@ -899,7 +882,7 @@ export default function AntiZigzagClient() {
                         <div className={`w-7 h-7 rounded-lg ${card.iconBg} flex items-center justify-center`}>
                           <card.icon className="w-3.5 h-3.5 text-white" />
                         </div>
-                        <h5 className="text-xs font-bold text-white">{card.title}</h5>
+                        <h4 className="text-xs font-bold text-white">{card.title}</h4>
                       </div>
                       <p className="text-xs text-gray-300 leading-relaxed">{card.text}</p>
                     </div>
@@ -908,26 +891,13 @@ export default function AntiZigzagClient() {
 
                 {ABOUT_SECTIONS.map((section, i) => (
                   <section key={i}>
-                    <h4 className="text-base font-bold text-white mb-2 flex items-center gap-2">
+                    <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
                       <section.icon className="w-4 h-4 text-red-400" /> {section.title}
-                    </h4>
+                    </h3>
                     {section.paragraphs.map((para, j) => (
                       <p key={j} className={`text-sm leading-relaxed text-gray-300 ${j < section.paragraphs.length - 1 ? "mb-3" : ""}`}>{para}</p>
                     ))}
                   </section>
-                ))}
-              </div>
-            </DrillAccordion>
-
-            <DrillAccordion
-              id="faq"
-              title="Frequently Asked Questions"
-              isOpen={openAccordion === 'faq'}
-              onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {FAQ_ITEMS.map((item, i) => (
-                  <FAQItem key={i} q={item.q} a={item.a} />
                 ))}
               </div>
             </DrillAccordion>
@@ -981,15 +951,6 @@ function RuleItem({ num, text, highlight = '', result }) {
           {result}
         </div>
       </div>
-    </div>
-  );
-}
-
-function FAQItem({ q, a }) {
-  return (
-    <div className="bg-[#05060b] border border-gray-800 rounded-xl p-5 hover:border-gray-700 transition-colors font-sans">
-      <h4 className="text-sm font-bold text-gray-200 mb-2">{q}</h4>
-      <p className="text-xs text-gray-200 leading-relaxed">{a}</p>
     </div>
   );
 }

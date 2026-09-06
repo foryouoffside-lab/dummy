@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import Link from 'next/link';
 
 import { Volume2, VolumeX, Target, Eye, Users, TrendingUp, Zap, ZapOff, Brain, Move, Trophy } from 'lucide-react';
 
@@ -22,7 +21,6 @@ import DrillCountdown from '../../../../../components/drill/DrillCountdown';
 import DrillAccordion from '../../../../../components/drill/DrillAccordion';
 import DrillFlashOverlay from '../../../../../components/drill/DrillFlashOverlay';
 import DrillRuleItem from '../../../../../components/drill/DrillRuleItem';
-import DrillFAQItem from '../../../../../components/drill/DrillFAQItem';
 import FpsStartCard from '../../../../../components/drill/FpsStartCard';
 import DrillResultCard from '../../../../../components/drill/DrillResultCard';
 import useImmersiveMode from '@/lib/useImmersiveMode';
@@ -37,15 +35,6 @@ const ELITE_SCORE = 16000; // 1000 -> 16000 (scaled for unbounded continuous run
 const TIME_PER_HIT = 0.6; // +0.6s per valid hit
 const TIME_PENALTY = 0.8; // -0.8s on miss / relocation timeout (opt-in gated)
 const STORAGE_KEY = 'skilldrills_visual_moving_target_v5';
-
-const RELATED_DRILLS = [
-  { id: "multiple-targets", name: "Multiple Targets", cat: "Visual Tracking", desc: "Track multiple moving targets across dynamic paths.", href: "/drills/visual/tracking-accuracy/multiple-targets" },
-  { id: "pursuit-tracker", name: "Pursuit Tracker", cat: "Visual Tracking", desc: "Smooth pursuit tracking accuracy and velocity alignment.", href: "/drills/visual/tracking-accuracy/pursuit-tracker" },
-  { id: "light-reaction", name: "Light Reaction", cat: "Reaction Speed", desc: "Test raw visual motor reaction speed.", href: "/drills/visual/reaction-speed/light-reaction" },
-  { id: "go-no-go", name: "Go / No-Go", cat: "Reaction Speed", desc: "Response inhibition & selective reaction speed.", href: "/drills/visual/reaction-speed/go/no-go" },
-  { id: "distance-judgment", name: "Distance Judgment Pro", cat: "Depth Perception", desc: "3D stereoscopic depth estimation & intercept timing.", href: "/drills/visual/depth-perception/distance-judgment" },
-  { id: "entropic-grid", name: "Entropic Grid", cat: "Visual Recognition", desc: "Visual search speed & pattern recognition grid.", href: "/drills/visual/visual-recognition/entropic-grid" }
-];
 
 const getSavedData = () => {
   try {
@@ -559,36 +548,36 @@ export default function KineticInterceptClient() {
     <div className="min-h-screen bg-[#050508] text-white flex flex-col font-sans select-none">
       {/* ── MAIN CONTENT AREA ── */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
-        {/* Title */}
+        {/* Title & AIO Snippet */}
         {!isFullscreen && (
-          <div className="text-center">
+          <div className="text-left">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              MOVING TARGET PRO
-              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
-                Moving Target Intercept Test
-              </span>
+              Moving Target Intercept Test
             </h1>
+            <p className="text-sm text-slate-400 mt-1 leading-relaxed">
+              Smooth pursuit is the eye movement that follows a target moving steadily across your field of view, as opposed to the jumps the eye makes between stationary points. Pursuit stays accurate up to roughly 30&deg;/s; past that the eye falls behind and has to catch up with saccades (Krauzlis, 2004; Rashbass, 1961). Intercepting a moving target adds a second problem on top: aiming where it is going rather than where it is.
+            </p>
           </div>
         )}
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 gap-2 max-w-2xl mx-auto w-full">
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2 text-center">
+          <div className="grid grid-cols-4 gap-2 w-full">
+            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-3 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
               <div className="text-base sm:text-lg font-black text-orange-400 tabular-nums">{uiScore}</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2 text-center">
+            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-3 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Shift Pace</div>
               <div className="text-base sm:text-lg font-black text-amber-400 tabular-nums">{currentInterval.toFixed(2)}s</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2 text-center">
+            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-3 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
               <div className={`text-base sm:text-lg font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>
                 {uiTimeLeft}s
               </div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2 text-center">
+            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-3 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
               <div className="text-base sm:text-lg font-black text-amber-400 tabular-nums">{bestScore}</div>
             </div>
@@ -745,9 +734,9 @@ export default function KineticInterceptClient() {
             >
               <div className="space-y-8">
                 <section>
-                  <h4 className="text-base font-bold text-white mb-2 flex items-center gap-2">
+                  <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
                     <Brain className="w-4 h-4 text-orange-400" /> What Is Kinetic Target Intercept Training?
-                  </h4>
+                  </h3>
                   <p className="text-sm leading-relaxed mb-3">
                     <strong>Kinetic Target Intercept Training</strong> is a high-speed smooth pursuit drill designed to test visual tracking and motor interception accuracy. The <strong>Moving Target drill</strong> renders bouncing target spheres traveling across a 2D bounding viewport at dynamic velocities.
                   </p>
@@ -760,21 +749,21 @@ export default function KineticInterceptClient() {
                   <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Who Should Use This?</h5>
+                      <h4 className="text-xs font-bold text-white">Who Should Use This?</h4>
                     </div>
                     <p className="text-xs text-gray-300 leading-relaxed">FPS gamers tracking moving opponents, athletes refining hand-eye motor speed, and visual tracking trainees.</p>
                   </div>
                   <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-orange-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Skills Improved</h5>
+                      <h4 className="text-xs font-bold text-white">Skills Improved</h4>
                     </div>
                     <p className="text-xs text-gray-300 leading-relaxed">Smooth pursuit tracking, motor interception accuracy, hand-eye coordination, and velocity prediction.</p>
                   </div>
                   <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-purple-600 flex items-center justify-center"><Zap className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Smooth Pursuit</h5>
+                      <h4 className="text-xs font-bold text-white">Smooth Pursuit</h4>
                     </div>
                     <p className="text-xs text-gray-300 leading-relaxed">Lead the moving target slightly ahead of its trajectory vector to click cleanly with high accuracy.</p>
                   </div>
@@ -782,51 +771,7 @@ export default function KineticInterceptClient() {
 
               </div>
             </DrillAccordion>
-
-            <DrillAccordion
-              id="faq"
-              title="Frequently Asked Questions"
-              isOpen={openAccordion === 'faq'}
-              onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <DrillFAQItem q="What is the Moving Target Pro Drill?" a="A free visual tracking exercise. Intercept bouncing target spheres traveling across a 2D bounding viewport." />
-                <DrillFAQItem q="What skills does this drill improve?" a="Smooth pursuit tracking, hand-eye coordination, velocity prediction, and motor interception accuracy under dynamic time limits." />
-                <DrillFAQItem q="How does progressive difficulty work?" a="As your score and combo climb, target movement velocity accelerates and hitboxes shrink continuously." />
-                <DrillFAQItem q="Are there negative score or time penalties?" a="By default, misclicks or timeouts only reset your combo multiplier. An opt-in time penalty (-0.8s per error) is available in session settings for hard-mode training." />
-                <DrillFAQItem q="Does difficulty decrease on mistakes?" a="No. Your level progression is monotonic — a mistake never takes you back down, allowing you to master your current level." />
-                <DrillFAQItem q="How long does each drill session last?" a="Each round starts with 45 seconds on the clock, and successful intercepts add +0.6s to extend your run." />
-                <DrillFAQItem q="Do I need to sign up?" a="No registration required. This drill is completely free and works instantly in your browser." />
-              </div>
-            </DrillAccordion>
           </div>
-        )}
-
-        {/* RELATED DRILLS GRID */}
-        {!isFullscreen && (
-          <section className="mt-4">
-            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">
-              Related Visual Drills
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {RELATED_DRILLS.map((drill) => (
-                <Link
-                  key={drill.id}
-                  href={drill.href}
-                  className="group bg-[#0c0c16] border border-white/5 hover:border-orange-500/40 rounded-xl p-3.5 transition-all duration-200 hover:-translate-y-0.5 flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="text-[10px] font-bold text-orange-400 uppercase tracking-wider mb-1">{drill.cat}</div>
-                    <div className="text-xs font-bold text-white group-hover:text-orange-300 transition-colors">{drill.name}</div>
-                    <div className="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">{drill.desc}</div>
-                  </div>
-                  <div className="text-[10px] font-bold text-slate-500 group-hover:text-orange-400 mt-3 flex items-center gap-1 transition-colors">
-                    Train Drill <span>→</span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
         )}
 
         {/* SITE FOOTER */}

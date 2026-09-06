@@ -1,6 +1,6 @@
 import { ImageResponse } from 'next/og';
 
-export const alt = 'Concentration Grid — free browser sequential visual search focus drill';
+export const alt = 'Schulte Table Trainer — free browser concentration grid and visual search focus drill';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -67,14 +67,14 @@ export default async function Image() {
           <div
             style={{
               display: 'flex',
-              fontSize: 92,
+              fontSize: 88,
               fontWeight: 900,
               color: '#ffffff',
               lineHeight: 1.05,
               letterSpacing: -2,
             }}
           >
-            Concentration Grid
+            Schulte Table Trainer
           </div>
           <div
             style={{

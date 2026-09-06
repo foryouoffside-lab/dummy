@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import Link from 'next/link';
 
 import { Volume2, VolumeX, Target, Eye, Users, TrendingUp, Zap, ZapOff, Brain, Crosshair, Trophy } from 'lucide-react';
 
@@ -22,7 +21,6 @@ import DrillCountdown from '../../../../../../components/drill/DrillCountdown';
 import DrillAccordion from '../../../../../../components/drill/DrillAccordion';
 import DrillFlashOverlay from '../../../../../../components/drill/DrillFlashOverlay';
 import DrillRuleItem from '../../../../../../components/drill/DrillRuleItem';
-import DrillFAQItem from '../../../../../../components/drill/DrillFAQItem';
 import FpsStartCard from '../../../../../../components/drill/FpsStartCard';
 import DrillResultCard from '../../../../../../components/drill/DrillResultCard';
 import useImmersiveMode from '@/lib/useImmersiveMode';
@@ -82,14 +80,7 @@ function draw2dTarget(ctx, x, y, targetVisible, targetType) {
   ctx.restore();
 }
 
-const RELATED_DRILLS = [
-  { id: "light-reaction", name: "Light Reaction", cat: "Reaction Speed", desc: "Test raw visual motor reaction speed.", href: "/drills/visual/reaction-speed/light-reaction" },
-  { id: "moving-target", name: "Moving Target", cat: "Visual Tracking", desc: "Kinetic visual tracking and target intercept.", href: "/drills/visual/tracking-accuracy/moving-target" },
-  { id: "visual-search", name: "Visual Search", cat: "Visual Recognition", desc: "Conjunctive visual search speed & pattern recognition.", href: "/drills/visual/visual-recognition/visual-search" },
-  { id: "multiple-targets", name: "Multiple Targets", cat: "Visual Tracking", desc: "Track multiple moving targets across dynamic paths.", href: "/drills/visual/tracking-accuracy/multiple-targets" },
-  { id: "distance-judgment", name: "Distance Judgment Pro", cat: "Depth Perception", desc: "3D stereoscopic depth estimation & intercept timing.", href: "/drills/visual/depth-perception/distance-judgment" },
-  { id: "entropic-grid", name: "Entropic Grid", cat: "Visual Recognition", desc: "Visual search speed & pattern recognition grid.", href: "/drills/visual/visual-recognition/entropic-grid" }
-];
+
 
 const getSavedData = () => {
   try {
@@ -615,34 +606,34 @@ export default function ChromaSyncClient() {
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
         {/* Title */}
         {!isFullscreen && (
-          <div className="text-center">
+          <div className="text-left">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              GO/NO-GO PRO
-              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
-                Go/No-Go Impulse Control Test
-              </span>
+              Go/No-Go Impulse Control Test
             </h1>
+            <p className="text-sm text-slate-400 mt-1 max-w-3xl leading-relaxed">
+              A go/no-go test measures response inhibition: how well you can hold back an action you have already started preparing. Most trials call for a response, so responding becomes the habit and the rare no-go trial is what exposes control. The stop-signal literature treats going and stopping as a race between two processes, and whichever finishes first decides the outcome (Logan &amp; Cowan, 1984). Simple visual reaction alone runs about 200–250 ms (Woods et al., 2015); inhibition has to beat that clock.
+            </p>
           </div>
         )}
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 gap-2 max-w-2xl mx-auto w-full">
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+          <div className="grid grid-cols-4 gap-2 w-full">
+            <div className="bg-[#0c0c16] border border-white/5 rounded-xl p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
               <div className="text-lg sm:text-xl font-black text-emerald-400 tabular-nums">{uiScore}</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+            <div className="bg-[#0c0c16] border border-white/5 rounded-xl p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
               <div className={`text-lg sm:text-xl font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>
                 {uiTimeLeft}s
               </div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+            <div className="bg-[#0c0c16] border border-white/5 rounded-xl p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Combo</div>
               <div className="text-lg sm:text-xl font-black tabular-nums text-rose-400">{uiCombo}x</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+            <div className="bg-[#0c0c16] border border-white/5 rounded-xl p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
               <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
             </div>
@@ -802,9 +793,9 @@ export default function ChromaSyncClient() {
             >
               <div className="space-y-8">
                 <section>
-                  <h4 className="text-base font-bold text-white mb-2 flex items-center gap-2">
+                  <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
                     <Brain className="w-4 h-4 text-emerald-400" /> What Is Go/No-Go Response Inhibition?
-                  </h4>
+                  </h3>
                   <p className="text-sm leading-relaxed mb-3">
                     <strong>Go/No-Go Training</strong> is the gold standard neuroscientific task for measuring motor response inhibition and impulse control. The <strong>Go/No-Go drill</strong> requires you to react as quickly as possible to green target signals ('Go') while suppressing motor actions when red distractor signals ('No-Go') appear.
                   </p>
@@ -817,21 +808,21 @@ export default function ChromaSyncClient() {
                   <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Who Should Use This?</h5>
+                      <h4 className="text-xs font-bold text-white">Who Should Use This?</h4>
                     </div>
                     <p className="text-xs text-gray-300 leading-relaxed">FPS gamers refining trigger discipline, pilots & drivers improving split-second decision making, and impulse control trainees.</p>
                   </div>
                   <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Skills Improved</h5>
+                      <h4 className="text-xs font-bold text-white">Skills Improved</h4>
                     </div>
                     <p className="text-xs text-gray-300 leading-relaxed">Response inhibition, impulse control, selective motor control, trigger discipline, and reaction speed.</p>
                   </div>
                   <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-purple-600 flex items-center justify-center"><Zap className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Trigger Control</h5>
+                      <h4 className="text-xs font-bold text-white">Trigger Control</h4>
                     </div>
                     <p className="text-xs text-gray-300 leading-relaxed">Restrain your thumb/finger from tapping instinctively when a red STOP target appears — every successful hold is worth points too.</p>
                   </div>
@@ -839,51 +830,7 @@ export default function ChromaSyncClient() {
 
               </div>
             </DrillAccordion>
-
-            <DrillAccordion
-              id="faq"
-              title="Frequently Asked Questions"
-              isOpen={openAccordion === 'faq'}
-              onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <DrillFAQItem q="What is the Go/No-Go Drill?" a="A free response inhibition task. React instantly to Green 'GO' targets while suppressing motor actions when Red 'STOP' targets spawn." />
-                <DrillFAQItem q="How does progressive difficulty work?" a="As your score and combo climb, signal display windows tighten continuously, challenging your impulse control boundaries." />
-                <DrillFAQItem q="Are there negative score or time penalties?" a="By default, wrong clicks on red NO-GO signals cost 1 life without deducting time. An opt-in time penalty (-0.8s per error) is available in session settings for hard-mode training." />
-                <DrillFAQItem q="Can a bad run end early?" a="No. A wrong click on a red NO-GO signal resets your combo (and deducts time if penalties are on), but nothing cuts the session short — every run plays until the clock reaches zero." />
-                <DrillFAQItem q="Does difficulty decrease on mistakes?" a="No. Your level progression is monotonic — a mistake never takes you back down, so you can safely master your current level." />
-                <DrillFAQItem q="How long does each drill session last?" a="Each round starts with 45 seconds on the clock, extendable by hitting GO targets and holding NO-GOs. The clock is the only thing that ends a run." />
-                <DrillFAQItem q="Do I need to sign up?" a="No registration required. This drill runs directly in your browser with instant response." />
-              </div>
-            </DrillAccordion>
           </div>
-        )}
-
-        {/* RELATED DRILLS GRID */}
-        {!isFullscreen && (
-          <section className="mt-4">
-            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">
-              Related Visual Drills
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {RELATED_DRILLS.map((drill) => (
-                <Link
-                  key={drill.id}
-                  href={drill.href}
-                  className="group bg-[#0c0c16] border border-white/5 hover:border-emerald-500/40 rounded-xl p-3.5 transition-all duration-200 hover:-translate-y-0.5 flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider mb-1">{drill.cat}</div>
-                    <div className="text-xs font-bold text-white group-hover:text-emerald-300 transition-colors">{drill.name}</div>
-                    <div className="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">{drill.desc}</div>
-                  </div>
-                  <div className="text-[10px] font-bold text-slate-500 group-hover:text-emerald-400 mt-3 flex items-center gap-1 transition-colors">
-                    Train Drill <span>→</span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
         )}
 
         {/* SITE FOOTER */}

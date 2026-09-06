@@ -8,7 +8,7 @@ import { ImageResponse } from 'next/og';
 // Satori (the renderer behind ImageResponse) supports FLEXBOX ONLY — no CSS grid,
 // and every element with more than one child needs an explicit `display: flex`.
 
-export const alt = 'Constant Slow Pursuit — free browser Visual Tracking drill on SkillDrills';
+export const alt = 'Constant Slow Pursuit — Smooth Pursuit Eye Exercise | SkillDrills';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -94,7 +94,7 @@ export default async function Image() {
               maxWidth: 980,
             }}
           >
-            {"Condition foveal pursuit along a continuous, visible Lissajous curve at low velocity."}
+            {"Condition smooth pursuit eye movement along a continuous Lissajous curve at low velocity."}
           </div>
         </div>
 

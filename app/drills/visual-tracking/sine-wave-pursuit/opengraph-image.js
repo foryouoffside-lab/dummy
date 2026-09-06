@@ -8,7 +8,7 @@ import { ImageResponse } from 'next/og';
 // Satori (the renderer behind ImageResponse) supports FLEXBOX ONLY — no CSS grid,
 // and every element with more than one child needs an explicit `display: flex`.
 
-export const alt = 'Sine-Wave Pursuit — free browser Visual Tracking drill on SkillDrills';
+export const alt = 'Sine Wave Pursuit — Smooth Pursuit Eye Training | SkillDrills';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -82,7 +82,7 @@ export default async function Image() {
               letterSpacing: -2,
             }}
           >
-            {"Sine-Wave Pursuit"}
+            {"Sine Wave Pursuit"}
           </div>
           <div
             style={{
@@ -94,7 +94,7 @@ export default async function Image() {
               maxWidth: 980,
             }}
           >
-            {"Track target oscillations along a horizontal sine wave guide line."}
+            {"Track oscillating targets along sinusoidal wave curves to build velocity gain."}
           </div>
         </div>
 

@@ -64,32 +64,34 @@ const RULES_ITEMS = [
   { title: "Streak Reset", text: "Landing on the ground without hitting the target resets your combo streak to 1.0x." }
 ];
 
-const ABOUT_TEXT = `Jump Sequence Pro tests vertical trajectory control, charge timing, and mid-air steering under dynamic spatial pressure. Players charge jump power and steer their mid-air flight path to intercept moving targets.
-
-As your score increases, the level scales up to Level 15+. Target movement velocity accelerates from 120 px/s up to 900+ px/s, target radius shrinks from 35px to 12px, and target direction shifts erratically.
-
-Successfully intercepting targets builds massive combo multipliers across a fixed 45-second session without negative score penalties.`;
-
-const FAQ_ITEMS = [
-  { q: "What is Jump Sequence Pro?", a: "Jump Sequence Pro is a physical fitness & motor control drill that trains trajectory calculation, charge timing, and mid-air steering. Players charge jump velocity and steer their airborne character to intercept dynamic moving targets." },
-  { q: "How do jump controls work?", a: "Hover your crosshair over your player circle at the bottom floor, hold mouse click to charge jump power, and release to launch into the air. While airborne, move your mouse left or right to steer." },
-  { q: "Does this drill improve gaming performance?", a: "Yes. Steering in mid-air and timing jump releases trains the neuromuscular coordination required for movement shooter mechanics, rocket jumping, and dynamic aerial tracking in games like Apex Legends and Overwatch." },
-  { q: "How does difficulty scaling work?", a: "As you score points, your level rises up to Level 15. Target movement speed accelerates up to 900+ px/s, target radius shrinks from 35px down to 12px, and target trajectory turns erratically." },
-  { q: "Are there penalties for missing a target?", a: "No. Landing on the floor without touching the target resets your combo streak to 1.0x, but does not deduct points or reduce your 45-second timer." },
-  { q: "How long does each session run?", a: "Each session runs for a fixed 45 seconds to provide a standard, reproducible performance benchmark." },
-  { q: "What is a good score in Jump Sequence Pro?", a: "Scoring 8,000+ points earns a Gold or Platinum grade, while reaching 17,000+ points with high trajectory accuracy places you in the Master tier." },
-  { q: "Do I need special hardware to practice this drill?", a: "No special hardware is required. Any standard computer mouse with 1:1 raw input support works ideally with our pointer lock system." },
-  { q: "Is this drill free to play?", a: "Yes, Jump Sequence Pro on SkillDrills is 100% free, ad-free, and runs entirely in your web browser with zero downloads." },
-  { q: "How often should I practice daily?", a: "Practicing 5 to 10 minutes daily is recommended for optimal neuromuscular adaptation and spatial tracking development." }
-];
-
-const RELATED_DRILLS = [
-  { id: "quick-dodge", name: "Reflex Game Online (Quick Dodge)", cat: "Reflex Training", desc: "Evade dynamic homing obstacles with fluid cursor agility.", href: "/drills/physical/reflex-training/quick-dodge" },
-  { id: "reaction-chain", name: "Reaction Chain Pro", cat: "Reflex Training", desc: "Train precision stopping and impulse arrest on incoming targets.", href: "/drills/physical/reflex-training/reaction-chain" },
-  { id: "agility-ladder", name: "Motor Sequencing (Agility Ladder)", cat: "Physical Fitness", desc: "Master bilateral motor sequencing and rhythmic mouse sweeps.", href: "/drills/physical/fitness/agility-ladder" },
-  { id: "cross-body-movement", name: "Cross-Body Movement", cat: "Physical Coordination", desc: "Improve bilateral motor coordination and cross-body tracking.", href: "/drills/physical/coordination/cross-body-movement" },
-  { id: "dynamic-grid-evasion", name: "Dynamic Grid Evasion", cat: "Physical Coordination", desc: "Evade dynamic grid hazards with rapid motor adjustments.", href: "/drills/physical/coordination/dynamic-grid-evasion" },
-  { id: "stability-challenge", name: "Stability Challenge", cat: "Physical Balance", desc: "Test static and dynamic balance holding capabilities.", href: "/drills/physical/balance-training/stability-challenge" }
+// ============================================================
+// ABOUT & BIOMECHANICAL RESEARCH DATA
+// ============================================================
+const ABOUT_SECTIONS = [
+  {
+    icon: Target,
+    title: "Stretch-Shortening Cycle & Vertical Impulse Regulation",
+    subtitle: "Biomechanical force potentiation and launch velocity calibration",
+    content: "Jump sequence training demands precise regulation of vertical takeoff impulse through neuromuscular stretch-shortening mechanics (Komi, 2000). By varying ground charge duration, the motor cortex modulates elastic energy storage in lower-limb extensor groups, translating force into reproducible ballistic flight parabolas."
+  },
+  {
+    icon: Move,
+    title: "Internal Forward Models & Mid-Air Trajectory Correction",
+    subtitle: "Cerebellar predictive simulation during aerial flight",
+    content: "Once airborne, ballistic flight paths cannot be altered by ground reaction forces; instead, fine mid-air course corrections rely on internal cerebellar forward models (Kawato, 1999). Players continuously compare the simulated future landing position with the moving target\'s vector to execute rapid lateral adjustments."
+  },
+  {
+    icon: Eye,
+    title: "Optical Tau & Dynamic Aerial Target Interception",
+    subtitle: "Time-to-contact estimation under erratic target acceleration",
+    content: "Interception timing is governed by optical tau (τ), the inverse rate of retinal image expansion (Lee, 1976). As target velocity escalates from 120 px/s up to 900 px/s, the visual cortex must extrapolate non-linear intersection coordinates before initiating jump liftoff."
+  },
+  {
+    icon: Activity,
+    title: "Two-Component Ballistic & Steering Convergence",
+    subtitle: "Woodworth two-component impulse coupled with Fitts speed-accuracy constraints",
+    content: "Motor execution follows Woodworth\'s (1899) classic two-phase model: an initial open-loop ballistic launch followed by closed-loop optical feedback guidance. Constricting target boundaries impose strict Fitts\'s Law (1954) speed-accuracy tradeoffs during terminal descent."
+  }
 ];
 
 // Difficulty parameters formula driven by drillDifficulty
@@ -697,34 +699,37 @@ export default function JumpSequenceClient() {
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
         {/* Title */}
         {!isFullscreen && (
-          <div className="text-center">
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white uppercase">
-              Jump Sequence Pro
-              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
-                Jump Sequence Reaction Drill
+          <div className="text-left">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+              Jump Sequence
+              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1">
+                Jump Sequence Training
               </span>
             </h1>
+            <p className="text-xs sm:text-sm text-slate-400 mt-2 max-w-3xl leading-relaxed">
+              Intercepting something that is falling means predicting where it will be, not reacting to where it is. The visual system can read time-to-contact directly from the rate at which an approaching object&apos;s image expands, without needing to know its size or speed (Lee, 1976), and the movement itself is planned in advance from an internal model rather than steered by feedback once it is airborne (Kawato, 1999). This is a cursor interception drill: it trains that prediction, and does not measure vertical jump or stretch-shortening cycle mechanics, which need force-plate measurement (Komi, 2000).
+            </p>
           </div>
         )}
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 gap-2.5 max-w-2xl mx-auto w-full">
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
-              <div className="text-lg sm:text-xl font-black text-white tabular-nums">{uiScore}</div>
+          <div className="grid grid-cols-4 gap-2 w-full">
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-3 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Score</div>
+              <div className="text-lg sm:text-2xl font-black text-white tabular-nums">{uiScore}</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
-              <div className={`text-lg sm:text-xl font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>{uiTimeLeft}s</div>
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-3 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Time</div>
+              <div className={`text-lg sm:text-2xl font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>{uiTimeLeft}s</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
-              <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-3 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Best Score</div>
+              <div className="text-lg sm:text-2xl font-black text-amber-400 tabular-nums">{bestScore}</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Combo</div>
-              <div className="text-lg sm:text-xl font-black text-rose-400 tabular-nums">{bestCombo}x</div>
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-3 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Best Combo</div>
+              <div className="text-lg sm:text-2xl font-black text-rose-400 tabular-nums">{bestCombo}x</div>
             </div>
           </div>
         )}
@@ -802,7 +807,7 @@ export default function JumpSequenceClient() {
             <FpsStartCard
               icon={Move}
               accent="cyan"
-              title="Jump Sequence Pro"
+              title="Jump Sequence"
               subtitle="Vertical Trajectory & Mid-Air Steering • 15 Levels"
               rules={[
                 { icon: Target, accent: 'cyan', title: 'Charge & Launch', text: 'Hold click over player dot to charge velocity and release to jump' },
@@ -919,60 +924,27 @@ export default function JumpSequenceClient() {
 
             <DrillAccordion
               id="about"
-              title="About Jump Sequence Pro"
+              title="About Jump Sequence Training"
               isOpen={openAccordion === 'about'}
               onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
             >
               <div className="space-y-4">
-                {ABOUT_TEXT.split('\n\n').map((para, i) => (
-                  <p key={i} className="text-sm leading-relaxed text-gray-300">{para}</p>
-                ))}
-              </div>
-            </DrillAccordion>
-
-            <DrillAccordion
-              id="faq"
-              title="Frequently Asked Questions"
-              isOpen={openAccordion === 'faq'}
-              onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {FAQ_ITEMS.map((item, i) => (
-                  <div key={i} className="bg-[#05060b] border border-gray-800 rounded-xl p-5">
-                    <h4 className="text-sm font-bold text-gray-200 mb-2">{item.q}</h4>
-                    <p className="text-xs text-gray-400 leading-relaxed">{item.a}</p>
-                  </div>
-                ))}
+                {ABOUT_SECTIONS.map((sec, idx) => {
+                  const IconComp = sec.icon;
+                  return (
+                    <div key={idx} className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <IconComp className="w-4 h-4 text-cyan-400 shrink-0" />
+                        <h3 className="text-sm font-bold text-white tracking-wide">{sec.title}</h3>
+                      </div>
+                      <h4 className="text-xs font-semibold text-slate-400 mb-2">{sec.subtitle}</h4>
+                      <p className="text-xs leading-relaxed text-slate-300">{sec.content}</p>
+                    </div>
+                  );
+                })}
               </div>
             </DrillAccordion>
           </div>
-        )}
-
-        {/* ── RELATED PHYSICAL & REFLEX DRILLS ── */}
-        {!isFullscreen && (
-          <section className="mt-4">
-            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3 font-sans">
-              Related Physical &amp; Reflex Drills
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {RELATED_DRILLS.map((drill) => (
-                <Link
-                  key={drill.id}
-                  href={drill.href}
-                  className="group bg-[#0c0c16] border border-white/5 hover:border-cyan-500/40 rounded-xl p-3.5 transition-all duration-200 hover:-translate-y-0.5 flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider mb-1">{drill.cat}</div>
-                    <div className="text-xs font-bold text-white group-hover:text-cyan-300 transition-colors">{drill.name}</div>
-                    <div className="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">{drill.desc}</div>
-                  </div>
-                  <div className="text-[10px] font-bold text-slate-500 group-hover:text-cyan-400 mt-3 flex items-center gap-1 transition-colors">
-                    Train Drill <span>→</span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
         )}
 
         {/* ── FOOTER ── */}

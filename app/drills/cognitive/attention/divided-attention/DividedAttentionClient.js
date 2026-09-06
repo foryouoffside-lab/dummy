@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
-import { Layers, Volume2, VolumeX, Play, RefreshCw, Share2, Users, TrendingUp, ArrowLeft, Zap, ZapOff, Trophy, Target } from 'lucide-react';
+import { Layers, Volume2, VolumeX, Play, RefreshCw, Share2, Users, TrendingUp, ArrowLeft, Zap, ZapOff } from 'lucide-react';
 
 import { isIdleFrameSkippable } from '@/lib/performance';
 import generateShareCard, { shareScoreCard } from '../../../../../components/ShareScoreCard';
@@ -65,8 +65,8 @@ const getLevelConfig = (level, combo = 0) => {
 
 const RULES_ITEMS = [
   { title: "Dual-Task Processing", text: "Process two independent streams simultaneously: track moving targets on the visual canvas AND tap MATCH when even numbers appear in the number stream." },
-  { title: "Visual Target Stream", text: "Tap moving blue targets as soon as they appear before their display timer expires (+100 PTS × Combo, +0.6s)." },
-  { title: "Numerical Match Stream", text: "Numbers (0-9) stream continuously on the side panel. Tap MATCH only when an EVEN number is active (+100 PTS × Combo, +0.6s)." },
+  { title: "Visual Target Stream", text: "Tap moving blue targets as soon as they appear before their display timer expires (+100 PTS × Combo × Level multiplier, +0.6s)." },
+  { title: "Numerical Match Stream", text: "Numbers (0-9) stream continuously on the side panel. Tap MATCH only when an EVEN number is active (+100 PTS × Combo × Level multiplier, +0.6s)." },
   { title: "Misses & Penalties", text: "Missed targets, missed even numbers, and false matches reset your combo (and deduct 0.8s if enabled). Nothing ends the run early — you play until the clock reaches zero." }
 ];
 
@@ -76,26 +76,13 @@ In fast-paced tactical environments (such as esports, aviation, high-frequency t
 
 By scaling target speeds and shrinking target dimensions as your score rises, the drill pushes prefrontal executive control networks to their absolute limit.`;
 
-const FAQ_ITEMS = [
-  { q: "What is divided attention in psychology?", a: "Divided attention is the cognitive ability to process two or more independent streams of information simultaneously, splitting your mental bandwidth across multiple tasks. It is a core component of executive function and is essential for activities like driving while navigating or reading while listening to instructions." },
-  { q: "What is the difference between divided attention and selective attention?", a: "Selective attention means focusing your full cognitive resources on one task while completely filtering out distractions. Divided attention means allocating resources across two or more tasks simultaneously. In everyday life, you use selective attention when studying in a quiet room and divided attention when walking while talking." },
-  { q: "What is an example of divided attention?", a: "Common examples include: driving a car while holding a conversation, cooking while watching television, and taking notes while listening to a lecture. In each case, your brain must maintain separate cognitive loops for distinct input channels at the same time." },
-  { q: "Can you improve divided attention with training?", a: "Yes. Research in cognitive neuroscience shows that repeated dual-task training expands your brain's bandwidth to handle parallel processing. The key is practicing tasks that use different sensory channels, such as visual-spatial tracking combined with auditory or numerical processing, which avoids bottlenecks in a single sensory pathway." },
-  { q: "What does this divided attention test measure?", a: "This test measures your ability to simultaneously track moving visual targets (visuospatial channel) and identify even or odd numbers (numerical cognition channel). It scores your accuracy in both streams, your response speed, and your resistance to divided-attention errors under time pressure." },
-  { q: "How does dual-task training improve cognitive performance?", a: "Dual-task drills create a processing bottleneck in the prefrontal cortex, forcing your executive network to develop more efficient resource allocation strategies. Over time, this reduces the interference effect between tasks, allowing you to maintain accuracy in both channels with less cognitive fatigue." },
-  { q: "What skills benefit most from divided attention training?", a: "Professionals who benefit most include air traffic controllers, emergency room nurses, competitive esports players (monitoring minimap + targets), sports athletes (tracking ball + opponents simultaneously), and surgeons managing instruments while reading vital signs." },
-  { q: "What is a dual-task paradigm?", a: "A dual-task paradigm is a research and training method where participants must perform two tasks simultaneously. The interference between tasks reveals the cognitive cost of divided attention. This drill implements a visual-numerical dual task, one of the most studied paradigms in attention research." },
-  { q: "Is this divided attention test free to use?", a: "Yes. This divided attention drill on SkillDrills is completely free to play with no registration, downloads, or subscriptions required. It runs entirely in your web browser." },
-  { q: "How does divided attention affect driving safety?", a: "Divided attention is critical for safe driving. You must simultaneously monitor the road ahead, check mirrors, obey traffic signals, and process GPS instructions. Studies show that insufficient divided attention capacity significantly increases collision risk, especially in complex traffic scenarios." }
-];
-
 const RELATED_DRILLS = [
-  { id: "multi-tasking", name: "Multi-Tasking", cat: "Attention", desc: "Track dual independent target streams under speed pressure.", href: "/drills/cognitive/attention/multi-tasking" },
-  { id: "symbol-matching", name: "Symbol Matching", cat: "Processing Speed", desc: "Match rapid symbol pairs under strict time pressure.", href: "/drills/cognitive/processing-speed/symbol-matching" },
-  { id: "concentration-stamina", name: "Concentration Stamina", cat: "Attention", desc: "Sustain continuous visual focus through prolonged high-density sequences.", href: "/drills/cognitive/attention/concentration-stamina" },
-  { id: "distraction-fighter", name: "Distraction Fighter", cat: "Focus", desc: "Filter out high-interference Stroop visual distractors.", href: "/drills/cognitive/focus/distraction-fighter" },
-  { id: "reaction-time", name: "Reaction Time", cat: "Processing Speed", desc: "Train choice reaction speed and visual reflex latency.", href: "/drills/cognitive/processing-speed/reaction-time" },
-  { id: "concentration-grid", name: "Concentration Grid", cat: "Focus", desc: "Scan and tap sequential numbers on expanding grid matrices.", href: "/drills/cognitive/focus/concentration-grid" }
+  { id: "concentration-stamina", name: "Focus Test", cat: "Attention", desc: "Sustain continuous visual focus through prolonged high-density sequences.", href: "/drills/cognitive/attention/concentration-stamina" },
+  { id: "multi-tasking", name: "Multitasking Test", cat: "Attention", desc: "Track dual independent target streams under speed pressure.", href: "/drills/cognitive/attention/multi-tasking" },
+  { id: "concentration-grid", name: "Schulte Table Trainer", cat: "Focus", desc: "Scan and tap sequential numbers on expanding grid matrices.", href: "/drills/cognitive/focus/concentration-grid" },
+  { id: "distraction-fighter", name: "Stroop Test Online", cat: "Focus", desc: "Filter out high-interference Stroop visual distractors.", href: "/drills/cognitive/focus/distraction-fighter" },
+  { id: "rsvp-reader", name: "Reading Speed Test", cat: "Processing Speed", desc: "Process rapid serial visual presentation text streams.", href: "/drills/cognitive/processing-speed/rsvp-reader" },
+  { id: "reaction-time", name: "Neuro Speed & Reflex Test", cat: "Processing Speed", desc: "Train choice reaction speed and visual reflex latency.", href: "/drills/cognitive/processing-speed/reaction-time" }
 ];
 
 export default function DividedAttentionClient() {
@@ -544,7 +531,7 @@ export default function DividedAttentionClient() {
         score: uiScore,
         accuracy: analytics.accuracy,
         speed: 0,
-        drillName: 'Divided Attention',
+        drillName: 'Divided Attention Test',
         rank: analytics.grade?.letter || 'A',
         rankName: analytics.grade?.label || 'DUAL TASK MASTER',
         playerName: getPlayerName(),
@@ -553,13 +540,13 @@ export default function DividedAttentionClient() {
         url: 'skilldrills.online/drills/cognitive/attention/divided-attention'
       });
       await shareScoreCard(canvas, {
-        title: 'Divided Attention — My Score',
-        text: `I scored ${uiScore} (Grade: ${analytics.grade?.letter || 'A'}, Lv. ${analytics.finalLevel}) on Divided Attention at SkillDrills!`,
+        title: 'Divided Attention Test — My Score',
+        text: `I scored ${uiScore} (Grade: ${analytics.grade?.letter || 'A'}, Lv. ${analytics.finalLevel}) on Divided Attention Test at SkillDrills!`,
         url
       });
     } catch (e) {
       if (navigator.share) {
-        navigator.share({ title: 'Divided Attention Score', text: `I scored ${uiScore} on Divided Attention!`, url }).catch(() => {});
+        navigator.share({ title: 'Divided Attention Test Score', text: `I scored ${uiScore} on Divided Attention Test!`, url }).catch(() => {});
       }
     }
   }, [uiScore, analytics]);
@@ -568,39 +555,32 @@ export default function DividedAttentionClient() {
     <div className="min-h-screen bg-[#050508] text-white flex flex-col font-sans select-none">
       {/* ── MAIN CONTENT AREA ── */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
-        {/* Title */}
+        {/* Title — left-aligned and sitting directly above the drill box */}
         {!isFullscreen && (
-          <div className="text-center">
+          <div className="flex flex-col gap-1">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              DIVIDED ATTENTION
-              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
-                Divided Attention Test
-              </span>
+              Divided Attention Test
             </h1>
+            <p className="text-[13px] text-slate-400 leading-relaxed">
+              Test your split focus and dual-task processing capacity. When two concurrent tasks compete for central executive resources, performance suffers from psychological refractory bottlenecks and cross-talk interference (Pashler, 1994; Wickens, 2002).
+            </p>
           </div>
         )}
 
-        {/* Live Stat Cards */}
+        {/* Live Stat Cards — full width flush with the drill container */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 gap-2.5 max-w-2xl mx-auto w-full">
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
-              <div className="text-lg sm:text-xl font-black text-blue-400 tabular-nums">{uiScore}</div>
-            </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
-              <div className={`text-lg sm:text-xl font-black tabular-nums ${uiTimeLeft <= 10 && gameState === 'playing' ? 'text-red-400 animate-pulse' : 'text-white'}`}>
-                {uiTimeLeft}s
+          <div className="grid grid-cols-4 gap-2 w-full -mb-2">
+            {[
+              { label: 'Score', value: uiScore, tone: 'text-blue-400' },
+              { label: 'Time', value: `${uiTimeLeft}s`, tone: uiTimeLeft <= 10 && gameState === 'playing' ? 'text-red-400 animate-pulse' : 'text-white' },
+              { label: 'Level', value: `L${uiLevel}`, tone: 'text-blue-400' },
+              { label: 'Best Score', value: bestScore, tone: 'text-amber-400' },
+            ].map((s) => (
+              <div key={s.label} className="rounded-lg border border-white/[0.06] bg-white/[0.015] px-2 py-2 text-center">
+                <div className="text-[9.5px] uppercase font-semibold text-slate-500 tracking-[0.12em]">{s.label}</div>
+                <div className={`text-lg sm:text-xl font-black tabular-nums font-mono mt-0.5 ${s.tone}`}>{s.value}</div>
               </div>
-            </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Level</div>
-              <div className="text-lg sm:text-xl font-black text-blue-400 tabular-nums">L{uiLevel}</div>
-            </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
-              <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
-            </div>
+            ))}
           </div>
         )}
 
@@ -750,23 +730,8 @@ export default function DividedAttentionClient() {
             <FpsStartCard
               icon={Layers}
               accent="blue"
-              title="Divided Attention"
+              title="Divided Attention Test"
               subtitle="Dual-Task Stream • Split Focus"
-              rules={[
-                { icon: Target, accent: 'blue', title: 'Tap Moving Targets (+100 PTS)', text: '+100 PTS × Combo × Level multiplier (+0.6s per hit)' },
-                {
-                  icon: Zap,
-                  accent: 'blue',
-                  title: penaltyEnabled ? 'Match Even Numbers • Time Penalty' : 'Match Even Numbers',
-                  text: penaltyEnabled
-                    ? 'Tap MATCH on EVEN numbers. A miss resets your combo and deducts 0.8s'
-                    : 'Tap MATCH on EVEN numbers. A miss resets your combo; the run lasts the full clock'
-                },
-              ]}
-              stats={[
-                { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
-                { icon: TrendingUp, label: 'Best Level', value: `Lv. ${bestLevel}`, color: 'text-blue-400', accent: 'blue' },
-              ]}
               isTouchOnlyDevice={false}
               onStart={enterDrill}
             />
@@ -819,7 +784,7 @@ export default function DividedAttentionClient() {
 
         <DrillAccordion
           id="about"
-          title="About Divided Attention"
+          title="About Divided Attention Test & Dual-Task Training"
           isOpen={openAccordion === 'about'}
           onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
         >
@@ -857,22 +822,9 @@ export default function DividedAttentionClient() {
             </div>
           </div>
         </DrillAccordion>
-
-        <DrillAccordion
-          id="faq"
-          title="Frequently Asked Questions"
-          isOpen={openAccordion === 'faq'}
-          onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
-        >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {FAQ_ITEMS.map((item, i) => (
-              <div key={i} className="bg-[#05060b] border border-gray-800 rounded-xl p-5">
-                <h4 className="text-sm font-bold text-gray-200 mb-2">{item.q}</h4>
-                <p className="text-xs text-gray-400 leading-relaxed">{item.a}</p>
-              </div>
-            ))}
-          </div>
-        </DrillAccordion>
+            {/* The FAQ is rendered by DrillGuide below, mapped from
+                faqSchema.mainEntity so the page's FAQPage JSON-LD and the visible
+                questions cannot drift. */}
         </div>
         )}
 

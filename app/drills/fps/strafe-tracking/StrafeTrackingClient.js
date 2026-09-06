@@ -615,43 +615,43 @@ export default function StrafeTrackingClient() {
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
         {/* Title */}
         {!isFullscreen && (
-          <div className="text-center">
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              STRAFE TRACKING
-              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
-                Strafe Tracking Aim Trainer
-              </span>
+          <div className="text-left max-w-4xl mx-auto w-full">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white mb-2">
+              Strafe Tracking Aim Trainer
             </h1>
+            <p className="text-xs sm:text-sm text-slate-400 leading-relaxed max-w-2xl">
+              Strafe tracking is keeping your crosshair on an opponent who changes direction unpredictably. Human smooth pursuit follows accurately to roughly 30&deg;/s, and each abrupt reversal costs a catch-up saccade about 100&ndash;130&nbsp;ms later (Rashbass, 1961; Krauzlis, 2004).
+            </p>
           </div>
         )}
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 gap-2.5 max-w-2xl mx-auto w-full">
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+          <div className="grid grid-cols-4 gap-2 w-full">
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Status</div>
-              <div className="text-lg sm:text-xl font-black text-green-400 tabular-nums">
+              <div className="text-sm sm:text-lg font-black text-green-400 tabular-nums">
                 {gameState === 'playing' ? 'TRACKING' : gameState === 'gameOver' ? 'COMPLETE' : 'STANDBY'}
               </div>
             </div>
 
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time Left</div>
-              <div className={`text-lg sm:text-xl font-black tabular-nums ${timeLeft <= 10 ? "text-red-400 animate-pulse" : "text-white"}`}>
+              <div className={`text-sm sm:text-lg font-black tabular-nums ${timeLeft <= 10 ? "text-red-400 animate-pulse" : "text-white"}`}>
                 {timeLeft}s
               </div>
             </div>
 
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Accuracy</div>
-              <div className="text-lg sm:text-xl font-black text-green-400 tabular-nums">
+              <div className="text-sm sm:text-lg font-black text-green-400 tabular-nums">
                 {accuracy}%
               </div>
             </div>
 
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
-              <div className="text-lg sm:text-xl font-black text-yellow-400 tabular-nums">
+              <div className="text-sm sm:text-lg font-black text-yellow-400 tabular-nums">
                 {bestScore}
               </div>
             </div>
@@ -812,9 +812,9 @@ export default function StrafeTrackingClient() {
             >
               <div className="space-y-6 font-sans">
                 <section>
-                  <h4 className="text-base font-bold text-white mb-2">
+                  <h3 className="text-base font-bold text-white mb-2">
                     What Is Strafe Tracking Training?
-                  </h4>
+                  </h3>
                   <p className="text-sm leading-relaxed mb-3 text-gray-300">
                     <strong>Strafe Tracking Training</strong> builds the continuous motor compensation required to keep your crosshair locked onto targets moving erratically horizontally across your screen.
                   </p>
@@ -823,41 +823,25 @@ export default function StrafeTrackingClient() {
                   <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Who Should Use This?</h5>
+                      <h4 className="text-xs font-bold text-white">Who Should Use This?</h4>
                     </div>
                     <p className="text-xs text-gray-300 leading-relaxed">Ranked players and esports competitors looking to track fast ADAD strafing and erratic movement patterns.</p>
                   </div>
                   <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-fuchsia-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Skills Trained</h5>
+                      <h4 className="text-xs font-bold text-white">Skills Trained</h4>
                     </div>
                     <p className="text-xs text-gray-300 leading-relaxed">Reactive tracking, aim smoothness, counter-strafe reading, directional transition speed, and wrist glide control.</p>
                   </div>
                   <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-orange-600 flex items-center justify-center"><Zap className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Hardware Raw Input</h5>
+                      <h4 className="text-xs font-bold text-white">Hardware Raw Input</h4>
                     </div>
                     <p className="text-xs text-gray-300 leading-relaxed">1:1 unaccelerated pointer lock mouse movement calibrated to simulate true in-game competitive mouse feel.</p>
                   </div>
                 </div>
-              </div>
-            </DrillAccordion>
-
-            <DrillAccordion
-              id="faq"
-              title="Frequently Asked Questions"
-              isOpen={openAccordion === 'faq'}
-              onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
-            >
-              <div className="space-y-4 font-sans">
-                {FAQ_ITEMS.map((item, idx) => (
-                  <div key={idx} className="border-b border-gray-800/80 pb-3 last:border-0 last:pb-0">
-                    <h5 className="text-xs font-bold text-white mb-1">{item.q}</h5>
-                    <p className="text-xs text-gray-400 leading-relaxed">{item.a}</p>
-                  </div>
-                ))}
               </div>
             </DrillAccordion>
           </div>
@@ -869,19 +853,6 @@ export default function StrafeTrackingClient() {
     </div>
   );
 }
-
-const FAQ_ITEMS = [
-  { q: "What is tracking aim in FPS games?", a: "Tracking aim is the mechanical ability to keep your crosshair continuously locked onto an opponent moving in a 3D environment, which is highly critical in games with a high time-to-kill (TTK)." },
-  { q: "How is tracking different from flicking?", a: "Flicking requires rapid muscle memory snaps to hit a target and reset, while tracking requires continuous visual pursuit, direction change recognition, and smooth speed adjustment." },
-  { q: "How do I improve reactive tracking?", a: "Improve reactive tracking by practicing against fast, unpredictable strafe speeds. Learn to read momentum changes without over-predicting or tensing your wrist." },
-  { q: "Why do I overtrack targets?", a: "Overtracking happens when your crosshair moves faster than the target during a direction swap, which is often caused by predictive aiming or excessive mouse acceleration." },
-  { q: "What causes shaky aim during tracking?", a: "Shaky aim is caused by excessive wrist tension, inappropriate mouse grip, or too high sensitivity. Smoothness aim drills help condition your hand to glide without micro-jitters." },
-  { q: "How are errors penalised in Strafe Tracking?", a: "Losing contact with the target resets your active combo multiplier. When the optional Time Penalty setting is enabled, falling off-target for 1.0 cumulative second also deducts 0.6s from your timer." },
-  { q: "Is tracking more important than flicking?", a: "It depends on the game. Tracking is primary in high-TTK games (Apex Legends, Overwatch 2, The Finals), whereas flicking is more critical in tactical, low-TTK shooters (Valorant, CS2)." },
-  { q: "Can tracking improve Apex Legends aim?", a: "Yes. Gunfights in Apex Legends require landing full automatic magazines on dodging enemies. Consistent tracking practice is the single best way to improve Apex aim." },
-  { q: "What sensitivity is best for tracking?", a: "Medium-to-low sensitivity (30cm to 45cm per 360°) offers the best balance between smoothness and speed for reactive tracking." },
-  { q: "Is this strafe tracking drill free?", a: "Yes, 100% free with unaccelerated raw input in your browser without downloads or signups." }
-];
 
 // === Subcomponents ===
 function RuleItem({ num, text, highlight = '', result }) {

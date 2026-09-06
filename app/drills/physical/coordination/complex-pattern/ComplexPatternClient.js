@@ -2,7 +2,6 @@
 import { isIdleFrameSkippable } from '@/lib/performance';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import Link from 'next/link';
 
 import {
   Activity, AlertCircle, ArrowRight, ChevronRight, Crosshair,
@@ -799,35 +798,35 @@ export default function ComplexPatternClient() {
     <div className="min-h-screen bg-[#050508] text-white flex flex-col font-sans select-none">
       {/* ── MAIN CONTENT AREA ── */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
-        {/* Title */}
+        {/* Title & AIO Header */}
         {!isFullscreen && (
-          <div className="text-center">
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white uppercase">
-              Complex Pattern Pro
-              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
-                Pattern Memory Game
-              </span>
+          <div className="text-left">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+              Pattern memory game
             </h1>
+            <p className="text-sm text-slate-400 mt-1.5 leading-relaxed max-w-3xl">
+              A pattern memory game asks you to hold a route in mind and then reproduce it. Spatial layouts are held in a limited, separate store from verbal material &mdash; the visuospatial sketchpad of working memory (Baddeley &amp; Hitch, 1974) &mdash; and estimates of how much fits in it cluster around four items rather than the seven often quoted (Cowan, 2001). This drill scales to 8 waypoints over a 45-second session, so the later patterns are deliberately past most people&apos;s span.
+            </p>
           </div>
         )}
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 gap-2.5 max-w-2xl mx-auto w-full">
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
+          <div className="grid grid-cols-4 gap-2 w-full">
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Score</div>
               <div className="text-lg sm:text-xl font-black text-white tabular-nums">{uiScore}</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Time Left</div>
               <div className={`text-lg sm:text-xl font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>{uiTimeLeft}s</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Best Score</div>
               <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Combo</div>
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Best Combo</div>
               <div className="text-lg sm:text-xl font-black text-rose-400 tabular-nums">{bestCombo}x</div>
             </div>
           </div>
@@ -906,7 +905,7 @@ export default function ComplexPatternClient() {
             <FpsStartCard
               icon={GitBranch}
               accent="purple"
-              title="Complex Pattern Pro"
+              title="Pattern Memory Game"
               subtitle="Spatial Working Memory & Vector Tracing • 15 Levels"
               rules={[
                 { icon: Target, accent: 'purple', title: 'Memorize Vector Path', text: 'Study multi-node geometric pattern shown briefly on canvas' },
@@ -1023,60 +1022,49 @@ export default function ComplexPatternClient() {
 
             <DrillAccordion
               id="about"
-              title="About Complex Pattern Pro"
+              title="About Pattern Memory Game"
               isOpen={openAccordion === 'about'}
               onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
             >
-              <div className="space-y-4">
-                {ABOUT_TEXT.split('\n\n').map((para, i) => (
-                  <p key={i} className="text-sm leading-relaxed text-gray-300">{para}</p>
-                ))}
-              </div>
-            </DrillAccordion>
+              <div className="space-y-6">
+                <div className="space-y-3">
+                  <h3 className="text-base font-bold text-white flex items-center gap-2">
+                    <GitBranch className="w-4 h-4 text-purple-400" /> Spatial Working Memory &amp; Multi-Node Path Tracing
+                  </h3>
+                  <p className="text-sm leading-relaxed text-gray-300">
+                    The <strong>Pattern Memory Game</strong> tests spatial working memory, visual geometry retention, and fine motor vector reproduction under time pressure. Players study multi-node geometric paths flashed briefly on canvas and reproduce them accurately from memory.
+                  </p>
+                  <p className="text-sm leading-relaxed text-gray-300">
+                    Grounded in Alan Baddeley&apos;s (1974) visuospatial sketchpad model and Nelson Cowan&apos;s (2001) working memory capacity research, the drill stresses cognitive buffering limits. As difficulty rises to Level 15+, node counts scale from 3 up to 8 waypoints while memorization flash durations shorten to 0.6 seconds, training serial motor chunking (Lashley 1951) and precise trajectory execution (Woodworth 1899).
+                  </p>
+                </div>
 
-            <DrillAccordion
-              id="faq"
-              title="Frequently Asked Questions"
-              isOpen={openAccordion === 'faq'}
-              onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {FAQ_ITEMS.map((item, i) => (
-                  <div key={i} className="bg-[#05060b] border border-gray-800 rounded-xl p-5">
-                    <h4 className="text-sm font-bold text-gray-200 mb-2">{item.q}</h4>
-                    <p className="text-xs text-gray-400 leading-relaxed">{item.a}</p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
+                    <div className="flex items-center gap-2.5 mb-2">
+                      <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
+                      <h4 className="text-xs font-bold text-white">Target Audience</h4>
+                    </div>
+                    <p className="text-xs text-gray-300 leading-relaxed">Gamers mastering recoil compensation patterns, digital artists training freehand vector confidence, and cognitive athletes expanding spatial working memory.</p>
                   </div>
-                ))}
+                  <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
+                    <div className="flex items-center gap-2.5 mb-2">
+                      <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
+                      <h4 className="text-xs font-bold text-white">Cognitive Benefits</h4>
+                    </div>
+                    <p className="text-xs text-gray-300 leading-relaxed">Visuospatial memory retention, mental angle manipulation, serial motor sequencing, and rapid gesture reproduction speed.</p>
+                  </div>
+                  <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
+                    <div className="flex items-center gap-2.5 mb-2">
+                      <div className="w-7 h-7 rounded-lg bg-purple-600 flex items-center justify-center"><Activity className="w-3.5 h-3.5 text-white" /></div>
+                      <h4 className="text-xs font-bold text-white">Adaptive Geometry</h4>
+                    </div>
+                    <p className="text-xs text-gray-300 leading-relaxed">Waypoints scale dynamically from 3 to 8 vertices, introducing acute hairpins, multi-axis loops, and rapid flash presentations.</p>
+                  </div>
+                </div>
               </div>
             </DrillAccordion>
           </div>
-        )}
-
-        {/* ── RELATED PHYSICAL & REFLEX DRILLS ── */}
-        {!isFullscreen && (
-          <section className="mt-4">
-            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3 font-sans">
-              Related Physical &amp; Reflex Drills
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {RELATED_DRILLS.map((drill) => (
-                <Link
-                  key={drill.id}
-                  href={drill.href}
-                  className="group bg-[#0c0c16] border border-white/5 hover:border-purple-500/40 rounded-xl p-3.5 transition-all duration-200 hover:-translate-y-0.5 flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="text-[10px] font-bold text-purple-400 uppercase tracking-wider mb-1">{drill.cat}</div>
-                    <div className="text-xs font-bold text-white group-hover:text-purple-300 transition-colors">{drill.name}</div>
-                    <div className="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">{drill.desc}</div>
-                  </div>
-                  <div className="text-[10px] font-bold text-slate-500 group-hover:text-purple-400 mt-3 flex items-center gap-1 transition-colors">
-                    Train Drill <span>→</span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
         )}
 
         {/* ── FOOTER ── */}

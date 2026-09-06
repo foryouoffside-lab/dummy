@@ -1,19 +1,7 @@
 import ReactionSpeedDrillsClient from './ReactionSpeedDrillsClient';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 
-// ============================================================
-// SEO RESEARCH FINDINGS — reaction-speed category hub
-// PRIMARY: "reaction time test" ~90,500/mo US, KD ~45% (High volume)
-//          "reaction speed training" ~880/mo US, KD ~30%
-// SECONDARY / LSI:
-//   "reflex training"                 ~480/mo,   KD ~25%
-//   "reflex test online"              ~590/mo,   KD ~15%
-//   "click speed test"                ~49,500/mo, KD ~55%
-//   "hand eye coordination test"      ~2,400/mo, KD ~22%
-//   "gaming reflex trainer"           ~170/mo,   KD ~15%
-// Key entities: simple reaction time, choice reaction time, foveal pursuit,
-//   saccadic sweeps, target acquisition, millisecond latency, neuroplasticity
-// ============================================================
+
 
 export const metadata = {
   title: 'Reaction Training Drills - Free Reflex Speed Practice',
@@ -80,11 +68,11 @@ const collectionPageSchema = {
     { "@type": "WebApplication", "name": "Reaction Time Test", "url": "https://skilldrills.online/drills/reaction-speed/reaction-time-test" },
     { "@type": "WebApplication", "name": "Reaction Game", "url": "https://skilldrills.online/drills/reaction-speed/reaction-game" },
     { "@type": "WebApplication", "name": "Reflex Training Drill", "url": "https://skilldrills.online/drills/reaction-speed/reflex-training-drill" },
-    { "@type": "WebApplication", "name": "Saccadic Gallery (Eye Exercises)", "url": "https://skilldrills.online/drills/reaction-speed/saccadic-gallery" },
+    { "@type": "WebApplication", "name": "Saccadic Eye Exercises", "url": "https://skilldrills.online/drills/reaction-speed/saccadic-gallery" },
     { "@type": "WebApplication", "name": "Visual Tracking Speed Test", "url": "https://skilldrills.online/drills/reaction-speed/visual-tracking-speed-test" },
-    { "@type": "WebApplication", "name": "Aim Tracking Trainer (FPS Tracking)", "url": "https://skilldrills.online/drills/reaction-speed/fps-tracking-trainer" },
-    { "@type": "WebApplication", "name": "Cover Peeking Reflex Drill (Barrier sequence)", "url": "https://skilldrills.online/drills/reaction-speed/barrier-sequence-pursuit" },
-    { "@type": "WebApplication", "name": "Corner Checking Trainer (Market doors)", "url": "https://skilldrills.online/drills/reaction-speed/market-doors-pursuit" }
+    { "@type": "WebApplication", "name": "FPS Tracking Trainer", "url": "https://skilldrills.online/drills/reaction-speed/fps-tracking-trainer" },
+    { "@type": "WebApplication", "name": "Jiggle Peek Trainer", "url": "https://skilldrills.online/drills/reaction-speed/barrier-sequence-pursuit" },
+    { "@type": "WebApplication", "name": "Corner Checking Trainer", "url": "https://skilldrills.online/drills/reaction-speed/market-doors-pursuit" }
   ]
 };
 

@@ -8,7 +8,7 @@ import { ImageResponse } from 'next/og';
 // Satori (the renderer behind ImageResponse) supports FLEXBOX ONLY — no CSS grid,
 // and every element with more than one child needs an explicit `display: flex`.
 
-export const alt = 'Zig-Zag Path Pursuit — free browser Visual Tracking drill on SkillDrills';
+export const alt = 'Zig-Zag Path Pursuit — Eye Tracking Coordination Drill | SkillDrills';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -94,7 +94,7 @@ export default async function Image() {
               maxWidth: 980,
             }}
           >
-            {"Track target movements along a visible multi-segment zig-zag guide path."}
+            {"Track target movements along a dynamic zig-zag vector path to condition smooth pursuit coordination."}
           </div>
         </div>
 

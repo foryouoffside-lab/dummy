@@ -5,8 +5,8 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 
 import {
-  AlertCircle, Brain, Crosshair, Flame,
-  Target, TrendingUp, Trophy, Volume2, VolumeX,
+  AlertCircle, Brain, Crosshair,
+  Target, TrendingUp, Volume2, VolumeX,
   Zap, ZapOff, Users
 } from 'lucide-react';
 
@@ -77,21 +77,11 @@ const getLevelConfig = (level, combo = 0) => {
 // ============================================================
 const RULES_ITEMS = [
   { title: "Successful Hit (+100 PTS)", text: "Chain hits to build score and combo multiplier up to 3.0x max." },
-  { title: "180° Edge Spawns & Streak Heat", text: "Targets spawn at extreme left/right edges, shrinking & speeding up as your streak grows." }
+  { title: "180° Edge Spawns & Streak Heat", text: "Targets spawn at extreme left/right edges, shrinking & speeding up as your streak grows." },
+  { title: "Miss / Timeout", text: "Missing a target or letting one time out resets your combo streak. If the time penalty is enabled in settings, it also costs you 0.8 seconds." }
 ];
 
-const FAQ_ITEMS = [
-  { q: "What is FPS awareness training?", a: "FPS awareness training involves specific drills designed to improve your ability to detect, process, and react to peripheral visual information and unexpected threats in a 3D gaming environment." },
-  { q: "How do professional FPS players and esports pros improve awareness?", a: "Pros utilize a mix of VOD reviews, dedicated aim trainers with wide field-of-view scenarios, and 180-degree flick drills to build unconscious competence in spatial mapping — the same skill many esports organizations train to maintain peak mechanical performance." },
-  { q: "Can awareness drills improve reaction time?", a: "Yes, by repeatedly exposing the brain to peripheral stimuli, visual processing speed increases, reducing the cognitive load required to react to flanking enemies." },
-  { q: "How does peripheral vision training help in FPS games?", a: "Strong peripheral vision lets you notice subtle movements or pixel changes at the edge of your screen without taking your crosshair off your primary angle. Playing with an ultra-wide field of view (FOV) in-game and drilling edge-of-screen spawns like this trainer both reinforce that skill." },
-  { q: "How do I stop getting flanked in FPS games?", a: "Improving spatial audio processing and training high-speed 180-degree turnaround flicks will allow you to quickly neutralize flankers before they secure the kill." },
-  { q: "What is situational awareness in gaming?", a: "Situational awareness is the holistic understanding of game state, audio cues, minimap information, and peripheral visual data to anticipate enemy actions." },
-  { q: "Does this drill help with CS2, Valorant, and other FPS games?", a: "Yes. In Valorant, quick target acquisition and reacting to utility or flashes off-screen is critical, and in CS2 flicking to an unexpected target on the edge of your monitor can win clutch rounds. Fast-paced shooters like Apex Legends, Overwatch 2, and Call of Duty benefit the same way." },
-  { q: "How often should I train 180° awareness?", a: "For optimal results, implement 10-15 minutes of awareness and wide-flick training into your daily warmup routine before queuing competitive matches." },
-  { q: "What skills does this drill improve?", a: "It targets peripheral detection, audio-spatial translation, saccadic eye movement, large-angle mouse flick consistency, and target acquisition speed as shrinking targets spawn across a wider horizontal plane under time pressure." },
-  { q: "Is this awareness trainer free, and do I need to sign up?", a: "Yes, this drill is completely free and runs directly in your browser with 1:1 hardware raw input — no registration required." }
-];
+
 
 const RELATED_DRILLS = [
   { id: "flick-shot-training", name: "Pro Flick Trainer", cat: "FPS Flicking", desc: "Snap to targets in time-attack mode with precision flicking.", href: "/drills/fps/flick-shot-training" },
@@ -700,34 +690,34 @@ export default function AwarenessDrillClient() {
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
         {/* Title */}
         {!isFullscreen && (
-          <div className="text-center">
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              180° AWARENESS PRO
-              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
-                180° Snap Turn Aim Trainer
-              </span>
+          <div className="text-left w-full">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white mb-2">
+              180° Awareness Pro
             </h1>
+            <p className="text-xs sm:text-sm text-slate-400 max-w-3xl leading-relaxed">
+              A 180&deg; turn is the longest mouse movement in a shooter. Under Fitts&rsquo;s law the time it takes scales with how far you move and how small the target is (Fitts, 1954) &mdash; so most of the cost is not the turn itself, it is reacquiring the target once you land.
+            </p>
           </div>
         )}
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 gap-2.5 max-w-2xl mx-auto w-full">
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+          <div className="grid grid-cols-4 gap-2 w-full">
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
-              <div className="text-lg sm:text-xl font-black text-white tabular-nums">{uiScore}</div>
+              <div className="text-base sm:text-lg font-black text-white tabular-nums">{uiScore}</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
-              <div className={`text-lg sm:text-xl font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>{uiTimeLeft}s</div>
+              <div className={`text-base sm:text-lg font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>{uiTimeLeft}s</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Accuracy</div>
-              <div className="text-lg sm:text-xl font-black text-blue-400 tabular-nums">{accuracy}%</div>
+              <div className="text-base sm:text-lg font-black text-blue-400 tabular-nums">{accuracy}%</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
-              <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
+              <div className="text-base sm:text-lg font-black text-amber-400 tabular-nums">{bestScore}</div>
             </div>
           </div>
         )}
@@ -826,15 +816,6 @@ export default function AwarenessDrillClient() {
               accent="emerald"
               title="180° Awareness Pro"
               subtitle="Hardware Raw Input • Endless Level Progression"
-              rules={[
-                { icon: Zap, accent: 'emerald', title: 'Hit Targets (+100 PTS)', text: 'Chain hits to build score and combo up to 3.0x' },
-                { icon: AlertCircle, accent: 'red', title: 'Failure Rule', text: penaltyEnabled ? 'Miss / Timeout → Combo Reset, -0.8s' : 'Miss / Timeout → Combo Reset' },
-              ]}
-              stats={[
-                { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
-                { icon: Flame, label: 'Best Combo', value: `${bestCombo}x`, color: 'text-emerald-400', accent: 'emerald' },
-                { icon: TrendingUp, label: 'Best Level', value: `Lv. ${bestLevel}`, color: 'text-blue-400', accent: 'blue' },
-              ]}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
             />
@@ -893,9 +874,9 @@ export default function AwarenessDrillClient() {
             >
               <div className="space-y-8">
                 <section>
-                  <h4 className="text-base font-bold text-white mb-2 flex items-center gap-2">
+                  <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
                     <Brain className="w-4 h-4 text-red-400" /> What Is 180° Awareness Training?
-                  </h4>
+                  </h3>
                   <p className="text-sm leading-relaxed mb-3 text-gray-300">
                     <strong>180° Awareness Pro</strong> isolates and exercises your ability to process visual information outside of your immediate focal point. Unlike standard aim trainers that prioritize micro-corrections, this awareness drill challenges spatial coordinate sweeps, forcing you to detect targets and execute rapid 180-degree turnarounds.
                   </p>
@@ -908,41 +889,25 @@ export default function AwarenessDrillClient() {
                   <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Who Should Use This?</h5>
+                      <h4 className="text-xs font-bold text-white">Who Should Use This?</h4>
                     </div>
                     <p className="text-xs text-gray-300 leading-relaxed">FPS gamers who keep getting flanked, CS2 & Valorant players building clutch-round reflexes, and esports competitors sharpening blind-flick consistency.</p>
                   </div>
                   <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Skills Improved</h5>
+                      <h4 className="text-xs font-bold text-white">Skills Improved</h4>
                     </div>
                     <p className="text-xs text-gray-300 leading-relaxed">Peripheral detection, audio-spatial translation, saccadic eye movement, large-angle flick consistency, and target acquisition speed.</p>
                   </div>
                   <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-purple-600 flex items-center justify-center"><Zap className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">180° Flick Consistency</h5>
+                      <h4 className="text-xs font-bold text-white">180° Flick Consistency</h4>
                     </div>
                     <p className="text-xs text-gray-300 leading-relaxed">Chain rapid full-turn snaps onto shrinking, edge-spawning targets to build the muscle memory for clean blind flicks under pressure.</p>
                   </div>
                 </div>
-              </div>
-            </DrillAccordion>
-
-            <DrillAccordion
-              id="faq"
-              title="Frequently Asked Questions"
-              isOpen={openAccordion === 'faq'}
-              onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {FAQ_ITEMS.map((item, i) => (
-                  <div key={i} className="bg-[#05060b] border border-gray-800 rounded-xl p-5">
-                    <h4 className="text-sm font-bold text-gray-200 mb-2">{item.q}</h4>
-                    <p className="text-xs text-gray-400 leading-relaxed">{item.a}</p>
-                  </div>
-                ))}
               </div>
             </DrillAccordion>
           </div>

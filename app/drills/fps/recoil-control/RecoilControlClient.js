@@ -110,23 +110,6 @@ const ABOUT_SECTIONS = [
   }
 ];
 
-const FAQ_ITEMS = [
-  { q: "What is recoil control?", a: "Recoil control is the mechanical compensation players perform by moving their mouse in the exact opposite direction of a weapon's automatic firing kickback to keep bullet placement accurate." },
-  { q: "How do I control recoil in CS2?", a: "In CS2, weapons like the AK-47 have set spray patterns. You must pull down your mouse for the first 10 bullets, then drift it left and right in a mirror shape of the spray pattern." },
-  { q: "How do I improve spray control?", a: "You can improve spray control by practicing to slowly build the muscle memory to counter-steer the movement of the weapon accurately." },
-  { q: "What is spray pattern training?", a: "Spray pattern training involves memorizing the exact offset path of bullets during sustained automatic fire and practicing the reverse path to hold a tight cluster." },
-  { q: "How often should I practice recoil control?", a: "Daily practice of 5 to 10 minutes before launching competitive matches is highly recommended to build and maintain weapon control muscle memory." },
-  { q: "How are errors penalised in Recoil Control Pro?", a: "Missing shots or emptying a magazine with less than 40% accuracy resets your combo streak. When the optional Time Penalty setting is enabled, a magazine discipline failure also deducts 0.6s from your clock." },
-  { q: "Does this help Valorant players?", a: "Yes, Valorant weapons like the Vandal have vertical recoil for the first few shots, followed by horizontal sway. Training spray control helps you manage the early vertical climb and control bursts." },
-  { q: "Does this help CS2 players?", a: "Yes, CS2 has fixed spray patterns, making recoil control training extremely effective as the patterns can be memorized and executed perfectly with practice." },
-  { q: "What is recoil compensation?", a: "Recoil compensation is the physical mouse pull-down and horizontal counter-steering done by players to keep their crosshair aligned on the target despite weapon climb." },
-  { q: "Why do my bullets spread?", a: "Bullets spread due to a combination of recoil (the predictable path the gun kicks) and inaccuracy bloom (the random spread deviation caused by movement or sustained fire)." },
-  { q: "How do professional players control recoil?", a: "Professional players rely on deeply ingrained muscle memory to instantly pull their mouse down and sway left-to-right at precise intervals based on the weapon they are firing." },
-  { q: "What is spray transfer training?", a: "Spray transfer training is the advanced skill of shifting your spray from one target to another while maintaining continuous automatic fire, adjusting for the active recoil offsets." },
-  { q: "Can recoil control improve consistency?", a: "Yes, knowing how to control your spray means you don't have to rely entirely on single-tap headshots, giving you a reliable backup option in close-to-medium range fights." },
-  { q: "Is this recoil trainer free?", a: "Yes, this Recoil Control Trainer is 100% free, runs in any modern web browser, and does not require downloads or sign-ups." },
-  { q: "What skills does this drill improve?", a: "It improves mouse pull-down timing, spray discipline, weapon pattern familiarity, horizontal control, and physical muscle memory." }
-];
 
 const RELATED_DRILLS = [
   { id: "target-acquisition", name: "Target Acquisition Pro", cat: "FPS Precision", desc: "Master visual discrimination and threat selection under pressure.", href: "/drills/fps/target-acquisition" },
@@ -798,34 +781,36 @@ export default function RecoilControlClient() {
     <div className="min-h-screen select-none bg-[#050508] text-white font-sans">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 font-sans">
         
-        {/* CENTERED PAGE HEADING */}
+        {/* Title */}
         {!isFullscreen && (
-          <h1 className="text-2xl sm:text-3xl font-black text-center text-white tracking-tight font-sans">
-            Recoil Control Pro
-            <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
+          <div className="text-left">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white mb-2">
               Recoil Control Trainer
-            </span>
-          </h1>
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-400 max-w-3xl leading-relaxed">
+              Recoil control is a learned open-loop motor program: the spray pattern is fixed, so you can run the counter-movement without waiting to see where the bullets land. Motor output gets more variable as a movement gets faster and more forceful (Schmidt et al., 1979), which is why a smooth pull-down repeats better than a hard one.
+            </p>
+          </div>
         )}
 
         {/* 4-STAT CARD ROW */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 gap-2.5 max-w-2xl mx-auto w-full">
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
-              <div className="text-lg sm:text-xl font-black text-white tabular-nums">{uiScore}</div>
+          <div className="grid grid-cols-4 gap-2 w-full">
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
+              <div className="text-[10px] uppercase font-semibold text-slate-400 tracking-wider">Score</div>
+              <div className="text-base sm:text-xl font-bold text-white tabular-nums">{uiScore}</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
-              <div className={`text-lg sm:text-xl font-black tabular-nums ${uiTimeLeft <= 10 ? "text-red-400 animate-pulse" : "text-white"}`}>{uiTimeLeft}s</div>
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
+              <div className="text-[10px] uppercase font-semibold text-slate-400 tracking-wider">Time</div>
+              <div className={`text-base sm:text-xl font-bold tabular-nums ${uiTimeLeft <= 10 ? "text-red-400 animate-pulse" : "text-white"}`}>{uiTimeLeft}s</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Accuracy</div>
-              <div className="text-lg sm:text-xl font-black text-red-400 tabular-nums">{accuracy}%</div>
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
+              <div className="text-[10px] uppercase font-semibold text-slate-400 tracking-wider">Accuracy</div>
+              <div className="text-base sm:text-xl font-bold text-red-400 tabular-nums">{accuracy}%</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
-              <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
+              <div className="text-[10px] uppercase font-semibold text-slate-400 tracking-wider">Best Score</div>
+              <div className="text-base sm:text-xl font-bold text-amber-400 tabular-nums">{bestScore}</div>
             </div>
           </div>
         )}
@@ -998,15 +983,15 @@ export default function RecoilControlClient() {
 
             <DrillAccordion
               id="about"
-              title="About Recoil Control"
+              title="About Recoil Control Trainer"
               isOpen={openAccordion === 'about'}
               onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
             >
               <div className="space-y-8 font-sans">
                 <section>
-                  <h4 className="text-base font-bold text-white mb-2 flex items-center gap-2">
+                  <h3 className="text-sm font-bold text-white mb-2 flex items-center gap-2">
                     <Crosshair className="w-4 h-4 text-red-400" /> Why Recoil Control Matters
-                  </h4>
+                  </h3>
                   {ABOUT_INTRO.map((para, i) => (
                     <p key={i} className={`text-sm leading-relaxed text-gray-300 ${i < ABOUT_INTRO.length - 1 ? "mb-3" : ""}`}>{para}</p>
                   ))}
@@ -1019,7 +1004,7 @@ export default function RecoilControlClient() {
                         <div className={`w-7 h-7 rounded-lg ${card.iconBg} flex items-center justify-center`}>
                           <card.icon className="w-3.5 h-3.5 text-white" />
                         </div>
-                        <h5 className="text-xs font-bold text-white">{card.title}</h5>
+                        <h4 className="text-xs font-bold text-white">{card.title}</h4>
                       </div>
                       <p className="text-xs text-gray-300 leading-relaxed">{card.text}</p>
                     </div>
@@ -1028,29 +1013,13 @@ export default function RecoilControlClient() {
 
                 {ABOUT_SECTIONS.map((section, i) => (
                   <section key={i}>
-                    <h4 className="text-base font-bold text-white mb-2 flex items-center gap-2">
+                    <h3 className="text-sm font-bold text-white mb-2 flex items-center gap-2">
                       <section.icon className="w-4 h-4 text-red-400" /> {section.title}
-                    </h4>
+                    </h3>
                     {section.paragraphs.map((para, j) => (
                       <p key={j} className={`text-sm leading-relaxed text-gray-300 ${j < section.paragraphs.length - 1 ? "mb-3" : ""}`}>{para}</p>
                     ))}
                   </section>
-                ))}
-              </div>
-            </DrillAccordion>
-
-            <DrillAccordion
-              id="faq"
-              title="Frequently Asked Questions"
-              isOpen={openAccordion === 'faq'}
-              onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-sans">
-                {FAQ_ITEMS.map((item, i) => (
-                  <div key={i} className="bg-[#05060b] border border-gray-800 rounded-xl p-5 hover:border-gray-700 transition-colors font-sans">
-                    <h4 className="text-sm font-bold text-gray-200 mb-2">{item.q}</h4>
-                    <p className="text-xs text-gray-200 leading-relaxed">{item.a}</p>
-                  </div>
                 ))}
               </div>
             </DrillAccordion>

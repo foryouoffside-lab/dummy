@@ -1,6 +1,7 @@
 import ReflexTrainingDrillWrapper from './ReflexTrainingDrillWrapper';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 import DrillGuide from '@/components/drill/DrillGuide';
+import { pickSources } from '@/lib/drillSources';
 
 // ============================================================
 // SEO RESEARCH FINDINGS — reflex-training-drill
@@ -72,7 +73,8 @@ const webAppSchema = {
   "author": { "@type": "Organization", "name": "SkillDrills", "url": "https://skilldrills.online" },
   "isAccessibleForFree": true,
   "learningResourceType": "Educational Game",
-  "teaches": "Reflex Training, Divided Attention, Multi-Target Acquisition, Hand-Eye Coordination, Reflex Response"
+  "teaches": "Reflex Training, Divided Attention, Multi-Target Acquisition, Hand-Eye Coordination, Reflex Response",
+  "dateModified": "2026-09-05"
 };
 
 const educationalSchema = {
@@ -81,7 +83,8 @@ const educationalSchema = {
   "name": "Reflex Training Drill (Multi-Target Burst Trainer)",
   "description": "Isolates and trains simultaneous multi-target acquisition, divided attention, motor reaction speed, and hand-eye alignment.",
   "applicationCategory": "EducationalGame",
-  "operatingSystem": "Web Browser"
+  "operatingSystem": "Web Browser",
+  "dateModified": "2026-09-05"
 };
 
 const howToSchema = {
@@ -120,37 +123,86 @@ const howToSchema = {
 const faqSchema = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
+  "dateModified": "2026-09-05",
   "mainEntity": [
     {
       "@type": "Question",
-      "name": "Can you train divided attention and multi-target reflexes?",
+      "name": "What is a reflex training drill?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes. Repeated exposure to simultaneous stimuli strengthens parallel visual processing and reduces the tunnel-vision effect of fixating on one target."
+        "text": "A reflex training drill is an interactive cognitive and motor exercise designed to condition rapid visual detection, spatial processing, and physical reaction speed against unexpected visual stimuli."
       }
     },
     {
       "@type": "Question",
-      "name": "How does this drill differ from single-target reaction tests?",
+      "name": "Can you actually train your reflexes?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Single-target tests present one stimulus at a time. This drill spawns 2 to 5 targets simultaneously, so you must scan and clear a full burst under a shared time limit."
+        "text": "Yes. While innate peripheral nerve conduction velocity is largely biological, systematic reaction training drastically reduces central cognitive latency—specifically stimulus recognition, visual spatial indexing, and motor response selection (Donders, 1868)."
       }
     },
     {
       "@type": "Question",
-      "name": "Which target should I clear first in a burst?",
+      "name": "What is choice reaction time vs simple reaction time?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Watch the depleting countdown ring around each target and prioritize whichever is closest to timing out, not just the nearest one to your cursor."
+        "text": "Simple reaction time (SRT) involves reacting to a single predictable stimulus with a single predetermined response (~180–220 ms). Choice reaction time (CRT) presents multiple possible stimuli or response options, requiring visual discrimination and cognitive decision-making, which adds 50 to 150 ms of processing delay."
       }
     },
     {
       "@type": "Question",
-      "name": "What is a good score on this drill?",
+      "name": "How does Hick\'s Law affect reaction speed?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "A score above 5,000 indicates strong divided-attention reflexes, while scores exceeding 10,000 represent elite multi-target acquisition speed."
+        "text": "Hick\'s Law (Hick, 1952; Hyman, 1953) states that reaction time increases logarithmically as the number of alternative choices increases: RT = a + b * log2(n + 1). In multi-target drills, training enables players to chunk visual space and compress this decision latency."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is divided attention in gaming?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Divided attention is the cognitive ability to monitor and process multiple simultaneous visual inputs across wide angles of view without falling into tunnel vision. According to Broadbent's filter model (1958), practice expands visual-spatial bandwidth and accelerates attentional filter switching."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do you practice multi-target acquisition?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Prioritize targets closest to expiration rather than randomly clicking nearest nodes. Mentally trace the shortest geometrical path connecting the cluster and practice decisive, non-oscillating stopping motions on each target."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why do my reflexes feel slow in fast-paced games?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Slowed in-game reflexes typically stem from cognitive overload, high muscle tension, or the Psychological Refractory Period (Welford, 1952), where processing a preceding visual event temporarily delays responses to subsequent stimuli appearing within 300 ms."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does monitor refresh rate affect reflex performance?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Display refresh rate directly quantizes visual presentation. Standard 60 Hz displays introduce ~16.7 ms frame intervals, whereas 240 Hz monitors reduce frame intervals to ~4.1 ms, eliminating visual latency and motion blur to expose target appearances earlier (Woods et al., 2015)."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How long should you practice reflex drills each day?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "10 to 20 minutes of high-intensity, deliberate burst drills per day provides optimal neurological adaptation without central nervous system exhaustion or tendon strain."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is this reflex training drill free to play?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. SkillDrills' Reflex Training Drill is 100% free, runs client-side directly in your browser with zero downloads or registration, and timestamps every event with the High Resolution Time API (performance.now()). Note that browser clocks are deliberately coarsened for security, so treat differences smaller than about 5 ms as measurement noise rather than a real change in your speed."
       }
     }
   ]
@@ -160,19 +212,21 @@ const reflexDrillGuide = {
   heading: "Reflex Training Drill Guide: Conditioning Multi-Target Acquisition & Burst Reaction Speed",
   intro: [
     "A reflex training drill bridges the gap between simple reaction time (reacting to a single predictable flash) and choice reaction time in complex environments. In high-stakes gaming and fast-paced sports, you are rarely presented with one lone stimulus. Instead, multiple threats appear concurrently across wide visual angles, requiring you to triage targets and clear them rapidly.",
-    "This burst reflex drill trains your neurological visual-spatial processing speed. By flashing clusters of targets that must be cleared before their expiration window closes, it forces your motor system to sequence rapid acquisitions without second-guessing or hesitation."
+    "Mental chronometry research established by Donders (1868) classifies reactions into Simple Reaction Time (Type A) and Choice Reaction Time (Type B), which requires stimulus discrimination and response selection. Under the Hick-Hyman Law (Hick, 1952; Hyman, 1953), choice latency increases logarithmically with the number of alternative stimuli presented. Broadbent (1958) and Kahneman (1973) demonstrated that human divided attention operates through limited-capacity perceptual channels, while Welford (1952) identified the Psychological Refractory Period (PRP)—a neurological bottleneck that delays processing of secondary stimuli appearing within 300 ms of an initial event.",
+    "This drill executes client-side using the HTML5 Canvas 2D API and the browser's requestAnimationFrame loop. High-precision event timestamps are recorded using the High Resolution Time API (performance.now()). Browser timer resolution is deliberately coarsened as a Spectre mitigation -- typically to about 1 ms in current browsers -- and display refresh adds its own quantization: ~16.7 ms per frame at 60 Hz, ~6.9 ms at 144 Hz and ~4.1 ms at 240 Hz (Woods et al., 2015). Mouse polling contributes a further ~8 ms at 125 Hz versus ~1 ms at 1000 Hz. In practice that means this drill resolves real differences of roughly 5 ms and upward; anything finer is noise, not progress. This burst reflex drill trains your neurological visual-spatial processing speed by challenging you to clear simultaneous target clusters under active countdown decay.",
+    "How this is measured: every event is timestamped with the browser's performance.now() high-resolution clock, entirely on your device -- no score is uploaded. Two things this cannot control: browser timers are deliberately coarsened as a Spectre mitigation (typically to about 1 ms), and your display quantizes the stimulus to its refresh interval -- about 16.7 ms per frame at 60 Hz, 6.9 ms at 144 Hz and 4.1 ms at 240 Hz (Woods et al., 2015). Mouse polling adds roughly 8 ms at 125 Hz versus 1 ms at 1000 Hz. So treat differences smaller than about 5 ms as measurement noise, and compare your own runs on the same hardware rather than against someone else's setup."
   ],
   benchmarks: {
     title: "Burst Reflex Acquisition Reference Tiers",
-    headers: ["Target Clear Speed", "Performance Tier", "Target Accuracy", "Cognitive Profile", "Recommended Drill Focus"],
+    headers: ["Average Clear Latency", "Performance Tier", "Choice Latency Profile", "Cognitive Characteristics", "Recommended Drill Focus"],
     rows: [
-      ["< 220 ms / target", "Godlike / Apex", "98%+", "Near-instantaneous spatial clustering and robotic flick-stop mechanics", "Push burst density to maximum targets"],
-      ["220 – 280 ms / target", "Master / Elite", "92% – 97%", "Exceptional divided attention; fluid eye-to-hand target switching", "Minimize reset delay between consecutive clicks"],
-      ["281 – 350 ms / target", "Advanced Competitor", "85% – 91%", "Sharp reflexes on initial targets; slight hesitation on outer cluster edges", "Practice wider eye sweeps to spot outer targets earlier"],
-      ["351 – 440 ms / target", "Intermediate", "75% – 84%", "Solid single-target speed; cognitive overload during dense bursts", "Triage targets by proximity: clear nearest targets first"],
-      ["> 440 ms / target", "Developing", "< 75%", "Visual panic during bursts; frequent misses from rushing clicks", "Focus on clean precision before ramping up acquisition pace"]
+      ["< 250 ms / target", "Apex / Pro", "Sub-threshold choice delay", "Near-instantaneous spatial clustering with minimal Hick\'s Law penalty", "Maximize concurrent burst density"],
+      ["250 – 320 ms / target", "Elite", "Compressed decision latency", "Rapid target triage; fluid inter-target saccadic transit", "Minimize dwell time between consecutive clicks"],
+      ["321 – 400 ms / target", "Advanced Competitor", "Typical multi-alternative CRT", "Sharp initial target acquisition with mild hesitation on cluster extremes", "Expand peripheral scanning arc to detect outer nodes earlier"],
+      ["401 – 500 ms / target", "Intermediate", "Elevated cognitive overhead", "Solid single-target reflex; brief processing freeze on dense bursts", "Triage targets by expiration countdown first"],
+      ["> 500 ms / target", "Developing", "High decision delay", "Susceptible to PRP bottleneck and visual search hesitation", "Focus on clean geometric pathing before ramping up speed"]
     ],
-    note: "These acquisition speed brackets are an editorial reference guide. Hardware input latency, mouse DPI, and monitor refresh rate impact recorded milliseconds."
+    note: "These clear latency tiers represent an editorial reference guide grounded in human choice reaction chronometry (Donders, 1868; Hick, 1952). Hardware input latency, mouse DPI, and monitor refresh rate impact recorded milliseconds."
   },
   techniques: {
     title: "Multi-Target Reflex Optimization",
@@ -208,10 +262,13 @@ const reflexDrillGuide = {
   ],
   audience: "Tactical shooter players (Valorant, CS2, R6 Siege), battle royale competitors, esports athletes, martial artists, and anyone training rapid multi-stimulus reflexes.",
   faqs: faqSchema.mainEntity.map(e => ({ q: e.name, a: e.acceptedAnswer.text })),
+  // Works named in this page's copy, with DOIs so a reader or an answer
+  // engine can check the figures rather than take them on trust.
+  sources: pickSources('donders1969', 'hick1952', 'hyman1953', 'welford1952', 'woods2015'),
   related: [
     { href: "/drills/reaction-speed/reaction-time-test", label: "Reaction Time Test" },
     { href: "/drills/reaction-speed/reaction-game", label: "Reaction Game" },
-    { href: "/drills/reaction-speed/saccadic-gallery", label: "Saccadic Gallery" },
+    { href: "/drills/reaction-speed/saccadic-gallery", label: "Saccadic Eye Exercises" },
     { href: "/drills/reaction-speed/fps-tracking-trainer", label: "FPS Tracking Trainer" }
   ]
 };

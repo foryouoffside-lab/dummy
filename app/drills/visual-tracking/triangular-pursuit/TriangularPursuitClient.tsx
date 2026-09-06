@@ -6,7 +6,6 @@ import { Play, RefreshCw, Timer, Share2, LogOut, Check, Sun, Moon, Volume2, Volu
 
 import DrillFooter from '../../../../components/drill/DrillFooter';
 import DrillCountdown from '../../../../components/drill/DrillCountdown';
-import DrillAccordion from '../../../../components/drill/DrillAccordion';
 import ZigZagPathPursuitStartCard from '../../../../components/drill/ZigZagPathPursuitStartCard';
 import { drillAudio } from '../../../../lib/drillAudio';
 import { drawTacticalTarget } from '../../../../lib/canvasFx';
@@ -18,12 +17,12 @@ import useImmersiveMode from '@/lib/useImmersiveMode';
 const STORAGE_KEY = 'skilldrills_visual_tracking_triangular_pursuit_v2';
 
 const RELATED_DRILLS = [
-  { id: "constant-slow-pursuit", name: "Constant Slow Pursuit", cat: "Visual Tracking", desc: "Condition smooth pursuit tracking along continuous Lissajous curves.", href: "/drills/visual-tracking/constant-slow-pursuit" },
-  { id: "directional-chaos-pursuit", name: "Directional Chaos Pursuit", cat: "Visual Tracking", desc: "Complex multi-directional visual tracking with sudden direction shifts.", href: "/drills/visual-tracking/directional-chaos-pursuit" },
-  { id: "dynamic-evasion-pursuit", name: "Dynamic Evasion Pursuit", cat: "Visual Tracking", desc: "Re-acquire targets executing rapid evasive directional changes.", href: "/drills/visual-tracking/dynamic-evasion-pursuit" },
-  { id: "180-degree-awareness", name: "180° Awareness Pro", cat: "FPS Awareness", desc: "Master 180-degree snap turn awareness for CS2 & Valorant.", href: "/drills/fps/180-degree-awareness" },
-  { id: "strafe-tracking", name: "Strafe Tracking", cat: "FPS Tracking", desc: "Smooth pursuit tracking against erratic horizontal targets.", href: "/drills/fps/strafe-tracking" },
-  { id: "recoil-control", name: "Recoil Control", cat: "FPS Recoil", desc: "Calibrate pulling pattern compensation for weapons.", href: "/drills/fps/recoil-control" }
+  { id: "constant-slow-pursuit", name: "Smooth Pursuit Eye Exercise", cat: "Visual Tracking", desc: "Condition smooth pursuit tracking along continuous Lissajous curves.", href: "/drills/visual-tracking/constant-slow-pursuit" },
+  { id: "directional-chaos-pursuit", name: "Erratic Motion Eye Drill", cat: "Visual Tracking", desc: "Complex multi-directional visual tracking with sudden direction shifts.", href: "/drills/visual-tracking/directional-chaos-pursuit" },
+  { id: "dynamic-evasion-pursuit", name: "Reactive Eye Tracking Drill", cat: "Visual Tracking", desc: "Re-acquire targets executing rapid evasive directional changes.", href: "/drills/visual-tracking/dynamic-evasion-pursuit" },
+  { id: "split-screen-tracking", name: "Divided Attention Eye Test", cat: "Visual Tracking", desc: "Condition divided attention across dual independent movement planes.", href: "/drills/visual-tracking/split-screen-tracking" },
+  { id: "infinity-pursuit", name: "Figure-8 Eye Tracking Exercise", cat: "Visual Tracking", desc: "Condition continuous pursuit across figure-8 infinity loops.", href: "/drills/visual-tracking/infinity-pursuit" },
+  { id: "spatial-shift-pursuit", name: "Adaptive Eye Tracking Drill", cat: "Visual Tracking", desc: "Track shifting targets across sudden spatial displacements.", href: "/drills/visual-tracking/spatial-shift-pursuit" }
 ];
 
 const getSavedData = () => {
@@ -47,7 +46,6 @@ export default function TriangularPursuitClient() {
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   useImmersiveMode(isFullscreen); // locks the page behind while the drill fills the screen
   const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
-  const [openAccordion, setOpenAccordion] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState<boolean>(false);
   const [countdownValue, setCountdownValue] = useState<number | string>(3);
   const [dayMode, setDayMode] = useState<boolean>(false); // Day Mode (White BG) / Night Mode (Dark BG)
@@ -409,19 +407,22 @@ export default function TriangularPursuitClient() {
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
         {/* Title */}
         {!isFullscreen && (
-          <div className="text-center">
+          <div>
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              TRIANGULAR PURSUIT
+              Triangular Pursuit
               <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
                 Eye Tracking Accuracy Drill
               </span>
             </h1>
+            <p className="mt-2 text-xs sm:text-sm text-slate-300 leading-relaxed max-w-3xl">
+              Triangular pursuit conditions multi-vector foveal tracking and catch-up saccadic suppression by guiding gaze along an acute 3-node geometric trajectory. Tracking continuous linear target velocities interrupted by sharp angular directional shifts trains predictive ocular motor coordination and dynamic visual acuity (de Brouwer et al., 2002; Orban de Xivry &amp; Lefèvre, 2007). Smooth pursuit tracks accurately to roughly 30&deg;/s along a straight edge, but a corner exceeds that in an instant, so each vertex is closed by a catch-up saccade rather than by pursuit (Krauzlis, 2004).
+            </p>
           </div>
         )}
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 gap-2.5 max-w-2xl mx-auto w-full">
+          <div className="grid grid-cols-4 gap-2 w-full -mb-2">
             <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Status</div>
               <div className="text-lg sm:text-xl font-black text-red-400 tabular-nums">
@@ -597,75 +598,6 @@ export default function TriangularPursuitClient() {
 
         </div>
 
-        {/* ACCORDION SECTION */}
-        {!isFullscreen && (
-          <div className="[&>div]:!mt-0">
-            <DrillAccordion
-              id="rules"
-              title="Drill Instructions & Settings"
-              isOpen={openAccordion === 'rules'}
-              onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-sans">
-                <RuleItem num="1" text="Triangular Pursuit" highlight="Pure Visual" result="Follow triangular vertices" />
-                <RuleItem num="2" text="Time Adjusting" highlight={`${selectedDuration}s Duration`} result="Customizable session timer" />
-                <RuleItem num="3" text="Hide Line" highlight={mathInvisible ? "Enabled (Invisible)" : "Disabled (Visible)"} result="Toggle path guide lines" />
-                <RuleItem num="4" text="Random Speed" highlight={randomSpeed ? "Enabled Acceleration" : "Disabled Velocity"} result="Erratic acceleration control" />
-              </div>
-            </DrillAccordion>
-
-            <DrillAccordion
-              id="about"
-              title="About Triangular Pursuit"
-              isOpen={openAccordion === 'about'}
-              onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
-            >
-              <div className="space-y-6 font-sans">
-                <section>
-                  <h4 className="text-base font-bold text-white mb-2">
-                    What Is Triangular Pursuit Training?
-                  </h4>
-                  <p className="text-sm leading-relaxed mb-3 text-gray-300">
-                    <strong>Triangular Pursuit Training</strong> conditions smooth pursuit agility by requiring your eyes to follow a target moving continuously around a triangular geometric path.
-                  </p>
-                  <p className="text-sm leading-relaxed text-gray-300">
-                    By utilizing features like <strong>Hide Line</strong> and <strong>Random Speed Acceleration</strong>, your visual cortex learns to track vertex transitions purely from the target's real-time position.
-                  </p>
-                </section>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
-                    <h5 className="text-xs font-bold text-white mb-1.5">Target Audience</h5>
-                    <p className="text-xs text-gray-300 leading-relaxed">Gamers, athletes, and vision training practitioners looking to build geometric tracking precision.</p>
-                  </div>
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
-                    <h5 className="text-xs font-bold text-white mb-1.5">Vertex Direction Shifts</h5>
-                    <p className="text-xs text-gray-300 leading-relaxed">Teaches ocular muscles to handle sharp angular direction changes smoothly.</p>
-                  </div>
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
-                    <h5 className="text-xs font-bold text-white mb-1.5">Invisible Line Mode</h5>
-                    <p className="text-xs text-gray-300 leading-relaxed">Hides path lines so tracking relies 100% on real-time visual input.</p>
-                  </div>
-                </div>
-              </div>
-            </DrillAccordion>
-
-            <DrillAccordion
-              id="faq"
-              title="Frequently Asked Questions"
-              isOpen={openAccordion === 'faq'}
-              onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-sans">
-                <FAQItem q="What is the Triangular Pursuit drill?" a="The Triangular Pursuit drill conditions smooth pursuit agility by requiring your eyes to follow a target moving continuously around a triangular geometric path." />
-                <FAQItem q="Why use the 'Hide Line' setting?" a="Hiding triangular vector guide lines forces your visual cortex to track vertex transitions purely from the target's real-time position." />
-                <FAQItem q="What does the Random Speed feature do?" a="Random Speed introduces variable segment transition speeds and random direction reversals across triangular vertices." />
-                <FAQItem q="How long should I practice visual tracking daily?" a="We recommend 5 to 10 minutes of daily visual tracking training before gaming or athletic practice to warm up ocular muscles and reduce eye fatigue." />
-              </div>
-            </DrillAccordion>
-          </div>
-        )}
-
         {/* RELATED DRILLS GRID */}
         {!isFullscreen && (
           <section className="mt-4">
@@ -697,32 +629,6 @@ export default function TriangularPursuitClient() {
         {!isFullscreen && <DrillFooter />}
 
       </main>
-    </div>
-  );
-}
-
-// === Subcomponents ===
-function RuleItem({ num, text, highlight = '', result }: { num: string; text: string; highlight?: string; result: string }) {
-  return (
-    <div className="flex items-center gap-4 bg-black p-4 rounded-xl border border-white/10 shadow-sm font-sans">
-      <div className="w-8 h-8 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-white text-base font-black shadow-lg flex-shrink-0">{num}</div>
-      <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-        <p className="text-sm font-medium text-gray-100 font-sans">
-          {text}{highlight && <span className="font-black text-white"> ({highlight})</span>}
-        </p>
-        <div className="text-xs font-black px-3 py-1.5 rounded-lg bg-[#050811] border border-white/10 text-white whitespace-nowrap shadow-inner tracking-wide text-center sm:text-left">
-          {result}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function FAQItem({ q, a }: { q: string; a: string }) {
-  return (
-    <div className="bg-[#05060b] border border-gray-800 rounded-xl p-5 hover:border-gray-700 transition-colors font-sans">
-      <h4 className="text-sm font-bold text-gray-200 mb-2">{q}</h4>
-      <p className="text-xs text-gray-400 leading-relaxed">{a}</p>
     </div>
   );
 }

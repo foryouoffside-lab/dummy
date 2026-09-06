@@ -1,6 +1,6 @@
 import { ImageResponse } from 'next/og';
 
-export const alt = 'Keyboard Recognition — professional keyboard speed trainer and custom keybind simulator';
+export const alt = 'Keyboard Speed Test — professional keyboard speed trainer and custom keybind simulator';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -71,7 +71,7 @@ export default async function Image() {
               letterSpacing: -2,
             }}
           >
-            Keyboard Recognition
+            Keyboard Speed Test
           </div>
           <div
             style={{

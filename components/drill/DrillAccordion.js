@@ -5,13 +5,13 @@ import { ChevronDown } from 'lucide-react';
 
 export default function DrillAccordion({ id, title, subtitle = null, icon: Icon = null, iconColor = 'text-emerald-400', iconBg = 'bg-emerald-500/10 border-emerald-500/20', isOpen, onToggle, children }) {
   return (
-    <div className="mt-4 border border-gray-800 bg-black rounded-2xl overflow-hidden transition-all duration-300">
+    <div className="mt-2.5 border border-white/[0.07] bg-white/[0.012] rounded-xl overflow-hidden transition-colors duration-200 hover:border-white/[0.11]">
       <button 
         onClick={onToggle}
         aria-expanded={isOpen}
         aria-controls={`accordion-content-${id}`}
         id={`accordion-header-${id}`}
-        className="w-full px-6 py-5 flex items-center justify-between text-left focus:outline-none hover:bg-white/[0.02] transition-colors cursor-pointer"
+        className="w-full px-5 py-4 flex items-center justify-between text-left focus:outline-none hover:bg-white/[0.02] transition-colors cursor-pointer"
       >
         <div className="flex items-center gap-3">
           {Icon && (
@@ -20,7 +20,7 @@ export default function DrillAccordion({ id, title, subtitle = null, icon: Icon 
             </div>
           )}
           <div>
-            <h2 className="text-lg font-bold text-white tracking-tight">{title}</h2>
+            <h2 className="text-[15px] font-bold text-white tracking-tight">{title}</h2>
             {subtitle && <p className="text-xs text-gray-300 mt-0.5">{subtitle}</p>}
           </div>
         </div>
@@ -41,7 +41,7 @@ export default function DrillAccordion({ id, title, subtitle = null, icon: Icon 
         role="region"
         aria-labelledby={`accordion-header-${id}`}
         hidden={!isOpen}
-        className={`px-6 pb-6 pt-4 border-t border-gray-800/80 space-y-6 text-gray-100 ${isOpen ? 'fx-fade-up' : ''}`}
+        className={`px-5 pb-5 pt-4 border-t border-white/[0.06] space-y-5 text-slate-300 text-[13px] leading-relaxed ${isOpen ? 'fx-fade-up' : ''}`}
       >
         {children}
       </div>

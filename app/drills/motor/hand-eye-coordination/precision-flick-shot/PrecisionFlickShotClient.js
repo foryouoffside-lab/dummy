@@ -2,7 +2,6 @@
 import { isIdleFrameSkippable } from '@/lib/performance';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import Link from 'next/link';
 
 import { 
   Activity, AlertCircle, ArrowRight, Brain, ChevronRight, 
@@ -81,33 +80,6 @@ const ABOUT_TEXT = `Precision Flick Shot Training is a high-speed motor drill en
 By training your hand to rapidly snap to target coordinates and stop cleanly over target centers, you condition muscle memory for instant headshot acquiring in competitive FPS games.
 
 As your score rises, target hitboxes shrink and decay rates accelerate dynamically, continuously pushing your spatial flick speed ceiling.`;
-
-const FAQ_ITEMS = [
-  { q: "What is the Precision Flick Shot Trainer?", a: "The Precision Flick Shot Trainer is an advanced motor drill engineered to test and improve mouse flick accuracy, target acquisition speed, and center-click timing." },
-  { q: "How does flick shot training improve FPS aim?", a: "By training your hand to rapidly snap to target coordinates and stop cleanly before clicking, you build refined muscle memory for flicking in tactical shooters." },
-  { q: "Does flick accuracy training help Valorant and CS2 players?", a: "Yes, opening duels and headshots in Valorant and CS2 rely heavily on fast micro-flicks and precise crosshair placement trained in this drill." },
-  { q: "How does difficulty scale in this trainer?", a: "Every 1400 points earned advances your level without cap, shrinking target hitboxes and accelerating target decay rates — two targets stay active on screen throughout." },
-  { q: "What is the Bulls-eye mechanic?", a: "Clicking within the inner 8-pixel center of a target awards double points (+200 PTS) and spawns yellow spark effects." },
-  { q: "What happens when you miss a click?", a: "Clicking empty space or letting a target decay out resets your combo multiplier to zero and triggers a red error flash. When the optional Time Penalty is enabled, 0.8s is deducted." },
-  { q: "How is flick accuracy calculated?", a: "Accuracy is calculated as total target hits divided by total clicks, displayed as a real-time percentage." },
-  { q: "Does this trainer support raw mouse input sensitivity?", a: "Yes — the Mouse Sensitivity slider in Session Settings on the drills hub matches your raw input multiplier and cm/360, and applies to every mouse-aimed drill." },
-  { q: "Is this precision flick shot drill free?", a: "Yes, the drill is 100% free with no sign-ups or downloads required, running directly in modern web browsers." },
-  { q: "How do combo multipliers work?", a: "Sustaining consecutive target hits without missing builds combo multipliers up to 3.0x bonus points per successful flick." },
-  { q: "Does this drill support touch screen input?", a: "This drill requires pointer-lock mouse input for crosshair control, so it is not playable on touch-only phones or tablets. Use a desktop or laptop with a mouse for the full experience." },
-  { q: "How long should I train flick accuracy daily?", a: "A 10-15 minute daily session before competitive gaming helps calibrate hand-eye coordination and spatial snapping accuracy." },
-  { q: "How is high performance maintained during gameplay?", a: "The canvas engine utilizes cached backdrop grid rendering and hardware-accelerated requestAnimationFrame loops for smooth 60+ FPS performance." },
-  { q: "What is the best technique for high flick scores?", a: "Focus on smooth deceleration so your cursor stops directly over the target center rather than over-shooting past the edges." },
-  { q: "How does the session timer work?", a: "Each session starts with 45 seconds on the clock. Clean target hits add +0.6s to extend your run. When the optional Time Penalty setting is enabled, misses and expirations deduct 0.8s." }
-];
-
-const RELATED_DRILLS = [
-  { id: "aim-trainer", name: "Aim Trainer Elite", cat: "Motor Coordination", desc: "Score-based dynamic target acquisition drill.", href: "/drills/motor/hand-eye-coordination/aim-trainer" },
-  { id: "steady-hand", name: "Steady Hand Trainer", cat: "Motor Control", desc: "Improve fine motor mouse control and stability.", href: "/drills/motor/precision-control/steady-hand" },
-  { id: "flick-shot-training", name: "Pro Flick Trainer", cat: "FPS Flicking", desc: "Snap to targets in time-attack mode with precision flicking.", href: "/drills/fps/flick-shot-training" },
-  { id: "target-switching-swarm", name: "Target Switching", cat: "FPS Multi-Kill", desc: "Flick and track target arrays rapidly.", href: "/drills/fps/target-switching-swarm" },
-  { id: "drag-and-drop", name: "Drag & Drop Precision", cat: "Motor Coordination", desc: "Master mouse spatial drag control and release timing.", href: "/drills/motor/hand-eye-coordination/drag-and-drop" },
-  { id: "rapid-tapping", name: "Rapid Tapping", cat: "Motor Speed", desc: "Boost physical clicking speed and stamina.", href: "/drills/motor/movement-speed/rapid-tapping" }
-];
 
 // ============================================================
 // MAIN COMPONENT
@@ -693,35 +665,35 @@ export default function PrecisionFlickShotClient() {
     <div className="min-h-screen bg-[#050508] text-white flex flex-col font-sans select-none">
       {/* ── MAIN CONTENT AREA ── */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
-        {/* Title */}
+        {/* Title & AIO Header */}
         {!isFullscreen && (
-          <div className="text-center">
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white uppercase">
+          <div className="text-left">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
               Precision Flick Shot
-              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
-                Mouse Accuracy Test
-              </span>
             </h1>
+            <p className="text-sm text-slate-400 mt-1.5 leading-relaxed max-w-3xl">
+              A flick shot is a single fast mouse movement that snaps the crosshair onto a target in one motion instead of sliding onto it. A movement that fast is made of two parts &mdash; a ballistic impulse that covers most of the distance, then a slower visually guided correction that closes what is left (Woodworth, 1899; Meyer et al., 1988) &mdash; which is why overshooting a target costs more time than starting the flick slightly slower. Your display bounds the measurement: at 60 Hz a new target can only appear every 16.7 ms, against 6.9 ms at 144 Hz (Woods et al., 2015).
+            </p>
           </div>
         )}
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 gap-2.5 max-w-2xl mx-auto w-full">
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
+          <div className="grid grid-cols-4 gap-2 w-full">
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Score</div>
               <div className="text-lg sm:text-xl font-black text-white tabular-nums">{uiScore}</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Time Left</div>
               <div className={`text-lg sm:text-xl font-black tabular-nums ${uiTimeLeft <= 10 ? "text-red-400 animate-pulse" : "text-white"}`}>{uiTimeLeft}s</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Accuracy</div>
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Accuracy</div>
               <div className="text-lg sm:text-xl font-black text-cyan-400 tabular-nums">{analytics.accuracy}%</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Best Score</div>
               <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
             </div>
           </div>
@@ -885,54 +857,43 @@ export default function PrecisionFlickShotClient() {
               isOpen={openAccordion === 'about'}
               onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
             >
-              <div className="space-y-4">
-                <p className="text-xs text-gray-300 leading-relaxed">{ABOUT_TEXT}</p>
-              </div>
-            </DrillAccordion>
+              <div className="space-y-6">
+                <div className="space-y-3">
+                  <h3 className="text-base font-bold text-white">Ballistic Flick Accuracy &amp; Submovement Optimization</h3>
+                  <p className="text-sm leading-relaxed text-gray-300">
+                    Precision Flick Shot is a high-speed motor coordination drill engineered to test and refine rapid mouse flicks, target acquisition speed, and center-click timing under extreme temporal pressure.
+                  </p>
+                  <p className="text-sm leading-relaxed text-gray-300">
+                    Target snapping is governed by the Stochastic Optimized Submovement Model (Meyer et al., 1988) and Woodworth&apos;s two-component hypothesis. Every flick begins with an open-loop ballistic motor impulse followed by a visual feedback deceleration phase. Training center-ring bulls-eyes forces the motor cortex to suppress endpoint distribution noise and minimize corrective secondary sub-movements.
+                  </p>
+                </div>
 
-            <DrillAccordion
-              id="faq"
-              title="Frequently Asked Questions"
-              isOpen={openAccordion === 'faq'}
-              onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
-            >
-              <div className="space-y-4">
-                {FAQ_ITEMS.map((item, idx) => (
-                  <div key={idx} className="border-b border-gray-800/80 pb-3 last:border-0 last:pb-0">
-                    <h5 className="text-xs font-bold text-white mb-1">{item.q}</h5>
-                    <p className="text-xs text-gray-400 leading-relaxed">{item.a}</p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
+                    <div className="flex items-center gap-2.5 mb-2">
+                      <div className="w-7 h-7 rounded-lg bg-cyan-600 flex items-center justify-center"><Target className="w-3.5 h-3.5 text-white" /></div>
+                      <h4 className="text-xs font-bold text-white">Bulls-eye Center Accuracy</h4>
+                    </div>
+                    <p className="text-xs text-gray-300 leading-relaxed">Hitting the inner 8-pixel core awards double points (+200 PTS), rewarding pinpoint foveal alignment and tight motor stopping power.</p>
                   </div>
-                ))}
+                  <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
+                    <div className="flex items-center gap-2.5 mb-2">
+                      <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
+                      <h4 className="text-xs font-bold text-white">Competitive Tactical Utility</h4>
+                    </div>
+                    <p className="text-xs text-gray-300 leading-relaxed">Directly trains opening duel reaction in CS2, Valorant, and Apex Legends where first-bullet headshot precision determines round outcomes.</p>
+                  </div>
+                  <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
+                    <div className="flex items-center gap-2.5 mb-2">
+                      <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
+                      <h4 className="text-xs font-bold text-white">Dynamic Decay Scaling</h4>
+                    </div>
+                    <p className="text-xs text-gray-300 leading-relaxed">As your score advances past 1,400-point level thresholds, target lifespans decay faster, requiring higher neuromuscular throughput.</p>
+                  </div>
+                </div>
               </div>
             </DrillAccordion>
           </div>
-        )}
-
-        {/* ── RELATED FPS DRILLS ── */}
-        {!isFullscreen && (
-          <section className="mt-4">
-            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">
-              Related Motor &amp; FPS Drills
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {RELATED_DRILLS.map((drill) => (
-                <Link
-                  key={drill.id}
-                  href={drill.href}
-                  className="group bg-[#0c0c16] border border-white/5 hover:border-cyan-500/40 rounded-xl p-3.5 transition-all duration-200 hover:-translate-y-0.5 flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider mb-1">{drill.cat}</div>
-                    <div className="text-xs font-bold text-white group-hover:text-cyan-300 transition-colors">{drill.name}</div>
-                    <div className="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">{drill.desc}</div>
-                  </div>
-                  <div className="text-[10px] font-bold text-slate-500 group-hover:text-cyan-400 mt-3 flex items-center gap-1 transition-colors">
-                    Train Drill <span>→</span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
         )}
       </main>
 

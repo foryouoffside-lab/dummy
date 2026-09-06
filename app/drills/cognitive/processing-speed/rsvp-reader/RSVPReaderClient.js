@@ -124,10 +124,10 @@ const FAQ_ITEMS = [
 const RELATED_DRILLS = [
   { id: "symbol-matching", name: "Symbol Matching", cat: "Processing Speed", desc: "Match rapid symbol pairs under strict time pressure.", href: "/drills/cognitive/processing-speed/symbol-matching" },
   { id: "reaction-time", name: "Reaction Time", cat: "Processing Speed", desc: "Train choice reaction speed and visual reflex latency.", href: "/drills/cognitive/processing-speed/reaction-time" },
-  { id: "concentration-stamina", name: "Concentration Stamina", cat: "Attention", desc: "Sustain continuous visual focus through prolonged high-density sequences.", href: "/drills/cognitive/attention/concentration-stamina" },
+  { id: "concentration-stamina", name: "Focus Test", cat: "Attention", desc: "Sustain continuous visual focus through prolonged high-density sequences.", href: "/drills/cognitive/attention/concentration-stamina" },
   { id: "distraction-fighter", name: "Distraction Fighter", cat: "Focus", desc: "Filter out high-interference Stroop visual distractors.", href: "/drills/cognitive/focus/distraction-fighter" },
-  { id: "concentration-grid", name: "Concentration Grid", cat: "Focus", desc: "Scan and tap sequential numbers on expanding grid matrices.", href: "/drills/cognitive/focus/concentration-grid" },
-  { id: "divided-attention", name: "Divided Attention", cat: "Attention", desc: "Track and react to multiple independent target streams simultaneously.", href: "/drills/cognitive/attention/divided-attention" }
+  { id: "concentration-grid", name: "Schulte Table Trainer", cat: "Focus", desc: "Scan and tap sequential numbers on expanding grid matrices.", href: "/drills/cognitive/focus/concentration-grid" },
+  { id: "divided-attention", name: "Divided Attention Test", cat: "Attention", desc: "Track and react to multiple independent target streams simultaneously.", href: "/drills/cognitive/attention/divided-attention" }
 ];
 
 export default function RSVPReaderClient() {
@@ -433,11 +433,11 @@ export default function RSVPReaderClient() {
         {!isFullscreen && (
         <div className="text-center">
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-            RSVP SPEED READER
-            <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
-              Reading Speed Test
-            </span>
+            Reading Speed Test
           </h1>
+          <p className="text-[13px] text-slate-400 leading-relaxed mt-1">
+            RSVP shows words one at a time in a fixed spot, removing eye movements from reading. Normal reading runs about 200&ndash;300 words per minute (Rayner, 1998). RSVP can push the rate higher, but comprehension falls as speed rises, because the limit on reading is the time needed to process each word rather than the time spent moving your eyes (Rayner et al., 2016).
+          </p>
         </div>
         )}
 

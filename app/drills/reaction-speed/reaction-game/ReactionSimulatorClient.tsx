@@ -682,54 +682,36 @@ export default function ReactionSimulatorClient() {
       {/* Main Container */}
       <main className="w-full max-w-5xl mx-auto px-3 sm:px-4 py-3 sm:py-6 flex flex-col gap-3 sm:gap-6">
         
-        {/* Navigation & Header */}
-        {!isFullscreen && (
-          <div className="w-full flex items-center justify-between">
-            <Link 
-              href="/drills/reaction-speed"
-              className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition-colors bg-white/5 px-3 py-1.5 rounded-lg border border-white/5"
-            >
-              ← Back to Reaction Hub
-            </Link>
-            <div className="text-xs text-slate-400 font-mono">
-              Drill ID: <span className="text-red-400">RS-04</span>
-            </div>
-          </div>
-        )}
 
-        {/* Drill Header */}
+        {/* Title — left-aligned and sitting directly on the drill box below it,
+            so the page reads top-left to bottom-right like a document rather than
+            a centred splash screen. */}
         {!isFullscreen && (
-          <div className="text-center">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-black uppercase tracking-tight text-white flex items-center justify-center gap-3 flex-wrap">
-              REACTION GAME
-              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
-                Online Reaction Game
-              </span>
+          <div className="flex flex-col gap-1">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+              Reaction Game
             </h1>
+            <p className="text-[13px] text-slate-400 leading-relaxed">
+              A typical adult reacts to a visual cue in 200&ndash;250&nbsp;ms (Kosinski, 2008). Intercepting a falling target adds tracking and aiming time on top of that, so scores here sit above a plain reaction time test.
+            </p>
           </div>
         )}
 
-        {/* Live Stat Cards */}
+        {/* Live Stat Cards — full width so the row's outer edges line up with the
+            drill box beneath it. */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 gap-2.5 max-w-2xl mx-auto w-full">
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
-              <div className="text-lg sm:text-xl font-black text-red-400 tabular-nums">{uiScore}</div>
-            </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
-              <div className={`text-lg sm:text-xl font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>
-                {uiTimeLeft}s
+          <div className="grid grid-cols-4 gap-2 w-full -mb-2">
+            {[
+              { label: 'Score', value: uiScore, tone: 'text-red-400' },
+              { label: 'Time', value: `${uiTimeLeft}s`, tone: uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white' },
+              { label: 'Level', value: `L${uiLevel}`, tone: 'text-indigo-400' },
+              { label: 'Best Score', value: bestScore, tone: 'text-amber-400' },
+            ].map((s) => (
+              <div key={s.label} className="rounded-lg border border-white/[0.06] bg-white/[0.015] px-2 py-2 text-center">
+                <div className="text-[9.5px] uppercase font-semibold text-slate-500 tracking-[0.12em]">{s.label}</div>
+                <div className={`text-lg sm:text-xl font-black tabular-nums font-mono mt-0.5 ${s.tone}`}>{s.value}</div>
               </div>
-            </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Level</div>
-              <div className="text-lg sm:text-xl font-black text-indigo-400 tabular-nums">L{uiLevel}</div>
-            </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
-              <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
-            </div>
+            ))}
           </div>
         )}
 
@@ -803,7 +785,7 @@ export default function ReactionSimulatorClient() {
             <FpsStartCard
               icon={Target}
               accent="red"
-              title="Reaction Simulator"
+              title="Reaction Game"
               subtitle="Reflex Interception • Vertical Tracking"
               rules={[
                 { icon: Target, accent: 'red', title: 'Intercept Falling Targets', text: '+100 PTS × Combo × Level multiplier (+0.6s per hit)' },
@@ -881,9 +863,9 @@ export default function ReactionSimulatorClient() {
             >
               <div className="space-y-8 font-sans">
                 <section>
-                  <h4 className="text-base font-bold text-white mb-2 flex items-center gap-2">
+                  <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
                     <Eye className="w-4 h-4 text-red-400" /> What Is Reflex Interception & Vertical Tracking Training?
-                  </h4>
+                  </h3>
                   <p className="text-sm leading-relaxed mb-3 text-gray-300">
                     <strong>Reaction Game</strong> (Reflex Interception Drill) isolates and conditions vertical visual tracking, fast-twitch motor responses, and rapid spatial interception. In tactical and arcade shooters like Apex Legends, Overwatch 2, Fortnite, and Halo, targets frequently drop from high ledges, jump pads, or vertical ziplines.
                   </p>
@@ -893,56 +875,34 @@ export default function ReactionSimulatorClient() {
                 </section>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                  <div className="p-4 rounded-xl border border-white/[0.07] bg-white/[0.012]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-red-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Who Should Use This?</h5>
+                      <h4 className="text-xs font-bold text-white">Who Should Use This?</h4>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Gamers, esports athletes, and traditional sports competitors looking to sharpen vertical reflex speed and hand-eye reaction timing.</p>
+                    <p className="text-xs text-slate-300 leading-relaxed">Gamers, esports athletes, and traditional sports competitors looking to sharpen vertical reflex speed and hand-eye reaction timing.</p>
                   </div>
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                  <div className="p-4 rounded-xl border border-white/[0.07] bg-white/[0.012]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Vertical Tracking Control</h5>
+                      <h4 className="text-xs font-bold text-white">Vertical Tracking Control</h4>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Trains your eyes and mouse hand to follow accelerating downward trajectories smoothly without panic snapping or over-aiming.</p>
+                    <p className="text-xs text-slate-300 leading-relaxed">Trains your eyes and mouse hand to follow accelerating downward trajectories smoothly without panic snapping or over-aiming.</p>
                   </div>
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                  <div className="p-4 rounded-xl border border-white/[0.07] bg-white/[0.012]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Zap className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Fast-Twitch Interception</h5>
+                      <h4 className="text-xs font-bold text-white">Fast-Twitch Interception</h4>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Conditioning fast-twitch motor responses allows you to click targets higher up the screen, maximizing score efficiency.</p>
+                    <p className="text-xs text-slate-300 leading-relaxed">Conditioning fast-twitch motor responses allows you to click targets higher up the screen, maximizing score efficiency.</p>
                   </div>
                 </div>
               </div>
             </DrillAccordion>
 
-            <DrillAccordion
-              id="faq"
-              title="Frequently Asked Questions"
-              isOpen={openAccordion === 'faq'}
-              onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-sans">
-                <FAQItem q="What is Reaction Simulator (Reflex Interception Drill)?" a="It is an online reflex training game where targets descend vertically at accelerating speeds, testing your vertical tracking and interception reflexes." />
-                <FAQItem q="What is a good score on a reaction time test?" a="Average human reaction time to visual stimuli is 200-250ms. Elite esports players achieve reaction speeds under 180ms." />
-                <FAQItem q="Can you train your reaction time?" a="Yes. Dedicated reflex training improves neuromuscular pathway efficiency, reducing visual processing delay and motor execution latency." />
-                <FAQItem q="Does gaming improve reaction time?" a="Research shows competitive gamers process visual information faster and execute choice motor responses with higher precision than non-gamers." />
-                <FAQItem q="Why is my reaction time slow?" a="Slow reaction time can be caused by muscle fatigue, high input latency, low refresh rates, lack of sleep, or cognitive distraction." />
-                <FAQItem q="How do you test your reflexes by yourself?" a="Using online reflex simulators like SkillDrills provides precise millisecond telemetry to measure and track your reaction speed." />
-                <FAQItem q="What is vertical tracking in FPS gaming?" a="Vertical tracking is the ability to keep your crosshair centered on targets falling, jumping, or moving along Y-axis paths." />
-                <FAQItem q="Is this reflex training game free?" a="Yes, all drills on SkillDrills are 100% free with no signups, downloads, or pop-up ads required." />
-                <FAQItem q="Does monitor refresh rate affect reflex scores?" a="Yes. Higher refresh rate monitors (144Hz, 240Hz, 360Hz) display target movement with lower input lag and smoother motion." />
-                <FAQItem q="How often should I practice reflex training?" a="Daily 5-10 minute warmup sessions improve neuromuscular speed, consistency, and hand-eye coordination over time." />
-                <FAQItem q="What games benefit from vertical reflex training?" a="Fast vertical shooters like Apex Legends, Overwatch 2, Fortnite, Halo, and Quake benefit heavily from vertical tracking agility." />
-                <FAQItem q="Can traditional athletes use this for vision training?" a="Yes. Sports vision research shows vertical reflex training enhances spatial interception skills for volleyball, basketball, and tennis." />
-                <FAQItem q="Should I click targets high up or wait until they drop?" a="Clicking targets high up gives you more margin for error and builds fast-twitch reaction speed before targets reach the danger line." />
-                <FAQItem q="Does this drill support touchscreens?" a="Yes! It features generous touch hitpads and automatic orientation warnings for mobile devices." />
-                <FAQItem q="How does adaptive level difficulty work?" a="Difficulty scales continuously based on your live performance and combo streak, with target velocity ramping up and spawn windows tightening." />
-                <FAQItem q="Is there a time penalty for missing or escaping targets?" a="By default, missing or letting targets escape only resets your combo streak. A time penalty (-0.8s per error) is available as an opt-in toggle in the session settings for players who want a harder challenge." />
-              </div>
-            </DrillAccordion>
+            {/* The FAQ is rendered by DrillGuide below, mapped from
+                faqSchema.mainEntity so the page's FAQPage JSON-LD and the visible
+                questions cannot drift. */}
           </div>
         )}
 
@@ -982,27 +942,18 @@ export default function ReactionSimulatorClient() {
 }
 
 // === Subcomponents ===
-function RuleItem({ num, text, highlight = '', result }: { num: string; text: string; highlight?: string; result: string }) {
+function RuleItem({ num, text, highlight, result }: { num: string; text: string; highlight?: string; result: string }) {
   return (
-    <div className="flex items-center gap-4 bg-black p-4 rounded-xl border border-white/10 shadow-sm font-sans">
-      <div className="w-8 h-8 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-white text-base font-black shadow-lg flex-shrink-0">{num}</div>
+    <div className="flex items-center gap-4 bg-white/[0.015] p-4 rounded-xl border border-white/[0.07] shadow-sm font-sans">
+      <div className="w-8 h-8 rounded-xl bg-white/[0.05] border border-white/10 flex items-center justify-center text-white text-base font-black shadow-lg flex-shrink-0">{num}</div>
       <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-        <p className="text-sm font-medium text-gray-100 font-sans">
+        <p className="text-sm font-medium text-slate-200 font-sans">
           {text}{highlight && <span className="font-black text-white"> ({highlight})</span>}
         </p>
-        <div className="text-xs font-black px-3 py-1.5 rounded-lg bg-[#050811] border border-white/10 text-white whitespace-nowrap shadow-inner tracking-wide text-center sm:text-left">
+        <div className="text-xs font-bold px-3 py-1.5 rounded-lg bg-black/40 border border-white/10 text-slate-300 whitespace-nowrap shadow-inner tracking-wide text-center sm:text-left">
           {result}
         </div>
       </div>
-    </div>
-  );
-}
-
-function FAQItem({ q, a }: { q: string; a: string }) {
-  return (
-    <div className="bg-[#05060b] border border-gray-800 rounded-xl p-5 hover:border-gray-700 transition-colors font-sans">
-      <h4 className="text-sm font-bold text-gray-200 mb-2">{q}</h4>
-      <p className="text-xs text-gray-400 leading-relaxed">{a}</p>
     </div>
   );
 }

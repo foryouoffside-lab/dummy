@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import Link from 'next/link';
 
 import { 
   Volume2, VolumeX,
@@ -22,22 +21,12 @@ import DrillCountdown from '../../../../../components/drill/DrillCountdown';
 import DrillAccordion from '../../../../../components/drill/DrillAccordion';
 import DrillFlashOverlay from '../../../../../components/drill/DrillFlashOverlay';
 import DrillRuleItem from '../../../../../components/drill/DrillRuleItem';
-import DrillFAQItem from '../../../../../components/drill/DrillFAQItem';
 import FpsStartCard from '../../../../../components/drill/FpsStartCard';
 import useImmersiveMode from '@/lib/useImmersiveMode';
 
 const DRILL_DURATION = 45; // 45 seconds duration
 const ELITE_SCORE = 180; // Target score for S+ rating in 45s
 const STORAGE_KEY = 'skilldrills_visual_pursuit_tracker_v2';
-
-const RELATED_DRILLS = [
-  { id: "moving-target", name: "Moving Target Pro", cat: "Visual Tracking", desc: "Kinetic visual tracking and smooth pursuit interception.", href: "/drills/visual/tracking-accuracy/moving-target" },
-  { id: "multiple-targets", name: "Multiple Targets", cat: "Visual Tracking", desc: "Multi-object tracking & visual working memory.", href: "/drills/visual/tracking-accuracy/multiple-targets" },
-  { id: "light-reaction", name: "Light Reaction", cat: "Reaction Speed", desc: "Test raw visual motor reaction speed.", href: "/drills/visual/reaction-speed/light-reaction" },
-  { id: "go-no-go", name: "Go / No-Go", cat: "Reaction Speed", desc: "Response inhibition & selective reaction speed.", href: "/drills/visual/reaction-speed/go/no-go" },
-  { id: "distance-judgment", name: "Distance Judgment Pro", cat: "Depth Perception", desc: "3D stereoscopic depth estimation & intercept timing.", href: "/drills/visual/depth-perception/distance-judgment" },
-  { id: "entropic-grid", name: "Entropic Grid", cat: "Visual Recognition", desc: "Visual search speed & pattern recognition grid.", href: "/drills/visual/visual-recognition/entropic-grid" }
-];
 
 const getSavedData = () => {
   try {
@@ -511,34 +500,34 @@ export default function AutoPursuitClient() {
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
         {/* Title */}
         {!isFullscreen && (
-          <div className="text-center">
+          <div className="text-left">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              PURSUIT TRACKER PRO
-              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
-                Smooth Pursuit Test
-              </span>
+              Smooth Pursuit Tracker
             </h1>
+            <p className="text-sm text-slate-400 mt-1">
+              Smooth pursuit is the eye movement that follows a continuously moving target, distinct from the saccades that jump between fixed points. It tracks accurately up to about 30&deg;/s, and beyond that the eye lags and needs catch-up saccades (Krauzlis, 2004; Rashbass, 1961). Pursuit also cannot be produced voluntarily on a blank screen &mdash; it needs a moving stimulus to lock onto.
+            </p>
           </div>
         )}
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 gap-2 max-w-2xl mx-auto w-full">
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2 text-center">
+          <div className="grid grid-cols-4 gap-2 w-full">
+            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-3 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
               <div className="text-base sm:text-lg font-black text-emerald-400 tabular-nums">{uiScore}</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2 text-center">
+            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-3 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Streak</div>
               <div className="text-base sm:text-lg font-black text-emerald-300 tabular-nums">{streak}x</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2 text-center">
+            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-3 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
               <div className={`text-base sm:text-lg font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>
                 {uiTimeLeft}s
               </div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2 text-center">
+            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-3 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
               <div className="text-base sm:text-lg font-black text-amber-400 tabular-nums">{bestScore}</div>
             </div>
@@ -753,9 +742,9 @@ export default function AutoPursuitClient() {
             >
               <div className="space-y-8">
                 <section>
-                  <h4 className="text-base font-bold text-white mb-2 flex items-center gap-2">
+                  <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
                     <Brain className="w-4 h-4 text-emerald-400" /> What Is Smooth Pursuit Tracking?
-                  </h4>
+                  </h3>
                   <p className="text-sm leading-relaxed mb-3">
                     <strong>Smooth Pursuit Training</strong> measures how accurately your eyes and cursor can continuously follow a moving object, rather than reacting to a single discrete event. The <strong>Pursuit Tracker drill</strong> presents an orb that accelerates and changes direction unpredictably, requiring your cursor to stay locked onto it in real time over a <strong>45-second round</strong>.
                   </p>
@@ -768,71 +757,28 @@ export default function AutoPursuitClient() {
                   <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Who Should Use This?</h5>
+                      <h4 className="text-xs font-bold text-white">Who Should Use This?</h4>
                     </div>
                     <p className="text-xs text-gray-300 leading-relaxed">FPS gamers tracking moving opponents, racket-sport athletes following a ball, and anyone training sustained visual-motor coordination.</p>
                   </div>
                   <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Skills Improved</h5>
+                      <h4 className="text-xs font-bold text-white">Skills Improved</h4>
                     </div>
                     <p className="text-xs text-gray-300 leading-relaxed">Smooth pursuit eye movement, continuous cursor tracking, velocity prediction, and sustained visual attention.</p>
                   </div>
                   <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-purple-600 flex items-center justify-center"><Zap className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Tracking Tip</h5>
+                      <h4 className="text-xs font-bold text-white">Tracking Tip</h4>
                     </div>
                     <p className="text-xs text-gray-300 leading-relaxed">Anticipate the orb's next direction rather than chasing its current position — it changes speed and heading without warning.</p>
                   </div>
                 </div>
               </div>
             </DrillAccordion>
-
-            <DrillAccordion
-              id="faq"
-              title="Frequently Asked Questions"
-              isOpen={openAccordion === 'faq'}
-              onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <DrillFAQItem q="What is the Smooth Pursuit Tracker?" a="An interactive tool to train and assess smooth pursuit eye movement and hand-eye alignment by maintaining a cursor on a moving visual target." />
-                <DrillFAQItem q="How is the performance score calculated?" a="You earn +5 PTS every time you keep your cursor locked onto the moving target for a full continuous second." />
-                <DrillFAQItem q="How does difficulty scale?" a="As your score and streak increase, the orb's maximum speed rises and its hitbox shrinks slightly — with no hard ceiling on either, so the challenge keeps building the longer you last." />
-                <DrillFAQItem q="Are there negative score or time penalties?" a="No. Losing the target for more than 2 seconds resets your streak, but you never lose accrued score points or remaining timer seconds." />
-                <DrillFAQItem q="How long does each drill session last?" a="Each round is timed for exactly 45 seconds of continuous tracking." />
-                <DrillFAQItem q="Do I need to sign up?" a="No registration required. This drill runs directly in your browser with instant response." />
-              </div>
-            </DrillAccordion>
           </div>
-        )}
-
-        {/* RELATED DRILLS GRID */}
-        {!isFullscreen && (
-          <section className="mt-4">
-            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">
-              Related Visual Drills
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {RELATED_DRILLS.map((drill) => (
-                <Link
-                  key={drill.id}
-                  href={drill.href}
-                  className="group bg-[#0c0c16] border border-white/5 hover:border-emerald-500/40 rounded-xl p-3.5 transition-all duration-200 hover:-translate-y-0.5 flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider mb-1">{drill.cat}</div>
-                    <div className="text-xs font-bold text-white group-hover:text-emerald-300 transition-colors">{drill.name}</div>
-                    <div className="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">{drill.desc}</div>
-                  </div>
-                  <div className="text-[10px] font-bold text-slate-500 group-hover:text-emerald-400 mt-3 flex items-center gap-1 transition-colors">
-                    Train Drill <span>→</span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
         )}
 
         {/* SITE FOOTER */}

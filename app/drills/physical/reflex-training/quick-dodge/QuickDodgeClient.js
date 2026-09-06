@@ -2,7 +2,6 @@
 import { isIdleFrameSkippable } from '@/lib/performance';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import Link from 'next/link';
 
 import {
   Activity, AlertCircle, ArrowRight, ChevronRight, Crosshair,
@@ -69,28 +68,6 @@ const ABOUT_TEXT = `The Reflex Game Online (Quick Dodge) tests raw reaction spee
 As your score increases, the level scales up to Level 15+. Obstacle speed accelerates from 300 px/s up to 1600+ px/s, and enemy spawn density grows exponentially.
 
 Successfully dodging threats builds huge combo multipliers and accelerates your score climb across a fixed 45-second session.`;
-
-const FAQ_ITEMS = [
-  { q: "What is a Reflex Game Online?", a: "A reflex game is an interactive browser drill where players must navigate a cursor to evade dynamic, homing threats. It tests raw reaction speed, spatial awareness, and cursor precision under heavy cognitive load." },
-  { q: "How does this dodge challenge improve coordination?", a: "By forcing you to process multiple peripheral threats simultaneously and execute precise, non-jittery mouse movements to escape tight corridors, it heavily strengthens visual-motor integration." },
-  { q: "Does this improve FPS gaming?", a: "Yes. Surviving high-level evasion drills requires elite mouse agility and peripheral scanning. These translate directly to dodging utility, counter-strafing, and fluid crosshair placement in tactical shooters." },
-  { q: "Is this good for Valorant or CS2?", a: "Absolutely. The rapid threat identification and repositioning translates directly to dodging flashes, grenades, and ultimate abilities while maintaining crosshair control." },
-  { q: "Does it improve hand-eye coordination?", a: "Yes, because you must physically move your mouse to navigate the safe coordinates you visually identified, syncing your visual cortex with your motor cortex." },
-  { q: "How does difficulty scaling work?", a: "As you score points, your level rises up to Level 15. Obstacle speed accelerates from 300 px/s up to 1600+ px/s, and spawn delay decreases." },
-  { q: "Are there score penalties for getting hit?", a: "No. Getting hit resets your combo streak and clears current obstacles for a brief reset, but does not deduct points or reduce your session timer." },
-  { q: "How long does each session run?", a: "Each session runs for a fixed 45 seconds, providing a standardized performance benchmark." },
-  { q: "What is a good score in Quick Dodge?", a: "Scoring 8,000+ points earns a Gold or Platinum grade, while reaching 17,000+ points with high evasion accuracy places you in the Master tier." },
-  { q: "Is this free?", a: "Yes! The SkillDrills Reflex Game Online is entirely free, ad-free, and runs purely in your web browser with zero downloads required." }
-];
-
-const RELATED_DRILLS = [
-  { id: "reaction-chain", name: "Reaction Chain", cat: "Reflex Training", desc: "Train precision stopping and impulse arrest on incoming targets.", href: "/drills/physical/reflex-training/reaction-chain" },
-  { id: "peripheral-threat-sweeper", name: "Peripheral Threat Sweeper", cat: "Reflex Training", desc: "Scan peripheral boundaries and eliminate approaching targets.", href: "/drills/physical/reflex-training/peripheral-threat-sweeper" },
-  { id: "agility-ladder", name: "Motor Sequencing (Agility Ladder)", cat: "Physical Fitness", desc: "Master bilateral motor sequencing and rhythmic mouse sweeps.", href: "/drills/physical/fitness/agility-ladder" },
-  { id: "cross-body-movement", name: "Cross-Body Movement", cat: "Physical Coordination", desc: "Improve bilateral motor coordination and cross-body tracking.", href: "/drills/physical/coordination/cross-body-movement" },
-  { id: "dynamic-grid-evasion", name: "Dynamic Grid Evasion", cat: "Physical Coordination", desc: "Evade dynamic grid hazards with rapid motor adjustments.", href: "/drills/physical/coordination/dynamic-grid-evasion" },
-  { id: "stability-challenge", name: "Stability Challenge", cat: "Physical Balance", desc: "Test static and dynamic balance holding capabilities.", href: "/drills/physical/balance-training/stability-challenge" }
-];
 
 // Rapid difficulty parameters formula driven by drillDifficulty
 const getLevelConfig = (level, combo = 0) => {
@@ -625,29 +602,37 @@ export default function QuickDodgeClient() {
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
         {/* Title */}
         {!isFullscreen && (
-          <div className="text-center">
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white uppercase">
-              Reflex Game Online (Quick Dodge)
-            </h1>
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-2">
+              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
+                Quick dodge
+              </h1>
+              <span className="text-[11px] font-semibold text-red-400/90 bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded-full" data-seo-kw="1">
+                Reflex Game Online
+              </span>
+            </div>
+            <p className="text-xs sm:text-sm text-slate-400 leading-relaxed max-w-3xl">
+              Dodging a pursuer is a prediction problem rather than a reaction one: by the time you see where it is, it has moved. Fast movements are planned in advance from an internal model of how the limb and the target will behave, not corrected continuously in flight (Kawato, 1999), because vision needs roughly 100–150 ms to alter a movement already under way (Woodworth, 1899). As the threats speed up, the window for a mid-course correction closes and only the prediction is left.
+            </p>
           </div>
         )}
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 gap-2.5 max-w-2xl mx-auto w-full">
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+          <div className="grid grid-cols-4 gap-2 w-full">
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
               <div className="text-lg sm:text-xl font-black text-white tabular-nums">{uiScore}</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
               <div className={`text-lg sm:text-xl font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>{uiTimeLeft}s</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
               <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Combo</div>
               <div className="text-lg sm:text-xl font-black text-rose-400 tabular-nums">{bestCombo}x</div>
             </div>
@@ -727,8 +712,8 @@ export default function QuickDodgeClient() {
             <FpsStartCard
               icon={ShieldAlert}
               accent="red"
-              title="Reflex Game Online"
-              subtitle="Mouse Control & Evasive Agility • 15 Levels"
+              title="Quick Dodge"
+              subtitle="Kinetic Evasion Reflex Drill • 15 Levels"
               rules={[
                 { icon: Target, accent: 'red', title: 'Evade Homing Obstacles', text: 'Navigate crosshair to dodge red threats spawning from edge boundaries' },
                 { icon: Zap, accent: 'rose', title: 'Streak Reset', text: 'Getting hit resets your combo streak without score or time penalties' },
@@ -835,7 +820,10 @@ export default function QuickDodgeClient() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {RULES_ITEMS.map((item, i) => (
                   <div key={i} className="bg-black p-4 rounded-xl border border-white/10">
-                    <p className="text-sm font-bold text-white mb-1">{item.title}</p>
+                    <h3 className="text-sm font-bold text-white mb-1 flex items-center gap-2">
+                      <Target className="w-4 h-4 text-red-400" />
+                      {item.title}
+                    </h3>
                     <p className="text-xs text-gray-300 leading-relaxed">{item.text}</p>
                   </div>
                 ))}
@@ -844,60 +832,21 @@ export default function QuickDodgeClient() {
 
             <DrillAccordion
               id="about"
-              title="About Reflex Game Online (Quick Dodge)"
+              title="About Quick Dodge (Reflex Game Online)"
               isOpen={openAccordion === 'about'}
               onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
             >
               <div className="space-y-4">
+                <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                  <ShieldAlert className="w-4 h-4 text-red-400" />
+                  Kinetic Collision Evasion & Trajectory Planning
+                </h3>
                 {ABOUT_TEXT.split('\n\n').map((para, i) => (
                   <p key={i} className="text-sm leading-relaxed text-gray-300">{para}</p>
                 ))}
               </div>
             </DrillAccordion>
-
-            <DrillAccordion
-              id="faq"
-              title="Frequently Asked Questions"
-              isOpen={openAccordion === 'faq'}
-              onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {FAQ_ITEMS.map((item, i) => (
-                  <div key={i} className="bg-[#05060b] border border-gray-800 rounded-xl p-5">
-                    <h4 className="text-sm font-bold text-gray-200 mb-2">{item.q}</h4>
-                    <p className="text-xs text-gray-400 leading-relaxed">{item.a}</p>
-                  </div>
-                ))}
-              </div>
-            </DrillAccordion>
           </div>
-        )}
-
-        {/* ── RELATED PHYSICAL & REFLEX DRILLS ── */}
-        {!isFullscreen && (
-          <section className="mt-4">
-            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3 font-sans">
-              Related Physical &amp; Reflex Drills
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {RELATED_DRILLS.map((drill) => (
-                <Link
-                  key={drill.id}
-                  href={drill.href}
-                  className="group bg-[#0c0c16] border border-white/5 hover:border-red-500/40 rounded-xl p-3.5 transition-all duration-200 hover:-translate-y-0.5 flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="text-[10px] font-bold text-red-400 uppercase tracking-wider mb-1">{drill.cat}</div>
-                    <div className="text-xs font-bold text-white group-hover:text-red-300 transition-colors">{drill.name}</div>
-                    <div className="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">{drill.desc}</div>
-                  </div>
-                  <div className="text-[10px] font-bold text-slate-500 group-hover:text-red-400 mt-3 flex items-center gap-1 transition-colors">
-                    Train Drill <span>→</span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
         )}
 
         {/* ── FOOTER ── */}

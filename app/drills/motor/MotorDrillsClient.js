@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import {
+  ArrowLeft,
   Hand,
   MousePointer,
   Gauge,
@@ -29,6 +30,9 @@ import AdjacentHubs from '@/components/AdjacentHubs';
 import { useTranslation } from '@/lib/i18n/useTranslation';
 import DrillPreview from '@/components/drill/DrillPreview';
 import { getDrillPreview } from '@/lib/drillPreviews';
+import StickyMobileCta from '@/components/StickyMobileCta';
+import { getLocalizedDrill } from '@/lib/i18n/drillNames';
+import { hasLocalizedRoute } from '@/lib/i18n/locales';
 
 // Tactical metadata & categorized discipline taxonomy for Motor skills
 const MOTOR_METADATA = {
@@ -115,7 +119,7 @@ const SKILL_PRESETS = [
 ];
 
 export default function MotorDrillsClient() {
-  const { t, localizeHref } = useTranslation();
+  const { locale, t, localizeHref } = useTranslation();
   const [isClient, setIsClient] = useState(false);
   const [drillLevels, setDrillLevels] = useState({});
   const [selectedDiscipline, setSelectedDiscipline] = useState('all');
@@ -343,19 +347,22 @@ export default function MotorDrillsClient() {
                 className="flex items-center gap-1.5 hover:text-emerald-400 transition-colors"
               >
                 <Home className="w-3.5 h-3.5" />
-                <span>HQ</span>
+                <span>{t('ui.nav.hq', 'HQ')}</span>
               </Link>
             </li>
             <li><ChevronRight className="w-3 h-3 text-hairline-2" /></li>
             <li>
-              <Link href={localizeHref('/drills')} className="hover:text-emerald-400 transition-colors">
-                {t('header.allHubs', 'Drills')}
+              <Link
+                href={hasLocalizedRoute(locale, '/drills') ? localizeHref('/drills') : '/drills'}
+                className="hover:text-emerald-400 transition-colors"
+              >
+                {t('ui.nav.drills', 'DRILLS')}
               </Link>
             </li>
             <li><ChevronRight className="w-3 h-3 text-hairline-2" /></li>
             <li>
               <span className="text-emerald-400 font-bold" aria-current="page">
-                {t('header.motor', 'Motor Sector')}
+                {t('header.motor', 'MOTOR')}
               </span>
             </li>
           </ol>
@@ -369,7 +376,7 @@ export default function MotorDrillsClient() {
           <p className="mt-2 text-sm sm:text-base text-ink-2 max-w-2xl leading-relaxed">
             {t(
               'hubs.motor.desc',
-              'Calibrate fine hand-eye coordination, rapid click speed thresholds, and sub-pixel path tracing. 100% browser-native with raw cursor feedback and zero input lag.'
+              'Motor skill drills measure how precisely and how fast you can control a mouse, a keyboard or a touchscreen. They all sit on one trade-off, Fitts’s Law: movement time grows with the logarithm of the distance to a target divided by that target’s width, so speed and accuracy cannot both be maximised at once (Fitts, 1954). Free, no sign-up, and every score stays in your browser.'
             )}
           </p>
         </div>
@@ -475,11 +482,18 @@ export default function MotorDrillsClient() {
               const userLevel = drillLevels[drill.folderName];
               const diffStyle = DIFFICULTY_STYLES[drill.difficulty] || DIFFICULTY_STYLES.Medium;
               const hasPreview = Boolean(getDrillPreview(drill.href));
+              const href = hasLocalizedRoute(locale, drill.href) ? localizeHref(drill.href) : drill.href;
+              const { name: displayName, tagline: displayTagline } = getLocalizedDrill(
+                drill.href,
+                locale,
+                drill.name,
+                drill.tagline
+              );
 
               return (
                 <Link
                   key={drill.href}
-                  href={drill.href}
+                  href={href}
                   className="group relative flex flex-col justify-between rounded-2xl bg-surface-1/90 border border-hairline p-5 shadow-lg transition-all duration-200 hover:-translate-y-1 hover:border-emerald-500/40 hover:shadow-xl hover:shadow-emerald-500/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
                 >
                   {/* Subtle top indicator hover line */}
@@ -504,7 +518,7 @@ export default function MotorDrillsClient() {
                           <span
                             className={`px-2 py-0.5 rounded-md border text-[9px] font-mono font-bold uppercase tracking-wider backdrop-blur-md bg-surface-1/80 ${diffStyle}`}
                           >
-                            {drill.difficulty}
+                            {drill.difficulty ? t(`ui.difficulty.${drill.difficulty.toLowerCase()}`, drill.difficulty) : drill.difficulty}
                           </span>
                         </div>
                       </div>
@@ -523,7 +537,7 @@ export default function MotorDrillsClient() {
                           <span
                             className={`px-2 py-0.5 rounded-md border text-[9px] font-mono font-bold uppercase tracking-wider ${diffStyle}`}
                           >
-                            {drill.difficulty}
+                            {drill.difficulty ? t(`ui.difficulty.${drill.difficulty.toLowerCase()}`, drill.difficulty) : drill.difficulty}
                           </span>
                         </div>
                       </div>
@@ -536,12 +550,12 @@ export default function MotorDrillsClient() {
 
                     {/* Drill Name */}
                     <h3 className="text-base font-bold text-ink-1 group-hover:text-emerald-400 transition-colors tracking-tight line-clamp-1">
-                      {drill.name}
+                      {displayName}
                     </h3>
 
                     {/* Tagline / Subtitle */}
                     <p className="mt-1.5 text-xs text-ink-3 leading-relaxed line-clamp-2">
-                      {drill.tagline}
+                      {displayTagline}
                     </p>
 
                     {/* Skill Focus Chips */}
@@ -568,7 +582,7 @@ export default function MotorDrillsClient() {
                     </span>
 
                     <span className="inline-flex items-center gap-1 font-bold text-emerald-400 group-hover:text-emerald-300 transition-colors uppercase tracking-wider">
-                      <span>Launch Drill</span>
+                      <span>{t('ui.launchDrill', 'Launch Drill')}</span>
                       <Play className="w-3 h-3 fill-current transition-transform group-hover:translate-x-0.5" />
                     </span>
                   </div>
@@ -644,6 +658,23 @@ export default function MotorDrillsClient() {
 
         {/* Clean Adjacent Hubs Navigation */}
         <AdjacentHubs currentCat="motor" />
+
+        {/* Back Link */}
+        <div className="mt-12 border-t border-hairline pt-6">
+          <Link 
+            href={hasLocalizedRoute(locale, '/drills') ? localizeHref('/drills') : '/drills'}
+            className="inline-flex items-center gap-2 text-xs font-mono uppercase font-bold text-ink-3 hover:text-ink-1 transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            {t('ui.returnToAllSectors', 'Return to All Sectors')}
+          </Link>
+        </div>
+
+        <StickyMobileCta
+          href={hasLocalizedRoute(locale, '/drills/motor/hand-eye-coordination/aim-trainer') ? localizeHref('/drills/motor/hand-eye-coordination/aim-trainer') : '/drills/motor/hand-eye-coordination/aim-trainer'}
+          label={t('hubs.motor.startCta', 'Start Aim Trainer')}
+          categoryName={t('header.motor', 'Motor')}
+        />
       </div>
 
       <SiteFooter />

@@ -715,36 +715,36 @@ export default function VisualTrackingSpeedTestClient() {
 
         {/* Drill Header */}
         {!isFullscreen && (
-          <div className="text-center">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-black uppercase tracking-tight text-white flex items-center justify-center gap-3 flex-wrap">
-              VISUAL TRACKING SPEED TEST
-              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
-                Smooth Pursuit Reflex & Dynamic Interception Trainer
-              </span>
+          <div className="flex flex-col gap-1">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+              Visual Tracking Speed Test
             </h1>
+            <p className="text-[13px] text-slate-400 leading-relaxed">
+              Visual tracking speed is how well your eyes follow a moving target and re-acquire it after a sudden change of direction. Smooth pursuit keeps pace up to roughly 30&deg;/s, and a catch-up saccade follows an abrupt change about 100&ndash;130&nbsp;ms later (Rashbass, 1961).
+            </p>
           </div>
         )}
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 gap-2.5 max-w-2xl mx-auto w-full">
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+          <div className="grid grid-cols-4 gap-2 w-full">
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
-              <div className="text-lg sm:text-xl font-black text-red-400 tabular-nums">{uiScore}</div>
+              <div className="text-base sm:text-lg font-black text-red-400 tabular-nums">{uiScore}</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
-              <div className={`text-lg sm:text-xl font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>
+              <div className={`text-base sm:text-lg font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>
                 {uiTimeLeft}s
               </div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Level</div>
-              <div className="text-lg sm:text-xl font-black text-indigo-400 tabular-nums">L{uiLevel}</div>
+              <div className="text-base sm:text-lg font-black text-indigo-400 tabular-nums">L{uiLevel}</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
-              <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
+              <div className="text-base sm:text-lg font-black text-amber-400 tabular-nums">{bestScore}</div>
             </div>
           </div>
         )}
@@ -897,9 +897,9 @@ export default function VisualTrackingSpeedTestClient() {
             >
               <div className="space-y-8 font-sans">
                 <section>
-                  <h4 className="text-base font-bold text-white mb-2 flex items-center gap-2">
+                  <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
                     <Eye className="w-4 h-4 text-red-400" /> What Is Visual Tracking & Kinetic Target Interception?
-                  </h4>
+                  </h3>
                   <p className="text-sm leading-relaxed mb-3 text-gray-300">
                     <strong>Visual Tracking Speed Test</strong> measures how fast and accurately you can acquire, track, and click targets gliding dynamically across your visual field. Unlike static flicking, moving target interception requires predicting projectile trajectory and matching crosshair speed to intercept point.
                   </p>
@@ -912,45 +912,25 @@ export default function VisualTrackingSpeedTestClient() {
                   <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-red-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Who Should Use This?</h5>
+                      <h4 className="text-xs font-bold text-white">Who Should Use This?</h4>
                     </div>
                     <p className="text-xs text-gray-300 leading-relaxed">Fast-paced FPS, arena shooter, and battle royale players looking to improve moving target interception and predictive clicks.</p>
                   </div>
                   <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Dynamic Visual Acuity</h5>
+                      <h4 className="text-xs font-bold text-white">Dynamic Visual Acuity</h4>
                     </div>
                     <p className="text-xs text-gray-300 leading-relaxed">Improves your ability to clearly resolve details and boundaries of moving targets across 2D visual angles.</p>
                   </div>
                   <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Zap className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Kinetic Intercept Precision</h5>
+                      <h4 className="text-xs font-bold text-white">Kinetic Intercept Precision</h4>
                     </div>
                     <p className="text-xs text-gray-300 leading-relaxed">Trains the neuromuscular connection to execute click commands precisely at the interception point.</p>
                   </div>
                 </div>
-              </div>
-            </DrillAccordion>
-
-            <DrillAccordion
-              id="faq"
-              title="Frequently Asked Questions"
-              isOpen={openAccordion === 'faq'}
-              onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-sans">
-                <FAQItem q="What is Visual Tracking Speed Test (Kinetic Interception)?" a="It is an interactive test where targets move across the screen at high velocities, challenging your smooth pursuit and intercept click timing." />
-                <FAQItem q="What is Dynamic Visual Acuity (DVA)?" a="DVA is the capacity of the visual system to track and resolve fine details while there is relative motion between the observer and the target." />
-                <FAQItem q="How does kinetic target training translate to games?" a="In games like Overwatch, Apex Legends, and Call of Duty, enemies constantly sprint and jump. Intercept training prevents trailing behind targets." />
-                <FAQItem q="Is this visual tracking drill free?" a="Yes, all drills on SkillDrills are 100% free with no signups, downloads, or pop-up ads required." />
-                <FAQItem q="How does dynamic level scaling work?" a="As your score and combo rise, target velocity increases, size shrinks, and time-to-live windows shorten continuously." />
-                <FAQItem q="Is there a time penalty for missing or timeouts?" a="By default, missing or timeouts only reset your combo streak. An opt-in time penalty (-0.8s per error) is available in session settings." />
-                <FAQItem q="What is smooth pursuit in vision?" a="Smooth pursuit is the visual eye movement mechanism that allows your eyes to closely follow a moving target across your visual field." />
-                <FAQItem q="Should I lead the target or click directly on it?" a="Focus your eyes directly on the center core of the target and execute a smooth click synced with its movement vector." />
-                <FAQItem q="What is a good score on this test?" a="A score above 5,000 indicates strong visual pursuit skills, while scores exceeding 10,000 represent elite tracking precision." />
-                <FAQItem q="How does this test measure reaction time?" a="It records the millisecond latency between target appearance and your successful click input." />
               </div>
             </DrillAccordion>
           </div>
@@ -1004,15 +984,6 @@ function RuleItem({ num, text, highlight = '', result }: { num: string; text: st
           {result}
         </div>
       </div>
-    </div>
-  );
-}
-
-function FAQItem({ q, a }: { q: string; a: string }) {
-  return (
-    <div className="bg-[#05060b] border border-gray-800 rounded-xl p-5 hover:border-gray-700 transition-colors font-sans">
-      <h4 className="text-sm font-bold text-gray-200 mb-2">{q}</h4>
-      <p className="text-xs text-gray-400 leading-relaxed">{a}</p>
     </div>
   );
 }

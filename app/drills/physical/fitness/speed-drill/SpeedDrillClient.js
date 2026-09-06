@@ -7,9 +7,9 @@ import Link from 'next/link';
 import {
   Activity, AlertCircle, ArrowRight, ChevronRight, Crosshair,
   Eye, GraduationCap, Play, RefreshCw, Target,
-  Timer, TrendingUp, Trophy, Volume2, VolumeX,
+  Timer, Volume2, VolumeX,
   Zap, ZapOff, Users, Share2, Sliders,
-  LogOut, Award, ShieldAlert, BarChart3, Info, Lightbulb, Flame
+  LogOut, Award, ShieldAlert, BarChart3, Info, Lightbulb
 } from 'lucide-react';
 
 import generateShareCard, { shareScoreCard } from '../../../../../components/ShareScoreCard';
@@ -68,31 +68,40 @@ const getLevelConfig = (level, combo = 0) => {
 };
 
 const RULES_ITEMS = [
-  { title: "Target Acquisition", text: "Click moving shrinking targets before radius decays to zero (+0.6s per hit)." },
+  { title: "Target Acquisition", text: "Click moving shrinking targets before radius decays to zero (+0.6s per hit). Each hit scores 100 points multiplied by your combo and level." },
   { title: "Combo Multiplier", text: "Chain unbroken target hits to build combo multiplier up to 3.0x max." },
   { title: "Level Progression", text: "Score increases level continuously. Target velocity & shrink rate accelerate dynamically." },
   { title: "Miss / Target Expiry", text: "Missing a target or letting target shrink to zero resets combo streak (and deducts 0.8s if enabled in settings)." }
 ];
 
-const FAQ_ITEMS = [
-  { q: "What is the Speed Drill reflex exercise?", a: "Speed Drill is a high-velocity target acquisition exercise that challenges players to click moving, shrinking targets before they vanish. It measures raw reaction speed, click timing, and tracking precision." },
-  { q: "How do target mechanics work?", a: "Yellow targets spawn with random initial velocities and bounce off canvas borders while shrinking over time. You must acquire and click each target before its radius reaches zero." },
-  { q: "How does difficulty scale in Speed Drill?", a: "As your score increases, difficulty scales continuously. Initial target sizes shrink, target movement speed accelerates up to 3.8x, and target shrinking rates increase." },
-  { q: "What happens when I miss or let a target expire?", a: "Missing a target or letting a target shrink to zero resets your combo multiplier back to 1.0x and triggers a red flash overlay. Clean hits add +0.6s to your timer, and missing or letting a target expire deducts 0.8s when time penalty is enabled in settings." },
-  { q: "How long does each session run?", a: "Each session starts with a 45-second timer. Every target hit earns a +0.6s extension, rewarding speed and precision with extended sessions." },
-  { q: "Does Speed Drill improve gaming performance?", a: "Yes. Rapid target acquisition and micro-burst clicking translate directly to faster time-to-kill (TTK) and sharper flick timing in FPS games like Valorant, CS2, and Apex Legends." },
-  { q: "What is a good score in Speed Drill?", a: "Scoring 12,000+ points earns a Gold or Platinum grade, while reaching 24,000+ points with 90%+ accuracy places you in the Master tier." },
-  { q: "Do I need special hardware to practice this drill?", a: "No special hardware is required. Any standard computer mouse with 1:1 raw input support works ideally with our pointer lock system." },
-  { q: "Is Speed Drill free to play?", a: "Yes, Speed Drill on SkillDrills is 100% free, ad-free, and runs entirely in your web browser with zero downloads." },
-  { q: "How often should I practice this drill?", a: "Practicing 5 to 10 minutes daily is recommended for optimal neuromuscular adaptation and consistent click timing improvement." }
-];
-
-const RELATED_DRILLS = [
-  { id: "stability-challenge", name: "Stability Challenge", cat: "Physical Balance", desc: "Test static and dynamic balance holding capabilities.", href: "/drills/physical/balance-training/stability-challenge" },
-  { id: "complex-pattern", name: "Complex Pattern", cat: "Physical Coordination", desc: "Train complex multi-limb movement patterns.", href: "/drills/physical/coordination/complex-pattern" },
-  { id: "cross-body-movement", name: "Cross-Body Movement", cat: "Physical Coordination", desc: "Improve bilateral motor coordination and cross-body tracking.", href: "/drills/physical/coordination/cross-body-movement" },
-  { id: "dynamic-grid-evasion", name: "Dynamic Grid Evasion", cat: "Physical Coordination", desc: "Evade dynamic grid hazards with rapid motor adjustments.", href: "/drills/physical/coordination/dynamic-grid-evasion" },
-  { id: "jump-sequence", name: "Jump Sequence Pro", cat: "Physical Fitness", desc: "Vertical trajectory & mid-air steering exercise.", href: "/drills/physical/fitness/jump-sequence" }
+// ============================================================
+// ABOUT & BIOMECHANICAL RESEARCH DATA
+// ============================================================
+const ABOUT_SECTIONS = [
+  {
+    icon: Crosshair,
+    title: "Ballistic Motor Flicks & Sub-Second Target Acquisition",
+    subtitle: "Woodworth two-component motor control under extreme speed demands",
+    content: "Rapid target acquisition relies on Woodworth\'s (1899) classic two-phase model: an initial open-loop ballistic motor impulse that snaps the cursor into the target vicinity, followed by fine visual adjustments before executing the click. As velocity scales up to 3.8x, the motor cortex minimizes dwell time between target detection and trigger execution."
+  },
+  {
+    icon: Target,
+    title: "Shrinking Spatial Boundaries & Fitts\'s Law Index of Difficulty",
+    subtitle: "Logarithmic speed-accuracy tradeoffs during target decay",
+    content: "Each target shrinks continuously from spawn until expiration. According to Fitts\'s Law (1954), the index of difficulty increases logarithmically as target width (W) constricts. Players must strike a balance between striking early at larger diameters versus waiting for stabilized tracking at smaller radii."
+  },
+  {
+    icon: Eye,
+    title: "Pre-Attentive Visual Saliency & Peripheral Detection",
+    subtitle: "Feature integration and rapid covert orienting",
+    content: "Formulated by Treisman & Gelade (1980), high-contrast moving targets trigger bottom-up visual saliency maps in the superior colliculus and parietal cortex. Peripheral vision flags target trajectory shifts instantly, directing saccadic eye movements to guide motor flick execution."
+  },
+  {
+    icon: Timer,
+    title: "Optical Tau & Time-to-Contact Interception Margin",
+    subtitle: "Retinal expansion rate analysis before target extinction",
+    content: "The visual system gauges target expiration via optical tau (τ), the inverse rate of retinal boundary decay (Lee, 1976). Accurate estimation of remaining time prevents premature frantic clicking or fatal hesitation, sustaining unbroken combo multipliers."
+  }
 ];
 
 export default function SpeedDrillClient() {
@@ -615,31 +624,37 @@ export default function SpeedDrillClient() {
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
         {/* Title */}
         {!isFullscreen && (
-          <div className="text-center">
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white uppercase">
-              Speed Drill Pro
+          <div className="text-left">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+              Speed Drill
+              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1">
+                Speed Drill Training
+              </span>
             </h1>
+            <p className="text-xs sm:text-sm text-slate-400 mt-2 max-w-3xl leading-relaxed">
+              A speed drill measures how fast you can move onto a target and click it as the target gets smaller and the time allowed gets shorter. Fitts&apos;s Law sets the floor: movement time grows with the logarithm of the distance to a target divided by its width, so a target half the size costs about the same extra time as one twice as far away (Fitts, 1954). The movement arrives in two parts &mdash; a fast ballistic impulse, then a slower visually guided correction (Woodworth, 1899) &mdash; and it is the correction that shrinking targets make expensive.
+            </p>
           </div>
         )}
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 gap-2.5 max-w-2xl mx-auto w-full">
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
-              <div className="text-lg sm:text-xl font-black text-white tabular-nums">{uiScore}</div>
+          <div className="grid grid-cols-4 gap-2 w-full">
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-3 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Score</div>
+              <div className="text-lg sm:text-2xl font-black text-white tabular-nums">{uiScore}</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
-              <div className={`text-lg sm:text-xl font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>{uiTimeLeft}s</div>
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-3 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Time</div>
+              <div className={`text-lg sm:text-2xl font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>{uiTimeLeft}s</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
-              <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-3 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Best Score</div>
+              <div className="text-lg sm:text-2xl font-black text-amber-400 tabular-nums">{bestScore}</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Combo</div>
-              <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestCombo}x</div>
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-3 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Best Combo</div>
+              <div className="text-lg sm:text-2xl font-black text-amber-400 tabular-nums">{bestCombo}x</div>
             </div>
           </div>
         )}
@@ -719,24 +734,8 @@ export default function SpeedDrillClient() {
             <FpsStartCard
               icon={Zap}
               accent="amber"
-              title="Speed Drill Pro"
+              title="Speed Drill"
               subtitle="Rapid Target Acquisition & Tapping • Continuous Scaling"
-              rules={[
-                { icon: Target, accent: 'orange', title: 'Click Shrinking Targets (+100 PTS)', text: '+100 PTS × Combo × Level multiplier (+0.6s per hit)' },
-                {
-                  icon: Zap,
-                  accent: 'red',
-                  title: penaltyEnabled ? 'Miss & Expiry Penalty (-0.8s)' : 'Miss & Expiry Reset',
-                  text: penaltyEnabled
-                    ? 'Missing clicks or letting targets expire subtracts 0.8s and resets combo'
-                    : 'Missing clicks or letting targets expire resets your combo multiplier'
-                },
-              ]}
-              stats={[
-                { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
-                { icon: Flame, label: 'Best Combo', value: `${bestCombo}x`, color: 'text-orange-400', accent: 'orange' },
-                { icon: TrendingUp, label: 'Best Level', value: `Lv. ${bestLevel}`, color: 'text-blue-400', accent: 'blue' },
-              ]}
               isTouchOnlyDevice={isTouchOnlyDevice}
               onStart={enterDrill}
             />
@@ -788,92 +787,27 @@ export default function SpeedDrillClient() {
 
             <DrillAccordion
               id="about"
-              title="About Speed Drill"
+              title="About Speed Drill Training"
               isOpen={openAccordion === 'about'}
               onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
             >
-              <div className="space-y-8">
-                <section>
-                  <h4 className="text-base font-bold text-white mb-2 flex items-center gap-2">
-                    <Crosshair className="w-4 h-4 text-emerald-400" /> What Is Speed Drill Target Acquisition Training?
-                  </h4>
-                  <p className="text-sm leading-relaxed text-gray-300 mb-3">
-                    <strong>Speed Drill</strong> is a high-velocity target acquisition and rapid tapping exercise. It trains your neuromuscular execution speed, visual tracking, and click timing under dynamic shrinking pressure. Yellow targets move erratically across the screen while constantly decreasing in radius.
-                  </p>
-                  <p className="text-sm leading-relaxed text-gray-300">
-                    As your score increases, difficulty scales continuously. Initial target radiuses shrink, velocity multipliers increase up to 3.8x, and shrinking speeds accelerate — sharpening the fast, decisive target lock needed to eliminate opponents in high-speed firefights without hesitating.
-                  </p>
-                </section>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
-                    <div className="flex items-center gap-2.5 mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Who Should Use This?</h5>
+              <div className="space-y-4">
+                {ABOUT_SECTIONS.map((sec, idx) => {
+                  const IconComp = sec.icon;
+                  return (
+                    <div key={idx} className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <IconComp className="w-4 h-4 text-emerald-400 shrink-0" />
+                        <h3 className="text-sm font-bold text-white tracking-wide">{sec.title}</h3>
+                      </div>
+                      <h4 className="text-xs font-semibold text-slate-400 mb-2">{sec.subtitle}</h4>
+                      <p className="text-xs leading-relaxed text-slate-300">{sec.content}</p>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">FPS players sharpening flick-to-target speed, esports competitors chasing lower time-to-kill, and anyone training raw click reflexes.</p>
-                  </div>
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
-                    <div className="flex items-center gap-2.5 mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Skills Improved</h5>
-                    </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Target acquisition speed, click timing precision, dynamic visual tracking, and neuromuscular reaction execution.</p>
-                  </div>
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
-                    <div className="flex items-center gap-2.5 mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-purple-600 flex items-center justify-center"><Timer className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Rapid Acquisition</h5>
-                    </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Every target shrinks to zero on a clock — hesitate and it expires, so lock on and click the instant it's in range.</p>
-                  </div>
-                </div>
-              </div>
-            </DrillAccordion>
-
-            <DrillAccordion
-              id="faq"
-              title="Frequently Asked Questions"
-              isOpen={openAccordion === 'faq'}
-              onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {FAQ_ITEMS.map((item, i) => (
-                  <div key={i} className="bg-[#05060b] border border-gray-800 rounded-xl p-5">
-                    <h4 className="text-sm font-bold text-gray-200 mb-2">{item.q}</h4>
-                    <p className="text-xs text-gray-400 leading-relaxed">{item.a}</p>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </DrillAccordion>
           </div>
-        )}
-
-        {/* ── RELATED PHYSICAL DRILLS ── */}
-        {!isFullscreen && (
-          <section className="mt-4">
-            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3 font-sans">
-              Related Physical &amp; Reflex Drills
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {RELATED_DRILLS.map((drill) => (
-                <Link
-                  key={drill.id}
-                  href={drill.href}
-                  className="group bg-[#0c0c16] border border-white/5 hover:border-emerald-500/40 rounded-xl p-3.5 transition-all duration-200 hover:-translate-y-0.5 flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider mb-1">{drill.cat}</div>
-                    <div className="text-xs font-bold text-white group-hover:text-emerald-300 transition-colors">{drill.name}</div>
-                    <div className="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">{drill.desc}</div>
-                  </div>
-                  <div className="text-[10px] font-bold text-slate-500 group-hover:text-emerald-400 mt-3 flex items-center gap-1 transition-colors">
-                    Train Drill <span>→</span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
         )}
 
         {/* ── FOOTER ── */}

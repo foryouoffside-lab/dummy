@@ -108,32 +108,7 @@ const ABOUT_SECTIONS = [
   }
 ];
 
-const FAQ_ITEMS = [
-  { q: "What is target prioritization in FPS games?", a: "Target prioritization is the cognitive process of evaluating multiple enemies on screen and deciding which threat to shoot first based on proximity, weapon threat level, and role." },
-  { q: "How do professional FPS players choose targets?", a: "Professional players assess threats instantaneously, prioritizing low-health enemies, immediate headshot threats, active duelists, and high-DPS opponents while ignoring non-threat distractors." },
-  { q: "Why do I shoot the wrong enemy under pressure?", a: "Shooting the wrong enemy is often caused by panic firing or poor visual filtering. Under high adrenaline, the brain defaults to shooting the first movement it detects rather than sorting target threat levels." },
-  { q: "What is threat assessment training?", a: "Threat assessment training uses cognitive drills to condition the brain to identify, rank, and eliminate targets in order of threat level (e.g., Red vs. Yellow) rather than raw visual proximity." },
-  { q: "How are errors penalised in Target Prioritization?", a: "Shooting a friendly green target, clicking a yellow target while a red threat is active, or missing clicks resets your combo streak. When the optional Time Penalty setting is enabled, each error deducts 0.6s from your clock." },
-  { q: "What is distractor suppression?", a: "Distractor suppression is the ability to ignore moving visual elements, friendly teammates, or non-threatening details (like decoy targets) to maintain absolute focus on critical targets." },
-  { q: "Can this drill improve decision making?", a: "Yes, this drill forces you to make split-second decisions under time pressure. Repeated practice builds the neural pathways required to make accurate tactical decisions in games." },
-  { q: "Does this help Valorant players?", a: "Yes, Valorant features decoy abilities (like Yoru clones or flashes) and chaotic team fights. Target prioritization training helps you ignore decoys and target the actual threat." },
-  { q: "Does this help CS2 players?", a: "Yes, CS2 requires high target discrimination, especially when holding angles or encountering multiple enemies pushing through choke points." },
-  { q: "Does this help Rainbow Six Siege players?", a: "Yes, Siege features visual clutter, friendly teammates close to enemies, and decoy gadgets. Visual filtering is critical to prevent friendly fire and eliminate threats." },
-  { q: "How often should I train target prioritization?", a: "We recommend practicing target selection for 10 minutes daily during your warm-up routine to build visual discipline and reduce panic-firing habits." },
-  { q: "Is this drill free?", a: "Yes, this Target Prioritization Trainer is 100% free, open-source, and runs directly in your web browser with zero downloads required." },
-  { q: "What skills does this drill improve?", a: "It trains threat assessment, visual filtering, distractor suppression, impulse control, tactical decision making, and target selection under intense cognitive pressure." },
-  { q: "Can cognitive training improve FPS performance?", a: "Yes, mechanical aim is only half the battle. Cognitive training helps you make better decisions, ensuring that your physical aim is directed at the correct target." },
-  { q: "Why is target selection important in competitive shooters?", a: "Even with perfect aim, shooting a friendly teammate or a low-threat target while a high-threat enemy is shooting at you will result in losing the engagement. Target selection ensures you eliminate the most critical threats first." }
-];
 
-const RELATED_DRILLS = [
-  { id: "flick-shot-training", name: "Pro Flick Trainer", cat: "FPS Flick", desc: "Snap to targets in time-attack mode with precision flicking.", href: "/drills/fps/flick-shot-training" },
-  { id: "180-degree-awareness", name: "180° Awareness Pro", cat: "FPS Awareness", desc: "Macro flicks under a forced 180-degree turn and audio cue.", href: "/drills/fps/180-degree-awareness" },
-  { id: "recoil-control", name: "Recoil Control", cat: "FPS Recoil", desc: "Calibrate pulling pattern compensation for weapons.", href: "/drills/fps/recoil-control" },
-  { id: "angle-hold-trainer", name: "Angle Hold Trainer", cat: "FPS Reaction", desc: "Test crosshair placement reaction speed on tight corners.", href: "/drills/fps/angle-hold-trainer" },
-  { id: "instant-response", name: "Instant Response", cat: "FPS Reaction", desc: "Raw reaction speed against a fixed center-screen flash.", href: "/drills/fps/instant-response" },
-  { id: "target-acquisition", name: "Target Acquisition", cat: "FPS Precision", desc: "Train rapid target identification and click timing.", href: "/drills/fps/target-acquisition" }
-];
 
 // ============================================================
 // MAIN COMPONENT
@@ -762,34 +737,34 @@ export default function TargetPrioritizationClient() {
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
         {/* Title */}
         {!isFullscreen && (
-          <div className="text-center">
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              TARGET PRIORITIZATION
-              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
-                Target Prioritization Trainer
-              </span>
+          <div className="text-left max-w-4xl mx-auto w-full">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white mb-2">
+              Target Prioritization Aim Trainer
             </h1>
+            <p className="text-xs sm:text-sm text-slate-400 leading-relaxed max-w-2xl">
+              Target prioritization is choosing which threat to shoot while holding fire on everything else. Stopping an action you have already started is its own process, racing the one that launched it (Logan &amp; Cowan, 1984) &mdash; which is why cancelling a shot is harder than taking one.
+            </p>
           </div>
         )}
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 gap-2.5 max-w-2xl mx-auto w-full">
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+          <div className="grid grid-cols-4 gap-2 w-full">
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
-              <div className="text-lg sm:text-xl font-black text-white tabular-nums">{score}</div>
+              <div className="text-sm sm:text-lg font-black text-white tabular-nums">{score}</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
-              <div className={`text-lg sm:text-xl font-black tabular-nums ${timeLeft <= 10 ? "text-red-400 animate-pulse" : "text-white"}`}>{timeLeft}s</div>
+              <div className={`text-sm sm:text-lg font-black tabular-nums ${timeLeft <= 10 ? "text-red-400 animate-pulse" : "text-white"}`}>{timeLeft}s</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Accuracy</div>
-              <div className="text-lg sm:text-xl font-black text-blue-400 tabular-nums">{accuracy}%</div>
+              <div className="text-sm sm:text-lg font-black text-blue-400 tabular-nums">{accuracy}%</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
-              <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
+              <div className="text-sm sm:text-lg font-black text-amber-400 tabular-nums">{bestScore}</div>
             </div>
           </div>
         )}
@@ -954,9 +929,9 @@ export default function TargetPrioritizationClient() {
             >
               <div className="space-y-8">
                 <section>
-                  <h4 className="text-base font-bold text-white mb-2 flex items-center gap-2">
+                  <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
                     <Crosshair className="w-4 h-4 text-blue-400" /> What Is Target Prioritization?
-                  </h4>
+                  </h3>
                   {ABOUT_INTRO.map((para, i) => (
                     <p key={i} className={`text-sm leading-relaxed text-gray-300 ${i < ABOUT_INTRO.length - 1 ? "mb-3" : ""}`}>{para}</p>
                   ))}
@@ -969,7 +944,7 @@ export default function TargetPrioritizationClient() {
                         <div className={`w-7 h-7 rounded-lg ${card.iconBg} flex items-center justify-center`}>
                           <card.icon className="w-3.5 h-3.5 text-white" />
                         </div>
-                        <h5 className="text-xs font-bold text-white">{card.title}</h5>
+                        <h4 className="text-xs font-bold text-white">{card.title}</h4>
                       </div>
                       <p className="text-xs text-gray-300 leading-relaxed">{card.text}</p>
                     </div>
@@ -978,9 +953,9 @@ export default function TargetPrioritizationClient() {
 
                 {ABOUT_SECTIONS.map((section, i) => (
                   <section key={i}>
-                    <h4 className="text-base font-bold text-white mb-2 flex items-center gap-2">
+                    <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
                       <section.icon className="w-4 h-4 text-blue-400" /> {section.title}
-                    </h4>
+                    </h3>
                     {section.paragraphs.map((para, j) => (
                       <p key={j} className={`text-sm leading-relaxed text-gray-300 ${j < section.paragraphs.length - 1 ? "mb-3" : ""}`}>{para}</p>
                     ))}
@@ -988,47 +963,7 @@ export default function TargetPrioritizationClient() {
                 ))}
               </div>
             </DrillAccordion>
-
-            <DrillAccordion
-              id="faq"
-              title="Frequently Asked Questions"
-              isOpen={openAccordion === 'faq'}
-              onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {FAQ_ITEMS.map((item, i) => (
-                  <FAQItem key={i} q={item.q} a={item.a} />
-                ))}
-              </div>
-            </DrillAccordion>
           </div>
-        )}
-
-        {/* ── RELATED FPS DRILLS ── */}
-        {!isFullscreen && (
-          <section className="mt-4">
-            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">
-              Related FPS Drills
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {RELATED_DRILLS.map((drill) => (
-                <Link
-                  key={drill.id}
-                  href={drill.href}
-                  className="group bg-[#0c0c16] border border-white/5 hover:border-blue-500/40 rounded-xl p-3.5 transition-all duration-200 hover:-translate-y-0.5 flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="text-[10px] font-bold text-blue-400 uppercase tracking-wider mb-1">{drill.cat}</div>
-                    <div className="text-xs font-bold text-white group-hover:text-blue-300 transition-colors">{drill.name}</div>
-                    <div className="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">{drill.desc}</div>
-                  </div>
-                  <div className="text-[10px] font-bold text-slate-500 group-hover:text-blue-400 mt-3 flex items-center gap-1 transition-colors">
-                    Train Drill <span>→</span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
         )}
       </main>
 
@@ -1051,15 +986,6 @@ function RuleItem({ num, text, highlight = '', result }) {
           {result}
         </div>
       </div>
-    </div>
-  );
-}
-
-function FAQItem({ q, a }) {
-  return (
-    <div className="bg-[#05060b] border border-gray-800 rounded-xl p-5 hover:border-gray-700 transition-colors font-sans">
-      <h4 className="text-sm font-bold text-gray-200 mb-2">{q}</h4>
-      <p className="text-xs text-gray-200 leading-relaxed">{a}</p>
     </div>
   );
 }

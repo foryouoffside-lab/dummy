@@ -74,25 +74,34 @@ const RULES_ITEMS = [
   { title: "Core Breach / Miss", text: "Missing threat or allowing core breach resets combo streak (and deducts 0.8s if enabled in settings)." }
 ];
 
-const FAQ_ITEMS = [
-  { q: "What is peripheral vision training?", a: "Peripheral vision training involves exercises designed to expand your active field of view, allowing your brain to process and react to visual stimuli occurring outside of your direct central focus." },
-  { q: "How does the Peripheral Threat Sweeper work?", a: "You must keep your gaze anchored to a central core while identifying and intercepting threat nodes that spawn at the screen's edges and move inward, bridging the gap between visual detection and motor execution." },
-  { q: "Why is peripheral awareness important for gamers?", a: "In esports titles like Valorant, CS2, and Apex Legends, players must keep their crosshair focused centrally while simultaneously monitoring the minimap, ammo, and flanking enemies. Strong peripheral vision reduces tunnel vision and reaction delay." },
-  { q: "What are the different threat types?", a: "As the game difficulty adapts, you will face Standard threats (Red, linear path), Fast threats (Orange, moving 1.6x speed), and Evasive threats (Purple, wobbling and altering their trajectory)." },
-  { q: "How does difficulty scale in Peripheral Threat Sweeper?", a: "As your score increases, difficulty scales continuously. Threat movement speed accelerates from 80 px/s up to 520 px/s, spawn interval drops from 1.4s down to 0.20s, and evasive wobbling threats appear more frequently." },
-  { q: "What happens when I miss or allow a core breach?", a: "Missing a threat or allowing a core breach resets your combo multiplier back to 1.0x and triggers a red flash overlay. Clean sweeps add +0.6s to your timer, and missing or allowing a core breach deducts 0.8s when time penalty is enabled in settings." },
-  { q: "How long does each session run?", a: "Each session starts with a 45-second timer. Every intercepted threat node earns a +0.6s extension, rewarding active peripheral defense with longer, high-intensity sessions." },
-  { q: "Does this game help with Valorant or CS2 aim?", a: "Yes. It trains rapid peripheral target acquisition and micro-flicks. Spotting enemy movement off-center without losing crosshair control is critical for tactical shooter success." },
-  { q: "What is a good score in Peripheral Threat Sweeper?", a: "Scoring 12,000+ points earns a Gold or Platinum grade, while reaching 24,000+ points with 90%+ accuracy places you in the Master tier." },
-  { q: "Is this reflex game free to play?", a: "Yes, Peripheral Threat Sweeper on SkillDrills is 100% free, ad-free, and runs entirely in your web browser with zero downloads." }
-];
-
-const RELATED_DRILLS = [
-  { id: "stability-challenge", name: "Stability Challenge", cat: "Physical Balance", desc: "Test static and dynamic balance holding capabilities.", href: "/drills/physical/balance-training/stability-challenge" },
-  { id: "complex-pattern", name: "Complex Pattern", cat: "Physical Coordination", desc: "Train complex multi-limb movement patterns.", href: "/drills/physical/coordination/complex-pattern" },
-  { id: "cross-body-movement", name: "Cross-Body Movement", cat: "Physical Coordination", desc: "Improve bilateral motor coordination and cross-body tracking.", href: "/drills/physical/coordination/cross-body-movement" },
-  { id: "dynamic-grid-evasion", name: "Dynamic Grid Evasion", cat: "Physical Coordination", desc: "Evade dynamic grid hazards with rapid motor adjustments.", href: "/drills/physical/coordination/dynamic-grid-evasion" },
-  { id: "quick-dodge", name: "Quick Dodge", cat: "Reflex Training", desc: "Evade homing obstacles using 1:1 raw mouse input.", href: "/drills/physical/reflex-training/quick-dodge" }
+// ============================================================
+// ABOUT & BIOMECHANICAL RESEARCH DATA
+// ============================================================
+const ABOUT_SECTIONS = [
+  {
+    icon: Eye,
+    title: "Covert Attentional Orienting & Peripheral Scanning",
+    subtitle: "Posner spatial cueing without foveal fixation shifts",
+    content: "Peripheral threat interception trains covert orienting of visual attention (Posner, 1980). Rather than constantly shifting primary eye gaze away from the central core, players maintain central fixation while covertly allocating attentional resources across the 360-degree radial periphery."
+  },
+  {
+    icon: Target,
+    title: "Pre-Attentive Feature Integration & Saliency Maps",
+    subtitle: "Treisman parallel visual search across radial angles",
+    content: "Newly spawned inward-moving threat vectors trigger pre-attentive motion and color feature detectors across the peripheral retina (Treisman & Gelade, 1980). High-contrast red and orange threat nodes generate instantaneous pop-out effects, alerting the parietal cortex to compute intercept angles."
+  },
+  {
+    icon: Shield,
+    title: "Two-Component Ballistic Flick & Core Protection",
+    subtitle: "Woodworth rapid motor snaps coupled with terminal capture adjustments",
+    content: "Target sweeps demand Woodworth\'s (1899) classic two-component motor control: an initial open-loop ballistic wrist snap covering 85%+ of the radial distance, followed by fine visual adjustments to intercept targets before they breach the central perimeter."
+  },
+  {
+    icon: Activity,
+    title: "Useful Field of View & Multi-Vector Bandwidth",
+    subtitle: "Expanding cognitive processing area under high-density spawn rates",
+    content: "As levels scale, spawn intervals compress from 1.4s down to 0.20s, and threat velocities accelerate up to 520 px/s. This expands the functional Useful Field of View (UFOV), conditioning the central nervous system to process multi-vector spatial hazards simultaneously."
+  }
 ];
 
 export default function PeripheralThreatSweeperClient() {
@@ -631,34 +640,37 @@ export default function PeripheralThreatSweeperClient() {
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
         {/* Title */}
         {!isFullscreen && (
-          <div className="text-center">
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white uppercase">
+          <div className="text-left">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
               Peripheral Threat Sweeper
-              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
+              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1">
                 Peripheral Vision Test
               </span>
             </h1>
+            <p className="text-xs sm:text-sm text-slate-400 mt-2 max-w-3xl leading-relaxed">
+              Peripheral vision is what you can detect without looking directly at it. Detail falls away sharply from the centre of gaze, but attention can still be shifted to a peripheral location while the eyes stay put, and a valid cue to that location speeds responses up (Posner, 1980). A single distinguishing feature such as colour is found in roughly the same time however many distractors surround it, while a target needing two features combined has to be searched for (Treisman &amp; Gelade, 1980) &mdash; which is what makes some threats here easy to catch at the edge and others not.
+            </p>
           </div>
         )}
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 gap-2.5 max-w-2xl mx-auto w-full">
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
-              <div className="text-lg sm:text-xl font-black text-white tabular-nums">{uiScore}</div>
+          <div className="grid grid-cols-4 gap-2 w-full">
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-3 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Score</div>
+              <div className="text-lg sm:text-2xl font-black text-white tabular-nums">{uiScore}</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
-              <div className={`text-lg sm:text-xl font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>{uiTimeLeft}s</div>
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-3 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Time</div>
+              <div className={`text-lg sm:text-2xl font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>{uiTimeLeft}s</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
-              <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-3 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Best Score</div>
+              <div className="text-lg sm:text-2xl font-black text-amber-400 tabular-nums">{bestScore}</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Combo</div>
-              <div className="text-lg sm:text-xl font-black text-emerald-400 tabular-nums">{bestCombo}x</div>
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-3 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Best Combo</div>
+              <div className="text-lg sm:text-2xl font-black text-emerald-400 tabular-nums">{bestCombo}x</div>
             </div>
           </div>
         )}
@@ -811,88 +823,23 @@ export default function PeripheralThreatSweeperClient() {
               isOpen={openAccordion === 'about'}
               onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
             >
-              <div className="space-y-8">
-                <section>
-                  <h4 className="text-base font-bold text-white mb-2 flex items-center gap-2">
-                    <Eye className="w-4 h-4 text-emerald-400" /> What Is Peripheral Threat Sweeper Vision Training?
-                  </h4>
-                  <p className="text-sm leading-relaxed text-gray-300 mb-3">
-                    <strong>Peripheral Threat Sweeper</strong> isolates and expands your active visual field, training your brain to process off-center stimuli without taking your direct gaze off primary focal points. Red threat nodes spawn at outer edge coordinates and travel inward toward your central shield core.
-                  </p>
-                  <p className="text-sm leading-relaxed text-gray-300">
-                    By mastering peripheral target scanning, players in CS2, Valorant, and Apex Legends reduce tunnel vision, detect flankers faster, and maintain crosshair alignment while processing minimap and peripheral cues — spotting enemy movement at the edges of the monitor instantly while keeping the crosshair locked on the primary angle.
-                  </p>
-                </section>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
-                    <div className="flex items-center gap-2.5 mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Who Should Use This?</h5>
+              <div className="space-y-4">
+                {ABOUT_SECTIONS.map((sec, idx) => {
+                  const IconComp = sec.icon;
+                  return (
+                    <div key={idx} className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <IconComp className="w-4 h-4 text-emerald-400 shrink-0" />
+                        <h3 className="text-sm font-bold text-white tracking-wide">{sec.title}</h3>
+                      </div>
+                      <h4 className="text-xs font-semibold text-slate-400 mb-2">{sec.subtitle}</h4>
+                      <p className="text-xs leading-relaxed text-slate-300">{sec.content}</p>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">FPS players reducing tunnel vision, esports competitors monitoring minimap and flanks, and anyone training off-center visual awareness.</p>
-                  </div>
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
-                    <div className="flex items-center gap-2.5 mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Skills Improved</h5>
-                    </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Peripheral vision range, spatial awareness, off-center target acquisition, and split-attention reaction speed.</p>
-                  </div>
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
-                    <div className="flex items-center gap-2.5 mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-purple-600 flex items-center justify-center"><Shield className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Threat Types</h5>
-                    </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Standard threats move in a straight line, Fast threats close 1.6x quicker, and Evasive threats wobble their trajectory — each demands a different scan pattern.</p>
-                  </div>
-                </div>
-              </div>
-            </DrillAccordion>
-
-            <DrillAccordion
-              id="faq"
-              title="Frequently Asked Questions"
-              isOpen={openAccordion === 'faq'}
-              onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {FAQ_ITEMS.map((item, i) => (
-                  <div key={i} className="bg-[#05060b] border border-gray-800 rounded-xl p-5">
-                    <h4 className="text-sm font-bold text-gray-200 mb-2">{item.q}</h4>
-                    <p className="text-xs text-gray-400 leading-relaxed">{item.a}</p>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </DrillAccordion>
           </div>
-        )}
-
-        {/* ── RELATED PHYSICAL DRILLS ── */}
-        {!isFullscreen && (
-          <section className="mt-4">
-            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3 font-sans">
-              Related Physical &amp; Reflex Drills
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {RELATED_DRILLS.map((drill) => (
-                <Link
-                  key={drill.id}
-                  href={drill.href}
-                  className="group bg-[#0c0c16] border border-white/5 hover:border-emerald-500/40 rounded-xl p-3.5 transition-all duration-200 hover:-translate-y-0.5 flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider mb-1">{drill.cat}</div>
-                    <div className="text-xs font-bold text-white group-hover:text-emerald-300 transition-colors">{drill.name}</div>
-                    <div className="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">{drill.desc}</div>
-                  </div>
-                  <div className="text-[10px] font-bold text-slate-500 group-hover:text-emerald-400 mt-3 flex items-center gap-1 transition-colors">
-                    Train Drill <span>→</span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
         )}
 
         {/* ── FOOTER ── */}

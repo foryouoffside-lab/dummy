@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import Link from 'next/link';
 
 import { Volume2, VolumeX, Target, Eye, Users, TrendingUp, Zap, ZapOff, Brain, Trophy } from 'lucide-react';
 
@@ -22,7 +21,6 @@ import DrillCountdown from '../../../../../components/drill/DrillCountdown';
 import DrillAccordion from '../../../../../components/drill/DrillAccordion';
 import DrillFlashOverlay from '../../../../../components/drill/DrillFlashOverlay';
 import DrillRuleItem from '../../../../../components/drill/DrillRuleItem';
-import DrillFAQItem from '../../../../../components/drill/DrillFAQItem';
 import FpsStartCard from '../../../../../components/drill/FpsStartCard';
 import DrillResultCard from '../../../../../components/drill/DrillResultCard';
 import useImmersiveMode from '@/lib/useImmersiveMode';
@@ -38,14 +36,7 @@ const TIME_PER_HIT = 0.6; // +0.6s per valid hit
 const TIME_PENALTY = 0.8; // -0.8s on miss / spam / timeout (opt-in gated)
 const STORAGE_KEY = 'skilldrills_visual_light_reaction_v5';
 
-const RELATED_DRILLS = [
-  { id: "go-no-go", name: "Go / No-Go", cat: "Reaction Speed", desc: "Response inhibition & selective reaction speed.", href: "/drills/visual/reaction-speed/go/no-go" },
-  { id: "moving-target", name: "Moving Target", cat: "Visual Tracking", desc: "Kinetic visual tracking and target intercept.", href: "/drills/visual/tracking-accuracy/moving-target" },
-  { id: "visual-search", name: "Visual Search", cat: "Visual Recognition", desc: "Conjunctive visual search speed & pattern recognition.", href: "/drills/visual/visual-recognition/visual-search" },
-  { id: "multiple-targets", name: "Multiple Targets", cat: "Visual Tracking", desc: "Track multiple moving targets across dynamic paths.", href: "/drills/visual/tracking-accuracy/multiple-targets" },
-  { id: "distance-judgment", name: "Distance Judgment Pro", cat: "Depth Perception", desc: "3D stereoscopic depth estimation & intercept timing.", href: "/drills/visual/depth-perception/distance-judgment" },
-  { id: "entropic-grid", name: "Entropic Grid", cat: "Visual Recognition", desc: "Visual search speed & pattern recognition grid.", href: "/drills/visual/visual-recognition/entropic-grid" }
-];
+
 
 const getSavedData = () => {
   try {
@@ -585,34 +576,34 @@ export default function StrobeLatencyClient() {
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
         {/* Title */}
         {!isFullscreen && (
-          <div className="text-center">
+          <div className="text-left">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              LIGHT REACTION PRO
-              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
-                Light Reaction Reflex Test
-              </span>
+              Light Reaction Reflex Test
             </h1>
+            <p className="text-sm text-slate-400 mt-1 max-w-3xl leading-relaxed">
+              Simple visual reaction time is how long it takes to respond to a light or a flash when you already know what to do — no choice, no decision. Healthy adults typically land around 200–250 ms (Woods et al., 2015; Kosinski, 2008). It is not a reflex: a true spinal reflex runs in tens of milliseconds, while this involves the visual cortex and motor cortex, which is why it is roughly ten times slower.
+            </p>
           </div>
         )}
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 gap-2.5 max-w-2xl mx-auto w-full">
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+          <div className="grid grid-cols-4 gap-2 w-full">
+            <div className="bg-[#0c0c16] border border-white/5 rounded-xl p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
               <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{uiScore}</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+            <div className="bg-[#0c0c16] border border-white/5 rounded-xl p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
               <div className={`text-lg sm:text-xl font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>
                 {uiTimeLeft}s
               </div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+            <div className="bg-[#0c0c16] border border-white/5 rounded-xl p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Level</div>
               <div className="text-lg sm:text-xl font-black text-indigo-400 tabular-nums">L{uiLevel}</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+            <div className="bg-[#0c0c16] border border-white/5 rounded-xl p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
               <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
             </div>
@@ -778,9 +769,9 @@ export default function StrobeLatencyClient() {
             >
               <div className="space-y-8">
                 <section>
-                  <h4 className="text-base font-bold text-white mb-2 flex items-center gap-2">
+                  <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
                     <Brain className="w-4 h-4 text-amber-400" /> What Is Light Reaction Training?
-                  </h4>
+                  </h3>
                   <p className="text-sm leading-relaxed mb-3">
                     <strong>Light Reaction Training</strong> measures visual motor latency and raw reflex response speed. The <strong>Light Reaction drill</strong> presents a central target that flashes white at unpredictable millisecond intervals, challenging you to react instantly upon visual stimulus onset.
                   </p>
@@ -793,21 +784,21 @@ export default function StrobeLatencyClient() {
                   <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Who Should Use This?</h5>
+                      <h4 className="text-xs font-bold text-white">Who Should Use This?</h4>
                     </div>
                     <p className="text-xs text-gray-300 leading-relaxed">FPS gamers, sprinters, martial artists, and drivers building lightning-fast visual motor reaction speed.</p>
                   </div>
                   <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-amber-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Skills Improved</h5>
+                      <h4 className="text-xs font-bold text-white">Skills Improved</h4>
                     </div>
                     <p className="text-xs text-gray-300 leading-relaxed">Visual reaction speed, motor latency, reflex speed, millisecond stimulus detection, and visual focus readiness.</p>
                   </div>
                   <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-purple-600 flex items-center justify-center"><Zap className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Reflex Readiness</h5>
+                      <h4 className="text-xs font-bold text-white">Reflex Readiness</h4>
                     </div>
                     <p className="text-xs text-gray-300 leading-relaxed">Maintain relaxed visual focus on the center reticle to respond immediately without anticipating or false-starting.</p>
                   </div>
@@ -815,52 +806,7 @@ export default function StrobeLatencyClient() {
 
               </div>
             </DrillAccordion>
-
-            <DrillAccordion
-              id="faq"
-              title="Frequently Asked Questions"
-              isOpen={openAccordion === 'faq'}
-              onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <DrillFAQItem q="What is the Light Reaction Pro Drill?" a="A free visual reflex speed test. Tap the target as fast as possible when it flashes bright white." />
-                <DrillFAQItem q="What is a good visual reaction time?" a="Average human visual reaction time is ~250ms, while elite gamers and reflex athletes consistently achieve sub-180ms reaction latencies." />
-                <DrillFAQItem q="How does progressive difficulty work?" a="As your score and combo climb, the flash window tightens continuously and the inter-flash delay speeds up dynamically." />
-                <DrillFAQItem q="Are there negative score or time penalties?" a="By default, premature taps or missed flashes only reset your combo multiplier. An opt-in time penalty (-0.8s per error) is available in session settings for hard-mode training." />
-                <DrillFAQItem q="Does difficulty decrease on mistakes?" a="No. Your level progression is monotonic — a mistake never takes you back down, so you can safely push your current level to its limit." />
-                <DrillFAQItem q="Why did my tap not register?" a="Tapping before the flash appears, or tapping faster than roughly 3 times per second, is treated as spam clicking rather than a genuine reaction — the strobe pauses for 1.2 seconds of stillness before resuming, so guessing can't substitute for a real reaction." />
-                <DrillFAQItem q="How long does each drill session last?" a="Each round starts with 45 seconds on the clock, and successful hits add +0.6s to extend your run." />
-                <DrillFAQItem q="Do I need to sign up?" a="No registration required. This drill is completely free and works instantly in your browser." />
-              </div>
-            </DrillAccordion>
           </div>
-        )}
-
-        {/* RELATED DRILLS GRID */}
-        {!isFullscreen && (
-          <section className="mt-4">
-            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">
-              Related Visual Drills
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {RELATED_DRILLS.map((drill) => (
-                <Link
-                  key={drill.id}
-                  href={drill.href}
-                  className="group bg-[#0c0c16] border border-white/5 hover:border-amber-500/40 rounded-xl p-3.5 transition-all duration-200 hover:-translate-y-0.5 flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="text-[10px] font-bold text-amber-400 uppercase tracking-wider mb-1">{drill.cat}</div>
-                    <div className="text-xs font-bold text-white group-hover:text-amber-300 transition-colors">{drill.name}</div>
-                    <div className="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">{drill.desc}</div>
-                  </div>
-                  <div className="text-[10px] font-bold text-slate-500 group-hover:text-amber-400 mt-3 flex items-center gap-1 transition-colors">
-                    Train Drill <span>→</span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
         )}
 
         {/* SITE FOOTER */}

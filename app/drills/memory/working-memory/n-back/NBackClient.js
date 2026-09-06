@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import Link from 'next/link';
 
 import {
   Brain, Play, RefreshCw, TrendingUp, Volume2, VolumeX,
@@ -20,7 +19,6 @@ import DrillCountdown from '../../../../../components/drill/DrillCountdown';
 import DrillAccordion from '../../../../../components/drill/DrillAccordion';
 import DrillFlashOverlay from '../../../../../components/drill/DrillFlashOverlay';
 import DrillRuleItem from '../../../../../components/drill/DrillRuleItem';
-import DrillFAQItem from '../../../../../components/drill/DrillFAQItem';
 import FpsStartCard from '../../../../../components/drill/FpsStartCard';
 import useImmersiveMode from '@/lib/useImmersiveMode';
 
@@ -400,19 +398,19 @@ export default function NBackClient() {
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
         {/* Title */}
         {!isFullscreen && (
-        <div className="text-center">
+        <div className="text-left">
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-            3-BACK TRAINING PRO
-            <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
-              3-Back Working Memory Test
-            </span>
+            N-Back Working Memory Test
           </h1>
+          <p className="text-[13px] text-slate-400 leading-relaxed mt-1">
+            The n-back task asks whether the current item matches the one n steps earlier, so you have to hold a short list and update it continuously at the same time. That combination of storage plus manipulation is what working memory means in Baddeley and Hitch's (1974) model, and its capacity sits near four items (Cowan, 2001).
+          </p>
         </div>
         )}
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-        <div className="grid grid-cols-4 gap-2.5 max-w-2xl mx-auto w-full">
+        <div className="grid grid-cols-4 gap-2 w-full">
           <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
             <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
             <div className="text-lg sm:text-xl font-black text-cyan-400 tabular-nums">{uiScore}</div>
@@ -661,20 +659,20 @@ export default function NBackClient() {
             </div>
           </DrillAccordion>
 
-          {/* ACCORDION 2: ABOUT 3-BACK TRAINING PRO */}
+          {/* ACCORDION 2: ABOUT N-BACK TRAINING */}
           <DrillAccordion
             id="about"
-            title="About 3-Back Training Pro"
+            title="About N-Back Working Memory Test"
             isOpen={openAccordion === 'about'}
             onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
           >
             <div className="space-y-8">
               <section>
-                <h4 className="text-base font-bold text-white mb-2 flex items-center gap-2">
+                <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
                   <Brain className="w-4 h-4 text-cyan-400" /> What Is N-Back Training?
-                </h4>
+                </h3>
                 <p className="text-sm leading-relaxed mb-3">
-                  <strong>N-Back Training</strong> is the gold-standard cognitive working memory paradigm used across neuroscientific research to measure fluid intelligence and memory updating capacity. The <strong>3-Back Training drill</strong> presents continuous letter streams, requiring you to determine whether the current item matches the letter presented 'N' steps ago.
+                  <strong>N-Back Training</strong> is the gold-standard cognitive working memory paradigm used across neuroscientific research to measure fluid intelligence and memory updating capacity. The <strong>N-Back Working Memory Test</strong> presents continuous stimulus streams, requiring you to determine whether the current item matches the item presented 'N' steps ago.
                 </p>
                 <p className="text-sm leading-relaxed">
                   By practicing <strong>working memory updating</strong>, you expand your executive control buffer and strengthen information manipulation speed under time pressure.
@@ -685,89 +683,35 @@ export default function NBackClient() {
                 <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                   <div className="flex items-center gap-2.5 mb-2">
                     <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
-                    <h5 className="text-xs font-bold text-white">Who Should Use This?</h5>
+                    <h4 className="text-xs font-bold text-white">Who Should Use This?</h4>
                   </div>
                   <p className="text-xs text-gray-300 leading-relaxed">Students improving focus, professionals maintaining mental agility, researchers studying working memory, and cognitive athletes.</p>
                 </div>
                 <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                   <div className="flex items-center gap-2.5 mb-2">
                     <div className="w-7 h-7 rounded-lg bg-cyan-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
-                    <h5 className="text-xs font-bold text-white">Skills Improved</h5>
+                    <h4 className="text-xs font-bold text-white">Skills Improved</h4>
                   </div>
                   <p className="text-xs text-gray-300 leading-relaxed">Working memory capacity, cognitive control, sustained attention, information updating, and executive function.</p>
                 </div>
                 <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                   <div className="flex items-center gap-2.5 mb-2">
                     <div className="w-7 h-7 rounded-lg bg-purple-600 flex items-center justify-center"><Zap className="w-3.5 h-3.5 text-white" /></div>
-                    <h5 className="text-xs font-bold text-white">Sub-Vocalization</h5>
+                    <h4 className="text-xs font-bold text-white">Sub-Vocalization</h4>
                   </div>
-                  <p className="text-xs text-gray-300 leading-relaxed">Mentally repeat the last 3 letters in order to keep your working memory buffer continuously updated.</p>
+                  <p className="text-xs text-gray-300 leading-relaxed">Mentally repeat the last N items in order to keep your working memory buffer continuously updated.</p>
                 </div>
               </div>
 
             </div>
           </DrillAccordion>
-
-          {/* ACCORDION 3: FREQUENTLY ASKED QUESTIONS */}
-          <DrillAccordion
-            id="faq"
-            title="Frequently Asked Questions"
-            isOpen={openAccordion === 'faq'}
-            onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
-          >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <DrillFAQItem q="What is the 3-Back Training Pro Drill?" a="A free N-Back working memory task. Letters appear every 2 seconds. Compare current letter to the one from 3 steps back." />
-              <DrillFAQItem q="Why is N-Back considered the gold standard?" a="It requires continuous working memory updating and executive control. Neuroscientific research shows improvements in working memory capacity and fluid intelligence." />
-              <DrillFAQItem q="How does progressive difficulty work?" a="Starts at 3-Back. Every 1200 points earned (roughly 8 correct judgments) automatically increments the N-Back level to 4-Back and beyond, and the letter display speeds up." />
-              <DrillFAQItem q="Are there negative score or time penalties?" a="No. An incorrect judgment never deducts score points or timer seconds, and a timed-out letter costs nothing either. A wrong answer only breaks your accuracy and your streak." />
-              <DrillFAQItem q="Can the drill end before the timer does?" a="No. Every run lasts the full 45 seconds no matter how many judgments you get wrong, so a bad start never cuts your session short — keep going and the accuracy score reflects the whole run." />
-              <DrillFAQItem q="Does difficulty decrease on mistakes?" a="No. Your N-Back level only ever goes up — a mistake never takes you back down, so you can safely master your current level." />
-              <DrillFAQItem q="How long does each drill session last?" a="Each round is timed for exactly 45 seconds of continuous focus." />
-              <DrillFAQItem q="Do I need to sign up?" a="No registration required. This drill runs directly in your browser with instant response." />
-              <DrillFAQItem q="What is the difference between N-Back and Dual N-Back?" a="This drill is a single-modality (letter) N-Back. Dual N-Back adds a second, simultaneous stream (typically spatial position) that must be tracked independently — a harder variant sometimes linked to fluid intelligence gains in research, though results are debated." />
-              <DrillFAQItem q="Can N-Back training increase IQ?" a="Some early studies suggested N-Back training could raise fluid intelligence scores, though later replication attempts produced mixed results. What is well-supported is that regular N-Back practice reliably improves performance on working-memory tasks themselves." />
-              <DrillFAQItem q="What is a good N-Back level to reach?" a="Comfortably sustaining 3-Back with high accuracy is a solid baseline. Advancing to 4-Back or 5-Back with consistent accuracy places you well above average working memory capacity." />
-            </div>
-          </DrillAccordion>
           </div>
         )}
 
-        {/* RELATED DRILLS GRID */}
-        {!isFullscreen && (
-          <section className="mt-4">
-            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">
-              Related Memory Drills
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              <RelatedCard href="/drills/memory/spatial-memory/path-tracing" title="Path Tracing" desc="Retrace animated path sequences on expanding grids." cat="Spatial Memory" />
-              <RelatedCard href="/drills/memory/spatial-memory/object-location" title="Object Location" desc="Memorize and locate emoji objects on grids." cat="Spatial Memory" />
-              <RelatedCard href="/drills/memory/spatial-memory/grid-memorization" title="Grid Memorization" desc="Memorize progressive spatial grid patterns." cat="Spatial Memory" />
-              <RelatedCard href="/drills/memory/short-term-memory/word-recall" title="Word Recall" desc="Free recall random word lists under time pressure." cat="Short-Term Memory" />
-              <RelatedCard href="/drills/memory/short-term-memory/color-sequence" title="Color Sequence" desc="Watch and recall color sequences." cat="Short-Term Memory" />
-              <RelatedCard href="/drills/memory/short-term-memory/digit-span" title="Digit Span" desc="Train numerical short-term memory capacity." cat="Short-Term Memory" />
-            </div>
-          </section>
-        )}
       </main>
 
       {/* SITE FOOTER */}
       {!isFullscreen && <DrillFooter />}
     </div>
-  );
-}
-
-// === Subcomponents ===
-function RelatedCard({ href, title, desc, cat }) {
-  return (
-    <Link href={href} className="group bg-[#0c0c16] border border-white/5 hover:border-cyan-500/40 rounded-xl p-3.5 transition-all duration-200 hover:-translate-y-0.5 flex flex-col justify-between">
-      <div>
-        {cat && <div className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider mb-1">{cat}</div>}
-        <div className="text-xs font-bold text-white group-hover:text-cyan-300 transition-colors">{title}</div>
-        <div className="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">{desc}</div>
-      </div>
-      <div className="text-[10px] font-bold text-slate-500 group-hover:text-cyan-400 mt-3 flex items-center gap-1 transition-colors">
-        Train Drill <span>→</span>
-      </div>
-    </Link>
   );
 }

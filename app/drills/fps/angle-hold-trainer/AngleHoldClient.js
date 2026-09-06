@@ -118,17 +118,7 @@ const ABOUT_SECTIONS = [
   }
 ];
 
-const FAQ_ITEMS = [
-  { q: "What is crosshair placement?", a: "Crosshair placement is a core shooter mechanic where you position your aim cursor exactly where an enemy's head is expected to spawn or appear, minimizing the physical distance required to shoot them." },
-  { q: "What is peeker's advantage?", a: "Peeker's advantage is a latency-driven delay where a moving player rounding a corner gets to see a stationary player holding the angle slightly before the stationary player's screen updates with their presence." },
-  { q: "How do CS2 and Valorant players hold angles?", a: "Players hold corners by leaving a slight horizontal gap between the corner wall and their crosshair. This offset accommodates their visual reaction delay, allowing them to click without needing to flick when an enemy swings wide." },
-  { q: "How far should my crosshair be from the wall?", a: "If enemies consistently push past your crosshair before you can click, hold wider (further away from the corner). If you shoot early and miss, hold tighter. Adjust the distance to match your reaction latency." },
-  { q: "How are errors penalised in Angle Hold Pro?", a: "By default, pre-firing early, shooting a fake peek, missing, or letting an enemy retreat resets your streak combo without reducing clock time. When the optional Time Penalty setting is enabled, each error deducts 0.8s from the session clock." },
-  { q: "Which competitive shooters does this drill help?", a: "This drill directly benefits Valorant defenders holding site angles, CS2 players covering bomb site holds against peeker swings, and Rainbow Six Siege anchors who need fast passive-hold reaction speed against tight-angle peeks." },
-  { q: "What skills does this drill improve?", a: "It improves trigger discipline, peek reaction speed, crosshair-to-corner distance calibration, and visual tracking of fast, variable peeks." },
-  { q: "How often should I practice crosshair placement?", a: "We recommend dedicating 10-15 minutes to crosshair placement and angle holding drills daily before your gaming sessions." },
-  { q: "Is this drill free?", a: "Yes, this drill is completely free to use and runs directly in any modern browser without requiring any downloads or account registration." }
-];
+
 
 const RELATED_DRILLS = [
   { id: "180-degree-awareness", name: "180° Awareness Pro", cat: "FPS Awareness", desc: "Master 180-degree snap turns and peripheral threat detection.", href: "/drills/fps/180-degree-awareness" },
@@ -719,34 +709,34 @@ export default function AngleHoldClient() {
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
         {/* Title */}
         {!isFullscreen && (
-          <div className="text-center">
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              ANGLE HOLD PRO
-              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
-                Crosshair Placement Trainer
-              </span>
+          <div className="text-left w-full">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white mb-2">
+              Crosshair Placement & Angle Hold Trainer
             </h1>
+            <p className="text-xs sm:text-sm text-slate-400 max-w-3xl leading-relaxed">
+              Holding an angle means reacting to an opponent who appears exactly where you are already aiming. A typical adult reacts to one expected visual stimulus in 200&ndash;250&nbsp;ms, and having to decide whether to shoot adds more, because reaction time rises with the number of alternatives (Donders, 1868; Hick, 1952).
+            </p>
           </div>
         )}
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 gap-2.5 max-w-2xl mx-auto w-full">
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+          <div className="grid grid-cols-4 gap-2 w-full">
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
-              <div className="text-lg sm:text-xl font-black text-white tabular-nums">{uiScore}</div>
+              <div className="text-base sm:text-lg font-black text-white tabular-nums">{uiScore}</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
-              <div className={`text-lg sm:text-xl font-black tabular-nums ${uiTimeLeft <= 10 ? "text-red-400 animate-pulse" : "text-white"}`}>{uiTimeLeft}s</div>
+              <div className={`text-base sm:text-lg font-black tabular-nums ${uiTimeLeft <= 10 ? "text-red-400 animate-pulse" : "text-white"}`}>{uiTimeLeft}s</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Accuracy</div>
-              <div className="text-lg sm:text-xl font-black text-blue-400 tabular-nums">{accuracy}%</div>
+              <div className="text-base sm:text-lg font-black text-blue-400 tabular-nums">{accuracy}%</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
-              <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
+              <div className="text-base sm:text-lg font-black text-amber-400 tabular-nums">{bestScore}</div>
             </div>
           </div>
         )}
@@ -908,9 +898,9 @@ export default function AngleHoldClient() {
             >
               <div className="space-y-8">
                 <section>
-                  <h4 className="text-base font-bold text-white mb-2 flex items-center gap-2">
+                  <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
                     <Crosshair className="w-4 h-4 text-orange-400" /> What Is Crosshair Placement & Angle Holding?
-                  </h4>
+                  </h3>
                   {ABOUT_INTRO.map((para, i) => (
                     <p key={i} className={`text-sm leading-relaxed text-gray-300 ${i < ABOUT_INTRO.length - 1 ? "mb-3" : ""}`}>{para}</p>
                   ))}
@@ -923,7 +913,7 @@ export default function AngleHoldClient() {
                         <div className={`w-7 h-7 rounded-lg ${card.iconBg} flex items-center justify-center`}>
                           <card.icon className="w-3.5 h-3.5 text-white" />
                         </div>
-                        <h5 className="text-xs font-bold text-white">{card.title}</h5>
+                        <h4 className="text-xs font-bold text-white">{card.title}</h4>
                       </div>
                       <p className="text-xs text-gray-300 leading-relaxed">{card.text}</p>
                     </div>
@@ -932,26 +922,13 @@ export default function AngleHoldClient() {
 
                 {ABOUT_SECTIONS.map((section, i) => (
                   <section key={i}>
-                    <h4 className="text-base font-bold text-white mb-2 flex items-center gap-2">
+                    <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
                       <section.icon className="w-4 h-4 text-orange-400" /> {section.title}
-                    </h4>
+                    </h3>
                     {section.paragraphs.map((para, j) => (
                       <p key={j} className={`text-sm leading-relaxed text-gray-300 ${j < section.paragraphs.length - 1 ? "mb-3" : ""}`}>{para}</p>
                     ))}
                   </section>
-                ))}
-              </div>
-            </DrillAccordion>
-
-            <DrillAccordion
-              id="faq"
-              title="Frequently Asked Questions"
-              isOpen={openAccordion === 'faq'}
-              onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {FAQ_ITEMS.map((item, i) => (
-                  <FAQItem key={i} q={item.q} a={item.a} />
                 ))}
               </div>
             </DrillAccordion>
@@ -1005,15 +982,6 @@ function RuleItem({ num, text, highlight = '', result }) {
           {result}
         </div>
       </div>
-    </div>
-  );
-}
-
-function FAQItem({ q, a }) {
-  return (
-    <div className="bg-[#05060b] border border-gray-800 rounded-xl p-5 hover:border-gray-700 transition-colors font-sans">
-      <h4 className="text-sm font-bold text-gray-200 mb-2">{q}</h4>
-      <p className="text-xs text-gray-200 leading-relaxed">{a}</p>
     </div>
   );
 }

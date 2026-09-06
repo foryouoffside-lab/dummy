@@ -173,6 +173,20 @@ export default function RootLayout({ children }) {
               "description": `Free online platform with ${totalDrillsCount} training drills for FPS gaming skills, cognitive enhancement, brain training, memory improvement, typing speed, and mental fitness.`,
               "email": "support@skilldrills.online",
               "foundingDate": "2026",
+              // Points the entity at a page that actually says who runs this and
+              // how the measurements work. `sameAs` is deliberately absent: this
+              // project controls no social profiles, and inventing one would be
+              // a fabricated trust signal.
+              "contactPoint": {
+                "@type": "ContactPoint",
+                "email": "support@skilldrills.online",
+                "contactType": "customer support",
+                "availableLanguage": ["English"]
+              },
+              "subjectOf": {
+                "@type": "AboutPage",
+                "url": "https://skilldrills.online/about"
+              },
               "slogan": "Master Your Mind & Mechanics",
               "areaServed": { "@type": "World", "name": "Worldwide" },
               "potentialAction": {

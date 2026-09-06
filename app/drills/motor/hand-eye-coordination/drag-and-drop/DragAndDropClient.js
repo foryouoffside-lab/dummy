@@ -2,7 +2,6 @@
 import { isIdleFrameSkippable } from '@/lib/performance';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import Link from 'next/link';
 
 import { 
   Activity, AlertCircle, ArrowRight, Brain, ChevronRight, 
@@ -149,33 +148,6 @@ const ABOUT_TEXT = `Drag & Drop Precision Training is a mechanical motor drill d
 By click-holding, transporting, and releasing objects into moving target containers, players build smooth muscle memory for pixel-accurate computer navigation in competitive games and professional software.
 
 As your score rises, target containers shrink and movement speed accelerates, continuously pushing your spatial control ceiling.`;
-
-const FAQ_ITEMS = [
-  { q: "What is the Drag and Drop Precision Trainer?", a: "The Drag and Drop Precision Trainer is a specialized motor drill designed to test and refine fine cursor control, spatial dragging accuracy, and deceleration timing." },
-  { q: "How does drag and drop training improve mouse control?", a: "By requiring you to click, transport, and accurately release objects into moving target zones under time pressure, it strengthens micro-motor pathways and cursor stability." },
-  { q: "Does drag precision training benefit FPS players?", a: "Yes, dragging and releasing precise coordinates trains mouse deceleration and stopping power, essential for crosshair placement and inventory management." },
-  { q: "How does difficulty scale in this drill?", a: "As your score increases, the level scales from 1 to 15, shrinking target containers, accelerating movement speed, and shortening target lifespan." },
-  { q: "What happens when a drop misses the target?", a: "Releasing outside the target zone resets your current combo multiplier to zero and triggers a red error flash without point loss." },
-  { q: "How is drag accuracy calculated?", a: "Accuracy is calculated as total successful target drops divided by total drop attempts, displayed as a real-time percentage." },
-  { q: "Can I adjust mouse sensitivity for this drill?", a: "Yes — the Mouse Sensitivity slider in Session Settings on the drills hub matches your raw input multiplier and cm/360, and applies to every mouse-aimed drill." },
-  { q: "Is this drag and drop drill free?", a: "Yes, the drill is 100% free with no sign-ups or downloads required, running directly in modern web browsers." },
-  { q: "How do combo multipliers work?", a: "Sustaining consecutive accurate drops builds combo multipliers up to 3.0x bonus points per successful placement." },
-  { q: "Can graphic designers and editors benefit from this drill?", a: "Yes, designers and editors build high-precision dragging dexterity needed for adjusting nodes, layers, and clip placement on timelines." },
-  { q: "Does this drill support touch screen input?", a: "This drill requires pointer-lock mouse input for cursor control, so it is not playable on touch-only phones or tablets. Use a desktop or laptop with a mouse for the full experience." },
-  { q: "How long should I train drag precision daily?", a: "A 10-15 minute daily session helps build muscle memory and maintain high baseline cursor control." },
-  { q: "How is high performance maintained during gameplay?", a: "The canvas engine utilizes cached backdrop grid rendering and hardware-accelerated requestAnimationFrame loops for smooth 60+ FPS performance." },
-  { q: "What is the best technique for high scores?", a: "Maintain smooth, controlled dragging speed rather than rushing, avoiding premature drops outside target boundaries." },
-  { q: "How does the 45-second session timer work?", a: "Each session runs for a fixed 45 seconds, giving you a standardized time window to score maximum points and benchmark your performance." }
-];
-
-const RELATED_DRILLS = [
-  { id: "aim-trainer", name: "Aim Trainer Elite", cat: "Motor Coordination", desc: "Score-based dynamic target acquisition drill.", href: "/drills/motor/hand-eye-coordination/aim-trainer" },
-  { id: "precision-flick-shot", name: "Precision Flick Shot", cat: "Motor Coordination", desc: "Precision single-target click accuracy trainer.", href: "/drills/motor/hand-eye-coordination/precision-flick-shot" },
-  { id: "flick-shot-training", name: "Pro Flick Trainer", cat: "FPS Flicking", desc: "Snap to targets in time-attack mode with precision flicking.", href: "/drills/fps/flick-shot-training" },
-  { id: "target-switching-swarm", name: "Target Switching", cat: "FPS Multi-Kill", desc: "Flick and track target arrays rapidly.", href: "/drills/fps/target-switching-swarm" },
-  { id: "steady-hand", name: "Steady Hand Trainer", cat: "Motor Control", desc: "Improve fine motor mouse control and stability.", href: "/drills/motor/precision-control/steady-hand" },
-  { id: "rapid-tapping", name: "Rapid Tapping", cat: "Motor Speed", desc: "Boost physical clicking speed and stamina.", href: "/drills/motor/movement-speed/rapid-tapping" }
-];
 
 // ============================================================
 // MAIN COMPONENT
@@ -732,35 +704,35 @@ export default function DragAndDropClient() {
     <div className="min-h-screen bg-[#050508] text-white flex flex-col font-sans select-none">
       {/* ── MAIN CONTENT AREA ── */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
-        {/* Title */}
+        {/* Title & AIO Header */}
         {!isFullscreen && (
-          <div className="text-center">
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white uppercase">
-              Drag &amp; Drop Precision
-              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
-                Drag &amp; Drop Mouse Trainer
-              </span>
+          <div className="text-left">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+              Drag &amp; Drop Mouse Trainer
             </h1>
+            <p className="text-sm text-slate-400 mt-1.5 leading-relaxed max-w-3xl">
+              A drag and drop test measures how accurately you can pick up an object, carry it with the mouse button held down, and release it on a target. Dragging is measurably slower and more error-prone than simply pointing at the same target with the same device (MacKenzie, Sellen &amp; Buxton, 1991), and the carry obeys the Steering Law: the time to stay inside a corridor scales with its length divided by its width, so a lane half as wide takes about twice as long to cross cleanly (Accot &amp; Zhai, 1997).
+            </p>
           </div>
         )}
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 gap-2.5 max-w-2xl mx-auto w-full">
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
+          <div className="grid grid-cols-4 gap-2 w-full">
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Score</div>
               <div className="text-lg sm:text-xl font-black text-white tabular-nums">{uiScore}</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Time Left</div>
               <div className={`text-lg sm:text-xl font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>{uiTimeLeft}s</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Accuracy</div>
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Accuracy</div>
               <div className="text-lg sm:text-xl font-black text-blue-400 tabular-nums">{analytics.accuracy}%</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Best Score</div>
               <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
             </div>
           </div>
@@ -858,7 +830,7 @@ export default function DragAndDropClient() {
             <FpsStartCard
               icon={Move}
               accent="blue"
-              title="Drag & Drop Precision"
+              title="Drag & Drop Mouse Trainer"
               subtitle="Spatial Drag & Drop Target Alignment • 15 Levels"
               rules={[
                 { icon: Target, accent: 'blue', title: 'Drag Blue Ball into Moving Bucket (+100 PTS)', text: 'Grab the blue ball and drop it cleanly inside the hollow moving blue bucket' },
@@ -975,86 +947,44 @@ export default function DragAndDropClient() {
 
             <DrillAccordion
               id="about"
-              title="About Drag & Drop Precision Trainer"
+              title="About Drag & Drop Mouse Trainer"
               isOpen={openAccordion === 'about'}
               onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
             >
-              <div className="space-y-8">
-                <div className="space-y-4">
+              <div className="space-y-6">
+                <div className="space-y-3">
+                  <h3 className="text-base font-bold text-white">Fine Motor Spatial Dragging &amp; Deceleration</h3>
                   {ABOUT_TEXT.split('\n\n').map((para, i) => (
                     <p key={i} className="text-sm leading-relaxed text-gray-300">{para}</p>
                   ))}
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                  <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Who Should Use This?</h5>
+                      <h4 className="text-xs font-bold text-white">Target Audiences</h4>
                     </div>
                     <p className="text-xs text-gray-300 leading-relaxed">Graphic designers dragging nodes and layers, video editors placing timeline clips, FPS gamers refining inventory drags, and anyone wanting steadier cursor control.</p>
                   </div>
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                  <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Skills Improved</h5>
+                      <h4 className="text-xs font-bold text-white">Steering Dynamics</h4>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Spatial dragging accuracy, cursor deceleration control, click-hold coordination, and precise release timing.</p>
+                    <p className="text-xs text-gray-300 leading-relaxed">Continuous cursor movement under sustained switch pressure tests Accot-Zhai steering law throughput and deceleration control.</p>
                   </div>
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                  <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-purple-600 flex items-center justify-center"><PenTool className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Release Timing</h5>
+                      <h4 className="text-xs font-bold text-white">Release Timing Precision</h4>
                     </div>
                     <p className="text-xs text-gray-300 leading-relaxed">Decelerate your cursor smoothly and release inside the moving container boundary — releasing outside it breaks your combo chain.</p>
                   </div>
                 </div>
               </div>
             </DrillAccordion>
-
-            <DrillAccordion
-              id="faq"
-              title="Frequently Asked Questions"
-              isOpen={openAccordion === 'faq'}
-              onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {FAQ_ITEMS.map((item, i) => (
-                  <div key={i} className="bg-[#05060b] border border-gray-800 rounded-xl p-5">
-                    <h4 className="text-sm font-bold text-gray-200 mb-2">{item.q}</h4>
-                    <p className="text-xs text-gray-400 leading-relaxed">{item.a}</p>
-                  </div>
-                ))}
-              </div>
-            </DrillAccordion>
           </div>
-        )}
-
-        {/* ── RELATED MOTOR DRILLS ── */}
-        {!isFullscreen && (
-          <section className="mt-4">
-            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3 font-sans">
-              Related Motor &amp; FPS Drills
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {RELATED_DRILLS.map((drill) => (
-                <Link
-                  key={drill.id}
-                  href={drill.href}
-                  className="group bg-[#0c0c16] border border-white/5 hover:border-blue-500/40 rounded-xl p-3.5 transition-all duration-200 hover:-translate-y-0.5 flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="text-[10px] font-bold text-blue-400 uppercase tracking-wider mb-1">{drill.cat}</div>
-                    <div className="text-xs font-bold text-white group-hover:text-blue-300 transition-colors">{drill.name}</div>
-                    <div className="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">{drill.desc}</div>
-                  </div>
-                  <div className="text-[10px] font-bold text-slate-500 group-hover:text-blue-400 mt-3 flex items-center gap-1 transition-colors">
-                    Train Drill <span>→</span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
         )}
 
         {/* ── FOOTER ── */}

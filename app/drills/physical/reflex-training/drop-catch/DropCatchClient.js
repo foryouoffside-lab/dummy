@@ -25,6 +25,7 @@ import { getComboMultiplier, getFpsScoreGrade } from '../../../../../lib/scoring
 import { createBackdropCache, getCanvasDpr, drawPulseRing, drawTacticalTarget } from '../../../../../lib/canvasFx';
 import useUnexpectedExitGuard from '../../../../../lib/useUnexpectedExitGuard';
 import DrillFooter from '../../../../../components/drill/DrillFooter';
+import DrillAccordion from '../../../../../components/drill/DrillAccordion';
 import DrillCountdown from '../../../../../components/drill/DrillCountdown';
 import FpsStartCard from '../../../../../components/drill/FpsStartCard';
 import DrillResultCard from '../../../../../components/drill/DrillResultCard';
@@ -81,24 +82,34 @@ As you score points, the engine adaptively accelerates falling velocities from 4
 
 Instantly distinguish between enemies, teammates, and decoy utility in chaos without sacrificing click execution time.`;
 
-const FAQ_ITEMS = [
-  { q: "What is a reflex test?", a: "A reflex test measures the speed and accuracy of your neuromuscular response to sudden visual stimuli, filtering out decoy targets." },
-  { q: "How does target recognition improve gaming?", a: "In competitive FPS games like Valorant or CS2, you must rapidly distinguish between enemies, teammates, and utility (like flashes)." },
-  { q: "Why are there red decoy balls?", a: "The red decoys test your impulse control. Pure reaction speed is useless if you shoot the wrong target." },
-  { q: "How does adaptive difficulty work?", a: "As your score increases, difficulty scales continuously. Falling velocity accelerates, radiuses shrink, and decoy probability increases." },
-  { q: "What happens when I miss or hit a decoy?", a: "Missing a green target or clicking a red decoy resets your combo multiplier back to 1.0x and triggers a red flash overlay. Clean catches add +0.6s to your timer, and missing a target or hitting a decoy deducts 0.8s when time penalty is enabled in settings." },
-  { q: "How long does each session run?", a: "Each session starts with a 45-second timer. Catching green targets earns +0.6s time extensions, allowing skilled players to extend runs dynamically as difficulty ramps up." },
-  { q: "What is impulse control training?", a: "Impulse control training conditions your brain to suppress an automatic physical reaction (clicking) until your visual cortex verifies the stimulus is correct (green vs red)." },
-  { q: "Is this reflex game free to play?", a: "Yes! The SkillDrills Reflex Test is entirely free, open-source, and runs purely in your web browser with zero downloads required." },
-  { q: "How long should I practice reflex training daily?", a: "For optimal cognitive adaptation and motor learning, practicing this drill for 5 to 10 minutes a day is more effective than occasional hour-long sessions." }
-];
-
-const RELATED_DRILLS = [
-  { id: "stability-challenge", name: "Stability Challenge", cat: "Physical Balance", desc: "Test static and dynamic balance holding capabilities.", href: "/drills/physical/balance-training/stability-challenge" },
-  { id: "complex-pattern", name: "Complex Pattern", cat: "Physical Coordination", desc: "Train complex multi-limb movement patterns.", href: "/drills/physical/coordination/complex-pattern" },
-  { id: "cross-body-movement", name: "Cross-Body Movement", cat: "Physical Coordination", desc: "Improve bilateral motor coordination and cross-body tracking.", href: "/drills/physical/coordination/cross-body-movement" },
-  { id: "dynamic-grid-evasion", name: "Dynamic Grid Evasion", cat: "Physical Coordination", desc: "Evade dynamic grid hazards with rapid motor adjustments.", href: "/drills/physical/coordination/dynamic-grid-evasion" },
-  { id: "speed-drill", name: "Speed Drill Pro", cat: "Physical Fitness", desc: "Rapid target acquisition & high-velocity tapping exercise.", href: "/drills/physical/fitness/speed-drill" },
+// ============================================================
+// ABOUT & BIOMECHANICAL RESEARCH DATA
+// ============================================================
+const ABOUT_SECTIONS = [
+  {
+    icon: Eye,
+    title: "Gravitational Acceleration & Optical Tau Interception",
+    subtitle: "Time-to-contact calculations under non-linear vertical acceleration",
+    content: "Falling targets accelerate continuously due to gravity. The human visual system estimates interception windows using optical tau (τ), the inverse relative rate of retinal image expansion (Lee, 1976). Accurate tau estimation enables players to predict the exact millisecond and vertical coordinate of interception before the target exits the capture boundary."
+  },
+  {
+    icon: ShieldAlert,
+    title: "Inhibitory Impulse Control & Horse-Race Stop Signals",
+    subtitle: "Logan countermanding paradigm and pre-frontal motor inhibition",
+    content: "The presentation of deceptive red decoys triggers an internal \'horse-race\' between the prepotent \'Go\' motor impulse (clicking) and the inhibitory \'Stop\' process (Logan et al., 1984). Successful practitioners suppress premature ballistic finger twitches until the visual cortex discriminates color and pattern identity."
+  },
+  {
+    icon: Zap,
+    title: "Donders Type C Discrimination Reaction Chronometry",
+    subtitle: "Stimulus classification latency prior to motor initiation",
+    content: "Unlike simple reflex tests, Drop Catch embodies Franciscus Donders\'s (1868) Type C reaction task: multiple visual stimuli are presented, but response must be restricted strictly to target items while withholding response to decoys, extending sensory-motor processing by 80–120ms."
+  },
+  {
+    icon: Target,
+    title: "Two-Component Ballistic Flick & Landing Deceleration",
+    subtitle: "Woodworth open-loop launch coupled with closed-loop precision landing",
+    content: "Cursor repositioning follows Woodworth\'s (1899) two-phase model: an initial open-loop ballistic flick covering 85%+ of the distance, followed by rapid optical feedback corrections. Constricting target diameters enforce strict speed-accuracy tradeoffs governed by Fitts\'s Law (1954)."
+  }
 ];
 
 const BENCHMARK_TIERS = [
@@ -108,11 +119,7 @@ const BENCHMARK_TIERS = [
   { tier: "Genetic Elite", level: "Lv. 13+", latency: "< 190ms", percentile: "Top 1%", target: "Esports professionals / fighter pilot reaction limits", color: "text-emerald-400", badge: "bg-emerald-500/10 border-emerald-500/20" },
 ];
 
-const HOW_TO_STEPS = [
-  { step: "01", title: "Watch the Drop Zone", desc: "Balls spawn from the upper border and accelerate from 400 px/s up to 1,250 px/s as your level rises." },
-  { step: "02", title: "Discriminate the Stimulus", desc: "Green balls are valid scoring targets. Red balls marked with 'X' are deceptive decoys designed to test impulse inhibition." },
-  { step: "03", title: "Catch Green, Avoid Decoys", desc: "Click green targets before they exit the lower screen to earn +100 PTS and +0.6s time extensions while keeping your streak unbroken." },
-];
+
 
 export default function DropCatchClient() {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
@@ -122,6 +129,7 @@ export default function DropCatchClient() {
   const [flashEnabled, setFlashEnabled] = useState(true);
   const [penaltyEnabled, setPenaltyEnabled] = useState(false);
   const [pointerLocked, setPointerLocked] = useState(false);
+  const [openAccordion, setOpenAccordion] = useState(null);
   const universalSens = useDrillSensitivity();
   const [isTouchOnlyDevice, setIsTouchOnlyDevice] = useState(false);
   const [copiedEmbed, setCopiedEmbed] = useState(false);
@@ -633,40 +641,38 @@ export default function DropCatchClient() {
       {/* ── MAIN CONTENT AREA ── */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
         {/* Title */}
-        {/* Title */}
         {!isFullscreen && (
-          <div className="text-center max-w-3xl mx-auto pt-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-2xs font-mono font-bold uppercase tracking-widest mb-3">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span>Cognitive Reflex &amp; Impulse Control</span>
-            </div>
-            <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-white uppercase">
-              Reflex Drop Catch Test
+          <div className="text-left">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+              Drop Catch
+              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1">
+                Reflex Drop Catch Test
+              </span>
             </h1>
-            <p className="text-xs sm:text-sm text-slate-300 mt-2 leading-relaxed max-w-xl mx-auto font-sans">
-              Train reaction speed, visual discrimination, and inhibitory impulse control. Catch falling green targets, avoid deceptive red decoys, and calibrate your reflex thresholds.
+            <p className="text-xs sm:text-sm text-slate-400 mt-2 max-w-3xl leading-relaxed">
+              A drop catch test measures how quickly you can respond to a falling object, and how reliably you can hold back when you should not respond at all. Catching does not require calculating distance and speed separately: the expanding retinal image specifies time-to-contact on its own (Lee, 1976). Withholding is a different mechanism &mdash; going and stopping race each other, and whichever finishes first wins (Logan &amp; Cowan, 1984). Simple visual reaction alone costs about 200&ndash;250 ms before either can start (Woods et al., 2015).
             </p>
           </div>
         )}
 
-        {/* Live Stat Cards (shown when playing or if player has established a score) */}
-        {!isFullscreen && (gameState === 'playing' || gameState === 'gameOver' || bestScore > 0) && (
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 max-w-2xl mx-auto w-full">
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
-              <div className="text-lg sm:text-xl font-black text-white tabular-nums">{uiScore}</div>
+        {/* Live Stat Cards */}
+        {!isFullscreen && (
+          <div className="grid grid-cols-4 gap-2 w-full">
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-3 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Score</div>
+              <div className="text-lg sm:text-2xl font-black text-white tabular-nums">{uiScore}</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
-              <div className={`text-lg sm:text-xl font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>{uiTimeLeft}s</div>
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-3 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Time</div>
+              <div className={`text-lg sm:text-2xl font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>{uiTimeLeft}s</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
-              <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-3 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Best Score</div>
+              <div className="text-lg sm:text-2xl font-black text-amber-400 tabular-nums">{bestScore}</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Combo</div>
-              <div className="text-lg sm:text-xl font-black text-emerald-400 tabular-nums">{bestCombo}x</div>
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-3 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Best Combo</div>
+              <div className="text-lg sm:text-2xl font-black text-emerald-400 tabular-nums">{bestCombo}x</div>
             </div>
           </div>
         )}
@@ -746,7 +752,7 @@ export default function DropCatchClient() {
             <FpsStartCard
               icon={Target}
               accent="emerald"
-              title="Reflex Drop Catch"
+              title="Drop Catch"
               subtitle="Visual Discrimination & Impulse Control • Continuous Scaling"
               rules={[
                 { icon: Zap, accent: 'emerald', title: 'Catch Green Target (+100 PTS)', text: '+100 PTS × Combo × Level multiplier (+0.6s per catch)' },
@@ -794,232 +800,48 @@ export default function DropCatchClient() {
           )}
         </div>
 
-        {/* ── RICH EDITORIAL & SEO RANKING SUITE ── */}
+        {/* ── ACCORDIONS ── */}
         {!isFullscreen && (
-          <div className="space-y-8 mt-6">
-
-            {/* 1. HOW TO PRACTICE (Direct 1:1 match with HowTo Schema) */}
-            <section className="bg-surface-1/90 border border-hairline rounded-3xl p-6 sm:p-8 backdrop-blur-xl shadow-xl">
-              <div className="flex items-center gap-2.5 mb-5">
-                <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
-                  <Play className="w-4 h-4" />
-                </div>
-                <div>
-                  <h2 className="text-base sm:text-lg font-bold text-white uppercase tracking-wider font-mono">
-                    How to Practice the Reflex Drop Catch Drill
-                  </h2>
-                  <p className="text-xs text-ink-3">Step-by-step instructions to train reaction speed and stimulus discrimination</p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {HOW_TO_STEPS.map((step) => (
-                  <div key={step.step} className="bg-surface-2 border border-hairline rounded-2xl p-5 relative overflow-hidden">
-                    <div className="text-xs font-mono font-bold text-emerald-400/60 uppercase tracking-wider mb-2">
-                      Step {step.step}
-                    </div>
-                    <h3 className="text-sm font-bold text-white mb-2 font-mono">{step.title}</h3>
-                    <p className="text-xs text-ink-2 leading-relaxed font-sans">{step.desc}</p>
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            {/* 2. HUMAN REFLEX BENCHMARKS & PERCENTILES (Information Gain Feature) */}
-            <section className="bg-surface-1/90 border border-hairline rounded-3xl p-6 sm:p-8 backdrop-blur-xl shadow-xl">
-              <div className="flex items-center gap-2.5 mb-5">
-                <div className="p-2 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400">
-                  <BarChart3 className="w-4 h-4" />
-                </div>
-                <div>
-                  <h2 className="text-base sm:text-lg font-bold text-white uppercase tracking-wider font-mono">
-                    Human Reflex &amp; Reaction Speed Benchmarks
-                  </h2>
-                  <p className="text-xs text-ink-3">How your reaction time compares to average human performance tiers</p>
-                </div>
-              </div>
-
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs font-mono border-collapse">
-                  <thead>
-                    <tr className="border-b border-hairline text-ink-3 uppercase text-[11px]">
-                      <th className="py-3 px-4 font-bold">Skill Tier</th>
-                      <th className="py-3 px-4 font-bold">Drop Catch Level</th>
-                      <th className="py-3 px-4 font-bold">Estimated Latency</th>
-                      <th className="py-3 px-4 font-bold">Global Percentile</th>
-                      <th className="py-3 px-4 font-bold hidden sm:table-cell">Real-World Profile</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-hairline">
-                    {BENCHMARK_TIERS.map((tier) => (
-                      <tr key={tier.tier} className="hover:bg-white/[0.02] transition-colors">
-                        <td className="py-3.5 px-4 font-bold text-white flex items-center gap-2">
-                          <span className={`w-2 h-2 rounded-full ${tier.badge.split(' ')[0].replace('/10', '')}`} />
-                          <span>{tier.tier}</span>
-                        </td>
-                        <td className={`py-3.5 px-4 font-bold ${tier.color}`}>{tier.level}</td>
-                        <td className="py-3.5 px-4 text-ink-1 font-bold">{tier.latency}</td>
-                        <td className="py-3.5 px-4">
-                          <span className={`px-2 py-0.5 rounded-md text-[10px] border font-bold ${tier.badge} ${tier.color}`}>
-                            {tier.percentile}
-                          </span>
-                        </td>
-                        <td className="py-3.5 px-4 text-ink-3 hidden sm:table-cell">{tier.target}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </section>
-
-            {/* 3. COGNITIVE IMPULSE CONTROL (Neuroscience of Go / No-Go Paradigm) */}
-            <section className="bg-surface-1/90 border border-hairline rounded-3xl p-6 sm:p-8 backdrop-blur-xl shadow-xl">
-              <div className="flex items-center gap-2.5 mb-4">
-                <div className="p-2 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-400">
-                  <Eye className="w-4 h-4" />
-                </div>
-                <div>
-                  <h2 className="text-base sm:text-lg font-bold text-white uppercase tracking-wider font-mono">
-                    Visual Discrimination &amp; Inhibitory Impulse Control
-                  </h2>
-                  <p className="text-xs text-ink-3">Why raw reaction speed without discrimination leads to costly errors</p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs text-ink-2 leading-relaxed font-sans pt-2">
-                <div className="space-y-3">
-                  <p>
-                    Most online reaction time tests only test <em>simple reaction time</em> (clicking when a red box turns green). In real competitive gaming and athletics, simple reaction tests are rarely applicable because visual environments are packed with clutter, moving decoys, and teammates.
-                  </p>
-                  <p>
-                    <strong>Reflex Drop Catch</strong> enforces the neuroscientific <strong>Go / No-Go paradigm</strong>. When a target enters your field of view, your motor cortex naturally wants to fire immediately. This drill forces your prefrontal cortex to perform a cognitive override, verifying target validity (green vs red decoy) before executing the click.
-                  </p>
-                </div>
-                <div className="space-y-3">
-                  <p>
-                    As targets accelerate from <strong>400 px/s up to 1,250 px/s</strong>, the decision window shrinks to sub-200ms intervals. This directly trains your visual filtering pathways to suppress false positives and eliminate panic misclicks in competitive shooters like Valorant, CS2, and Apex Legends.
-                  </p>
-                  <div className="p-3.5 rounded-xl bg-surface-2 border border-hairline flex items-center gap-3">
-                    <ShieldCheck className="w-5 h-5 text-emerald-400 shrink-0" />
-                    <span className="text-2xs font-mono text-ink-1">
-                      Adaptive velocity scaling and decoy probability increase continuously as score accumulates.
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            {/* 4. SCORING MATRIX & TIME EXTENSION RULES */}
-            <section className="bg-surface-1/90 border border-hairline rounded-3xl p-6 sm:p-8 backdrop-blur-xl shadow-xl">
-              <div className="flex items-center gap-2.5 mb-5">
-                <div className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400">
-                  <Trophy className="w-4 h-4" />
-                </div>
-                <div>
-                  <h2 className="text-base sm:text-lg font-bold text-white uppercase tracking-wider font-mono">
-                    Scoring Rules &amp; Dynamic Multipliers
-                  </h2>
-                  <p className="text-xs text-ink-3">Mechanics governing points, combos, streak multipliers, and session timers</p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="[&>div]:!mt-0">
+            <DrillAccordion
+              id="rules"
+              title="Drill Instructions & Scoring System"
+              isOpen={openAccordion === 'rules'}
+              onToggle={() => setOpenAccordion(openAccordion === 'rules' ? null : 'rules')}
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {RULES_ITEMS.map((item, i) => (
-                  <div key={i} className="bg-surface-2 border border-hairline p-4 rounded-xl">
-                    <p className="text-xs font-mono font-bold text-emerald-400 uppercase tracking-wider mb-1.5">{item.title}</p>
-                    <p className="text-2xs text-ink-2 leading-relaxed">{item.text}</p>
+                  <div key={i} className="bg-black p-4 rounded-xl border border-white/10">
+                    <p className="text-sm font-bold text-white mb-1">{item.title}</p>
+                    <p className="text-xs text-gray-300 leading-relaxed">{item.text}</p>
                   </div>
                 ))}
               </div>
-            </section>
+            </DrillAccordion>
 
-            {/* 5. FREQUENTLY ASKED QUESTIONS (Direct 1:1 match with FAQPage Schema) */}
-            <section className="bg-surface-1/90 border border-hairline rounded-3xl p-6 sm:p-8 backdrop-blur-xl shadow-xl">
-              <div className="flex items-center gap-2.5 mb-5">
-                <div className="p-2 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400">
-                  <Sparkles className="w-4 h-4" />
-                </div>
-                <div>
-                  <h2 className="text-base sm:text-lg font-bold text-white uppercase tracking-wider font-mono">
-                    Frequently Asked Questions
-                  </h2>
-                  <p className="text-xs text-ink-3">Common questions regarding reflex calibration, impulse control, and training cadence</p>
-                </div>
+            <DrillAccordion
+              id="about"
+              title="About Drop Catch Training"
+              isOpen={openAccordion === 'about'}
+              onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
+            >
+              <div className="space-y-4">
+                {ABOUT_SECTIONS.map((sec, idx) => {
+                  const IconComp = sec.icon;
+                  return (
+                    <div key={idx} className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <IconComp className="w-4 h-4 text-emerald-400 shrink-0" />
+                        <h3 className="text-sm font-bold text-white tracking-wide">{sec.title}</h3>
+                      </div>
+                      <h4 className="text-xs font-semibold text-slate-400 mb-2">{sec.subtitle}</h4>
+                      <p className="text-xs leading-relaxed text-slate-300">{sec.content}</p>
+                    </div>
+                  );
+                })}
               </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {FAQ_ITEMS.map((item, i) => (
-                  <div key={i} className="bg-surface-2 border border-hairline rounded-xl p-4 sm:p-5">
-                    <h3 className="text-xs sm:text-sm font-bold font-mono text-white mb-2 leading-snug">{item.q}</h3>
-                    <p className="text-2xs sm:text-xs text-ink-2 leading-relaxed">{item.a}</p>
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            {/* 6. EMBED TOOLKIT & BACKLINK MAGNET */}
-            <section className="bg-surface-1/90 border border-hairline rounded-3xl p-6 sm:p-8 backdrop-blur-xl shadow-xl">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-3">
-                <div className="flex items-center gap-2.5">
-                  <div className="p-2 rounded-xl bg-teal-500/10 border border-teal-500/20 text-teal-400">
-                    <Code className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h2 className="text-base font-bold text-white uppercase tracking-wider font-mono">
-                      Embed This Drill on Your Website
-                    </h2>
-                    <p className="text-xs text-ink-3">Free interactive reflex game widget for esports portals, blogs, and community forums</p>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    const code = '<iframe src="https://skilldrills.online/drills/physical/reflex-training/drop-catch" width="100%" height="620" style="border:none;border-radius:16px;" allow="fullscreen"></iframe>';
-                    navigator.clipboard.writeText(code);
-                    setCopiedEmbed(true);
-                    setTimeout(() => setCopiedEmbed(false), 2200);
-                  }}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-500 text-white text-xs font-mono font-bold uppercase tracking-wider hover:bg-emerald-400 transition-colors shrink-0 shadow-lg shadow-emerald-500/20"
-                >
-                  {copiedEmbed ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                  <span>{copiedEmbed ? 'Copied!' : 'Copy Embed Code'}</span>
-                </button>
-              </div>
-
-              <div className="p-3.5 bg-black/60 border border-hairline rounded-xl font-mono text-[11px] text-ink-3 overflow-x-auto select-all">
-                <code>&lt;iframe src=&quot;https://skilldrills.online/drills/physical/reflex-training/drop-catch&quot; width=&quot;100%&quot; height=&quot;620&quot; style=&quot;border:none;border-radius:16px;&quot; allow=&quot;fullscreen&quot;&gt;&lt;/iframe&gt;</code>
-              </div>
-            </section>
-
+            </DrillAccordion>
           </div>
-        )}
-
-        {/* ── RELATED PHYSICAL DRILLS ── */}
-        {!isFullscreen && (
-          <section className="mt-4">
-            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3 font-sans">
-              Related Physical &amp; Reflex Drills
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {RELATED_DRILLS.map((drill) => (
-                <Link
-                  key={drill.id}
-                  href={drill.href}
-                  className="group bg-[#0c0c16] border border-white/5 hover:border-emerald-500/40 rounded-xl p-3.5 transition-all duration-200 hover:-translate-y-0.5 flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider mb-1">{drill.cat}</div>
-                    <div className="text-xs font-bold text-white group-hover:text-emerald-300 transition-colors">{drill.name}</div>
-                    <div className="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">{drill.desc}</div>
-                  </div>
-                  <div className="text-[10px] font-bold text-slate-500 group-hover:text-emerald-400 mt-3 flex items-center gap-1 transition-colors">
-                    Train Drill <span>→</span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
         )}
 
         {/* ── FOOTER ── */}

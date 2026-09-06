@@ -75,26 +75,6 @@ const RULES_ITEMS = [
   { title: "Wrong Click / Miss Penalty", text: "Wrong target or miss resets combo to 0 (-0.6s with Time Penalty enabled)." }
 ];
 
-const FAQ_ITEMS = [
-  { q: "What is target acquisition in FPS games?", a: "Target acquisition is the combined process of visually detecting a threat, identifying it as an enemy (not a teammate), deciding to engage, and getting your crosshair on the target fast enough to fire first. It involves both cognitive processing (recognition and decision) and mechanical execution (crosshair movement). This is the skill that separates players who see enemies fast from those who react slowly." },
-  { q: "How does target acquisition differ from reaction time?", a: "Reaction time measures the gap between stimulus appearance and your click. Target acquisition includes reaction time but adds the prior cognitive steps: visual scan → target detection → threat confirmation → aim → shoot. Better target acquisition means your brain identifies threats faster, giving your mechanical aim more time to respond accurately." },
-  { q: "Why do some players always seem to see enemies before others?", a: "Players with trained target acquisition have learned unconscious threat pattern recognition — their visual system has been trained to flag enemy silhouettes, color cues, and movement patterns faster than untrained players. This creates the illusion that they see first when actually their brain is processing the same visual information faster and more efficiently." },
-  { q: "How does this help in Valorant compared to other drills?", a: "Valorant's round-based structure means you often peek corners or angles with partial information. Fast target acquisition is critical for winning the split-second timing battle when two players simultaneously come into view of each other. This drill specifically trains the speed of the visual identification → aim decision → click sequence." },
-  { q: "What cognitive skills does target acquisition training improve?", a: "Target acquisition training improves visual processing speed (how fast your eyes register a target), pattern recognition (identifying enemy silhouettes), selective attention (filtering enemies from background), and decision speed (choosing to engage). Together these create the faster perception that high-rank players possess." },
-  { q: "How are errors penalised in Target Acquisition Pro?", a: "Clicking a darker target out of order or clicking empty space resets your streak combo multiplier. When the optional Time Penalty setting is enabled in your session preferences, each mistake also deducts 0.6s from your clock." },
-  { q: "How does target acquisition impact CS2 and tactical shooters?", a: "In CS2, time-to-kill is extremely fast. Spotting a target's head pixel a fraction of a second earlier grants the critical advantage needed to secure first-bullet headshots." },
-  { q: "What is the optimal daily target acquisition training routine?", a: "We recommend 10 to 15 minutes of target acquisition drills at the start of your gaming session to warm up visual processing speed before entering competitive matches." }
-];
-
-const RELATED_DRILLS = [
-  { id: "180-degree-awareness", name: "180° Awareness Pro", cat: "FPS Awareness", desc: "Master 180-degree snap turns and peripheral threat detection.", href: "/drills/fps/180-degree-awareness" },
-  { id: "target-switching-swarm", name: "Target Switching Swarm", cat: "FPS Switching", desc: "Train multi-target flick switching under high density.", href: "/drills/fps/target-switching-swarm" },
-  { id: "target-prioritization", name: "Target Prioritization", cat: "FPS Strategy", desc: "Evaluate threat distances and prioritize high-risk targets.", href: "/drills/fps/target-prioritization" },
-  { id: "flick-shot-training", name: "Pro Flick Trainer", cat: "FPS Flicking", desc: "Snap to targets in time-attack mode with precision flicking.", href: "/drills/fps/flick-shot-training" },
-  { id: "micro-correction-precision", name: "Micro Flicks", cat: "FPS Precision", desc: "Optimize tight-angle crosshair micro corrections.", href: "/drills/fps/micro-correction-precision" },
-  { id: "instant-response", name: "Instant Response", cat: "FPS Reaction", desc: "Train raw single-stimulus reflex acquisition.", href: "/drills/fps/instant-response" }
-];
-
 export default function TargetAcquisitionClient() {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -696,34 +676,34 @@ export default function TargetAcquisitionClient() {
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
         {/* Title */}
         {!isFullscreen && (
-          <div className="text-center">
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              TARGET ACQUISITION PRO
-              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
-                Target Acquisition Trainer
-              </span>
+          <div className="text-left max-w-4xl mx-auto w-full">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white mb-2">
+              Target Acquisition Aim Trainer
             </h1>
+            <p className="text-xs sm:text-sm text-slate-400 leading-relaxed max-w-2xl">
+              Target acquisition is finding the right target and moving onto it. Basic visual features like colour and orientation are processed in parallel across the whole visual field before attention binds them into an object (Treisman &amp; Gelade, 1980) &mdash; which is why a high-contrast target is found faster than a camouflaged one.
+            </p>
           </div>
         )}
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 gap-2.5 max-w-2xl mx-auto w-full">
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+          <div className="grid grid-cols-4 gap-2 w-full">
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
-              <div className="text-lg sm:text-xl font-black text-white tabular-nums">{uiScore}</div>
+              <div className="text-sm sm:text-lg font-black text-white tabular-nums">{uiScore}</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
-              <div className={`text-lg sm:text-xl font-black tabular-nums ${uiTimeLeft <= 10 ? "text-red-400 animate-pulse" : "text-white"}`}>{uiTimeLeft}s</div>
+              <div className={`text-sm sm:text-lg font-black tabular-nums ${uiTimeLeft <= 10 ? "text-red-400 animate-pulse" : "text-white"}`}>{uiTimeLeft}s</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Accuracy</div>
-              <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{accuracy}%</div>
+              <div className="text-sm sm:text-lg font-black text-amber-400 tabular-nums">{accuracy}%</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
-              <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
+              <div className="text-sm sm:text-lg font-black text-amber-400 tabular-nums">{bestScore}</div>
             </div>
           </div>
         )}
@@ -873,56 +853,13 @@ export default function TargetAcquisitionClient() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {RULES_ITEMS.map((item, i) => (
                   <div key={i} className="bg-[#05060b] border border-gray-800 rounded-xl p-4">
-                    <h4 className="text-xs font-bold text-gray-200 mb-1">{item.title}</h4>
+                    <h3 className="text-xs font-bold text-gray-200 mb-1">{item.title}</h3>
                     <p className="text-xs text-gray-400 leading-relaxed">{item.text}</p>
                   </div>
                 ))}
               </div>
             </DrillAccordion>
-
-            <DrillAccordion
-              id="faq"
-              title="Frequently Asked Questions"
-              isOpen={openAccordion === 'faq'}
-              onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {FAQ_ITEMS.map((item, i) => (
-                  <div key={i} className="bg-[#05060b] border border-gray-800 rounded-xl p-5 hover:border-gray-700 transition-colors">
-                    <h4 className="text-sm font-bold text-gray-200 mb-2">{item.q}</h4>
-                    <p className="text-xs text-gray-400 leading-relaxed">{item.a}</p>
-                  </div>
-                ))}
-              </div>
-            </DrillAccordion>
           </div>
-        )}
-
-        {/* ── RELATED FPS DRILLS ── */}
-        {!isFullscreen && (
-          <section className="mt-4">
-            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">
-              Related FPS Drills
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {RELATED_DRILLS.map((drill) => (
-                <Link
-                  key={drill.id}
-                  href={drill.href}
-                  className="group bg-[#0c0c16] border border-white/5 hover:border-amber-500/40 rounded-xl p-3.5 transition-all duration-200 hover:-translate-y-0.5 flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="text-[10px] font-bold text-amber-400 uppercase tracking-wider mb-1">{drill.cat}</div>
-                    <div className="text-xs font-bold text-white group-hover:text-amber-300 transition-colors">{drill.name}</div>
-                    <div className="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">{drill.desc}</div>
-                  </div>
-                  <div className="text-[10px] font-bold text-slate-500 group-hover:text-amber-400 mt-3 flex items-center gap-1 transition-colors">
-                    Train Drill <span>→</span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
         )}
       </main>
 

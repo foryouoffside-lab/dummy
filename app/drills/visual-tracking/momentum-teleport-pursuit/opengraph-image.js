@@ -8,7 +8,7 @@ import { ImageResponse } from 'next/og';
 // Satori (the renderer behind ImageResponse) supports FLEXBOX ONLY — no CSS grid,
 // and every element with more than one child needs an explicit `display: flex`.
 
-export const alt = 'Momentum Teleport Pursuit — free browser Visual Tracking drill on SkillDrills';
+export const alt = 'Momentum Teleport — Anticipatory Eye Tracking Drill | SkillDrills';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -94,7 +94,7 @@ export default async function Image() {
               maxWidth: 980,
             }}
           >
-            {"Predict target direction after coordinates instantly teleport while maintaining velocity momentum."}
+            {"Predict target trajectory and re-acquire focus after instant position jumps."}
           </div>
         </div>
 

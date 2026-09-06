@@ -18,12 +18,12 @@ import useImmersiveMode from '@/lib/useImmersiveMode';
 const STORAGE_KEY = 'skilldrills_visual_tracking_momentum_teleport_pursuit_v2';
 
 const RELATED_DRILLS = [
-  { id: "constant-slow-pursuit", name: "Constant Slow Pursuit", cat: "Visual Tracking", desc: "Condition smooth pursuit tracking along continuous Lissajous curves.", href: "/drills/visual-tracking/constant-slow-pursuit" },
-  { id: "directional-chaos-pursuit", name: "Directional Chaos Pursuit", cat: "Visual Tracking", desc: "Complex multi-directional visual tracking with sudden direction shifts.", href: "/drills/visual-tracking/directional-chaos-pursuit" },
-  { id: "dynamic-evasion-pursuit", name: "Dynamic Evasion Pursuit", cat: "Visual Tracking", desc: "Re-acquire targets executing rapid evasive directional changes.", href: "/drills/visual-tracking/dynamic-evasion-pursuit" },
-  { id: "180-degree-awareness", name: "180° Awareness Pro", cat: "FPS Awareness", desc: "Master 180-degree snap turn awareness for CS2 & Valorant.", href: "/drills/fps/180-degree-awareness" },
-  { id: "strafe-tracking", name: "Strafe Tracking", cat: "FPS Tracking", desc: "Smooth pursuit tracking against erratic horizontal targets.", href: "/drills/fps/strafe-tracking" },
-  { id: "recoil-control", name: "Recoil Control", cat: "FPS Recoil", desc: "Calibrate pulling pattern compensation for weapons.", href: "/drills/fps/recoil-control" }
+  { id: "constant-slow-pursuit", name: "Smooth Pursuit Eye Exercise", cat: "Visual Tracking", desc: "Condition smooth pursuit tracking along continuous Lissajous curves.", href: "/drills/visual-tracking/constant-slow-pursuit" },
+  { id: "directional-chaos-pursuit", name: "Erratic Motion Eye Drill", cat: "Visual Tracking", desc: "Complex multi-directional visual tracking with sudden direction shifts.", href: "/drills/visual-tracking/directional-chaos-pursuit" },
+  { id: "dynamic-evasion-pursuit", name: "Reactive Eye Tracking Drill", cat: "Visual Tracking", desc: "Re-acquire targets executing rapid evasive directional changes.", href: "/drills/visual-tracking/dynamic-evasion-pursuit" },
+  { id: "ghosting-suppress-pursuit", name: "Eye Fixation Stability Training", cat: "Visual Tracking", desc: "Condition visual stability and suppress perceptual ghosting artifacts.", href: "/drills/visual-tracking/ghosting-suppress-pursuit" },
+  { id: "infinity-pursuit", name: "Figure-8 Eye Tracking Exercise", cat: "Visual Tracking", desc: "Track targets along figure-8 infinity loops at custom speeds.", href: "/drills/visual-tracking/infinity-pursuit" },
+  { id: "predictive-pursuit", name: "Predictive Eye Tracking Drill", cat: "Visual Tracking", desc: "Anticipate target trajectory through periodic visual occlusions.", href: "/drills/visual-tracking/predictive-pursuit" }
 ];
 
 const getSavedData = () => {
@@ -152,10 +152,10 @@ export default function MomentumTeleportPursuitClient() {
       });
       await shareScoreCard(url, canvas);
     } catch (e) {
-      const text = 'Momentum Teleport Pursuit — Free Visual Tracking & Gaze Calibration Drill!';
+      const text = 'Momentum Teleport — Free Anticipatory Eye Tracking Drill!';
       if (typeof navigator !== 'undefined' && navigator.share) {
         try {
-          await navigator.share({ title: 'Momentum Teleport Pursuit Drill', text, url });
+          await navigator.share({ title: 'Momentum Teleport - Anticipatory Eye Tracking Drill', text, url });
         } catch (e) {}
       } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
         navigator.clipboard.writeText(url);
@@ -417,21 +417,24 @@ export default function MomentumTeleportPursuitClient() {
     <div className="min-h-screen bg-[#050508] text-white flex flex-col font-sans select-none">
       {/* ── MAIN CONTENT AREA ── */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
-        {/* Title */}
+        {/* Title & AEO Answer Block */}
         {!isFullscreen && (
-          <div className="text-center">
+          <div className="flex flex-col gap-1">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              MOMENTUM TELEPORT PURSUIT
-              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
+              Momentum Teleport Pursuit
+              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-0.5 normal-case tracking-normal">
                 Anticipatory Eye Tracking Drill
               </span>
             </h1>
+            <p className="text-[13px] text-slate-400 leading-relaxed">
+              Anticipatory eye tracking drills condition rapid saccadic target re-acquisition followed by immediate velocity matching when objects teleport across space (Rashbass, 1961; Findlay & Walker, 1999). Preserving momentum across spatial coordinate jumps trains the visual cortex to maintain internal velocity representations, bridging saccadic suppression and smooth pursuit continuity (Bahill et al., 1980; Barnes, 2008). Pursuit itself only tracks accurately to roughly 30&deg;/s (Krauzlis, 2004), which is why a jump has to be closed by a saccade rather than by pursuit alone.
+            </p>
           </div>
         )}
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 gap-2.5 max-w-2xl mx-auto w-full">
+          <div className="grid grid-cols-4 gap-2 w-full -mb-2">
             <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Status</div>
               <div className="text-lg sm:text-xl font-black text-red-400 tabular-nums">
@@ -623,56 +626,6 @@ export default function MomentumTeleportPursuitClient() {
                 <RuleItem num="4" text="Random Speed" highlight={randomSpeed ? "Enabled Acceleration" : "Disabled Velocity"} result="Erratic acceleration control" />
               </div>
             </DrillAccordion>
-
-            <DrillAccordion
-              id="about"
-              title="About Momentum Teleport Pursuit"
-              isOpen={openAccordion === 'about'}
-              onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
-            >
-              <div className="space-y-6 font-sans">
-                <section>
-                  <h4 className="text-base font-bold text-white mb-2">
-                    What Is Momentum Teleport Pursuit Training?
-                  </h4>
-                  <p className="text-sm leading-relaxed mb-3 text-gray-300">
-                    <strong>Momentum Teleport Pursuit Training</strong> conditions rapid gaze re-acquisition by forcing your eyes to snap to new target coordinates after instant teleportation while predicting its continuous momentum trajectory.
-                  </p>
-                  <p className="text-sm leading-relaxed text-gray-300">
-                    By utilizing features like <strong>Hide Line</strong> and <strong>Random Speed Acceleration</strong>, your visual cortex learns to track unpredictable teleporting trajectories independently.
-                  </p>
-                </section>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
-                    <h5 className="text-xs font-bold text-white mb-1.5">Target Audience</h5>
-                    <p className="text-xs text-gray-300 leading-relaxed">Gamers, athletes, and vision training practitioners looking to build rapid target re-acquisition.</p>
-                  </div>
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
-                    <h5 className="text-xs font-bold text-white mb-1.5">Momentum Preservation</h5>
-                    <p className="text-xs text-gray-300 leading-relaxed">Forces eye muscles to anticipate continuous motion direction immediately post-teleport.</p>
-                  </div>
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
-                    <h5 className="text-xs font-bold text-white mb-1.5">Invisible Line Mode</h5>
-                    <p className="text-xs text-gray-300 leading-relaxed">Hides path lines so tracking relies 100% on real-time visual input.</p>
-                  </div>
-                </div>
-              </div>
-            </DrillAccordion>
-
-            <DrillAccordion
-              id="faq"
-              title="Frequently Asked Questions"
-              isOpen={openAccordion === 'faq'}
-              onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-sans">
-                <FAQItem q="What is the Momentum Teleport Pursuit drill?" a="The Momentum Teleport Pursuit drill conditions visual tracking agility by forcing your eyes to snap to new target coordinates after instant teleportation while predicting its continuous momentum trajectory." />
-                <FAQItem q="Why use the 'Hide Line' setting?" a="Hiding vector path lines forces your visual motor cortex to react dynamically to real-time object movement without visual direction cues." />
-                <FAQItem q="What does the Random Speed feature do?" a="Random Speed introduces unpredictable acceleration bursts and random teleport intervals, strengthening eye muscle modulation under erratic speeds." />
-                <FAQItem q="How long should I practice visual tracking daily?" a="We recommend 5 to 10 minutes of daily visual tracking training before gaming or athletic practice to warm up ocular muscles and reduce eye fatigue." />
-              </div>
-            </DrillAccordion>
           </div>
         )}
 
@@ -724,15 +677,6 @@ function RuleItem({ num, text, highlight = '', result }: { num: string; text: st
           {result}
         </div>
       </div>
-    </div>
-  );
-}
-
-function FAQItem({ q, a }: { q: string; a: string }) {
-  return (
-    <div className="bg-[#05060b] border border-gray-800 rounded-xl p-5 hover:border-gray-700 transition-colors font-sans">
-      <h4 className="text-sm font-bold text-gray-200 mb-2">{q}</h4>
-      <p className="text-xs text-gray-400 leading-relaxed">{a}</p>
     </div>
   );
 }

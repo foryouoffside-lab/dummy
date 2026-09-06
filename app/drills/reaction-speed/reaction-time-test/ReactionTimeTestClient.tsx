@@ -25,8 +25,6 @@ import DrillFlashOverlay from '../../../../components/drill/DrillFlashOverlay';
 import FpsStartCard from '../../../../components/drill/FpsStartCard';
 import useImmersiveMode from '@/lib/useImmersiveMode';
 
-const FpsStartCardAny = FpsStartCard as React.ComponentType<any>;
-
 const ELITE_SCORE = 5000;
 const STORAGE_KEY = 'skilldrills_reaction_time_test_v2';
 
@@ -610,36 +608,38 @@ export default function ReactionTimeTestClient() {
     <div className="min-h-screen bg-[#050508] text-white flex flex-col font-sans select-none">
       {/* ── MAIN CONTENT AREA ── */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
-        {/* Title */}
+        {/* Title — left-aligned and sitting directly on the drill box below it,
+            so the page reads top-left to bottom-right like a document rather than
+            a centred splash screen. */}
         {!isFullscreen && (
-          <div className="text-center">
+          <div className="flex flex-col gap-1">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              REACTION TIME TEST
+              Reaction Time Test
             </h1>
+            <p className="text-[13px] text-slate-400 leading-relaxed">
+              Measure your visual reaction speed in milliseconds. A typical adult reacts in{' '}
+              <span className="whitespace-nowrap">200&ndash;250&nbsp;ms</span>; under{' '}
+              <span className="whitespace-nowrap">180&nbsp;ms</span> is elite.
+            </p>
           </div>
         )}
 
-        {/* Live Stat Cards */}
+        {/* Live Stat Cards — full width so the row's outer edges line up with the
+            drill box beneath it. The previous max-w-2xl left them floating in the
+            middle, visually detached from the thing they describe. */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 gap-2.5 max-w-2xl mx-auto w-full">
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
-              <div className="text-lg sm:text-xl font-black text-cyan-400 tabular-nums font-mono">{uiScore}</div>
-            </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Avg Error</div>
-              <div className="text-lg sm:text-xl font-black text-white tabular-nums font-mono">
-                ±{liveAvgError}<span className="text-xs text-slate-400">ms</span>
+          <div className="grid grid-cols-4 gap-2 w-full -mb-2">
+            {[
+              { label: 'Score', value: uiScore, tone: 'text-cyan-400' },
+              { label: 'Avg Error', value: <>±{liveAvgError}<span className="text-[11px] text-slate-500 ml-0.5">ms</span></>, tone: 'text-white' },
+              { label: 'Level', value: `L${uiLevel}`, tone: 'text-indigo-400' },
+              { label: 'Best Score', value: bestScore, tone: 'text-amber-400' },
+            ].map((s) => (
+              <div key={s.label} className="rounded-lg border border-white/[0.06] bg-white/[0.015] px-2 py-2 text-center">
+                <div className="text-[9.5px] uppercase font-semibold text-slate-500 tracking-[0.12em]">{s.label}</div>
+                <div className={`text-lg sm:text-xl font-black tabular-nums font-mono mt-0.5 ${s.tone}`}>{s.value}</div>
               </div>
-            </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Level</div>
-              <div className="text-lg sm:text-xl font-black text-indigo-400 tabular-nums font-mono">L{uiLevel}</div>
-            </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
-              <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums font-mono">{bestScore}</div>
-            </div>
+            ))}
           </div>
         )}
 
@@ -723,7 +723,7 @@ export default function ReactionTimeTestClient() {
 
           {/* START CARD */}
           {gameState === 'start' && (
-            <FpsStartCardAny
+            <FpsStartCard
               icon={Clock}
               accent="cyan"
               title="Reaction Time Test"
@@ -847,9 +847,9 @@ export default function ReactionTimeTestClient() {
             >
               <div className="space-y-8 font-sans">
                 <section>
-                  <h4 className="text-base font-bold text-white mb-2 flex items-center gap-2">
+                  <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
                     <Eye className="w-4 h-4 text-cyan-400" /> What Is Visual Reaction Time & Mental Chronometry?
-                  </h4>
+                  </h3>
                   <p className="text-sm leading-relaxed mb-3 text-gray-300">
                     <strong>Reaction Time Test</strong> measures and conditions visual latency, internal clock calibration, and mental chronometry. In fast-paced FPS, racing, and sports games, the gap between two players is often a few tens of milliseconds, so shaving even a small amount off your visual response is what decides duels.
                   </p>
@@ -862,21 +862,21 @@ export default function ReactionTimeTestClient() {
                   <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-cyan-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Who Should Use This?</h5>
+                      <h4 className="text-xs font-bold text-white">Who Should Use This?</h4>
                     </div>
                     <p className="text-xs text-gray-300 leading-relaxed">Gamers, esports athletes, musicians, and drivers looking to refine visual response speed and internal timing rhythm.</p>
                   </div>
                   <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Temporal Calibration</h5>
+                      <h4 className="text-xs font-bold text-white">Temporal Calibration</h4>
                     </div>
                     <p className="text-xs text-gray-300 leading-relaxed">Trains your brain to track seconds smoothly without relying on visual metronomes or rushing clicks.</p>
                   </div>
                   <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center"><Zap className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Sustained Focus</h5>
+                      <h4 className="text-xs font-bold text-white">Sustained Focus</h4>
                     </div>
                     <p className="text-xs text-gray-300 leading-relaxed">Unlimited practice mode allows you to build flow-state focus and track millisecond error statistics over time.</p>
                   </div>
@@ -884,20 +884,11 @@ export default function ReactionTimeTestClient() {
               </div>
             </DrillAccordion>
 
-            <DrillAccordion
-              id="faq"
-              title="Frequently Asked Questions"
-              isOpen={openAccordion === 'faq'}
-              onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-sans">
-                <FAQItem q="What is the Reaction Time Test?" a="It is an online visual reaction speed game that measures your response latency and internal clock timing accuracy in milliseconds." />
-                <FAQItem q="What is a good reaction time?" a="Average human visual reaction time is 200-250ms. Elite gamers and athletes achieve reaction speeds under 180ms." />
-                <FAQItem q="Can you improve reaction speed?" a="Yes! Dedicated practice sharpens neural processing efficiency, reducing decision time and motor execution delay." />
-                <FAQItem q="How does the time-free mode work?" a="You can play as many rounds as you want without a timer forcing the game to end. Click End Drill whenever you wish to view your full session analytics." />
-                <FAQItem q="Is this reflex trainer free?" a="Yes, all drills on SkillDrills are 100% free with no signups or ads." />
-              </div>
-            </DrillAccordion>
+            {/* The FAQ is rendered by DrillGuide below, mapped from
+                faqSchema.mainEntity so the page's FAQPage JSON-LD and the visible
+                questions cannot drift. A second hand-written FAQ accordion used to
+                sit here with five differently-worded questions -- duplicate UI, and
+                not one of the five appeared in the schema. */}
           </div>
         )}
 
@@ -949,15 +940,6 @@ function RuleItem({ num, text, highlight = '', result }: { num: string; text: st
           {result}
         </div>
       </div>
-    </div>
-  );
-}
-
-function FAQItem({ q, a }: { q: string; a: string }) {
-  return (
-    <div className="bg-[#05060b] border border-gray-800 rounded-xl p-5 hover:border-gray-700 transition-colors font-sans">
-      <h4 className="text-sm font-bold text-gray-200 mb-2">{q}</h4>
-      <p className="text-xs text-gray-400 leading-relaxed">{a}</p>
     </div>
   );
 }

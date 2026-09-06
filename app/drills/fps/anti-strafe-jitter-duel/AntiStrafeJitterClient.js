@@ -97,24 +97,6 @@ const ABOUT_SECTIONS = [
   }
 ];
 
-const FAQ_ITEMS = [
-  { q: "What is reactive tracking?", a: "Reactive tracking is the mechanical ability in FPS games to continuously follow a rapidly and unpredictably moving target with your crosshair, requiring fast visual reaction and micro-corrections." },
-  { q: "How do I improve tracking aim?", a: "Improve tracking aim by maintaining high visual focus on the target itself rather than your crosshair, training against fast direction changes, and practicing smooth, continuous mouse adjustments without tensing your hand." },
-  { q: "What is anti-strafe tracking?", a: "Anti-strafe tracking is a specialized aiming skill to counter an enemy's ADAD movement patterns, where the target quickly switches horizontal directions to break tracking alignment." },
-  { q: "How do professional Apex players train tracking?", a: "Professional Apex Legends players practice tracking by using high-strafe reactive tracking trainers, learning target velocity changes, and performing smooth close-quarters tracking warmups." },
-  { q: "How do Overwatch players improve tracking aim?", a: "Overwatch players improve tracking aim by training against erratic movement patterns (like ADAD and crouch strafes) and maintaining crosshair alignment on high-mobility heroes like Tracer and Genji." },
-  { q: "Why is tracking important?", a: "Tracking aim is critical for fully automatic weapons and high time-to-kill (TTK) games like Apex, Overwatch, and The Finals, where damage output is directly proportional to how long your crosshair remains on the enemy." },
-  { q: "How are errors penalised in Anti-Strafe Jitter Duel?", a: "Losing tracking contact for 1.0s resets your streak combo multiplier. When the optional Time Penalty setting is enabled in your session preferences, each 1.0s tracking loss also deducts 0.6s from your clock." },
-  { q: "Can this improve close-range aim?", a: "Yes, this drill simulates rapid close-range strafes and jitter duels where targets move wide across your screen, forcing your eyes and wrist to make high-speed reactive adjustments." },
-  { q: "Does this help Apex Legends?", a: "Absolutely. Apex duels are defined by fast ADAD strafes, slide jumps, and close-quarter jitter movements. This drill directly targets those reaction mechanics." },
-  { q: "Does this help Overwatch?", a: "Yes. It trains your hand to match the instant, zero-momentum direction changes typical of Overwatch characters, improving hit registration for tracking heroes like Soldier: 76, Zarya, and Tracer." },
-  { q: "Does this help Call of Duty?", a: "Yes, tracking and reading player movement changes is essential in Call of Duty for tracking slide cancelers and fast strafers in close-quarters gunfights." },
-  { q: "How often should I practice tracking?", a: "We recommend dedicating 10-15 minutes to reactive tracking and direction change drills daily before launching your games." },
-  { q: "Is this drill free?", a: "Yes, this reactive tracking trainer is completely free to use and runs directly in any modern browser without requiring any downloads or account registration." },
-  { q: "What skills does this improve?", a: "It improves anti-strafe response, jitter correction speed, continuous tracking uptime, mouse tension control, and target lock-on retention." },
-  { q: "Can tracking drills improve consistency?", a: "Yes, repetitive practice against high-speed direction shifts develops consistent wrist-to-screen coordinate mapping, minimizing mechanical errors and aiming panic." },
-  { q: "How do I read fast direction changes?", a: "Do not try to guess when the target will turn. Relax your eyes, widen your focal awareness, and react to the target's change in velocity as a reflex rather than an anticipation." }
-];
 
 const RELATED_DRILLS = [
   { id: "vertical-air-track", name: "Vertical Air Track", cat: "FPS Tracking", desc: "Vertical axis mouse control and prediction trainer.", href: "/drills/fps/vertical-air-track" },
@@ -638,32 +620,32 @@ export default function AntiStrafeJitterClient() {
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
         {/* Title */}
         {!isFullscreen && (
-          <div className="text-center">
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white uppercase">
-              Anti-Strafe Jitter Duel
-              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
-                Anti-Strafe Jitter Trainer
-              </span>
+          <div className="text-left">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white mb-2">
+              Anti-Strafe Jitter Trainer
             </h1>
+            <p className="text-xs sm:text-sm text-slate-400 max-w-3xl leading-relaxed">
+              Counter-strafing flips a target&rsquo;s direction faster than your eyes can follow it. Human smooth pursuit tracks accurately up to roughly 30&deg;/s; past that, or after an abrupt reversal, the eye needs a catch-up saccade about 100&ndash;130&nbsp;ms later (Rashbass, 1961; Krauzlis, 2004).
+            </p>
           </div>
         )}
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 gap-2.5 max-w-2xl mx-auto w-full">
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+          <div className="grid grid-cols-4 gap-2 w-full">
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
               <div className="text-lg sm:text-xl font-black text-white tabular-nums">{score}</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
               <div className={`text-lg sm:text-xl font-black tabular-nums ${timeLeft <= 10 ? "text-red-400 animate-pulse" : "text-white"}`}>{timeLeft}s</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Accuracy</div>
               <div className="text-lg sm:text-xl font-black text-cyan-400 tabular-nums">{accuracy}%</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
               <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
             </div>
@@ -827,9 +809,9 @@ export default function AntiStrafeJitterClient() {
             >
               <div className="space-y-8">
                 <section>
-                  <h4 className="text-base font-bold text-white mb-2 flex items-center gap-2">
+                  <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
                     <Shield className="w-4 h-4 text-cyan-400" /> What Is Anti-Strafe Tracking?
-                  </h4>
+                  </h3>
                   {ABOUT_INTRO.map((para, i) => (
                     <p key={i} className={`text-sm leading-relaxed text-gray-300 ${i < ABOUT_INTRO.length - 1 ? "mb-3" : ""}`}>{para}</p>
                   ))}
@@ -842,7 +824,7 @@ export default function AntiStrafeJitterClient() {
                         <div className={`w-7 h-7 rounded-lg ${card.iconBg} flex items-center justify-center`}>
                           <card.icon className="w-3.5 h-3.5 text-white" />
                         </div>
-                        <h5 className="text-xs font-bold text-white">{card.title}</h5>
+                        <h4 className="text-xs font-bold text-white">{card.title}</h4>
                       </div>
                       <p className="text-xs text-gray-300 leading-relaxed">{card.text}</p>
                     </div>
@@ -851,26 +833,13 @@ export default function AntiStrafeJitterClient() {
 
                 {ABOUT_SECTIONS.map((section, i) => (
                   <section key={i}>
-                    <h4 className="text-base font-bold text-white mb-2 flex items-center gap-2">
+                    <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
                       <section.icon className="w-4 h-4 text-cyan-400" /> {section.title}
-                    </h4>
+                    </h3>
                     {section.paragraphs.map((para, j) => (
                       <p key={j} className={`text-sm leading-relaxed text-gray-300 ${j < section.paragraphs.length - 1 ? "mb-3" : ""}`}>{para}</p>
                     ))}
                   </section>
-                ))}
-              </div>
-            </DrillAccordion>
-
-            <DrillAccordion
-              id="faq"
-              title="Frequently Asked Questions"
-              isOpen={openAccordion === 'faq'}
-              onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {FAQ_ITEMS.map((item, i) => (
-                  <FAQItem key={i} q={item.q} a={item.a} />
                 ))}
               </div>
             </DrillAccordion>
@@ -924,15 +893,6 @@ function RuleItem({ num, text, highlight = '', result }) {
           {result}
         </div>
       </div>
-    </div>
-  );
-}
-
-function FAQItem({ q, a }) {
-  return (
-    <div className="bg-[#05060b] border border-gray-800 rounded-xl p-5 hover:border-gray-700 transition-colors font-sans">
-      <h4 className="text-sm font-bold text-gray-200 mb-2">{q}</h4>
-      <p className="text-xs text-gray-200 leading-relaxed">{a}</p>
     </div>
   );
 }

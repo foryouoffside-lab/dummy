@@ -103,23 +103,6 @@ const ABOUT_SECTIONS = [
   }
 ];
 
-const FAQ_ITEMS = [
-  { q: "What is flow state?", a: "Flow state, often called 'being in the zone', is a psychological state of deep focus and total immersion in an activity, resulting in peak performance and cognitive clarity." },
-  { q: "Can flow state be trained?", a: "Yes, flow state can be trained by repeatedly engaging in activities that balance challenge and skill, such as sustained visual tracking drills, which build concentration endurance." },
-  { q: "How long should I practice?", a: "For building focus endurance, aim for 10-15 minute daily sessions. Stop when you notice severe mental fatigue or frequent attention drift." },
-  { q: "What is deep focus?", a: "Deep focus is the ability to sustain attention on a single complex task without succumbing to external distractions or internal cognitive drift." },
-  { q: "How does flow improve learning?", a: "Flow eliminates mental friction and distraction, allowing the brain's working memory to dedicate 100% of its resources to processing and storing new information." },
-  { q: "How does flow improve gaming?", a: "In competitive gaming, flow state allows players to react intuitively, track targets flawlessly, and make split-second strategic decisions without conscious hesitation." },
-  { q: "Can flow improve productivity?", a: "Absolutely. Operating in a flow state is the core principle behind 'Deep Work', allowing individuals to produce higher quality output in significantly less time." },
-  { q: "What is sustained attention?", a: "Sustained attention is a component of executive functioning that involves maintaining consistent behavioral response and focus during continuous and repetitive activity." },
-  { q: "Why does focus break and how are penalties applied?", a: "A focus break occurs when your crosshair stays off the target for 1.0s or more, which resets your combo multiplier. If you have the optional Time Penalty enabled in your session settings, a focus break also deducts 0.6s from your clock." },
-  { q: "What is attention control?", a: "Attention control is an individual's capacity to choose what they pay attention to and what they ignore. It is a critical metric for cognitive stability." },
-  { q: "How long does it take to improve concentration?", a: "With daily, deliberate practice using concentration tools, measurable improvements in sustained attention and focus duration can be seen in 2 to 4 weeks." },
-  { q: "Can this improve ADHD-like focus problems?", a: "While not a medical treatment, visual tracking exercises that provide immediate gamified feedback can help train the brain's reward pathways to sustain attention longer." },
-  { q: "How often should I train?", a: "Daily practice is optimal for neuroplasticity. Use this drill as a 5-minute mental warmup before starting work, studying, or competitive gaming sessions." },
-  { q: "What is peak flow?", a: "Peak flow occurs during high combo multipliers. It represents total visual and motor synchronization, where tracking becomes predictive rather than reactive." },
-  { q: "What is concentration endurance?", a: "Concentration endurance is the mental stamina required to maintain a high-level flow state over prolonged periods without cognitive degradation." }
-];
 
 const RELATED_DRILLS = [
   { id: "pro-smooth-pursuit", name: "Pro Smooth Pursuit", cat: "FPS Tracking", desc: "Lissajous curve tracking and smooth arm glide.", href: "/drills/fps/pro-smooth-pursuit" },
@@ -657,32 +640,32 @@ export default function FlowStateClient() {
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
         {/* Title */}
         {!isFullscreen && (
-          <div className="text-center">
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              FLOW STATE TRAINER
-              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
-                Aim Flow State Trainer
-              </span>
+          <div className="text-left">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white mb-2">
+              Flow State Trainer
             </h1>
+            <p className="text-xs sm:text-sm text-slate-400 max-w-3xl leading-relaxed">
+              Flow is the state where attention narrows onto the task and self-monitoring drops away. Dietrich (2004) attributes it to transient hypofrontality &mdash; reduced prefrontal activity during highly practised performance. This drill holds difficulty near your current skill, which is the condition flow requires.
+            </p>
           </div>
         )}
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 gap-2.5 max-w-2xl mx-auto w-full">
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+          <div className="grid grid-cols-4 gap-2 w-full">
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
               <div className="text-lg sm:text-xl font-black text-cyan-400 tabular-nums">{score}</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
               <div className={`text-lg sm:text-xl font-black tabular-nums ${timeLeft <= 10 ? "text-red-400 animate-pulse" : "text-white"}`}>{timeLeft}s</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Accuracy</div>
               <div className="text-lg sm:text-xl font-black text-blue-400 tabular-nums">{accuracy}%</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
               <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
             </div>
@@ -844,9 +827,9 @@ export default function FlowStateClient() {
             >
               <div className="space-y-8">
                 <section>
-                  <h4 className="text-base font-bold text-white mb-2 flex items-center gap-2">
+                  <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
                     <Waves className="w-4 h-4 text-cyan-400" /> What Is Flow State Training?
-                  </h4>
+                  </h3>
                   {ABOUT_INTRO.map((para, i) => (
                     <p key={i} className={`text-sm leading-relaxed text-gray-300 ${i < ABOUT_INTRO.length - 1 ? "mb-3" : ""}`}>{para}</p>
                   ))}
@@ -859,7 +842,7 @@ export default function FlowStateClient() {
                         <div className={`w-7 h-7 rounded-lg ${card.iconBg} flex items-center justify-center`}>
                           <card.icon className="w-3.5 h-3.5 text-white" />
                         </div>
-                        <h5 className="text-xs font-bold text-white">{card.title}</h5>
+                        <h4 className="text-xs font-bold text-white">{card.title}</h4>
                       </div>
                       <p className="text-xs text-gray-300 leading-relaxed">{card.text}</p>
                     </div>
@@ -868,26 +851,13 @@ export default function FlowStateClient() {
 
                 {ABOUT_SECTIONS.map((section, i) => (
                   <section key={i}>
-                    <h4 className="text-base font-bold text-white mb-2 flex items-center gap-2">
+                    <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
                       <section.icon className="w-4 h-4 text-cyan-400" /> {section.title}
-                    </h4>
+                    </h3>
                     {section.paragraphs.map((para, j) => (
                       <p key={j} className={`text-sm leading-relaxed text-gray-300 ${j < section.paragraphs.length - 1 ? "mb-3" : ""}`}>{para}</p>
                     ))}
                   </section>
-                ))}
-              </div>
-            </DrillAccordion>
-
-            <DrillAccordion
-              id="faq"
-              title="Frequently Asked Questions"
-              isOpen={openAccordion === 'faq'}
-              onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {FAQ_ITEMS.map((item, i) => (
-                  <FAQItem key={i} q={item.q} a={item.a} />
                 ))}
               </div>
             </DrillAccordion>
@@ -941,15 +911,6 @@ function RuleItem({ num, text, highlight = '', result }) {
           {result}
         </div>
       </div>
-    </div>
-  );
-}
-
-function FAQItem({ q, a }) {
-  return (
-    <div className="bg-[#05060b] border border-gray-800 rounded-xl p-5 hover:border-gray-700 transition-colors font-sans">
-      <h4 className="text-sm font-bold text-gray-200 mb-2">{q}</h4>
-      <p className="text-xs text-gray-200 leading-relaxed">{a}</p>
     </div>
   );
 }

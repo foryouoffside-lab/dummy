@@ -78,22 +78,22 @@ const FAQ_ITEMS = [
   { q: "What is the Digit Symbol Substitution Test (DSST)?", a: "The Digit Symbol Substitution Test (DSST) is a classic neuropsychological test from the Wechsler Adult Intelligence Scale (WAIS). A legend at the top maps digits (1-9) to unique symbols. You must rapidly scan rows of digits below and write or select the corresponding symbol for each. It measures processing speed, visual scanning efficiency, short-term associative memory, and executive attention." },
   { q: "What does the symbol matching test measure?", a: "Symbol matching measures: (1) Processing speed — how quickly your brain can look up and apply the digit-to-symbol mapping, (2) Visual scanning — efficient eye movement across the legend and test items, (3) Associative learning — binding digit-symbol pairs in short-term memory, (4) Executive attention — sustaining the task over repeated monotonous items, and (5) Motor speed — the time to indicate your response." },
   { q: "What is the difference between DSST and SDMT?", a: "In the DSST (Wechsler), you look at a digit and must write the corresponding symbol. In the SDMT (Symbol Digit Modalities Test by Smith, 1973), you look at a symbol and must write or say the corresponding digit. The SDMT is often preferred in clinical settings because oral administration (saying numbers aloud) removes motor speed as a confounding variable, isolating pure cognitive processing speed." },
-  { q: "Is this symbol matching test used for dementia screening?", a: "Yes. The DSST and SDMT are among the most sensitive cognitive screening tools for neurological conditions including multiple sclerosis, Parkinson's disease, traumatic brain injury, and early Alzheimer's disease. Processing speed measured by symbol substitution tests declines measurably years before other cognitive deficits appear, making it a valuable early marker." },
+  { q: "Is this symbol matching drill a medical or screening test?", a: "No. This is a free browser game built on the same symbol-substitution format as the DSST and SDMT, but it is not those instruments and is not a screening or diagnostic test for any condition. The clinical versions use different materials, timing and scoring, and are administered and interpreted by trained professionals. Nothing you score here tells you anything about your health. If you are concerned about your memory or thinking, speak to a doctor." },
   { q: "How can I improve my cognitive processing speed?", a: "Evidence-based approaches include: (1) Regular computerized cognitive training (speed of processing games like DSST/SDMT), (2) Aerobic exercise (most consistently shown to improve processing speed across all ages), (3) Optimal sleep quality (sleep is critical for synaptic consolidation and myelination), (4) Cardiovascular health management (reduced vascular risk improves white matter integrity), and (5) Reducing chronic stress and inflammation." },
   { q: "What is processing speed and why does it matter?", a: "Cognitive processing speed is the rate at which your brain can take in, comprehend, and begin to respond to information. It is one of the most important global indicators of overall brain health and is highly correlated with general intelligence. Faster processing means you can read faster, make decisions more quickly, follow conversations more easily, and react to environmental changes with less latency." },
-  { q: "How does the DSST predict future cognitive decline?", a: "Longitudinal studies show that DSST performance in midlife (ages 40-60) is a strong predictor of cognitive status in older age. Individuals with faster symbol substitution scores at 45-55 years show significantly lower rates of dementia and cognitive impairment at 75-85 years. This makes DSST-style training a potentially high-value preventive cognitive health activity." },
+  { q: "Will practising this drill make me faster at everyday tasks?", a: "You will get faster at this drill with practice. Whether that carries over to unrelated everyday tasks is far less certain -- gains on a trained cognitive task often fail to generalise to untrained ones. Treat your score as a measure of how well you do this particular task, not as a general index of how your brain works." },
   { q: "What strategies help improve symbol matching speed?", a: "Key strategies: (1) Memorize the legend early — don't look up every symbol, build automatic digit-symbol associations from the start, (2) Use chunking — match 2-3 items before re-scanning the legend, (3) Optimize eye movement — minimize the distance your eye travels between legend and test items with consistent scanning patterns, (4) Practice regularly — DSST performance improves significantly with repeated practice sessions." },
-  { q: "What is the average DSST score for adults?", a: "In the WAIS-IV standardization, the average DSST score for adults aged 20-34 is approximately 70-75 correct symbols in 120 seconds. Scores decline with age: 50-64 year-olds average 55-60, and 65-79 year-olds average 45-52. Top performers in cognitive training studies can achieve 85-100+ with extensive practice." },
+  { q: "What is the average DSST score for adults?", a: "In the WAIS-IV standardization, adults aged 20-34 average roughly 70-75 correct symbols in 120 seconds, with the average falling in older age bands. Those figures come from the supervised pencil-and-paper clinical test. This drill uses different symbols, timing and scoring, so your score here is not comparable to them and should not be read as a clinical result." },
   { q: "Is this symbol matching test free to play online?", a: "Yes. The Symbol Matching drill on SkillDrills is completely free. No registration, downloads, or subscriptions required. It runs directly in your browser on desktop and mobile, measuring your processing speed and providing performance feedback after each session." }
 ];
 
 const RELATED_DRILLS = [
   { id: "reaction-time", name: "Reaction Time", cat: "Processing Speed", desc: "Train choice reaction speed and visual reflex latency.", href: "/drills/cognitive/processing-speed/reaction-time" },
   { id: "rsvp-reader", name: "RSVP Speed Reader", cat: "Processing Speed", desc: "Process rapid serial visual presentation text streams.", href: "/drills/cognitive/processing-speed/rsvp-reader" },
-  { id: "divided-attention", name: "Divided Attention", cat: "Attention", desc: "Track and react to multiple independent target streams simultaneously.", href: "/drills/cognitive/attention/divided-attention" },
+  { id: "divided-attention", name: "Divided Attention Test", cat: "Attention", desc: "Track and react to multiple independent target streams simultaneously.", href: "/drills/cognitive/attention/divided-attention" },
   { id: "distraction-fighter", name: "Distraction Fighter", cat: "Focus", desc: "Filter out high-interference Stroop visual distractors.", href: "/drills/cognitive/focus/distraction-fighter" },
-  { id: "concentration-grid", name: "Concentration Grid", cat: "Focus", desc: "Scan and tap sequential numbers on expanding grid matrices.", href: "/drills/cognitive/focus/concentration-grid" },
-  { id: "multi-tasking", name: "Multi-Tasking", cat: "Attention", desc: "Track dual independent target streams under speed pressure.", href: "/drills/cognitive/attention/multi-tasking" }
+  { id: "concentration-grid", name: "Schulte Table Trainer", cat: "Focus", desc: "Scan and tap sequential numbers on expanding grid matrices.", href: "/drills/cognitive/focus/concentration-grid" },
+  { id: "multi-tasking", name: "Multitasking Test", cat: "Attention", desc: "Track dual independent target streams under speed pressure.", href: "/drills/cognitive/attention/multi-tasking" }
 ];
 
 export default function SymbolMatchingClient() {
@@ -461,11 +461,11 @@ export default function SymbolMatchingClient() {
         {!isFullscreen && (
         <div className="text-center">
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-            SYMBOL MATCHING
-            <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
-              Symbol Digit Modalities Test
-            </span>
+            Symbol Digit Modalities Test
           </h1>
+          <p className="text-[13px] text-slate-400 leading-relaxed mt-1">
+            A symbol-substitution task asks you to match symbols to digits against the clock, measuring processing speed rather than knowledge. The format comes from the Digit Symbol Substitution Test and the Symbol Digit Modalities Test (Smith, 1973); this drill borrows that format as a game, not as the clinical instrument.
+          </p>
         </div>
         )}
 

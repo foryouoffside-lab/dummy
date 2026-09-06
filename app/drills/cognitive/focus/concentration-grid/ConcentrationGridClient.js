@@ -3,8 +3,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import {
-  Compass, Volume2, VolumeX, Eye, Zap, ZapOff, Ban,
-  Share2, ArrowLeft, Trophy, Target, Timer, TrendingUp, RefreshCw, Layers, Users, Play, Flame
+  Compass, Volume2, VolumeX, Eye, Zap, ZapOff,
+  Share2, ArrowLeft, TrendingUp, RefreshCw, Users
 } from 'lucide-react';
 
 import { drillAudio } from '../../../../../lib/drillAudio';
@@ -61,26 +61,13 @@ By systematically scanning numbers in numerical sequence across expanding grids,
 
 Because the session runs on a single fixed 45-second clock with no time bonuses or penalties, the drill rewards sustained accuracy over lucky bursts of speed — one careless tap costs a life, and every second spent hesitating is time you can't get back, making peak grid size and total grids cleared the truest measures of your focus stamina.`;
 
-const FAQ_ITEMS = [
-  { q: "What is Concentration Grid?", a: "Concentration Grid is a timed cognitive exercise where players find and tap numbers in sequential order (1, 2, 3...) on a randomized, expanding grid as fast as possible." },
-  { q: "How is score calculated?", a: "Score is awarded for each correct sequential tap, with a speed bonus for fast reaction time. Completing a full grid also grants a large clear bonus based on grid dimension." },
-  { q: "Why do grid sizes change?", a: "As you complete smaller grids, the board expands to larger sizes. Tighter spacing and more numbers increase visual clutter, forcing your brain to expand its peripheral scanning field." },
-  { q: "Does the timer ever change during a session?", a: "No. Every session runs on one fixed 45-second clock with zero time bonuses or penalties. Clearing a grid grows the board to the next size, but the clock keeps counting down the whole time — chain clears together to rack up as many grids as you can before time's up." },
-  { q: "Can a wrong tap end my session early?", a: "No. A wrong tap flashes a warning and counts against your accuracy, but every session runs until the timer reaches zero no matter how many you miss." },
-  { q: "What cognitive skill does Concentration Grid actually train?", a: "It primarily trains visual search efficiency — the speed at which your brain scans a cluttered field and locates a specific target among distractors. This relies on efficient micro-saccadic eye movements and peripheral vision rather than central foveal focus alone." },
-  { q: "Where did the concentration grid exercise originate?", a: "Numbered scanning grids trace back to sports psychology performance labs and are a staple warm-up in football, tennis, and combat sports training. Coaches use them to sharpen an athlete's ability to process a busy visual field quickly before switching attention to the actual game action." },
-  { q: "Why do the numbers rotate at larger grid sizes?", a: "From the 5x5 grid onward, each number tile is rendered at a slight random rotation. This removes the shortcut of recognizing a number purely by its shape and orientation, forcing genuine digit recognition and keeping visual search difficulty climbing alongside grid size." },
-  { q: "How does this compare to a standard Schulte table?", a: "This drill is a timed, gamified evolution of the classic Schulte table (a fixed 5x5 number grid used in speed-reading and attention training). Instead of one static grid, it chains progressively larger grids together against a single countdown clock, rewarding sustained accuracy over the whole run rather than one isolated attempt." },
-  { q: "Is this concentration grid test free to play?", a: "Yes. Concentration Grid on SkillDrills is completely free with no sign-up, downloads, or paywalls. It runs directly in your browser on desktop and mobile." }
-];
-
 const RELATED_DRILLS = [
-  { id: "concentration-stamina", name: "Concentration Stamina", cat: "Attention", desc: "Sustain continuous visual focus through prolonged high-density sequences.", href: "/drills/cognitive/attention/concentration-stamina" },
-  { id: "rsvp-reader", name: "RSVP Speed Reader", cat: "Processing Speed", desc: "Process rapid serial visual presentation text streams.", href: "/drills/cognitive/processing-speed/rsvp-reader" },
-  { id: "divided-attention", name: "Divided Attention", cat: "Attention", desc: "Track and react to multiple independent target streams simultaneously.", href: "/drills/cognitive/attention/divided-attention" },
-  { id: "multi-tasking", name: "Multi-Tasking", cat: "Attention", desc: "Track dual independent target streams under speed pressure.", href: "/drills/cognitive/attention/multi-tasking" },
-  { id: "distraction-fighter", name: "Distraction Fighter", cat: "Focus", desc: "Filter out high-interference Stroop visual distractors.", href: "/drills/cognitive/focus/distraction-fighter" },
-  { id: "reaction-time", name: "Reaction Time", cat: "Processing Speed", desc: "Train choice reaction speed and visual reflex latency.", href: "/drills/cognitive/processing-speed/reaction-time" }
+  { id: "concentration-stamina", name: "Focus Test", cat: "Attention", desc: "Sustain continuous visual focus through prolonged high-density sequences.", href: "/drills/cognitive/attention/concentration-stamina" },
+  { id: "rsvp-reader", name: "Reading Speed Test", cat: "Processing Speed", desc: "Process rapid serial visual presentation text streams.", href: "/drills/cognitive/processing-speed/rsvp-reader" },
+  { id: "divided-attention", name: "Divided Attention Test", cat: "Attention", desc: "Track and react to multiple independent target streams simultaneously.", href: "/drills/cognitive/attention/divided-attention" },
+  { id: "multi-tasking", name: "Multitasking Test", cat: "Attention", desc: "Track dual independent target streams under speed pressure.", href: "/drills/cognitive/attention/multi-tasking" },
+  { id: "distraction-fighter", name: "Stroop Test Online", cat: "Focus", desc: "Filter out high-interference Stroop visual distractors.", href: "/drills/cognitive/focus/distraction-fighter" },
+  { id: "reaction-time", name: "Neuro Speed & Reflex Test", cat: "Processing Speed", desc: "Train choice reaction speed and visual reflex latency.", href: "/drills/cognitive/processing-speed/reaction-time" }
 ];
 
 // ============================================================
@@ -366,14 +353,14 @@ export default function ConcentrationGridClient() {
         accuracy: endSummary.accuracy,
         rating: { letter: gradeInfo.grade, label: gradeInfo.label, emoji: '🎯' },
         newBest: endSummary.isNewBest,
-        drillName: 'Concentration Grid',
+        drillName: 'Schulte Table Trainer',
         playerName: getPlayerName(),
       });
       await shareScoreCard(url, canvas);
     } catch (e) {
-      const text = `🎯 I scored ${endSummary.score} PTS (${endSummary.peakGrid}×${endSummary.peakGrid} grid, ${endSummary.gridsCleared} grids cleared) on Concentration Grid! Accuracy: ${endSummary.accuracy}%. Practice free cognitive focus drills at skilldrills.online!`;
+      const text = `🎯 I scored ${endSummary.score} PTS (${endSummary.peakGrid}×${endSummary.peakGrid} grid, ${endSummary.gridsCleared} grids cleared) on Schulte Table Trainer! Accuracy: ${endSummary.accuracy}%. Practice free cognitive focus drills at skilldrills.online!`;
       if (typeof navigator !== 'undefined' && navigator.share) {
-        navigator.share({ title: 'Concentration Grid Score', text, url }).catch(() => {});
+        navigator.share({ title: 'Schulte Table Trainer Score', text, url }).catch(() => {});
       } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
         navigator.clipboard.writeText(`${text} ${url}`);
       }
@@ -386,38 +373,31 @@ export default function ConcentrationGridClient() {
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
         {/* Title */}
         {!isFullscreen && (
-        <div className="text-center">
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-            CONCENTRATION GRID
-            <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
+          <div className="flex flex-col gap-1">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
               Schulte Table Trainer
-            </span>
-          </h1>
-        </div>
+            </h1>
+            <p className="text-[13px] text-slate-400 leading-relaxed">
+              The Schulte table is a psychodiagnostic visual search grid designed to widen the functional peripheral field and reduce fixation latency during sequential scanning (Lu et al., 2022; Rayner, 1998). This expanding grid drill trains rapid eye movements (saccades) and selective attention to locate numerical targets under progressive visual crowding (Treisman &amp; Gelade, 1980; Wolfe, 2007).
+            </p>
+          </div>
         )}
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-        <div className="grid grid-cols-4 gap-2.5 max-w-2xl mx-auto w-full">
-          <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-            <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
-            <div className="text-lg sm:text-xl font-black text-cyan-400 tabular-nums">{score}</div>
+          <div className="grid grid-cols-4 gap-2 w-full -mb-2">
+            {[
+              { label: 'Score', value: score, tone: 'text-cyan-400' },
+              { label: 'Time', value: `${Math.ceil(timeRemaining)}s`, tone: timeRemaining <= 10 ? 'text-red-400 animate-pulse' : 'text-white' },
+              { label: 'Grid Size', value: `${gridSize}×${gridSize}`, tone: 'text-indigo-400' },
+              { label: 'Best Score', value: bestScore, tone: 'text-amber-400' },
+            ].map((s) => (
+              <div key={s.label} className="rounded-lg border border-white/[0.06] bg-white/[0.015] px-2 py-2 text-center">
+                <div className="text-[9.5px] uppercase font-semibold text-slate-500 tracking-[0.12em]">{s.label}</div>
+                <div className={`text-lg sm:text-xl font-black tabular-nums font-mono mt-0.5 ${s.tone}`}>{s.value}</div>
+              </div>
+            ))}
           </div>
-          <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-            <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
-            <div className={`text-lg sm:text-xl font-black tabular-nums ${timeRemaining <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>
-              {Math.ceil(timeRemaining)}s
-            </div>
-          </div>
-          <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-            <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Grid Size</div>
-            <div className="text-lg sm:text-xl font-black text-indigo-400 tabular-nums">{gridSize}×{gridSize}</div>
-          </div>
-          <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-            <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
-            <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
-          </div>
-        </div>
         )}
 
         {/* Game Stage Container */}
@@ -496,16 +476,8 @@ export default function ConcentrationGridClient() {
             <FpsStartCard
               icon={Compass}
               accent="cyan"
-              title="Concentration Grid"
-              subtitle="Sequential Number Search"
-              rules={[
-                { icon: Target, accent: 'emerald', title: 'Tap Numbers in Order (1, 2, 3...)', text: 'Locate and click numbers in strict sequential numerical order' },
-                { icon: Zap, accent: 'blue', title: 'Speed & Grid Scaling', text: 'Grid size and search density scale as levels progress' },
-              ]}
-              stats={[
-                { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
-                { icon: TrendingUp, label: 'Best Level', value: `Lv. ${bestLevel}`, color: 'text-blue-400', accent: 'blue' },
-              ]}
+              title="Schulte Table Trainer"
+              subtitle="Sequential Number Search • Expanding Schulte Grid"
               isTouchOnlyDevice={false}
               onStart={enterDrill}
             />
@@ -615,10 +587,10 @@ export default function ConcentrationGridClient() {
           </div>
         </DrillAccordion>
 
-        {/* ── ACCORDION 2: ABOUT CONCENTRATION GRID ── */}
+        {/* ── ACCORDION 2: ABOUT SCHULTE TABLE & CONCENTRATION GRID ── */}
         <DrillAccordion
           id="about"
-          title="About Concentration Grid"
+          title="About Schulte Table & Concentration Grid"
           isOpen={openAccordion === 'about'}
           onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
         >
@@ -654,23 +626,6 @@ export default function ConcentrationGridClient() {
                 <p className="text-xs text-gray-300 leading-relaxed">Each cleared grid expands to a larger, denser board, widening the visual field you must scan without losing track of the next target number.</p>
               </div>
             </div>
-          </div>
-        </DrillAccordion>
-
-        {/* ── ACCORDION 3: FAQ ── */}
-        <DrillAccordion
-          id="faq"
-          title="Frequently Asked Questions"
-          isOpen={openAccordion === 'faq'}
-          onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
-        >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {FAQ_ITEMS.map((item, i) => (
-              <div key={i} className="bg-[#05060b] border border-gray-800 rounded-xl p-5">
-                <h4 className="text-sm font-bold text-gray-200 mb-2">{item.q}</h4>
-                <p className="text-xs text-gray-400 leading-relaxed">{item.a}</p>
-              </div>
-            ))}
           </div>
         </DrillAccordion>
         </div>

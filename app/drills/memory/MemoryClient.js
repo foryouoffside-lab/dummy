@@ -2,7 +2,18 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { ArrowLeft, Brain, Target, Home, ChevronRight, Sparkles } from "lucide-react";
+import {
+  ArrowLeft,
+  Brain,
+  Layers,
+  Compass,
+  Database,
+  GitBranch,
+  Zap,
+  Home,
+  ChevronRight,
+  Sparkles
+} from "lucide-react";
 import { DRILLS } from "@/lib/drillsRegistry";
 import { getDifficultyRank } from "@/lib/scoringEngine";
 import { getDrillTagline, sortByInterest } from "@/lib/drillCatalog";
@@ -10,7 +21,11 @@ import SiteFooter from "@/components/SiteFooter";
 import Reveal from "@/components/Reveal";
 import DrillCarousel from "@/components/drill/DrillCarousel";
 import StickyMobileCta from "@/components/StickyMobileCta";
+import AdjacentHubs from "@/components/AdjacentHubs";
 import { useTranslation } from '@/lib/i18n/useTranslation';
+import { hasLocalizedRoute } from '@/lib/i18n/locales';
+import { getLocalizedDrill } from '@/lib/i18n/drillNames';
+import { isIdleFrameSkippable } from '@/lib/performance';
 
 const memDrills = DRILLS.filter(d => d.category === 'memory');
 
@@ -33,7 +48,7 @@ const memoryCategories = [
   {
     name: "Working Memory",
     folderName: "working-memory",
-    icon: Brain,
+    icon: Layers,
     color: "indigo",
     bgColor: "bg-indigo-500/10 border-indigo-500/20 text-indigo-400",
     textColor: "text-indigo-400",
@@ -43,7 +58,7 @@ const memoryCategories = [
   {
     name: "Spatial Memory",
     folderName: "spatial-memory",
-    icon: Brain,
+    icon: Compass,
     color: "indigo",
     bgColor: "bg-indigo-500/10 border-indigo-500/20 text-indigo-400",
     textColor: "text-indigo-400",
@@ -62,7 +77,7 @@ const orderedMemoryDrills = sortByInterest(
 );
 
 export default function MemoryClient() {
-  const { t } = useTranslation();
+  const { locale, t, localizeHref } = useTranslation();
   const [isClient, setIsClient] = useState(false);
   const [drillLevels, setDrillLevels] = useState({});
   const canvasRef = useRef(null);
@@ -98,12 +113,13 @@ export default function MemoryClient() {
     } catch (e) {}
   }, [isClient]);
 
-  // Binary data grid background animation
+  // Binary data grid background animation with reduced motion & intersection awareness
   useEffect(() => {
     if (!isClient) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
+    if (!ctx) return;
     let animationFrameId;
 
     const resize = () => {
@@ -116,30 +132,56 @@ export default function MemoryClient() {
     const columns = Math.floor(canvas.width / 24);
     const dropPositions = Array(columns).fill(0);
 
+    // If reduced-motion is requested, render a static poster frame and skip RAF
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      ctx.fillStyle = "rgba(8, 13, 26, 0.15)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "rgba(99, 102, 241, 0.08)";
+      ctx.font = "12px monospace";
+      for (let x = 0; x < columns; x++) {
+        for (let y = 16; y < canvas.height; y += 32) {
+          if (Math.random() > 0.4) {
+            ctx.fillText(Math.random() > 0.5 ? "1" : "0", x * 24, y);
+          }
+        }
+      }
+      return () => {
+        window.removeEventListener("resize", resize);
+      };
+    }
+
+    let isVisible = true;
+    const observer = new IntersectionObserver(([entry]) => {
+      isVisible = entry.isIntersecting;
+    });
+    observer.observe(canvas);
+
     let lastTime = 0;
     const draw = (timestamp) => {
       if (!timestamp) timestamp = 0;
-      const elapsed = timestamp - lastTime;
-      if (elapsed > 45) {
-        lastTime = timestamp;
-        ctx.fillStyle = "rgba(8, 13, 26, 0.15)";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        ctx.fillStyle = "rgba(99, 102, 241, 0.12)";
-        ctx.font = "12px monospace";
-
-        dropPositions.forEach((y, x) => {
-          const text = Math.random() > 0.5 ? "1" : "0";
-          const xCoord = x * 24;
-          ctx.fillText(text, xCoord, y);
-
-          if (y > canvas.height && Math.random() > 0.985) {
-            dropPositions[x] = 0;
-          } else {
-            dropPositions[x] = y + 16;
-          }
-        });
+      if (!isVisible || isIdleFrameSkippable(false, timestamp, lastTime)) {
+        animationFrameId = requestAnimationFrame(draw);
+        return;
       }
+      lastTime = timestamp;
+      ctx.fillStyle = "rgba(8, 13, 26, 0.15)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = "rgba(99, 102, 241, 0.12)";
+      ctx.font = "12px monospace";
+
+      dropPositions.forEach((y, x) => {
+        const text = Math.random() > 0.5 ? "1" : "0";
+        const xCoord = x * 24;
+        ctx.fillText(text, xCoord, y);
+
+        if (y > canvas.height && Math.random() > 0.985) {
+          dropPositions[x] = 0;
+        } else {
+          dropPositions[x] = y + 16;
+        }
+      });
+
       animationFrameId = requestAnimationFrame(draw);
     };
 
@@ -147,11 +189,10 @@ export default function MemoryClient() {
 
     return () => {
       cancelAnimationFrame(animationFrameId);
+      observer.disconnect();
       window.removeEventListener("resize", resize);
     };
   }, [isClient]);
-
-  const totalDrills = memoryCategories.reduce((acc, cat) => acc + cat.drills.length, 0);
 
   return (
     <div className="min-h-screen bg-canvas text-ink-1 font-sans selection:bg-indigo-500/30 selection:text-indigo-300 relative overflow-hidden">
@@ -167,75 +208,32 @@ export default function MemoryClient() {
         <div className="absolute top-[30%] -right-40 w-[480px] h-[480px] bg-purple-500/[0.08] rounded-full blur-[140px]" />
       </div>
 
-      {/* SEO Structured Data */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "CollectionPage",
-            name: "Memory Training Drills - Free Brain Memory Exercises",
-            url: "https://skilldrills.online/drills/memory",
-            description: `${totalDrills} free memory training drills across Short-Term, Working, and Spatial Memory.`,
-            isPartOf: {
-              "@type": "WebSite",
-              name: "SkillDrills",
-              url: "https://skilldrills.online",
-            },
-            about: {
-              "@type": "Thing",
-              name: "Memory Training & Cognitive Enhancement",
-            },
-            numberOfItems: totalDrills,
-            itemListElement: memoryCategories
-              .flatMap((category) =>
-                category.drills.map((drill) => ({
-                  ...drill,
-                  categoryFolder: category.folderName,
-                }))
-              )
-              .map((drill, index) => ({
-                "@type": "ListItem",
-                position: index + 1,
-                item: {
-                  "@type": "WebApplication",
-                  name: drill.name,
-                  url: `https://skilldrills.online/drills/memory/${drill.categoryFolder}/${drill.folderName}`,
-                  description: drill.description,
-                  applicationCategory: "EducationalApplication",
-                  operatingSystem: "Web",
-                },
-              })),
-          }),
-        }}
-      />
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
-        {/* Breadcrumb */}
+        {/* Breadcrumb Navigation */}
         <nav aria-label="Breadcrumb" className="mb-8">
           <ol className="flex items-center gap-2 text-xs font-mono text-ink-3 uppercase tracking-wider">
             <li>
               <Link
-                href="/"
+                href={localizeHref('/')}
                 className="flex items-center gap-1.5 hover:text-indigo-400 transition-colors"
               >
                 <Home className="w-3.5 h-3.5" />
-                <span>HQ</span>
+                <span>{t('ui.nav.hq', 'HQ')}</span>
               </Link>
             </li>
-            <ChevronRight className="w-3 h-3 text-hairline-2" />
+            <li><ChevronRight className="w-3 h-3 text-hairline-2" /></li>
             <li>
               <Link
-                href="/drills"
+                href={hasLocalizedRoute(locale, '/drills') ? localizeHref('/drills') : '/drills'}
                 className="hover:text-indigo-400 transition-colors"
               >
-                Drills
+                {t('ui.nav.drills', 'DRILLS')}
               </Link>
             </li>
-            <ChevronRight className="w-3 h-3 text-hairline-2" />
+            <li><ChevronRight className="w-3 h-3 text-hairline-2" /></li>
             <li>
               <span className="text-indigo-400 font-bold" aria-current="page">
-                Memory Hub
+                {t('header.memory', 'MEMORY')}
               </span>
             </li>
           </ol>
@@ -255,19 +253,23 @@ export default function MemoryClient() {
         <Reveal>
           <DrillCarousel
             headingId="memory-drills"
-            heading="Memory drills"
+            heading={t('hubs.memory.drillsHeading', 'Memory drills')}
             accent="indigo"
             icon={Brain}
-            allLabel="View all"
-            drills={orderedMemoryDrills.map((drill) => ({
-              href: drill.href,
-              name: drill.name,
-              tagline: getDrillTagline(drill.href, drill.description),
-              difficulty: drill.difficulty,
-              duration: drill.duration,
-              icon: drill.icon,
-              badge: drillLevels[drill.folderName] ? `Lv. ${drillLevels[drill.folderName]}` : null,
-            }))}
+            allLabel={t('ui.viewAll', 'View all')}
+            drills={orderedMemoryDrills.map((drill) => {
+              const fallbackTagline = getDrillTagline(drill.href, drill.description);
+              const localized = getLocalizedDrill(drill.href, locale, drill.name, fallbackTagline);
+              return {
+                href: drill.href,
+                name: localized.name,
+                tagline: localized.tagline,
+                difficulty: drill.difficulty,
+                duration: drill.duration,
+                icon: drill.icon,
+                badge: drillLevels[drill.folderName] ? `Lv. ${drillLevels[drill.folderName]}` : null,
+              };
+            })}
           />
         </Reveal>
 
@@ -281,71 +283,65 @@ export default function MemoryClient() {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
               {[
                 {
-                  emoji: "💾",
+                  icon: Database,
                   title: "Working Buffer",
                   desc: "Augment sensory sequence mapping and pattern retention grids.",
                 },
                 {
-                  emoji: "🎯",
+                  icon: Compass,
                   title: "Spatial Tracing",
                   desc: "Sharpen layout memory recall and path tracking resolution.",
                 },
                 {
-                  emoji: "🧬",
+                  icon: GitBranch,
                   title: "Recall Streaks",
                   desc: "Build durable concept connections across non-adjacent recall points.",
                 },
                 {
-                  emoji: "⚡",
+                  icon: Zap,
                   title: "N-Back Endurance",
                   desc: "Maximize mental data processing rates under progressive cognitive loads.",
                 },
-              ].map((benefit, i) => (
-                <div key={i} className="bg-surface-2 border border-hairline rounded-xl p-4">
-                  <h4 className="font-bold text-indigo-400 mb-1 flex items-center gap-2 uppercase text-xs tracking-wider font-mono">
-                    <span>{benefit.emoji}</span>
-                    {benefit.title}
-                  </h4>
-                  <p className="text-xs text-ink-2 leading-relaxed">
-                    {benefit.desc}
-                  </p>
-                </div>
-              ))}
+              ].map((benefit, i) => {
+                const Icon = benefit.icon;
+                return (
+                  <div key={i} className="bg-surface-2 border border-hairline rounded-xl p-4">
+                    <div className="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center mb-3">
+                      <Icon className="w-4 h-4" />
+                    </div>
+                    <h4 className="font-bold text-indigo-400 mb-1 uppercase text-xs tracking-wider font-mono">
+                      {benefit.title}
+                    </h4>
+                    <p className="text-xs text-ink-2 leading-relaxed">
+                      {benefit.desc}
+                    </p>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </Reveal>
 
-        {/* Explore Related Hubs (Fixed 4 unique links - Defect #6) */}
-        <Reveal className="mt-12 mb-8 border-t border-hairline pt-12">
-          <h2 className="text-base font-bold tracking-widest text-center text-ink-1 font-mono uppercase mb-8">
-            Explore Adjacent Hubs
-          </h2>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
-            <Link href="/drills/cognitive" className="group bg-surface-1 backdrop-blur-xl border border-hairline rounded-xl p-5 hover:border-violet-500/40 transition-all duration-200 hover:-translate-y-1 text-center">
-              <div className="text-2xl mb-2">🧠</div>
-              <h3 className="font-bold text-ink-1 group-hover:text-violet-400 transition-colors uppercase text-xs font-mono">Cognitive Hub</h3>
-              <p className="text-2xs text-ink-3 uppercase mt-1 font-mono">Focus &amp; decision speed</p>
-            </Link>
-            <Link href="/drills/visual-tracking" className="group bg-surface-1 backdrop-blur-xl border border-hairline rounded-xl p-5 hover:border-cyan-500/40 transition-all duration-200 hover:-translate-y-1 text-center">
-              <div className="text-2xl mb-2">👁️</div>
-              <h3 className="font-bold text-ink-1 group-hover:text-cyan-400 transition-colors uppercase text-xs font-mono">Visual Tracking</h3>
-              <p className="text-2xs text-ink-3 uppercase mt-1 font-mono">Smooth pursuit labs</p>
-            </Link>
-            <Link href="/drills/reaction-speed" className="group bg-surface-1 backdrop-blur-xl border border-hairline rounded-xl p-5 hover:border-amber-500/40 transition-all duration-200 hover:-translate-y-1 text-center">
-              <div className="text-2xl mb-2">⚡</div>
-              <h3 className="font-bold text-ink-1 group-hover:text-amber-400 transition-colors uppercase text-xs font-mono">Reaction Speed</h3>
-              <p className="text-2xs text-ink-3 uppercase mt-1 font-mono">Reflex latency tests</p>
-            </Link>
-            <Link href="/drills/fps" className="group bg-surface-1 backdrop-blur-xl border border-hairline rounded-xl p-5 hover:border-red-500/40 transition-all duration-200 hover:-translate-y-1 text-center">
-              <div className="text-2xl mb-2">🎯</div>
-              <h3 className="font-bold text-ink-1 group-hover:text-red-400 transition-colors uppercase text-xs font-mono">Tactical Aim</h3>
-              <p className="text-2xs text-ink-3 uppercase mt-1 font-mono">Aim &amp; click accuracy</p>
-            </Link>
-          </div>
-        </Reveal>
+        {/* Clean Adjacent Hubs Navigation */}
+        <AdjacentHubs currentCat="memory" />
+
+        {/* Back Link */}
+        <div className="mt-12 border-t border-hairline pt-6">
+          <Link 
+            href={hasLocalizedRoute(locale, '/drills') ? localizeHref('/drills') : '/drills'}
+            className="inline-flex items-center gap-2 text-xs font-mono uppercase font-bold text-ink-3 hover:text-ink-1 transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            {t('ui.returnToAllSectors', 'Return to All Sectors')}
+          </Link>
+        </div>
       </div>
 
-      <StickyMobileCta href="/drills/memory/short-term-memory/digit-span" label="Start Memory Drill" categoryName="Memory" />
+      <StickyMobileCta
+        href={hasLocalizedRoute(locale, '/drills/memory/short-term-memory/digit-span') ? localizeHref('/drills/memory/short-term-memory/digit-span') : '/drills/memory/short-term-memory/digit-span'}
+        label={t('hubs.memory.startCta', 'Start Memory Drill')}
+        categoryName={t('header.memory', 'Memory')}
+      />
       <SiteFooter />
     </div>
   );

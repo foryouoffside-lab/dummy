@@ -2,7 +2,6 @@
 import { isIdleFrameSkippable } from '@/lib/performance';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import Link from 'next/link';
 
 import {
   Activity, AlertCircle, ArrowRight, ChevronRight, Crosshair,
@@ -74,65 +73,6 @@ const getLevelConfig = (level, combo = 0) => {
     hitMargin: Math.max(3, ramp(12, 4, p))
   };
 };
-
-const FAQ_ITEMS = [
-  {
-    q: "What is a sequence aim trainer?",
-    a: "A sequence aim trainer is a specialized mouse accuracy tool designed to practice moving the crosshair to multiple targets in a specific size order under time pressure, simulating multi-target acquisition in competitive shooters."
-  },
-  {
-    q: "How does finger sequencing improve FPS aiming?",
-    a: "Finger sequencing conditions your brain and motor pathways to execute precise multi-target micro-flicks in rapid succession without crosshair overshooting or hesitation between target transfers."
-  },
-  {
-    q: "How is this different from a simple click speed test (CPS)?",
-    a: "A CPS test measures raw spam clicks on a stationary box. Sequence Aim Training measures spatial accuracy, rapid crosshair pathing, micro-adjustments, and ordered visual recognition under strict time limits."
-  },
-  {
-    q: "Does sequential target training help in Valorant and CS2?",
-    a: "Yes. In clutch situations where multiple enemies push your angle, being able to clear targets in quick sequential succession from primary threat to secondary threat is critical to winning rounds."
-  },
-  {
-    q: "How do you calculate accuracy in this sequence trainer?",
-    a: "Accuracy is calculated as the ratio of successful ordered node hits to total mouse click actions. Missed clicks on empty canvas space or clicking nodes out of size order penalizes your accuracy."
-  },
-  {
-    q: "What is the best mouse sensitivity for finger sequencing drills?",
-    a: "We recommend using your exact in-game competitive sensitivity (typically 25cm - 45cm per 360 turn) so that your motor memory directly translates to in-game target switching."
-  },
-  {
-    q: "How does difficulty scaling work in Level 1 to 15?",
-    a: "As your score increases, target node radii shrink, allowed sequence window times tighten, and distance spreads expand continuously."
-  },
-  {
-    q: "Can I train on mobile or touch screen devices?",
-    a: "Yes! The drill fully supports high-speed touch interactions on mobile and tablet displays, allowing you to train finger dexterity on any device."
-  },
-  {
-    q: "How often should I practice sequence aim training?",
-    a: "Integrating 5 to 10 minutes of sequential click training into your daily warmup routine before ranked matches builds sharp muscle memory and warm finger reflexes."
-  },
-  {
-    q: "What is the combo multiplier system?",
-    a: "Completing node chains sequentially builds your combo streak. Sustaining consecutive unbroken chains boosts your point multiplier up to 3.0x, driving elite leaderboard scores."
-  },
-  {
-    q: "Why do node sizes change within each chain?",
-    a: "Node sizes descend from largest to smallest to train initial broad flicking followed by fine micro-correction, mimicking initial enemy target locking followed by headshot refinement."
-  },
-  {
-    q: "Is this sequence aim trainer completely free?",
-    a: "Yes, SkillDrills Sequence Aim Trainer is 100% free with no sign-ups, downloads, or paywalls required."
-  },
-  {
-    q: "What games benefit most from finger sequence training?",
-    a: "Valorant, Counter-Strike 2, Apex Legends, Overwatch 2, Rainbow Six Siege, and Call of Duty: Warzone."
-  },
-  {
-    q: "How can I share my score card results?",
-    a: "After completing a drill session, click the 'Share Score' button in the results modal to instantly copy or share your verified performance summary."
-  }
-];
 
 export default function FingerSequencingClient() {
   const [gameState, setGameState] = useState('start'); // 'start' | 'countdown' | 'playing' | 'gameOver'
@@ -846,32 +786,35 @@ export default function FingerSequencingClient() {
     <div className="min-h-screen bg-[#050508] text-white flex flex-col font-sans select-none">
       {/* ── MAIN CONTENT AREA ── */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
-        {/* Title */}
+        {/* Title & AIO Header */}
         {!isFullscreen && (
-          <div className="text-center">
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white uppercase">
+          <div className="text-left">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
               Sequence Aim Trainer
             </h1>
+            <p className="text-sm text-slate-400 mt-1.5 leading-relaxed max-w-3xl">
+              Sequential target switching means clicking a set of targets in a required order rather than whichever one is easiest to reach. An ordered sequence like that runs as a single pre-planned motor program instead of one fresh decision per target (Lashley, 1951; Keele, 1968), so the time is spent in the transitions between targets, not in the clicks. Each transition is itself a Fitts&apos;s Law movement, timed by the log of the gap between two targets divided by their width (Fitts, 1954).
+            </p>
           </div>
         )}
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 gap-2.5 max-w-2xl mx-auto w-full">
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
+          <div className="grid grid-cols-4 gap-2 w-full">
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Score</div>
               <div className="text-lg sm:text-xl font-black text-white tabular-nums">{uiScore}</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Time Left</div>
               <div className={`text-lg sm:text-xl font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>{uiTimeLeft}s</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Accuracy</div>
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Accuracy</div>
               <div className="text-lg sm:text-xl font-black text-emerald-400 tabular-nums">{liveAccuracy}%</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Best Score</div>
               <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
             </div>
           </div>
@@ -1043,75 +986,45 @@ export default function FingerSequencingClient() {
               isOpen={openAccordion === 'about'}
               onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
             >
-              <div className="space-y-8">
-                <section>
-                  <h4 className="text-base font-bold text-white mb-2 flex items-center gap-2">
-                    <Target className="w-4 h-4 text-emerald-400" /> Mastering Sequential Target Acquisition
-                  </h4>
-                  <p className="text-sm leading-relaxed mb-3">
-                    <strong>Sequence Aim Training</strong> isolates and exercises your motor cortex's ability to plan crosshair paths across multiple targets in rapid succession. In competitive shooters like <strong>Valorant, CS2, and Apex Legends</strong>, engagements frequently demand clearing an enemy on a primary angle before micro-flicking to a secondary target.
+              <div className="space-y-6">
+                <div className="space-y-3">
+                  <h3 className="text-base font-bold text-white flex items-center gap-2">
+                    <Target className="w-4 h-4 text-emerald-400" /> Mastering Sequential Target Acquisition &amp; Finger Speed
+                  </h3>
+                  <p className="text-sm leading-relaxed text-gray-300">
+                    <strong>Sequence Aim Training</strong> isolates and exercises your motor cortex&apos;s ability to plan and execute ballistic crosshair trajectories across multiple ordered targets under strict temporal pressure. In competitive shooters like <strong>Valorant, CS2, and Apex Legends</strong>, clutch engagements frequently demand clearing an enemy on a primary angle before immediately micro-flicking to a secondary opponent.
                   </p>
-                  <p className="text-sm leading-relaxed">
-                    By forcing ordered node clicks from largest to smallest, the drill trains the transition from broad initial flicks to tight micro-corrections, eliminating hesitation and crosshair overshooting between target transfers.
+                  <p className="text-sm leading-relaxed text-gray-300">
+                    By enforcing ordered node clicks from largest to smallest, the drill trains the transition from broad initial flicks to tight micro-corrections, eliminating hesitation and crosshair overshooting between target transfers according to the serial order motor programming principles established by Lashley (1951) and Keele (1968).
                   </p>
-                </section>
+                </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                  <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Target Audience</h5>
+                      <h4 className="text-xs font-bold text-white">Target Audience</h4>
                     </div>
                     <p className="text-xs text-gray-300 leading-relaxed">FPS players looking to sharpen target switching, finger dexterity, micro-flick precision, and multi-kill clutch consistency.</p>
                   </div>
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                  <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-teal-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Mechanical Benefits</h5>
+                      <h4 className="text-xs font-bold text-white">Mechanical Benefits</h4>
                     </div>
                     <p className="text-xs text-gray-300 leading-relaxed">Conditions smooth crosshair deceleration, reduces finger friction, and builds muscle memory for rapid multi-target transfers.</p>
                   </div>
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                  <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Zap className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Difficulty Scaling</h5>
+                      <h4 className="text-xs font-bold text-white">Difficulty Scaling</h4>
                     </div>
                     <p className="text-xs text-gray-300 leading-relaxed">Continuous exponential scaling smoothly tightens sequence timer windows, shrinks target node radii, and expands spatial node spreads.</p>
                   </div>
                 </div>
               </div>
             </DrillAccordion>
-
-            <DrillAccordion
-              id="faq"
-              title="Frequently Asked Questions"
-              isOpen={openAccordion === 'faq'}
-              onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {FAQ_ITEMS.map((item, idx) => (
-                  <FAQItem key={idx} q={item.q} a={item.a} />
-                ))}
-              </div>
-            </DrillAccordion>
           </div>
-        )}
-
-        {/* ── RELATED DRILLS ── */}
-        {!isFullscreen && (
-          <section className="mt-4">
-            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3 font-sans">
-              Related Motor &amp; Speed Drills
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              <RelatedCard href="/drills/motor/hand-eye-coordination/aim-trainer" title="Aim Trainer Pro" desc="Train raw click precision and reaction timing on dynamic targets." />
-              <RelatedCard href="/drills/motor/hand-eye-coordination/precision-flick-shot" title="Precision Flick Shot" desc="Master high-speed flick shots with strict pixel accuracy." />
-              <RelatedCard href="/drills/motor/precision-control/steady-hand" title="Steady Hand Trainer" desc="Trace a winding path corridor with shrinking width on streak." />
-              <RelatedCard href="/drills/fps/180-degree-awareness" title="180° Awareness Pro" desc="Master wide horizontal flicks and peripheral target detection." />
-              <RelatedCard href="/drills/fps/flick-shot-training" title="Pro Flick Trainer" desc="Snap to targets in time-attack mode with precision flicking." />
-              <RelatedCard href="/drills/fps/target-acquisition" title="Target Acquisition" desc="Train rapid target identification and click timing." />
-            </div>
-          </section>
         )}
 
         {/* ── FOOTER ── */}
@@ -1135,30 +1048,6 @@ function RuleItem({ num, text, highlight = '', result }) {
           {result}
         </div>
       </div>
-    </div>
-  );
-}
-
-function RelatedCard({ href, title, desc }) {
-  return (
-    <Link href={href} className="group p-5 bg-black rounded-2xl border border-gray-800 hover:border-emerald-500/50 hover:bg-white/[0.02] transition-all flex flex-col justify-between">
-      <div>
-        <h4 className="font-bold text-white group-hover:text-emerald-400 transition-colors mb-1 text-base">{title}</h4>
-        <p className="text-xs text-gray-400 leading-relaxed line-clamp-2">{desc}</p>
-      </div>
-      <div className="flex items-center gap-1 mt-4 text-xs text-emerald-400 font-bold font-mono">
-        <span>TRY DRILL</span>
-        <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-      </div>
-    </Link>
-  );
-}
-
-function FAQItem({ q, a }) {
-  return (
-    <div className="bg-[#05060b] border border-gray-800 rounded-xl p-5 hover:border-gray-700 transition-colors">
-      <h4 className="text-sm font-bold text-gray-200 mb-2">{q}</h4>
-      <p className="text-xs text-gray-400 leading-relaxed">{a}</p>
     </div>
   );
 }

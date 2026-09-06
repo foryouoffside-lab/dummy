@@ -1,4 +1,6 @@
 import DistractionFighterClient from './DistractionFighterClient';
+import DrillGuide from '@/components/drill/DrillGuide';
+import { pickSources } from '@/lib/drillSources';
 import { getAlternateLanguages } from '@/lib/i18n/locales';
 
 // ============================================================
@@ -36,8 +38,7 @@ const webAppSchema = {
   "description": "Free online distraction resistance and inhibitory control game. Fight off visual distractors, train Stroop-effect resistance, and strengthen your ability to maintain focus on primary targets in cognitively noisy environments.",
   "genre": "Cognitive Brain Training / Inhibitory Control",
   "url": "https://skilldrills.online/drills/cognitive/focus/distraction-fighter",
-  "publisher": { "@type": "Organization", "name": "SkillDrills", "url": "https://skilldrills.online" },
-  "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.8", "reviewCount": "1203" }
+  "publisher": { "@type": "Organization", "name": "SkillDrills", "url": "https://skilldrills.online" }
 };
 
 const faqSchema = {
@@ -86,8 +87,8 @@ const faqSchema = {
     },
     {
       "@type": "Question",
-      "name": "Does inhibitory control training help children with ADHD?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Inhibitory control deficits are a hallmark of ADHD. Computerized inhibitory control training shows promise as a supplemental intervention, with studies showing improvements in stop-signal reaction times, Stroop interference, and classroom behavior with regular practice. Always combine cognitive training with clinical treatment and professional guidance." }
+      "name": "Can this Stroop drill diagnose or treat ADHD?",
+      "acceptedAnswer": { "@type": "Answer", "text": "No. This is a free browser game, not a medical device, a diagnostic instrument, or a treatment for any condition. Stroop tasks are used in research and in clinical settings, but this is not a clinical version, and your score here says nothing about whether you or anyone else has ADHD. If you have concerns about attention or focus, speak to a qualified clinician." }
     },
     {
       "@type": "Question",
@@ -174,6 +175,26 @@ export const metadata = {
   },
 };
 
+
+const distractionfighterGuide = {
+  heading: "Stroop Test Guide & the Interference Effect",
+  intro: [
+    "The Stroop task asks you to name the colour a word is printed in while ignoring the word itself. When the two disagree -- the word RED printed in blue -- responses slow down and errors rise. Stroop reported the effect in 1935, and it has proved one of the most robust results in experimental psychology (Stroop, 1935).",
+    "Half a century of follow-up work established that the interference is essentially universal in healthy adults, that it shrinks with practice but never disappears, and that it is asymmetric: colour never interferes with reading the way reading interferes with colour naming (MacLeod, 1991). Reading is the more automatic process, so it wins unless inhibition holds it back -- and stopping a response you have already begun is its own process, racing the one that started it (Logan &amp; Cowan, 1984).",
+    "Timing methodology: every event is timestamped with the browser's performance.now() high-resolution clock, entirely on your device. Browser timers are deliberately coarsened as a Spectre mitigation (typically to about 1 ms), and your display quantizes each change to its refresh interval -- about 16.7 ms per frame at 60 Hz, 6.9 ms at 144 Hz and 4.1 ms at 240 Hz (Woods et al., 2015). Treat differences smaller than about 5 ms as measurement noise, and compare your own runs on the same hardware rather than against someone else's setup.",
+    "Data transparency: SkillDrills collects no aggregate data. Your scores and settings live only in your browser's localStorage and are never uploaded, so this site publishes no user averages, percentiles or player counts. Every figure quoted here comes from the published work listed in the References panel below.",
+    "This drill is a free browser game for practice and interest. It is not a medical device, a diagnostic instrument, or a screening or treatment tool for any condition, and no score here says anything about your health. If you have concerns about your attention, memory or thinking, speak to a qualified clinician.",
+  ],
+  // Works named in this page's copy, with DOIs so a reader or an answer
+  // engine can check the figures rather than take them on trust.
+  sources: pickSources('stroop1935', 'macleod1991', 'logan1984', 'woods2015'),
+  related: [
+    { href: "/drills/cognitive/focus/concentration-grid", label: "Schulte Table Trainer" },
+    { href: "/drills/cognitive/attention/divided-attention", label: "Divided Attention Test" },
+    { href: "/drills/cognitive/processing-speed/reaction-time", label: "Neuro Speed &amp; Reflex Test" },
+  ],
+};
+
 export default function DistractionFighterPage() {
   return (
     <>
@@ -184,6 +205,7 @@ export default function DistractionFighterPage() {
       <DistractionFighterClient
         faqs={faqSchema.mainEntity.map((e) => ({ q: e.name, a: e.acceptedAnswer.text }))}
       />
+      <DrillGuide guide={distractionfighterGuide} />
     </>
   );
 }

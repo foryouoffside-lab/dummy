@@ -40,15 +40,6 @@ const TIME_PER_HIT = 0.4; // +0.4s on target destruction
 const TIME_PENALTY = 0.6; // opt-in on target dropped past bottom boundary
 const STORAGE_KEY = 'skilldrills_fps_vertical_air_track_v3';
 
-const RELATED_DRILLS = [
-  { id: "flick-shot-training", name: "Pro Flick Trainer", cat: "FPS Flicking", desc: "Snap to targets in time-attack mode with precision flicking.", href: "/drills/fps/flick-shot-training" },
-  { id: "180-degree-awareness", name: "180° Awareness Pro", cat: "FPS Awareness", desc: "Macro flicks under a forced 180-degree turn and audio cue.", href: "/drills/fps/180-degree-awareness" },
-  { id: "recoil-control", name: "Recoil Control", cat: "FPS Recoil", desc: "Calibrate pulling pattern compensation for weapons.", href: "/drills/fps/recoil-control" },
-  { id: "angle-hold-trainer", name: "Angle Hold Trainer", cat: "FPS Reaction", desc: "Test crosshair placement reaction speed on tight corners.", href: "/drills/fps/angle-hold-trainer" },
-  { id: "instant-response", name: "Instant Response", cat: "FPS Reflex", desc: "Raw reaction speed against a fixed center-screen flash.", href: "/drills/fps/instant-response" },
-  { id: "target-acquisition", name: "Target Acquisition", cat: "FPS Precision", desc: "Train rapid target identification and click timing.", href: "/drills/fps/target-acquisition" }
-];
-
 const getSavedData = () => {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -116,19 +107,7 @@ const ABOUT_SECTIONS = [
   }
 ];
 
-const FAQ_ITEMS = [
-  { q: "What is vertical aim training in FPS games?", a: "Vertical aim training focuses on the Y-axis (up and down) movement of your mouse, which is systematically under-trained compared to horizontal tracking. Airborne targets require vertical mouse tracking to follow cleanly in games like Apex Legends and Overwatch 2." },
-  { q: "What is popcorn tracking and does this drill train it?", a: "Popcorn tracking is tracking targets that bounce or hop vertically, creating irregular parabolic movement patterns — similar to popcorn kernels popping. This drill trains the specific vertical mouse control needed to track bouncing aerial movement." },
-  { q: "How does vertical aim training help in Apex Legends?", a: "Apex Legends features high vertical movement — grappling hooks, jump pads, Horizon lifts, and air gliding all create aerial targets. Training vertical aim specifically enables you to track and punish opponents in the air rather than losing crosshair alignment." },
-  { q: "What is an elevator peek in FPS shooters?", a: "An elevator peek is when an opponent uses a building's height advantage or zipline to appear above your crosshair level unexpectedly. This drill trains the upward flick and hold motion needed to instantly adjust vertical crosshair position." },
-  { q: "Why is vertical tracking harder than horizontal tracking?", a: "Horizontal mouse movement is practiced constantly in daily computer use. Vertical mouse movement for precise aim is an unnatural motion that receives far less daily muscle memory training, making dedicated vertical practice essential." },
-  { q: "How do Overwatch 2 players train aerial tracking?", a: "Overwatch players practice tracking high-mobility heroes like Pharah, Echo, Mercy, or Winston during leaps. Using vertical aim trainers helps smooth out Y-axis tracking adjustments." },
-  { q: "Does vertical aim training help in Halo Infinite?", a: "Yes, Halo Infinite features grapples, repulsors, and jump pads that launch players high into the air. Vertical tracking practice helps you land consistent shots on airborne targets." },
-  { q: "How are errors penalised in Vertical Air-Track?", a: "Losing tracking contact resets your active combo streak. When the optional Time Penalty setting is enabled, allowing an airborne target to drop past the bottom boundary without destroying it deducts 0.6s from your timer." },
-  { q: "How often should I train vertical tracking?", a: "We recommend 10 to 15 minutes of vertical tracking 3 to 4 times per week to develop smooth Y-axis control and reduce wrist fatigue during vertical engagements." },
-  { q: "Is this drill free?", a: "Yes, this Vertical Air-Track Trainer is 100% free, runs directly in your web browser, and requires no downloads or accounts." },
-  { q: "What skills does this drill improve?", a: "It trains vertical smooth pursuit, parabolic trajectory prediction, Y-axis crosshair control, and mid-air target tracking under gravity." }
-];
+
 
 // ============================================================
 // MAIN COMPONENT
@@ -790,36 +769,36 @@ export default function VerticalAirTrackClient() {
     <div className="min-h-screen bg-[#050508] text-white flex flex-col font-sans select-none">
       {/* ── MAIN CONTENT AREA ── */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
-        {/* Title */}
+        {/* Title & Definition Snippet */}
         {!isFullscreen && (
-          <div className="text-center">
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              VERTICAL AIR-TRACK
-              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
-                Vertical Tracking Trainer
-              </span>
+          <div className="text-left max-w-4xl mx-auto w-full">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white mb-2">
+              Vertical Aim Trainer
             </h1>
+            <p className="text-xs sm:text-sm text-slate-400 leading-relaxed max-w-2xl">
+              Vertical aim is tracking a target moving along the Y-axis, usually on a falling arc. Smooth pursuit follows accurately to roughly 30&deg;/s (Krauzlis, 2004), and skilled interceptors predict where a target will be rather than chasing where it currently is (Land &amp; McLeod, 2000).
+            </p>
           </div>
         )}
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 gap-2.5 max-w-2xl mx-auto w-full">
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
-              <div className="text-lg sm:text-xl font-black text-white tabular-nums">{score}</div>
+          <div className="grid grid-cols-4 gap-2 w-full">
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Score</div>
+              <div className="text-base sm:text-lg font-bold font-mono text-white tabular-nums mt-0.5">{score}</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
-              <div className={`text-lg sm:text-xl font-black tabular-nums ${timeLeft <= 10 ? "text-red-400 animate-pulse" : "text-white"}`}>{timeLeft}s</div>
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Time</div>
+              <div className={`text-base sm:text-lg font-bold font-mono tabular-nums mt-0.5 ${timeLeft <= 10 ? "text-red-400 animate-pulse" : "text-white"}`}>{timeLeft}s</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Accuracy</div>
-              <div className="text-lg sm:text-xl font-black text-red-400 tabular-nums">{accuracy}%</div>
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Accuracy</div>
+              <div className="text-base sm:text-lg font-bold font-mono text-red-400 tabular-nums mt-0.5">{accuracy}%</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
-              <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Best Score</div>
+              <div className="text-base sm:text-lg font-bold font-mono text-amber-400 tabular-nums mt-0.5">{bestScore}</div>
             </div>
           </div>
         )}
@@ -980,9 +959,9 @@ export default function VerticalAirTrackClient() {
             >
               <div className="space-y-8">
                 <section>
-                  <h4 className="text-base font-bold text-white mb-2 flex items-center gap-2">
+                  <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
                     <Crosshair className="w-4 h-4 text-red-400" /> What Is Vertical Air-Track?
-                  </h4>
+                  </h3>
                   {ABOUT_INTRO.map((para, i) => (
                     <p key={i} className={`text-sm leading-relaxed text-gray-300 ${i < ABOUT_INTRO.length - 1 ? "mb-3" : ""}`}>{para}</p>
                   ))}
@@ -995,7 +974,7 @@ export default function VerticalAirTrackClient() {
                         <div className={`w-7 h-7 rounded-lg ${card.iconBg} flex items-center justify-center`}>
                           <card.icon className="w-3.5 h-3.5 text-white" />
                         </div>
-                        <h5 className="text-xs font-bold text-white">{card.title}</h5>
+                        <h4 className="text-xs font-bold text-white">{card.title}</h4>
                       </div>
                       <p className="text-xs text-gray-300 leading-relaxed">{card.text}</p>
                     </div>
@@ -1004,9 +983,9 @@ export default function VerticalAirTrackClient() {
 
                 {ABOUT_SECTIONS.map((section, i) => (
                   <section key={i}>
-                    <h4 className="text-base font-bold text-white mb-2 flex items-center gap-2">
+                    <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
                       <section.icon className="w-4 h-4 text-red-400" /> {section.title}
-                    </h4>
+                    </h3>
                     {section.paragraphs.map((para, j) => (
                       <p key={j} className={`text-sm leading-relaxed text-gray-300 ${j < section.paragraphs.length - 1 ? "mb-3" : ""}`}>{para}</p>
                     ))}
@@ -1014,47 +993,7 @@ export default function VerticalAirTrackClient() {
                 ))}
               </div>
             </DrillAccordion>
-
-            <DrillAccordion
-              id="faq"
-              title="Frequently Asked Questions"
-              isOpen={openAccordion === 'faq'}
-              onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {FAQ_ITEMS.map((item, i) => (
-                  <FAQItem key={i} q={item.q} a={item.a} />
-                ))}
-              </div>
-            </DrillAccordion>
           </div>
-        )}
-
-        {/* ── RELATED FPS DRILLS ── */}
-        {!isFullscreen && (
-          <section className="mt-4">
-            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">
-              Related FPS Drills
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {RELATED_DRILLS.map((drill) => (
-                <Link
-                  key={drill.id}
-                  href={drill.href}
-                  className="group bg-[#0c0c16] border border-white/5 hover:border-red-500/40 rounded-xl p-3.5 transition-all duration-200 hover:-translate-y-0.5 flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="text-[10px] font-bold text-red-400 uppercase tracking-wider mb-1">{drill.cat}</div>
-                    <div className="text-xs font-bold text-white group-hover:text-red-300 transition-colors">{drill.name}</div>
-                    <div className="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">{drill.desc}</div>
-                  </div>
-                  <div className="text-[10px] font-bold text-slate-500 group-hover:text-red-400 mt-3 flex items-center gap-1 transition-colors">
-                    Train Drill <span>→</span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
         )}
       </main>
 
@@ -1077,15 +1016,6 @@ function RuleItem({ num, text, highlight = '', result }) {
           {result}
         </div>
       </div>
-    </div>
-  );
-}
-
-function FAQItem({ q, a }) {
-  return (
-    <div className="bg-[#05060b] border border-gray-800 rounded-xl p-5 hover:border-gray-700 transition-colors font-sans">
-      <h4 className="text-sm font-bold text-gray-200 mb-2">{q}</h4>
-      <p className="text-xs text-gray-200 leading-relaxed">{a}</p>
     </div>
   );
 }

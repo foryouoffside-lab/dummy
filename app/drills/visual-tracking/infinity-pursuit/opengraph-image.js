@@ -8,7 +8,7 @@ import { ImageResponse } from 'next/og';
 // Satori (the renderer behind ImageResponse) supports FLEXBOX ONLY — no CSS grid,
 // and every element with more than one child needs an explicit `display: flex`.
 
-export const alt = 'Infinity Pursuit — free browser Visual Tracking drill on SkillDrills';
+export const alt = 'Infinity Pursuit — Figure-8 Eye Tracking Exercise | SkillDrills';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -94,7 +94,7 @@ export default async function Image() {
               maxWidth: 980,
             }}
           >
-            {"Track a target moving along a visible figure-8 Lemniscate path at a fluid pace."}
+            {"Condition smooth pursuit eye tracking along continuous figure-8 loops."}
           </div>
         </div>
 

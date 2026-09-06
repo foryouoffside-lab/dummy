@@ -1,33 +1,40 @@
 import ReactionSimulatorWrapper from './ReactionSimulatorWrapper';
 import DrillGuide from '@/components/drill/DrillGuide';
+import { pickSources } from '@/lib/drillSources';
 
 // ============================================================
 // SEO RESEARCH FINDINGS — reaction-game
-// PRIMARY: "reaction game" — 27 exact / 239 broad US, 5 exact GB (Bing API 2026-09-04)
-//          "reflex game"   — 25 exact US, 2 exact GB (Bing API 2026-09-04)
+// PRIMARY: "reaction game" — 27 exact / 239 broad US, 5 exact / 11 broad GB (Bing API 2026-09-05)
 // SECONDARY / LSI:
-//   "reaction games"        — 23 exact US, 5 exact GB (Bing API 2026-09-04)
-//   "reaction time games"   — 21 exact US, 3 exact GB (Bing API 2026-09-04)
+//   "reaction time trainer" — 128 exact US, 7 exact GB (Bing API 2026-09-05)
+//   "reaction time game"    — 79 exact US, 12 exact GB (Bing API 2026-09-05)
+//   "reaction test game"    — 33 exact US (Bing API 2026-09-05)
+//   "reflex game"           — 25 exact US, 2 exact GB (Bing API 2026-09-05)
+//   "reaction games"        — 23 exact US, 5 exact GB (Bing API 2026-09-05)
+//   "reaction time games"   — 21 exact US, 3 exact GB (Bing API 2026-09-05)
+// INTERNATIONAL:
+//   "反射神経ゲーム" (ja-JP) — 606 exact (owned by reflex-training-drill; not reused)
+//   "jogos de reflexo" (pt-BR) — 128 exact (below new-locale threshold of 1000/mo)
 // ============================================================
 
 export const metadata = {
-  title: 'Reaction Game - Free Online Reflex Training Game',
-  description: 'Free online reaction game. Intercept falling targets, train vertical tracking speed, and sharpen hand-eye coordination with zero downloads.',
+  title: 'Reaction Game - Free Online Reaction Time Trainer',
+  description: 'Free online reaction game. Intercept accelerating falling targets, train visual tracking, and find out how fast your reflexes really are. No sign-up.',
   keywords: [
     'reaction game', 'reflex game', 'reaction games', 'reaction time games',
+    'reaction time game', 'reaction time trainer', 'reaction test game',
     'falling target reaction game', 'online reflex games free',
     'hand eye coordination game', 'reaction speed test',
-    'fps reaction time test', 'vertical tracking aim trainer',
-    'mouse speed click trainer', 'free aim trainer browser',
-    'gaming eye coordination drill', 'low latency reflex test'
+    'vertical tracking aim trainer', 'free aim trainer browser',
+    'gaming eye coordination drill', 'choice reaction time test'
   ],
   alternates: {
     canonical: 'https://skilldrills.online/drills/reaction-speed/reaction-game',
   },
   robots: { index: true, follow: true },
   openGraph: {
-    title: 'Reaction Game - Free Online Reflex Training Game | SkillDrills',
-    description: 'Play this free online reaction game. Intercept accelerating falling targets before they escape, train vertical visual tracking, and improve your hand-eye coordination.',
+    title: 'Reaction Game - Free Online Reaction Time Trainer | SkillDrills',
+    description: 'Play this free online reaction game. Intercept accelerating falling targets, train vertical visual tracking, and improve your hand-eye coordination.',
     url: 'https://skilldrills.online/drills/reaction-speed/reaction-game',
     siteName: 'SkillDrills',
     locale: 'en_US',
@@ -35,7 +42,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Reaction Game - Free Online Reflex Training Game',
+    title: 'Reaction Game - Free Online Reaction Time Trainer',
     description: 'Intercept falling targets and train vertical tracking. Free browser-based reaction game with no downloads.',
   },
 };
@@ -56,8 +63,9 @@ const breadcrumbSchema = {
 const webAppSchema = {
   "@context": "https://schema.org",
   "@type": "WebApplication",
-  "name": "Reaction Game — Free Online Reflex Training Game | SkillDrills",
+  "name": "Reaction Game — Free Online Reaction Time Trainer | SkillDrills",
   "url": "https://skilldrills.online/drills/reaction-speed/reaction-game",
+  "dateModified": "2026-09-05",
   "description": "Train reaction speed, vertical visual tracking, and hand-eye coordination. A free device-adaptive falling-target reaction game for mobile and desktop.",
   "applicationCategory": "EducationalApplication",
   "operatingSystem": "All",
@@ -115,37 +123,70 @@ const howToSchema = {
 const faqSchema = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
+  "dateModified": "2026-09-05",
   "mainEntity": [
     {
       "@type": "Question",
-      "name": "What is Reaction Simulator (Reflex Interception Drill)?",
+      "name": "What is a reaction game?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "It is an online reflex training game where targets descend vertically at accelerating speeds, testing your vertical tracking and interception reflexes."
+        "text": "A reaction game is an interactive training tool designed to test and condition neuromuscular response speed, visual tracking, and hand-eye coordination through rapid stimulus interception."
       }
     },
     {
       "@type": "Question",
-      "name": "What is a good score on a reaction time test?",
+      "name": "What games test reaction time?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Average human reaction time to visual stimuli is 200-250ms. Elite esports players achieve reaction speeds under 180ms."
+        "text": "Reaction time is tested by simple visual click timers, dynamic target interception games, fast-paced rhythm games, and tactical FPS aim trainers that challenge sensory processing latency."
       }
     },
     {
       "@type": "Question",
-      "name": "Can you train your reaction time?",
+      "name": "What is the average reaction time for a human?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes. Dedicated reflex training improves neuromuscular pathway efficiency, reducing visual processing delay and motor execution latency."
+        "text": "Average human visual reaction time to simple stimuli is 200–250ms. Complex choice reaction tasks requiring stimulus identification and motor selection typically take 250–350ms."
       }
     },
     {
       "@type": "Question",
-      "name": "Does gaming improve reaction time?",
+      "name": "Can you train your reaction time with games?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Research shows competitive gamers process visual information faster and execute choice motor responses with higher precision than non-gamers."
+        "text": "Yes. Consistent reaction training conditions neuromuscular pathways, reduces visual discrimination hesitation, and sharpens anticipatory motor readiness."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the difference between simple reaction time and choice reaction time?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Simple reaction time (SRT) measures response latency to a single known stimulus. Choice reaction time (CRT) requires evaluating multiple alternative targets or lanes before executing a motor action, scaling logarithmically with stimulus alternatives per Hick\'s Law (Hick, 1952)."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What games improve hand-eye coordination?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Vertical falling-target games, rhythm action titles, and fast tracking aim drills heavily train hand-eye coordination by forcing rapid spatial alignment between visual gaze and cursor position."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is a good reaction time for gaming?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Competitive esports players typically maintain reaction speeds between 150ms and 190ms, giving them a critical advantage in fast tactical duels and twitch shooters."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does playing video games increase reaction time?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Peer-reviewed research by Dye, Green, and Bavelier (2009 in Neuropsychologia) demonstrated that action video game players exhibit approximately 10% faster reaction times across both simple and choice motor tasks without sacrificing decision accuracy."
       }
     },
     {
@@ -153,39 +194,47 @@ const faqSchema = {
       "name": "Why is my reaction time slow?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Slow reaction time can be caused by muscle fatigue, high input latency, low refresh rates, lack of sleep, or cognitive distraction."
+        "text": "Reaction latency increases due to mental fatigue, sleep deprivation, cognitive distraction, high input hardware latency, and standard 60Hz display buffering."
       }
     },
     {
       "@type": "Question",
-      "name": "How do you test your reflexes by yourself?",
+      "name": "Does monitor refresh rate affect reflex game scores?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Using online reflex simulators like SkillDrills provides precise millisecond telemetry to measure and track your reaction speed."
+        "text": "Yes. A 60Hz display draws a new frame every 16.7ms, whereas a 144Hz monitor refreshes every 6.9ms and a 240Hz monitor every 4.1ms, noticeably reducing input lag."
       }
     },
     {
       "@type": "Question",
-      "name": "What is vertical tracking in FPS gaming?",
+      "name": "What is vertical tracking in gaming?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Vertical tracking is the ability to keep your crosshair centered on targets falling, jumping, or moving along Y-axis paths."
+        "text": "Vertical tracking is the motor skill of smoothly maintaining crosshair centering on targets moving, dropping, or jumping along the vertical Y-axis."
       }
     },
     {
       "@type": "Question",
-      "name": "Is this reflex training game free?",
+      "name": "Is this reaction game free?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes, all drills on SkillDrills are 100% free with no signups, downloads, or pop-up ads required."
+        "text": "Yes, all drills on SkillDrills are 100% free to play directly in your web browser with no registration, downloads, or pop-up ads."
       }
     },
     {
       "@type": "Question",
-      "name": "Does monitor refresh rate affect reflex scores?",
+      "name": "Does this drill support touchscreens and mobile devices?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes. Higher refresh rate monitors (144Hz, 240Hz, 360Hz) display target movement with lower input lag and smoother motion."
+        "text": "Yes. The drill features generous touch hitpads and automatic orientation detection for optimal play on mobile phones and tablets."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does adaptive difficulty work in this reaction game?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Difficulty scales dynamically with your score and combo streak. Targets accelerate downward, spawn intervals tighten, and target hitboxes shrink as your level increases."
       }
     },
     {
@@ -193,92 +242,54 @@ const faqSchema = {
       "name": "How often should I practice reflex training?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Daily 5-10 minute warmup sessions improve neuromuscular speed, consistency, and hand-eye coordination over time."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "What games benefit from vertical reflex training?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Fast vertical shooters like Apex Legends, Overwatch 2, Fortnite, Halo, and Quake benefit heavily from vertical tracking agility."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Can traditional athletes use this for vision training?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes. Sports vision research shows vertical reflex training enhances spatial interception skills for volleyball, basketball, and tennis."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Should I click targets high up or wait until they drop?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Clicking targets high up gives you more margin for error and builds fast-twitch reaction speed before targets reach the danger line."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Does this drill support touchscreens?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes! It features generous touch hitpads and automatic orientation warnings for mobile devices."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "How does adaptive level difficulty work?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "As your score increases, falling speeds accelerate, targets shrink in size, and spawn intervals shorten."
+        "text": "A daily 5-to-10 minute warmup session provides optimal neuromuscular conditioning without inducing eye strain or hand fatigue."
       }
     }
   ]
 };
 
 const reactionGameGuide = {
-  heading: "Online Reaction Game Guide: Training Vertical Tracking & Interception Reflexes",
+  heading: "Reaction Game Guide: Training Vertical Tracking & Interception Reflexes",
   intro: [
-    "Reaction games train your visual perception, response speed, and motor execution by forcing you to identify dynamic stimuli and act within a fraction of a second. In our vertical falling-target reaction game, targets drop at variable acceleration across multiple lanes, requiring you to balance rapid target selection with precise click accuracy.",
-    "Unlike simple single-button reaction timers, multi-lane reaction games engage choice reaction time and visual tracking. You must continuously monitor the upper visual field, project target landing trajectories, and prioritize imminent escapees to sustain high-speed combo streaks."
+    "A reaction game is an interactive training tool designed to test and condition neuromuscular response speed, visual tracking, and hand-eye coordination through rapid stimulus interception. Unlike static single-button reaction timers, multi-lane falling-target games engage choice reaction time by requiring players to track dynamic trajectories across the visual field and intercept targets before they escape.",
+    "Our vertical reaction game runs directly in your browser with zero downloads, providing millisecond response telemetry, adaptive level scaling, and optional error penalty toggles for esports warmup and cognitive conditioning.",
+    "Measurement Methodology & Display Latency: Target response latency is measured using the High Resolution Time API (performance.now()), calculating the exact duration between canvas frame dispatch and pointer contact. Benchmark interpretations must account for hardware display latency: a 60Hz screen introduces up to 16.7ms of frame buffer delay, whereas 144Hz displays reduce frame latency to 6.9ms and 240Hz monitors to 4.1ms.",
+    "How this is measured: every event is timestamped with the browser's performance.now() high-resolution clock, entirely on your device -- no score is uploaded. Two things this cannot control: browser timers are deliberately coarsened as a Spectre mitigation (typically to about 1 ms), and your display quantizes the stimulus to its refresh interval -- about 16.7 ms per frame at 60 Hz, 6.9 ms at 144 Hz and 4.1 ms at 240 Hz (Woods et al., 2015). Mouse polling adds roughly 8 ms at 125 Hz versus 1 ms at 1000 Hz. So treat differences smaller than about 5 ms as measurement noise, and compare your own runs on the same hardware rather than against someone else's setup."
   ],
   benchmarks: {
     title: "Reaction Game Performance & Scoring Reference Tiers",
-    headers: ["Score Range", "Difficulty Band", "Target Speed", "Skill Profile", "Recommended Focus"],
+    headers: ["Score Range", "Difficulty Band", "Skill Profile", "Recommended Focus"],
     rows: [
-      ["15,000+ pts", "Grandmaster", "Extreme (>1400 px/s)", "Immediate foveal acquisition and micro-second click release", "Maintain composure during multi-sphere simultaneous drops"],
-      ["10,000–14,999 pts", "Elite", "Fast (1000–1400 px/s)", "High-level anticipation with minimal miss penalties", "Push interception point higher up the vertical lanes"],
-      ["6,000–9,999 pts", "Proficient", "Moderate (700–1000 px/s)", "Consistent baseline reflexes with occasional misses", "Focus on peripheral detection rather than tracking single targets"],
-      ["2,500–5,999 pts", "Intermediate", "Standard (450–700 px/s)", "Comfortable with single targets, challenged by multi-lane waves", "Minimize mouse travel by resting cursor near mid-lane"],
-      ["< 2,500 pts", "Novice", "Slow (<450 px/s)", "Reactive clicking with higher panic and delay", "Prioritize accuracy over speed to build rhythm"]
+      ["15,000+ pts", "Grandmaster", "Immediate foveal acquisition and micro-second click release", "Maintain composure during multi-sphere simultaneous drops"],
+      ["10,000–14,999 pts", "Elite", "High-level anticipation with minimal miss penalties", "Push interception point higher up the vertical lanes"],
+      ["6,000–9,999 pts", "Proficient", "Consistent baseline reflexes with occasional misses", "Focus on peripheral detection rather than tracking single targets"],
+      ["2,500–5,999 pts", "Intermediate", "Comfortable with single targets, challenged by multi-lane waves", "Minimize mouse travel by resting cursor near mid-lane"],
+      ["< 2,500 pts", "Novice", "Reactive clicking with higher panic and delay", "Prioritize accuracy over speed to build rhythm"]
     ],
-    note: "These scoring bands are an editorial reference guide calibrated for standard 60–144Hz displays. Enabling the optional time penalty increases difficulty significantly."
+    note: "These scoring bands are an editorial reference guide calibrated for standard 60–144Hz displays. This site collects no aggregate user data; scoring bands reflect game engine velocity tiers. Enabling the optional time penalty increases difficulty significantly."
   },
   techniques: {
     title: "Reaction & Interception Mechanics",
     items: [
       {
         name: "High-Screen Interception",
-        desc: "Clicking falling targets near the top or upper-third of the screen maximizes time buffer and prevents last-second panic clicks near the danger baseline.",
+        desc: "Clicking falling targets near the upper-third of the screen maximizes time buffer and conditions fast-twitch motor release before targets reach critical velocity.",
         tips: "Keep your eye gaze slightly above screen center to register spawns the millisecond they appear."
       },
       {
-        name: "Trajectory Projection & Pre-Aiming",
-        desc: "Rather than chasing a fast-falling target with your cursor, project where the target will be 150ms in the future and let it fall into your crosshair.",
-        tips: "Anticipatory clicking reduces muscular over-correction and fatigue."
+        name: "Trajectory Projection & Choice Response",
+        desc: "Rather than chasing targets reactively, project where the target will be 150ms in the future and let it fall into your crosshair to eliminate motor over-correction.",
+        tips: "Anticipatory clicking engages cortical motor planning, noticeably reducing interception delay compared to reactive cursor dragging."
       },
       {
         name: "Peripheral Target Scanning",
-        desc: "Fixating intently on one lane leaves you blind to adjacent drops. Soften your visual focus to use peripheral motion detectors for new spawns.",
-        tips: "Human peripheral vision has higher temporal resolution for rapid movement than central vision."
+        desc: "Fixating intently on one lane leaves you blind to adjacent drops. Soften your visual focus so retinal rod cells detect peripheral motion immediately upon target spawn.",
+        tips: "Human peripheral vision possesses higher temporal resolution for rapid movement than central foveal vision."
       },
       {
-        name: "Input Latency Management",
-        desc: "Browser rendering at 60Hz incurs ~16.7ms frame intervals. Running on a 144Hz+ monitor with a high-polling mouse cuts input response latency.",
-        tips: "Turn off background heavy browser tabs and disable GPU throttling for crisp click delivery."
+        name: "Display Refresh & Hardware Latency",
+        desc: "A standard 60Hz display introduces ~16.7ms of frame buffer latency, whereas 144Hz displays reduce latency to ~6.9ms and 240Hz to ~4.1ms.",
+        tips: "Use a high-refresh monitor, 1000Hz polling rate gaming mouse, and disable browser hardware acceleration throttling for crisp click registration."
       }
     ]
   },
@@ -291,11 +302,14 @@ const reactionGameGuide = {
   ],
   audience: "Gamers training for vertical movement shooters (Apex Legends, Overwatch 2, Fortnite), athletes conditioning interception reflexes, and anyone wanting a fast, free reaction game to sharpen hand-eye coordination.",
   faqs: faqSchema.mainEntity.map(e => ({ q: e.name, a: e.acceptedAnswer.text })),
+  // Works named in this page's copy, with DOIs so a reader or an answer
+  // engine can check the figures rather than take them on trust.
+  sources: pickSources('kosinski2008', 'hick1952', 'woods2015'),
   related: [
     { href: "/drills/reaction-speed/reaction-time-test", label: "Reaction Time Test" },
     { href: "/drills/reaction-speed/reflex-training-drill", label: "Reflex Training Drill" },
     { href: "/drills/reaction-speed/fps-tracking-trainer", label: "FPS Tracking Trainer" },
-    { href: "/drills/reaction-speed/saccadic-gallery", label: "Saccadic Eye Gallery" }
+    { href: "/drills/reaction-speed/saccadic-gallery", label: "Saccadic Eye Exercises" }
   ]
 };
 

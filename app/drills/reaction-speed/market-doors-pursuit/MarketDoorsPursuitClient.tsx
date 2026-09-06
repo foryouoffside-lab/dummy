@@ -713,7 +713,7 @@ export default function MarketDoorsPursuitClient() {
         score: uiScore,
         accuracy: analytics.accuracy,
         speed: analytics.avgReactionTime,
-        drillName: 'Market Doors Pursuit',
+        drillName: 'Corner Checking Trainer',
         rank: analytics.grade?.letter || 'A',
         rankName: analytics.grade?.label || 'ELITE REFLEX',
         playerName: getPlayerName(),
@@ -723,15 +723,15 @@ export default function MarketDoorsPursuitClient() {
       });
 
       await shareScoreCard(canvas, {
-        title: 'Market Doors Pursuit — My Score',
-        text: `I scored ${uiScore} (Grade: ${analytics.grade?.letter || 'A'}, Lv. ${analytics.finalLevel}) on Market Doors Pursuit at SkillDrills!`,
+        title: 'Corner Checking Trainer — My Score',
+        text: `I scored ${uiScore} (Grade: ${analytics.grade?.letter || 'A'}, Lv. ${analytics.finalLevel}) on Corner Checking Trainer at SkillDrills!`,
         url
       });
     } catch (err) {
       if (navigator.share) {
         navigator.share({
-          title: 'Market Doors Pursuit',
-          text: `I scored ${uiScore} on Market Doors Pursuit! Can you beat my score?`,
+          title: 'Corner Checking Trainer',
+          text: `I scored ${uiScore} on Corner Checking Trainer! Can you beat my score?`,
           url
         }).catch(() => {});
       }
@@ -768,35 +768,35 @@ export default function MarketDoorsPursuitClient() {
 
         {/* Drill Header */}
         {!isFullscreen && (
-          <div className="text-center">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-black uppercase tracking-tight text-white flex items-center justify-center gap-3 flex-wrap">
-              MARKET DOORS PURSUIT
-              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
-                Corner Checking & Doorway Clearing Aim Trainer
-              </span>
+          <div className="text-left">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+              Corner Checking Trainer
             </h1>
+            <p className="text-[13px] text-slate-400 mt-1 max-w-2xl leading-relaxed">
+              Corner checking is clearing one angle at a time so only one threat can see you at once. Each shift of gaze to a new angle is a saccade lasting 20&ndash;40&nbsp;ms (Rayner, 1998), followed by roughly 200&nbsp;ms to react to whatever it reveals.
+            </p>
           </div>
         )}
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 gap-2.5 max-w-2xl mx-auto w-full">
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
-              <div className="text-lg sm:text-xl font-black text-red-400 tabular-nums">{uiScore}</div>
+          <div className="grid grid-cols-4 gap-2 w-full -mb-2">
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider font-mono">Score</div>
+              <div className="text-lg sm:text-xl font-black text-white tabular-nums">{uiScore}</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider font-mono">Time</div>
               <div className={`text-lg sm:text-xl font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>
                 {uiTimeLeft}s
               </div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Level</div>
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider font-mono">Level</div>
               <div className="text-lg sm:text-xl font-black text-indigo-400 tabular-nums">L{uiLevel}</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
+              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider font-mono">Best Score</div>
               <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
             </div>
           </div>
@@ -872,8 +872,8 @@ export default function MarketDoorsPursuitClient() {
             <FpsStartCard
               icon={Target}
               accent="red"
-              title="Market Doors Pursuit"
-              subtitle="Corner Checking • Doorway Clearing"
+              title="Corner Checking Trainer"
+              subtitle="Doorway Clearing • Saccadic Sweeps"
               rules={[
                 { icon: Target, accent: 'red', title: 'Clear Doorway Targets', text: '+100 PTS × Combo × Level multiplier (+0.6s per hit)' },
                 {
@@ -944,17 +944,17 @@ export default function MarketDoorsPursuitClient() {
 
             <DrillAccordion
               id="about"
-              title="About Market Doors Pursuit"
+              title="About Corner Checking Trainer"
               isOpen={openAccordion === 'about'}
               onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
             >
               <div className="space-y-8 font-sans">
                 <section>
-                  <h4 className="text-base font-bold text-white mb-2 flex items-center gap-2">
+                  <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
                     <Eye className="w-4 h-4 text-red-400" /> What Is Corner Checking & Doorway Clearing?
-                  </h4>
+                  </h3>
                   <p className="text-sm leading-relaxed mb-3 text-gray-300">
-                    <strong>Market Doors Pursuit</strong> conditions rapid horizontal saccades and corner-checking reflexes across 5 structured entry portals. When clearing choke points in tactical shooters, moving your crosshair smoothly from doorway to doorway while immediately clicking emerging enemies determines round outcomes.
+                    <strong>Corner Checking Trainer</strong> conditions rapid horizontal saccades and corner-checking reflexes across 5 structured entry portals. When clearing choke points in tactical shooters, moving your crosshair smoothly from doorway to doorway while immediately clicking emerging enemies determines round outcomes.
                   </p>
                   <p className="text-sm leading-relaxed text-gray-300">
                     Training your visual focus across structured horizontal entry points prevents over-flicking and builds consistent horizontal crosshair tracking habits.
@@ -962,50 +962,36 @@ export default function MarketDoorsPursuitClient() {
                 </section>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                  <div className="p-4 rounded-xl border border-white/[0.07] bg-white/[0.012]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-red-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Who Should Use This?</h5>
+                      <h4 className="text-xs font-bold text-white">Who Should Use This?</h4>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Competitive gamers training corner checking, horizontal saccadic clearing, and entry fragging.</p>
+                    <p className="text-xs text-slate-300 leading-relaxed">Competitive gamers training corner checking, horizontal saccadic clearing, and entry fragging.</p>
                   </div>
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                  <div className="p-4 rounded-xl border border-white/[0.07] bg-white/[0.012]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Horizontal Gaze Sweeping</h5>
+                      <h4 className="text-xs font-bold text-white">Horizontal Gaze Sweeping</h4>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Builds consistent horizontal eye scans across structured entryway intervals without vertical drift.</p>
+                    <p className="text-xs text-slate-300 leading-relaxed">Builds consistent horizontal eye scans across structured entryway intervals without vertical drift.</p>
                   </div>
-                  <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
+                  <div className="p-4 rounded-xl border border-white/[0.07] bg-white/[0.012]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Zap className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Doorway Target Interception</h5>
+                      <h4 className="text-xs font-bold text-white">Doorway Target Interception</h4>
                     </div>
-                    <p className="text-xs text-gray-300 leading-relaxed">Reinforces rapid micro-adjustments and click precision when enemies emerge inside entry choke points.</p>
+                    <p className="text-xs text-slate-300 leading-relaxed">Reinforces rapid micro-adjustments and click precision when enemies emerge inside entry choke points.</p>
                   </div>
                 </div>
               </div>
             </DrillAccordion>
 
-            <DrillAccordion
-              id="faq"
-              title="Frequently Asked Questions"
-              isOpen={openAccordion === 'faq'}
-              onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-sans">
-                <FAQItem q="What is Market Doors Pursuit (Doorway Clearing)?" a="It is an online reflex training drill simulating choke point entry, where targets flash inside 5 structured doorways across the screen." />
-                <FAQItem q="How does this improve crosshair placement?" a="By training your muscle memory to sweep horizontally between entry portals at head level, you clear corners faster and more accurately." />
-                <FAQItem q="What are horizontal saccades in gaming?" a="Horizontal saccades are rapid sideways eye movements between visual anchor points, crucial for clearing multiple doorways in FPS games." />
-                <FAQItem q="Is this doorway clearing drill free?" a="Yes, all drills on SkillDrills are 100% free with no signups, downloads, or pop-up ads required." />
-                <FAQItem q="How does dynamic level scaling work?" a="As your score and combo climb, target sizes shrink and spawn intervals shorten continuously with no artificial cap." />
-                <FAQItem q="Is there a time penalty for missing or timeouts?" a="By default, missing or timeouts only reset your combo streak. An opt-in time penalty (-0.8s per error) is available in session settings." />
-                <FAQItem q="What does 'slicing the pie' mean in FPS games?" a="Slicing the pie is a tactical technique where a player sweeps around a corner incrementally to clear narrow angles one by one." />
-                <FAQItem q="How does this drill improve site entry in Valorant and CS2?" a="Site entries require checking multiple doorways simultaneously. Training saccadic sweeps reduces hesitation when clearing entry points." />
-                <FAQItem q="Does this drill train choice reaction time?" a="Yes. Targets appear randomly in any doorway, forcing your visual cortex to process spatial location and execute immediate taps." />
-                <FAQItem q="Should I look at the doorways or my crosshair?" a="Focus your eyes directly on the open doorway spaces while allowing your motor reflex to snap the crosshair onto emerging targets." />
-              </div>
-            </DrillAccordion>
+            {/* The FAQ is rendered by DrillGuide below, mapped from
+                faqSchema.mainEntity so the page's FAQPage JSON-LD and the visible
+                questions cannot drift. A second hand-written FAQ accordion used to
+                sit here with differently-worded questions -- duplicate UI, and
+                did not match the schema. */}
           </div>
         )}
 
@@ -1057,15 +1043,6 @@ function RuleItem({ num, text, highlight = '', result }: { num: string; text: st
           {result}
         </div>
       </div>
-    </div>
-  );
-}
-
-function FAQItem({ q, a }: { q: string; a: string }) {
-  return (
-    <div className="bg-[#05060b] border border-gray-800 rounded-xl p-5 hover:border-gray-700 transition-colors font-sans">
-      <h4 className="text-sm font-bold text-gray-200 mb-2">{q}</h4>
-      <p className="text-xs text-gray-400 leading-relaxed">{a}</p>
     </div>
   );
 }

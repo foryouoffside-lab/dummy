@@ -8,7 +8,7 @@ import { ImageResponse } from 'next/og';
 // Satori (the renderer behind ImageResponse) supports FLEXBOX ONLY — no CSS grid,
 // and every element with more than one child needs an explicit `display: flex`.
 
-export const alt = 'Directional Chaos Pursuit — free browser Visual Tracking drill on SkillDrills';
+export const alt = 'Directional Chaos Pursuit — Erratic Motion Eye Drill | SkillDrills';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -94,7 +94,7 @@ export default async function Image() {
               maxWidth: 980,
             }}
           >
-            {"Track a bouncing target subjected to continuous chaotic velocity nudges."}
+            {"Track unpredictable target trajectories with erratic velocity shifts and boundary bounces."}
           </div>
         </div>
 

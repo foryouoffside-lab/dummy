@@ -7,18 +7,36 @@ import { getPlayerName } from '../lib/leaderboard';
  */
 export default function generateShareCard({
   score,
-  bestScore,
-  accuracy,
-  rating,
-  newBest,
+  bestScore = 0,
+  accuracy = 0,
+  rating = undefined,
+  newBest = false,
   visualHits = 0,
   numberHits = 0,
   bestCombo = 0,
-  drillName,
-  playerName,
+  drillName = 'Drill',
+  playerName = '',
+  // Two call shapes grew up in parallel. 51 drills pass a `rating` object;
+  // 15 -- most of reaction-speed -- pass flat `rank`/`rankName` strings, which
+  // this function never accepted. Those cards silently fell through to the
+  // 'C - Keep Going' default below, so a player who scored an S rank shared an
+  // image saying C. Accepting both shapes fixes the wrong grade and lets the
+  // .tsx callers type-check. `speed`, `level`, `date` and `url` are likewise
+  // passed by several drills; `speed` is rendered below, and the rest are
+  // accepted and ignored rather than throwing a type error at the call site.
+  rank = undefined,
+  rankName = undefined,
+  speed = undefined,
+  level = undefined,
+  date = undefined,
+  url = undefined,
 }) {
   const isNewBest = newBest && score >= bestScore && bestScore > 0;
-  const r = rating || { letter: 'C', label: 'Keep Going', emoji: '🎯', color: '#6B7280' };
+  const r =
+    rating ||
+    (rank
+      ? { letter: rank, label: rankName || '', emoji: '🎯', color: '#6B7280' }
+      : { letter: 'C', label: 'Keep Going', emoji: '🎯', color: '#6B7280' });
 
   // Render at 3840x2560 (4K UHD width) for ultra-crisp resolution
   const SCALE = 6.4;
@@ -67,7 +85,7 @@ export default function generateShareCard({
   // Rating
   ctx.fillStyle = '#ffffff';
   ctx.font = 'bold 22px Arial, sans-serif';
-  ctx.fillText(`${r.emoji} ${r.letter} - ${r.label}`, 300, 205);
+  ctx.fillText(r.label ? `${r.emoji} ${r.letter} - ${r.label}` : `${r.emoji} ${r.letter}`, 300, 205);
 
   // New Best badge
   if (isNewBest && score > 0) {
@@ -87,7 +105,9 @@ export default function generateShareCard({
   const stats = [
     { label: 'Accuracy', value: `${accuracy}%`, x: 110 },
     { label: 'Grade', value: `${r.letter}`, x: 300 },
-    { label: 'Best Score', value: `${bestScore}`, x: 490 },
+    speed !== undefined && speed !== null
+      ? { label: 'Avg Speed', value: `${speed}ms`, x: 490 }
+      : { label: 'Best Score', value: `${bestScore}`, x: 490 },
   ];
 
   ctx.font = '13px Arial, sans-serif';

@@ -1,4 +1,6 @@
 import EliteNeuroSwitchClient from './EliteNeuroSwitchClient';
+import DrillGuide from '@/components/drill/DrillGuide';
+import { pickSources } from '@/lib/drillSources';
 
 // ============================================================
 // SEO RESEARCH FINDINGS — reaction-time
@@ -35,8 +37,7 @@ const webAppSchema = {
   "description": "Free online reaction time test. Measure your visual reaction speed in milliseconds. Test your click reflex, compare to the average, and train to improve your response latency. Similar to Human Benchmark reaction time test.",
   "genre": "Cognitive Testing / Processing Speed / Reaction Time",
   "url": "https://skilldrills.online/drills/cognitive/processing-speed/reaction-time",
-  "publisher": { "@type": "Organization", "name": "SkillDrills", "url": "https://skilldrills.online" },
-  "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.9", "reviewCount": "8743" }
+  "publisher": { "@type": "Organization", "name": "SkillDrills", "url": "https://skilldrills.online" }
 };
 
 const faqSchema = {
@@ -65,8 +66,33 @@ const faqSchema = {
     },
     {
       "@type": "Question",
-      "name": "What is Hick's Law and how does it apply here?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Hick's Law states that reaction time increases logarithmically with the number of choices you must discriminate between before responding. Because this drill forces you to actively verify the current rule before reacting, it directly exercises the decision-time component Hick's Law describes, rather than pure reflex speed alone." }
+      "name": "What is Hick\'s Law and how does it apply here?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Hick\'s Law states that reaction time increases logarithmically with the number of choices you must discriminate between before responding. Because this drill forces you to actively verify the current rule before reacting, it directly exercises the decision-time component Hick\'s Law describes, rather than pure reflex speed alone." }
+    },
+    {
+      "@type": "Question",
+      "name": "How can I improve my choice reaction time?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Evidence-based approaches include: (1) deliberate practice on choice-based (not just simple) reaction drills, since the two skills don't fully transfer, (2) consistent sleep, since fatigue disproportionately slows the decision stage, (3) regular aerobic exercise, which improves neural conduction velocity, and (4) fast-paced action gaming, shown in research to sharpen visual-motor choice reaction speed." }
+    },
+    {
+      "@type": "Question",
+      "name": "Why does reaction time matter for gaming and esports?",
+      "acceptedAnswer": { "@type": "Answer", "text": "In competitive gaming, choice reaction time determines how quickly you can distinguish a real threat from a decoy and execute the correct response — exactly the skill this drill isolates. Elite esports athletes consistently test in the 150-180ms range for choice reaction tasks, well below the general population average." }
+    },
+    {
+      "@type": "Question",
+      "name": "How does scoring and grading work in this drill?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Each correct tap on the active rule's target earns points. Tapping the wrong-colored target resets your combo multiplier. When enabled, an opt-in time penalty of 0.8s is deducted. Your final score is graded against an elite benchmark, awarding letter grades from D up to S+." }
+    },
+    {
+      "@type": "Question",
+      "name": "Does reaction time change with age?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes. Choice reaction time is fastest in the late teens to mid-20s, then slows gradually — roughly 1-2ms per year after age 25, accelerating past 60. Regular training can partially offset this decline by keeping the decision-making pathway well-practiced." }
+    },
+    {
+      "@type": "Question",
+      "name": "Is this reaction time test free?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes. This reaction time test on SkillDrills is completely free. No registration, downloads, or subscriptions required. It runs entirely in your browser on both desktop and mobile devices." }
     }
   ]
 };
@@ -100,7 +126,7 @@ const howToSchema = {
 
 export const metadata = {
   title: "Free Reaction Time Test - Neuro Speed & Reflex Trainer",
-  description: "Test your reaction speed for free with our online neuro speed test. Assess your reflexes, compare against human benchmarks, and train your cognitive response.",
+  description: "Free online choice reaction time test. Measure how fast you pick the right response, see how Hick\'s law affects your speed, and track your best.",
   keywords: [
     "reaction time test online",
     "test reaction speed free",
@@ -116,7 +142,7 @@ export const metadata = {
   robots: { index: true, follow: true },
   openGraph: {
     title: "Free Reaction Time Test | Online Neuro Speed & Reflex Trainer | SkillDrills",
-    description: "Test your reaction speed for free with our online neuro speed test. Assess your reflexes, compare against human benchmarks, and train your cognitive response.",
+    description: "Free online choice reaction time test. Measure how fast you pick the right response, see how Hick\'s law affects your speed, and track your best.",
     url: "https://skilldrills.online/drills/cognitive/processing-speed/reaction-time",
     siteName: 'SkillDrills',
     locale: 'en_US',
@@ -125,8 +151,28 @@ export const metadata = {
   twitter: {
     card: 'summary_large_image',
     title: "Free Reaction Time Test | Online Neuro Speed & Reflex Trainer | SkillDrills",
-    description: "Test your reaction speed for free with our online neuro speed test. Assess your reflexes, compare against human benchmarks, and train your cognitive response.",
+    description: "Free online choice reaction time test. Measure how fast you pick the right response, see how Hick\'s law affects your speed, and track your best.",
   },
+};
+
+
+const reactiontimeGuide = {
+  heading: "Choice Reaction Time Guide & Hick\'s Law",
+  intro: [
+    "Simple reaction time is responding to one expected signal. Choice reaction time is picking the correct response from several, and it is always slower, because a decision sits between the stimulus and the movement -- the subtraction logic Donders introduced in 1868.",
+    "Hick (1952) and Hyman (1953) showed the cost is orderly: reaction time rises roughly with the logarithm of the number of alternatives, so going from two choices to four adds time, but far less than doubling it. Reaction time also slows gradually with age from the mid-twenties onward (Der &amp; Deary, 2006), and what a browser measures always includes your hardware as well as you.",
+    "Timing methodology: every event is timestamped with the browser's performance.now() high-resolution clock, entirely on your device. Browser timers are deliberately coarsened as a Spectre mitigation (typically to about 1 ms), and your display quantizes each change to its refresh interval -- about 16.7 ms per frame at 60 Hz, 6.9 ms at 144 Hz and 4.1 ms at 240 Hz (Woods et al., 2015). Treat differences smaller than about 5 ms as measurement noise, and compare your own runs on the same hardware rather than against someone else's setup.",
+    "Data transparency: SkillDrills collects no aggregate data. Your scores and settings live only in your browser's localStorage and are never uploaded, so this site publishes no user averages, percentiles or player counts. Every figure quoted here comes from the published work listed in the References panel below.",
+    "This drill is a free browser game for practice and interest. It is not a medical device, a diagnostic instrument, or a screening or treatment tool for any condition, and no score here says anything about your health. If you have concerns about your attention, memory or thinking, speak to a qualified clinician.",
+  ],
+  // Works named in this page's copy, with DOIs so a reader or an answer
+  // engine can check the figures rather than take them on trust.
+  sources: pickSources('donders1969', 'hick1952', 'hyman1953', 'der2006', 'woods2015'),
+  related: [
+    { href: "/drills/reaction-speed/reaction-time-test", label: "Reaction Time Test" },
+    { href: "/drills/cognitive/focus/distraction-fighter", label: "Stroop Test Online" },
+    { href: "/drills/cognitive/processing-speed/symbol-matching", label: "Symbol Digit Modalities Test" },
+  ],
 };
 
 export default function ReactionTimePage() {
@@ -137,6 +183,7 @@ export default function ReactionTimePage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }} />
       <EliteNeuroSwitchClient />
+      <DrillGuide guide={reactiontimeGuide} />
     </>
   );
 }

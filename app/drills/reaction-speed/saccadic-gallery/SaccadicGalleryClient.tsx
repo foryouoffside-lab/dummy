@@ -730,36 +730,36 @@ export default function SaccadicGalleryClient() {
 
         {/* Drill Header */}
         {!isFullscreen && (
-          <div className="text-center">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-black uppercase tracking-tight text-white flex items-center justify-center gap-3 flex-wrap">
-              SACCADIC GALLERY
-              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
-                Saccadic Eye Movement Test & Gallery Aim Trainer
-              </span>
+          <div className="flex flex-col gap-1">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+              Saccadic Eye Exercises
             </h1>
+            <p className="text-[13px] text-slate-400 leading-relaxed">
+              A saccade is a rapid jump of both eyes between fixation points, reaching 200&ndash;700&deg;/s and lasting 20&ndash;40&nbsp;ms &mdash; among the fastest movements the human body produces (Rayner, 1998). These exercises train how quickly and accurately you make them.
+            </p>
           </div>
         )}
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 gap-2.5 max-w-2xl mx-auto w-full">
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+          <div className="grid grid-cols-4 gap-2 w-full">
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
-              <div className="text-lg sm:text-xl font-black text-red-400 tabular-nums">{uiScore}</div>
+              <div className="text-base sm:text-lg font-black text-red-400 tabular-nums">{uiScore}</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
-              <div className={`text-lg sm:text-xl font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>
+              <div className={`text-base sm:text-lg font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>
                 {uiTimeLeft}s
               </div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Level</div>
-              <div className="text-lg sm:text-xl font-black text-indigo-400 tabular-nums">L{uiLevel}</div>
+              <div className="text-base sm:text-lg font-black text-indigo-400 tabular-nums">L{uiLevel}</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
-              <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
+              <div className="text-base sm:text-lg font-black text-amber-400 tabular-nums">{bestScore}</div>
             </div>
           </div>
         )}
@@ -912,9 +912,9 @@ export default function SaccadicGalleryClient() {
             >
               <div className="space-y-8 font-sans">
                 <section>
-                  <h4 className="text-base font-bold text-white mb-2 flex items-center gap-2">
+                  <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
                     <Eye className="w-4 h-4 text-red-400" /> What Is Saccadic Eye Movement & Gallery Training?
-                  </h4>
+                  </h3>
                   <p className="text-sm leading-relaxed mb-3 text-gray-300">
                     <strong>Saccadic Gallery</strong> trains ballistic eye movements — rapid, simultaneous movements of both eyes in the same direction between phases of fixation. In competitive gaming, saccadic speed governs how quickly your gaze snaps to spotted enemies across different screen regions.
                   </p>
@@ -927,45 +927,25 @@ export default function SaccadicGalleryClient() {
                   <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-red-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Who Should Use This?</h5>
+                      <h4 className="text-xs font-bold text-white">Who Should Use This?</h4>
                     </div>
                     <p className="text-xs text-gray-300 leading-relaxed">Gamers and esports athletes sharpening rapid gaze acquisition, ballistic saccades, and first-shot accuracy.</p>
                   </div>
                   <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Saccadic Gaze Calibration</h5>
+                      <h4 className="text-xs font-bold text-white">Saccadic Gaze Calibration</h4>
                     </div>
                     <p className="text-xs text-gray-300 leading-relaxed">Conditions ocular muscles to execute ballistic gaze shifts across screen sectors with zero foveal latency.</p>
                   </div>
                   <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Zap className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Rapid Target Acquisition</h5>
+                      <h4 className="text-xs font-bold text-white">Rapid Target Acquisition</h4>
                     </div>
                     <p className="text-xs text-gray-300 leading-relaxed">Enhances trigger response timing immediately upon completing ballistic eye shifts to new target nodes.</p>
                   </div>
                 </div>
-              </div>
-            </DrillAccordion>
-
-            <DrillAccordion
-              id="faq"
-              title="Frequently Asked Questions"
-              isOpen={openAccordion === 'faq'}
-              onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-sans">
-                <FAQItem q="What is Saccadic Gallery (Ballistic Gaze Shifts)?" a="It is an online reflex training drill where targets appear sequentially across structured grid nodes, testing saccadic eye acceleration and click response." />
-                <FAQItem q="What are saccadic eye movements?" a="Saccades are rapid, jerky eye movements between fixation points. Training saccades reduces visual fixation delay in high-speed gaming." />
-                <FAQItem q="How does this help in FPS games?" a="Faster saccades allow you to visually acquire off-angle enemies and flankers in games like CS2, Valorant, and Apex Legends before snapping your crosshair." />
-                <FAQItem q="Is this saccadic training drill free?" a="Yes, all drills on SkillDrills are 100% free with no downloads or registrations required." />
-                <FAQItem q="How does adaptive level progression work?" a="Difficulty scales continuously as your score and combo rise, shrinking node size and reducing target exposure windows." />
-                <FAQItem q="Is there a time penalty for missing or timeouts?" a="By default, missing or timeouts only reset your combo streak. A time penalty (-0.8s per error) is available as an opt-in toggle in session settings." />
-                <FAQItem q="What is the difference between saccadic and smooth pursuit?" a="Saccadic movements are rapid jumps between targets, whereas smooth pursuit involves smoothly tracking a moving object across space." />
-                <FAQItem q="Should I move my head or only my eyes?" a="Keep your head still and move only your eyes. Moving only your eyes conditions true saccadic agility and faster neural processing." />
-                <FAQItem q="What is saccadic latency?" a="Saccadic latency is the time delay (typically 150-200ms) between the appearance of a visual target and the initiation of an eye jump." />
-                <FAQItem q="What is a good score on Saccadic Gallery?" a="A score above 5,000 indicates strong ocular reflexes, while scores exceeding 10,000 represent elite saccadic eye speed." />
               </div>
             </DrillAccordion>
           </div>
@@ -1019,15 +999,6 @@ function RuleItem({ num, text, highlight = '', result }: { num: string; text: st
           {result}
         </div>
       </div>
-    </div>
-  );
-}
-
-function FAQItem({ q, a }: { q: string; a: string }) {
-  return (
-    <div className="bg-[#05060b] border border-gray-800 rounded-xl p-5 hover:border-gray-700 transition-colors font-sans">
-      <h4 className="text-sm font-bold text-gray-200 mb-2">{q}</h4>
-      <p className="text-xs text-gray-400 leading-relaxed">{a}</p>
     </div>
   );
 }

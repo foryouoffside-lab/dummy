@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
-import { Target, Volume2, VolumeX, Play, RefreshCw, Share2, LogOut, ArrowLeft, Users, TrendingUp, Zap, ZapOff, Trophy } from 'lucide-react';
+import { Target, Volume2, VolumeX, Play, RefreshCw, Share2, LogOut, ArrowLeft, Users, TrendingUp, Zap, ZapOff } from 'lucide-react';
 
 import { isIdleFrameSkippable } from '@/lib/performance';
 import generateShareCard, { shareScoreCard } from '../../../../../components/ShareScoreCard';
@@ -64,7 +64,7 @@ const getLevelConfig = (level, combo = 0) => {
 
 const RULES_ITEMS = [
   { title: "Dual Target Streams", text: "Two independent shape streams flow simultaneously across the screen (top/bottom in portrait mode, left/right in landscape)." },
-  { title: "Target Matching", text: "Check your active TOP and BOTTOM target shapes. Tap only matching shapes (+100 PTS × Combo, +0.6s)." },
+  { title: "Target Matching", text: "Check your active TOP and BOTTOM target shapes. Tap only matching shapes (+100 PTS × Combo × Level multiplier, +0.6s)." },
   { title: "Opposite Flow Directions", text: "Streams travel in opposing directions to challenge bilateral hemispheric visual tracking." },
   { title: "Progressive Challenge", text: "Stream speed accelerates and target shapes diverge as your streak climbs. Misses reset combo (and deduct 0.8s if enabled)." }
 ];
@@ -75,26 +75,13 @@ By streaming distinct geometric shapes across left and right visual fields, the 
 
 As your score increases, stream velocity accelerates and target templates diverge, pushing your visual processing throughput to elite levels.`;
 
-const FAQ_ITEMS = [
-  { q: "Can humans actually multitask?", a: "True simultaneous multitasking is largely a myth for cognitive tasks. What humans call multitasking is actually rapid task switching — alternating between tasks very quickly. The brain serializes most cognitive work, but the speed and efficiency of this switching can be significantly improved with targeted training." },
-  { q: "What is the difference between multitasking and task switching?", a: "Multitasking implies parallel processing two cognitive tasks simultaneously. Task switching (set-shifting) is the rapid alternation between tasks. Research shows that most human multitasking is high-speed task switching. Each switch carries a 'switch cost' — a brief latency and accuracy penalty while the brain reloads the new task's rules." },
-  { q: "How can I improve my multitasking skills?", a: "Effective multitasking improvement comes from: (1) practicing tasks that use different sensory channels simultaneously, (2) training rapid rule-switching with minimal errors, and (3) building automaticity in component tasks so they demand less conscious oversight. This drill exercises all three through its dual-target flow mechanics." },
-  { q: "Why does multitasking drain mental energy?", a: "Each task-set reconfiguration requires the prefrontal cortex to disengage old task rules, flush working memory, and load new task parameters. This cognitive overhead consumes glucose and neurotransmitters rapidly. The cumulative energy cost of many switches explains the brain drain of multitasking-heavy workdays." },
-  { q: "What are the negative effects of multitasking on performance?", a: "Studies show unregulated multitasking can reduce task performance quality by up to 40%, increase error rates, fragment attention, and elevate cortisol. However, trained and structured multitasking with clear task boundaries and practiced switching can dramatically reduce these penalties." },
-  { q: "What does this multitasking test measure?", a: "This dual-target flow test measures your ability to track and respond to multiple concurrent tasks with overlapping deadlines. It evaluates your accuracy across parallel streams, your switching speed when task demands converge, and how well you maintain performance across both channels under increasing cognitive load." },
-  { q: "How does executive function control multitasking?", a: "The dorsolateral prefrontal cortex acts as the central executive, maintaining multiple task representations in working memory, deciding which task gets priority at any moment, and managing the motor output queue. Multitasking training directly strengthens this executive control network." },
-  { q: "Can multitasking games improve work productivity?", a: "Yes. By training your brain's task-switching latency and executive control, multitasking games help you manage real work streams more efficiently. You will find it easier to maintain quality across multiple projects, handle interruptions, and return to primary tasks with less context reload time." },
-  { q: "Who benefits most from multitasking training?", a: "Air traffic controllers, emergency dispatchers, surgeons, esports players, teachers, project managers, stock traders, and emergency first responders are among the professions where high-quality multitasking or rapid task-switching is a critical performance variable. This drill targets all these audiences." },
-  { q: "Is this multitasking test free to play?", a: "Yes. The Dual Target Flow multitasking drill on SkillDrills is completely free with no registration, downloads, or subscriptions required. It runs directly in your web browser." }
-];
-
 const RELATED_DRILLS = [
-  { id: "divided-attention", name: "Divided Attention", cat: "Attention", desc: "Track and react to multiple independent target streams simultaneously.", href: "/drills/cognitive/attention/divided-attention" },
-  { id: "rsvp-reader", name: "RSVP Speed Reader", cat: "Processing Speed", desc: "Process rapid serial visual presentation text streams.", href: "/drills/cognitive/processing-speed/rsvp-reader" },
-  { id: "concentration-stamina", name: "Concentration Stamina", cat: "Attention", desc: "Sustain continuous visual focus through prolonged high-density sequences.", href: "/drills/cognitive/attention/concentration-stamina" },
-  { id: "distraction-fighter", name: "Distraction Fighter", cat: "Focus", desc: "Filter out high-interference Stroop visual distractors.", href: "/drills/cognitive/focus/distraction-fighter" },
-  { id: "reaction-time", name: "Reaction Time", cat: "Processing Speed", desc: "Train choice reaction speed and visual reflex latency.", href: "/drills/cognitive/processing-speed/reaction-time" },
-  { id: "concentration-grid", name: "Concentration Grid", cat: "Focus", desc: "Scan and tap sequential numbers on expanding grid matrices.", href: "/drills/cognitive/focus/concentration-grid" }
+  { id: "concentration-stamina", name: "Focus Test", cat: "Attention", desc: "Sustain continuous visual focus through prolonged high-density sequences.", href: "/drills/cognitive/attention/concentration-stamina" },
+  { id: "divided-attention", name: "Divided Attention Test", cat: "Attention", desc: "Track and react to multiple independent target streams simultaneously.", href: "/drills/cognitive/attention/divided-attention" },
+  { id: "concentration-grid", name: "Schulte Table Trainer", cat: "Focus", desc: "Scan and tap sequential numbers on expanding grid matrices.", href: "/drills/cognitive/focus/concentration-grid" },
+  { id: "distraction-fighter", name: "Stroop Test Online", cat: "Focus", desc: "Filter out high-interference Stroop visual distractors.", href: "/drills/cognitive/focus/distraction-fighter" },
+  { id: "rsvp-reader", name: "Reading Speed Test", cat: "Processing Speed", desc: "Process rapid serial visual presentation text streams.", href: "/drills/cognitive/processing-speed/rsvp-reader" },
+  { id: "reaction-time", name: "Neuro Speed & Reflex Test", cat: "Processing Speed", desc: "Train choice reaction speed and visual reflex latency.", href: "/drills/cognitive/processing-speed/reaction-time" }
 ];
 
 export default function DualTargetFlowClient() {
@@ -559,7 +546,7 @@ export default function DualTargetFlowClient() {
         score: uiScore,
         accuracy: analytics.accuracy,
         speed: 0,
-        drillName: 'Multi-Tasking',
+        drillName: 'Multitasking Test',
         rank: analytics.grade?.letter || 'A',
         rankName: analytics.grade?.label || 'DUAL FLOW MASTER',
         playerName: getPlayerName(),
@@ -568,13 +555,13 @@ export default function DualTargetFlowClient() {
         url: 'skilldrills.online/drills/cognitive/attention/multi-tasking'
       });
       await shareScoreCard(canvas, {
-        title: 'Multi-Tasking — My Score',
-        text: `I scored ${uiScore} (Grade: ${analytics.grade?.letter || 'A'}, Lv. ${analytics.finalLevel}) on Multi-Tasking at SkillDrills!`,
+        title: 'Multitasking Test — My Score',
+        text: `I scored ${uiScore} (Grade: ${analytics.grade?.letter || 'A'}, Lv. ${analytics.finalLevel}) on Multitasking Test at SkillDrills!`,
         url
       });
     } catch (e) {
       if (navigator.share) {
-        navigator.share({ title: 'Multi-Tasking Score', text: `I scored ${uiScore} on Multi-Tasking!`, url }).catch(() => {});
+        navigator.share({ title: 'Multitasking Test Score', text: `I scored ${uiScore} on Multitasking Test!`, url }).catch(() => {});
       }
     }
   }, [uiScore, analytics]);
@@ -585,38 +572,31 @@ export default function DualTargetFlowClient() {
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
         {/* Title */}
         {!isFullscreen && (
-        <div className="text-center">
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-            MULTI-TASKING
-            <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
+          <div className="flex flex-col gap-1">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
               Multitasking Test
-            </span>
-          </h1>
-        </div>
+            </h1>
+            <p className="text-[13px] text-slate-400 leading-relaxed">
+              Human multitasking relies on rapid task switching rather than true simultaneous processing, incurring a measurable 100&ndash;300&nbsp;ms switch penalty as cognitive goals alternate (Rogers &amp; Monsell, 1995; Monsell, 2003). This dual-stream flow drill trains prefrontal executive control to manage concurrent target streams under escalating velocity (Pashler, 1994).
+            </p>
+          </div>
         )}
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-        <div className="grid grid-cols-4 gap-2.5 max-w-2xl mx-auto w-full">
-          <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-            <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
-            <div className="text-lg sm:text-xl font-black text-blue-400 tabular-nums">{uiScore}</div>
+          <div className="grid grid-cols-4 gap-2 w-full -mb-2">
+            {[
+              { label: 'Score', value: uiScore, tone: 'text-blue-400' },
+              { label: 'Time', value: `${uiTimeLeft}s`, tone: uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white' },
+              { label: 'Level', value: `L${uiLevel}`, tone: 'text-blue-400' },
+              { label: 'Best Score', value: bestScore, tone: 'text-amber-400' },
+            ].map((s) => (
+              <div key={s.label} className="rounded-lg border border-white/[0.06] bg-white/[0.015] px-2 py-2 text-center">
+                <div className="text-[9.5px] uppercase font-semibold text-slate-500 tracking-[0.12em]">{s.label}</div>
+                <div className={`text-lg sm:text-xl font-black tabular-nums font-mono mt-0.5 ${s.tone}`}>{s.value}</div>
+              </div>
+            ))}
           </div>
-          <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-            <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
-            <div className={`text-lg sm:text-xl font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>
-              {uiTimeLeft}s
-            </div>
-          </div>
-          <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-            <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Level</div>
-            <div className="text-lg sm:text-xl font-black text-indigo-400 tabular-nums">L{uiLevel}</div>
-          </div>
-          <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-            <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
-            <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
-          </div>
-        </div>
         )}
 
         {/* Game Stage Container */}
@@ -716,23 +696,8 @@ export default function DualTargetFlowClient() {
             <FpsStartCard
               icon={Target}
               accent="blue"
-              title="Multi-Tasking"
+              title="Multitasking Test"
               subtitle="Dual-Stream Tracking • Peripheral Focus"
-              rules={[
-                { icon: Target, accent: 'emerald', title: 'Tap Shapes Matching Active Targets', text: '+100 PTS × Combo × Level multiplier (+0.6s per hit)' },
-                {
-                  icon: Zap,
-                  accent: 'blue',
-                  title: penaltyEnabled ? 'Time Penalty (-0.8s)' : 'Dual Stream Focus',
-                  text: penaltyEnabled
-                    ? 'Misclicks or missed targets subtract 0.8s and reset combo'
-                    : 'Track parallel streams under accelerating flow speed. Misses reset combo'
-                },
-              ]}
-              stats={[
-                { icon: Trophy, label: 'Best Score', value: bestScore, color: 'text-white', accent: 'slate' },
-                { icon: TrendingUp, label: 'Best Level', value: `Lv. ${bestLevel}`, color: 'text-blue-400', accent: 'blue' },
-              ]}
               isTouchOnlyDevice={false}
               onStart={enterDrill}
             />
@@ -785,7 +750,7 @@ export default function DualTargetFlowClient() {
 
             <DrillAccordion
               id="about"
-              title="About Multi-Tasking"
+              title="About Multitasking Test & Dual-Target Flow"
               isOpen={openAccordion === 'about'}
               onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
             >
@@ -821,22 +786,6 @@ export default function DualTargetFlowClient() {
                     <p className="text-xs text-gray-300 leading-relaxed">Left and right target templates rotate and diverge as you level up, forcing you to reload task rules fast and minimize switch-cost errors.</p>
                   </div>
                 </div>
-              </div>
-            </DrillAccordion>
-
-            <DrillAccordion
-              id="faq"
-              title="Frequently Asked Questions"
-              isOpen={openAccordion === 'faq'}
-              onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-sans">
-                {FAQ_ITEMS.map((item, i) => (
-                  <div key={i} className="bg-[#05060b] border border-gray-800 rounded-xl p-5">
-                    <h4 className="text-sm font-bold text-gray-200 mb-2">{item.q}</h4>
-                    <p className="text-xs text-gray-400 leading-relaxed">{item.a}</p>
-                  </div>
-                ))}
               </div>
             </DrillAccordion>
           </div>

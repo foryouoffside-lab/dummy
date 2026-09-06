@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import Link from 'next/link';
 
 import {
   Activity, AlertCircle, ArrowRight, Award, Brain, ChevronRight,
@@ -24,7 +23,6 @@ import DrillCountdown from '../../../../../components/drill/DrillCountdown';
 import DrillAccordion from '../../../../../components/drill/DrillAccordion';
 import DrillFlashOverlay from '../../../../../components/drill/DrillFlashOverlay';
 import DrillRuleItem from '../../../../../components/drill/DrillRuleItem';
-import DrillFAQItem from '../../../../../components/drill/DrillFAQItem';
 import FpsStartCard from '../../../../../components/drill/FpsStartCard';
 import useImmersiveMode from '@/lib/useImmersiveMode';
 
@@ -55,15 +53,6 @@ const saveData = (score) => {
     }
   } catch (e) {}
 };
-
-const RELATED_DRILLS = [
-  { id: "entropic-grid", name: "Entropic Grid", cat: "Visual Recognition", desc: "Find 2-character target codes under dynamic noise.", href: "/drills/visual/visual-recognition/entropic-grid" },
-  { id: "visual-search", name: "Visual Search", cat: "Visual Recognition", desc: "Conjunctive search for target symbols among noise.", href: "/drills/visual/visual-recognition/visual-search" },
-  { id: "moving-target", name: "Moving Target Pro", cat: "Visual Tracking", desc: "Kinetic visual tracking and smooth pursuit interception.", href: "/drills/visual/tracking-accuracy/moving-target" },
-  { id: "multiple-targets", name: "Multiple Targets", cat: "Visual Tracking", desc: "Multi-object tracking & visual working memory.", href: "/drills/visual/tracking-accuracy/multiple-targets" },
-  { id: "pursuit-tracker", name: "Pursuit Tracker", cat: "Visual Tracking", desc: "Smooth pursuit tracking accuracy and velocity alignment.", href: "/drills/visual/tracking-accuracy/pursuit-tracker" },
-  { id: "distance-judgment", name: "Distance Judgment Pro", cat: "Depth Perception", desc: "3D stereoscopic depth estimation & intercept timing.", href: "/drills/visual/depth-perception/distance-judgment" }
-];
 
 // ==========================================
 // ERROR BOUNDARY
@@ -581,36 +570,36 @@ export default function RhythmAnomalyClient() {
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
         {/* Title */}
         {!isFullscreen && (
-          <div className="text-center">
+          <div className="text-left">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              RHYTHM ANOMALY
-              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
-                Rhythm Anomaly Timing Test
-              </span>
+              Rhythm Anomaly Timing Test
             </h1>
+            <p className="text-sm text-slate-400 mt-1">
+              A visual timing test asks you to spot the one element in a pulsing array that is out of step with the rest. Human sensitivity to flicker peaks somewhere around 10–20 Hz and falls away to nothing near 50–60 Hz, above which a flickering light simply looks steady (De Lange, 1958; Kelly, 1961). Judging whether two things pulse in phase is harder than detecting the flicker itself and breaks down at considerably lower rates, which is what this 6x6 matrix measures.
+            </p>
           </div>
         )}
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 gap-2.5 max-w-2xl mx-auto w-full">
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+          <div className="grid grid-cols-4 gap-2 w-full">
+            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-3 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
-              <div className="text-lg sm:text-xl font-black text-purple-400 tabular-nums">{score}</div>
+              <div className="text-base sm:text-lg font-black text-purple-400 tabular-nums">{score}</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-3 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
-              <div className={`text-lg sm:text-xl font-black tabular-nums ${localTimeRemaining <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>
+              <div className={`text-base sm:text-lg font-black tabular-nums ${localTimeRemaining <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>
                 {Math.ceil(localTimeRemaining)}s
               </div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-3 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Level</div>
-              <div className="text-lg sm:text-xl font-black text-indigo-400 tabular-nums">L{speedLevel}</div>
+              <div className="text-base sm:text-lg font-black text-indigo-400 tabular-nums">L{speedLevel}</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
+            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-3 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
-              <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
+              <div className="text-base sm:text-lg font-black text-amber-400 tabular-nums">{bestScore}</div>
             </div>
           </div>
         )}
@@ -833,9 +822,9 @@ export default function RhythmAnomalyClient() {
             >
               <div className="space-y-8">
                 <section>
-                  <h4 className="text-base font-bold text-white mb-2 flex items-center gap-2">
+                  <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
                     <Brain className="w-4 h-4 text-purple-400" /> What Is Rhythm Anomaly Training?
-                  </h4>
+                  </h3>
                   <p className="text-sm leading-relaxed mb-3">
                     <strong>Rhythm Anomaly Training</strong> is a specialized visual temporal perception drill designed to test out-of-sync motion discrimination. The <strong>Rhythm Anomaly drill</strong> displays a 6x6 matrix of 36 pulsing cells, challenging your visual system to detect the single cell pulsing at a higher temporal frequency than the surrounding grid over a <strong>45-second session</strong>.
                   </p>
@@ -848,21 +837,21 @@ export default function RhythmAnomalyClient() {
                   <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Who Should Use This?</h5>
+                      <h4 className="text-xs font-bold text-white">Who Should Use This?</h4>
                     </div>
                     <p className="text-xs text-gray-300 leading-relaxed">FPS gamers spotting subtle peripheral movements, pilots & drivers improving motion anomaly detection, and visual athletes.</p>
                   </div>
                   <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-purple-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Skills Improved</h5>
+                      <h4 className="text-xs font-bold text-white">Skills Improved</h4>
                     </div>
                     <p className="text-xs text-gray-300 leading-relaxed">Visual temporal discrimination, peripheral motion perception, micro-flicker detection, and visual attention stamina.</p>
                   </div>
                   <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center"><Zap className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Soft-Focus Technique</h5>
+                      <h4 className="text-xs font-bold text-white">Soft-Focus Technique</h4>
                     </div>
                     <p className="text-xs text-gray-300 leading-relaxed">Avoid hard-focusing on individual cells. Soft-focus your eyes over the entire grid so temporal anomalies jump out automatically.</p>
                   </div>
@@ -870,51 +859,7 @@ export default function RhythmAnomalyClient() {
 
               </div>
             </DrillAccordion>
-
-            <DrillAccordion
-              id="faq"
-              title="Frequently Asked Questions"
-              isOpen={openAccordion === 'faq'}
-              onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <DrillFAQItem q="What is the Rhythm Anomaly Drill?" a="A free visual temporal discrimination exercise. 6x6 grid of 36 pulsing cells. Find the cell pulsing at a faster frequency than the steady grid rhythm." />
-                <DrillFAQItem q="Are there negative score or time penalties?" a="No. Each round is a fixed 45 seconds. Correct hits earn +10 PTS; misclicks and timeouts reset your current streak, but never deduct score points or reduce remaining timer seconds." />
-                <DrillFAQItem q="How does speed scaling work?" a="Consecutive hits increase the speed level, accelerating the overall grid pulse frequency and tightening timeout limits." />
-                <DrillFAQItem q="What is the random cell flicker I sometimes see?" a="That's the entropy scramble — a handful of random non-target cells flash briefly as background visual noise." />
-                <DrillFAQItem q="Does difficulty decrease on mistakes?" a="No. Your level only ever goes up — a mistake never takes you back down, so you can safely master your current speed." />
-                <DrillFAQItem q="How long does each drill session last?" a="Each round is timed for exactly 45 seconds of continuous focus." />
-                <DrillFAQItem q="Do I need to sign up?" a="No registration required. This drill runs directly in your browser with instant response." />
-              </div>
-            </DrillAccordion>
           </div>
-        )}
-
-        {/* RELATED DRILLS GRID */}
-        {!isFullscreen && (
-          <section className="mt-4">
-            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">
-              Related Visual Drills
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {RELATED_DRILLS.map((drill) => (
-                <Link
-                  key={drill.id}
-                  href={drill.href}
-                  className="group bg-[#0c0c16] border border-white/5 hover:border-purple-500/40 rounded-xl p-3.5 transition-all duration-200 hover:-translate-y-0.5 flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="text-[10px] font-bold text-purple-400 uppercase tracking-wider mb-1">{drill.cat}</div>
-                    <div className="text-xs font-bold text-white group-hover:text-purple-300 transition-colors">{drill.name}</div>
-                    <div className="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">{drill.desc}</div>
-                  </div>
-                  <div className="text-[10px] font-bold text-slate-500 group-hover:text-purple-400 mt-3 flex items-center gap-1 transition-colors">
-                    Train Drill <span>→</span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
         )}
 
         {/* SITE FOOTER */}

@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import {
+  ArrowLeft,
   Crosshair,
   Eye,
   Zap,
@@ -27,6 +28,9 @@ import AdjacentHubs from '@/components/AdjacentHubs';
 import { useTranslation } from '@/lib/i18n/useTranslation';
 import DrillPreview from '@/components/drill/DrillPreview';
 import { getDrillPreview } from '@/lib/drillPreviews';
+import StickyMobileCta from '@/components/StickyMobileCta';
+import { hasLocalizedRoute } from '@/lib/i18n/locales';
+import { getLocalizedDrill } from '@/lib/i18n/drillNames';
 
 // Mapping: drill folderName → actual localStorage STORAGE_KEY
 const FOLDER_TO_STORAGE_KEY = {
@@ -182,7 +186,7 @@ const GAME_PRESETS = [
 ];
 
 export default function FPSHubClient() {
-  const { t, localizeHref } = useTranslation();
+  const { locale, t, localizeHref } = useTranslation();
   const [isClient, setIsClient] = useState(false);
   const [drillLevels, setDrillLevels] = useState({});
   const [selectedDiscipline, setSelectedDiscipline] = useState('all');
@@ -336,19 +340,22 @@ export default function FPSHubClient() {
                 className="flex items-center gap-1.5 hover:text-red-400 transition-colors"
               >
                 <Home className="w-3.5 h-3.5" />
-                <span>HQ</span>
+                <span>{t('ui.nav.hq', 'HQ')}</span>
               </Link>
             </li>
             <li><ChevronRight className="w-3 h-3 text-hairline-2" /></li>
             <li>
-              <Link href={localizeHref('/drills')} className="hover:text-red-400 transition-colors">
-                {t('header.allHubs', 'Drills')}
+              <Link
+                href={hasLocalizedRoute(locale, '/drills') ? localizeHref('/drills') : '/drills'}
+                className="hover:text-red-400 transition-colors"
+              >
+                {t('ui.nav.drills', 'DRILLS')}
               </Link>
             </li>
             <li><ChevronRight className="w-3 h-3 text-hairline-2" /></li>
             <li>
               <span className="text-red-400 font-bold" aria-current="page">
-                {t('header.fps', 'FPS Aim Sector')}
+                {t('header.fps', 'FPS AIM')}
               </span>
             </li>
           </ol>
@@ -468,11 +475,18 @@ export default function FPSHubClient() {
               const userLevel = drillLevels[drill.folderName];
               const diffStyle = DIFFICULTY_STYLES[drill.difficulty] || DIFFICULTY_STYLES.Medium;
               const hasPreview = Boolean(getDrillPreview(drill.href));
+              const href = hasLocalizedRoute(locale, drill.href) ? localizeHref(drill.href) : drill.href;
+              const { name: displayName, tagline: displayTagline } = getLocalizedDrill(
+                drill.href,
+                locale,
+                drill.name,
+                drill.tagline
+              );
 
               return (
                 <Link
                   key={drill.href}
-                  href={drill.href}
+                  href={href}
                   className="group relative flex flex-col justify-between rounded-2xl bg-surface-1/90 border border-hairline p-5 shadow-lg transition-all duration-200 hover:-translate-y-1 hover:border-red-500/40 hover:shadow-xl hover:shadow-red-500/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
                 >
                   {/* Subtle top indicator hover line */}
@@ -497,7 +511,7 @@ export default function FPSHubClient() {
                           <span
                             className={`px-2 py-0.5 rounded-md border text-[9px] font-mono font-bold uppercase tracking-wider backdrop-blur-md bg-surface-1/80 ${diffStyle}`}
                           >
-                            {drill.difficulty}
+                            {drill.difficulty ? t(`ui.difficulty.${drill.difficulty.toLowerCase()}`, drill.difficulty) : drill.difficulty}
                           </span>
                         </div>
                       </div>
@@ -516,7 +530,7 @@ export default function FPSHubClient() {
                           <span
                             className={`px-2 py-0.5 rounded-md border text-[9px] font-mono font-bold uppercase tracking-wider ${diffStyle}`}
                           >
-                            {drill.difficulty}
+                            {drill.difficulty ? t(`ui.difficulty.${drill.difficulty.toLowerCase()}`, drill.difficulty) : drill.difficulty}
                           </span>
                         </div>
                       </div>
@@ -529,12 +543,12 @@ export default function FPSHubClient() {
 
                     {/* Drill Name */}
                     <h3 className="text-base font-bold text-ink-1 group-hover:text-red-400 transition-colors tracking-tight line-clamp-1">
-                      {drill.name}
+                      {displayName}
                     </h3>
 
                     {/* Tagline / Subtitle */}
                     <p className="mt-1.5 text-xs text-ink-3 leading-relaxed line-clamp-2">
-                      {drill.tagline}
+                      {displayTagline}
                     </p>
 
                     {/* Game Target Chips */}
@@ -561,7 +575,7 @@ export default function FPSHubClient() {
                     </span>
 
                     <span className="inline-flex items-center gap-1 font-bold text-red-400 group-hover:text-red-300 transition-colors uppercase tracking-wider">
-                      <span>Launch Drill</span>
+                      <span>{t('ui.launchDrill', 'Launch Drill')}</span>
                       <Play className="w-3 h-3 fill-current transition-transform group-hover:translate-x-0.5" />
                     </span>
                   </div>
@@ -616,7 +630,7 @@ export default function FPSHubClient() {
                   High Refresh Physics
                 </h3>
                 <p className="text-2xs text-ink-3 leading-relaxed">
-                  Decoupled sub-millisecond physics loops run up to 360Hz refresh rates. Targets glide smoothly without jitter, judder, or frame drops.
+                  Physics runs decoupled from rendering and keeps up with refresh rates to 360Hz. Targets glide smoothly without jitter, judder, or frame drops.
                 </p>
               </div>
 
@@ -637,6 +651,23 @@ export default function FPSHubClient() {
 
         {/* Clean Adjacent Hubs Navigation */}
         <AdjacentHubs currentCat="fps" />
+
+        {/* Back Link */}
+        <div className="mt-12 border-t border-hairline pt-6">
+          <Link 
+            href={hasLocalizedRoute(locale, '/drills') ? localizeHref('/drills') : '/drills'}
+            className="inline-flex items-center gap-2 text-xs font-mono uppercase font-bold text-ink-3 hover:text-ink-1 transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            {t('ui.returnToAllSectors', 'Return to All Sectors')}
+          </Link>
+        </div>
+
+        <StickyMobileCta
+          href={hasLocalizedRoute(locale, '/drills/fps/flick-shot-training') ? localizeHref('/drills/fps/flick-shot-training') : '/drills/fps/flick-shot-training'}
+          label={t('hubs.fps.startCta', 'Start FPS Drill')}
+          categoryName={t('header.fps', 'FPS Aim')}
+        />
       </div>
 
       <SiteFooter />

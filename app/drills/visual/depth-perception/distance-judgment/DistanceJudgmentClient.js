@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import Link from 'next/link';
 
 import { 
   Volume2, VolumeX,
@@ -23,7 +22,6 @@ import DrillCountdown from '../../../../../components/drill/DrillCountdown';
 import DrillAccordion from '../../../../../components/drill/DrillAccordion';
 import DrillFlashOverlay from '../../../../../components/drill/DrillFlashOverlay';
 import DrillRuleItem from '../../../../../components/drill/DrillRuleItem';
-import DrillFAQItem from '../../../../../components/drill/DrillFAQItem';
 import FpsStartCard from '../../../../../components/drill/FpsStartCard';
 import useImmersiveMode from '@/lib/useImmersiveMode';
 
@@ -33,15 +31,6 @@ const POINTS_CLOSE = 100;
 const POINTS_PER_LEVEL = 750; // Level up every 750 points
 const ELITE_SCORE = 1500; // Target score for S+ rating
 const STORAGE_KEY = 'skilldrills_visual_distance_judgment_v4';
-
-const RELATED_DRILLS = [
-  { id: "moving-target", name: "Moving Target", cat: "Visual Tracking", desc: "Kinetic visual tracking and target intercept.", href: "/drills/visual/tracking-accuracy/moving-target" },
-  { id: "light-reaction", name: "Light Reaction", cat: "Reaction Speed", desc: "Test raw visual motor reaction speed.", href: "/drills/visual/reaction-speed/light-reaction" },
-  { id: "multiple-targets", name: "Multiple Targets", cat: "Visual Tracking", desc: "Track multiple moving targets across dynamic paths.", href: "/drills/visual/tracking-accuracy/multiple-targets" },
-  { id: "pursuit-tracker", name: "Pursuit Tracker", cat: "Visual Tracking", desc: "Smooth pursuit tracking accuracy and velocity alignment.", href: "/drills/visual/tracking-accuracy/pursuit-tracker" },
-  { id: "go-no-go", name: "Go / No-Go", cat: "Reaction Speed", desc: "Response inhibition & selective reaction speed.", href: "/drills/visual/reaction-speed/go/no-go" },
-  { id: "entropic-grid", name: "Entropic Grid", cat: "Visual Recognition", desc: "Visual search speed & pattern recognition grid.", href: "/drills/visual/visual-recognition/entropic-grid" }
-];
 
 const getSavedData = () => {
   try {
@@ -537,21 +526,21 @@ export default function DistanceJudgmentClient() {
     <div className="min-h-screen bg-[#050508] text-white flex flex-col font-sans select-none">
       {/* ── MAIN CONTENT AREA ── */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
-        {/* Title */}
+        {/* Title — left-aligned sentence-case H1 and 2-sentence definition snippet */}
         {!isFullscreen && (
-          <div className="text-center">
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              DISTANCE JUDGMENT PRO
-              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
-                Depth Perception Test
-              </span>
+          <div className="flex flex-col">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white mb-2">
+              Distance Judgment Depth Perception Test
             </h1>
+            <p className="text-sm text-slate-400 mb-4 max-w-3xl leading-relaxed">
+              Depth perception is judging how far away things are and in what order. Two cues carry most of it: binocular disparity, the small difference between the images from your two eyes — which random-dot stereograms showed is enough on its own, with no other cue present, to produce a sense of depth (Julesz, 1971) — and optical expansion, the rate at which an approaching object&apos;s image grows on the retina, which specifies time-to-contact without your needing to know the object&apos;s size or speed (Lee, 1976; Regan &amp; Beverley, 1978). A flat monitor removes the first cue, so a browser test measures the second: this drill times your judgement of expansion and intercept, not your stereo acuity, which needs the two-rod apparatus Howard (1919) described.
+            </p>
           </div>
         )}
 
-        {/* Live Stat Cards */}
+        {/* Live Stat Cards — full width hairline grid */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 gap-2.5 max-w-2xl mx-auto w-full">
+          <div className="grid grid-cols-4 gap-2 w-full">
             <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
               <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
               <div className="text-lg sm:text-xl font-black text-cyan-400 tabular-nums">{uiScore}</div>
@@ -768,11 +757,11 @@ export default function DistanceJudgmentClient() {
             >
               <div className="space-y-8">
                 <section>
-                  <h4 className="text-base font-bold text-white mb-2 flex items-center gap-2">
+                  <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
                     <Brain className="w-4 h-4 text-cyan-400" /> What Is Distance Judgment Training?
-                  </h4>
+                  </h3>
                   <p className="text-sm leading-relaxed mb-3">
-                    <strong>Distance Judgment Training</strong> develops binocular stereoscopic depth perception and visual intercept timing. The drill project a 3D sphere along a deep visual tunnel toward a target depth plane.
+                    <strong>Distance Judgment Training</strong> develops binocular stereoscopic depth perception and visual intercept timing. The drill projects a 3D sphere along a deep visual tunnel toward a target depth plane.
                   </p>
                   <p className="text-sm leading-relaxed">
                     By training your visual cortex to calculate looming velocity and relative depth cues under accelerating speeds, you enhance spatial awareness and intercept precision.
@@ -783,21 +772,21 @@ export default function DistanceJudgmentClient() {
                   <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Who Should Use This?</h5>
+                      <h4 className="text-xs font-bold text-white">Who Should Use This?</h4>
                     </div>
                     <p className="text-xs text-gray-300 leading-relaxed">Athletes in intercept sports (baseball, tennis, esports), pilots, drivers, and cognitive vision training enthusiasts.</p>
                   </div>
                   <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-cyan-600 flex items-center justify-center"><TrendingUp className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Skills Improved</h5>
+                      <h4 className="text-xs font-bold text-white">Skills Improved</h4>
                     </div>
                     <p className="text-xs text-gray-300 leading-relaxed">3D depth perception, looming velocity estimation, visual motor intercept timing, and spatial anticipation.</p>
                   </div>
                   <div className="p-4 rounded-xl border border-gray-800 bg-white/[0.02]">
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-purple-600 flex items-center justify-center"><Zap className="w-3.5 h-3.5 text-white" /></div>
-                      <h5 className="text-xs font-bold text-white">Depth Calibration</h5>
+                      <h4 className="text-xs font-bold text-white">Depth Calibration</h4>
                     </div>
                     <p className="text-xs text-gray-300 leading-relaxed">Track the expanding sphere shadow against the target depth ring to time your intercept tap accurately.</p>
                   </div>
@@ -805,51 +794,7 @@ export default function DistanceJudgmentClient() {
 
               </div>
             </DrillAccordion>
-
-            <DrillAccordion
-              id="faq"
-              title="Frequently Asked Questions"
-              isOpen={openAccordion === 'faq'}
-              onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <DrillFAQItem q="What is Distance Judgment Pro?" a="A 3D depth perception exercise. Tap when the approaching 3D sphere perfectly matches the depth ring size." />
-                <DrillFAQItem q="How does progressive difficulty work?" a="As your score increases, sphere approach speed accelerates from 2200ms down to 500ms and target depth windows become narrower." />
-                <DrillFAQItem q="Are there negative score or time penalties?" a="No. A missed tap never deducts score points or reduces remaining timer seconds — the screen just flashes red and the next sphere approaches." />
-                <DrillFAQItem q="How long does each drill session last?" a="Each round is timed for exactly 45 seconds of continuous focus." />
-                <DrillFAQItem q="What skills does this drill improve?" a="Stereoscopic depth perception, visual distance estimation, 3D spatial awareness, and interceptive timing." />
-                <DrillFAQItem q="Does difficulty decrease on mistakes?" a="No. The level remains unchanged when a mistake is made, allowing you to master your current level." />
-                <DrillFAQItem q="Do I need to sign up?" a="No registration required. This drill is completely free and works instantly in your browser." />
-              </div>
-            </DrillAccordion>
           </div>
-        )}
-
-        {/* RELATED DRILLS GRID */}
-        {!isFullscreen && (
-          <section className="mt-4">
-            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">
-              Related Visual Drills
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {RELATED_DRILLS.map((drill) => (
-                <Link
-                  key={drill.id}
-                  href={drill.href}
-                  className="group bg-[#0c0c16] border border-white/5 hover:border-cyan-500/40 rounded-xl p-3.5 transition-all duration-200 hover:-translate-y-0.5 flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider mb-1">{drill.cat}</div>
-                    <div className="text-xs font-bold text-white group-hover:text-cyan-300 transition-colors">{drill.name}</div>
-                    <div className="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">{drill.desc}</div>
-                  </div>
-                  <div className="text-[10px] font-bold text-slate-500 group-hover:text-cyan-400 mt-3 flex items-center gap-1 transition-colors">
-                    Train Drill <span>→</span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
         )}
 
         {/* SITE FOOTER */}

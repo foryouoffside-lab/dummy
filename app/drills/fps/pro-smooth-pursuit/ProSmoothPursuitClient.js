@@ -76,18 +76,6 @@ const RULES_ITEMS = [
   { title: "Level Progression", text: "Level up every 1400 PTS scored. Target speed accelerates & curves sharpen dynamically." }
 ];
 
-const FAQ_ITEMS = [
-  { q: "What is smooth pursuit training?", a: "Smooth pursuit training develops your eyes' ability to track a moving target smoothly and continuously, which helps your brain calculate velocity and guides your arm to move the mouse at a matching speed without stutters." },
-  { q: "How do I improve tracking aim?", a: "To improve tracking aim, focus your eyes entirely on the target model rather than your crosshair. Maintain a relaxed wrist and arm, practice continuous tracking drills regularly, and calibrate your sensitivity for consistent muscle memory." },
-  { q: "What is continuous tracking?", a: "Continuous tracking is the skill of keeping your crosshair locked onto a moving target without losing connection. Unlike flick shots, it requires constant speed adjustments and micro-corrections over a long duration." },
-  { q: "How do pro players improve tracking?", a: "Professional players improve tracking by using aim trainers to practice smooth pursuit, maintaining physical relaxation to avoid mouse jitter, using lightweight mice and slick mouse pads, and playing games with high time-to-kill (TTK)." },
-  { q: "Can tracking drills improve Apex aim?", a: "Yes. Apex Legends has a very high time-to-kill (TTK), meaning you must track enemies through multiple strafes and jumps. Smooth pursuit drills are critical to mastering weapons like the R-99, Volt, and Flatline." },
-  { q: "Does this help Overwatch players?", a: "Absolutely. Overwatch 2 features heroes with high movement speed and no inertia, meaning players must track Soldier: 76, Tracer, Zarya, and Sombra continuously to secure kills." },
-  { q: "Why is tracking harder than flicking?", a: "Tracking is harder because it requires visual feedback processing and muscular speed adjustments over several seconds, whereas flicking is a single rapid muscle command that happens in a fraction of a second." },
-  { q: "How are errors penalised in Pro Smooth Pursuit?", a: "Losing lock-on with the target resets your combo multiplier. When the optional Time Penalty setting is enabled, falling off-target for 1.0 cumulative second also deducts 0.6s from your timer." },
-  { q: "What skills does smooth pursuit improve?", a: "This drill improves smooth pursuit, visual response latency, ADAD strafe reading, target reacquisition speed, wrist micro-corrections, and tracking stability under pressure." },
-  { q: "Is this smooth pursuit trainer free?", a: "Yes, this tracking trainer is 100% free, requires no sign-ups or downloads, and runs natively in modern desktop browsers with 1:1 raw mouse input." }
-];
 
 const RELATED_DRILLS = [
   { id: "flick-shot-training", name: "Pro Flick Trainer", cat: "FPS Flicking", desc: "Snap to targets in time-attack mode with precision flicking.", href: "/drills/fps/flick-shot-training" },
@@ -573,34 +561,34 @@ export default function ProSmoothPursuitClient() {
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
         {/* Title */}
         {!isFullscreen && (
-          <div className="text-center">
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white uppercase">
-              Pro Smooth Pursuit
-              <span data-seo-kw="1" className="block text-sm font-semibold text-slate-400 mt-1 normal-case tracking-normal">
-                Smooth Pursuit Aim Trainer
-              </span>
+          <div className="text-left">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white mb-2">
+              Smooth Pursuit Aim Trainer
             </h1>
+            <p className="text-xs sm:text-sm text-slate-400 max-w-3xl leading-relaxed">
+              Smooth pursuit is the eye movement that keeps a moving target on your fovea. It tracks accurately up to roughly 30&deg;/s; past that the eye falls behind and inserts catch-up saccades instead (Krauzlis, 2004; Rashbass, 1961).
+            </p>
           </div>
         )}
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 gap-2.5 max-w-2xl mx-auto w-full">
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
-              <div className="text-lg sm:text-xl font-black text-white tabular-nums">{score}</div>
+          <div className="grid grid-cols-4 gap-2 w-full">
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
+              <div className="text-[10px] uppercase font-semibold text-slate-400 tracking-wider">Score</div>
+              <div className="text-base sm:text-xl font-bold text-white tabular-nums">{score}</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
-              <div className={`text-lg sm:text-xl font-black tabular-nums ${timeLeft <= 10 ? "text-red-400 animate-pulse" : "text-white"}`}>{timeLeft}s</div>
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
+              <div className="text-[10px] uppercase font-semibold text-slate-400 tracking-wider">Time</div>
+              <div className={`text-base sm:text-xl font-bold tabular-nums ${timeLeft <= 10 ? "text-red-400 animate-pulse" : "text-white"}`}>{timeLeft}s</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Accuracy</div>
-              <div className="text-lg sm:text-xl font-black text-emerald-400 tabular-nums">{accuracy}%</div>
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
+              <div className="text-[10px] uppercase font-semibold text-slate-400 tracking-wider">Accuracy</div>
+              <div className="text-base sm:text-xl font-bold text-emerald-400 tabular-nums">{accuracy}%</div>
             </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
-              <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
+            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
+              <div className="text-[10px] uppercase font-semibold text-slate-400 tracking-wider">Best Score</div>
+              <div className="text-base sm:text-xl font-bold text-amber-400 tabular-nums">{bestScore}</div>
             </div>
           </div>
         )}
@@ -759,15 +747,15 @@ export default function ProSmoothPursuitClient() {
 
             <DrillAccordion
               id="about"
-              title="About Pro Smooth Pursuit"
+              title="About Smooth Pursuit Aim Trainer"
               isOpen={openAccordion === 'about'}
               onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
             >
               <div className="space-y-8">
                 <section>
-                  <h4 className="text-base font-bold text-white mb-2 flex items-center gap-2">
+                  <h3 className="text-sm font-bold text-white mb-2 flex items-center gap-2">
                     <Eye className="w-4 h-4 text-emerald-400" /> What Is Smooth Pursuit Training?
-                  </h4>
+                  </h3>
                   <p className="text-sm leading-relaxed mb-3">
                     <strong>Smooth Pursuit Training</strong> isolates your eyes' ability to follow a moving coordinate without quick saccadic jerks. In fast-paced FPS shooters, players who master <strong>smooth pursuit</strong> keep their weapons locked onto targets at various ranges, matching their exact path velocity.
                   </p>
@@ -775,22 +763,6 @@ export default function ProSmoothPursuitClient() {
                     The Lissajous curve provides a harmonically oscillating trajectory that forces you to constantly adapt both horizontal and vertical mouse velocities simultaneously.
                   </p>
                 </section>
-              </div>
-            </DrillAccordion>
-
-            <DrillAccordion
-              id="faq"
-              title="Frequently Asked Questions"
-              isOpen={openAccordion === 'faq'}
-              onToggle={() => setOpenAccordion(openAccordion === 'faq' ? null : 'faq')}
-            >
-              <div className="space-y-4">
-                {FAQ_ITEMS.map((item, idx) => (
-                  <div key={idx} className="border-b border-gray-800/80 pb-3 last:border-0 last:pb-0">
-                    <h5 className="text-xs font-bold text-white mb-1">{item.q}</h5>
-                    <p className="text-xs text-gray-400 leading-relaxed">{item.a}</p>
-                  </div>
-                ))}
               </div>
             </DrillAccordion>
           </div>
