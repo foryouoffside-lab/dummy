@@ -308,7 +308,7 @@ export default function MotorDrillsClient() {
   };
 
   return (
-    <div className="min-h-screen bg-canvas text-ink-1 font-sans selection:bg-emerald-500/30 selection:text-emerald-200 relative overflow-hidden">
+    <div className="min-h-screen bg-canvas text-ink-1 font-sans selection:bg-emerald-500/30 selection:text-emerald-200 relative overflow-clip">
       {/* Interactive cursor coordinate guide canvas */}
       <canvas
         style={{ touchAction: 'none' }}

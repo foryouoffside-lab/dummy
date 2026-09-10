@@ -32,7 +32,7 @@ export default function VisualTrackingDrillsClient() {
   const orderedTrackingDrills = sortByInterest(trackingDrills);
 
   return (
-    <div className="min-h-screen bg-canvas text-ink-1 font-sans selection:bg-cyan-500/30 relative overflow-hidden">
+    <div className="min-h-screen bg-canvas text-ink-1 font-sans selection:bg-cyan-500/30 relative overflow-clip">
 
       {/* Layered premium background: hub-tinted mesh blobs + grid + grain */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">

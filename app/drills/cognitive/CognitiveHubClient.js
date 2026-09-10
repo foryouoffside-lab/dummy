@@ -175,7 +175,7 @@ export default function CognitiveHubClient() {
   const totalDrills = cognitiveCategories.reduce((acc, cat) => acc + cat.drills.length, 0);
 
   return (
-    <div className="min-h-screen bg-canvas text-ink-1 font-sans selection:bg-violet-500/30 selection:text-violet-300 relative overflow-hidden">
+    <div className="min-h-screen bg-canvas text-ink-1 font-sans selection:bg-violet-500/30 selection:text-violet-300 relative overflow-clip">
       
       <canvas style={{ touchAction: 'none' }} ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none z-0 opacity-40" />
 

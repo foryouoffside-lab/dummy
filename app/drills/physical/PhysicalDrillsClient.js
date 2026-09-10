@@ -326,7 +326,7 @@ export default function PhysicalDrillsClient() {
   };
 
   return (
-    <div className="min-h-screen bg-canvas text-ink-1 font-sans selection:bg-rose-500/30 selection:text-rose-200 relative overflow-hidden">
+    <div className="min-h-screen bg-canvas text-ink-1 font-sans selection:bg-rose-500/30 selection:text-rose-200 relative overflow-clip">
       {/* Kinetic velocity stream canvas */}
       <canvas
         style={{ touchAction: 'none' }}

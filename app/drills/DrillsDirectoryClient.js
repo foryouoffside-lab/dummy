@@ -75,7 +75,7 @@ export default function DrillsDirectoryClient() {
   });
 
   return (
-    <div className="min-h-screen bg-canvas text-ink-1 font-sans relative overflow-hidden flex flex-col justify-between">
+    <div className="min-h-screen bg-canvas text-ink-1 font-sans relative overflow-clip flex flex-col justify-between">
 
       {/* Layered premium background: mesh blobs + grid + grain */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">

@@ -308,7 +308,7 @@ export default function FPSHubClient() {
   };
 
   return (
-    <div className="min-h-screen bg-canvas text-ink-1 font-sans selection:bg-red-500/30 selection:text-red-200 relative overflow-hidden">
+    <div className="min-h-screen bg-canvas text-ink-1 font-sans selection:bg-red-500/30 selection:text-red-200 relative overflow-clip">
       {/* Tactical ambient background: Red/Orange glow + subtle grid mesh */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[1100px] h-[480px] bg-red-600/[0.10] rounded-full blur-[160px]" />

@@ -69,7 +69,7 @@ export default function ReactionSpeedDrillsClient() {
   }, [isClient]);
 
   return (
-    <div className="min-h-screen bg-canvas text-ink-1 font-sans selection:bg-amber-500/30 relative overflow-hidden">
+    <div className="min-h-screen bg-canvas text-ink-1 font-sans selection:bg-amber-500/30 relative overflow-clip">
 
       {/* Layered premium background: hub-tinted mesh blobs + grid + grain */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">

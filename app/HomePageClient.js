@@ -294,7 +294,14 @@ export default function HomePageClient() {
   }, [selectedCategoryTab]);
 
   return (
-    <div className="min-h-screen bg-canvas text-ink-1 font-sans relative overflow-x-hidden selection:bg-blue-500/25 selection:text-cyan-300">
+    // overflow-x-clip, not overflow-x-hidden: `hidden` on one axis forces the
+    // other axis to compute as `auto`, which silently turns this wrapper into a
+    // scroll container. That captured the page's scrollport, so the scroll-driven
+    // reveal animations resolved their view() timeline against a div that never
+    // scrolls (leaving them stuck at 100%) and any `position: sticky` descendant
+    // would stick to this box instead of the viewport. `clip` does the same
+    // clipping with no scroll container.
+    <div className="min-h-screen bg-canvas text-ink-1 font-sans relative overflow-x-clip selection:bg-blue-500/25 selection:text-cyan-300">
 
       {/* ─────────────────────────────────────────────────────────
           PRECISION BACKGROUND ARCHITECTURE (ENGINEERED GRID)

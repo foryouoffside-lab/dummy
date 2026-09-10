@@ -3,6 +3,17 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    /* The palette is dark-only (canvas is #06070B); there is no light theme to
+       switch to. Declaring the scheme lets the UA paint its own canvas, form
+       controls and scrollbars dark instead of defaulting them to light, so a
+       refresh no longer flashes white before this stylesheet is applied. The
+       matching <meta name="color-scheme"> in the root layout covers the frames
+       before this file has even been parsed. */
+    color-scheme: dark;
+    background-color: theme('colors.canvas');
+  }
+
   body {
     @apply bg-canvas text-ink-1 font-sans antialiased selection:bg-blue-500/20 selection:text-blue-400;
   }
@@ -111,3 +122,28 @@
    combo/clear announcements across every drill. */
 @keyframes fxScorePopup { 0%{opacity:1; transform:translateY(0);} 100%{opacity:0; transform:translateY(-38px);} }
 .fx-score-popup { animation: fxScorePopup .9s ease-out forwards; }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   SCROLL REVEAL (components/Reveal.js)
+   Scroll-driven rather than observer-driven, so the wrapped markup is visible
+   on its own and never depends on JS having hydrated. The whole rule is behind
+   @supports on purpose: where view() timelines are unavailable the content is
+   simply shown, which is the correct fallback and what the old observer version
+   failed to do.
+   ───────────────────────────────────────────────────────────────────────────── */
+@keyframes revealRise {
+  from { opacity: 0; transform: translateY(var(--reveal-y, 20px)); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .reveal {
+      animation: revealRise linear both;
+      animation-timeline: view();
+      /* --reveal-stagger carries the caller's delay as a scroll offset, so a row
+         of cards still arrives one after another instead of all at once. */
+      animation-range-start: entry calc(5% + var(--reveal-stagger, 0%));
+      animation-range-end: entry calc(60% + var(--reveal-stagger, 0%));
+    }
+  }
+}

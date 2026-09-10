@@ -103,10 +103,15 @@ export const metadata = {
 };
 
 export const viewport = {
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
-    { media: '(prefers-color-scheme: dark)', color: '#000000' },
-  ],
+  // Emits <meta name="color-scheme" content="dark">, which the UA reads while
+  // parsing <head> -- before the stylesheet has been applied. Without it the
+  // browser assumes a light page and paints its default white canvas, so every
+  // refresh of this (dark-only) site flashed white before the first real frame.
+  colorScheme: 'dark',
+  // One value, not a light/dark pair: there is no light theme, so advertising
+  // #ffffff to a light-preference client just made the mobile browser chrome
+  // white above a near-black page. This matches `canvas` in the Tailwind theme.
+  themeColor: '#06070B',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 5,
@@ -114,7 +119,7 @@ export const viewport = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`scroll-smooth ${inter.variable}`}>
+    <html lang="en" className={`motion-safe:scroll-smooth ${inter.variable}`}>
       <head>
         {/* next/font/google self-hosts Inter at build time, so nothing is ever
             fetched from fonts.googleapis.com or fonts.gstatic.com at runtime.

@@ -238,14 +238,6 @@ const nextConfig = {
     ],
   },
   
-  // ============================================
-  // WEBPACK SPLIT CHUNKS (Reduces TBT)
-  // ============================================
-  
-  webpack: (config, { isServer, dev }) => {
-    return config;
-  },
-  
   eslint: {
     ignoreDuringBuilds: true,
   },

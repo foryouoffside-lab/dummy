@@ -154,7 +154,7 @@ export default function MemoryClient() {
   const totalDrills = memoryCategories.reduce((acc, cat) => acc + cat.drills.length, 0);
 
   return (
-    <div className="min-h-screen bg-canvas text-ink-1 font-sans selection:bg-indigo-500/30 selection:text-indigo-300 relative overflow-hidden">
+    <div className="min-h-screen bg-canvas text-ink-1 font-sans selection:bg-indigo-500/30 selection:text-indigo-300 relative overflow-clip">
       <canvas
         style={{ touchAction: "none" }}
         ref={canvasRef}
