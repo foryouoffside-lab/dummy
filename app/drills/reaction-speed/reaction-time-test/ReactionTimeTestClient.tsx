@@ -616,11 +616,6 @@ export default function ReactionTimeTestClient() {
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
               Reaction Time Test
             </h1>
-            <p className="text-[13px] text-slate-400 leading-relaxed">
-              Measure your visual reaction speed in milliseconds. A typical adult reacts in{' '}
-              <span className="whitespace-nowrap">200&ndash;250&nbsp;ms</span>; under{' '}
-              <span className="whitespace-nowrap">180&nbsp;ms</span> is elite.
-            </p>
           </div>
         )}
 
@@ -813,6 +808,13 @@ export default function ReactionTimeTestClient() {
 
         </div>
 
+        {/* Drill Caption */}
+        {!isFullscreen && (
+          <p className="text-xs text-slate-400 leading-relaxed -mt-2">
+            Measure your visual reaction time in milliseconds by clicking the instant the target triggers.
+          </p>
+        )}
+
         {/* ACCORDIONS */}
         {!isFullscreen && (
           <div className="[&>div]:!mt-0">
@@ -841,6 +843,11 @@ export default function ReactionTimeTestClient() {
                   <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
                     <Eye className="w-4 h-4 text-cyan-400" /> What Is Visual Reaction Time & Mental Chronometry?
                   </h3>
+                  <p className="text-sm leading-relaxed mb-3 text-gray-300">
+                    Measure your visual reaction speed in milliseconds. A typical adult reacts in{' '}
+                    <span className="whitespace-nowrap">200&ndash;250&nbsp;ms</span>; under{' '}
+                    <span className="whitespace-nowrap">180&nbsp;ms</span> is elite.
+                  </p>
                   <p className="text-sm leading-relaxed mb-3 text-gray-300">
                     <strong>Reaction Time Test</strong> measures and conditions visual latency, internal clock calibration, and mental chronometry. In fast-paced FPS, racing, and sports games, the gap between two players is often a few tens of milliseconds, so shaving even a small amount off your visual response is what decides duels.
                   </p>

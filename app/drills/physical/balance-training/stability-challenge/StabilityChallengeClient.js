@@ -577,13 +577,13 @@ export default function StabilityChallengeClient() {
     <div className="min-h-screen bg-[#050508] text-white flex flex-col font-sans select-none">
       {/* ── MAIN CONTENT AREA ── */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
-        {/* Title & AIO Header */}
+        {/* Title & Header */}
         {!isFullscreen && (
-          <div className="text-left">
+          <div className="flex flex-col gap-1">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
               Stability challenge
             </h1>
-            <p className="text-sm text-slate-400 mt-1.5 leading-relaxed max-w-3xl">
+            <p className="text-[13px] text-slate-400 leading-relaxed">
               Holding something steady against a force that keeps pushing it off centre is a continuous correction task, never a finished one. Standing balance works the same way: quiet standing is not motionless but a constant loop of small corrections around a drifting centre of pressure (Winter, 1995), organised into a few stereotyped strategies rather than improvised each time (Nashner &amp; McCollum, 1985). Vision needs roughly 100&ndash;150 ms to influence a movement already under way (Woodworth, 1899), so the faster the disturbance, the more you have to anticipate instead of react. This drill runs that loop through a mouse cursor &mdash; it trains the correction habit, and does not measure physical balance.
             </p>
           </div>
@@ -591,35 +591,30 @@ export default function StabilityChallengeClient() {
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 gap-2 w-full">
-            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Score</div>
-              <div className="text-lg sm:text-xl font-black text-white tabular-nums">{uiScore}</div>
-            </div>
-            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Time Left</div>
-              <div className={`text-lg sm:text-xl font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>{uiTimeLeft}s</div>
-            </div>
-            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Best Score</div>
-              <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
-            </div>
-            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Best Combo</div>
-              <div className="text-lg sm:text-xl font-black text-emerald-400 tabular-nums">{bestCombo}x</div>
-            </div>
+          <div className="grid grid-cols-4 gap-2 w-full -mb-2">
+            {[
+              { label: 'Score', val: uiScore },
+              { label: 'Time Left', val: `${uiTimeLeft}s` },
+              { label: 'Best Score', val: bestScore },
+              { label: 'Best Combo', val: `${bestCombo}x` },
+            ].map((st, i) => (
+              <div key={i} className="border border-white/[0.06] bg-white/[0.015] px-2 py-2 rounded-xl text-center">
+                <div className="text-[10px] uppercase tracking-wider text-white/40 font-semibold">{st.label}</div>
+                <div className="text-base sm:text-lg font-bold text-white tabular-nums">{st.val}</div>
+              </div>
+            ))}
           </div>
         )}
 
-        {/* Game Stage Container */}
+        {/* Drill Box */}
         <div 
           ref={containerRef} 
           onContextMenu={(e) => { if (gameActiveRef.current) e.preventDefault(); }}
-          className={`overflow-hidden flex flex-col transition-all duration-150 select-none bg-[#080811] text-white border border-white/10 ${
+          className={
             isFullscreen 
-              ? 'fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#080811] rounded-none border-none flex flex-col items-center justify-center' 
-              : 'w-full rounded-2xl bg-[#080811] aspect-video min-h-[460px] sm:min-h-[500px] max-h-[88vh] relative overflow-hidden flex flex-col'
-          }`}
+              ? 'fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#050508] flex flex-col items-center justify-center' 
+              : 'w-full rounded-2xl aspect-video min-h-[460px] md:min-h-[500px] max-h-[88vh] max-md:portrait:aspect-[3/4] max-md:portrait:min-h-[420px] max-md:portrait:max-h-[76vh] max-md:landscape:min-h-[340px] max-md:landscape:max-h-[85vh] bg-[#080811] border border-white/10 relative overflow-hidden flex flex-col'
+          }
         >
           {/* DOM Flash Overlay */}
           {flashes.map((f) => (

@@ -377,9 +377,6 @@ export default function ConcentrationGridClient() {
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
               Schulte Table Trainer
             </h1>
-            <p className="text-[13px] text-slate-400 leading-relaxed">
-              The Schulte table is a psychodiagnostic visual search grid designed to widen the functional peripheral field and reduce fixation latency during sequential scanning (Lu et al., 2022; Rayner, 1998). This expanding grid drill trains rapid eye movements (saccades) and selective attention to locate numerical targets under progressive visual crowding (Treisman &amp; Gelade, 1980; Wolfe, 2007).
-            </p>
           </div>
         )}
 
@@ -568,6 +565,13 @@ export default function ConcentrationGridClient() {
           )}
         </div>
 
+        {/* Stage Caption */}
+        {!isFullscreen && (
+          <p className="text-xs text-slate-400 leading-relaxed -mt-2">
+            Scan and tap numbers in sequential order across progressively expanding grid matrices before time expires.
+          </p>
+        )}
+
         {/* ── ACCORDIONS: no gap between them, per drill-page layout request ── */}
         {!isFullscreen && (
         <div className="[&>div]:!mt-0">
@@ -597,6 +601,9 @@ export default function ConcentrationGridClient() {
           <div className="space-y-8">
             <section>
               <div className="space-y-4">
+                <p className="text-sm leading-relaxed text-gray-300">
+                  The Schulte table is a psychodiagnostic visual search grid designed to widen the functional peripheral field and reduce fixation latency during sequential scanning (Lu et al., 2022; Rayner, 1998). This expanding grid drill trains rapid eye movements (saccades) and selective attention to locate numerical targets under progressive visual crowding (Treisman &amp; Gelade, 1980; Wolfe, 2007).
+                </p>
                 {ABOUT_TEXT.split('\n\n').map((para, i) => (
                   <p key={i} className="text-sm leading-relaxed text-gray-300">{para}</p>
                 ))}

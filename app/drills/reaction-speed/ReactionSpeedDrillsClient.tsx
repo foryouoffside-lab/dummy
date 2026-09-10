@@ -127,7 +127,7 @@ export default function ReactionSpeedDrillsClient({ faqs = [] }: { faqs?: HubFaq
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-ink-1">
             {t('hubs.reaction-speed.h1', 'Reaction Time Test & Drills')}
           </h1>
-          <p className="mt-2 text-sm sm:text-base text-ink-2 max-w-2xl leading-relaxed">
+          <p className="mt-2 text-sm sm:text-base text-ink-2 leading-relaxed">
             {t('hubs.reaction-speed.desc', 'Test and accelerate simple & choice stimulus response times, visual trigger reflexes, and latency stability.')}
           </p>
         </div>
@@ -139,6 +139,7 @@ export default function ReactionSpeedDrillsClient({ faqs = [] }: { faqs?: HubFaq
             heading={t('hubs.reaction-speed.drillsHeading', 'Reaction drills')}
             accent="amber"
             icon={Zap}
+            showcase
             allLabel={t('ui.viewAll', 'View all')}
             drills={orderedReactiveDrills.map((drill) => {
               const fallbackTagline = getDrillTagline(drill.href, drill.description);

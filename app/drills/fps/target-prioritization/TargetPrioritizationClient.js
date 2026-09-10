@@ -737,35 +737,27 @@ export default function TargetPrioritizationClient() {
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
         {/* Title */}
         {!isFullscreen && (
-          <div className="text-left max-w-4xl mx-auto w-full">
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white mb-2">
+          <div className="flex flex-col gap-1">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
               Target Prioritization Aim Trainer
             </h1>
-            <p className="text-xs sm:text-sm text-slate-400 leading-relaxed max-w-2xl">
-              Target prioritization is choosing which threat to shoot while holding fire on everything else. Stopping an action you have already started is its own process, racing the one that launched it (Logan &amp; Cowan, 1984) &mdash; which is why cancelling a shot is harder than taking one.
-            </p>
           </div>
         )}
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 gap-2 w-full">
-            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
-              <div className="text-sm sm:text-lg font-black text-white tabular-nums">{score}</div>
-            </div>
-            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
-              <div className={`text-sm sm:text-lg font-black tabular-nums ${timeLeft <= 10 ? "text-red-400 animate-pulse" : "text-white"}`}>{timeLeft}s</div>
-            </div>
-            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Accuracy</div>
-              <div className="text-sm sm:text-lg font-black text-blue-400 tabular-nums">{accuracy}%</div>
-            </div>
-            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
-              <div className="text-sm sm:text-lg font-black text-amber-400 tabular-nums">{bestScore}</div>
-            </div>
+          <div className="grid grid-cols-4 gap-2 w-full -mb-2">
+            {[
+              { label: "Score", val: score },
+              { label: "Time", val: `${timeLeft}s`, highlight: timeLeft <= 10 },
+              { label: "Accuracy", val: `${accuracy}%`, color: "text-blue-400" },
+              { label: "Best Score", val: bestScore, color: "text-amber-400" },
+            ].map((s, i) => (
+              <div key={i} className="border border-white/[0.06] bg-white/[0.015] px-2 py-2 rounded-xl text-center">
+                <div className="text-[9px] sm:text-[10px] uppercase font-bold text-slate-500 tracking-wider mb-0.5">{s.label}</div>
+                <div className={`text-xs sm:text-sm md:text-base font-black tabular-nums truncate ${s.highlight ? "text-red-400 animate-pulse" : s.color || "text-white"}`}>{s.val}</div>
+              </div>
+            ))}
           </div>
         )}
 
@@ -773,10 +765,10 @@ export default function TargetPrioritizationClient() {
         <div 
           ref={containerRef} 
           onContextMenu={(e) => { if (gameState === 'playing' || gameState === 'countdown') e.preventDefault(); }}
-          className={`overflow-hidden flex flex-col transition-all duration-150 select-none bg-[#080811] text-white border border-white/10 ${
+          className={`overflow-hidden flex flex-col transition-all duration-150 select-none bg-[#080811] text-white ${
             isFullscreen 
-              ? "fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#080811] rounded-none border-none flex flex-col items-center justify-center" 
-              : "w-full rounded-2xl bg-[#080811] aspect-video min-h-[460px] sm:min-h-[500px] max-h-[88vh] relative overflow-hidden flex flex-col"
+              ? "fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#050508] flex flex-col items-center justify-center" 
+              : "w-full rounded-2xl aspect-video min-h-[460px] md:min-h-[500px] max-h-[88vh] max-md:portrait:aspect-[3/4] max-md:portrait:min-h-[420px] max-md:portrait:max-h-[76vh] max-md:landscape:min-h-[340px] max-md:landscape:max-h-[85vh] bg-[#080811] border border-white/10 relative overflow-hidden flex flex-col"
           }`}
           style={{ touchAction: (gameState === 'playing' || gameState === 'countdown') ? 'none' : 'auto' }}
         >
@@ -894,6 +886,13 @@ export default function TargetPrioritizationClient() {
           )}
         </div>
 
+        {/* Stage Caption */}
+        {!isFullscreen && (
+          <p className="text-xs text-slate-400 leading-relaxed -mt-2">
+            Eliminate highest-threat red targets first and intermediate yellow targets while holding fire on green friendlies.
+          </p>
+        )}
+
         {/* ── ACCORDIONS ── */}
         {!isFullscreen && (
           <div className="[&>div]:!mt-0">
@@ -921,6 +920,9 @@ export default function TargetPrioritizationClient() {
                   <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
                     <Crosshair className="w-4 h-4 text-blue-400" /> What Is Target Prioritization?
                   </h3>
+                  <p className="text-sm leading-relaxed text-gray-300 mb-3">
+                    Target prioritization is choosing which threat to shoot while holding fire on everything else. Stopping an action you have already started is its own process, racing the one that launched it (Logan &amp; Cowan, 1984) &mdash; which is why cancelling a shot is harder than taking one.
+                  </p>
                   {ABOUT_INTRO.map((para, i) => (
                     <p key={i} className={`text-sm leading-relaxed text-gray-300 ${i < ABOUT_INTRO.length - 1 ? "mb-3" : ""}`}>{para}</p>
                   ))}

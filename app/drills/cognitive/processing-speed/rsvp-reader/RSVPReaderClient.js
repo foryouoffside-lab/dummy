@@ -431,38 +431,28 @@ export default function RSVPReaderClient() {
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
         {/* Title */}
         {!isFullscreen && (
-        <div className="text-center">
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-            Reading Speed Test
-          </h1>
-          <p className="text-[13px] text-slate-400 leading-relaxed mt-1">
-            RSVP shows words one at a time in a fixed spot, removing eye movements from reading. Normal reading runs about 200&ndash;300 words per minute (Rayner, 1998). RSVP can push the rate higher, but comprehension falls as speed rises, because the limit on reading is the time needed to process each word rather than the time spent moving your eyes (Rayner et al., 2016).
-          </p>
-        </div>
+          <div className="flex flex-col gap-1">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+              Reading Speed Test
+            </h1>
+          </div>
         )}
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-        <div className="grid grid-cols-4 gap-2.5 max-w-2xl mx-auto w-full">
-          <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-            <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
-            <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{uiScore}</div>
+          <div className="grid grid-cols-4 gap-2 w-full -mb-2">
+            {[
+              { label: 'Score', value: uiScore, color: 'text-amber-400' },
+              { label: 'Time', value: `${uiTimeLeft}s`, color: uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white' },
+              { label: 'Speed', value: `${uiWpm} WPM`, color: 'text-indigo-400' },
+              { label: 'Best Score', value: bestScore, color: 'text-amber-400' },
+            ].map((card) => (
+              <div key={card.label} className="border border-white/[0.06] bg-white/[0.015] px-2 py-2 rounded-xl text-center">
+                <div className="text-[10px] font-bold tracking-wider uppercase text-slate-500">{card.label}</div>
+                <div className={`text-base sm:text-lg font-black tabular-nums ${card.color || 'text-white'}`}>{card.value}</div>
+              </div>
+            ))}
           </div>
-          <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-            <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
-            <div className={`text-lg sm:text-xl font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>
-              {uiTimeLeft}s
-            </div>
-          </div>
-          <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-            <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Speed</div>
-            <div className="text-lg sm:text-xl font-black text-indigo-400 tabular-nums">{uiWpm} WPM</div>
-          </div>
-          <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-            <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
-            <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
-          </div>
-        </div>
         )}
 
         {/* Game Stage Container */}
@@ -648,6 +638,13 @@ export default function RSVPReaderClient() {
 
         </div>
 
+        {/* Stage Caption */}
+        {!isFullscreen && (
+          <p className="text-xs text-slate-400 leading-relaxed -mt-2">
+            Read rapid serial text presentation and tap when the designated target word flashes on screen.
+          </p>
+        )}
+
         {/* ACCORDIONS */}
         {!isFullscreen && (
           <div className="[&>div]:!mt-0">
@@ -676,6 +673,9 @@ export default function RSVPReaderClient() {
               <div className="space-y-8 font-sans">
                 <section>
                   <div className="space-y-4">
+                    <p className="text-sm leading-relaxed text-gray-300">
+                      RSVP shows words one at a time in a fixed spot, removing eye movements from reading. Normal reading runs about 200&ndash;300 words per minute (Rayner, 1998). RSVP can push the rate higher, but comprehension falls as speed rises, because the limit on reading is the time needed to process each word rather than the time spent moving your eyes (Rayner et al., 2016).
+                    </p>
                     {ABOUT_TEXT.split('\n\n').map((para, i) => (
                       <p key={i} className="text-sm leading-relaxed text-gray-300">{para}</p>
                     ))}

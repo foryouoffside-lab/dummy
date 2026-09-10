@@ -620,9 +620,6 @@ export default function CrossBodyMovementClient() {
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
               Hand eye coordination game
             </h1>
-            <p className="text-sm text-slate-400 mt-1.5 leading-relaxed max-w-3xl">
-              Crossing the midline means reaching to the side of space opposite the hand doing the reaching. It is measurably harder: reaches to contralateral targets are slower and less accurate than reaches to targets on the same side as the hand (Carey, Hargreaves &amp; Goodale, 1996). Each sweep here is also a Fitts&apos;s Law movement &mdash; time grows with the log of distance divided by target width (Fitts, 1954) &mdash; and the corridor narrows to 4 px, so the cost of the crossing rises as the session runs.
-            </p>
           </div>
         )}
 
@@ -808,6 +805,13 @@ export default function CrossBodyMovementClient() {
           )}
         </div>
 
+        {/* Drill Caption */}
+        {!isFullscreen && (
+          <p className="text-xs text-slate-400 leading-relaxed -mt-2">
+            Sweep the cursor across the screen to connect opposite-side nodes before the corridor narrows.
+          </p>
+        )}
+
         {/* ── ACCORDIONS ── */}
         {!isFullscreen && (
           <div className="[&>div]:!mt-0">
@@ -838,6 +842,9 @@ export default function CrossBodyMovementClient() {
                   <h3 className="text-base font-bold text-white flex items-center gap-2">
                     <GitBranch className="w-4 h-4 text-cyan-400" /> Bilateral Motor Integration &amp; Contralateral Reaching
                   </h3>
+                  <p className="text-sm leading-relaxed text-gray-300">
+                    Crossing the midline means reaching to the side of space opposite the hand doing the reaching. It is measurably harder: reaches to contralateral targets are slower and less accurate than reaches to targets on the same side as the hand (Carey, Hargreaves &amp; Goodale, 1996). Each sweep here is also a Fitts&apos;s Law movement &mdash; time grows with the log of distance divided by target width (Fitts, 1954) &mdash; and the corridor narrows to 4 px, so the cost of the crossing rises as the session runs.
+                  </p>
                   <p className="text-sm leading-relaxed text-gray-300">
                     The <strong>Hand Eye Coordination Game</strong> (Cross-Body Movement) trains bilateral motor control, cross-body diagonal mouse sweeps, and high-velocity vector line tracking. Players touch edge nodes to activate connection vectors and sweep across the body midline to reach opposite-side target nodes.
                   </p>

@@ -677,7 +677,7 @@ export default function MotorSequencingClient() {
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
               Agility ladder drills
             </h1>
-            <p className="text-sm text-slate-400 mt-1.5 leading-relaxed max-w-3xl">
+            <p className="text-sm text-slate-400 mt-1.5 leading-relaxed">
               An agility ladder drill is a fixed footwork pattern repeated at increasing speed. Fast sequences are not run as one decision per step: the order is held as a pre-planned motor program (Lashley, 1951) and generalised into a pattern that can be rescaled to a new speed without being relearned (Schmidt, 1975). This version drives the pattern through a cursor at up to 750 px/s over 45 seconds, so it trains the sequencing and the rhythm, not the footwork itself.
             </p>
           </div>

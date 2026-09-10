@@ -801,7 +801,7 @@ export default function ComplexPatternClient() {
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
               Pattern memory game
             </h1>
-            <p className="text-sm text-slate-400 mt-1.5 leading-relaxed max-w-3xl">
+            <p className="text-sm text-slate-400 mt-1.5 leading-relaxed">
               A pattern memory game asks you to hold a route in mind and then reproduce it. Spatial layouts are held in a limited, separate store from verbal material &mdash; the visuospatial sketchpad of working memory (Baddeley &amp; Hitch, 1974) &mdash; and estimates of how much fits in it cluster around four items rather than the seven often quoted (Cowan, 2001). This drill scales to 8 waypoints over a 45-second session, so the later patterns are deliberately past most people&apos;s span.
             </p>
           </div>

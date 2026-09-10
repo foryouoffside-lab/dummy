@@ -387,9 +387,6 @@ export default function ConcentrationStaminaClient() {
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
               Focus Test & Concentration Stamina Drill
             </h1>
-            <p className="text-[13px] text-slate-400 leading-relaxed mt-1">
-              Sustained attention decays measurably the longer you watch for a rare signal: Mackworth (1948) found detection accuracy dropping within the first 30 minutes of a monitoring task, and the decline is steeper when the events come faster or the memory load is higher (Parasuraman, 1979). This drill compresses that vigilance decrement into a short session.
-            </p>
           </div>
         )}
 
@@ -584,6 +581,13 @@ export default function ConcentrationStaminaClient() {
           )}
         </div>
 
+        {/* Stage Caption */}
+        {!isFullscreen && (
+          <p className="text-xs text-slate-400 leading-relaxed -mt-2">
+            React quickly to stimuli that match the active rule while filtering out distractors as rules switch dynamically.
+          </p>
+        )}
+
         {/* ── ACCORDIONS ── */}
         {!isFullscreen && (
         <div className="[&>div]:!mt-0">
@@ -612,6 +616,9 @@ export default function ConcentrationStaminaClient() {
           <div className="space-y-8">
             <section>
               <div className="space-y-4">
+                <p className="text-sm leading-relaxed text-gray-300">
+                  Sustained attention decays measurably the longer you watch for a rare signal: Mackworth (1948) found detection accuracy dropping within the first 30 minutes of a monitoring task, and the decline is steeper when the events come faster or the memory load is higher (Parasuraman, 1979). This drill compresses that vigilance decrement into a short session.
+                </p>
                 {ABOUT_TEXT.split('\n\n').map((para, i) => (
                   <p key={i} className="text-sm leading-relaxed text-gray-300">{para}</p>
                 ))}

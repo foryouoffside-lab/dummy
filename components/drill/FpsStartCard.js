@@ -215,9 +215,8 @@ function getAccent(name) {
  * Drop it in wherever `gameState === 'start'`.
  *
  * @param {React.ComponentType} icon - main badge icon
- * @param {keyof ACCENTS} accent - card-wide theme (badge, subtitle, button)
+ * @param {keyof ACCENTS} accent - card-wide theme (badge, button)
  * @param {string} title
- * @param {string} subtitle
  * @param {boolean} isTouchOnlyDevice
  * @param {string} touchBlockedLabel - what the drill actually needs, shown in place
  *   of the start button on a touch-only device. Most of these drills aim with a
@@ -228,7 +227,6 @@ export default function FpsStartCard({
   icon: Icon,
   accent = 'emerald',
   title,
-  subtitle,
   // Every drill using this card has always passed `rules` and `stats`, but the
   // signature never accepted them, so React dropped both silently and the card
   // rendered as an icon, a title and a button over an empty canvas. The ACCENTS
@@ -242,7 +240,7 @@ export default function FpsStartCard({
   isTouchOnlyDevice = false,
   touchBlockedLabel = 'Mouse Required for Pointer Lock',
   onStart,
-  maxWidthClassName = 'max-w-[420px]',
+  maxWidthClassName = 'max-w-[380px]',
 }) {
   const a = getAccent(accent);
 
@@ -272,9 +270,6 @@ export default function FpsStartCard({
 
           <div>
             <h2 className="text-[19px] font-black tracking-tight text-white leading-tight">{title}</h2>
-            {subtitle && (
-              <p className={`text-[10px] ${a.subtitleText} uppercase tracking-[0.15em] font-semibold mt-1`}>{subtitle}</p>
-            )}
           </div>
 
           {/* Rules. Hairline rows on the card background per the house style --

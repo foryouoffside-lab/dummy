@@ -580,7 +580,7 @@ export default function StrobeLatencyClient() {
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
               Light Reaction Reflex Test
             </h1>
-            <p className="text-sm text-slate-400 mt-1 max-w-3xl leading-relaxed">
+            <p className="text-sm text-slate-400 mt-1 leading-relaxed">
               Simple visual reaction time is how long it takes to respond to a light or a flash when you already know what to do — no choice, no decision. Healthy adults typically land around 200–250 ms (Woods et al., 2015; Kosinski, 2008). It is not a reflex: a true spinal reflex runs in tens of milliseconds, while this involves the visual cortex and motor cortex, which is why it is roughly ten times slower.
             </p>
           </div>

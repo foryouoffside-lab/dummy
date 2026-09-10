@@ -6,7 +6,8 @@ import {
   ArrowLeft,
   Target,
   Home,
-  ChevronRight
+  ChevronRight,
+  Sparkles
 } from 'lucide-react';
 import { DRILLS } from '@/lib/drillsRegistry';
 import { getDrillTagline, sortByInterest } from '@/lib/drillCatalog';
@@ -19,7 +20,7 @@ import { useTranslation } from '@/lib/i18n/useTranslation';
 import { getLocalizedDrill } from '@/lib/i18n/drillNames';
 import { hasLocalizedRoute } from '@/lib/i18n/locales';
 
-export default function VisualTrackingDrillsClient() {
+export default function VisualTrackingDrillsClient({ faqs = [] }: { faqs?: Array<{ q: string; a: string }> }) {
   const { locale, localizeHref, t } = useTranslation();
   const [isClient, setIsClient] = useState(false);
   const [drillBadges, setDrillBadges] = useState<Record<string, string>>({});
@@ -123,7 +124,7 @@ export default function VisualTrackingDrillsClient() {
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-ink-1">
             {t('hubs.visual-tracking.h1', 'Visual Tracking Training')}
           </h1>
-          <p className="mt-2 text-sm sm:text-base text-ink-2 max-w-2xl leading-relaxed">
+          <p className="mt-2 text-sm sm:text-base text-ink-2 leading-relaxed">
             {t('hubs.visual-tracking.desc', 'Train smooth ocular pursuit, continuous trajectory prediction, and gaze stability.')}
           </p>
         </div>
@@ -135,6 +136,7 @@ export default function VisualTrackingDrillsClient() {
             heading={t('hubs.visual-tracking.drillsHeading', 'Tracking drills')}
             accent="cyan"
             icon={Target}
+            showcase
             allLabel={t('ui.viewAll', 'View all')}
             drills={orderedTrackingDrills.map((drill) => {
               const fallbackTagline = getDrillTagline(drill.href, drill.description);
@@ -150,6 +152,36 @@ export default function VisualTrackingDrillsClient() {
             })}
           />
         </Reveal>
+
+        {/* Frequently Asked Questions (SEO / AEO / GEO) */}
+        {faqs?.length > 0 && (
+          <Reveal className="mb-14">
+            <div className="rounded-3xl bg-surface-1/70 border border-hairline p-6 sm:p-8 backdrop-blur-xl shadow-xl">
+              <div className="flex items-center gap-2 mb-6">
+                <Sparkles className="w-5 h-5 text-cyan-400" />
+                <h2 className="text-sm sm:text-base font-bold uppercase tracking-wider text-ink-1 font-mono">
+                  {t('home.faqTitle', 'Frequently Asked Questions')}
+                </h2>
+              </div>
+
+              <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {faqs.map((f, i) => (
+                  <div key={i} className="bg-surface-2/80 border border-hairline rounded-2xl p-5 flex flex-col justify-start">
+                    <dt className="font-bold text-ink-1 text-sm font-sans flex items-start gap-2.5">
+                      <span className="text-cyan-400 font-mono text-xs font-bold shrink-0 mt-0.5">
+                        Q{i + 1}.
+                      </span>
+                      <span>{f.q}</span>
+                    </dt>
+                    <dd className="mt-2.5 text-xs text-ink-3 leading-relaxed pl-6 font-sans">
+                      {f.a}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+          </Reveal>
+        )}
 
         <AdjacentHubs currentCat="visual-tracking" />
 

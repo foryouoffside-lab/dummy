@@ -414,7 +414,7 @@ export default function TriangularPursuitClient() {
                 Eye Tracking Accuracy Drill
               </span>
             </h1>
-            <p className="mt-2 text-xs sm:text-sm text-slate-300 leading-relaxed max-w-3xl">
+            <p className="mt-2 text-xs sm:text-sm text-slate-300 leading-relaxed">
               Triangular pursuit conditions multi-vector foveal tracking and catch-up saccadic suppression by guiding gaze along an acute 3-node geometric trajectory. Tracking continuous linear target velocities interrupted by sharp angular directional shifts trains predictive ocular motor coordination and dynamic visual acuity (de Brouwer et al., 2002; Orban de Xivry &amp; Lefèvre, 2007). Smooth pursuit tracks accurately to roughly 30&deg;/s along a straight edge, but a corner exceeds that in an instant, so each vertex is closed by a catch-up saccade rather than by pursuit (Krauzlis, 2004).
             </p>
           </div>

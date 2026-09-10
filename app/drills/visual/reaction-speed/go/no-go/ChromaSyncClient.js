@@ -610,7 +610,7 @@ export default function ChromaSyncClient() {
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
               Go/No-Go Impulse Control Test
             </h1>
-            <p className="text-sm text-slate-400 mt-1 max-w-3xl leading-relaxed">
+            <p className="text-sm text-slate-400 mt-1 leading-relaxed">
               A go/no-go test measures response inhibition: how well you can hold back an action you have already started preparing. Most trials call for a response, so responding becomes the habit and the rare no-go trial is what exposes control. The stop-signal literature treats going and stopping as a race between two processes, and whichever finishes first decides the outcome (Logan &amp; Cowan, 1984). Simple visual reaction alone runs about 200–250 ms (Woods et al., 2015); inhibition has to beat that clock.
             </p>
           </div>

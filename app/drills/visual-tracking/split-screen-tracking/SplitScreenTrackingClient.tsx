@@ -430,7 +430,7 @@ export default function SplitScreenTrackingClient() {
                 Divided Attention Eye Test
               </span>
             </h1>
-            <p className="mt-2 text-xs sm:text-sm text-slate-300 leading-relaxed max-w-3xl">
+            <p className="mt-2 text-xs sm:text-sm text-slate-300 leading-relaxed">
               Split-screen tracking conditions divided visual attention by training observers to monitor two independent targets moving along orthogonal vertical and horizontal axes simultaneously. By utilizing covert peripheral vision between hemifields, this drill strengthens parallel visual processing and reduces attentional tunneling (Pylyshyn &amp; Storm, 1988; Alvarez &amp; Cavanagh, 2005). Most people can track about four or five independent moving targets at once, with accuracy falling away sharply beyond that (Pylyshyn &amp; Storm, 1988).
             </p>
           </div>

@@ -631,7 +631,7 @@ export default function SpeedDrillClient() {
                 Speed Drill Training
               </span>
             </h1>
-            <p className="text-xs sm:text-sm text-slate-400 mt-2 max-w-3xl leading-relaxed">
+            <p className="text-xs sm:text-sm text-slate-400 mt-2 leading-relaxed">
               A speed drill measures how fast you can move onto a target and click it as the target gets smaller and the time allowed gets shorter. Fitts&apos;s Law sets the floor: movement time grows with the logarithm of the distance to a target divided by its width, so a target half the size costs about the same extra time as one twice as far away (Fitts, 1954). The movement arrives in two parts &mdash; a fast ballistic impulse, then a slower visually guided correction (Woodworth, 1899) &mdash; and it is the correction that shrinking targets make expensive.
             </p>
           </div>

@@ -459,38 +459,28 @@ export default function SymbolMatchingClient() {
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
         {/* Title */}
         {!isFullscreen && (
-        <div className="text-center">
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-            Symbol Digit Modalities Test
-          </h1>
-          <p className="text-[13px] text-slate-400 leading-relaxed mt-1">
-            A symbol-substitution task asks you to match symbols to digits against the clock, measuring processing speed rather than knowledge. The format comes from the Digit Symbol Substitution Test and the Symbol Digit Modalities Test (Smith, 1973); this drill borrows that format as a game, not as the clinical instrument.
-          </p>
-        </div>
+          <div className="flex flex-col gap-1">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+              Symbol Digit Modalities Test
+            </h1>
+          </div>
         )}
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-        <div className="grid grid-cols-4 gap-2.5 max-w-2xl mx-auto w-full">
-          <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-            <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
-            <div className="text-lg sm:text-xl font-black text-cyan-400 tabular-nums">{uiScore}</div>
+          <div className="grid grid-cols-4 gap-2 w-full -mb-2">
+            {[
+              { label: 'Score', value: uiScore, color: 'text-cyan-400' },
+              { label: 'Time', value: `${uiTimeLeft}s`, color: uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white' },
+              { label: 'Level', value: `L${uiLevel}`, color: 'text-indigo-400' },
+              { label: 'Best Score', value: bestScore, color: 'text-amber-400' },
+            ].map((card) => (
+              <div key={card.label} className="border border-white/[0.06] bg-white/[0.015] px-2 py-2 rounded-xl text-center">
+                <div className="text-[10px] font-bold tracking-wider uppercase text-slate-500">{card.label}</div>
+                <div className={`text-base sm:text-lg font-black tabular-nums ${card.color || 'text-white'}`}>{card.value}</div>
+              </div>
+            ))}
           </div>
-          <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-            <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
-            <div className={`text-lg sm:text-xl font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>
-              {uiTimeLeft}s
-            </div>
-          </div>
-          <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-            <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Level</div>
-            <div className="text-lg sm:text-xl font-black text-indigo-400 tabular-nums">L{uiLevel}</div>
-          </div>
-          <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-            <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
-            <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
-          </div>
-        </div>
         )}
 
         {/* DRILL BOX CONTAINER */}
@@ -636,6 +626,13 @@ export default function SymbolMatchingClient() {
 
         </div>
 
+        {/* Stage Caption */}
+        {!isFullscreen && (
+          <p className="text-xs text-slate-400 leading-relaxed -mt-2">
+            Match the active symbol prompt to its corresponding digit using the key mapping bar.
+          </p>
+        )}
+
         {/* ACCORDIONS */}
         {!isFullscreen && (
           <div className="[&>div]:!mt-0">
@@ -664,6 +661,9 @@ export default function SymbolMatchingClient() {
               <div className="space-y-8 font-sans">
                 <section>
                   <div className="space-y-4">
+                    <p className="text-sm leading-relaxed text-gray-300">
+                      A symbol-substitution task asks you to match symbols to digits against the clock, measuring processing speed rather than knowledge. The format comes from the Digit Symbol Substitution Test and the Symbol Digit Modalities Test (Smith, 1973); this drill borrows that format as a game, not as the clinical instrument.
+                    </p>
                     {ABOUT_TEXT.split('\n\n').map((para, i) => (
                       <p key={i} className="text-sm leading-relaxed text-gray-300">{para}</p>
                     ))}

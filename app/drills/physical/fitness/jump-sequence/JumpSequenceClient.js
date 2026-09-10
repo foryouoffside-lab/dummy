@@ -703,7 +703,7 @@ export default function JumpSequenceClient() {
                 Jump Sequence Training
               </span>
             </h1>
-            <p className="text-xs sm:text-sm text-slate-400 mt-2 max-w-3xl leading-relaxed">
+            <p className="text-xs sm:text-sm text-slate-400 mt-2 leading-relaxed">
               Intercepting something that is falling means predicting where it will be, not reacting to where it is. The visual system can read time-to-contact directly from the rate at which an approaching object&apos;s image expands, without needing to know its size or speed (Lee, 1976), and the movement itself is planned in advance from an internal model rather than steered by feedback once it is airborne (Kawato, 1999). This is a cursor interception drill: it trains that prediction, and does not measure vertical jump or stretch-shortening cycle mechanics, which need force-plate measurement (Komi, 2000).
             </p>
           </div>

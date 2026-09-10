@@ -638,11 +638,11 @@ diagnostics = "Low target identification accuracy. Anchor your gaze centrally an
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
         {/* Title & AIO Snippet */}
         {!isFullscreen && (
-          <div className="text-left">
+          <div className="flex flex-col gap-1">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
               Multiple Object Tracking Test
             </h1>
-            <p className="text-sm text-slate-400 mt-1 leading-relaxed">
+            <p className="text-[13px] text-slate-400 leading-relaxed">
               A multiple object tracking (MOT) test asks you to follow several moving targets among identical moving distractors, then identify them at the end. Most people can track about four or five independent targets at once, and accuracy falls away sharply beyond that (Pylyshyn &amp; Storm, 1988). The limit is attentional rather than optical &mdash; the eyes cannot fixate five things at once, so the tracking is done by attention split across locations (Cavanagh &amp; Alvarez, 2005).
             </p>
           </div>
@@ -650,69 +650,18 @@ diagnostics = "Low target identification accuracy. Anchor your gaze centrally an
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 gap-2 w-full">
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-3 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
-              <div className="text-lg sm:text-xl font-black text-purple-400 tabular-nums">{customScore}</div>
-            </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-3 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
-              <div className={`text-lg sm:text-xl font-black tabular-nums ${localTimeRemaining <= 10 && phase === 'TRACKING' ? 'text-red-400 animate-pulse' : 'text-white'}`}>
-                {phase === 'TRACKING' ? `${localTimeRemaining}s` : '-'}
+          <div className="grid grid-cols-4 gap-2 w-full -mb-2">
+            {[
+              { label: 'Score', value: customScore, color: 'text-purple-400' },
+              { label: 'Time', value: phase === 'TRACKING' ? `${localTimeRemaining}s` : '-', color: localTimeRemaining <= 10 && phase === 'TRACKING' ? 'text-red-400 animate-pulse' : 'text-white' },
+              { label: 'Phase', value: phase === 'IDENTIFY' ? 'WAIT' : phase, color: 'text-cyan-400' },
+              { label: 'Best Score', value: bestScore || 0, color: 'text-amber-400' },
+            ].map((card) => (
+              <div key={card.label} className="border border-white/[0.06] bg-white/[0.015] px-2 py-2 rounded-xl text-center">
+                <div className="text-[10px] font-bold tracking-wider uppercase text-slate-500">{card.label}</div>
+                <div className={`text-base sm:text-lg font-black tabular-nums ${card.color || 'text-white'}`}>{card.value}</div>
               </div>
-            </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-3 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Phase</div>
-              <div className="text-lg sm:text-xl font-black text-cyan-400 tabular-nums">{phase === 'IDENTIFY' ? 'WAIT' : phase}</div>
-            </div>
-            <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-3 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
-              <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore || 0}</div>
-            </div>
-          </div>
-        )}
-
-        {/* Dynamic Controls BEFORE start */}
-        {gameState === 'start' && !isFullscreen && (
-          <div className="p-4 rounded-xl border border-white/5 bg-[#0d0d18] grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-            <div className="w-full">
-              <div className="flex justify-between items-center mb-1.5">
-                <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Tracking Duration</label>
-                <span className="text-purple-400 font-mono text-xs font-bold">{drillDuration}s</span>
-              </div>
-              <input 
-                type="range" min="15" max="60" step="15" 
-                value={drillDuration} 
-                onChange={(e) => setDrillDuration(parseInt(e.target.value))} 
-                className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-purple-500" 
-              />
-            </div>
-            
-            <div className="w-full md:border-l md:border-white/5 md:pl-4">
-              <div className="flex justify-between items-center mb-1.5">
-                <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Ball Velocity</label>
-                <span className="text-pink-400 font-mono text-xs font-bold">LVL {ballSpeed}</span>
-              </div>
-              <input 
-                type="range" min="2" max="12" step="1" 
-                value={ballSpeed} 
-                onChange={(e) => setBallSpeed(parseInt(e.target.value))} 
-                className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-pink-500" 
-              />
-            </div>
-
-            <div className="w-full md:border-l md:border-white/5 md:pl-4">
-              <div className="flex justify-between items-center mb-1.5">
-                <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Total Balls</label>
-                <span className="text-cyan-400 font-mono text-xs font-bold">{totalBalls}</span>
-              </div>
-              <input 
-                type="range" min="4" max="10" step="1" 
-                value={totalBalls} 
-                onChange={(e) => setTotalBalls(parseInt(e.target.value))} 
-                className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-500" 
-              />
-            </div>
+            ))}
           </div>
         )}
 

@@ -670,7 +670,7 @@ export default function ReactionSimulatorClient() {
   }, [uiScore, analytics]);
 
   return (
-    <div className="w-full flex flex-col items-center justify-start min-h-screen bg-[#050508] text-white selection:bg-red-500 selection:text-white">
+    <div className="min-h-screen bg-[#050508] text-white flex flex-col font-sans select-none">
       
       {/* Mobile Orientation Alert */}
       {isMobile && isPortrait && (
@@ -680,7 +680,7 @@ export default function ReactionSimulatorClient() {
       )}
 
       {/* Main Container */}
-      <main className="w-full max-w-5xl mx-auto px-3 sm:px-4 py-3 sm:py-6 flex flex-col gap-3 sm:gap-6">
+      <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
         
 
         {/* Title — left-aligned and sitting directly on the drill box below it,
@@ -702,14 +702,14 @@ export default function ReactionSimulatorClient() {
         {!isFullscreen && (
           <div className="grid grid-cols-4 gap-2 w-full -mb-2">
             {[
-              { label: 'Score', value: uiScore, tone: 'text-red-400' },
-              { label: 'Time', value: `${uiTimeLeft}s`, tone: uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white' },
-              { label: 'Level', value: `L${uiLevel}`, tone: 'text-indigo-400' },
-              { label: 'Best Score', value: bestScore, tone: 'text-amber-400' },
-            ].map((s) => (
-              <div key={s.label} className="rounded-lg border border-white/[0.06] bg-white/[0.015] px-2 py-2 text-center">
-                <div className="text-[9.5px] uppercase font-semibold text-slate-500 tracking-[0.12em]">{s.label}</div>
-                <div className={`text-lg sm:text-xl font-black tabular-nums font-mono mt-0.5 ${s.tone}`}>{s.value}</div>
+              { label: 'Score', value: uiScore, color: 'text-red-400' },
+              { label: 'Time', value: `${uiTimeLeft}s`, color: uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white' },
+              { label: 'Level', value: `L${uiLevel}`, color: 'text-indigo-400' },
+              { label: 'Best Score', value: bestScore, color: 'text-amber-400' },
+            ].map((card) => (
+              <div key={card.label} className="border border-white/[0.06] bg-white/[0.015] px-2 py-2 rounded-xl text-center">
+                <div className="text-[10px] font-bold tracking-wider uppercase text-slate-500">{card.label}</div>
+                <div className={`text-base sm:text-lg font-black tabular-nums ${card.color || 'text-white'}`}>{card.value}</div>
               </div>
             ))}
           </div>

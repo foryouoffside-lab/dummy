@@ -423,7 +423,7 @@ export default function StaircaseStepClient() {
                 Vertical Eye Tracking Exercise
               </span>
             </h1>
-            <p className="mt-2 text-xs sm:text-sm text-slate-300 leading-relaxed max-w-3xl">
+            <p className="mt-2 text-xs sm:text-sm text-slate-300 leading-relaxed">
               Staircase step tracking conditions vertical smooth pursuit and elevation gaze stability by guiding observers along a multi-segment vertical zig-zag polyline. By training acute direction reversals and diagonal velocity shifts without head movement, this drill strengthens specialized midbrain ocular motor pathways (Rottach et al., 1996; Ke et al., 2013). Vertical pursuit is measurably worse than horizontal in the same observers (Rottach et al., 1996), and pursuit takes roughly 100 ms to begin after a target starts moving (Lisberger, 2010).
             </p>
           </div>

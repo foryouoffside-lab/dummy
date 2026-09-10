@@ -394,9 +394,6 @@ export default function VisualSearchClient() {
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
               Conjunctive Visual Search Test
             </h1>
-            <p className="text-sm text-slate-400 mt-1.5 max-w-3xl leading-relaxed">
-              A conjunction search is looking for something that no single feature identifies &mdash; a red square among red circles and blue squares, where colour alone and shape alone both fail. Searches like that get slower roughly in proportion to the number of distractors on screen, while a target defined by one unique feature &quot;pops out&quot; in about the same time no matter how many distractors there are (Treisman &amp; Gelade, 1980; Wolfe, 1994).
-            </p>
           </div>
         )}
 
@@ -623,6 +620,13 @@ export default function VisualSearchClient() {
 
         </div>
 
+        {/* Drill Caption */}
+        {!isFullscreen && (
+          <p className="text-xs text-slate-400 leading-relaxed -mt-2">
+            Scan the dense grid and click the target letter C hidden among rotated distractor shapes.
+          </p>
+        )}
+
         {/* ACCORDION 1: DRILL INSTRUCTIONS & SCORING */}
         {!isFullscreen && (
           <div className="[&>div]:!mt-0">
@@ -651,6 +655,9 @@ export default function VisualSearchClient() {
                   <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
                     <Brain className="w-4 h-4 text-cyan-400" /> What Is Visual Search Training?
                   </h3>
+                  <p className="text-sm leading-relaxed mb-3 text-gray-300">
+                    A conjunction search is looking for something that no single feature identifies &mdash; a red square among red circles and blue squares, where colour alone and shape alone both fail. Searches like that get slower roughly in proportion to the number of distractors on screen, while a target defined by one unique feature &quot;pops out&quot; in about the same time no matter how many distractors there are (Treisman &amp; Gelade, 1980; Wolfe, 1994).
+                  </p>
                   <p className="text-sm leading-relaxed mb-3">
                     <strong>Visual Search Training</strong> is an advanced selective attention drill based on classic conjunctive search paradigms. The <strong>Visual Search drill</strong> challenges you to locate a single target letter (&apos;C&apos;) hidden among rotated distractor letters (&apos;O&apos;).
                   </p>

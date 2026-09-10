@@ -532,7 +532,7 @@ export default function DistanceJudgmentClient() {
             <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white mb-2">
               Distance Judgment Depth Perception Test
             </h1>
-            <p className="text-sm text-slate-400 mb-4 max-w-3xl leading-relaxed">
+            <p className="text-sm text-slate-400 mb-4 leading-relaxed">
               Depth perception is judging how far away things are and in what order. Two cues carry most of it: binocular disparity, the small difference between the images from your two eyes — which random-dot stereograms showed is enough on its own, with no other cue present, to produce a sense of depth (Julesz, 1971) — and optical expansion, the rate at which an approaching object&apos;s image grows on the retina, which specifies time-to-contact without your needing to know the object&apos;s size or speed (Lee, 1976; Regan &amp; Beverley, 1978). A flat monitor removes the first cue, so a browser test measures the second: this drill times your judgement of expansion and intercept, not your stereo acuity, which needs the two-rod apparatus Howard (1919) described.
             </p>
           </div>

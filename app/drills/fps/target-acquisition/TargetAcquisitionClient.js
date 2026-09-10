@@ -423,7 +423,7 @@ export default function TargetAcquisitionClient() {
                 drillAudio.playHit();
               }
 
-              createExplosion(hitTarget.x, hitTarget.y, '#f59e0b');
+              createExplosion(hitTarget.x, hitTarget.y, '#00ff88');
               createHitMarker(ch.x, ch.y);
               setUiScore(eRef.score);
 
@@ -479,7 +479,7 @@ export default function TargetAcquisitionClient() {
           backdropCacheRef.current = createBackdropCache(width, height, (bCtx, w, h) => {
             bCtx.fillStyle = '#050508';
             bCtx.fillRect(0, 0, w, h);
-            bCtx.strokeStyle = 'rgba(245, 158, 11, 0.04)';
+            bCtx.strokeStyle = 'rgba(0, 255, 136, 0.04)';
             bCtx.lineWidth = 1;
             const cx = w / 2, cy = h / 2;
             bCtx.beginPath();
@@ -558,7 +558,7 @@ export default function TargetAcquisitionClient() {
 
           drawPulseRing(
             ctx, t.x, t.y, t.radius,
-            `rgba(245, 158, 11, ${t.val})`,
+            `rgba(0, 255, 136, ${t.val})`,
             ((time / 1600) + t.seed) % 1
           );
 
@@ -566,15 +566,15 @@ export default function TargetAcquisitionClient() {
             t.x - t.radius * 0.35, t.y - t.radius * 0.35, t.radius * 0.1,
             t.x, t.y, t.radius
           );
-          g.addColorStop(0,    `rgba(255, 214, 138, ${t.val})`);
-          g.addColorStop(0.55, `rgba(245, 158, 11,  ${t.val})`);
-          g.addColorStop(1,    `rgba(154, 71,  8,   ${t.val})`);
+          g.addColorStop(0,    `rgba(178, 255, 224, ${t.val})`);
+          g.addColorStop(0.55, `rgba(0, 255, 136,  ${t.val})`);
+          g.addColorStop(1,    `rgba(6, 95,  70,   ${t.val})`);
           ctx.fillStyle = g;
           ctx.beginPath();
           ctx.arc(t.x, t.y, t.radius, 0, Math.PI * 2);
           ctx.fill();
 
-          ctx.strokeStyle = `rgba(253, 230, 138, ${t.val * 0.9})`;
+          ctx.strokeStyle = `rgba(167, 243, 208, ${t.val * 0.9})`;
           ctx.lineWidth = 2;
           ctx.beginPath();
           ctx.arc(t.x, t.y, t.radius - 1, 0, Math.PI * 2);
@@ -610,7 +610,7 @@ export default function TargetAcquisitionClient() {
       // Draw Crosshair
       const ch = e.crosshair;
       if (ch.initialized && (gameState === 'playing' || gameState === 'start')) {
-        const activeColor = pointerLocked ? '#f59e0b' : '#3b82f6';
+        const activeColor = pointerLocked ? '#ff2d95' : '#eab308';
         ctx.strokeStyle = activeColor;
         ctx.fillStyle = activeColor;
         
@@ -676,35 +676,27 @@ export default function TargetAcquisitionClient() {
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
         {/* Title */}
         {!isFullscreen && (
-          <div className="text-left max-w-4xl mx-auto w-full">
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white mb-2">
+          <div className="flex flex-col gap-1">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
               Target Acquisition Aim Trainer
             </h1>
-            <p className="text-xs sm:text-sm text-slate-400 leading-relaxed max-w-2xl">
-              Target acquisition is finding the right target and moving onto it. Basic visual features like colour and orientation are processed in parallel across the whole visual field before attention binds them into an object (Treisman &amp; Gelade, 1980) &mdash; which is why a high-contrast target is found faster than a camouflaged one.
-            </p>
           </div>
         )}
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 gap-2 w-full">
-            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
-              <div className="text-sm sm:text-lg font-black text-white tabular-nums">{uiScore}</div>
-            </div>
-            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
-              <div className={`text-sm sm:text-lg font-black tabular-nums ${uiTimeLeft <= 10 ? "text-red-400 animate-pulse" : "text-white"}`}>{uiTimeLeft}s</div>
-            </div>
-            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Accuracy</div>
-              <div className="text-sm sm:text-lg font-black text-amber-400 tabular-nums">{accuracy}%</div>
-            </div>
-            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
-              <div className="text-sm sm:text-lg font-black text-amber-400 tabular-nums">{bestScore}</div>
-            </div>
+          <div className="grid grid-cols-4 gap-2 w-full -mb-2">
+            {[
+              { label: "Score", val: uiScore },
+              { label: "Time", val: `${uiTimeLeft}s`, highlight: uiTimeLeft <= 10 },
+              { label: "Accuracy", val: `${accuracy}%`, color: "text-amber-400" },
+              { label: "Best Score", val: bestScore, color: "text-amber-400" },
+            ].map((s, i) => (
+              <div key={i} className="border border-white/[0.06] bg-white/[0.015] px-2 py-2 rounded-xl text-center">
+                <div className="text-[9px] sm:text-[10px] uppercase font-bold text-slate-500 tracking-wider mb-0.5">{s.label}</div>
+                <div className={`text-xs sm:text-sm md:text-base font-black tabular-nums truncate ${s.highlight ? "text-red-400 animate-pulse" : s.color || "text-white"}`}>{s.val}</div>
+              </div>
+            ))}
           </div>
         )}
 
@@ -714,8 +706,8 @@ export default function TargetAcquisitionClient() {
           onContextMenu={(e) => { if (gameActiveRef.current) e.preventDefault(); }}
           className={`overflow-hidden flex flex-col transition-all duration-150 select-none bg-[#080811] text-white ${
             isFullscreen 
-              ? "fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#080811] rounded-none border-none flex flex-col items-center justify-center" 
-              : "w-full rounded-2xl bg-[#080811] aspect-video min-h-[460px] sm:min-h-[500px] max-h-[88vh] relative overflow-hidden flex flex-col"
+              ? "fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#050508] flex flex-col items-center justify-center" 
+              : "w-full rounded-2xl aspect-video min-h-[460px] md:min-h-[500px] max-h-[88vh] max-md:portrait:aspect-[3/4] max-md:portrait:min-h-[420px] max-md:portrait:max-h-[76vh] max-md:landscape:min-h-[340px] max-md:landscape:max-h-[85vh] bg-[#080811] border border-white/10 relative overflow-hidden flex flex-col"
           }`}
           style={{ touchAction: gameActiveRef.current ? 'none' : 'auto' }}
         >
@@ -832,6 +824,13 @@ export default function TargetAcquisitionClient() {
           )}
         </div>
 
+        {/* Stage Caption */}
+        {!isFullscreen && (
+          <p className="text-xs text-slate-400 leading-relaxed -mt-2">
+            Identify and click the brightest target in each cluster as quickly and accurately as possible.
+          </p>
+        )}
+
         {/* ── ACCORDIONS ── */}
         {!isFullscreen && (
           <div className="[&>div]:!mt-0">
@@ -848,6 +847,24 @@ export default function TargetAcquisitionClient() {
                     <p className="text-xs text-gray-400 leading-relaxed">{item.text}</p>
                   </div>
                 ))}
+              </div>
+            </DrillAccordion>
+
+            <DrillAccordion
+              id="about"
+              title="About Target Acquisition Aim Trainer"
+              isOpen={openAccordion === 'about'}
+              onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
+            >
+              <div className="space-y-6 font-sans">
+                <section>
+                  <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
+                    <Target className="w-4 h-4 text-amber-400" /> What Is Target Acquisition?
+                  </h3>
+                  <p className="text-sm leading-relaxed text-gray-300">
+                    Target acquisition is finding the right target and moving onto it. Basic visual features like colour and orientation are processed in parallel across the whole visual field before attention binds them into an object (Treisman &amp; Gelade, 1980) &mdash; which is why a high-contrast target is found faster than a camouflaged one.
+                  </p>
+                </section>
               </div>
             </DrillAccordion>
           </div>

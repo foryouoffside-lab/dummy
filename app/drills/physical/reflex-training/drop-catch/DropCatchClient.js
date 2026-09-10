@@ -649,7 +649,7 @@ export default function DropCatchClient() {
                 Reflex Drop Catch Test
               </span>
             </h1>
-            <p className="text-xs sm:text-sm text-slate-400 mt-2 max-w-3xl leading-relaxed">
+            <p className="text-xs sm:text-sm text-slate-400 mt-2 leading-relaxed">
               A drop catch test measures how quickly you can respond to a falling object, and how reliably you can hold back when you should not respond at all. Catching does not require calculating distance and speed separately: the expanding retinal image specifies time-to-contact on its own (Lee, 1976). Withholding is a different mechanism &mdash; going and stopping race each other, and whichever finishes first wins (Logan &amp; Cowan, 1984). Simple visual reaction alone costs about 200&ndash;250 ms before either can start (Woods et al., 2015).
             </p>
           </div>

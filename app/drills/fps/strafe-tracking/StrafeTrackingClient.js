@@ -548,7 +548,7 @@ export default function StrafeTrackingClient() {
 
       const ch = e.crosshair;
       if (ch.initialized && (gameState === 'playing' || gameState === 'start' || gameState === 'countdown')) {
-        const activeColor = pointerLocked ? '#22c55e' : '#eab308';
+        const activeColor = pointerLocked ? '#ff2d95' : '#eab308';
         ctx.fillStyle = activeColor;
         ctx.strokeStyle = activeColor;
 
@@ -615,46 +615,27 @@ export default function StrafeTrackingClient() {
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
         {/* Title */}
         {!isFullscreen && (
-          <div className="text-left max-w-4xl mx-auto w-full">
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white mb-2">
+          <div className="flex flex-col gap-1">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
               Strafe Tracking Aim Trainer
             </h1>
-            <p className="text-xs sm:text-sm text-slate-400 leading-relaxed max-w-2xl">
-              Strafe tracking is keeping your crosshair on an opponent who changes direction unpredictably. Human smooth pursuit follows accurately to roughly 30&deg;/s, and each abrupt reversal costs a catch-up saccade about 100&ndash;130&nbsp;ms later (Rashbass, 1961; Krauzlis, 2004).
-            </p>
           </div>
         )}
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 gap-2 w-full">
-            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Status</div>
-              <div className="text-sm sm:text-lg font-black text-green-400 tabular-nums">
-                {gameState === 'playing' ? 'TRACKING' : gameState === 'gameOver' ? 'COMPLETE' : 'STANDBY'}
+          <div className="grid grid-cols-4 gap-2 w-full -mb-2">
+            {[
+              { label: 'Status', value: gameState === 'playing' ? 'TRACKING' : gameState === 'gameOver' ? 'COMPLETE' : 'STANDBY', color: 'text-green-400' },
+              { label: 'Time Left', value: `${timeLeft}s`, color: timeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white' },
+              { label: 'Accuracy', value: `${accuracy}%`, color: 'text-green-400' },
+              { label: 'Best Score', value: bestScore, color: 'text-yellow-400' },
+            ].map((card) => (
+              <div key={card.label} className="border border-white/[0.06] bg-white/[0.015] px-2 py-2 rounded-xl text-center">
+                <div className="text-[10px] font-bold tracking-wider uppercase text-slate-500">{card.label}</div>
+                <div className={`text-base sm:text-lg font-black tabular-nums ${card.color || 'text-white'}`}>{card.value}</div>
               </div>
-            </div>
-
-            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time Left</div>
-              <div className={`text-sm sm:text-lg font-black tabular-nums ${timeLeft <= 10 ? "text-red-400 animate-pulse" : "text-white"}`}>
-                {timeLeft}s
-              </div>
-            </div>
-
-            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Accuracy</div>
-              <div className="text-sm sm:text-lg font-black text-green-400 tabular-nums">
-                {accuracy}%
-              </div>
-            </div>
-
-            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
-              <div className="text-sm sm:text-lg font-black text-yellow-400 tabular-nums">
-                {bestScore}
-              </div>
-            </div>
+            ))}
           </div>
         )}
 
@@ -662,11 +643,11 @@ export default function StrafeTrackingClient() {
         <div 
           ref={containerRef} 
           onContextMenu={(e) => { if (gameState === 'playing' || gameState === 'countdown') e.preventDefault(); }}
-          className={`overflow-hidden flex flex-col transition-all duration-150 select-none bg-[#050508] text-white ${
+          className={
             isFullscreen 
-              ? "fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#050508] rounded-none border-none" 
-              : "relative w-full rounded-2xl border border-white/10 bg-[#050508] shadow-[0_0_40px_rgba(0,0,0,0.9)] aspect-video min-h-[460px] sm:min-h-[500px] max-h-[88vh]"
-          }`}
+              ? "fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#050508] flex flex-col items-center justify-center" 
+              : "w-full rounded-2xl aspect-video min-h-[460px] md:min-h-[500px] max-h-[88vh] max-md:portrait:aspect-[3/4] max-md:portrait:min-h-[420px] max-md:portrait:max-h-[76vh] max-md:landscape:min-h-[340px] max-md:landscape:max-h-[85vh] bg-[#080811] border border-white/10 relative overflow-hidden flex flex-col"
+          }
           style={{ touchAction: (gameState === 'playing' || gameState === 'countdown') ? 'none' : 'auto' }}
         >
           {flashes.map((f) => (
@@ -778,6 +759,13 @@ export default function StrafeTrackingClient() {
           )}
         </div>
 
+        {/* Stage Caption */}
+        {!isFullscreen && (
+          <p className="text-xs text-slate-400 leading-relaxed -mt-2">
+            Hold your crosshair on the moving target as it rapidly counter-strafes and changes direction across the floor.
+          </p>
+        )}
+
         {/* ACCORDIONS SECTION */}
         {!isFullscreen && (
           <div className="[&>div]:!mt-0 font-sans">
@@ -806,6 +794,9 @@ export default function StrafeTrackingClient() {
                   <h3 className="text-base font-bold text-white mb-2">
                     What Is Strafe Tracking Training?
                   </h3>
+                  <p className="text-sm leading-relaxed mb-3 text-gray-300">
+                    Strafe tracking is keeping your crosshair on an opponent who changes direction unpredictably. Human smooth pursuit follows accurately to roughly 30&deg;/s, and each abrupt reversal costs a catch-up saccade about 100&ndash;130&nbsp;ms later (Rashbass, 1961; Krauzlis, 2004).
+                  </p>
                   <p className="text-sm leading-relaxed mb-3 text-gray-300">
                     <strong>Strafe Tracking Training</strong> builds the continuous motor compensation required to keep your crosshair locked onto targets moving erratically horizontally across your screen.
                   </p>

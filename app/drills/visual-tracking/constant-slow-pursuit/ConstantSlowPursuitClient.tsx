@@ -398,9 +398,6 @@ export default function ConstantSlowPursuitClient() {
                 Smooth Pursuit Eye Exercise
               </span>
             </h1>
-            <p className="text-[13px] text-slate-400 leading-relaxed">
-              Smooth pursuit is the continuous voluntary movement of the eyes to keep a moving target centered on the fovea (Rashbass, 1961). At low tracking velocities, maintaining smooth gaze requires high neural gain across cortico-cerebellar circuits; if gaze falls behind, the brain triggers abrupt catch-up saccades (Krauzlis, 2004; Robinson, 1965). Pursuit tracks a target accurately up to roughly 30&deg;/s; past that the eye falls behind and needs catch-up saccades (Krauzlis, 2004).
-            </p>
           </div>
         )}
 
@@ -582,6 +579,13 @@ export default function ConstantSlowPursuitClient() {
 
         </div>
 
+        {/* Drill Caption */}
+        {!isFullscreen && (
+          <p className="text-xs text-slate-400 leading-relaxed -mt-2">
+            Track the moving target smoothly along the continuous Lissajous curve at low velocity.
+          </p>
+        )}
+
         {/* ACCORDION SECTION */}
         {!isFullscreen && (
           <div className="[&>div]:!mt-0">
@@ -596,6 +600,19 @@ export default function ConstantSlowPursuitClient() {
                 <RuleItem num="2" text="Time Adjusting" highlight={`${selectedDuration}s Duration`} result="Customizable session timer" />
                 <RuleItem num="3" text="Hide Line" highlight={mathInvisible ? "Enabled (Invisible)" : "Disabled (Visible)"} result="Toggle path guide lines" />
                 <RuleItem num="4" text="Random Speed" highlight={randomSpeed ? "Enabled Acceleration" : "Disabled Velocity"} result="Erratic acceleration control" />
+              </div>
+            </DrillAccordion>
+
+            <DrillAccordion
+              id="about"
+              title="About Constant Slow Pursuit"
+              isOpen={openAccordion === 'about'}
+              onToggle={() => setOpenAccordion(openAccordion === 'about' ? null : 'about')}
+            >
+              <div className="space-y-4">
+                <p className="text-sm leading-relaxed text-slate-300">
+                  Smooth pursuit is the continuous voluntary movement of the eyes to keep a moving target centered on the fovea (Rashbass, 1961). At low tracking velocities, maintaining smooth gaze requires high neural gain across cortico-cerebellar circuits; if gaze falls behind, the brain triggers abrupt catch-up saccades (Krauzlis, 2004; Robinson, 1965). Pursuit tracks a target accurately up to roughly 30&deg;/s; past that the eye falls behind and needs catch-up saccades (Krauzlis, 2004).
+                </p>
               </div>
             </DrillAccordion>
           </div>

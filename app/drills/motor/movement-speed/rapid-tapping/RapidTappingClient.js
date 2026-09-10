@@ -680,11 +680,11 @@ export default function RapidTappingClient() {
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
         {/* Title & AIO Header */}
         {!isFullscreen && (
-          <div className="text-left">
+          <div className="flex flex-col gap-1">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
               CPS Test
             </h1>
-            <p className="text-sm text-slate-400 mt-1.5 leading-relaxed max-w-3xl">
+            <p className="text-[13px] text-slate-400 leading-relaxed">
               A CPS test counts how many times you can click a mouse button in one second. Sustained one-finger clicking runs to roughly 5&ndash;7 clicks per second, because the standard finger tapping test puts a healthy adult&apos;s dominant index finger near 50&ndash;55 taps per 10 seconds (Halstead, 1947) &mdash; the much higher numbers quoted online come from jitter and butterfly techniques, which do not use one finger press per click.
             </p>
           </div>
@@ -692,23 +692,18 @@ export default function RapidTappingClient() {
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 gap-2 w-full">
-            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Score</div>
-              <div className="text-lg sm:text-xl font-black text-white tabular-nums">{uiScore}</div>
-            </div>
-            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Time Left</div>
-              <div className={`text-lg sm:text-xl font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>{uiTimeLeft}s</div>
-            </div>
-            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">CPS Rate</div>
-              <div className="text-lg sm:text-xl font-black text-fuchsia-400 tabular-nums">{liveCps}</div>
-            </div>
-            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Best Score</div>
-              <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
-            </div>
+          <div className="grid grid-cols-4 gap-2 w-full -mb-2">
+            {[
+              { label: "Score", val: uiScore },
+              { label: "Time Left", val: `${uiTimeLeft}s`, highlight: uiTimeLeft <= 10 },
+              { label: "CPS Rate", val: liveCps, color: "text-fuchsia-400" },
+              { label: "Best Score", val: bestScore, color: "text-amber-400" },
+            ].map((s, i) => (
+              <div key={i} className="border border-white/[0.06] bg-white/[0.015] px-2 py-2 rounded-xl text-center">
+                <div className="text-[9px] sm:text-[10px] uppercase font-bold text-slate-500 tracking-wider mb-0.5">{s.label}</div>
+                <div className={`text-xs sm:text-sm md:text-base font-black tabular-nums truncate ${s.highlight ? "text-red-400 animate-pulse" : s.color || "text-white"}`}>{s.val}</div>
+              </div>
+            ))}
           </div>
         )}
 
@@ -716,10 +711,10 @@ export default function RapidTappingClient() {
         <div
           ref={containerRef}
           onContextMenu={(e) => { if (gameActiveRef.current) e.preventDefault(); }}
-          className={`overflow-hidden flex flex-col transition-all duration-150 select-none bg-[#080811] text-white border border-white/10 ${
+          className={`overflow-hidden flex flex-col transition-all duration-150 select-none bg-[#080811] text-white ${
             isFullscreen
-              ? 'fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#080811] rounded-none border-none flex flex-col items-center justify-center'
-              : 'w-full rounded-2xl bg-[#080811] aspect-video min-h-[460px] sm:min-h-[500px] max-h-[88vh] relative overflow-hidden flex flex-col'
+              ? 'fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#050508] flex flex-col items-center justify-center'
+              : 'w-full rounded-2xl aspect-video min-h-[460px] md:min-h-[500px] max-h-[88vh] max-md:portrait:aspect-[3/4] max-md:portrait:min-h-[420px] max-md:portrait:max-h-[76vh] max-md:landscape:min-h-[340px] max-md:landscape:max-h-[85vh] bg-[#080811] border border-white/10 relative overflow-hidden flex flex-col'
           }`}
           style={{ touchAction: gameActiveRef.current ? 'none' : 'auto' }}
         >

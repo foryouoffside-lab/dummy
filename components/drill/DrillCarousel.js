@@ -30,6 +30,16 @@ import { getLocalizedDrill } from '@/lib/i18n/drillNames';
 // Tailwind scans source for complete class strings, so each accent spells its
 // classes out in full. Do not build these by interpolation.
 const ACCENTS = {
+  purple: {
+    text: 'text-purple-400',
+    chip: 'bg-purple-500/10 border-purple-500/20 text-purple-400',
+    hoverBorder: 'hover:border-purple-500/40',
+    hoverText: 'group-hover:text-purple-400',
+    focus: 'focus-visible:ring-purple-500/60',
+    dot: 'bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.75)]',
+    band: 'bg-gradient-to-b from-purple-500/[0.14] to-purple-500/[0.04] border-t border-purple-500/25',
+    bandIcon: 'bg-purple-500/[0.16] text-purple-300',
+  },
   violet: {
     text: 'text-violet-400',
     chip: 'bg-violet-500/10 border-violet-500/20 text-violet-400',
@@ -37,6 +47,8 @@ const ACCENTS = {
     hoverText: 'group-hover:text-violet-400',
     focus: 'focus-visible:ring-violet-500/60',
     dot: 'bg-violet-500 shadow-[0_0_10px_rgba(139,92,246,0.75)]',
+    band: 'bg-gradient-to-b from-violet-500/[0.14] to-violet-500/[0.04] border-t border-violet-500/25',
+    bandIcon: 'bg-violet-500/[0.16] text-violet-300',
   },
   red: {
     text: 'text-red-400',
@@ -45,6 +57,8 @@ const ACCENTS = {
     hoverText: 'group-hover:text-red-400',
     focus: 'focus-visible:ring-red-500/60',
     dot: 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.75)]',
+    band: 'bg-gradient-to-b from-red-500/[0.14] to-red-500/[0.04] border-t border-red-500/25',
+    bandIcon: 'bg-red-500/[0.16] text-red-300',
   },
   indigo: {
     text: 'text-indigo-400',
@@ -53,6 +67,8 @@ const ACCENTS = {
     hoverText: 'group-hover:text-indigo-400',
     focus: 'focus-visible:ring-indigo-500/60',
     dot: 'bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.75)]',
+    band: 'bg-gradient-to-b from-indigo-500/[0.14] to-indigo-500/[0.04] border-t border-indigo-500/25',
+    bandIcon: 'bg-indigo-500/[0.16] text-indigo-300',
   },
   emerald: {
     text: 'text-emerald-400',
@@ -61,6 +77,8 @@ const ACCENTS = {
     hoverText: 'group-hover:text-emerald-400',
     focus: 'focus-visible:ring-emerald-500/60',
     dot: 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.75)]',
+    band: 'bg-gradient-to-b from-emerald-500/[0.14] to-emerald-500/[0.04] border-t border-emerald-500/25',
+    bandIcon: 'bg-emerald-500/[0.16] text-emerald-300',
   },
   rose: {
     text: 'text-rose-400',
@@ -69,6 +87,8 @@ const ACCENTS = {
     hoverText: 'group-hover:text-rose-400',
     focus: 'focus-visible:ring-rose-500/60',
     dot: 'bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.75)]',
+    band: 'bg-gradient-to-b from-rose-500/[0.14] to-rose-500/[0.04] border-t border-rose-500/25',
+    bandIcon: 'bg-rose-500/[0.16] text-rose-300',
   },
   fuchsia: {
     text: 'text-fuchsia-400',
@@ -77,6 +97,8 @@ const ACCENTS = {
     hoverText: 'group-hover:text-fuchsia-400',
     focus: 'focus-visible:ring-fuchsia-500/60',
     dot: 'bg-fuchsia-500 shadow-[0_0_10px_rgba(217,70,239,0.75)]',
+    band: 'bg-gradient-to-b from-fuchsia-500/[0.14] to-fuchsia-500/[0.04] border-t border-fuchsia-500/25',
+    bandIcon: 'bg-fuchsia-500/[0.16] text-fuchsia-300',
   },
   cyan: {
     text: 'text-cyan-400',
@@ -85,6 +107,8 @@ const ACCENTS = {
     hoverText: 'group-hover:text-cyan-400',
     focus: 'focus-visible:ring-cyan-500/60',
     dot: 'bg-cyan-500 shadow-[0_0_10px_rgba(6,182,212,0.75)]',
+    band: 'bg-gradient-to-b from-cyan-500/[0.14] to-cyan-500/[0.04] border-t border-cyan-500/25',
+    bandIcon: 'bg-cyan-500/[0.16] text-cyan-300',
   },
   amber: {
     text: 'text-amber-400',
@@ -93,6 +117,8 @@ const ACCENTS = {
     hoverText: 'group-hover:text-amber-400',
     focus: 'focus-visible:ring-amber-500/60',
     dot: 'bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.75)]',
+    band: 'bg-gradient-to-b from-amber-500/[0.14] to-amber-500/[0.04] border-t border-amber-500/25',
+    bandIcon: 'bg-amber-500/[0.16] text-amber-300',
   },
 };
 
@@ -115,7 +141,7 @@ function difficultyChip(difficulty) {
  * that is the whole point of the redesign, so it is enforced here rather than
  * left to whoever writes the copy.
  */
-function DrillCard({ drill, accent, icon: Icon, className = '' }) {
+function DrillCard({ drill, accent, icon: Icon, className = '', showcase = false }) {
   const a = ACCENTS[accent] || ACCENTS.violet;
   const hasPreview = Boolean(getDrillPreview(drill.href));
   // drill.href is the canonical English route and stays that way: it is the
@@ -134,6 +160,47 @@ function DrillCard({ drill, accent, icon: Icon, className = '' }) {
   const localized = getLocalizedDrill(drill.href, locale, drill.name, drill.tagline);
   const displayName = localized.name;
   const displayTagline = localized.tagline;
+
+  if (showcase && hasPreview) {
+    return (
+      <Link
+        href={href}
+        className={`group relative flex flex-col overflow-hidden rounded-2xl border border-hairline bg-surface-1 shadow-lg transition-all duration-200 hover:-translate-y-1 focus:outline-none focus-visible:ring-2 ${a.hoverBorder} ${a.focus} ${className}`}
+      >
+        <div className="relative">
+          <DrillPreview href={drill.href} accent={accent} icon={Icon} showcase className="w-full" />
+
+          {drill.badge && (
+            <span className={`absolute top-2.5 right-2.5 z-10 px-2 py-0.5 rounded-full border text-[9px] font-mono font-bold tracking-wider backdrop-blur-md bg-surface-1/80 ${a.chip}`}>
+              {drill.badge}
+            </span>
+          )}
+
+          <span aria-hidden="true" className="absolute bottom-[7px] left-[7px] z-10 inline-flex items-center justify-center w-[22px] h-[22px] rounded-full bg-black/60 border border-white/[0.14] text-white">
+            <Play className="w-3 h-3 fill-current translate-x-[0.5px]" />
+          </span>
+
+          {drill.duration && (
+            <span aria-hidden="true" className="absolute bottom-[7px] right-[7px] z-10 rounded px-[5px] py-[2px] text-[9px] font-bold text-white bg-black/[0.72]">
+              {drill.duration}
+            </span>
+          )}
+        </div>
+
+        <div className={`relative flex items-center gap-2.5 px-3 pt-2.5 pb-3 min-h-[56px] ${a.band}`}>
+          <span className={`shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-xl ${a.bandIcon}`}>
+            {Icon ? <Icon className="w-[18px] h-[18px]" /> : <Play className="w-[18px] h-[18px]" />}
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className={`block text-[15px] font-bold tracking-tight text-ink-1 truncate transition-colors ${a.hoverText}`}>
+              {displayName}
+            </span>
+            <span className="mt-0.5 block text-xs text-ink-3 truncate">{displayTagline}</span>
+          </span>
+        </div>
+      </Link>
+    );
+  }
 
   return (
     <Link
@@ -205,6 +272,7 @@ export default function DrillCarousel({
   heading = 'Pick a drill',
   headingId,
   allLabel = 'View all',
+  showcase = false,
 }) {
   const { t } = useTranslation();
   const trackRef = useRef(null);
@@ -316,7 +384,7 @@ export default function DrillCarousel({
       {showAll ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {drills.map((drill) => (
-            <DrillCard key={drill.href} drill={drill} accent={accent} icon={drill.icon || icon} className="h-full" />
+            <DrillCard key={drill.href} drill={drill} accent={accent} icon={drill.icon || icon} className="h-full" showcase={showcase} />
           ))}
         </div>
       ) : (
@@ -332,6 +400,7 @@ export default function DrillCarousel({
                 accent={accent}
                 icon={drill.icon || icon}
                 className="snap-start shrink-0 w-[82%] sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.667rem)]"
+                showcase={showcase}
               />
             ))}
           </div>

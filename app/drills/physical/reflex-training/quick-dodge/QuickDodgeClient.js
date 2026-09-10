@@ -611,7 +611,7 @@ export default function QuickDodgeClient() {
                 Reflex Game Online
               </span>
             </div>
-            <p className="text-xs sm:text-sm text-slate-400 leading-relaxed max-w-3xl">
+            <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
               Dodging a pursuer is a prediction problem rather than a reaction one: by the time you see where it is, it has moved. Fast movements are planned in advance from an internal model of how the limb and the target will behave, not corrected continuously in flight (Kawato, 1999), because vision needs roughly 100–150 ms to alter a movement already under way (Woodworth, 1899). As the threats speed up, the window for a mid-course correction closes and only the prediction is left.
             </p>
           </div>

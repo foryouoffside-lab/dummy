@@ -686,7 +686,7 @@ export default function VisualTrackingSpeedTestClient() {
   }, [uiScore, analytics]);
 
   return (
-    <div className="w-full flex flex-col items-center justify-start min-h-screen bg-[#050508] text-white selection:bg-red-500 selection:text-white">
+    <div className="min-h-screen bg-[#050508] text-white flex flex-col font-sans select-none">
       
       {/* Mobile Orientation Alert */}
       {isMobile && isPortrait && (
@@ -696,22 +696,7 @@ export default function VisualTrackingSpeedTestClient() {
       )}
 
       {/* Main Container */}
-      <main className="w-full max-w-5xl mx-auto px-3 sm:px-4 py-3 sm:py-6 flex flex-col gap-3 sm:gap-6">
-        
-        {/* Navigation & Header */}
-        {!isFullscreen && (
-          <div className="w-full flex items-center justify-between">
-            <Link 
-              href="/drills/reaction-speed"
-              className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition-colors bg-white/5 px-3 py-1.5 rounded-lg border border-white/5"
-            >
-              ← Back to Reaction Hub
-            </Link>
-            <div className="text-xs text-slate-400 font-mono">
-              Drill ID: <span className="text-red-400">RS-05</span>
-            </div>
-          </div>
-        )}
+      <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
 
         {/* Drill Header */}
         {!isFullscreen && (
@@ -727,25 +712,18 @@ export default function VisualTrackingSpeedTestClient() {
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 gap-2 w-full">
-            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
-              <div className="text-base sm:text-lg font-black text-red-400 tabular-nums">{uiScore}</div>
-            </div>
-            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
-              <div className={`text-base sm:text-lg font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>
-                {uiTimeLeft}s
+          <div className="grid grid-cols-4 gap-2 w-full -mb-2">
+            {[
+              { label: 'Score', value: uiScore, color: 'text-red-400' },
+              { label: 'Time', value: `${uiTimeLeft}s`, color: uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white' },
+              { label: 'Level', value: `L${uiLevel}`, color: 'text-indigo-400' },
+              { label: 'Best Score', value: bestScore, color: 'text-amber-400' },
+            ].map(card => (
+              <div key={card.label} className="border border-white/[0.06] bg-white/[0.015] px-2 py-2 rounded-xl text-center">
+                <div className="text-[10px] font-bold tracking-wider uppercase text-slate-500">{card.label}</div>
+                <div className={`text-base sm:text-lg font-black tabular-nums ${card.color || 'text-white'}`}>{card.value}</div>
               </div>
-            </div>
-            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Level</div>
-              <div className="text-base sm:text-lg font-black text-indigo-400 tabular-nums">L{uiLevel}</div>
-            </div>
-            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
-              <div className="text-base sm:text-lg font-black text-amber-400 tabular-nums">{bestScore}</div>
-            </div>
+            ))}
           </div>
         )}
 

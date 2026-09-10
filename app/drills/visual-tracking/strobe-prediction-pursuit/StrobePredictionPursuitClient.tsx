@@ -422,7 +422,7 @@ export default function StrobePredictionPursuitClient() {
                 Strobe Vision Training Drill
               </span>
             </h1>
-            <p className="mt-2 text-xs sm:text-sm text-slate-300 leading-relaxed max-w-3xl">
+            <p className="mt-2 text-xs sm:text-sm text-slate-300 leading-relaxed">
               Strobe prediction pursuit conditions visual extrapolation and predictive gaze tracking by intermittently occluding a moving target in cyclic dark phases. By compelling the brain to maintain ocular pursuit across sensory interruptions, this drill strengthens forward cerebellar kinetic models and improves anticipatory timing (Appelbaum et al., 2011; Bennett et al., 2007). Here the target is hidden for one third of every strobe cycle (60 frames visible, 30 dark). When a tracked target is briefly occluded the eyes do not stop: velocity decays during the blank and re-accelerates before it reappears (Bennett et al., 2007).
             </p>
           </div>

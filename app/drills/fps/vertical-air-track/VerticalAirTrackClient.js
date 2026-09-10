@@ -771,35 +771,27 @@ export default function VerticalAirTrackClient() {
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
         {/* Title & Definition Snippet */}
         {!isFullscreen && (
-          <div className="text-left max-w-4xl mx-auto w-full">
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white mb-2">
+          <div className="flex flex-col gap-1">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
               Vertical Aim Trainer
             </h1>
-            <p className="text-xs sm:text-sm text-slate-400 leading-relaxed max-w-2xl">
-              Vertical aim is tracking a target moving along the Y-axis, usually on a falling arc. Smooth pursuit follows accurately to roughly 30&deg;/s (Krauzlis, 2004), and skilled interceptors predict where a target will be rather than chasing where it currently is (Land &amp; McLeod, 2000).
-            </p>
           </div>
         )}
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 gap-2 w-full">
-            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Score</div>
-              <div className="text-base sm:text-lg font-bold font-mono text-white tabular-nums mt-0.5">{score}</div>
-            </div>
-            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Time</div>
-              <div className={`text-base sm:text-lg font-bold font-mono tabular-nums mt-0.5 ${timeLeft <= 10 ? "text-red-400 animate-pulse" : "text-white"}`}>{timeLeft}s</div>
-            </div>
-            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Accuracy</div>
-              <div className="text-base sm:text-lg font-bold font-mono text-red-400 tabular-nums mt-0.5">{accuracy}%</div>
-            </div>
-            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Best Score</div>
-              <div className="text-base sm:text-lg font-bold font-mono text-amber-400 tabular-nums mt-0.5">{bestScore}</div>
-            </div>
+          <div className="grid grid-cols-4 gap-2 w-full -mb-2">
+            {[
+              { label: "Score", val: score },
+              { label: "Time", val: `${timeLeft}s`, highlight: timeLeft <= 10 },
+              { label: "Accuracy", val: `${accuracy}%`, color: "text-red-400" },
+              { label: "Best Score", val: bestScore, color: "text-amber-400" },
+            ].map((s, i) => (
+              <div key={i} className="border border-white/[0.06] bg-white/[0.015] px-2 py-2 rounded-xl text-center">
+                <div className="text-[9px] sm:text-[10px] uppercase font-bold text-slate-500 tracking-wider mb-0.5">{s.label}</div>
+                <div className={`text-xs sm:text-sm md:text-base font-black tabular-nums truncate ${s.highlight ? "text-red-400 animate-pulse" : s.color || "text-white"}`}>{s.val}</div>
+              </div>
+            ))}
           </div>
         )}
 
@@ -807,10 +799,10 @@ export default function VerticalAirTrackClient() {
         <div 
           ref={containerRef} 
           onContextMenu={(e) => { if (gameState === 'playing' || gameState === 'countdown') e.preventDefault(); }}
-          className={`overflow-hidden flex flex-col transition-all duration-150 select-none bg-[#080811] text-white border border-white/10 ${
+          className={`overflow-hidden flex flex-col transition-all duration-150 select-none bg-[#080811] text-white ${
             isFullscreen 
-              ? "fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#080811] rounded-none border-none flex flex-col items-center justify-center" 
-              : "w-full rounded-2xl bg-[#080811] aspect-video min-h-[460px] sm:min-h-[500px] max-h-[88vh] relative overflow-hidden flex flex-col"
+              ? "fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#050508] flex flex-col items-center justify-center" 
+              : "w-full rounded-2xl aspect-video min-h-[460px] md:min-h-[500px] max-h-[88vh] max-md:portrait:aspect-[3/4] max-md:portrait:min-h-[420px] max-md:portrait:max-h-[76vh] max-md:landscape:min-h-[340px] max-md:landscape:max-h-[85vh] bg-[#080811] border border-white/10 relative overflow-hidden flex flex-col"
           }`}
           style={{ touchAction: (gameState === 'playing' || gameState === 'countdown') ? 'none' : 'auto' }}
         >
@@ -925,6 +917,13 @@ export default function VerticalAirTrackClient() {
           )}
         </div>
 
+        {/* Stage Caption */}
+        {!isFullscreen && (
+          <p className="text-xs text-slate-400 leading-relaxed -mt-2">
+            Track targets moving along parabolic vertical trajectories to build smooth vertical tracking precision.
+          </p>
+        )}
+
         {/* ── ACCORDIONS ── */}
         {!isFullscreen && (
           <div className="[&>div]:!mt-0 font-sans">
@@ -952,6 +951,9 @@ export default function VerticalAirTrackClient() {
                   <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
                     <Crosshair className="w-4 h-4 text-red-400" /> What Is Vertical Air-Track?
                   </h3>
+                  <p className="text-sm leading-relaxed text-gray-300 mb-3">
+                    Vertical aim is tracking a target moving along the Y-axis, usually on a falling arc. Smooth pursuit follows accurately to roughly 30&deg;/s (Krauzlis, 2004), and skilled interceptors predict where a target will be rather than chasing where it currently is (Land &amp; McLeod, 2000).
+                  </p>
                   {ABOUT_INTRO.map((para, i) => (
                     <p key={i} className={`text-sm leading-relaxed text-gray-300 ${i < ABOUT_INTRO.length - 1 ? "mb-3" : ""}`}>{para}</p>
                   ))}

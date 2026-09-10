@@ -1,0 +1,27 @@
+{
+  "enabledMcpjsonServers": ["Canva", "mypry"],
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/debug-gate.js"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Task",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/mark-debugged.js"
+          }
+        ]
+      }
+    ]
+  }
+}

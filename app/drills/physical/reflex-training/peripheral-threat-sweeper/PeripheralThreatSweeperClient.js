@@ -647,7 +647,7 @@ export default function PeripheralThreatSweeperClient() {
                 Peripheral Vision Test
               </span>
             </h1>
-            <p className="text-xs sm:text-sm text-slate-400 mt-2 max-w-3xl leading-relaxed">
+            <p className="text-xs sm:text-sm text-slate-400 mt-2 leading-relaxed">
               Peripheral vision is what you can detect without looking directly at it. Detail falls away sharply from the centre of gaze, but attention can still be shifted to a peripheral location while the eyes stay put, and a valid cue to that location speeds responses up (Posner, 1980). A single distinguishing feature such as colour is found in roughly the same time however many distractors surround it, while a target needing two features combined has to be searched for (Treisman &amp; Gelade, 1980) &mdash; which is what makes some threats here easy to catch at the edge and others not.
             </p>
           </div>

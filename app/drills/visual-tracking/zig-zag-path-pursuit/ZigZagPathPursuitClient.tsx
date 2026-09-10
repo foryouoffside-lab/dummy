@@ -433,7 +433,7 @@ export default function ZigZagPathPursuitClient() {
                 Eye Tracking Coordination Drill
               </span>
             </h1>
-            <p className="mt-2 text-xs sm:text-sm text-slate-300 leading-relaxed max-w-3xl">
+            <p className="mt-2 text-xs sm:text-sm text-slate-300 leading-relaxed">
               Zig-zag path pursuit conditions multi-vector foveal tracking and rapid catch-up saccades by guiding gaze along an alternating multi-segment polyline. Navigating sharp diagonal inflection points trains predictive ocular motor coordination and dynamic visual acuity (de Brouwer et al., 2002; Orban de Xivry &amp; Lefèvre, 2007). Pursuit holds to roughly 30&deg;/s on each straight leg, and every reversal exceeds it, so the eye alternates between smooth tracking and catch-up saccades (Krauzlis, 2004).
             </p>
           </div>

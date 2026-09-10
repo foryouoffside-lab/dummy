@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import {
   ArrowLeft,
@@ -10,10 +10,6 @@ import {
   Crosshair,
   Home,
   ChevronRight,
-  Search,
-  X,
-  Clock,
-  Play,
   Sparkles,
   Layers,
   Activity,
@@ -21,15 +17,14 @@ import {
   Compass
 } from 'lucide-react';
 import { DRILLS } from '@/lib/drillsRegistry';
-import { getDrillTagline } from '@/lib/drillCatalog';
+import { getDrillTagline, sortByInterest } from '@/lib/drillCatalog';
 import { getDifficultyRank } from '@/lib/scoringEngine';
 import { isIdleFrameSkippable } from '@/lib/performance';
 import SiteFooter from '@/components/SiteFooter';
 import Reveal from '@/components/Reveal';
 import AdjacentHubs from '@/components/AdjacentHubs';
 import { useTranslation } from '@/lib/i18n/useTranslation';
-import DrillPreview from '@/components/drill/DrillPreview';
-import { getDrillPreview } from '@/lib/drillPreviews';
+import DrillCarousel from '@/components/drill/DrillCarousel';
 import StickyMobileCta from '@/components/StickyMobileCta';
 import { getLocalizedDrill } from '@/lib/i18n/drillNames';
 import { hasLocalizedRoute } from '@/lib/i18n/locales';
@@ -94,37 +89,53 @@ const MOTOR_METADATA = {
   },
 };
 
-const DIFFICULTY_STYLES = {
-  Beginner: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-  Easy: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-  Intermediate: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-  Medium: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-  Advanced: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
-  Hard: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
-  Expert: 'bg-rose-500/10 text-rose-400 border-rose-500/20',
-};
+const motorDrills = DRILLS.filter((d) => d.category === 'motor');
 
-const DISCIPLINES = [
-  { id: 'all', label: 'All Drills', icon: Layers },
-  { id: 'coordination', label: 'Hand-Eye Coordination', icon: MousePointer },
-  { id: 'speed', label: 'Movement Speed', icon: Gauge },
-  { id: 'precision', label: 'Precision Control', icon: Crosshair },
+const motorCategories = [
+  {
+    id: 'coordination',
+    name: 'Hand-Eye Coordination',
+    icon: MousePointer,
+    description: 'Calibrate cursor trajectory, snap accuracy, and dynamic target acquisition',
+    drills: motorDrills
+      .filter((d) => MOTOR_METADATA[d.folderName]?.discipline === 'coordination')
+      .sort((a, b) => getDifficultyRank(a.difficulty) - getDifficultyRank(b.difficulty)),
+  },
+  {
+    id: 'speed',
+    name: 'Movement Speed',
+    icon: Gauge,
+    description: 'Develop peak click cadence, finger dexterity, and rapid key actuation',
+    drills: motorDrills
+      .filter((d) => MOTOR_METADATA[d.folderName]?.discipline === 'speed')
+      .sort((a, b) => getDifficultyRank(a.difficulty) - getDifficultyRank(b.difficulty)),
+  },
+  {
+    id: 'precision',
+    name: 'Precision Control',
+    icon: Compass,
+    description: 'Train sub-pixel cursor steadiness, path tracing, and micro-tremor suppression',
+    drills: motorDrills
+      .filter((d) => MOTOR_METADATA[d.folderName]?.discipline === 'precision')
+      .sort((a, b) => getDifficultyRank(a.difficulty) - getDifficultyRank(b.difficulty)),
+  },
 ];
 
-const SKILL_PRESETS = [
-  { id: 'all', label: 'All Skills' },
-  { id: 'aim', label: 'Aim & Flicks' },
-  { id: 'speed', label: 'Speed & Tapping' },
-  { id: 'control', label: 'Steady Micro-Control' },
-];
+// Flat, interest-ordered list for the carousel picker
+const orderedMotorDrills = sortByInterest(
+  motorCategories.flatMap((category) =>
+    category.drills.map((drill) => ({
+      ...drill,
+      tagline: getDrillTagline(drill.href, drill.description),
+      icon: category.icon,
+    }))
+  )
+);
 
-export default function MotorDrillsClient() {
+export default function MotorDrillsClient({ faqs = [] }) {
   const { locale, t, localizeHref } = useTranslation();
   const [isClient, setIsClient] = useState(false);
   const [drillLevels, setDrillLevels] = useState({});
-  const [selectedDiscipline, setSelectedDiscipline] = useState('all');
-  const [selectedPreset, setSelectedPreset] = useState('all');
-  const [searchQuery, setSearchQuery] = useState('');
   const canvasRef = useRef(null);
 
   useEffect(() => {
@@ -233,85 +244,6 @@ export default function MotorDrillsClient() {
     };
   }, [isClient]);
 
-  // Base motor drills list enriched with presentation metadata
-  const baseDrills = useMemo(() => {
-    return DRILLS.filter((d) => d.category === 'motor').map((drill) => {
-      const meta = MOTOR_METADATA[drill.folderName] || {
-        discipline: 'coordination',
-        disciplineName: 'Hand-Eye Coordination',
-        focus: 'Motor Skill Practice',
-        skills: ['Precision', 'Timing'],
-        icon: MousePointer,
-      };
-      return {
-        ...drill,
-        tagline: getDrillTagline(drill.href, drill.description),
-        discipline: meta.discipline,
-        disciplineName: meta.disciplineName,
-        focus: meta.focus,
-        skills: meta.skills,
-        icon: meta.icon,
-      };
-    });
-  }, []);
-
-  // Discipline drill counts
-  const disciplineCounts = useMemo(() => {
-    const counts = { all: baseDrills.length, coordination: 0, speed: 0, precision: 0 };
-    baseDrills.forEach((d) => {
-      if (counts[d.discipline] !== undefined) {
-        counts[d.discipline] += 1;
-      }
-    });
-    return counts;
-  }, [baseDrills]);
-
-  // Filtered drills based on active controls
-  const filteredDrills = useMemo(() => {
-    return baseDrills
-      .filter((drill) => {
-        // Discipline filter
-        if (selectedDiscipline !== 'all' && drill.discipline !== selectedDiscipline) {
-          return false;
-        }
-
-        // Preset filter
-        if (selectedPreset === 'aim') {
-          const isAim = ['aim-trainer', 'precision-flick-shot', 'drag-and-drop'].includes(drill.folderName);
-          if (!isAim) return false;
-        } else if (selectedPreset === 'speed') {
-          const isSpeed = ['rapid-tapping', 'finger-sequencing', 'keyboard-recognition'].includes(drill.folderName);
-          if (!isSpeed) return false;
-        } else if (selectedPreset === 'control') {
-          const isControl = ['steady-hand', 'tracing'].includes(drill.folderName);
-          if (!isControl) return false;
-        }
-
-        // Text query
-        if (searchQuery.trim()) {
-          const q = searchQuery.toLowerCase().trim();
-          const matchName = drill.name.toLowerCase().includes(q);
-          const matchTagline = drill.tagline.toLowerCase().includes(q);
-          const matchFocus = drill.focus.toLowerCase().includes(q);
-          const matchSkills = drill.skills.some((s) => s.toLowerCase().includes(q));
-          const matchDiscipline = drill.disciplineName.toLowerCase().includes(q);
-          if (!matchName && !matchTagline && !matchFocus && !matchSkills && !matchDiscipline) {
-            return false;
-          }
-        }
-
-        return true;
-      })
-      .sort((a, b) => getDifficultyRank(a.difficulty) - getDifficultyRank(b.difficulty));
-  }, [baseDrills, selectedDiscipline, selectedPreset, searchQuery]);
-
-  const hasActiveFilters = selectedDiscipline !== 'all' || selectedPreset !== 'all' || searchQuery.trim() !== '';
-
-  const resetFilters = () => {
-    setSelectedDiscipline('all');
-    setSelectedPreset('all');
-    setSearchQuery('');
-  };
 
   return (
     <div className="min-h-screen bg-canvas text-ink-1 font-sans selection:bg-emerald-500/30 selection:text-emerald-200 relative overflow-hidden">
@@ -373,7 +305,7 @@ export default function MotorDrillsClient() {
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-ink-1">
             {t('hubs.motor.h1', 'Mouse Precision & Motor Drills')}
           </h1>
-          <p className="mt-2 text-sm sm:text-base text-ink-2 max-w-2xl leading-relaxed">
+          <p className="mt-2 text-sm sm:text-base text-ink-2 leading-relaxed">
             {t(
               'hubs.motor.desc',
               'Motor skill drills measure how precisely and how fast you can control a mouse, a keyboard or a touchscreen. They all sit on one trade-off, Fitts’s Law: movement time grows with the logarithm of the distance to a target divided by that target’s width, so speed and accuracy cannot both be maximised at once (Fitts, 1954). Free, no sign-up, and every score stays in your browser.'
@@ -381,230 +313,96 @@ export default function MotorDrillsClient() {
           </p>
         </div>
 
-        {/* Interactive Filter & Search Controls */}
-        <div className="mb-6 space-y-4">
-          {/* Top Bar: Search + Skill Focus Presets */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-            {/* Real-time Search Box */}
-            <div className="relative flex-1 max-w-md">
-              <Search className="w-4 h-4 text-ink-3 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search drills by name, skill, or mechanic..."
-                className="w-full pl-10 pr-9 py-2.5 bg-surface-1/90 border border-hairline rounded-xl text-xs font-mono text-ink-1 placeholder:text-ink-3 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition-all shadow-inner"
-              />
-              {searchQuery && (
-                <button
-                  type="button"
-                  onClick={() => setSearchQuery('')}
-                  aria-label="Clear search query"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-3 hover:text-ink-1 p-0.5"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              )}
-            </div>
+        {/* Drill Matrix - Swipeable Carousel */}
+        <Reveal className="mb-14">
+          <DrillCarousel
+            headingId="motor-drills"
+            heading={t('hubs.motor.drillsHeading', 'Motor precision drills')}
+            accent="emerald"
+            icon={Crosshair}
+            showcase
+            allLabel={t('ui.viewAll', 'View all')}
+            drills={orderedMotorDrills.map((drill) => {
+              const localized = getLocalizedDrill(drill.href, locale, drill.name, drill.tagline);
+              return {
+                href: drill.href,
+                name: localized.name,
+                tagline: localized.tagline,
+                difficulty: drill.difficulty,
+                duration: drill.duration,
+                icon: drill.icon,
+                badge: drillLevels[drill.folderName] ? `Lv. ${drillLevels[drill.folderName]}` : null,
+              };
+            })}
+          />
+        </Reveal>
 
-            {/* Skill Target Presets */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
-              <span className="text-2xs font-mono uppercase text-ink-3 mr-1 shrink-0">Focus:</span>
-              {SKILL_PRESETS.map((preset) => {
-                const active = selectedPreset === preset.id;
-                return (
-                  <button
-                    key={preset.id}
-                    type="button"
-                    onClick={() => setSelectedPreset(preset.id)}
-                    className={`px-3 py-1.5 rounded-lg text-2xs font-mono font-bold uppercase tracking-wider transition-all shrink-0 border ${
-                      active
-                        ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-sm'
-                        : 'bg-surface-1/70 text-ink-3 border-hairline hover:text-ink-1 hover:border-hairline-2'
-                    }`}
-                  >
-                    {preset.label}
-                  </button>
-                );
-              })}
+        {/* Motor Training Domains - 3 Category Cards with Crawlable Links */}
+        <Reveal className="mb-14">
+          <div className="bg-surface-1 border border-hairline rounded-3xl p-6 sm:p-8 relative overflow-hidden backdrop-blur-xl shadow-xl">
+            <div className="flex items-center gap-2 mb-6">
+              <Layers className="w-5 h-5 text-emerald-400" />
+              <h2 className="text-sm sm:text-base font-bold uppercase tracking-wider text-ink-1 font-mono">
+                Motor Training Domains
+              </h2>
             </div>
-          </div>
-
-          {/* Discipline Navigation Tabs */}
-          <div className="flex items-center justify-between gap-3 border-b border-hairline pb-3 overflow-x-auto scrollbar-none">
-            <div className="flex items-center gap-2">
-              {DISCIPLINES.map((cat) => {
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              {motorCategories.map((cat) => {
                 const Icon = cat.icon;
-                const active = selectedDiscipline === cat.id;
-                const count = disciplineCounts[cat.id];
                 return (
-                  <button
+                  <div
                     key={cat.id}
-                    type="button"
-                    onClick={() => setSelectedDiscipline(cat.id)}
-                    className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-mono font-bold uppercase tracking-wider transition-all shrink-0 border ${
-                      active
-                        ? 'bg-emerald-500 text-white border-emerald-400 shadow-lg shadow-emerald-500/20'
-                        : 'bg-surface-1/80 text-ink-2 border-hairline hover:text-ink-1 hover:border-hairline-2 hover:bg-surface-2'
-                    }`}
+                    className="bg-surface-2/80 border border-hairline rounded-2xl p-5 flex flex-col justify-between"
                   >
-                    <Icon className="w-3.5 h-3.5 shrink-0" />
-                    <span>{cat.label}</span>
-                    <span
-                      className={`ml-0.5 px-1.5 py-0.5 rounded-md text-[10px] font-mono ${
-                        active ? 'bg-black/20 text-white' : 'bg-surface-2 text-ink-3'
-                      }`}
-                    >
-                      {count}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-
-            {hasActiveFilters && (
-              <button
-                type="button"
-                onClick={resetFilters}
-                className="text-2xs font-mono text-emerald-400 hover:text-emerald-300 uppercase tracking-wider shrink-0 underline underline-offset-4"
-              >
-                Reset Filters
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Drill Matrix Grid - Desktop First, No Hidden Carousels */}
-        {filteredDrills.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-5 mb-14">
-            {filteredDrills.map((drill) => {
-              const Icon = drill.icon;
-              const userLevel = drillLevels[drill.folderName];
-              const diffStyle = DIFFICULTY_STYLES[drill.difficulty] || DIFFICULTY_STYLES.Medium;
-              const hasPreview = Boolean(getDrillPreview(drill.href));
-              const href = hasLocalizedRoute(locale, drill.href) ? localizeHref(drill.href) : drill.href;
-              const { name: displayName, tagline: displayTagline } = getLocalizedDrill(
-                drill.href,
-                locale,
-                drill.name,
-                drill.tagline
-              );
-
-              return (
-                <Link
-                  key={drill.href}
-                  href={href}
-                  className="group relative flex flex-col justify-between rounded-2xl bg-surface-1/90 border border-hairline p-5 shadow-lg transition-all duration-200 hover:-translate-y-1 hover:border-emerald-500/40 hover:shadow-xl hover:shadow-emerald-500/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
-                >
-                  {/* Subtle top indicator hover line */}
-                  <div className="absolute top-0 left-4 right-4 h-[2px] bg-gradient-to-r from-emerald-500 to-teal-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-                  <div>
-                    {/* Header: Live Preview or Static Icon, Tags & Difficulty Badge */}
-                    {hasPreview ? (
-                      <div className="relative mb-3.5">
-                        <DrillPreview href={drill.href} accent="emerald" icon={Icon} className="w-full" />
-                        <div className="absolute top-2.5 left-2.5 z-10">
-                          <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg border backdrop-blur-md bg-surface-1/80 border-emerald-500/20 text-emerald-400 shadow-sm">
-                            <Icon className="w-3.5 h-3.5" />
-                          </span>
-                        </div>
-                        <div className="absolute top-2.5 right-2.5 z-10 flex items-center gap-1.5">
-                          {userLevel && (
-                            <span className="px-2 py-0.5 rounded-md bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[9px] font-mono font-bold tracking-wider backdrop-blur-md">
-                              Lv. {userLevel}
-                            </span>
-                          )}
-                          <span
-                            className={`px-2 py-0.5 rounded-md border text-[9px] font-mono font-bold uppercase tracking-wider backdrop-blur-md bg-surface-1/80 ${diffStyle}`}
-                          >
-                            {drill.difficulty ? t(`ui.difficulty.${drill.difficulty.toLowerCase()}`, drill.difficulty) : drill.difficulty}
-                          </span>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="flex items-center justify-between gap-2 mb-3">
-                        <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 group-hover:bg-emerald-500/20 group-hover:text-emerald-300 transition-colors">
+                    <div>
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
                           <Icon className="w-4 h-4" />
                         </div>
-
-                        <div className="flex items-center gap-1.5 shrink-0">
-                          {userLevel && (
-                            <span className="px-2 py-0.5 rounded-md bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[9px] font-mono font-bold tracking-wider">
-                              Lv. {userLevel}
-                            </span>
-                          )}
-                          <span
-                            className={`px-2 py-0.5 rounded-md border text-[9px] font-mono font-bold uppercase tracking-wider ${diffStyle}`}
-                          >
-                            {drill.difficulty ? t(`ui.difficulty.${drill.difficulty.toLowerCase()}`, drill.difficulty) : drill.difficulty}
+                        <div>
+                          <h3 className="text-sm font-bold font-mono uppercase tracking-wider text-ink-1">
+                            {cat.name}
+                          </h3>
+                          <span className="text-[10px] font-mono text-emerald-400">
+                            {cat.drills.length} {cat.drills.length === 1 ? 'Drill' : 'Drills'}
                           </span>
                         </div>
                       </div>
-                    )}
-
-                    {/* Discipline Eyebrow */}
-                    <div className="text-[10px] font-mono uppercase tracking-wider text-emerald-400/80 mb-1">
-                      {drill.disciplineName}
+                      <p className="text-xs text-ink-2 leading-relaxed mb-4">
+                        {cat.description}
+                      </p>
                     </div>
 
-                    {/* Drill Name */}
-                    <h3 className="text-base font-bold text-ink-1 group-hover:text-emerald-400 transition-colors tracking-tight line-clamp-1">
-                      {displayName}
-                    </h3>
-
-                    {/* Tagline / Subtitle */}
-                    <p className="mt-1.5 text-xs text-ink-3 leading-relaxed line-clamp-2">
-                      {displayTagline}
-                    </p>
-
-                    {/* Skill Focus Chips */}
-                    <div className="mt-3.5 flex flex-wrap gap-1.5">
-                      {drill.skills.map((skill) => (
-                        <span
-                          key={skill}
-                          className="px-2 py-0.5 rounded bg-surface-2 border border-hairline text-[10px] font-mono text-ink-2"
-                        >
-                          {skill}
-                        </span>
-                      ))}
-                      <span className="px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-mono text-emerald-300/90">
-                        {drill.focus}
-                      </span>
+                    <div className="space-y-2 pt-3 border-t border-hairline">
+                      {cat.drills.map((drill) => {
+                        const href = hasLocalizedRoute(locale, drill.href)
+                          ? localizeHref(drill.href)
+                          : drill.href;
+                        const fallbackTagline = getDrillTagline(drill.href, drill.description);
+                        const localized = getLocalizedDrill(drill.href, locale, drill.name, fallbackTagline);
+                        return (
+                          <Link
+                            key={drill.href}
+                            href={href}
+                            className="group/item flex items-center justify-between p-2 rounded-xl bg-surface-1/60 hover:bg-emerald-500/10 border border-hairline hover:border-emerald-500/30 transition-all text-xs"
+                          >
+                            <span className="font-medium text-ink-1 group-hover/item:text-emerald-300 transition-colors truncate pr-2">
+                              {localized.name}
+                            </span>
+                            <span className="text-[10px] font-mono text-ink-3 group-hover/item:text-emerald-400 shrink-0 flex items-center gap-1">
+                              {drill.duration}
+                              <ChevronRight className="w-3 h-3 transition-transform group-hover/item:translate-x-0.5" />
+                            </span>
+                          </Link>
+                        );
+                      })}
                     </div>
                   </div>
-
-                  {/* Card Footer: Duration & Interactive Launch CTA */}
-                  <div className="mt-4 pt-3.5 border-t border-hairline flex items-center justify-between text-2xs font-mono text-ink-3">
-                    <span className="inline-flex items-center gap-1.5">
-                      <Clock className="w-3.5 h-3.5 text-ink-3" />
-                      <span>{drill.duration}</span>
-                    </span>
-
-                    <span className="inline-flex items-center gap-1 font-bold text-emerald-400 group-hover:text-emerald-300 transition-colors uppercase tracking-wider">
-                      <span>{t('ui.launchDrill', 'Launch Drill')}</span>
-                      <Play className="w-3 h-3 fill-current transition-transform group-hover:translate-x-0.5" />
-                    </span>
-                  </div>
-                </Link>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
-        ) : (
-          /* Empty Filter State */
-          <div className="p-12 text-center bg-surface-1/60 border border-hairline rounded-2xl mb-14">
-            <Crosshair className="w-8 h-8 text-ink-3 mx-auto mb-3 opacity-60" />
-            <h3 className="text-sm font-bold font-mono uppercase text-ink-1">No drills match your filter</h3>
-            <p className="text-xs text-ink-3 mt-1">Try broadening your search query or choosing another discipline.</p>
-            <button
-              type="button"
-              onClick={resetFilters}
-              className="mt-4 px-4 py-2 rounded-xl bg-surface-2 border border-hairline text-xs font-mono uppercase font-bold text-emerald-400 hover:text-emerald-300 transition-colors"
-            >
-              Reset All Filters
-            </button>
-          </div>
-        )}
+        </Reveal>
 
         {/* Motor Kinematics Architecture & Technical Specifications */}
         <Reveal className="mb-14">
@@ -655,6 +453,36 @@ export default function MotorDrillsClient() {
             </div>
           </div>
         </Reveal>
+
+        {/* Frequently Asked Questions (SEO / AEO / GEO) */}
+        {faqs?.length > 0 && (
+          <Reveal className="mb-14">
+            <div className="rounded-3xl bg-surface-1/70 border border-hairline p-6 sm:p-8 backdrop-blur-xl shadow-xl">
+              <div className="flex items-center gap-2 mb-6">
+                <Sparkles className="w-5 h-5 text-emerald-400" />
+                <h2 className="text-sm sm:text-base font-bold uppercase tracking-wider text-ink-1 font-mono">
+                  {t('home.faqTitle', 'Frequently Asked Questions')}
+                </h2>
+              </div>
+
+              <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {faqs.map((f, i) => (
+                  <div key={i} className="bg-surface-2/80 border border-hairline rounded-2xl p-5 flex flex-col justify-start">
+                    <dt className="font-bold text-ink-1 text-sm font-sans flex items-start gap-2.5">
+                      <span className="text-emerald-400 font-mono text-xs font-bold shrink-0 mt-0.5">
+                        Q{i + 1}.
+                      </span>
+                      <span>{f.q}</span>
+                    </dt>
+                    <dd className="mt-2.5 text-xs text-ink-3 leading-relaxed pl-6 font-sans">
+                      {f.a}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+          </Reveal>
+        )}
 
         {/* Clean Adjacent Hubs Navigation */}
         <AdjacentHubs currentCat="motor" />

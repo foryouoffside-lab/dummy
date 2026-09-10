@@ -613,9 +613,6 @@ export default function AimTrainerClient() {
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
               Aim Trainer Elite
             </h1>
-            <p className="text-sm text-slate-400 mt-1.5 max-w-3xl leading-relaxed">
-              An aim trainer measures how quickly and how accurately you can move a mouse cursor onto a target and click it. Fitts&apos;s Law describes the trade-off it exposes: movement time grows with the logarithm of the distance to a target divided by that target&apos;s width, so a target half the size costs about the same extra time as one twice as far away (Fitts, 1954; MacKenzie, 1992).
-            </p>
           </div>
         )}
 
@@ -765,6 +762,13 @@ export default function AimTrainerClient() {
           )}
         </div>
 
+        {/* Drill Caption */}
+        {!isFullscreen && (
+          <p className="text-xs text-slate-400 leading-relaxed -mt-2">
+            Acquire and click targets as quickly and accurately as possible before they expire.
+          </p>
+        )}
+
         {/* ── ACCORDIONS ── */}
         {!isFullscreen && (
           <div className="[&>div]:!mt-0 font-sans">
@@ -795,6 +799,9 @@ export default function AimTrainerClient() {
                   <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
                     <Target className="w-4 h-4 text-emerald-400" /> What Is Aim Trainer Elite?
                   </h3>
+                  <p className="text-sm leading-relaxed mb-3 text-slate-300">
+                    An aim trainer measures how quickly and how accurately you can move a mouse cursor onto a target and click it. Fitts&apos;s Law describes the trade-off it exposes: movement time grows with the logarithm of the distance to a target divided by that target&apos;s width, so a target half the size costs about the same extra time as one twice as far away (Fitts, 1954; MacKenzie, 1992).
+                  </p>
                   <p className="text-sm leading-relaxed mb-3 text-slate-300">
                     <strong>Aim Trainer Elite</strong> is a dynamic target acquisition drill engineered to isolate and refine your visual-motor latency, micro-flick precision, and click timing under accelerating difficulty. Grounded in Fitts&apos;s Law and two-component motor control theory, targets dynamically shrink, accelerate, and expire across the canvas.
                   </p>

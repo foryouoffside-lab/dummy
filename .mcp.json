@@ -1,0 +1,19 @@
+{
+  "mcpServers": {
+    "Canva": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote@latest",
+        "https://mcp.canva.com/mcp"
+      ]
+    },
+    "mypry": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mypry-bridge"
+      ]
+    }
+  }
+}

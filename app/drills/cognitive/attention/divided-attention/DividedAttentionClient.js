@@ -561,9 +561,6 @@ export default function DividedAttentionClient() {
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
               Divided Attention Test
             </h1>
-            <p className="text-[13px] text-slate-400 leading-relaxed">
-              Test your split focus and dual-task processing capacity. When two concurrent tasks compete for central executive resources, performance suffers from psychological refractory bottlenecks and cross-talk interference (Pashler, 1994; Wickens, 2002).
-            </p>
           </div>
         )}
 
@@ -763,6 +760,13 @@ export default function DividedAttentionClient() {
 
         </div>
 
+        {/* Stage Caption */}
+        {!isFullscreen && (
+          <p className="text-xs text-slate-400 leading-relaxed -mt-2">
+            Track moving spatial targets while simultaneously monitoring the number stream for even digits.
+          </p>
+        )}
+
         {/* ── ACCORDIONS ── */}
         {!isFullscreen && (
         <div className="[&>div]:!mt-0">
@@ -791,6 +795,9 @@ export default function DividedAttentionClient() {
           <div className="space-y-8">
             <section>
               <div className="space-y-4">
+                <p className="text-sm leading-relaxed text-gray-300">
+                  Test your split focus and dual-task processing capacity. When two concurrent tasks compete for central executive resources, performance suffers from psychological refractory bottlenecks and cross-talk interference (Pashler, 1994; Wickens, 2002).
+                </p>
                 {ABOUT_TEXT.split('\n\n').map((para, i) => (
                   <p key={i} className="text-sm leading-relaxed text-gray-300">{para}</p>
                 ))}

@@ -43,6 +43,7 @@
     "eslint": "^9.17.0",
     "eslint-config-next": "^15.1.4",
     "glob": "^11.0.0",
+    "mypry": "^0.2.1",
     "postcss": "^8.5.10",
     "rimraf": "^6.0.1",
     "typescript": "^5.7.2",

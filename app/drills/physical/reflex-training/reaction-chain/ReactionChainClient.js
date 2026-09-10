@@ -700,7 +700,7 @@ export default function ReactionChainClient() {
                 Impulse Control Reflex Game
               </span>
             </div>
-            <p className="text-xs sm:text-sm text-slate-400 leading-relaxed max-w-3xl">
+            <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
               Stopping a fast movement exactly on a target is harder than starting one. Going and stopping behave like a race between two independent processes, and whichever finishes first determines whether the action is completed or cancelled (Logan &amp; Cowan, 1984). A rapid aimed movement also arrives in two parts — a ballistic impulse covering most of the distance, then a slower visually guided correction (Woodworth, 1899) — so overshooting costs far more time than setting off slightly slower.
             </p>
           </div>

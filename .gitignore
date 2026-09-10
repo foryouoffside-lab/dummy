@@ -66,6 +66,9 @@ __pycache__/
 scripts/bing/.bing-key
 bing-*.csv
 
+# Debug2Fix per-session state (debug-runtime markers)
+.claude/.debug-state/
+
 # graphify knowledge graph
 graphify-out/cost.json
 graphify-out/cache/

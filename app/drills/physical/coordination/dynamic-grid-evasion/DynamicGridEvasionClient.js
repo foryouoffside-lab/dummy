@@ -636,7 +636,7 @@ export default function DynamicGridEvasionClient() {
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
               Dynamic grid evasion
             </h1>
-            <p className="text-sm text-slate-400 mt-1.5 leading-relaxed max-w-3xl">
+            <p className="text-sm text-slate-400 mt-1.5 leading-relaxed">
               Attention can be moved to a location without moving the eyes there, and a cue that points to the right place speeds up responses while a misleading one slows them down (Posner, 1980). That is what a grid evasion task exercises: you watch the whole 3x3 field rather than fixating one cell. Warnings here contract to 0.45 seconds and hazards can cover 7 of the 9 cells, so late in a session there is no time to look at each cell in turn.
             </p>
           </div>

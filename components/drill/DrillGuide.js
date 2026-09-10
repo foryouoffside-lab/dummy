@@ -252,7 +252,7 @@ export default function DrillGuide({ guide, ...flat }) {
             <h2 className="text-lg sm:text-xl font-bold text-white tracking-tight mb-2.5">{heading}</h2>
           )}
           {intro?.map((p, i) => (
-            <p key={i} className="text-[13px] leading-relaxed text-slate-400 mb-2.5 last:mb-0 max-w-3xl">{p}</p>
+            <p key={i} className="text-[13px] leading-relaxed text-slate-400 mb-2.5 last:mb-0">{p}</p>
           ))}
         </div>
       )}
@@ -263,7 +263,7 @@ export default function DrillGuide({ guide, ...flat }) {
           paragraph of it. It stays outside a panel and always visible for the
           same reason the intro does: it carries the page's definition. */}
       {children && (
-        <div className="pt-1 pb-1 text-[13px] leading-relaxed text-slate-400 space-y-2.5 max-w-3xl [&_h3]:text-[15px] [&_h3]:font-bold [&_h3]:text-white [&_h3]:mt-5 [&_h3]:mb-1.5 [&_strong]:text-slate-200 [&_em]:text-slate-300">
+        <div className="pt-1 pb-1 text-[13px] leading-relaxed text-slate-400 space-y-2.5 [&_h3]:text-[15px] [&_h3]:font-bold [&_h3]:text-white [&_h3]:mt-5 [&_h3]:mb-1.5 [&_strong]:text-slate-200 [&_em]:text-slate-300">
           {children}
         </div>
       )}

@@ -55,7 +55,7 @@ const TIME_PENALTY = 0.8;
 // Bumped from _v2: sessions are no longer a fixed 45s, so scores from the old
 // fixed-length build are not comparable to these and must not share a best.
 const STORAGE_KEY = 'skilldrills_fps_flick_shot_v3';
-const TARGET_COLOR = '#10b981'; // fixed tactical-sphere color — matches the drill's emerald identity
+const TARGET_COLOR = '#00ff88'; // fixed tactical-sphere color — shared FPS target green
 
 const getSavedData = () => {
   try {
@@ -695,7 +695,7 @@ export default function ProFlickClient() {
 
       const ch = e.crosshair;
       if (ch.initialized && (gameState === 'playing' || gameState === 'start')) {
-        const activeColor = pointerLocked ? '#10b981' : '#eab308';
+        const activeColor = pointerLocked ? '#ff2d95' : '#eab308';
         ctx.strokeStyle = activeColor;
         ctx.fillStyle = activeColor;
 
@@ -761,35 +761,27 @@ export default function ProFlickClient() {
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
         {/* Title */}
         {!isFullscreen && (
-          <div className="text-left w-full">
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white mb-2">
+          <div className="flex flex-col gap-1">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
               Flick Shot Trainer
             </h1>
-            <p className="text-xs sm:text-sm text-slate-400 max-w-3xl leading-relaxed">
-              A flick is one ballistic mouse movement onto a target you have already seen. Its duration scales with the distance moved and the size of the target (Fitts, 1954), and most flicks end in a smaller corrective submovement rather than landing clean (Elliott et al., 2010).
-            </p>
           </div>
         )}
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 gap-2 w-full">
-            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
-              <div className="text-base sm:text-lg font-black text-white tabular-nums">{uiScore}</div>
-            </div>
-            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
-              <div className={`text-base sm:text-lg font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>{uiTimeLeft}s</div>
-            </div>
-            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Accuracy</div>
-              <div className="text-base sm:text-lg font-black text-blue-400 tabular-nums">{accuracy}%</div>
-            </div>
-            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
-              <div className="text-base sm:text-lg font-black text-amber-400 tabular-nums">{bestScore}</div>
-            </div>
+          <div className="grid grid-cols-4 gap-2 w-full -mb-2">
+            {[
+              { label: 'Score', value: uiScore },
+              { label: 'Time', value: `${uiTimeLeft}s`, color: uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white' },
+              { label: 'Accuracy', value: `${accuracy}%`, color: 'text-blue-400' },
+              { label: 'Best Score', value: bestScore, color: 'text-amber-400' },
+            ].map((card) => (
+              <div key={card.label} className="border border-white/[0.06] bg-white/[0.015] px-2 py-2 rounded-xl text-center">
+                <div className="text-[10px] font-bold tracking-wider uppercase text-slate-500">{card.label}</div>
+                <div className={`text-base sm:text-lg font-black tabular-nums ${card.color || 'text-white'}`}>{card.value}</div>
+              </div>
+            ))}
           </div>
         )}
 
@@ -797,11 +789,11 @@ export default function ProFlickClient() {
         <div 
           ref={containerRef} 
           onContextMenu={(e) => { if (gameActiveRef.current) e.preventDefault(); }}
-          className={`overflow-hidden flex flex-col transition-all duration-150 select-none bg-[#080811] text-white border border-white/10 ${
+          className={
             isFullscreen 
-              ? 'fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#080811] rounded-none border-none flex flex-col items-center justify-center' 
-              : 'w-full rounded-2xl bg-[#080811] aspect-video min-h-[460px] sm:min-h-[500px] max-h-[88vh] relative overflow-hidden flex flex-col'
-          }`}
+              ? 'fixed inset-0 z-[100] w-screen h-[100dvh] bg-[#050508] flex flex-col items-center justify-center' 
+              : 'w-full rounded-2xl aspect-video min-h-[460px] md:min-h-[500px] max-h-[88vh] max-md:portrait:aspect-[3/4] max-md:portrait:min-h-[420px] max-md:portrait:max-h-[76vh] max-md:landscape:min-h-[340px] max-md:landscape:max-h-[85vh] bg-[#080811] border border-white/10 relative overflow-hidden flex flex-col'
+          }
           style={{ touchAction: gameActiveRef.current ? 'none' : 'auto' }}
         >
           {/* DOM Flash Overlay */}
@@ -918,6 +910,13 @@ export default function ProFlickClient() {
 
         </div>
 
+        {/* Drill Caption */}
+        {!isFullscreen && (
+          <p className="text-xs text-slate-400 leading-relaxed -mt-2">
+            Snap to and click spawning targets across the screen before their shrinking timer ring expires.
+          </p>
+        )}
+
         {/* ── ACCORDIONS ── */}
         {!isFullscreen && (
           <div className="[&>div]:!mt-0">
@@ -945,6 +944,9 @@ export default function ProFlickClient() {
                   <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
                     <Crosshair className="w-4 h-4 text-red-400" /> What Is Flick Aim Training?
                   </h3>
+                  <p className="text-sm leading-relaxed mb-3 text-gray-300">
+                    A flick is one ballistic mouse movement onto a target you have already seen. Its duration scales with the distance moved and the size of the target (Fitts, 1954), and most flicks end in a smaller corrective submovement rather than landing clean (Elliott et al., 2010).
+                  </p>
                   {ABOUT_INTRO.map((para, i) => (
                     <p key={i} className={`text-sm leading-relaxed text-gray-300 ${i < ABOUT_INTRO.length - 1 ? 'mb-3' : ''}`}>{para}</p>
                   ))}

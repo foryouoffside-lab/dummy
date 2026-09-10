@@ -32,7 +32,7 @@ const FOLDER_TO_STORAGE_KEY = {
   'rhythm-anomaly': 'rhythmAnomalyBestScore_v8',
 };
 
-export default function VisualDrillsClient() {
+export default function VisualDrillsClient({ faqs = [] }) {
   const { locale, localizeHref, t } = useTranslation();
   const [isClient, setIsClient] = useState(false);
   const [drillLevels, setDrillLevels] = useState({});
@@ -149,7 +149,7 @@ export default function VisualDrillsClient() {
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-ink-1">
             {t('hubs.visual.h1', 'Visual Training & Recognition')}
           </h1>
-          <p className="mt-2 text-sm sm:text-base text-ink-2 max-w-2xl leading-relaxed">
+          <p className="mt-2 text-sm sm:text-base text-ink-2 leading-relaxed">
             {t(
               'hubs.visual.desc',
               'Visual training drills measure how quickly and how accurately your visual system finds, follows and judges things on a screen. Each one isolates a different function: simple visual reaction, which runs about 200–250 ms in healthy adults (Woods et al., 2015); smooth pursuit, which stays accurate to roughly 30°/s before the eye needs catch-up saccades (Krauzlis, 2004); visual search; multiple object tracking; and depth judgement. Free, no sign-up, and every score stays in your browser.'
@@ -164,6 +164,7 @@ export default function VisualDrillsClient() {
             heading={t('hubs.visual.drillsHeading', 'Visual drills')}
             accent="fuchsia"
             icon={Eye}
+            showcase
             allLabel={t('ui.viewAll', 'View all')}
             drills={orderedVisualDrills.map((drill) => {
               const fallbackTagline = getDrillTagline(drill.href, drill.description);
@@ -211,6 +212,36 @@ export default function VisualDrillsClient() {
             </div>
           </div>
         </Reveal>
+
+        {/* Frequently Asked Questions (SEO / AEO / GEO) */}
+        {faqs?.length > 0 && (
+          <Reveal className="mb-14">
+            <div className="rounded-3xl bg-surface-1/70 border border-hairline p-6 sm:p-8 backdrop-blur-xl shadow-xl">
+              <div className="flex items-center gap-2 mb-6">
+                <Sparkles className="w-5 h-5 text-fuchsia-400" />
+                <h2 className="text-sm sm:text-base font-bold uppercase tracking-wider text-ink-1 font-mono">
+                  {t('home.faqTitle', 'Frequently Asked Questions')}
+                </h2>
+              </div>
+
+              <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {faqs.map((f, i) => (
+                  <div key={i} className="bg-surface-2/80 border border-hairline rounded-2xl p-5 flex flex-col justify-start">
+                    <dt className="font-bold text-ink-1 text-sm font-sans flex items-start gap-2.5">
+                      <span className="text-fuchsia-400 font-mono text-xs font-bold shrink-0 mt-0.5">
+                        Q{i + 1}.
+                      </span>
+                      <span>{f.q}</span>
+                    </dt>
+                    <dd className="mt-2.5 text-xs text-ink-3 leading-relaxed pl-6 font-sans">
+                      {f.a}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+          </Reveal>
+        )}
 
         <AdjacentHubs currentCat="visual" />
 

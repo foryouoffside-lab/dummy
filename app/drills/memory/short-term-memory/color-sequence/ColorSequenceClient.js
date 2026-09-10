@@ -453,37 +453,27 @@ export default function ColorSequenceClient() {
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
         {/* Title & Definition Snippet */}
         {!isFullscreen && (
-          <div className="text-left max-w-4xl mx-auto w-full">
+          <div className="flex flex-col gap-1">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
               Color Memory Game
             </h1>
-          <p className="text-[13px] text-slate-400 leading-relaxed mt-1">
-            Visual working memory holds only about four simple items at a time, and that ceiling is set by the number of objects rather than how complex each one is (Luck &amp; Vogel, 1997; Cowan, 2001). A lengthening colour sequence walks you straight into that limit.
-          </p>
           </div>
         )}
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-          <div className="grid grid-cols-4 gap-2 w-full">
-            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Score</div>
-              <div className="text-base sm:text-lg font-bold font-mono text-purple-400 tabular-nums mt-0.5">{uiScore}</div>
-            </div>
-            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Time</div>
-              <div className={`text-base sm:text-lg font-bold font-mono tabular-nums mt-0.5 ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>
-                {uiTimeLeft}s
+          <div className="grid grid-cols-4 gap-2 w-full -mb-2">
+            {[
+              { label: "Score", val: uiScore, color: "text-purple-400" },
+              { label: "Time", val: `${uiTimeLeft}s`, highlight: uiTimeLeft <= 10 },
+              { label: "Level", val: `Lv. ${level}`, color: "text-indigo-400" },
+              { label: "Best Score", val: bestScore, color: "text-amber-400" },
+            ].map((s, i) => (
+              <div key={i} className="border border-white/[0.06] bg-white/[0.015] px-2 py-2 rounded-xl text-center">
+                <div className="text-[9px] sm:text-[10px] uppercase font-bold text-slate-500 tracking-wider mb-0.5">{s.label}</div>
+                <div className={`text-xs sm:text-sm md:text-base font-black tabular-nums truncate ${s.highlight ? "text-red-400 animate-pulse" : s.color || "text-white"}`}>{s.val}</div>
               </div>
-            </div>
-            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Level</div>
-              <div className="text-base sm:text-lg font-bold font-mono text-indigo-400 tabular-nums mt-0.5">Lv. {level}</div>
-            </div>
-            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Best Score</div>
-              <div className="text-base sm:text-lg font-bold font-mono text-amber-400 tabular-nums mt-0.5">{bestScore}</div>
-            </div>
+            ))}
           </div>
         )}
 
@@ -703,6 +693,13 @@ export default function ColorSequenceClient() {
 
         </div>
 
+        {/* Drill Caption */}
+        {!isFullscreen && (
+          <p className="text-xs text-slate-400 leading-relaxed -mt-2">
+            Watch and reproduce the flashing color pattern in the correct order as sequences grow longer.
+          </p>
+        )}
+
         {/* ACCORDION 1: DRILL INSTRUCTIONS & SCORING */}
         {!isFullscreen && (
           <div className="[&>div]:!mt-0">
@@ -732,6 +729,9 @@ export default function ColorSequenceClient() {
                 <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
                   <Brain className="w-4 h-4 text-purple-400" /> What Is Visual Memory Training?
                 </h3>
+                <p className="text-sm leading-relaxed mb-3 text-gray-300">
+                  Visual working memory holds only about four simple items at a time, and that ceiling is set by the number of objects rather than how complex each one is (Luck &amp; Vogel, 1997; Cowan, 2001). A lengthening colour sequence walks you straight into that limit.
+                </p>
                 <p className="text-sm leading-relaxed mb-3">
                   <strong>Visual Memory Training</strong> isolates and exercises your ability to encode, hold, and manipulate short-term visual patterns. The <strong>Color Sequence drill</strong> presents progressive color strings, challenging your visual working memory capacity and recall speed.
                 </p>

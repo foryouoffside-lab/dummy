@@ -576,9 +576,6 @@ export default function DualTargetFlowClient() {
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
               Multitasking Test
             </h1>
-            <p className="text-[13px] text-slate-400 leading-relaxed">
-              Human multitasking relies on rapid task switching rather than true simultaneous processing, incurring a measurable 100&ndash;300&nbsp;ms switch penalty as cognitive goals alternate (Rogers &amp; Monsell, 1995; Monsell, 2003). This dual-stream flow drill trains prefrontal executive control to manage concurrent target streams under escalating velocity (Pashler, 1994).
-            </p>
           </div>
         )}
 
@@ -729,6 +726,13 @@ export default function DualTargetFlowClient() {
 
         </div>
 
+        {/* Stage Caption */}
+        {!isFullscreen && (
+          <p className="text-xs text-slate-400 leading-relaxed -mt-2">
+            Monitor and tap matching symbols across dual opposing streams as flow speed and shapes accelerate.
+          </p>
+        )}
+
         {/* ACCORDIONS */}
         {!isFullscreen && (
           <div className="[&>div]:!mt-0">
@@ -757,6 +761,9 @@ export default function DualTargetFlowClient() {
               <div className="space-y-8 font-sans">
                 <section>
                   <div className="space-y-4">
+                    <p className="text-sm leading-relaxed text-gray-300">
+                      Human multitasking relies on rapid task switching rather than true simultaneous processing, incurring a measurable 100&ndash;300&nbsp;ms switch penalty as cognitive goals alternate (Rogers &amp; Monsell, 1995; Monsell, 2003). This dual-stream flow drill trains prefrontal executive control to manage concurrent target streams under escalating velocity (Pashler, 1994).
+                    </p>
                     {ABOUT_TEXT.split('\n\n').map((para, i) => (
                       <p key={i} className="text-sm leading-relaxed text-gray-300">{para}</p>
                     ))}

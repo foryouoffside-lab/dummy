@@ -739,7 +739,7 @@ export default function MarketDoorsPursuitClient() {
   }, [uiScore, analytics]);
 
   return (
-    <div className="w-full flex flex-col items-center justify-start min-h-screen bg-[#050508] text-white selection:bg-red-500 selection:text-white">
+    <div className="min-h-screen bg-[#050508] text-white flex flex-col font-sans select-none">
       
       {/* Mobile Orientation Alert */}
       {isMobile && isPortrait && (
@@ -749,30 +749,15 @@ export default function MarketDoorsPursuitClient() {
       )}
 
       {/* Main Container */}
-      <main className="w-full max-w-5xl mx-auto px-3 sm:px-4 py-3 sm:py-6 flex flex-col gap-3 sm:gap-6">
+      <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
         
-        {/* Navigation & Header */}
-        {!isFullscreen && (
-          <div className="w-full flex items-center justify-between">
-            <Link 
-              href="/drills/reaction-speed"
-              className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition-colors bg-white/5 px-3 py-1.5 rounded-lg border border-white/5"
-            >
-              ← Back to Reaction Hub
-            </Link>
-            <div className="text-xs text-slate-400 font-mono">
-              Drill ID: <span className="text-red-400">RS-03</span>
-            </div>
-          </div>
-        )}
-
         {/* Drill Header */}
         {!isFullscreen && (
-          <div className="text-left">
+          <div className="flex flex-col gap-1">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
               Corner Checking Trainer
             </h1>
-            <p className="text-[13px] text-slate-400 mt-1 max-w-2xl leading-relaxed">
+            <p className="text-[13px] text-slate-400 leading-relaxed">
               Corner checking is clearing one angle at a time so only one threat can see you at once. Each shift of gaze to a new angle is a saccade lasting 20&ndash;40&nbsp;ms (Rayner, 1998), followed by roughly 200&nbsp;ms to react to whatever it reveals.
             </p>
           </div>
@@ -781,24 +766,17 @@ export default function MarketDoorsPursuitClient() {
         {/* Live Stat Cards */}
         {!isFullscreen && (
           <div className="grid grid-cols-4 gap-2 w-full -mb-2">
-            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider font-mono">Score</div>
-              <div className="text-lg sm:text-xl font-black text-white tabular-nums">{uiScore}</div>
-            </div>
-            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider font-mono">Time</div>
-              <div className={`text-lg sm:text-xl font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>
-                {uiTimeLeft}s
+            {[
+              { label: 'Score', value: uiScore, tone: 'text-white' },
+              { label: 'Time', value: `${uiTimeLeft}s`, tone: uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white' },
+              { label: 'Level', value: `L${uiLevel}`, tone: 'text-indigo-400' },
+              { label: 'Best Score', value: bestScore, tone: 'text-amber-400' },
+            ].map((s) => (
+              <div key={s.label} className="rounded-lg border border-white/[0.06] bg-white/[0.015] px-2 py-2 text-center">
+                <div className="text-[9.5px] uppercase font-semibold text-slate-500 tracking-[0.12em]">{s.label}</div>
+                <div className={`text-lg sm:text-xl font-black tabular-nums font-mono mt-0.5 ${s.tone}`}>{s.value}</div>
               </div>
-            </div>
-            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider font-mono">Level</div>
-              <div className="text-lg sm:text-xl font-black text-indigo-400 tabular-nums">L{uiLevel}</div>
-            </div>
-            <div className="bg-white/[0.015] border border-white/[0.06] rounded-xl p-2 sm:p-2.5 text-center">
-              <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider font-mono">Best Score</div>
-              <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
-            </div>
+            ))}
           </div>
         )}
 

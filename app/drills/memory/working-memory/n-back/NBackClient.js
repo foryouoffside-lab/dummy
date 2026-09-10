@@ -398,38 +398,31 @@ export default function NBackClient() {
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
         {/* Title */}
         {!isFullscreen && (
-        <div className="text-left">
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-            N-Back Working Memory Test
-          </h1>
-          <p className="text-[13px] text-slate-400 leading-relaxed mt-1">
-            The n-back task asks whether the current item matches the one n steps earlier, so you have to hold a short list and update it continuously at the same time. That combination of storage plus manipulation is what working memory means in Baddeley and Hitch's (1974) model, and its capacity sits near four items (Cowan, 2001).
-          </p>
-        </div>
+          <div className="flex flex-col gap-1">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+              N-Back Working Memory Test
+            </h1>
+            <p className="text-[13px] text-slate-400 leading-relaxed">
+              The n-back task asks whether the current item matches the one n steps earlier, so you have to hold a short list and update it continuously at the same time. That combination of storage plus manipulation is what working memory means in Baddeley and Hitch's (1974) model, and its capacity sits near four items (Cowan, 2001).
+            </p>
+          </div>
         )}
 
         {/* Live Stat Cards */}
         {!isFullscreen && (
-        <div className="grid grid-cols-4 gap-2 w-full">
-          <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-            <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Score</div>
-            <div className="text-lg sm:text-xl font-black text-cyan-400 tabular-nums">{uiScore}</div>
+          <div className="grid grid-cols-4 gap-2 w-full -mb-2">
+            {[
+              { label: "Score", val: uiScore, color: "text-cyan-400" },
+              { label: "Time", val: `${uiTimeLeft}s`, highlight: uiTimeLeft <= 10 },
+              { label: "Level", val: `${nBackLevel}-Back`, color: "text-indigo-400" },
+              { label: "Best Score", val: bestScore, color: "text-amber-400" },
+            ].map((s, i) => (
+              <div key={i} className="border border-white/[0.06] bg-white/[0.015] px-2 py-2 rounded-xl text-center">
+                <div className="text-[9px] sm:text-[10px] uppercase font-bold text-slate-500 tracking-wider mb-0.5">{s.label}</div>
+                <div className={`text-xs sm:text-sm md:text-base font-black tabular-nums truncate ${s.highlight ? "text-red-400 animate-pulse" : s.color || "text-white"}`}>{s.val}</div>
+              </div>
+            ))}
           </div>
-          <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-            <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Time</div>
-            <div className={`text-lg sm:text-xl font-black tabular-nums ${uiTimeLeft <= 10 ? 'text-red-400 animate-pulse' : 'text-white'}`}>
-              {uiTimeLeft}s
-            </div>
-          </div>
-          <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-            <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Level</div>
-            <div className="text-lg sm:text-xl font-black text-indigo-400 tabular-nums">{nBackLevel}-Back</div>
-          </div>
-          <div className="bg-[#0d0d18] border border-white/5 rounded-xl p-2.5 text-center">
-            <div className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Best Score</div>
-            <div className="text-lg sm:text-xl font-black text-amber-400 tabular-nums">{bestScore}</div>
-          </div>
-        </div>
         )}
 
         {/* Game Stage Container */}
